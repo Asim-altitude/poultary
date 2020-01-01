@@ -16,6 +16,7 @@ import 'package:poultary/medication_vaccination.dart';
 import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/transactions_screen.dart';
+import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -121,13 +122,23 @@ class _DashboardScreen extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+
+    getFilters();
     getList();
     getLanguage();
     Utils.setupAds();
 
-
     // Utils.showInterstitial();
   }
+
+  int _dashboard_filter = 2;
+  void getFilters() async {
+
+    _dashboard_filter = (await SessionManager.getDashboardFilter())!;
+    date_filter_name = filterList.elementAt(_dashboard_filter);
+
+  }
+
   List<String> filterList = ['TODAY'.tr(),'YESTERDAY'.tr(),'THIS_MONTH'.tr(), 'LAST_MONTH'.tr(),'LAST3_MONTHS'.tr(), 'LAST6_MONTHS'.tr(),'THIS_YEAR'.tr(),
     'LAST_YEAR'.tr(),'ALL_TIME'.tr()];
 
@@ -284,8 +295,9 @@ class _DashboardScreen extends State<DashboardScreen> {
 
     }else if (filter == 'ALL_TIME'.tr()){
       index = 8;
-      str_date ="";
-      end_date ="";
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date ="1950-01-01";
+      end_date = inputFormat.format(DateTime.now());;
       print(str_date+" "+end_date);
 
 
@@ -351,7 +363,7 @@ class _DashboardScreen extends State<DashboardScreen> {
 
     flock_total = flocks.length;
 
-    getFilteredData("THIS_MONTH".tr());
+    getFilteredData(date_filter_name);
 
     setState(() {
 

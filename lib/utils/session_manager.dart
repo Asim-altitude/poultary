@@ -22,6 +22,10 @@ class SessionManager {
   static final String in_app = "in_app";
   static final String selected_language = "selected_language";
 
+  static final String dash_filter = "dash_filter";
+  static final String report_filter = "report_filter";
+  static final String other_filter = "other_filter";
+
   static Future<void> setUserID(int userid) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setInt(SessionManager.user_id, userid);
@@ -194,4 +198,31 @@ class SessionManager {
     selectedLanguage = pref.getString(SessionManager.selected_language) ?? 'en';
     return selectedLanguage;
   }
+
+  static Future<int?> getDashboardFilter() async {
+    final SharedPreferences pref = await SharedPreferences.getInstance();
+    int? selectedLanguage;
+    selectedLanguage = pref.getInt(SessionManager.dash_filter) ?? 6;
+    return selectedLanguage;
+  }
+
+  static Future<int?> getReportFilter() async {
+    final SharedPreferences pref = await SharedPreferences.getInstance();
+    int? selectedLanguage;
+    selectedLanguage = pref.getInt(SessionManager.report_filter) ?? 6;
+    return selectedLanguage;
+  }
+
+  static Future<int?> getOtherFilter() async {
+    final SharedPreferences pref = await SharedPreferences.getInstance();
+    int? selectedLanguage;
+    selectedLanguage = pref.getInt(SessionManager.other_filter) ?? 2;
+    return selectedLanguage;
+  }
+
+  static Future<void> updateFilterValue(String key, int value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt(key, value);
+  }
+
 }

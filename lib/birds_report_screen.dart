@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'model/feed_item.dart';
@@ -36,16 +37,25 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
 
   }
 
+  int _reports_filter = 2;
+  void getFilters() async {
+
+    _reports_filter = (await SessionManager.getReportFilter())!;
+    date_filter_name = filterList.elementAt(_reports_filter);
+
+    getData(date_filter_name);
+  }
 
   @override
   void initState() {
     super.initState();
      try
      {
+
        date_filter_name = Utils.applied_filter;
+       getFilters();
        getList();
 
-       getData(date_filter_name);
      }
      catch(ex){
        print(ex);
@@ -656,8 +666,9 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
 
     }else if (filter == 'ALL_TIME'.tr()){
       index = 8;
-      str_date ="";
-      end_date ="";
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date ="1950-01-01";
+      end_date = inputFormat.format(DateTime.now());;
       print(str_date+" "+end_date);
 
 

@@ -825,7 +825,6 @@ class Utils {
     int quality = 10;
 
 
-
     print( "convertToJPGFileIfRequiredWithCompression => ${quality}");
 
     Uint8List? image = await FlutterImageCompress.compressWithFile(file.path,

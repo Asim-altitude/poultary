@@ -12,6 +12,7 @@ import 'package:poultary/model/finance_report_item.dart';
 import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:syncfusion_flutter_charts/sparkcharts.dart';
@@ -46,6 +47,15 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
   List<_SalesData> data1 = [];
 
   late ZoomPanBehavior _zoomPanBehavior;
+
+  int _reports_filter = 2;
+  void getFilters() async {
+
+    _reports_filter = (await SessionManager.getReportFilter())!;
+    date_filter_name = filterList.elementAt(_reports_filter);
+    getData(date_filter_name);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -61,8 +71,9 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
            selectionRectBorderWidth: 1,
            selectionRectColor: Colors.grey
        );
+       getFilters();
        getList();
-       getData(date_filter_name);
+
      }
      catch(ex){
        print(ex);
@@ -783,10 +794,10 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
     }else if (filter == 'ALL_TIME'.tr()){
       index = 8;
-      str_date ="";
-      end_date ="";
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date ="1950-01-01";
+      end_date = inputFormat.format(DateTime.now());;
       print(str_date+" "+end_date);
-
 
       pdf_formatted_date_filter = 'ALL_TIME'.tr();
     }

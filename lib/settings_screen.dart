@@ -9,33 +9,22 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:language_picker/language_picker.dart';
 import 'package:language_picker/languages.dart';
-import 'package:poultary/add_eggs.dart';
 import 'package:poultary/add_feeding.dart';
 import 'package:poultary/category_screen.dart';
-import 'package:poultary/inventory.dart';
-import 'package:poultary/model/category_item.dart';
-import 'package:poultary/model/feed_item.dart';
-import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/sticky.dart';
-import 'package:poultary/sub_category_screen.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
-
-import 'add_flocks.dart';
 import 'all_events.dart';
 import 'database/databse_helper.dart';
 import 'farm_setup_screen.dart';
+import 'filter_setup_screen.dart';
 import 'manage_flock_screen.dart';
-import 'model/egg_item.dart';
-import 'model/flock.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:in_app_purchase_android/billing_client_wrappers.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 import 'consume_store.dart';
-import 'package:prompt_dialog/prompt_dialog.dart';
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
@@ -343,7 +332,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                                 child: Row(
                                   children: [
 
-                                    Icon(Icons.settings_applications,color: Utils.getThemeColorBlue(),),
+                                    Icon(Icons.account_balance_rounded,color: Utils.getThemeColorBlue(),),
                                     SizedBox(width: 4,),
                                     Text('FARM_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                                   ],
@@ -352,6 +341,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                           ],),),
                     ),
                   ),
+
                   InkWell(
                     onTap: () {
                       Navigator.push(
@@ -397,7 +387,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                                 child: Row(
                                   children: [
 
-                                    Icon(Icons.api,color: Utils.getThemeColorBlue(),),
+                                    Icon(Icons.account_tree,color: Utils.getThemeColorBlue(),),
                                     SizedBox(width: 4,),
                                     Text('CATEGORY_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                                   ],
@@ -451,7 +441,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                                 child: Row(
                                   children: [
 
-                                    Icon(Icons.album,color: Utils.getThemeColorBlue(),),
+                                    Icon(Icons.group_work_outlined,color: Utils.getThemeColorBlue(),),
                                     SizedBox(width: 4,),
                                     Text('FLOCK_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                                   ],
@@ -516,6 +506,59 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                     ),
                   ),
                   SizedBox(height: 4,),
+                  InkWell(
+                    onTap: ()
+                    {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>  FilterSetupScreen(inStart: false,)),
+
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(3)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 2,
+                            offset: Offset(0, 1), // changes position of shadow
+                          ),
+                        ],
+                        color: Colors.white,
+                        //  border: Border.all(color: Colors.blueAccent,width: 1.0)
+                      ),
+                      margin: EdgeInsets.only(left: 12,right: 12,top: 5,bottom: 8),
+                      child: Container(
+                        height: 52,
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white, //(x,y)
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Align(
+                                alignment: Alignment.topLeft,
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.filter_list,color: Utils.getThemeColorBlue(),),
+                                    SizedBox(width: 4,),
+                                    Text('All Data Filters'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                  ],
+                                )),
+
+                          ],),),
+                    ),
+                  ),
                 ],
               ),),
 

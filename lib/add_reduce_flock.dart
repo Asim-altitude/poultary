@@ -12,6 +12,7 @@ import 'package:poultary/inventory.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'add_flocks.dart';
@@ -41,14 +42,21 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
   }
 
+  int _other_filter = 2;
+  void getFilters() async {
+
+    _other_filter = (await SessionManager.getOtherFilter())!;
+    date_filter_name = filterList.elementAt(_other_filter);
+
+    getData(date_filter_name);
+  }
+
   @override
   void initState() {
     super.initState();
 
-
-
+    getFilters();
     getList();
-    getEggCollectionList();
     Utils.setupAds();
 
   }
@@ -735,7 +743,8 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
           builder: (context) =>  NewBirdsCollection(isCollection: true,flock_detail: null)),
     );
 
-    getEggCollectionList();
+    getData(date_filter_name);
+    ;
   }
 
   Future<void> reduceCollection() async{
@@ -745,7 +754,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
           builder: (context) =>  NewBirdsCollection(isCollection: false,flock_detail: null)),
     );
 
-    getEggCollectionList();
+    getData(date_filter_name);
   }
 
 
@@ -953,8 +962,9 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
     }else if (filter == 'ALL_TIME'.tr()){
       index = 8;
-      str_date ="";
-      end_date ="";
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date ="1950-01-01";
+      end_date = inputFormat.format(DateTime.now());;
       print(str_date+" "+end_date);
       getFilteredTransactions(str_date,end_date);
 
@@ -1023,7 +1033,8 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                           flock_detail: list.elementAt(selected_index!))),
             );
 
-            getEggCollectionList();
+            getData(date_filter_name);
+
           }else{
             await Navigator.push(
               context,
@@ -1033,7 +1044,8 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                           flock_detail: list.elementAt(selected_index!))),
             );
 
-            getEggCollectionList();
+            getData(date_filter_name);
+
           }
         }
         else if(value == 1){

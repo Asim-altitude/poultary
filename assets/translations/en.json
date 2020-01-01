@@ -354,8 +354,12 @@
   "Inventory Purchase": "Inventory Purchase",
   "Financial Settlements": "Financial Settlements",
   "Repairing": "Repairing",
-  "Other": "Other"
 
+  "Data Filters Settings": "Data Filters Settings",
+  "All Data Filters": "All Data Filters",
+  "Dashboard Filter": "Dashboard Filter",
+  "Reports Filter": "Reports Filter",
+  "All Other Filters": "All Other Filters"
 
 
 }

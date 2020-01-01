@@ -15,6 +15,7 @@ import 'package:poultary/model/feed_item.dart';
 import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
@@ -42,12 +43,21 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
 
   }
 
+  int _other_filter = 2;
+  void getFilters() async {
+
+    _other_filter = (await SessionManager.getOtherFilter())!;
+    date_filter_name = filterList.elementAt(_other_filter);
+    getData(date_filter_name);
+
+  }
+
   @override
   void initState() {
     super.initState();
 
+    getFilters();
     getList();
-    getData(date_filter_name);
     Utils.setupAds();
 
   }
@@ -949,10 +959,10 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
 
     }else if (filter == 'ALL_TIME'.tr()){
       index = 8;
-      str_date ="";
-      end_date ="";
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date ="1950-01-01";
+      end_date = inputFormat.format(DateTime.now());;
       print(str_date+" "+end_date);
-
 
       getFilteredTransactions(str_date, end_date);
     }

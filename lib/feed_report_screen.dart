@@ -11,6 +11,7 @@ import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -39,6 +40,14 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
   }
 
+  int _reports_filter = 2;
+  void getFilters() async {
+
+    _reports_filter = (await SessionManager.getReportFilter())!;
+    date_filter_name = filterList.elementAt(_reports_filter);
+    getData(date_filter_name);
+  }
+
   late ZoomPanBehavior _zoomPanBehavior;
   @override
   void initState() {
@@ -55,9 +64,8 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
            selectionRectColor: Colors.grey
        );
        date_filter_name = Utils.applied_filter;
-
+       getFilters();
        getList();
-       getData(date_filter_name);
 
      }
      catch(ex){
@@ -671,10 +679,10 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
     }else if (filter == 'ALL_TIME'.tr()){
       index = 8;
-      str_date ="";
-      end_date ="";
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date ="1950-01-01";
+      end_date = inputFormat.format(DateTime.now());;
       print(str_date+" "+end_date);
-
 
       pdf_formatted_date_filter = 'ALL_TIME'.tr();
     }

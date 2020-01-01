@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,16 +6,13 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
-
 import 'birds_report_screen.dart';
-import 'daily_feed.dart';
-import 'egg_collection.dart';
 import 'eggs_report_screen.dart';
 import 'feed_report_screen.dart';
 import 'financial_report_screen.dart';
 import 'health_report_screen.dart';
-import 'medication_vaccination.dart';
 import 'model/feed_item.dart';
 import 'model/flock.dart';
 
@@ -47,15 +41,27 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
     super.initState();
      try
      {
-       Utils.applied_filter = date_filter_name;
+       getFilters();
+
        getList();
-       getData(date_filter_name);
      }
      catch(ex){
        print(ex);
      }
     Utils.setupAds();
 
+  }
+
+  int _reports_filter = 2;
+  void getFilters() async {
+
+    _reports_filter = (await SessionManager.getReportFilter())!;
+    date_filter_name = filterList.elementAt(_reports_filter);
+
+    print("SELECTED_FILTER $date_filter_name");
+    print("SELECTED_FILTER_INDEX $_reports_filter");
+
+    getData(_reports_filter);
   }
 
   int total_flock_birds = 0;
@@ -97,7 +103,11 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
   List<Feeding> feedings = [];
 
-  void getAllData() async{
+  void getAllData() async {
+
+    print(date_filter_name);
+    print("START_DATE $str_date END_DATE $end_date");
+    print("REPORT_FILTER $_reports_filter");
 
     clearValues();
 
@@ -328,7 +338,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                             MaterialPageRoute(
                                 builder: (context) => const FinanceReportsScreen()),
                           );
-                          getAllData();
+                          getData(_reports_filter);
                         },child: Column(
                           children: [
 
@@ -371,7 +381,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                             MaterialPageRoute(
                                 builder: (context) => const BirdsReportsScreen()),
                           );
-                          getAllData();
+                          getData(_reports_filter);
                         },child: Column(
                           children: [
 
@@ -511,7 +521,6 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                             borderRadius: BorderRadius.all(Radius.circular(6)),
                             //  color: Colors.white10.withAlpha(30),
                             color: Utils.getThemeColorBlue(),
-
                             border: Border.all(color: Colors.white38,width: 1.0)
                         ),
                         padding: EdgeInsets.all(10),
@@ -525,7 +534,6 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                           getAllData();
                         },child: Column(
                           children: [
-
                             Row(
                               /* mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,*/
@@ -872,10 +880,11 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
               setState(() {
                 date_filter_name = filterList.elementAt(index);
+                _reports_filter = filterList.indexOf(date_filter_name);
                 Utils.applied_filter = date_filter_name;
               });
 
-              getData(date_filter_name);
+              getData(_reports_filter);
               Navigator.pop(bcontext);
             },
             child: ListTile(
@@ -894,10 +903,10 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
   String date_filter_name = 'THIS_MONTH'.tr();
   String str_date = '',end_date = '';
-  void getData(String filter){
+  void getData(int filter) {
     int index = 0;
 
-    if (filter == 'TODAY'.tr()){
+    if (filter == 0){
       index = 0;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
@@ -909,7 +918,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
       getAllData();
 
     }
-    else if (filter == 'YESTERDAY'.tr()){
+    else if (filter == 1){
       index = 1;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day -1);
 
@@ -921,7 +930,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
       getAllData();
 
     }
-    else if (filter == 'THIS_MONTH'.tr()){
+    else if (filter == 2){
       index = 2;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
 
@@ -934,7 +943,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
 
       getAllData();
-    }else if (filter == 'LAST_MONTH'.tr()){
+    }else if (filter == 3){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
 
@@ -949,7 +958,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
       getAllData();
 
-    }else if (filter == 'LAST3_MONTHS'.tr()){
+    }else if (filter == 4){
       index = 4;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -2, 1);
 
@@ -962,7 +971,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
 
       getAllData();
-    }else if (filter == 'LAST6_MONTHS'.tr()){
+    }else if (filter == 5){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
 
@@ -975,7 +984,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
 
       getAllData();
-    }else if (filter == 'THIS_YEAR'.tr()){
+    }else if (filter == 6){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
@@ -986,7 +995,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
       print(str_date+" "+end_date);
 
       getAllData();
-    }else if (filter == 'LAST_YEAR'.tr()){
+    }else if (filter == 7){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year-1, 12,31);
@@ -999,15 +1008,16 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
       getAllData();
 
-    }else if (filter == 'ALL_TIME'.tr()){
+    }else if (filter == 8){
       index = 8;
-      str_date ="";
-      end_date ="";
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date ="1950-01-01";
+      end_date = inputFormat.format(DateTime.now());
       print(str_date+" "+end_date);
-
 
       getAllData();
     }
+
     getAllData();
 
   }
