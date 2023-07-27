@@ -1,0 +1,55 @@
+import 'dart:async';
+import 'dart:core';
+
+
+
+class Flock{
+
+  int f_id = -1;
+  String f_name = "";
+  int bird_count = 0;
+  String purpose = "";
+  String icon = "";
+  String acqusition_type = "";
+  String acqusition_date = "";
+  String notes = "";
+
+  Flock(
+      {
+        required this.f_id, required this.f_name,required this.bird_count,required this.purpose
+        ,required this.acqusition_type,required this.acqusition_date,required this.notes,required this.icon
+      });
+
+  Flock.fromJson(Map<String, dynamic> json) {
+    f_id = json['f_id'];
+    f_name = json['f_name'].toString();
+    purpose = json['purpose'].toString();
+    bird_count = json['bird_count'];
+    acqusition_date = json['acqusition_date'].toString();
+    notes = json['notes'].toString();
+    icon = json['icon'].toString();
+    acqusition_type = json['acqusition_type'].toString();
+
+
+  }
+
+  @override
+  String toString() {
+    return 'Flock {f_id: $f_id, f_name: $f_name, purpose: $purpose, bird_count: $bird_count,acqusition_date:$acqusition_date,notes:$notes,acqusition_type: $acqusition_type }';
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['f_name'] = this.f_name;
+    data['purpose'] = this.purpose;
+    data['acqusition_date'] = this.acqusition_date;
+    data['acqusition_type'] = this.acqusition_type;
+    data['notes'] = this.notes;
+    data['icon'] = this.icon;
+    data['bird_count'] = this.bird_count;
+
+    return data;
+  }
+}
+
+
