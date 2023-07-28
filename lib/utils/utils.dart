@@ -9,6 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 
 import '../model/egg_item.dart';
+import '../model/feed_item.dart';
 import '../model/flock.dart';
 
 
@@ -36,6 +37,8 @@ class Utils {
 
   static Flock? selected_flock;
   static Eggs? selected_egg_collection;
+  static Feeding? selected_feeding;
+  static String vaccine_medicine = "New Medication";
 
 
   static double getWidthResized(double input) {

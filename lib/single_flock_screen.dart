@@ -8,8 +8,10 @@ import 'package:poultary/inventory.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'add_flocks.dart';
+import 'daily_feed.dart';
 import 'database/databse_helper.dart';
 import 'egg_collection.dart';
+import 'medication_vaccination.dart';
 import 'model/flock.dart';
 
 class SingleFlockScreen extends StatefulWidget {
@@ -245,7 +247,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const Inventory()),
+                                builder: (context) => const DailyFeedScreen()),
                           );
                         }),
 
@@ -287,10 +289,11 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                           ),
                         ),
                         onTap: () {
+                          Utils.vaccine_medicine = "New Medication";
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const Inventory()),
+                                builder: (context) => const MedicationVaccinationScreen()),
                           );
                         }),
 
@@ -332,10 +335,11 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                           ),
                         ),
                         onTap: () {
+                          Utils.vaccine_medicine = "New Vaccination";
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const Inventory()),
+                                builder: (context) => const MedicationVaccinationScreen()),
                           );
                         }),
 

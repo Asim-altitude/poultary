@@ -9,6 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:poultary/model/feed_item.dart';
+import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
@@ -17,16 +19,16 @@ import 'model/egg_item.dart';
 import 'model/flock.dart';
 import 'model/flock_image.dart';
 
-class NewEggCollection extends StatefulWidget {
-  const NewEggCollection({Key? key}) : super(key: key);
+class NewFeeding extends StatefulWidget {
+  const NewFeeding({Key? key}) : super(key: key);
 
   @override
-  _NewEggCollection createState() => _NewEggCollection();
+  _NewFeeding createState() => _NewFeeding();
 }
 
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _NewEggCollection extends State<NewEggCollection>
+class _NewFeeding extends State<NewFeeding>
     with SingleTickerProviderStateMixin {
   double widthScreen = 0;
   double heightScreen = 0;
@@ -37,23 +39,28 @@ class _NewEggCollection extends State<NewEggCollection>
   }
 
   String _purposeselectedValue = "";
+  String _feedselectedValue = "";
   String _acqusitionselectedValue = "";
 
   List<String> _purposeList = [];
+  List<String> _feedList = [];
+  List<SubItem> _subItemList = [];
 
   int chosen_index = 0;
+
+
 
   @override
   void initState() {
     super.initState();
     getList();
+    getFeedList();
   }
 
   List<Flock> flocks = [];
   void getList() async {
 
     await DatabaseHelper.instance.database;
-
 
     flocks = await DatabaseHelper.getFlocks();
 
@@ -72,15 +79,34 @@ class _NewEggCollection extends State<NewEggCollection>
 
   }
 
+  void getFeedList() async {
+    await DatabaseHelper.instance.database;
+
+    _subItemList = await DatabaseHelper.getSubCategoryList(3);
+
+    _subItemList.insert(0,SubItem(c_id: 3,id: -1,name: 'Choose Feed'));
+
+    for(int i=0;i<_subItemList.length;i++){
+      _feedList.add(_subItemList.elementAt(i).name!);
+    }
+
+    _feedselectedValue = _feedList[0];
+
+    print(_feedselectedValue);
+
+
+    setState(() {
+
+    });
+
+  }
+
   Flock? currentFlock = null;
 
   bool _validate = false;
 
   String date = "Choose Date";
-  final nameController = TextEditingController();
-  final totalEggsController = TextEditingController();
-  final goodEggsController = TextEditingController();
-  final badEggsController = TextEditingController();
+  final quantityController = TextEditingController();
   final notesController = TextEditingController();
 
   bool imagesAdded = false;
@@ -130,7 +156,7 @@ class _NewEggCollection extends State<NewEggCollection>
                           child: Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                "Egg Collection",
+                                "New Feeding",
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.black,
@@ -170,43 +196,19 @@ class _NewEggCollection extends State<NewEggCollection>
                           Container(
                             width: widthScreen,
                             height: 70,
-                            padding: EdgeInsets.all(0),
+                            alignment: Alignment.centerRight,
+                            padding: EdgeInsets.all(10),
                             margin: EdgeInsets.only(left: 20, right: 20),
                             decoration: BoxDecoration(
-                                color: Colors.white60,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
-                                width: widthScreen,
-                                height: 60,
-                                child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
-                                  onChanged: (text) {
-                                    if (text.isEmpty){
-                                      good_eggs = 0;
-                                    }else{
-                                      good_eggs = int.parse(text);
-                                    }
-
-                                    calculateTotalEggs();
-                                  },
-                                  controller: goodEggsController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Good Eggs',
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
-                                  ),
-                                ),
+                              color: Colors.transparent,
+                              borderRadius: const BorderRadius.all(
+                                  Radius.circular(10.0)),
+                              border: Border.all(
+                                color:  Colors.black,
+                                width: 1.0,
                               ),
                             ),
+                            child: getFeedTypeList(),
                           ),
 
                           SizedBox(height: 10,width: widthScreen),
@@ -226,57 +228,13 @@ class _NewEggCollection extends State<NewEggCollection>
                                 child: TextFormField(
                                   maxLines: null,
                                   expands: true,
-                                  onChanged: (text) {
-                                    if (text.isEmpty){
-                                      bad_eggs = 0;
-                                    }else{
-                                      bad_eggs = int.parse(text);
-                                    }
-
-                                    calculateTotalEggs();
-                                  },
-                                  controller: badEggsController,
+                                  controller: quantityController,
                                   keyboardType: TextInputType.number,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Bad Eggs',
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            padding: EdgeInsets.all(0),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                                color: Colors.white60,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
-                                width: widthScreen,
-                                height: 60,
-                                child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
-                                  readOnly: true,
-                                  controller: totalEggsController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Total Eggs',
+                                    hintText: 'Feed Quantity (kgs)',
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -361,8 +319,8 @@ class _NewEggCollection extends State<NewEggCollection>
                               if(validate){
                                 print("Everything Okay");
                                 await DatabaseHelper.instance.database;
-                                int? id = await DatabaseHelper.insertEggCollection(Eggs(f_id: getFlockID(), f_name: _purposeselectedValue, image: '', good_eggs: this.good_eggs, bad_eggs: bad_eggs, total_eggs: int.parse(totalEggsController.text),short_note: '', date: date));
-                                Utils.showToast("Eggs Collection Added");
+                                int? id = await DatabaseHelper.insertNewFeeding(Feeding(f_id: getFlockID(), short_note: notesController.text, date: date, feed_name: _feedselectedValue, quantity: int.parse(quantityController.text),));
+                                Utils.showToast("New Feeding Added");
                                 Navigator.pop(context);
 
                               }else{
@@ -439,6 +397,41 @@ class _NewEggCollection extends State<NewEggCollection>
     );
   }
 
+  Widget getFeedTypeList() {
+    return Container(
+      width: widthScreen,
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration.collapsed(hintText: ''),
+        isDense: true,
+        value: _feedselectedValue,
+        elevation: 16,
+        isExpanded: true,
+        onChanged: (String? newValue) {
+          setState(() {
+            _feedselectedValue = newValue!;
+
+            print("Selected Feed $_feedselectedValue");
+
+          });
+        },
+        items: _feedList.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
 
   void pickDate() async{
 
@@ -471,20 +464,20 @@ class _NewEggCollection extends State<NewEggCollection>
       print("Select Date");
     }
 
-    if(totalEggsController.text.length == 0){
+    if(quantityController.text.length == 0){
       valid = false;
-      print("No eggs added");
+      print("Add quantity added");
     }
-
-
+    
+    if (getFeedID() == -1){
+      valid = false;
+      print("Add feed type");
+    }
 
     return valid;
 
   }
 
-  void calculateTotalEggs() {
-    totalEggsController.text = (good_eggs + bad_eggs).toString();
-  }
 
   int getFlockID() {
 
@@ -495,6 +488,21 @@ class _NewEggCollection extends State<NewEggCollection>
         break;
       }
     }
+
+    return selected_id;
+  }
+
+  int getFeedID() {
+
+    int selected_id = -1;
+    for(int i=0;i<_subItemList.length;i++){
+      if(_feedselectedValue.toLowerCase() == _subItemList.elementAt(i).name!.toLowerCase()){
+        selected_id = _subItemList.elementAt(i).id!;
+        break;
+      }
+    }
+
+    print("selected feed id $selected_id");
 
     return selected_id;
   }

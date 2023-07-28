@@ -1,11 +1,13 @@
 import 'package:flutter/services.dart';
 import 'package:poultary/model/egg_item.dart';
 import 'package:poultary/model/flock.dart';
+import 'package:poultary/model/sub_category_item.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:io';
 import 'package:path/path.dart';
 
 import '../model/bird_item.dart';
+import '../model/feed_item.dart';
 import '../model/flock_image.dart';
 class DatabaseHelper  {
   static const _databaseName = "assets/poultary.db";
@@ -100,6 +102,15 @@ class DatabaseHelper  {
     return _birdList;
   }
 
+  static Future<int?> insertNewFeeding(Feeding feeding) async {
+
+    return await _database?.insert(
+      'Feeding',
+      feeding.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+
+  }
 
   static Future<int?> insertEggCollection(Eggs eggs) async {
 
@@ -133,6 +144,52 @@ class DatabaseHelper  {
     return _eggList;
   }
 
+  static Future<List<Feeding>>  getAllFeedings() async {
+    var result = await _database?.rawQuery("SELECT * FROM Feeding");
+    List<Feeding> _feedList = [];
+    Feeding feed;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            feed = Feeding.fromJson(json);
+            _feedList.add(feed);
+            print(_feedList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        feed = Feeding.fromJson(json);
+      }
+    }
+    return _feedList;
+  }
+
+
+  static Future<List<SubItem>>  getSubCategoryList(int i) async {
+    var result = await _database?.rawQuery("SELECT * FROM Category_Detail where c_id = $i");
+    List<SubItem> _feedList = [];
+    SubItem feed;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            feed = SubItem.fromJson(json);
+            _feedList.add(feed);
+            print(_feedList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        feed = SubItem.fromJson(json);
+      }
+    }
+    return _feedList;
+  }
 
   static Future<String> getFlockName(int id) async {
 
