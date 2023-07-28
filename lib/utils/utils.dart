@@ -8,6 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 
+import '../model/egg_item.dart';
+import '../model/flock.dart';
+
 
 class Utils {
   static const String APPLICATION_ID = "BirdDiary";
@@ -31,8 +34,8 @@ class Utils {
   //static final totalSecondsInDay = 5;
   static final totalSecondsInDay = 86400;
 
-  static List<String> allFonts = [];
-  static List<String> emojiList = [];
+  static Flock? selected_flock;
+  static Eggs? selected_egg_collection;
 
 
   static double getWidthResized(double input) {
@@ -84,42 +87,6 @@ class Utils {
     return tempVar;
   }
 
-
-  static List<String> getFontList(){
-
-    allFonts = [];
-
-    allFonts.add("AlloyInklgdWw");
-    allFonts.add("AmberyGardenRegularPKjGd");
-    allFonts.add("ChailceNogginRegular");
-    allFonts.add("GladlyAcceptRegular");
-    allFonts.add("GlitchGoblin");
-    allFonts.add("HoarselySingleLine");
-    allFonts.add("MotleyForcesRegular");
-
-    allFonts.add("Ronysiswadi14");
-
-    allFonts.add("RustyHooksRegular");
-
-    allFonts.add("SinglyLinkedRegular");
-    allFonts.add("RoSpritendoSemibold");
-    allFonts.add("SunnyspellsRegular");
-
-    return allFonts;
-
-
-  }
-
-  static List<String> getEmojiList(){
-
-    emojiList = [];
-
-    emojiList.add("");
-
-    return allFonts;
-
-
-  }
 
 
   static String get bannerAdUnitId {

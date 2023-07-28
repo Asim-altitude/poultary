@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:poultary/model/egg_item.dart';
 import 'package:poultary/model/flock.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:io';
@@ -97,6 +98,48 @@ class DatabaseHelper  {
       }
     }
     return _birdList;
+  }
+
+
+  static Future<int?> insertEggCollection(Eggs eggs) async {
+
+    return await _database?.insert(
+      'Eggs',
+      eggs.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+
+  }
+  static Future<List<Eggs>>  getEggsCollections() async {
+    var result = await _database?.rawQuery("SELECT * FROM Eggs");
+    List<Eggs> _eggList = [];
+    Eggs eggs;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            eggs = Eggs.fromJson(json);
+            _eggList.add(eggs);
+            print(_eggList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        eggs = Eggs.fromJson(json);
+      }
+    }
+    return _eggList;
+  }
+
+
+  static Future<String> getFlockName(int id) async {
+
+    var result = await _database?.rawQuery("SELECT f_name FROM Flock where f_id = $id");
+
+    return result![0].toString();
+
   }
 
   static Future<List<Flock>>  getFlocks() async {

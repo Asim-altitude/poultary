@@ -25,7 +25,7 @@ class _FlockScreen extends State<FlockScreen>
   double widthScreen = 0;
   double heightScreen = 0;
   
-  List<Flock> flocks = [];
+
   
   bool no_flock = false;
 
@@ -43,7 +43,7 @@ class _FlockScreen extends State<FlockScreen>
     getList();
     
   }
-
+  List<Flock> flocks = [];
   void getList() async {
 
     await DatabaseHelper.instance.database;
