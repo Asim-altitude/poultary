@@ -117,34 +117,44 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
             child: SingleChildScrollView(
               child: Column(
                 children: [
-
-                  Row(
-                    children: [
-                      Container(
-                        alignment: Alignment.center,
-                        width: 60,
-                        height: 60,
-                        child: InkWell(
-                          child: Icon(Icons.arrow_back,
-                              color: Colors.black, size: 30),
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                        ),
+                  ClipRRect(
+                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.deepPurple, //(x,y)
+                          ),
+                        ],
                       ),
-                      Expanded(
-                          child: Container(
+                      child: Row(
+                        children: [
+                          Container(
+                            alignment: Alignment.center,
+                            width: 60,
+                            height: 60,
+                            child: InkWell(
+                              child: Icon(Icons.arrow_back,
+                                  color: Colors.white, size: 30),
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ),
+                          Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                "Add New Flock",
+                                "New Flock",
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 20,
+                                    color: Colors.white,
+                                    fontSize: 18,
                                     fontWeight: FontWeight.bold),
-                              ))),
+                              )),
 
-                    ],
+                        ],
+                      ),
+                    ),
                   ),
                   Container(
                       margin: EdgeInsets.only(left: 10,top: 20),
@@ -353,7 +363,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                                   width: 1.0,
                                 ),
                               ),
-                              child: Text(date, style: TextStyle(
+                              child: Text(Utils.getFormattedDate(date), style: TextStyle(
                                   color: Colors.black, fontSize: 16),),
                             ),
                           ),

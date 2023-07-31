@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:poultary/category_screen.dart';
 import 'package:poultary/inventory.dart';
 import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/utils/utils.dart';
@@ -179,6 +180,18 @@ class _HomeScreen extends State<HomeScreen> with SingleTickerProviderStateMixin{
                       );
 
                     }),
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CategoryScreen()),
+                  );
+                },
+                child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Container(margin: EdgeInsets.only(right: 15, top: 20), child: Text("Category Set up", style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),))),
               ),
 
 

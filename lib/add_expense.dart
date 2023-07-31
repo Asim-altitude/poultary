@@ -9,6 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:poultary/model/feed_item.dart';
+import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
@@ -16,17 +18,18 @@ import 'model/bird_item.dart';
 import 'model/egg_item.dart';
 import 'model/flock.dart';
 import 'model/flock_image.dart';
+import 'model/transaction_item.dart';
 
-class NewEggCollection extends StatefulWidget {
-  const NewEggCollection({Key? key}) : super(key: key);
+class NewExpense extends StatefulWidget {
+  const NewExpense({Key? key}) : super(key: key);
 
   @override
-  _NewEggCollection createState() => _NewEggCollection();
+  _NewExpense createState() => _NewExpense();
 }
 
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _NewEggCollection extends State<NewEggCollection>
+class _NewExpense extends State<NewExpense>
     with SingleTickerProviderStateMixin {
   double widthScreen = 0;
   double heightScreen = 0;
@@ -37,23 +40,32 @@ class _NewEggCollection extends State<NewEggCollection>
   }
 
   String _purposeselectedValue = "";
-  String _acqusitionselectedValue = "";
+  String _saleselectedValue = "Expense Item";
 
   List<String> _purposeList = [];
+  List<String> _saleItemList = [];
+  List<SubItem> _paymentMethodList = [];
+  List<String>  _visiblePaymentMethodList = [];
+  List<SubItem> _subItemList = [];
 
   int chosen_index = 0;
+
+
+  bool includeExtras = false;
+
 
   @override
   void initState() {
     super.initState();
     getList();
+    getExpenseCategoryList();
+    getPayMethodList();
   }
 
   List<Flock> flocks = [];
   void getList() async {
 
     await DatabaseHelper.instance.database;
-
 
     flocks = await DatabaseHelper.getFlocks();
 
@@ -64,6 +76,48 @@ class _NewEggCollection extends State<NewEggCollection>
     }
 
     _purposeselectedValue = _purposeList[0];
+
+    setState(() {
+
+    });
+
+  }
+
+  void getPayMethodList() async {
+    await DatabaseHelper.instance.database;
+
+    _paymentMethodList = await DatabaseHelper.getSubCategoryList(5);
+
+    _paymentMethodList.insert(0,SubItem(c_id: 3,id: -1,name: 'Payment Method'));
+
+    for(int i=0;i<_paymentMethodList.length;i++){
+      _visiblePaymentMethodList.add(_paymentMethodList.elementAt(i).name!);
+    }
+
+    payment_method = _visiblePaymentMethodList[0];
+
+    print(_visiblePaymentMethodList);
+
+    setState(() {
+
+    });
+
+  }
+
+  void getExpenseCategoryList() async {
+    await DatabaseHelper.instance.database;
+
+    _subItemList = await DatabaseHelper.getSubCategoryList(2);
+
+    _subItemList.insert(0,SubItem(c_id: 3,id: -1,name: 'Expense Item'));
+
+    for(int i=0;i<_subItemList.length;i++){
+      _saleItemList.add(_subItemList.elementAt(i).name!);
+    }
+
+    _saleselectedValue = _saleItemList[0];
+
+    print(_saleItemList);
 
 
     setState(() {
@@ -77,11 +131,14 @@ class _NewEggCollection extends State<NewEggCollection>
   bool _validate = false;
 
   String date = "Choose Date";
-  final nameController = TextEditingController();
-  final totalEggsController = TextEditingController();
-  final goodEggsController = TextEditingController();
-  final badEggsController = TextEditingController();
+  String payment_method = "Payment Method";
+  String payment_status = "Payment Status";
+
+  final quantityController = TextEditingController();
   final notesController = TextEditingController();
+  final amountController = TextEditingController();
+  final howmanyController = TextEditingController();
+  final soldtoController = TextEditingController();
 
   bool imagesAdded = false;
 
@@ -111,6 +168,7 @@ class _NewEggCollection extends State<NewEggCollection>
             child: SingleChildScrollView(
               child: Column(
                 children: [
+
                   ClipRRect(
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
                     child: Container(
@@ -138,7 +196,7 @@ class _NewEggCollection extends State<NewEggCollection>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                "New Collection",
+                                "New Expense",
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -180,43 +238,132 @@ class _NewEggCollection extends State<NewEggCollection>
                           Container(
                             width: widthScreen,
                             height: 70,
-                            padding: EdgeInsets.all(0),
+                            alignment: Alignment.centerRight,
+                            padding: EdgeInsets.all(10),
                             margin: EdgeInsets.only(left: 20, right: 20),
                             decoration: BoxDecoration(
-                                color: Colors.white60,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
-                                width: widthScreen,
-                                height: 60,
-                                child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
-                                  onChanged: (text) {
-                                    if (text.isEmpty){
-                                      good_eggs = 0;
-                                    }else{
-                                      good_eggs = int.parse(text);
-                                    }
+                              color: Colors.transparent,
+                              borderRadius: const BorderRadius.all(
+                                  Radius.circular(10.0)),
+                              border: Border.all(
+                                color:  Colors.black,
+                                width: 1.0,
+                              ),
+                            ),
+                            child: getSaleTypeList(),
+                          ),
 
-                                    calculateTotalEggs();
-                                  },
-                                  controller: goodEggsController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Good Eggs',
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
+                          SizedBox(height: 10,width: widthScreen),
+                          
+                          
+                          Container(
+                            
+                            child: Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  height: 70,
+                                  padding: EdgeInsets.all(0),
+                                  margin: EdgeInsets.only(left: 20,right: 5,),
+                                  decoration: BoxDecoration(
+                                      color: Colors.white60,
+                                      borderRadius:
+                                      BorderRadius.all(Radius.circular(10))),
+                                  child: Container(
+                                    child: SizedBox(
+                                      width: widthScreen,
+                                      height: 60,
+                                      child: TextFormField(
+                                        maxLines: null,
+                                        expands: true,
+                                        controller: howmanyController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(
+                                          border: OutlineInputBorder(
+                                              borderRadius:
+                                              BorderRadius.all(Radius.circular(10))),
+                                          hintText: 'How many/much?',
+                                          hintStyle: TextStyle(
+                                              color: Colors.grey, fontSize: 14),
+                                          labelStyle: TextStyle(
+                                              color: Colors.black, fontSize: 16),
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
+                              Expanded(
+                                 child: Container(
+                               height: 70,
+                               padding: EdgeInsets.all(0),
+                               margin: EdgeInsets.only( right: 20),
+                               decoration: BoxDecoration(
+                                   color: Colors.white60,
+                                   borderRadius:
+                                   BorderRadius.all(Radius.circular(10))),
+                               child: Container(
+                                 child: SizedBox(
+                                   width: widthScreen,
+                                   height: 60,
+                                   child: TextFormField(
+                                     maxLines: null,
+                                     expands: true,
+                                     controller: amountController,
+                                     keyboardType: TextInputType.number,
+                                     decoration: const InputDecoration(
+                                       border: OutlineInputBorder(
+                                           borderRadius:
+                                           BorderRadius.all(Radius.circular(10))),
+                                       hintText: 'Expense Amount',
+                                       hintStyle: TextStyle(
+                                           color: Colors.grey, fontSize: 14),
+                                       labelStyle: TextStyle(
+                                           color: Colors.black, fontSize: 16),
+                                     ),
+                                   ),
+                                 ),
+                               ),
+                             )) ,
+                            ],
+                          ),),
+
+                          SizedBox(height: 10,width: widthScreen),
+                          Container(
+                            width: widthScreen,
+                            height: 70,
+                            alignment: Alignment.centerRight,
+                            padding: EdgeInsets.all(10),
+                            margin: EdgeInsets.only(left: 20, right: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: const BorderRadius.all(
+                                  Radius.circular(10.0)),
+                              border: Border.all(
+                                color:  Colors.black,
+                                width: 1.0,
+                              ),
                             ),
+                            child: getPaymentMethodList(),
+                          ),
+
+                          SizedBox(height: 10,width: widthScreen),
+                          Container(
+                            width: widthScreen,
+                            height: 70,
+                            alignment: Alignment.centerRight,
+                            padding: EdgeInsets.all(10),
+                            margin: EdgeInsets.only(left: 20, right: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: const BorderRadius.all(
+                                  Radius.circular(10.0)),
+                              border: Border.all(
+                                color:  Colors.black,
+                                width: 1.0,
+                              ),
+                            ),
+                            child: getPaymentStatusList(),
                           ),
 
                           SizedBox(height: 10,width: widthScreen),
@@ -236,22 +383,12 @@ class _NewEggCollection extends State<NewEggCollection>
                                 child: TextFormField(
                                   maxLines: null,
                                   expands: true,
-                                  onChanged: (text) {
-                                    if (text.isEmpty){
-                                      bad_eggs = 0;
-                                    }else{
-                                      bad_eggs = int.parse(text);
-                                    }
-
-                                    calculateTotalEggs();
-                                  },
-                                  controller: badEggsController,
-                                  keyboardType: TextInputType.number,
+                                  controller: soldtoController,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Bad Eggs',
+                                    hintText: 'Paid To (Person name)',
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -262,40 +399,6 @@ class _NewEggCollection extends State<NewEggCollection>
                             ),
                           ),
 
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            padding: EdgeInsets.all(0),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                                color: Colors.white60,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
-                                width: widthScreen,
-                                height: 60,
-                                child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
-                                  readOnly: true,
-                                  controller: totalEggsController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Total Eggs',
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
 
 
                           SizedBox(height: 10,width: widthScreen),
@@ -371,10 +474,10 @@ class _NewEggCollection extends State<NewEggCollection>
                               if(validate){
                                 print("Everything Okay");
                                 await DatabaseHelper.instance.database;
-                                int? id = await DatabaseHelper.insertEggCollection(Eggs(f_id: getFlockID(), f_name: _purposeselectedValue, image: '', good_eggs: this.good_eggs, bad_eggs: bad_eggs, total_eggs: int.parse(totalEggsController.text),short_note: '', date: date));
-                                Utils.showToast("Eggs Collection Added");
+                                TransactionItem transaction_item = TransactionItem(f_id: getFlockID(), date: date, sale_item: "", expense_item: _saleselectedValue, type: "Expense", amount: amountController.text, payment_method: payment_method, payment_status: payment_status, sold_purchased_from: soldtoController.text, short_note: notesController.text, how_many: howmanyController.text, extra_cost: "", extra_cost_details: "");
+                                int? id = await DatabaseHelper.insertNewTransaction(transaction_item);
+                                Utils.showToast("New Expense Added");
                                 Navigator.pop(context);
-
                               }else{
                                 Utils.showToast("Provide all required info");
                               }
@@ -449,6 +552,110 @@ class _NewEggCollection extends State<NewEggCollection>
     );
   }
 
+  Widget getSaleTypeList() {
+    return Container(
+      width: widthScreen,
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration.collapsed(hintText: ''),
+        isDense: true,
+        value: _saleselectedValue,
+        elevation: 16,
+        isExpanded: true,
+        onChanged: (String? newValue) {
+          setState(() {
+            _saleselectedValue = newValue!;
+
+            print("Selected Sale Item $_saleselectedValue");
+
+          });
+        },
+        items: _saleItemList.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+
+  Widget getPaymentMethodList() {
+    return Container(
+      width: widthScreen,
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration.collapsed(hintText: ""),
+        isDense: true,
+        value: payment_method,
+        elevation: 16,
+        isExpanded: true,
+        onChanged: (String? newValue) {
+          setState(() {
+            payment_method = newValue!;
+
+          });
+        },
+        items: _visiblePaymentMethodList.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+
+  List<String> paymentStatusList = ['Payment Status','Cleared','UnClear','Reconciled'];
+  Widget getPaymentStatusList() {
+    return Container(
+      width: widthScreen,
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration.collapsed(hintText: ''),
+        isDense: true,
+        value: payment_status,
+        elevation: 16,
+        isExpanded: true,
+        onChanged: (String? newValue) {
+          setState(() {
+            payment_status = newValue!;
+
+          });
+        },
+        items: paymentStatusList.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
 
   void pickDate() async{
 
@@ -481,20 +688,41 @@ class _NewEggCollection extends State<NewEggCollection>
       print("Select Date");
     }
 
-    if(totalEggsController.text.length == 0){
+    if(howmanyController.text.isEmpty){
       valid = false;
-      print("No eggs added");
+      print("Add how many ");
     }
 
+    if(soldtoController.text.isEmpty){
+      valid = false;
+      print("Add Sold to");
+    }
+
+    if(amountController.text.isEmpty){
+      valid = false;
+      print("Add amount");
+    }
+    
+    if (_saleselectedValue.toLowerCase().contains("item")){
+      valid = false;
+      print("No sale item slected");
+    }
+
+    if (payment_method.toLowerCase().contains("payment")){
+      valid = false;
+      print("No payment method slected");
+    }
+
+    if (payment_status.toLowerCase().contains("status")){
+      valid = false;
+      print("No payment status slected");
+    }
 
 
     return valid;
 
   }
 
-  void calculateTotalEggs() {
-    totalEggsController.text = (good_eggs + bad_eggs).toString();
-  }
 
   int getFlockID() {
 
@@ -505,6 +733,21 @@ class _NewEggCollection extends State<NewEggCollection>
         break;
       }
     }
+
+    return selected_id;
+  }
+
+  int getFeedID() {
+
+    int selected_id = -1;
+    for(int i=0;i<_subItemList.length;i++){
+      if(_saleselectedValue.toLowerCase() == _subItemList.elementAt(i).name!.toLowerCase()){
+        selected_id = _subItemList.elementAt(i).id!;
+        break;
+      }
+    }
+
+    print("selected Sale id $selected_id");
 
     return selected_id;
   }

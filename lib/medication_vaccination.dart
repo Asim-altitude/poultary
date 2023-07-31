@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:poultary/add_eggs.dart';
 import 'package:poultary/add_feeding.dart';
+import 'package:poultary/add_vac_med.dart';
 import 'package:poultary/inventory.dart';
 import 'package:poultary/model/feed_item.dart';
 import 'package:poultary/single_flock_screen.dart';
@@ -15,6 +16,7 @@ import 'add_flocks.dart';
 import 'database/databse_helper.dart';
 import 'model/egg_item.dart';
 import 'model/flock.dart';
+import 'model/med_vac_item.dart';
 
 class MedicationVaccinationScreen extends StatefulWidget {
   const MedicationVaccinationScreen({Key? key}) : super(key: key);
@@ -46,19 +48,19 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
       isVaccine = true;
     }
 
-    getEggCollectionList();
+    getvaccMedList();
   }
 
   bool no_colection = true;
-  List<Feeding> feedings = [];
+  List<Vaccination_Medication> vac_med_list = [];
   List<String> flock_name = [];
-  void getEggCollectionList() async {
+  void getvaccMedList() async {
 
     await DatabaseHelper.instance.database;
 
-    feedings = await DatabaseHelper.getAllFeedings();
+    vac_med_list = await DatabaseHelper.getAllVaccinationMedications();
 
-    feed_total = feedings.length;
+    feed_total = vac_med_list.length;
 
     setState(() {
 
@@ -68,7 +70,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
 
   int feed_total = 0;
 
-  String applied_filter_name = Utils.vaccine_medicine;
+  String applied_filter_name = "All Medication/Vaccination";
 
   @override
   Widget build(BuildContext context) {
@@ -94,18 +96,46 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
-              Container(
+              ClipRRect(
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                child: Container(
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.deepPurple, //(x,y)
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        alignment: Alignment.center,
+                        width: 60,
+                        height: 60,
+                        child: InkWell(
+                          child: Icon(Icons.arrow_back,
+                              color: Colors.white, size: 30),
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                      Container(
+                          margin: EdgeInsets.only(left: 10),
+                          child: Text(
+                            applied_filter_name,
+                            textAlign: TextAlign.start,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold),
+                          )),
 
-                  margin: EdgeInsets.only(left: 10,top: 20),
-                  child: Text(
-                    applied_filter_name,
-                    textAlign: TextAlign.start,
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  )),
-              feedings.length > 0 ? InkWell(
+                    ],
+                  ),
+                ),
+              ),
+              vac_med_list.length > 0 ? InkWell(
                 onTap: () {
                   addNewCollection();
                 },
@@ -124,16 +154,16 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                   ),
                 ),
               ) : SizedBox(width: 0,height: 0,),
-              feedings.length > 0 ? Container(
+              vac_med_list.length > 0 ? Container(
                 height: heightScreen - 220,
                 width: widthScreen,
                 child: ListView.builder(
-                    itemCount: feedings.length,
+                    itemCount: vac_med_list.length,
                     scrollDirection: Axis.vertical,
                     itemBuilder: (BuildContext context, int index) {
                       return InkWell(
                         onTap: () {
-                          Utils.selected_feeding = feedings.elementAt(index);
+                          Utils.selected_med = vac_med_list.elementAt(index);
                           Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -160,9 +190,9 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                                   alignment: Alignment.topLeft,
                                   margin: EdgeInsets.all(10),
                                   child: Column( children: [
-                                    Container(margin: EdgeInsets.all(0), child: Text(feedings.elementAt(index).feed_name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),)),
+                                    Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).medicine!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),)),
 
-                                    Container(margin: EdgeInsets.all(5), child: Text(feedings.elementAt(index).date.toString(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+                                    Container(margin: EdgeInsets.all(5), child: Text(vac_med_list.elementAt(index).date.toString(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
                                    // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
                                   ],),
                                 ),
@@ -173,8 +203,8 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                                     margin: EdgeInsets.only(right: 10),
                                     child: Row(
                                       children: [
-                                        Container(  child: Text(feedings.elementAt(index).quantity.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),)),
-                                        Text("kg", style: TextStyle(color: Colors.black, fontSize: 16),)
+                                        Container(  child: Text(vac_med_list.elementAt(index).bird_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),)),
+                                        Text("Birds", style: TextStyle(color: Colors.black, fontSize: 16),)
                                       ],
                                     ),
                                   ),
@@ -192,13 +222,13 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                   margin: EdgeInsets.only(top: 50),
                   child: Column(
                     children: [
-                      Text('No Feedings yet', style: TextStyle(fontSize: 18, color: Colors.black),),
+                      Text('No vaccination/medication added', style: TextStyle(fontSize: 18, color: Colors.black),),
                       InkWell(
                         onTap: () {
                           addNewCollection();
                         },
                         child: Container(
-                          width: 150,
+                          width: 100,
                           height: 50,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
@@ -212,7 +242,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                           ),
                           margin: EdgeInsets.all( 20),
                           child: Text(
-                            "Add New",
+                            "New",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 color: Colors.deepPurple,
@@ -464,7 +494,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => const NewFeeding()),
+          builder: (context) => const NewVaccineMedicine()),
     );
   }
 }

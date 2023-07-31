@@ -9,6 +9,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:poultary/model/feed_item.dart';
+import 'package:poultary/model/med_vac_item.dart';
+import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
@@ -17,16 +20,16 @@ import 'model/egg_item.dart';
 import 'model/flock.dart';
 import 'model/flock_image.dart';
 
-class NewEggCollection extends StatefulWidget {
-  const NewEggCollection({Key? key}) : super(key: key);
+class NewVaccineMedicine extends StatefulWidget {
+  const NewVaccineMedicine({Key? key}) : super(key: key);
 
   @override
-  _NewEggCollection createState() => _NewEggCollection();
+  _NewVaccineMedicine createState() => _NewVaccineMedicine();
 }
 
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _NewEggCollection extends State<NewEggCollection>
+class _NewVaccineMedicine extends State<NewVaccineMedicine>
     with SingleTickerProviderStateMixin {
   double widthScreen = 0;
   double heightScreen = 0;
@@ -37,23 +40,28 @@ class _NewEggCollection extends State<NewEggCollection>
   }
 
   String _purposeselectedValue = "";
+  String _diseaseelectedValue = "";
   String _acqusitionselectedValue = "";
 
   List<String> _purposeList = [];
+  List<String> _diseaseList = [];
+  List<SubItem> _subItemList = [];
 
   int chosen_index = 0;
+
+
 
   @override
   void initState() {
     super.initState();
     getList();
+    getDiseaseList();
   }
 
   List<Flock> flocks = [];
   void getList() async {
 
     await DatabaseHelper.instance.database;
-
 
     flocks = await DatabaseHelper.getFlocks();
 
@@ -72,15 +80,36 @@ class _NewEggCollection extends State<NewEggCollection>
 
   }
 
+  void getDiseaseList() async {
+    await DatabaseHelper.instance.database;
+
+    _subItemList = await DatabaseHelper.getSubCategoryList(4);
+
+    _subItemList.insert(0,SubItem(c_id: 3,id: -1,name: 'Choose Disease'));
+
+    for(int i=0;i<_subItemList.length;i++){
+      _diseaseList.add(_subItemList.elementAt(i).name!);
+    }
+
+    _diseaseelectedValue = _diseaseList[0];
+
+    print(_diseaseelectedValue);
+
+
+    setState(() {
+
+    });
+
+  }
+
   Flock? currentFlock = null;
 
   bool _validate = false;
 
   String date = "Choose Date";
-  final nameController = TextEditingController();
-  final totalEggsController = TextEditingController();
-  final goodEggsController = TextEditingController();
-  final badEggsController = TextEditingController();
+  final bird_countController = TextEditingController();
+  final doctorController = TextEditingController();
+  final medicineController = TextEditingController();
   final notesController = TextEditingController();
 
   bool imagesAdded = false;
@@ -111,6 +140,7 @@ class _NewEggCollection extends State<NewEggCollection>
             child: SingleChildScrollView(
               child: Column(
                 children: [
+
                   ClipRRect(
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
                     child: Container(
@@ -138,7 +168,7 @@ class _NewEggCollection extends State<NewEggCollection>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                "New Collection",
+                                Utils.vaccine_medicine.toLowerCase().contains("medi")? 'New Medication':'New Vaccination',
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -180,7 +210,25 @@ class _NewEggCollection extends State<NewEggCollection>
                           Container(
                             width: widthScreen,
                             height: 70,
-                            padding: EdgeInsets.all(0),
+                            alignment: Alignment.centerRight,
+                            padding: EdgeInsets.all(10),
+                            margin: EdgeInsets.only(left: 20, right: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: const BorderRadius.all(
+                                  Radius.circular(10.0)),
+                              border: Border.all(
+                                color:  Colors.black,
+                                width: 1.0,
+                              ),
+                            ),
+                            child: getDiseaseTypeList(),
+                          ),
+
+                          SizedBox(height: 10,width: widthScreen),
+                          Container(
+                            width: widthScreen,
+                            height: 70,
                             margin: EdgeInsets.only(left: 20, right: 20),
                             decoration: BoxDecoration(
                                 color: Colors.white60,
@@ -189,26 +237,18 @@ class _NewEggCollection extends State<NewEggCollection>
                             child: Container(
                               child: SizedBox(
                                 width: widthScreen,
-                                height: 60,
+                                height: 70,
                                 child: TextFormField(
                                   maxLines: null,
                                   expands: true,
-                                  onChanged: (text) {
-                                    if (text.isEmpty){
-                                      good_eggs = 0;
-                                    }else{
-                                      good_eggs = int.parse(text);
-                                    }
-
-                                    calculateTotalEggs();
-                                  },
-                                  controller: goodEggsController,
-                                  keyboardType: TextInputType.number,
+                                  controller: medicineController,
+                                  keyboardType: TextInputType.multiline,
+                                  textAlign: TextAlign.start,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Good Eggs',
+                                    hintText: 'Medicine name',
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -236,57 +276,13 @@ class _NewEggCollection extends State<NewEggCollection>
                                 child: TextFormField(
                                   maxLines: null,
                                   expands: true,
-                                  onChanged: (text) {
-                                    if (text.isEmpty){
-                                      bad_eggs = 0;
-                                    }else{
-                                      bad_eggs = int.parse(text);
-                                    }
-
-                                    calculateTotalEggs();
-                                  },
-                                  controller: badEggsController,
+                                  controller: bird_countController,
                                   keyboardType: TextInputType.number,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Bad Eggs',
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            padding: EdgeInsets.all(0),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                                color: Colors.white60,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
-                                width: widthScreen,
-                                height: 60,
-                                child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
-                                  readOnly: true,
-                                  controller: totalEggsController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Total Eggs',
+                                    hintText: 'Birds count',
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -332,6 +328,40 @@ class _NewEggCollection extends State<NewEggCollection>
                           SizedBox(height: 10,width: widthScreen),
                           Container(
                             width: widthScreen,
+                            height: 70,
+                            margin: EdgeInsets.only(left: 20, right: 20),
+                            decoration: BoxDecoration(
+                                color: Colors.white60,
+                                borderRadius:
+                                BorderRadius.all(Radius.circular(10))),
+                            child: Container(
+                              child: SizedBox(
+                                width: widthScreen,
+                                height: 70,
+                                child: TextFormField(
+                                  maxLines: null,
+                                  expands: true,
+                                  controller: doctorController,
+                                  keyboardType: TextInputType.multiline,
+                                  textAlign: TextAlign.start,
+                                  decoration: const InputDecoration(
+                                    border: OutlineInputBorder(
+                                        borderRadius:
+                                        BorderRadius.all(Radius.circular(10))),
+                                    hintText: 'Doctor name',
+                                    hintStyle: TextStyle(
+                                        color: Colors.grey, fontSize: 16),
+                                    labelStyle: TextStyle(
+                                        color: Colors.black, fontSize: 16),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(height: 10,width: widthScreen),
+                          Container(
+                            width: widthScreen,
                             height: 150,
                             padding: EdgeInsets.all(5),
                             margin: EdgeInsets.only(left: 10, right: 10),
@@ -363,6 +393,7 @@ class _NewEggCollection extends State<NewEggCollection>
                               ),
                             ),
                           ),
+
                           SizedBox(height: 10,width: widthScreen),
                           InkWell(
                             onTap: () async {
@@ -371,8 +402,9 @@ class _NewEggCollection extends State<NewEggCollection>
                               if(validate){
                                 print("Everything Okay");
                                 await DatabaseHelper.instance.database;
-                                int? id = await DatabaseHelper.insertEggCollection(Eggs(f_id: getFlockID(), f_name: _purposeselectedValue, image: '', good_eggs: this.good_eggs, bad_eggs: bad_eggs, total_eggs: int.parse(totalEggsController.text),short_note: '', date: date));
-                                Utils.showToast("Eggs Collection Added");
+                                Vaccination_Medication med_vacc = Vaccination_Medication(f_id : getFlockID(), disease: _diseaseelectedValue, medicine: medicineController.text, date: date, type: Utils.vaccine_medicine.toLowerCase().contains("medi")? 'Medication':'Vaccination', short_note: notesController.text, bird_count: int.parse(bird_countController.text), doctor_name: doctorController.text,);
+                                int? id = await DatabaseHelper.insertMedVac(med_vacc);
+                                Utils.showToast("New Med_Vac Added");
                                 Navigator.pop(context);
 
                               }else{
@@ -449,6 +481,41 @@ class _NewEggCollection extends State<NewEggCollection>
     );
   }
 
+  Widget getDiseaseTypeList() {
+    return Container(
+      width: widthScreen,
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration.collapsed(hintText: ''),
+        isDense: true,
+        value: _diseaseelectedValue,
+        elevation: 16,
+        isExpanded: true,
+        onChanged: (String? newValue) {
+          setState(() {
+            _diseaseelectedValue = newValue!;
+
+            print("Selected Disease $_diseaseelectedValue");
+
+          });
+        },
+        items: _diseaseList.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
 
   void pickDate() async{
 
@@ -481,20 +548,31 @@ class _NewEggCollection extends State<NewEggCollection>
       print("Select Date");
     }
 
-    if(totalEggsController.text.length == 0){
+    if(bird_countController.text.length == 0){
       valid = false;
-      print("No eggs added");
+      print("Add Birds Total added");
+    }
+    
+    if (getDiseaseID() == -1){
+      valid = false;
+      print("Add Disease type");
     }
 
+    if (medicineController.text.isEmpty){
+      valid = false;
+      print("Add Medicine type");
+    }
+
+    if (doctorController.text.isEmpty){
+      valid = false;
+      print("Add Doctor ");
+    }
 
 
     return valid;
 
   }
 
-  void calculateTotalEggs() {
-    totalEggsController.text = (good_eggs + bad_eggs).toString();
-  }
 
   int getFlockID() {
 
@@ -505,6 +583,21 @@ class _NewEggCollection extends State<NewEggCollection>
         break;
       }
     }
+
+    return selected_id;
+  }
+
+  int getDiseaseID() {
+
+    int selected_id = -1;
+    for(int i=0;i<_subItemList.length;i++){
+      if(_diseaseelectedValue.toLowerCase() == _subItemList.elementAt(i).name!.toLowerCase()){
+        selected_id = _subItemList.elementAt(i).id!;
+        break;
+      }
+    }
+
+    print("selected disease id $selected_id");
 
     return selected_id;
   }

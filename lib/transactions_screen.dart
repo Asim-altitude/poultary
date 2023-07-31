@@ -5,9 +5,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:poultary/add_eggs.dart';
+import 'package:poultary/add_expense.dart';
 import 'package:poultary/add_feeding.dart';
+import 'package:poultary/add_income.dart';
 import 'package:poultary/inventory.dart';
 import 'package:poultary/model/feed_item.dart';
+import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/utils/utils.dart';
 
@@ -16,15 +19,15 @@ import 'database/databse_helper.dart';
 import 'model/egg_item.dart';
 import 'model/flock.dart';
 
-class DailyFeedScreen extends StatefulWidget {
-  const DailyFeedScreen({Key? key}) : super(key: key);
+class TransactionsScreen extends StatefulWidget {
+  const TransactionsScreen({Key? key}) : super(key: key);
 
   @override
-  _DailyFeedScreen createState() => _DailyFeedScreen();
+  _TransactionsScreen createState() => _TransactionsScreen();
 }
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderStateMixin{
+class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerProviderStateMixin{
 
   double widthScreen = 0;
   double heightScreen = 0;
@@ -39,20 +42,20 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
   void initState() {
     super.initState();
 
-    getEggCollectionList();
+    getAllTransactions();
   }
 
   bool no_colection = true;
-  List<Feeding> feedings = [];
+  List<TransactionItem> transactionList = [];
   List<String> flock_name = [];
-  void getEggCollectionList() async {
+  void getAllTransactions() async {
 
     await DatabaseHelper.instance.database;
 
-    feedings = await DatabaseHelper.getAllFeedings();
+    transactionList = await DatabaseHelper.getAllTransactions();
 
 
-    feed_total = feedings.length;
+    feed_total = transactionList.length;
 
     setState(() {
 
@@ -62,7 +65,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
 
   int feed_total = 0;
 
-  String applied_filter_name = "All Feedings";
+  String applied_filter_name = "Income/Expense";
 
   @override
   Widget build(BuildContext context) {
@@ -76,24 +79,84 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
     return SafeArea(child: Scaffold(
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.transparent,
+        child: Container(
+          height: 60,
+          width: widthScreen,
+          child: Row(children: [
+
+            Expanded(
+              child: InkWell(
+                onTap: () {
+                  addNewIncome();
+                },
+                child: Container(
+                  height: 50,
+                  margin: EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: const BorderRadius.all(
+                        Radius.circular(5.0)),
+                    border: Border.all(
+                      color:  Colors.green,
+                      width: 2.0,
+                    ),
+                  ),
+                  child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Icon(Icons.add, color: Colors.white, size: 30,),
+                    Text('Income', style: TextStyle(
+                        color: Colors.white, fontSize: 18),)
+                  ],),
+                ),
+              ),
+            ),
+            Expanded(
+              child: InkWell(
+                onTap: () {
+                  addNewExpense();
+                },
+                child: Container(
+                  height: 50,
+                  margin: EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: const BorderRadius.all(
+                        Radius.circular(5.0)),
+                    border: Border.all(
+                      color:  Colors.red,
+                      width: 2.0,
+                    ),
+                  ),
+                  child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Icon(Icons.add, color: Colors.white, size: 30,),
+                    Text('Expense', style: TextStyle(
+                        color: Colors.white, fontSize: 18),)
+                  ],),
+                ),
+              ),
+            ),
+          ],),
+        ),
+        elevation: 0,
+      ),
       body:SafeArea(
         top: false,
-
           child:Container(
           width: widthScreen,
           height: heightScreen,
           color: Colors.white,
             child:SingleChildScrollView(
             child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.end,
             children:  [
-
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
                 child: Container(
                   decoration: BoxDecoration(
-                     boxShadow: [
+                    boxShadow: [
                       BoxShadow(
                         color: Colors.deepPurple, //(x,y)
                       ),
@@ -128,35 +191,18 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                   ),
                 ),
               ),
-              feedings.length > 0 ? InkWell(
-                onTap: () {
-                  addNewCollection();
-                },
-                child: Container(
-                  width: widthScreen,
-                  height: 60,
-                  alignment: Alignment.centerRight,
-                  margin: EdgeInsets.all( 20),
-                  child: Text(
-                    "New Feeding",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        color: Colors.deepPurple,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ) : SizedBox(width: 0,height: 0,),
-              feedings.length > 0 ? Container(
-                height: heightScreen - 220,
+
+              transactionList.length > 0 ? Container(
+                margin: EdgeInsets.only(top: 0),
+                height: heightScreen - 200,
                 width: widthScreen,
                 child: ListView.builder(
-                    itemCount: feedings.length,
+                    itemCount: transactionList.length,
                     scrollDirection: Axis.vertical,
                     itemBuilder: (BuildContext context, int index) {
                       return InkWell(
                         onTap: () {
-                          Utils.selected_feeding = feedings.elementAt(index);
+                          Utils.selected_transaction = transactionList.elementAt(index);
                           Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -165,46 +211,45 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                         child: Card(
                           margin: EdgeInsets.all(10),
                           color: Colors.white,
-                          elevation: 3,
-                          child: Container(
-                            height: 100,
-                            /*decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
-                            ),*/
-                            child: Row( children: [
-                              Expanded(
-                                child: Container(
-                                  alignment: Alignment.topLeft,
-                                  margin: EdgeInsets.all(10),
-                                  child: Column( children: [
-                                    Container(margin: EdgeInsets.all(0), child: Text(feedings.elementAt(index).feed_name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),)),
+                          elevation: 2,
 
-                                    Container(margin: EdgeInsets.all(5), child: Text(feedings.elementAt(index).date.toString(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-                                   // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                  ],),
-                                ),
-                              ),
-                              Column(
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.only(right: 10),
-                                    child: Row(
-                                      children: [
-                                        Container(  child: Text(feedings.elementAt(index).quantity.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),)),
-                                        Text("kg", style: TextStyle(color: Colors.black, fontSize: 16),)
-                                      ],
+                          child: Container(
+                            height: 130,
+                            child: Column(
+                              children: [
+                                Container(child: Text(style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black), transactionList.elementAt(index).type.toLowerCase().contains("income")? transactionList.elementAt(index).sale_item : transactionList.elementAt(index).expense_item),),
+                                Row( children: [
+                                  Expanded(
+                                    child: Container(
+                                      margin: EdgeInsets.all(10),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            margin: EdgeInsets.only(right: 10),
+                                            child: Row(
+                                              children: [
+                                                Container(  child: Text(transactionList.elementAt(index).amount.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),)),
+                                                Text("USD", style: TextStyle(color: Colors.black, fontSize: 14),)
+                                              ],
+                                            ),
+                                          ),
+
+                                          Container(child: Text(Utils.getFormattedDate(transactionList.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+                                          // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+                                        ],),
                                     ),
                                   ),
-                                ],
-                              ),
+                                  Column(
+                                    children: [
+                                      Container(margin: EdgeInsets.all(5), child: Text(transactionList.elementAt(index).type!, style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color:transactionList.elementAt(index).type!.toLowerCase().contains("income")? Colors.green : Colors.red),)),
+                                    ],
+                                  ),
 
-                            ]),
+                                ]),
+                              ],
+                            ) ,
                           ),
                         ),
                       );
@@ -212,42 +257,20 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                     }),
               ) : Center(
                 child: Container(
-                  margin: EdgeInsets.only(top: 50),
-                  child: Column(
-                    children: [
-                      Text('No Feedings added', style: TextStyle(fontSize: 18, color: Colors.black),),
-                      InkWell(
-                        onTap: () {
-                          addNewCollection();
-                        },
-                        child: Container(
-                          width: 100,
-                          height: 50,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(10.0)),
-                            border: Border.all(
-                              color:  Colors.deepPurple,
-                              width: 2.0,
-                            ),
-                          ),
-                          margin: EdgeInsets.all( 20),
-                          child: Text(
-                            "New",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: Colors.deepPurple,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                    ],
+                  margin: EdgeInsets.only(top: 20),
+                  child: Container(
+                    height: heightScreen - 200,
+                    width: widthScreen,
+                    child: Column(
+                      children: [
+                        Text('No Income/Expense added', style: TextStyle(fontSize: 18, color: Colors.black),),
+
+                      ],
+                    ),
                   ),
                 ),
               ),
+
 
                    /* Text(
               "Main Menu",
@@ -483,11 +506,19 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
       ),),),),),);
   }
 
-  void addNewCollection(){
+  void addNewIncome(){
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => const NewFeeding()),
+          builder: (context) => const NewIncome()),
+    );
+  }
+
+  void addNewExpense(){
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => const NewExpense()),
     );
   }
 }

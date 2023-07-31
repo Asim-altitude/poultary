@@ -11,6 +11,8 @@ import 'package:intl/intl.dart';
 import '../model/egg_item.dart';
 import '../model/feed_item.dart';
 import '../model/flock.dart';
+import '../model/med_vac_item.dart';
+import '../model/transaction_item.dart';
 
 
 class Utils {
@@ -38,8 +40,11 @@ class Utils {
   static Flock? selected_flock;
   static Eggs? selected_egg_collection;
   static Feeding? selected_feeding;
-  static String vaccine_medicine = "New Medication";
-
+  static int selected_category = -1;
+  static String selected_category_name = "";
+  static TransactionItem? selected_transaction;
+  static Vaccination_Medication? selected_med;
+  static String vaccine_medicine = "All Medications/Vaccinations";
 
   static double getWidthResized(double input) {
     double tempVar = 0;
@@ -160,6 +165,11 @@ class Utils {
   }
 
   static String getFormattedDate(String date){
+
+    if (date.toLowerCase().contains("date")){
+      return date;
+    }
+
     var inputFormat = DateFormat('yyyy-MM-dd');
     var inputDate = inputFormat.parse(date); // <-- dd/MM 24H format
 

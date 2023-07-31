@@ -60,7 +60,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
   int egg_total = 0;
 
-  String applied_filter_name = "All Egg Collections";
+  String applied_filter_name = "All Collections";
 
   @override
   Widget build(BuildContext context) {
@@ -86,17 +86,45 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
-              Container(
+              ClipRRect(
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                child: Container(
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.deepPurple, //(x,y)
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        alignment: Alignment.center,
+                        width: 60,
+                        height: 60,
+                        child: InkWell(
+                          child: Icon(Icons.arrow_back,
+                              color: Colors.white, size: 30),
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                      Container(
+                          margin: EdgeInsets.only(left: 10),
+                          child: Text(
+                            applied_filter_name,
+                            textAlign: TextAlign.start,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold),
+                          )),
 
-                  margin: EdgeInsets.only(left: 10,top: 20),
-                  child: Text(
-                    applied_filter_name,
-                    textAlign: TextAlign.start,
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  )),
+                    ],
+                  ),
+                ),
+              ),
               eggs.length > 0 ? InkWell(
                 onTap: () {
                   addNewCollection();
@@ -184,13 +212,13 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                   margin: EdgeInsets.only(top: 50),
                   child: Column(
                     children: [
-                      Text('No Egg Collections', style: TextStyle(fontSize: 18, color: Colors.black),),
+                      Text('No Egg Collections Added', style: TextStyle(fontSize: 18, color: Colors.black),),
                       InkWell(
                         onTap: () {
                           addNewCollection();
                         },
                         child: Container(
-                          width: 150,
+                          width: 100,
                           height: 50,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
@@ -204,7 +232,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                           ),
                           margin: EdgeInsets.all( 20),
                           child: Text(
-                            "Add New",
+                            "New",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 color: Colors.deepPurple,

@@ -10,7 +10,7 @@ class Feeding{
   String? date;
   String? feed_name;
   String? short_note;
-  int? quantity;
+  String? quantity;
 
   Feeding(
       {
@@ -21,7 +21,7 @@ class Feeding{
     id = json['id'];
     f_id = json['f_id'];
     feed_name = json['feed_name'].toString();
-    quantity = json['quantity'];
+    quantity = json['quantity'].toString();
     date = json['feeding_date'].toString();
     short_note = json['short_note'].toString();
   }

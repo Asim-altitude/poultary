@@ -137,34 +137,44 @@ class _NewFeeding extends State<NewFeeding>
             child: SingleChildScrollView(
               child: Column(
                 children: [
-
-                  Row(
-                    children: [
-                      Container(
-                        alignment: Alignment.center,
-                        width: 60,
-                        height: 60,
-                        child: InkWell(
-                          child: Icon(Icons.arrow_back,
-                              color: Colors.black, size: 30),
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                        ),
+                  ClipRRect(
+                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.deepPurple, //(x,y)
+                          ),
+                        ],
                       ),
-                      Expanded(
-                          child: Container(
+                      child: Row(
+                        children: [
+                          Container(
+                            alignment: Alignment.center,
+                            width: 60,
+                            height: 60,
+                            child: InkWell(
+                              child: Icon(Icons.arrow_back,
+                                  color: Colors.white, size: 30),
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ),
+                          Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
                                 "New Feeding",
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 20,
+                                    color: Colors.white,
+                                    fontSize: 18,
                                     fontWeight: FontWeight.bold),
-                              ))),
+                              )),
 
-                    ],
+                        ],
+                      ),
+                    ),
                   ),
 
                   Container(
@@ -271,7 +281,7 @@ class _NewFeeding extends State<NewFeeding>
                                     width: 1.0,
                                   ),
                                 ),
-                                child: Text(date, style: TextStyle(
+                                child: Text(Utils.getFormattedDate(date), style: TextStyle(
                                     color: Colors.black, fontSize: 16),),
                               ),
                             ),
@@ -319,7 +329,7 @@ class _NewFeeding extends State<NewFeeding>
                               if(validate){
                                 print("Everything Okay");
                                 await DatabaseHelper.instance.database;
-                                int? id = await DatabaseHelper.insertNewFeeding(Feeding(f_id: getFlockID(), short_note: notesController.text, date: date, feed_name: _feedselectedValue, quantity: int.parse(quantityController.text),));
+                                int? id = await DatabaseHelper.insertNewFeeding(Feeding(f_id: getFlockID(), short_note: notesController.text, date: date, feed_name: _feedselectedValue, quantity: quantityController.text,));
                                 Utils.showToast("New Feeding Added");
                                 Navigator.pop(context);
 

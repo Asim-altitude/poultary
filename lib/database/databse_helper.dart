@@ -1,14 +1,17 @@
 import 'package:flutter/services.dart';
 import 'package:poultary/model/egg_item.dart';
 import 'package:poultary/model/flock.dart';
+import 'package:poultary/model/med_vac_item.dart';
 import 'package:poultary/model/sub_category_item.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:io';
 import 'package:path/path.dart';
 
 import '../model/bird_item.dart';
+import '../model/category_item.dart';
 import '../model/feed_item.dart';
 import '../model/flock_image.dart';
+import '../model/transaction_item.dart';
 class DatabaseHelper  {
   static const _databaseName = "assets/poultary.db";
 
@@ -78,6 +81,29 @@ class DatabaseHelper  {
 
   }
 
+  static Future<List<CategoryItem>>  getCategoryItem() async {
+    var result = await _database?.rawQuery("SELECT * FROM Category");
+    List<CategoryItem> _categoryList = [];
+    CategoryItem category;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            category = CategoryItem.fromJson(json);
+            _categoryList.add(category);
+            print(_categoryList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        category = CategoryItem.fromJson(json);
+      }
+    }
+    return _categoryList;
+  }
+
 
   static Future<List<Bird>>  getBirds() async {
     var result = await _database?.rawQuery("SELECT * FROM Bird");
@@ -102,6 +128,14 @@ class DatabaseHelper  {
     return _birdList;
   }
 
+  static Future<int?> insertNewTransaction(TransactionItem transaction) async{
+    return await _database?.insert(
+      'Transactions',
+      transaction.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   static Future<int?> insertNewFeeding(Feeding feeding) async {
 
     return await _database?.insert(
@@ -121,6 +155,17 @@ class DatabaseHelper  {
     );
 
   }
+
+  static Future<int?> insertMedVac(Vaccination_Medication vaccination_medication) async {
+
+    return await _database?.insert(
+      'Vaccination_Medication',
+      vaccination_medication.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+
+  }
+
   static Future<List<Eggs>>  getEggsCollections() async {
     var result = await _database?.rawQuery("SELECT * FROM Eggs");
     List<Eggs> _eggList = [];
@@ -144,6 +189,52 @@ class DatabaseHelper  {
     return _eggList;
   }
 
+  static Future<List<TransactionItem>>  getAllTransactions() async {
+    var result = await _database?.rawQuery("SELECT * FROM Transactions");
+    List<TransactionItem> _transactionList = [];
+    TransactionItem _transaction;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            _transaction = TransactionItem.fromJson(json);
+            _transactionList.add(_transaction);
+            print(_transactionList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        _transaction = TransactionItem.fromJson(json);
+      }
+    }
+    return _transactionList;
+  }
+
+  static Future<List<TransactionItem>>  getAllIncomes() async {
+    var result = await _database?.rawQuery("SELECT * FROM Transactions where type = 'Income'");
+    List<TransactionItem> _transactionList = [];
+    TransactionItem _transaction;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            _transaction = TransactionItem.fromJson(json);
+            _transactionList.add(_transaction);
+            print(_transactionList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        _transaction = TransactionItem.fromJson(json);
+      }
+    }
+    return _transactionList;
+  }
+
   static Future<List<Feeding>>  getAllFeedings() async {
     var result = await _database?.rawQuery("SELECT * FROM Feeding");
     List<Feeding> _feedList = [];
@@ -165,6 +256,30 @@ class DatabaseHelper  {
       }
     }
     return _feedList;
+  }
+
+
+  static Future<List<Vaccination_Medication>>  getAllVaccinationMedications() async {
+    var result = await _database?.rawQuery("SELECT * FROM Vaccination_Medication");
+    List<Vaccination_Medication> _medList = [];
+    Vaccination_Medication medi;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            medi = Vaccination_Medication.fromJson(json);
+            _medList.add(medi);
+            print(_medList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        medi = Vaccination_Medication.fromJson(json);
+      }
+    }
+    return _medList;
   }
 
 
