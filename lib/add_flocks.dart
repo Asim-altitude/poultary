@@ -39,14 +39,14 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
   String _acqusitionselectedValue = "";
 
   List<String> _purposeList = [
-    'Select Purpose',
+    '--Select Purpose--',
     'Egg',
     'Meat',
     'Both',
   ];
 
   List<String> acqusitionList = [
-    'Acqusition Type',
+    '--Acqusition Type--',
     'Purchased',
     'Hatched on Form',
     'Gift',
@@ -452,10 +452,15 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                               print("Everything Okay");
                               await DatabaseHelper.instance.database;
                               int? id = await DatabaseHelper.insertFlock(Flock(f_id: 1, f_name: nameController.text, bird_count: int.parse(birdcountController.text)
-                                , purpose: _purposeselectedValue, acqusition_type: _acqusitionselectedValue, acqusition_date: date, notes: notesController.text, icon: birds.elementAt(chosen_index).image,
+                                , purpose: _purposeselectedValue, acqusition_type: _acqusitionselectedValue, acqusition_date: date, notes: notesController.text, icon: birds.elementAt(chosen_index).image, active_bird_count: int.parse(birdcountController.text),
                               ));
 
-                              insertFlockImages(id);
+                              if (base64Images.length > 0){
+                                insertFlockImages(id);
+                              }else{
+                                Utils.showToast("New Flock Created");
+                                Navigator.pop(context);
+                              }
 
                             }else{
                               Utils.showToast("Provide all required info");
@@ -645,7 +650,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
 
       for (int i=0;i<imageFileList!.length;i++) {
         final bytes = File(imageFileList!.elementAt(i).path).readAsBytesSync();
-        String base64Image = "data:image/png;base64," + base64Encode(bytes);
+        String base64Image =  base64Encode(bytes);
         base64Images.add(base64Image);
 
         print("img_pan : $base64Image");

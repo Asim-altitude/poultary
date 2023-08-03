@@ -21,7 +21,7 @@ class HomeScreen extends StatefulWidget {
 }
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _HomeScreen extends State<HomeScreen> with SingleTickerProviderStateMixin{
+class _HomeScreen extends State<HomeScreen> {
 
   double widthScreen = 0;
   double heightScreen = 0;
@@ -36,8 +36,11 @@ class _HomeScreen extends State<HomeScreen> with SingleTickerProviderStateMixin{
   void initState() {
     super.initState();
 
+
     getList();
   }
+
+
 
   bool no_flock = true;
   List<Flock> flocks = [];
@@ -101,12 +104,15 @@ class _HomeScreen extends State<HomeScreen> with SingleTickerProviderStateMixin{
                         fontWeight: FontWeight.bold),
                   )),
               InkWell(
-                onTap: () {
-                  Navigator.push(
+                onTap: () async {
+                 await Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const ADDFlockScreen()),
                   );
+
+                 getList();
+
                 },
                 child: Align(
                     alignment: Alignment.centerRight,
@@ -121,13 +127,17 @@ class _HomeScreen extends State<HomeScreen> with SingleTickerProviderStateMixin{
                     scrollDirection: Axis.vertical,
                     itemBuilder: (BuildContext context, int index) {
                       return  InkWell(
-                        onTap: () {
+                        onTap: () async{
                           Utils.selected_flock = flocks.elementAt(index);
-                          Navigator.push(
+                         await Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => const SingleFlockScreen()),
-                        );},
+                        );
+
+                        getList();
+
+                        },
                         child: Card(
                           margin: EdgeInsets.all(10),
                           color: Colors.white,
@@ -166,7 +176,7 @@ class _HomeScreen extends State<HomeScreen> with SingleTickerProviderStateMixin{
                                     margin: EdgeInsets.only(right: 10),
                                     child: Row(
                                       children: [
-                                        Container( margin: EdgeInsets.only(right: 5), child: Text(flocks.elementAt(index).bird_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),)),
+                                        Container( margin: EdgeInsets.only(right: 5), child: Text(flocks.elementAt(index).active_bird_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),)),
                                         Text("Birds", style: TextStyle(color: Colors.black, fontSize: 16),)
                                       ],
                                     ),
@@ -429,5 +439,7 @@ class _HomeScreen extends State<HomeScreen> with SingleTickerProviderStateMixin{
       ),),
         ),),),),);
   }
+
+
 }
 

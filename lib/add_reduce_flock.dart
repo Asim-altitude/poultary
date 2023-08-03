@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:poultary/add_birds.dart';
 import 'package:poultary/add_eggs.dart';
 import 'package:poultary/inventory.dart';
 import 'package:poultary/single_flock_screen.dart';
@@ -13,16 +14,17 @@ import 'add_flocks.dart';
 import 'database/databse_helper.dart';
 import 'model/egg_item.dart';
 import 'model/flock.dart';
+import 'model/flock_detail.dart';
 
-class EggCollectionScreen extends StatefulWidget {
-  const EggCollectionScreen({Key? key}) : super(key: key);
+class AddReduceFlockScreen extends StatefulWidget {
+  const AddReduceFlockScreen({Key? key}) : super(key: key);
 
   @override
-  _EggCollectionScreen createState() => _EggCollectionScreen();
+  _AddReduceFlockScreen createState() => _AddReduceFlockScreen();
 }
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerProviderStateMixin{
+class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTickerProviderStateMixin{
 
   double widthScreen = 0;
   double heightScreen = 0;
@@ -41,17 +43,17 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
   }
 
   bool no_colection = true;
-  List<Eggs> eggs = [];
+  List<Flock_Detail> list = [];
   List<String> flock_name = [];
 
   void getEggCollectionList() async {
 
     await DatabaseHelper.instance.database;
 
-    eggs = await DatabaseHelper.getEggsCollections();
+    list = await DatabaseHelper.getFlockDetails();
 
 
-    egg_total = eggs.length;
+    egg_total = list.length;
 
     setState(() {
 
@@ -61,7 +63,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
   int egg_total = 0;
 
-  String applied_filter_name = "All Collections";
+  String applied_filter_name = "All Additions/Reductions";
 
   @override
   Widget build(BuildContext context) {
@@ -101,8 +103,8 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                   ),
                   child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
                     Icon(Icons.add, color: Colors.white, size: 30,),
-                    Text('Collect', style: TextStyle(
-                        color: Colors.white, fontSize: 18),)
+                    Text('ADD Birds', style: TextStyle(
+                        color: Colors.white, fontSize: 16),)
                   ],),
                 ),
               ),
@@ -126,8 +128,8 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                   ),
                   child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
                     Icon(Icons.add, color: Colors.white, size: 30,),
-                    Text('Reduce', style: TextStyle(
-                        color: Colors.white, fontSize: 18),)
+                    Text('Reduce Birds', style: TextStyle(
+                        color: Colors.white, fontSize: 16),)
                   ],),
                 ),
               ),
@@ -187,16 +189,16 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                   ),
                 ),
               ),
-              eggs.length > 0 ? Container(
+              list.length > 0 ? Container(
                 height: heightScreen - 220,
                 width: widthScreen,
                 child: ListView.builder(
-                    itemCount: eggs.length,
+                    itemCount: list.length,
                     scrollDirection: Axis.vertical,
                     itemBuilder: (BuildContext context, int index) {
                       return InkWell(
                         onTap: () {
-                          Utils.selected_egg_collection = eggs.elementAt(index);
+                          Utils.selected_flock_collection = list.elementAt(index);
                           Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -223,9 +225,8 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                                   alignment: Alignment.topLeft,
                                   margin: EdgeInsets.all(10),
                                   child: Column( children: [
-                                    Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).f_name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),)),
-
-                                    Container(margin: EdgeInsets.all(5), child: Text(eggs.elementAt(index).date.toString(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+                                    Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index)!.item_type, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),)),
+                                    Container(margin: EdgeInsets.all(5), child: Text(list.elementAt(index).acqusition_date.toString(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
                                    // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
                                   ],),
                                 ),
@@ -236,8 +237,8 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                                     margin: EdgeInsets.only(right: 10),
                                     child: Row(
                                       children: [
-                                        Container( margin: EdgeInsets.only(right: 5), child: Text(eggs.elementAt(index).total_eggs.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color:eggs.elementAt(index).isCollection == 0?Colors.red:Colors.green),)),
-                                        Text("Eggs", style: TextStyle(color: Colors.black, fontSize: 12),)
+                                        Container( margin: EdgeInsets.only(right: 5), child: Text(list.elementAt(index).item_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color:list.elementAt(index).item_type.toLowerCase().contains("add") == 0?Colors.green:Colors.red),)),
+                                        Text("Birds", style: TextStyle(color: Colors.black, fontSize: 12),)
                                       ],
                                     ),
                                   ),
@@ -255,7 +256,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                   margin: EdgeInsets.only(top: 50),
                   child: Column(
                     children: [
-                      Text('No Egg Collections Added', style: TextStyle(fontSize: 18, color: Colors.black),),
+                      Text('No Birds Added/Reduced', style: TextStyle(fontSize: 18, color: Colors.black),),
                     ],
                   ),
                 ),
@@ -496,24 +497,22 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
   }
 
   Future<void> addNewCollection() async{
-
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) =>  NewEggCollection(isCollection: true,)),
+          builder: (context) =>  NewBirdsCollection(isCollection: true,)),
     );
-    print(result);
-    getEggCollectionList();
 
+    getEggCollectionList();
   }
 
   Future<void> reduceCollection() async{
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) =>  NewEggCollection(isCollection: false,)),
+          builder: (context) =>  NewBirdsCollection(isCollection: false,)),
     );
-    print(result);
+
     getEggCollectionList();
   }
 }

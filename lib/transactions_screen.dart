@@ -506,20 +506,24 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
       ),),),),),);
   }
 
-  void addNewIncome(){
-    Navigator.push(
+  Future<void> addNewIncome() async {
+    var txt = await Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => const NewIncome()),
     );
+
+    getAllTransactions();
   }
 
-  void addNewExpense(){
-    Navigator.push(
+  Future<void> addNewExpense() async{
+   var txt = await Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => const NewExpense()),
     );
+
+    getAllTransactions();
   }
 }
 

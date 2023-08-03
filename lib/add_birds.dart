@@ -9,8 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:poultary/model/feed_item.dart';
-import 'package:poultary/model/sub_category_item.dart';
+import 'package:poultary/model/flock_detail.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
@@ -18,48 +17,61 @@ import 'model/bird_item.dart';
 import 'model/egg_item.dart';
 import 'model/flock.dart';
 import 'model/flock_image.dart';
-import 'model/transaction_item.dart';
 
-class NewIncome extends StatefulWidget {
-  const NewIncome({Key? key}) : super(key: key);
+class NewBirdsCollection extends StatefulWidget {
+
+  bool isCollection;
+  NewBirdsCollection({Key? key, required this.isCollection}) : super(key: key);
 
   @override
-  _NewIncome createState() => _NewIncome();
+  _NewBirdsCollection createState() => _NewBirdsCollection(this.isCollection);
 }
 
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _NewIncome extends State<NewIncome>
+class _NewBirdsCollection extends State<NewBirdsCollection>
     with SingleTickerProviderStateMixin {
   double widthScreen = 0;
   double heightScreen = 0;
 
+   bool isCollection;
+  _NewBirdsCollection(this.isCollection);
+
   @override
   void dispose() {
     super.dispose();
+
   }
 
   String _purposeselectedValue = "";
-  String _saleselectedValue = "Sale Item";
+  String _reductionReasonValue = "";
+  String _acqusitionselectedValue = "";
 
   List<String> _purposeList = [];
-  List<String> _saleItemList = [];
-  List<SubItem> _paymentMethodList = [];
-  List<String>  _visiblePaymentMethodList = [];
-  List<SubItem> _subItemList = [];
+  List<String> _reductionReasons = ['--Reduction Reason--',
+    'Sold','Personal Use','Mortality','Lost/Stolen','Other'];
 
+  List<String> acqusitionList = [
+    '--Acqusition Type--',
+    'Purchased',
+    'Hatched on Form',
+    'Gift',
+    'Other',
+  ];
   int chosen_index = 0;
 
+  int active_bird_count = 0;
 
-  bool includeExtras = false;
-
+  String max_hint = "";
 
   @override
   void initState() {
     super.initState();
+
+    _reductionReasonValue = _reductionReasons[0];
+    _acqusitionselectedValue = acqusitionList[0];
     getList();
-    getIncomeCategoryList();
-    getPayMethodList();
+
   }
 
   List<Flock> flocks = [];
@@ -67,57 +79,14 @@ class _NewIncome extends State<NewIncome>
 
     await DatabaseHelper.instance.database;
 
-    flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0));
+    flocks = await DatabaseHelper.getFlocks();
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
     }
 
     _purposeselectedValue = _purposeList[0];
-
-    setState(() {
-
-    });
-
-  }
-
-  void getPayMethodList() async {
-    await DatabaseHelper.instance.database;
-
-    _paymentMethodList = await DatabaseHelper.getSubCategoryList(5);
-
-    _paymentMethodList.insert(0,SubItem(c_id: 3,id: -1,name: 'Payment Method'));
-
-    for(int i=0;i<_paymentMethodList.length;i++){
-      _visiblePaymentMethodList.add(_paymentMethodList.elementAt(i).name!);
-    }
-
-    payment_method = _visiblePaymentMethodList[0];
-
-    print(_visiblePaymentMethodList);
-
-    setState(() {
-
-    });
-
-  }
-
-  void getIncomeCategoryList() async {
-    await DatabaseHelper.instance.database;
-
-    _subItemList = await DatabaseHelper.getSubCategoryList(1);
-
-    _subItemList.insert(0,SubItem(c_id: 3,id: -1,name: 'Sale Item'));
-
-    for(int i=0;i<_subItemList.length;i++){
-      _saleItemList.add(_subItemList.elementAt(i).name!);
-    }
-
-    _saleselectedValue = _saleItemList[0];
-
-    print(_saleItemList);
 
 
     setState(() {
@@ -131,15 +100,9 @@ class _NewIncome extends State<NewIncome>
   bool _validate = false;
 
   String date = "Choose Date";
-  String displayDate = "";
-  String payment_method = "Payment Method";
-  String payment_status = "Payment Status";
-
-  final quantityController = TextEditingController();
+  final nameController = TextEditingController();
+  final totalBirdsController = TextEditingController();
   final notesController = TextEditingController();
-  final amountController = TextEditingController();
-  final howmanyController = TextEditingController();
-  final soldtoController = TextEditingController();
 
   bool imagesAdded = false;
 
@@ -169,14 +132,13 @@ class _NewIncome extends State<NewIncome>
             child: SingleChildScrollView(
               child: Column(
                 children: [
-
                   ClipRRect(
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
                     child: Container(
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.deepPurple, //(x,y)
+                            color: isCollection ? Colors.green : Colors.red, //(x,y)
                           ),
                         ],
                       ),
@@ -197,7 +159,7 @@ class _NewIncome extends State<NewIncome>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                "New Income",
+                                isCollection? 'Add Birds' : 'Reduce Birds',
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -235,137 +197,6 @@ class _NewIncome extends State<NewIncome>
                             child: getDropDownList(),
                           ),
 
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
-                            ),
-                            child: getSaleTypeList(),
-                          ),
-
-                          SizedBox(height: 10,width: widthScreen),
-                          
-                          
-                          Container(
-                            
-                            child: Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  height: 70,
-                                  padding: EdgeInsets.all(0),
-                                  margin: EdgeInsets.only(left: 20,right: 5,),
-                                  decoration: BoxDecoration(
-                                      color: Colors.white60,
-                                      borderRadius:
-                                      BorderRadius.all(Radius.circular(10))),
-                                  child: Container(
-                                    child: SizedBox(
-                                      width: widthScreen,
-                                      height: 60,
-                                      child: TextFormField(
-                                        maxLines: null,
-                                        expands: true,
-                                        controller: howmanyController,
-                                        keyboardType: TextInputType.number,
-                                        decoration: const InputDecoration(
-                                          border: OutlineInputBorder(
-                                              borderRadius:
-                                              BorderRadius.all(Radius.circular(10))),
-                                          hintText: 'How many?',
-                                          hintStyle: TextStyle(
-                                              color: Colors.grey, fontSize: 16),
-                                          labelStyle: TextStyle(
-                                              color: Colors.black, fontSize: 16),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                 child: Container(
-                               height: 70,
-                               padding: EdgeInsets.all(0),
-                               margin: EdgeInsets.only( right: 20),
-                               decoration: BoxDecoration(
-                                   color: Colors.white60,
-                                   borderRadius:
-                                   BorderRadius.all(Radius.circular(10))),
-                               child: Container(
-                                 child: SizedBox(
-                                   width: widthScreen,
-                                   height: 60,
-                                   child: TextFormField(
-                                     maxLines: null,
-                                     expands: true,
-                                     controller: amountController,
-                                     keyboardType: TextInputType.number,
-                                     decoration: const InputDecoration(
-                                       border: OutlineInputBorder(
-                                           borderRadius:
-                                           BorderRadius.all(Radius.circular(10))),
-                                       hintText: 'Sale Amount',
-                                       hintStyle: TextStyle(
-                                           color: Colors.grey, fontSize: 16),
-                                       labelStyle: TextStyle(
-                                           color: Colors.black, fontSize: 16),
-                                     ),
-                                   ),
-                                 ),
-                               ),
-                             )) ,
-                            ],
-                          ),),
-
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
-                            ),
-                            child: getPaymentMethodList(),
-                          ),
-
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
-                            ),
-                            child: getPaymentStatusList(),
-                          ),
 
                           SizedBox(height: 10,width: widthScreen),
                           Container(
@@ -384,12 +215,13 @@ class _NewIncome extends State<NewIncome>
                                 child: TextFormField(
                                   maxLines: null,
                                   expands: true,
-                                  controller: soldtoController,
+                                  controller: totalBirdsController,
+                                  keyboardType: TextInputType.number,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Sold To (Person name)',
+                                    hintText: 'Birds count',
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -399,8 +231,46 @@ class _NewIncome extends State<NewIncome>
                               ),
                             ),
                           ),
+                         Container(
+                             margin: EdgeInsets.only(left: 20),
+                             child: Text(max_hint, style: TextStyle(color: Colors.red, fontSize: 14),)),
+                         !isCollection? SizedBox(height: 10,width: widthScreen): SizedBox(height: 0,width: widthScreen),
+                         !isCollection? Container(
+                            width: widthScreen,
+                            height: 70,
+                            alignment: Alignment.centerRight,
+                            padding: EdgeInsets.all(10),
+                            margin: EdgeInsets.only(left: 20, right: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: const BorderRadius.all(
+                                  Radius.circular(10.0)),
+                              border: Border.all(
+                                color:  Colors.black,
+                                width: 1.0,
+                              ),
+                            ),
+                            child: getReductionList(),
+                          ):SizedBox(height: 0,width: widthScreen),
 
-
+                         isCollection? SizedBox(height: 10,width: widthScreen): SizedBox(height: 0,width: widthScreen),
+                         isCollection? Container(
+                            width: widthScreen,
+                            height: 70,
+                            alignment: Alignment.centerRight,
+                            padding: EdgeInsets.all(10),
+                            margin: EdgeInsets.only(left: 20, right: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: const BorderRadius.all(
+                                  Radius.circular(10.0)),
+                              border: Border.all(
+                                color:  Colors.black,
+                                width: 1.0,
+                              ),
+                            ),
+                            child: getAcqusitionList(),
+                          ):SizedBox(height: 0,width: widthScreen),
 
                           SizedBox(height: 10,width: widthScreen),
                           Container(
@@ -475,10 +345,58 @@ class _NewIncome extends State<NewIncome>
                               if(validate){
                                 print("Everything Okay");
                                 await DatabaseHelper.instance.database;
-                                TransactionItem transaction_item = TransactionItem(f_id: getFlockID(), date: date, sale_item: _saleselectedValue, expense_item: "", type: "Income", amount: amountController.text, payment_method: payment_method, payment_status: payment_status, sold_purchased_from: soldtoController.text, short_note: notesController.text, how_many: howmanyController.text, extra_cost: "", extra_cost_details: "");
-                                int? id = await DatabaseHelper.insertNewTransaction(transaction_item);
-                                Utils.showToast("New Income Added");
-                                Navigator.pop(context);
+
+
+                                if(isCollection){
+
+                                  int active_birds = getFlockActiveBirds();
+                                  active_birds = active_birds + int.parse(totalBirdsController.text);
+                                  print(active_birds);
+
+                                  DatabaseHelper.updateFlockBirds(active_birds, getFlockID());
+
+                                  int? id = await DatabaseHelper.insertFlockDetail(Flock_Detail(f_id: getFlockID(), item_type: isCollection? 'Addition':'Reduction', item_count: int.parse(totalBirdsController.text), acqusition_type: _acqusitionselectedValue, acqusition_date: date, reason: _reductionReasonValue, short_note: notesController.text));
+                                  Utils.showToast("Birds Added");
+
+                                  Navigator.pop(context);
+
+                                }else{
+                                  int active_birds = getFlockActiveBirds();
+
+                                  if (int.parse(totalBirdsController.text) < active_birds) {
+
+                                    active_birds = active_birds - int.parse(totalBirdsController.text);
+                                    print(active_birds);
+
+                                    DatabaseHelper.updateFlockBirds(
+                                        active_birds, getFlockID());
+
+                                    int? id = await DatabaseHelper
+                                        .insertFlockDetail(Flock_Detail(
+                                        f_id: getFlockID(),
+                                        item_type: isCollection
+                                            ? 'Addition'
+                                            : 'Reduction',
+                                        item_count: int.parse(
+                                            totalBirdsController.text),
+                                        acqusition_type: _acqusitionselectedValue,
+                                        acqusition_date: date,
+                                        reason: _reductionReasonValue,
+                                        short_note: notesController.text));
+
+
+                                    Utils.showToast("Birds Reduced");
+                                    Navigator.pop(context);
+                                  }else{
+
+                                    max_hint = "Cannot reduce more than $active_birds";
+                                    setState(() {
+
+                                    });
+
+                                  }
+                                }
+
                               }else{
                                 Utils.showToast("Provide all required info");
                               }
@@ -530,7 +448,7 @@ class _NewIncome extends State<NewIncome>
         elevation: 16,
         isExpanded: true,
         onChanged: (String? newValue) {
-          setState(() {
+          setState((){
             _purposeselectedValue = newValue!;
 
           });
@@ -553,24 +471,22 @@ class _NewIncome extends State<NewIncome>
     );
   }
 
-  Widget getSaleTypeList() {
+  Widget getReductionList() {
     return Container(
       width: widthScreen,
       child: DropdownButtonFormField<String>(
         decoration: InputDecoration.collapsed(hintText: ''),
         isDense: true,
-        value: _saleselectedValue,
+        value: _reductionReasonValue,
         elevation: 16,
         isExpanded: true,
         onChanged: (String? newValue) {
           setState(() {
-            _saleselectedValue = newValue!;
-
-            print("Selected Sale Item $_saleselectedValue");
+            _reductionReasonValue = newValue!;
 
           });
         },
-        items: _saleItemList.map<DropdownMenuItem<String>>((String value) {
+        items: _reductionReasons.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
@@ -588,58 +504,22 @@ class _NewIncome extends State<NewIncome>
     );
   }
 
-
-  Widget getPaymentMethodList() {
-    return Container(
-      width: widthScreen,
-      child: DropdownButtonFormField<String>(
-        decoration: InputDecoration.collapsed(hintText: ""),
-        isDense: true,
-        value: payment_method,
-        elevation: 16,
-        isExpanded: true,
-        onChanged: (String? newValue) {
-          setState(() {
-            payment_method = newValue!;
-
-          });
-        },
-        items: _visiblePaymentMethodList.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              style: new TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.normal,
-                color: Colors.black,
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-
-  List<String> paymentStatusList = ['Payment Status','Cleared','UnClear','Reconciled'];
-  Widget getPaymentStatusList() {
+  Widget getAcqusitionList() {
     return Container(
       width: widthScreen,
       child: DropdownButtonFormField<String>(
         decoration: InputDecoration.collapsed(hintText: ''),
         isDense: true,
-        value: payment_status,
+        value: _acqusitionselectedValue,
         elevation: 16,
         isExpanded: true,
         onChanged: (String? newValue) {
           setState(() {
-            payment_status = newValue!;
+            _acqusitionselectedValue = newValue!;
 
           });
         },
-        items: paymentStatusList.map<DropdownMenuItem<String>>((String value) {
+        items: acqusitionList.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
@@ -656,7 +536,6 @@ class _NewIncome extends State<NewIncome>
       ),
     );
   }
-
 
   void pickDate() async{
 
@@ -675,8 +554,8 @@ class _NewIncome extends State<NewIncome>
       print(
           formattedDate); //formatted date output using intl package =>  2021-03-16
       setState(() {
-        date = formattedDate;
-        displayDate = Utils.getFormattedDate(date);//set output date to TextField value.
+        date =
+            formattedDate; //set output date to TextField value.
       });
     } else {}
   }
@@ -689,34 +568,24 @@ class _NewIncome extends State<NewIncome>
       print("Select Date");
     }
 
-    if(howmanyController.text.isEmpty){
-      valid = false;
-      print("Add how many ");
+
+    if(isCollection) {
+      if (_acqusitionselectedValue.toLowerCase().contains("acqusition")) {
+        valid = false;
+        print("Select Acqusition Type");
+      }
     }
 
-    if(soldtoController.text.isEmpty){
-      valid = false;
-      print("Add Sold to");
+    if(!isCollection) {
+      if (_reductionReasonValue.toLowerCase().contains("reduction")) {
+        valid = false;
+        print("Select Reduction reason");
+      }
     }
 
-    if(amountController.text.isEmpty){
+    if(totalBirdsController.text.length <=0){
       valid = false;
-      print("Add amount");
-    }
-    
-    if (_saleselectedValue.toLowerCase().contains("item")){
-      valid = false;
-      print("No sale item slected");
-    }
-
-    if (payment_method.toLowerCase().contains("payment")){
-      valid = false;
-      print("No payment method slected");
-    }
-
-    if (payment_status.toLowerCase().contains("status")){
-      valid = false;
-      print("No payment status slected");
+      print("add birds count");
     }
 
 
@@ -729,7 +598,7 @@ class _NewIncome extends State<NewIncome>
 
     int selected_id = -1;
     for(int i=0;i<flocks.length;i++){
-      if(_purposeselectedValue.toLowerCase() == flocks.elementAt(i).f_name){
+      if(_purposeselectedValue.toLowerCase() == flocks.elementAt(i).f_name.toLowerCase()){
         selected_id = flocks.elementAt(i).f_id;
         break;
       }
@@ -738,19 +607,19 @@ class _NewIncome extends State<NewIncome>
     return selected_id;
   }
 
-  int getFeedID() {
+  int getFlockActiveBirds() {
 
-    int selected_id = -1;
-    for(int i=0;i<_subItemList.length;i++){
-      if(_saleselectedValue.toLowerCase() == _subItemList.elementAt(i).name!.toLowerCase()){
-        selected_id = _subItemList.elementAt(i).id!;
+    int? selected_id = -1;
+    for(int i=0;i<flocks.length;i++){
+      if(_purposeselectedValue.toLowerCase() == flocks.elementAt(i).f_name.toLowerCase()){
+        selected_id = flocks.elementAt(i).active_bird_count;
         break;
       }
     }
 
-    print("selected Sale id $selected_id");
-
-    return selected_id;
+    return selected_id!;
   }
+
+
 
 }

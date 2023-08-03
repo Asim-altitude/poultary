@@ -7,7 +7,8 @@ class Flock{
 
   int f_id = -1;
   String f_name = "";
-  int bird_count = 0;
+  int? bird_count;
+  int? active_bird_count;
   String purpose = "";
   String icon = "";
   String acqusition_type = "";
@@ -16,7 +17,7 @@ class Flock{
 
   Flock(
       {
-        required this.f_id, required this.f_name,required this.bird_count,required this.purpose
+        required this.f_id, required this.f_name,required this.bird_count, required this.active_bird_count,required this.purpose
         ,required this.acqusition_type,required this.acqusition_date,required this.notes,required this.icon
       });
 
@@ -25,6 +26,7 @@ class Flock{
     f_name = json['f_name'].toString();
     purpose = json['purpose'].toString();
     bird_count = json['bird_count'];
+    active_bird_count = json['active_bird_count'];
     acqusition_date = json['acqusition_date'].toString();
     notes = json['notes'].toString();
     icon = json['icon'].toString();
@@ -33,10 +35,7 @@ class Flock{
 
   }
 
-  @override
-  String toString() {
-    return 'Flock {f_id: $f_id, f_name: $f_name, purpose: $purpose, bird_count: $bird_count,acqusition_date:$acqusition_date,notes:$notes,acqusition_type: $acqusition_type }';
-  }
+
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
@@ -46,6 +45,7 @@ class Flock{
     data['acqusition_type'] = this.acqusition_type;
     data['notes'] = this.notes;
     data['icon'] = this.icon;
+    data['active_bird_count'] = this.active_bird_count;
     data['bird_count'] = this.bird_count;
 
     return data;

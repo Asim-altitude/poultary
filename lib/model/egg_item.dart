@@ -13,13 +13,15 @@ class Eggs{
   int bad_eggs = 0;
   int total_eggs = 0;
   String? date;
+  int? isCollection;
+  String? reduction_reason;
   String? short_note;
 
 
   Eggs(
       {
         required this.f_id,required this.f_name, this.id, required this.image, required this.good_eggs,required this.bad_eggs
-        , required this.total_eggs, required this.date,required this.short_note
+        , required this.total_eggs, required this.date,required this.short_note, required this.isCollection,required this.reduction_reason
       });
 
   Eggs.fromJson(Map<String, dynamic> json) {
@@ -30,6 +32,8 @@ class Eggs{
     good_eggs = json['good_eggs'];
     bad_eggs = json['spoilt_eggs'];
     total_eggs = json['total_eggs'];
+    isCollection = json['isCollection'];
+    reduction_reason = json['reduction_reason'];
     date = json['collection_date'].toString();
     short_note = json['short_note'].toString();
 
@@ -38,7 +42,6 @@ class Eggs{
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
     data['f_id'] = this.f_id;
     data['image'] = this.image;
     data['f_name'] = this.f_name;
@@ -47,7 +50,8 @@ class Eggs{
     data['short_note'] = this.short_note;
     data['total_eggs'] = this.total_eggs;
     data['collection_date'] = this.date;
-
+    data['reduction_reason'] = this.reduction_reason;
+    data['isCollection'] = this.isCollection;
 
     return data;
   }

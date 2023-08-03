@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/services.dart';
 import 'package:poultary/model/egg_item.dart';
 import 'package:poultary/model/flock.dart';
@@ -10,6 +12,7 @@ import 'package:path/path.dart';
 import '../model/bird_item.dart';
 import '../model/category_item.dart';
 import '../model/feed_item.dart';
+import '../model/flock_detail.dart';
 import '../model/flock_image.dart';
 import '../model/transaction_item.dart';
 class DatabaseHelper  {
@@ -156,6 +159,26 @@ class DatabaseHelper  {
 
   }
 
+  static Future<int?> insertNewSubItem(SubItem subitem) async {
+
+    return await _database?.insert(
+      'Category_Detail',
+      subitem.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+
+  }
+
+  static Future<int?> insertFlockDetail(Flock_Detail flock_detail) async {
+
+    return await _database?.insert(
+      'Flock_Detail',
+      flock_detail.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+
+  }
+
   static Future<int?> insertMedVac(Vaccination_Medication vaccination_medication) async {
 
     return await _database?.insert(
@@ -164,6 +187,29 @@ class DatabaseHelper  {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
 
+  }
+
+  static Future<List<Flock_Detail>>  getFlockDetails() async {
+    var result = await _database?.rawQuery("SELECT * FROM Flock_Detail");
+    List<Flock_Detail> _List = [];
+    Flock_Detail flock_detail;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            flock_detail = Flock_Detail.fromJson(json);
+            _List.add(flock_detail);
+            print(_List);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        flock_detail = Flock_Detail.fromJson(json);
+      }
+    }
+    return _List;
   }
 
   static Future<List<Eggs>>  getEggsCollections() async {
@@ -188,6 +234,7 @@ class DatabaseHelper  {
     }
     return _eggList;
   }
+
 
   static Future<List<TransactionItem>>  getAllTransactions() async {
     var result = await _database?.rawQuery("SELECT * FROM Transactions");
@@ -314,6 +361,16 @@ class DatabaseHelper  {
 
   }
 
+  static Future<int> getFlockActiveBirds(int id) async {
+
+    print(id);
+    var result = await _database?.rawQuery("SELECT active_bird_count FROM Flock where f_id = $id");
+
+    print(result![0]);
+    return int.parse(result![0].toString());
+
+  }
+
   static Future<List<Flock>>  getFlocks() async {
     var result = await _database?.rawQuery("SELECT * FROM Flock");
     List<Flock> _birdList = [];
@@ -337,12 +394,51 @@ class DatabaseHelper  {
     return _birdList;
   }
 
+  static Future<int>  deleteSubItem(SubItem subItem) async {
+    var result = await _database?.rawQuery("DELETE FROM Category_Detail WHERE id = '${subItem.id}'");
+    return 1;
+  }
+
   static Future<int>  deleteFlock (Flock flock) async {
     var result = await _database?.rawQuery("DELETE FROM Flock WHERE f_id = '${flock.f_id}\'");
     return 1;
   }
-  static Future<int>  updateFlockName (int count, int id) async {
-    var result = await _database?.rawUpdate("UPDATE Flock SET bird_count = '${count}' WHERE f_id = ${id}");
+  static Future<int>  updateFlockBirds (int count, int id) async {
+    var result = await _database?.rawUpdate("UPDATE Flock SET active_bird_count = '${count}' WHERE f_id = ${id}");
     return 1;
+  }
+
+  static Future<Flock> findFlock(int id) async {
+
+    var result =  await _database?.query('Flock', where: "f_id = ?", whereArgs: [id], limit: 1);
+    Map<String, dynamic> json = result![0];
+
+    Flock flock =  Flock.fromJson(json);
+    print(flock);
+
+    return flock;
+  }
+
+  static Future<List<Flock_Image>> getFlockImage(int f_id) async{
+    var result = await _database?.rawQuery("SELECT * FROM Flock_Image where f_id = $f_id");
+    List<Flock_Image> _birdList = [];
+    Flock_Image flock;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            flock = Flock_Image.fromJson(json);
+            _birdList.add(flock);
+            print(_birdList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        flock = Flock_Image.fromJson(json);
+      }
+    }
+    return _birdList;
   }
 }

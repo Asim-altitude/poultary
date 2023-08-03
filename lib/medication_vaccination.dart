@@ -70,7 +70,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
 
   int feed_total = 0;
 
-  String applied_filter_name = "All Medication/Vaccination";
+  String applied_filter_name = "Health";
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +84,69 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
     return SafeArea(child: Scaffold(
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.transparent,
+        child: Container(
+          height: 60,
+          width: widthScreen,
+          child: Row(children: [
+
+            Expanded(
+              child: InkWell(
+                onTap: () {
+                  Utils.vaccine_medicine ="Vaccination";
+                  addNewVacMad();
+                },
+                child: Container(
+                  height: 50,
+                  margin: EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: const BorderRadius.all(
+                        Radius.circular(5.0)),
+                    border: Border.all(
+                      color:  Colors.green,
+                      width: 2.0,
+                    ),
+                  ),
+                  child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Icon(Icons.add, color: Colors.white, size: 30,),
+                    Text('Vaccination', style: TextStyle(
+                        color: Colors.white, fontSize: 18),)
+                  ],),
+                ),
+              ),
+            ),
+            Expanded(
+              child: InkWell(
+                onTap: () {
+                  Utils.vaccine_medicine ="Medication";
+                  addNewVacMad();
+                },
+                child: Container(
+                  height: 50,
+                  margin: EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: const BorderRadius.all(
+                        Radius.circular(5.0)),
+                    border: Border.all(
+                      color:  Colors.green,
+                      width: 2.0,
+                    ),
+                  ),
+                  child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Icon(Icons.add, color: Colors.white, size: 30,),
+                    Text('Medication', style: TextStyle(
+                        color: Colors.white, fontSize: 18),)
+                  ],),
+                ),
+              ),
+            ),
+          ],),
+        ),
+        elevation: 0,
+      ),
       body:SafeArea(
         top: false,
 
@@ -135,25 +198,6 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                   ),
                 ),
               ),
-              vac_med_list.length > 0 ? InkWell(
-                onTap: () {
-                  addNewCollection();
-                },
-                child: Container(
-                  width: widthScreen,
-                  height: 60,
-                  alignment: Alignment.centerRight,
-                  margin: EdgeInsets.all( 20),
-                  child: Text(
-                    Utils.vaccine_medicine,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        color: Colors.deepPurple,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ) : SizedBox(width: 0,height: 0,),
               vac_med_list.length > 0 ? Container(
                 height: heightScreen - 220,
                 width: widthScreen,
@@ -223,34 +267,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                   child: Column(
                     children: [
                       Text('No vaccination/medication added', style: TextStyle(fontSize: 18, color: Colors.black),),
-                      InkWell(
-                        onTap: () {
-                          addNewCollection();
-                        },
-                        child: Container(
-                          width: 100,
-                          height: 50,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(10.0)),
-                            border: Border.all(
-                              color:  Colors.deepPurple,
-                              width: 2.0,
-                            ),
-                          ),
-                          margin: EdgeInsets.all( 20),
-                          child: Text(
-                            "New",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: Colors.deepPurple,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
+
                     ],
                   ),
                 ),
@@ -490,12 +507,14 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
       ),),),),),);
   }
 
-  void addNewCollection(){
-    Navigator.push(
+  Future<void> addNewVacMad() async {
+   var str = await Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => const NewVaccineMedicine()),
     );
+
+   getvaccMedList();
   }
 }
 

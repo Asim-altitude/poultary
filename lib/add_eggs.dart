@@ -18,10 +18,12 @@ import 'model/flock.dart';
 import 'model/flock_image.dart';
 
 class NewEggCollection extends StatefulWidget {
-  const NewEggCollection({Key? key}) : super(key: key);
+
+  bool isCollection;
+  NewEggCollection({Key? key, required this.isCollection}) : super(key: key);
 
   @override
-  _NewEggCollection createState() => _NewEggCollection();
+  _NewEggCollection createState() => _NewEggCollection(this.isCollection);
 }
 
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
@@ -31,21 +33,30 @@ class _NewEggCollection extends State<NewEggCollection>
   double widthScreen = 0;
   double heightScreen = 0;
 
+   bool isCollection;
+  _NewEggCollection(this.isCollection);
+
   @override
   void dispose() {
     super.dispose();
+
   }
 
   String _purposeselectedValue = "";
+  String _reductionReasonValue = "";
   String _acqusitionselectedValue = "";
 
   List<String> _purposeList = [];
+  List<String> _reductionReasons = ['--Reduction Reason--',
+    'Sold','Broken','Personal Use','Lost/Stolen','Other'];
 
   int chosen_index = 0;
 
   @override
   void initState() {
     super.initState();
+
+    _reductionReasonValue = _reductionReasons[0];
     getList();
   }
 
@@ -57,7 +68,7 @@ class _NewEggCollection extends State<NewEggCollection>
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: ''));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -117,7 +128,7 @@ class _NewEggCollection extends State<NewEggCollection>
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.deepPurple, //(x,y)
+                            color: isCollection ? Colors.green : Colors.red, //(x,y)
                           ),
                         ],
                       ),
@@ -131,14 +142,14 @@ class _NewEggCollection extends State<NewEggCollection>
                               child: Icon(Icons.arrow_back,
                                   color: Colors.white, size: 30),
                               onTap: () {
-                                Navigator.pop(context);
+                                Navigator.pop(context,"Egg ADDED");
                               },
                             ),
                           ),
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                "New Collection",
+                                isCollection? 'New Collection' : 'New Reduction',
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -298,6 +309,25 @@ class _NewEggCollection extends State<NewEggCollection>
                           ),
 
 
+                         !isCollection? SizedBox(height: 10,width: widthScreen): SizedBox(height: 0,width: widthScreen),
+                         !isCollection? Container(
+                            width: widthScreen,
+                            height: 70,
+                            alignment: Alignment.centerRight,
+                            padding: EdgeInsets.all(10),
+                            margin: EdgeInsets.only(left: 20, right: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: const BorderRadius.all(
+                                  Radius.circular(10.0)),
+                              border: Border.all(
+                                color:  Colors.black,
+                                width: 1.0,
+                              ),
+                            ),
+                            child: getReductionList(),
+                          ):SizedBox(height: 0,width: widthScreen),
+
                           SizedBox(height: 10,width: widthScreen),
                           Container(
                             width: widthScreen,
@@ -371,9 +401,16 @@ class _NewEggCollection extends State<NewEggCollection>
                               if(validate){
                                 print("Everything Okay");
                                 await DatabaseHelper.instance.database;
-                                int? id = await DatabaseHelper.insertEggCollection(Eggs(f_id: getFlockID(), f_name: _purposeselectedValue, image: '', good_eggs: this.good_eggs, bad_eggs: bad_eggs, total_eggs: int.parse(totalEggsController.text),short_note: '', date: date));
-                                Utils.showToast("Eggs Collection Added");
-                                Navigator.pop(context);
+                                if (isCollection){
+                                  int? id = await DatabaseHelper.insertEggCollection(Eggs(f_id: getFlockID(), f_name: _purposeselectedValue, image: '', good_eggs: this.good_eggs, bad_eggs: bad_eggs, total_eggs: int.parse(totalEggsController.text),short_note: '', date: date,reduction_reason: '', isCollection: 1));
+                                  Utils.showToast("Eggs Collection Added");
+                                  Navigator.pop(context,"Egg ADDED");
+                                }else{
+                                  int? id = await DatabaseHelper.insertEggCollection(Eggs(f_id: getFlockID(), f_name: _purposeselectedValue, image: '', good_eggs: this.good_eggs, bad_eggs: bad_eggs, total_eggs: int.parse(totalEggsController.text),short_note: '', date: date,reduction_reason: _reductionReasonValue, isCollection: 0));
+                                  Utils.showToast("Eggs Reduction Added");
+                                  Navigator.pop(context,"Egg Reduced");
+                                }
+
 
                               }else{
                                 Utils.showToast("Provide all required info");
@@ -449,6 +486,38 @@ class _NewEggCollection extends State<NewEggCollection>
     );
   }
 
+  Widget getReductionList() {
+    return Container(
+      width: widthScreen,
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration.collapsed(hintText: ''),
+        isDense: true,
+        value: _reductionReasonValue,
+        elevation: 16,
+        isExpanded: true,
+        onChanged: (String? newValue) {
+          setState(() {
+            _reductionReasonValue = newValue!;
+
+          });
+        },
+        items: _reductionReasons.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
 
   void pickDate() async{
 

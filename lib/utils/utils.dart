@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import '../model/egg_item.dart';
 import '../model/feed_item.dart';
 import '../model/flock.dart';
+import '../model/flock_detail.dart';
 import '../model/med_vac_item.dart';
 import '../model/transaction_item.dart';
 
@@ -39,6 +40,7 @@ class Utils {
 
   static Flock? selected_flock;
   static Eggs? selected_egg_collection;
+  static Flock_Detail? selected_flock_collection;
   static Feeding? selected_feeding;
   static int selected_category = -1;
   static String selected_category_name = "";

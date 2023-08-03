@@ -90,7 +90,7 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
         height: 60,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: Colors.transparent,
+          color: Colors.deepPurple,
           borderRadius: const BorderRadius.all(
               Radius.circular(10.0)),
           border: Border.all(
@@ -98,12 +98,12 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
             width: 2.0,
           ),
         ),
-        margin: EdgeInsets.all( 20),
+        margin: EdgeInsets.only(left: 10, right: 10),
         child: Text(
-          "New Item",
+          "Add New",
           textAlign: TextAlign.center,
           style: TextStyle(
-              color: Colors.deepPurple,
+              color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.bold),
         ),
@@ -116,7 +116,7 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
         top: false,
           child:Container(
           width: widthScreen,
-          height: heightScreen - 100,
+          height: heightScreen ,
 
           color: Colors.white,
             child:SingleChildScrollView(
@@ -168,6 +168,7 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
                 height: heightScreen - 220,
                 width: widthScreen,
                 child: ListView.builder(
+                    controller: _controller,
                     itemCount: categoryList.length,
                     scrollDirection: Axis.vertical,
                     itemBuilder: (BuildContext context, int index) {
@@ -183,21 +184,23 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
                           margin: EdgeInsets.all(10),
                           color: Colors.white,
                           elevation: 3,
-                          child: Container(
-                            height: 70,
-                            child: Row( children: [
-                              Expanded(
-                                child: Container(
-                                  alignment: Alignment.topLeft,
-                                  margin: EdgeInsets.all(10),
-                                  child: Column( children: [
-                                    Container(margin: EdgeInsets.all(0), child: Text(categoryList.elementAt(index).name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),)),
-   // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                  ],),
-                                ),
-                              ),
+                          child: Row(
+                            children: [
+                              Row( children: [
+                                Column( children: [
+                                  Container(
 
-                            ]),
+                                      width: widthScreen - widthScreen/4,
+                                      margin: EdgeInsets.all(10) , padding: EdgeInsets.all(10), child: Text(categoryList.elementAt(index).name!, style: TextStyle( fontWeight: FontWeight.normal, fontSize: 18, color: Colors.black),)),
+   // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+                                ],),
+
+                              ]),
+                              InkWell(
+                                onTap: () {
+                                  showAlertDialog(context,index);
+                                },child: Container(width: 40,height: 40,child: Icon(Icons.cancel, color: Colors.deepPurple,),))
+                            ],
                           ),
                         ),
                       );
@@ -209,6 +212,43 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
       ),),),),),);
   }
 
+  showAlertDialog(BuildContext context, int index) {
+
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: Text("Cancel"),
+      onPressed:  () {
+        Navigator.pop(context);
+      },
+    );
+    Widget continueButton = TextButton(
+      child: Text("Delete"),
+      onPressed:  () {
+        DatabaseHelper.deleteSubItem(categoryList.elementAt(index));
+
+        getSubCategoriesList();
+        Navigator.pop(context);
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Confirmation"),
+      content: Text("Are you sure you want to delete this item?"),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
 
   void openPopup() {
 
@@ -234,6 +274,13 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
                     InkWell(
                       onTap: () async {
                         print(nameController.text);
+
+                        if(!nameController.text.isEmpty){
+                          await DatabaseHelper.insertNewSubItem(SubItem(c_id: Utils.selected_category, name: nameController.text));
+                          getSubCategoriesList();
+                          Navigator.pop(context);
+                          _scrollDown();
+                        }
 
                       },
                       child: Container(
@@ -268,12 +315,17 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
           );
         });
   }
-  void addNewCollection(){
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => const NewFeeding()),
+
+  final ScrollController _controller = ScrollController();
+
+// This is what you're looking for!
+  void _scrollDown() {
+    _controller.animateTo(
+      _controller.position.maxScrollExtent,
+      duration: Duration(seconds: 2),
+      curve: Curves.fastOutSlowIn,
     );
   }
+
 }
 

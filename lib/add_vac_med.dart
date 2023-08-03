@@ -65,7 +65,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: ''));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -114,6 +114,8 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
   bool imagesAdded = false;
 
+
+
   int good_eggs = 0;
   int bad_eggs = 0;
 
@@ -147,7 +149,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.deepPurple, //(x,y)
+                            color: Colors.green, //(x,y)
                           ),
                         ],
                       ),
@@ -348,9 +350,9 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Doctor name',
+                                    hintText: "Vaccinated/Medicated by",
                                     hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
+                                        color: Colors.grey, fontSize: 14),
                                     labelStyle: TextStyle(
                                         color: Colors.black, fontSize: 16),
                                   ),

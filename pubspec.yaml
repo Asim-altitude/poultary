@@ -38,7 +38,7 @@ dependencies:
   sqflite: ^2.2.8+4
   image_picker: ^0.8.4+3
   fluttertoast: ^8.2.2
-
+  syncfusion_flutter_datepicker: ^22.2.7
 
 
 
