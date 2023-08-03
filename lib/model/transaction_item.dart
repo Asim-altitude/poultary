@@ -8,6 +8,7 @@ class TransactionItem{
   int? id = -1;
   int? f_id = -1;
   String date = "";
+  String f_name = "";
   String sale_item = "";
   String expense_item = "";
   String type = "";
@@ -22,7 +23,7 @@ class TransactionItem{
 
   TransactionItem(
       {
-        required this.f_id, required this.date, required this.sale_item,
+        required this.f_id, required this.date,required this.f_name, required this.sale_item,
         required this.expense_item, required this.type, required this.amount
      , required this.payment_method, required this.payment_status, required this.sold_purchased_from
         , required this.short_note, required this.how_many, required this.extra_cost,
@@ -33,6 +34,7 @@ class TransactionItem{
     id = json['id'];
     f_id = json['f_id'];
     date = json['date'];
+    f_name = json['f_name'];
     sale_item = json['sale_item'];
     expense_item = json['expense_item'];
     type = json['type'];
@@ -50,6 +52,7 @@ class TransactionItem{
 
     data['f_id'] = this.f_id;
     data['date'] = this.date;
+    data['f_name'] = this.f_name;
     data['sale_item'] = this.sale_item;
     data['expense_item'] = this.expense_item;
     data['type'] = this.type;

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:poultary/add_eggs.dart';
 import 'package:poultary/inventory.dart';
 import 'package:poultary/single_flock_screen.dart';
@@ -37,6 +38,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
   void initState() {
     super.initState();
 
+    getList();
     getEggCollectionList();
   }
 
@@ -187,6 +189,142 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                   ),
                 ),
               ),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 45,
+                      alignment: Alignment.centerRight,
+                      padding: EdgeInsets.only(left: 10),
+                      margin: EdgeInsets.only(top: 10,left: 25,right: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        borderRadius: const BorderRadius.all(
+                            Radius.circular(10.0)),
+                        border: Border.all(
+                          color:  Colors.deepPurple,
+                          width: 2.0,
+                        ),
+                      ),
+                      child: getDropDownList(),
+                    ),
+                  ),
+                  InkWell(
+                      onTap: () {
+                        openDatePicker();
+                      },
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Container(
+                          height: 45,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: const BorderRadius.all(
+                                Radius.circular(10.0)),
+                            border: Border.all(
+                              color:  Colors.deepPurple,
+                              width: 2.0,
+                            ),
+                          ),
+                          margin: EdgeInsets.only(right: 30,top: 15,bottom: 5),
+                          padding: EdgeInsets.only(left: 5,right: 5),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(date_filter_name, style: TextStyle(fontSize: 14),),
+                              Icon(Icons.arrow_drop_down, color: Colors.deepPurple,),
+                            ],
+                          ),
+                        ),
+                      )),
+                ],
+              ),
+              Container(
+                height: 50,
+                width: widthScreen ,
+                margin: EdgeInsets.only(left: 25,right: 25,bottom: 5),
+                child: Row(children: [
+
+                  Expanded(
+                    child: InkWell(
+                      onTap: () {
+                        selected = 1;
+                        filter_name ='All';
+                        getFilteredTransactions(str_date, end_date);
+                      },
+                      child: Container(
+                        height: 40,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: selected == 1 ? Colors.deepPurple : Colors.transparent,
+                          borderRadius: BorderRadius.only(topLeft: Radius.circular(10)
+                              ,bottomLeft: Radius.circular(10)),
+                          border: Border.all(
+                            color:  Colors.deepPurple,
+                            width: 2.0,
+                          ),
+                        ),
+                        child: Text('All', style: TextStyle(
+                            color: selected==1 ? Colors.white : Colors.deepPurple, fontSize: 14),),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: InkWell(
+                      onTap: () {
+                        selected = 2;
+                        isCollection = 1;
+                        filter_name ='1';
+                        getFilteredTransactions(str_date, end_date);
+
+                      },
+                      child: Container(
+                        height: 40,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: selected==2 ? Colors.deepPurple : Colors.transparent,
+
+
+                          border: Border.all(
+                            color: Colors.deepPurple,
+                            width: 2.0,
+                          ),
+                        ),
+                        child: Text('Collection', style: TextStyle(
+                            color: selected==2 ? Colors.white : Colors.deepPurple, fontSize: 14),),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: InkWell(
+                      onTap: () {
+                        selected = 3;
+                        filter_name ='0';
+                        isCollection = 0;
+                        getFilteredTransactions(str_date, end_date);
+
+                      },
+                      child: Container(
+                        height: 40,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: selected==3 ? Colors.deepPurple : Colors.transparent,
+                          borderRadius: BorderRadius.only(topRight: Radius.circular(10)
+                              ,bottomRight: Radius.circular(10)),
+                          border: Border.all(
+                            color:  Colors.deepPurple,
+                            width: 2.0,
+                          ),
+                        ),
+                        child: Text('Reduction', style: TextStyle(
+                            color: selected==3 ? Colors.white : Colors.deepPurple, fontSize: 14),),
+                      ),
+                    ),
+                  ),
+                ],),
+              ),
+
               eggs.length > 0 ? Container(
                 height: heightScreen - 220,
                 width: widthScreen,
@@ -514,7 +652,250 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
           builder: (context) =>  NewEggCollection(isCollection: false,)),
     );
     print(result);
-    getEggCollectionList();
+    getFilteredTransactions(str_date, end_date);
   }
+
+
+  //FILTER WORK
+  List<Flock> flocks = [];
+  String _purposeselectedValue = "";
+  List<String> _purposeList = [];
+  void getList() async {
+
+    await DatabaseHelper.instance.database;
+
+    flocks = await DatabaseHelper.getFlocks();
+
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0));
+
+    for(int i=0;i<flocks.length;i++){
+      _purposeList.add(flocks.elementAt(i).f_name);
+    }
+
+    _purposeselectedValue = _purposeList[0];
+
+    setState(() {
+
+    });
+
+  }
+
+  int isCollection = 1;
+  int selected = 1;
+  int f_id = -1;
+
+
+  Widget getDropDownList() {
+    return Container(
+      width: widthScreen,
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration.collapsed(hintText: ''),
+        isDense: true,
+        value: _purposeselectedValue,
+        elevation: 10,
+        isExpanded: true,
+        onChanged: (String? newValue) {
+          setState(() {
+            _purposeselectedValue = newValue!;
+            getFlockID();
+            getFilteredTransactions(str_date, end_date);
+
+          });
+        },
+        items: _purposeList.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: new TextStyle(
+                fontSize: 14.0,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  String filter_name = "All";
+  void openDatePicker() {
+    showDialog(
+        context: context,
+        builder: (BuildContext bcontext) {
+          return AlertDialog(
+            title: Text('Date Filter'),
+            content: setupAlertDialoadContainer(bcontext,widthScreen - 40, widthScreen),
+          );
+        });
+  }
+
+
+  Widget setupAlertDialoadContainer(BuildContext bcontext,double width, double height) {
+
+    return Container(
+      height: height, // Change as per your requirement
+      width: width, // Change as per your requirement
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: filterList.length,
+        itemBuilder: (BuildContext context, int index) {
+          return InkWell(
+            onTap: () {
+
+              setState(() {
+                date_filter_name = filterList.elementAt(index);
+              });
+
+              getData(date_filter_name);
+              Navigator.pop(bcontext);
+            },
+            child: ListTile(
+              title: Text(filterList.elementAt(index)),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void getFilteredTransactions(String st,String end) async {
+
+    await DatabaseHelper.instance.database;
+
+
+    eggs = await DatabaseHelper.getFilteredEggs(f_id,filter_name,st,end);
+
+
+    setState(() {
+
+    });
+
+  }
+
+
+  List<String> filterList = ['Today','Yesterday','This Month', 'Last Month','Last 3 months', 'Last 6 months','This Year',
+    'Last Year','All Time'];
+
+  String date_filter_name = "This Month";
+  String str_date='',end_date='';
+  void getData(String filter){
+    int index = 0;
+
+    if (filter == 'Today'){
+      index = 0;
+      DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date = inputFormat.format(today);
+      end_date = inputFormat.format(today);
+      print(str_date+" "+end_date);
+
+      getFilteredTransactions(str_date,end_date);
+    }
+    else if (filter == 'Yesterday'){
+      index = 1;
+      DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day -1);
+
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date = inputFormat.format(today);
+      end_date = inputFormat.format(today);
+      print(str_date+" "+end_date);
+
+      getFilteredTransactions(str_date,end_date);
+    }
+    else if (filter == 'This Month'){
+      index = 2;
+      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
+
+      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month + 1).subtract(Duration(days: 1));
+
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date = inputFormat.format(firstDayCurrentMonth);
+      end_date = inputFormat.format(lastDayCurrentMonth);
+      print(str_date+" "+end_date);
+      getFilteredTransactions(str_date,end_date);
+
+    }else if (filter == 'Last Month'){
+      index = 3;
+      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
+
+      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month  -1,30);
+
+
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date = inputFormat.format(firstDayCurrentMonth);
+      end_date = inputFormat.format(lastDayCurrentMonth);
+      print(str_date+" "+end_date);
+      getFilteredTransactions(str_date,end_date);
+
+
+    }else if (filter == 'Last 3 months'){
+      index = 4;
+      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -2, 1);
+
+      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
+
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date = inputFormat.format(firstDayCurrentMonth);
+      end_date = inputFormat.format(lastDayCurrentMonth);
+      print(str_date+" "+end_date);
+      getFilteredTransactions(str_date,end_date);
+    }else if (filter == 'Last 6 months'){
+      index = 5;
+      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
+
+      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
+
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date = inputFormat.format(firstDayCurrentMonth);
+      end_date = inputFormat.format(lastDayCurrentMonth);
+      print(str_date+" "+end_date);
+      getFilteredTransactions(str_date,end_date);
+    }else if (filter == 'This Year'){
+      index = 6;
+      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
+      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
+
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date = inputFormat.format(firstDayCurrentMonth);
+      end_date = inputFormat.format(lastDayCurrentMonth);
+      print(str_date+" "+end_date);
+      getFilteredTransactions(str_date,end_date);
+    }else if (filter == 'Last Year'){
+      index = 7;
+      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
+      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year-1, 12,31);
+
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date = inputFormat.format(firstDayCurrentMonth);
+      end_date = inputFormat.format(lastDayCurrentMonth);
+      print(str_date+" "+end_date);
+      getFilteredTransactions(str_date,end_date);
+    }else if (filter == 'All Time'){
+      index = 8;
+      str_date ="";
+      end_date ="";
+      print(str_date+" "+end_date);
+      getFilteredTransactions(str_date,end_date);
+    }
+
+  }
+
+  int getFlockID() {
+
+
+    for(int i=0;i<flocks.length;i++){
+      if(_purposeselectedValue == flocks.elementAt(i).f_name){
+        f_id = flocks.elementAt(i).f_id;
+        break;
+      }
+    }
+
+    return f_id;
+  }
+
 }
 

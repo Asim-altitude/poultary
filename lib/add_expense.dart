@@ -474,7 +474,7 @@ class _NewExpense extends State<NewExpense>
                               if(validate){
                                 print("Everything Okay");
                                 await DatabaseHelper.instance.database;
-                                TransactionItem transaction_item = TransactionItem(f_id: getFlockID(), date: date, sale_item: "", expense_item: _saleselectedValue, type: "Expense", amount: amountController.text, payment_method: payment_method, payment_status: payment_status, sold_purchased_from: soldtoController.text, short_note: notesController.text, how_many: howmanyController.text, extra_cost: "", extra_cost_details: "");
+                                TransactionItem transaction_item = TransactionItem(f_id: getFlockID(), date: date, sale_item: "", expense_item: _saleselectedValue, type: "Expense", amount: amountController.text, payment_method: payment_method, payment_status: payment_status, sold_purchased_from: soldtoController.text, short_note: notesController.text, how_many: howmanyController.text, extra_cost: "", extra_cost_details: "", f_name: _purposeselectedValue);
                                 int? id = await DatabaseHelper.insertNewTransaction(transaction_item);
                                 Utils.showToast("New Expense Added");
                                 Navigator.pop(context);
@@ -728,7 +728,7 @@ class _NewExpense extends State<NewExpense>
 
     int selected_id = -1;
     for(int i=0;i<flocks.length;i++){
-      if(_purposeselectedValue.toLowerCase() == flocks.elementAt(i).f_name){
+      if(_purposeselectedValue == flocks.elementAt(i).f_name){
         selected_id = flocks.elementAt(i).f_id;
         break;
       }

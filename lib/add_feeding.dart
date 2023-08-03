@@ -329,7 +329,7 @@ class _NewFeeding extends State<NewFeeding>
                               if(validate){
                                 print("Everything Okay");
                                 await DatabaseHelper.instance.database;
-                                int? id = await DatabaseHelper.insertNewFeeding(Feeding(f_id: getFlockID(), short_note: notesController.text, date: date, feed_name: _feedselectedValue, quantity: quantityController.text,));
+                                int? id = await DatabaseHelper.insertNewFeeding(Feeding(f_id: getFlockID(), short_note: notesController.text, date: date, feed_name: _feedselectedValue, quantity: quantityController.text, f_name: _purposeselectedValue,));
                                 Utils.showToast("New Feeding Added");
                                 Navigator.pop(context);
 
@@ -493,7 +493,7 @@ class _NewFeeding extends State<NewFeeding>
 
     int selected_id = -1;
     for(int i=0;i<flocks.length;i++){
-      if(_purposeselectedValue.toLowerCase() == flocks.elementAt(i).f_name){
+      if(_purposeselectedValue == flocks.elementAt(i).f_name){
         selected_id = flocks.elementAt(i).f_id;
         break;
       }

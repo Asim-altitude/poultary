@@ -580,7 +580,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
     int selected_id = -1;
     for(int i=0;i<flocks.length;i++){
-      if(_purposeselectedValue.toLowerCase() == flocks.elementAt(i).f_name){
+      if(_purposeselectedValue == flocks.elementAt(i).f_name){
         selected_id = flocks.elementAt(i).f_id;
         break;
       }

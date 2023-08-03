@@ -235,6 +235,277 @@ class DatabaseHelper  {
     return _eggList;
   }
 
+  static Future<List<Eggs>>  getFilteredEggs(int f_id,String type,String str_date, String end_date) async {
+
+    var result = null;
+
+    if(f_id == -1) {
+      if (type == 'All' && !str_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Eggs where collection_date BETWEEN '$str_date' and '$end_date'");
+      } else if (str_date.isEmpty && end_date.isEmpty && type == 'All') {
+        result = await _database?.rawQuery("SELECT * FROM Eggs");
+      } else if (str_date.isEmpty && end_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Eggs where isCollection = $type");
+      } else {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Eggs where isCollection = $type and collection_date BETWEEN  '$str_date' and '$end_date'");
+      }
+    }else{
+      if (type == 'All' && !str_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Eggs where f_id = $f_id and collection_date BETWEEN '$str_date' and '$end_date'");
+      } else if (str_date.isEmpty && end_date.isEmpty && type == 'All') {
+        result = await _database?.rawQuery("SELECT * FROM Eggs where f_id = $f_id");
+      } else if (str_date.isEmpty && end_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Eggs where f_id = $f_id and isCollection = $type");
+      } else {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Eggs where f_id = $f_id and isCollection = $type and collection_date BETWEEN '$str_date' and '$end_date'");
+      }
+    }
+
+    print(result);
+    List<Eggs> _transactionList = [];
+    Eggs _transaction;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            _transaction = Eggs.fromJson(json);
+            _transactionList.add(_transaction);
+            print(_transactionList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        _transaction = Eggs.fromJson(json);
+      }
+    }
+    return _transactionList;
+  }
+
+
+  static Future<List<Flock_Detail>>  getFilteredFlockDetails(int f_id,String type,String str_date, String end_date) async {
+
+    var result = null;
+
+    if(f_id == -1) {
+      if (type == 'All' && !str_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Flock_Detail where acqusition_date BETWEEN '$str_date' and '$end_date'");
+      } else if (str_date.isEmpty && end_date.isEmpty && type == 'All') {
+        result = await _database?.rawQuery("SELECT * FROM Flock_Detail");
+      } else if (str_date.isEmpty && end_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Flock_Detail where item_type = '$type'");
+      } else {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Flock_Detail where item_type = '$type' and acqusition_date BETWEEN  '$str_date' and '$end_date'");
+      }
+    }else{
+      if (type == 'All' && !str_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Flock_Detail where f_id = $f_id and acqusition_date BETWEEN '$str_date' and '$end_date'");
+      } else if (str_date.isEmpty && end_date.isEmpty && type == 'All') {
+        result = await _database?.rawQuery("SELECT * FROM Flock_Detail where f_id = $f_id");
+      } else if (str_date.isEmpty && end_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Flock_Detail where f_id = $f_id and item_type = '$type'");
+      } else {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Flock_Detail where f_id = $f_id and item_type = '$type' and acqusition_date BETWEEN  '$str_date' and '$end_date'");
+      }
+    }
+
+    print(result);
+    List<Flock_Detail> _transactionList = [];
+    Flock_Detail _transaction;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            _transaction = Flock_Detail.fromJson(json);
+            _transactionList.add(_transaction);
+            print(_transactionList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        _transaction = Flock_Detail.fromJson(json);
+      }
+    }
+    return _transactionList;
+  }
+
+  static Future<List<Vaccination_Medication>>  getFilteredMedication(int f_id,String type,String str_date, String end_date) async {
+
+    var result = null;
+
+    if(f_id == -1) {
+      if (type == 'All' && !str_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Vaccination_Medication where date BETWEEN '$str_date' and '$end_date'");
+      } else if (str_date.isEmpty && end_date.isEmpty && type == 'All') {
+        result = await _database?.rawQuery("SELECT * FROM Vaccination_Medication");
+      } else if (str_date.isEmpty && end_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Vaccination_Medication where type = '$type'");
+      } else {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Vaccination_Medication where type = '$type' and date BETWEEN  '$str_date' and '$end_date'");
+      }
+    }else{
+      if (type == 'All' && !str_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Vaccination_Medication where f_id = $f_id and date BETWEEN '$str_date' and '$end_date'");
+      } else if (str_date.isEmpty && end_date.isEmpty && type == 'All') {
+        result = await _database?.rawQuery("SELECT * FROM Vaccination_Medication where f_id = $f_id");
+      } else if (str_date.isEmpty && end_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Vaccination_Medication where f_id = $f_id and type = '$type'");
+      } else {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Vaccination_Medication where f_id = $f_id and type = '$type' and date BETWEEN  '$str_date' and '$end_date'");
+      }
+    }
+
+    print(result);
+    List<Vaccination_Medication> _transactionList = [];
+    Vaccination_Medication _transaction;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            _transaction = Vaccination_Medication.fromJson(json);
+            _transactionList.add(_transaction);
+            print(_transactionList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        _transaction = Vaccination_Medication.fromJson(json);
+      }
+    }
+    return _transactionList;
+  }
+
+  static Future<List<Feeding>>  getFilteredFeeding(int f_id,String type,String str_date, String end_date) async {
+
+    var result = null;
+
+    if(f_id == -1) {
+      if (type == 'All' && !str_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Feeding where feeding_date BETWEEN '$str_date' and '$end_date'");
+      } else if (str_date.isEmpty && end_date.isEmpty && type == 'All') {
+        result = await _database?.rawQuery("SELECT * FROM Feeding");
+      } else if (str_date.isEmpty && end_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Feeding ");
+      } else {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Feeding where and feeding_date BETWEEN  '$str_date' and '$end_date'");
+      }
+    }else{
+      if (type == 'All' && !str_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Feeding where f_id = $f_id and feeding_date BETWEEN '$str_date' and '$end_date'");
+      } else if (str_date.isEmpty && end_date.isEmpty && type == 'All') {
+        result = await _database?.rawQuery("SELECT * FROM Feeding where f_id = $f_id");
+      } else if (str_date.isEmpty && end_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Feeding where f_id = $f_id ");
+      } else {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Feeding where f_id = $f_id  and feeding_date BETWEEN  '$str_date' and '$end_date'");
+      }
+    }
+
+    print(result);
+    List<Feeding> _transactionList = [];
+    Feeding _transaction;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            _transaction = Feeding.fromJson(json);
+            _transactionList.add(_transaction);
+            print(_transactionList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        _transaction = Feeding.fromJson(json);
+      }
+    }
+    return _transactionList;
+  }
+
+
+  static Future<List<TransactionItem>>  getFilteredTransactions(int f_id,String type,String str_date, String end_date) async {
+
+    var result = null;
+
+    if(f_id == -1) {
+      if (type == 'All' && !str_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Transactions where date BETWEEN '$str_date' and '$end_date'");
+      } else if (str_date.isEmpty && end_date.isEmpty && type == 'All') {
+        result = await _database?.rawQuery("SELECT * FROM Transactions");
+      } else if (str_date.isEmpty && end_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Transactions where type = '$type'");
+      } else {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Transactions where type = '$type' and date BETWEEN  '$str_date' and '$end_date'");
+      }
+    }else{
+      if (type == 'All' && !str_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Transactions where f_id = $f_id and date BETWEEN '$str_date' and '$end_date'");
+      } else if (str_date.isEmpty && end_date.isEmpty && type == 'All') {
+        result = await _database?.rawQuery("SELECT * FROM Transactions where f_id = $f_id");
+      } else if (str_date.isEmpty && end_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Transactions where f_id = $f_id and type = '$type'");
+      } else {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Transactions where f_id = $f_id and type = '$type' and date BETWEEN  '$str_date' and '$end_date'");
+      }
+    }
+
+    print(result);
+    List<TransactionItem> _transactionList = [];
+    TransactionItem _transaction;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            _transaction = TransactionItem.fromJson(json);
+            _transactionList.add(_transaction);
+            print(_transactionList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        _transaction = TransactionItem.fromJson(json);
+      }
+    }
+    return _transactionList;
+  }
 
   static Future<List<TransactionItem>>  getAllTransactions() async {
     var result = await _database?.rawQuery("SELECT * FROM Transactions");
