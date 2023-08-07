@@ -10,6 +10,7 @@ import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'add_flocks.dart';
+import 'all_reports_screen.dart';
 import 'database/databse_helper.dart';
 import 'model/flock.dart';
 
@@ -202,6 +203,18 @@ class _HomeScreen extends State<HomeScreen> {
                 child: Align(
                     alignment: Alignment.centerRight,
                     child: Container(margin: EdgeInsets.only(right: 15, top: 20), child: Text("Category Set up", style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),))),
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ReportsScreen()),
+                  );
+                },
+                child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Container(margin: EdgeInsets.only(right: 15, top: 20), child: Text("Reports", style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),))),
               ),
 
 

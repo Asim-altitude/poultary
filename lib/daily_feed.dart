@@ -325,7 +325,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                                 child: Container(
                                   alignment: Alignment.topLeft,
                                   margin: EdgeInsets.all(10),
-                                  child: Column( children: [
+                                  child: Column(children: [
                                     Row(
                                       children: [
                                         Container(margin: EdgeInsets.all(0), child: Text(feedings.elementAt(index).feed_name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),)),

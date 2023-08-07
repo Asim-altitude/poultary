@@ -451,6 +451,205 @@ class DatabaseHelper  {
     }
     return _transactionList;
   }
+  static Future<List<Feeding>> getAllMostUsedFeeds(int f_id, String type,String str_date, String end_date) async {
+
+    var result;
+
+    if(f_id==-1 && !str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT * from Feeding where feeding_date BETWEEN '$str_date'and '$end_date' ORDER BY quantity ASC");
+      print("SELECT * from Feeding where feeding_date BETWEEN '$str_date'and '$end_date' ORDER BY quantity ASC");
+    }else if(f_id!=-1 && str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT * from Feeding where f_id='$f_id' ORDER BY quantity ASC");
+      print("SELECT * from Feeding where f_id='$f_id' ORDER BY quantity ASC");
+    }else if(f_id!=-1 && !str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT * from Feeding where f_id='$f_id' and feeding_date BETWEEN '$str_date'and '$end_date' ORDER BY quantity ASC");
+      print("SELECT * from Feeding where f_id='$f_id' and feeding_date BETWEEN '$str_date'and '$end_date' ORDER BY quantity ASC");
+    }else if (f_id==-1 && str_date.isEmpty){
+      result = await _database?.rawQuery(
+          "SELECT * from Feeding ORDER BY quantity ASC ");
+      print("SELECT * from Feeding ORDER BY quantity ASC ");
+    }
+
+    List<Feeding> _feedList = [];
+    Feeding feed;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            feed = Feeding.fromJson(json);
+            _feedList.add(feed);
+            print(_feedList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        feed = Feeding.fromJson(json);
+      }
+    }
+    return _feedList;
+
+  }
+
+
+  static Future<List<Feeding>> getTopMostUsedFeeds(int f_id,String str_date, String end_date) async {
+
+    var result;
+
+    if(f_id==-1 && !str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT * from Feeding where feeding_date BETWEEN '$str_date'and '$end_date' ORDER BY quantity ASC LIMIT 3");
+      print("SELECT * from Feeding where feeding_date BETWEEN '$str_date'and '$end_date' ORDER BY quantity ASC LIMIT 3");
+    }else if(f_id!=-1 && str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT * from Feeding where f_id='$f_id' ORDER BY quantity ASC LIMIT 3");
+      print("SELECT * from Feeding where f_id='$f_id' ORDER BY quantity ASC LIMIT 3");
+    }else if(f_id!=-1 && !str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT * from Feeding where f_id='$f_id' and feeding_date BETWEEN '$str_date'and '$end_date' ORDER BY quantity ASC LIMIT 3");
+      print("SELECT * from Feeding where f_id='$f_id' and feeding_date BETWEEN '$str_date'and '$end_date' ORDER BY quantity ASC LIMIT 3");
+    }else if (f_id==-1 && str_date.isEmpty){
+      result = await _database?.rawQuery(
+          "SELECT * from Feeding ORDER BY quantity ASC LIMIT 3");
+      print("SELECT * from Feeding ORDER BY quantity ASC LIMIT 3");
+    }
+
+    List<Feeding> _feedList = [];
+    Feeding feed;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            feed = Feeding.fromJson(json);
+            _feedList.add(feed);
+            print(_feedList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        feed = Feeding.fromJson(json);
+      }
+    }
+    return _feedList;
+
+  }
+
+  static Future<int> getTotalFeedConsumption(int f_id,String str_date, String end_date) async {
+
+    var result;
+
+    if(f_id == -1 && !str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT sum(quantity) FROM Feeding where feeding_date BETWEEN '$str_date'and '$end_date'");
+      print("SELECT sum(quantity) FROM Feeding where feeding_date BETWEEN '$str_date'and '$end_date'");
+    }else if(f_id!=-1 && str_date.isEmpty){
+      result = await _database?.rawQuery(
+          "SELECT sum(quantity) FROM Feeding where f_id = $f_id ");
+      print("SELECT sum(quantity) FROM Feeding where f_id = $f_id ");
+    }
+    else if (f_id!=-1 && !str_date.isEmpty){
+      result = await _database?.rawQuery(
+          "SELECT sum(quantity) FROM Feeding where f_id = $f_id and feeding_date BETWEEN '$str_date'and '$end_date'");
+      print("SELECT sum(quantity) FROM Feeding where f_id = $f_id and feeding_date BETWEEN '$str_date'and '$end_date'");
+    }else if (f_id==-1 && str_date.isEmpty){
+      result = await _database?.rawQuery(
+          "SELECT sum(quantity) FROM Feeding");
+      print("SELECT sum(quantity) FROM Feeding");
+    }
+
+    Map<String,dynamic> map = result![0];
+    print(map.values.first);
+
+    if(map.values.first.toString().toLowerCase() == 'null')
+      return 0;
+    else
+      return int.parse(map.values.first.toString());
+
+  }
+
+
+  static Future<int> getAllFlockBirdsCount(int f_id,String str_date, String end_date) async {
+
+    var result;
+
+    if(f_id == -1 && !str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT sum(bird_count) FROM Flock where acqusition_date BETWEEN '$str_date'and '$end_date'");
+    }else if(f_id != -1 && str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT sum(bird_count) FROM Flock where f_id = $f_id ");
+
+    }else if(f_id != -1 && !str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT sum(bird_count) FROM Flock where f_id = $f_id and acqusition_date BETWEEN '$str_date'and '$end_date' ");
+
+    }else if (f_id == -1 && str_date.isEmpty){
+      result = await _database?.rawQuery(
+          "SELECT sum(bird_count) FROM Flock");
+    }
+
+    Map<String,dynamic> map = result![0];
+    print(map.values.first);
+
+    if(map.values.first.toString().toLowerCase() == 'null')
+      return 0;
+    else
+      return int.parse(map.values.first.toString());
+
+  }
+
+  static Future<int> getBirdsCalculations(int f_id, String type,String str_date, String end_date) async {
+
+    var result;
+
+    if(f_id==-1) {
+      result = await _database?.rawQuery(
+          "SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and acqusition_date BETWEEN '$str_date'and '$end_date'");
+      print("SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and acqusition_date BETWEEN '$str_date'and '$end_date'");
+    }else if (f_id!=-1){
+      result = await _database?.rawQuery(
+          "SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and f_id = $f_id and acqusition_date BETWEEN '$str_date'and '$end_date'");
+      print("SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and f_id = $f_id and acqusition_date BETWEEN '$str_date'and '$end_date'");
+    }
+
+    Map<String,dynamic> map = result![0];
+    print(map.values.first);
+
+    if(map.values.first.toString().toLowerCase() == 'null')
+      return 0;
+    else
+      return int.parse(map.values.first.toString());
+
+  }
+
+  static Future<int> getEggCalculations(int f_id,int type,String str_date, String end_date) async {
+
+    var result;
+
+    if(f_id==-1) {
+      result = await _database?.rawQuery(
+          "SELECT sum(total_eggs) FROM Eggs where isCollection = $type and collection_date BETWEEN '$str_date'and '$end_date'");
+      print("SELECT sum(total_eggs) FROM Eggs where isCollection = $type and collection_date BETWEEN '$str_date'and '$end_date'");
+    }else if (f_id!=-1){
+      result = await _database?.rawQuery(
+          "SELECT sum(total_eggs) FROM Eggs where isCollection = $type and f_id = $f_id and collection_date BETWEEN '$str_date'and '$end_date'");
+      print("SELECT sum(total_eggs) FROM Eggs where isCollection = $type and f_id = $f_id and collection_date BETWEEN '$str_date'and '$end_date'");
+    }
+
+    Map<String,dynamic> map = result![0];
+    print(map.values.first);
+    if(map.values.first.toString().toLowerCase() == 'null')
+        return 0;
+    else
+        return int.parse(map.values.first.toString());
+
+  }
 
 
   static Future<List<TransactionItem>>  getFilteredTransactions(int f_id,String type,String str_date, String end_date) async {
@@ -631,6 +830,7 @@ class DatabaseHelper  {
     return result![0].toString();
 
   }
+
 
   static Future<int> getFlockActiveBirds(int id) async {
 
