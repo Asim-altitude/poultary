@@ -328,7 +328,6 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                         selected = 3;
                         filter_name ='Reduction';
                         getFilteredTransactions(str_date, end_date);
-
                       },
                       child: Container(
                         height: 40,
@@ -350,7 +349,6 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                 ],),
               ),
 
-
               list.length > 0 ? Container(
                 height: heightScreen - 220,
                 width: widthScreen,
@@ -360,27 +358,13 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                     itemBuilder: (BuildContext context, int index) {
                       return InkWell(
                         onTap: () {
-                          Utils.selected_flock_collection = list.elementAt(index);
-                          Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const SingleFlockScreen()),
-                        );},
+                          },
                         child: Card(
                           margin: EdgeInsets.all(10),
                           color: Colors.white,
                           elevation: 3,
                           child: Container(
                             height: 100,
-                            /*decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
-                            ),*/
                             child: Row( children: [
                               Expanded(
                                 child: Container(

@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:poultary/category_screen.dart';
-import 'package:poultary/dashboard.dart';
 import 'package:poultary/inventory.dart';
 import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/transactions_screen.dart';
@@ -18,15 +18,15 @@ import 'database/databse_helper.dart';
 import 'egg_collection.dart';
 import 'model/flock.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({Key? key}) : super(key: key);
 
   @override
-  _HomeScreen createState() => _HomeScreen();
+  _DashboardScreen createState() => _DashboardScreen();
 }
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _HomeScreen extends State<HomeScreen> {
+class _DashboardScreen extends State<DashboardScreen> {
 
   double widthScreen = 0;
   double heightScreen = 0;
@@ -41,21 +41,38 @@ class _HomeScreen extends State<HomeScreen> {
   void initState() {
     super.initState();
 
-    _piData.add(_PieData("Income", 2000,'2000'));
-    _piData.add(_PieData("Expense", 500,'500'));
 
-
+    getData();
     getList();
   }
 
+  String str_date='',end_date='';
+  void getData() async{
 
+    await DatabaseHelper.instance.database;
+
+    DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
+    DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month + 1).subtract(Duration(days: 1));
+
+    var inputFormat = DateFormat('yyyy-MM-dd');
+    str_date = inputFormat.format(firstDayCurrentMonth);
+    end_date = inputFormat.format(lastDayCurrentMonth);
+
+    gross_income = await DatabaseHelper.getTransactionsTotal(-1, "Income", str_date, end_date);
+    total_expense = await DatabaseHelper.getTransactionsTotal(-1, "Expense", str_date, end_date);
+
+    net_income = gross_income - total_expense;
+
+    setState(() {
+
+    });
+  }
 
   bool no_flock = true;
   List<Flock> flocks = [];
   void getList() async {
 
     await DatabaseHelper.instance.database;
-
     flocks = await DatabaseHelper.getFlocks();
 
     if(flocks.length == 0)
@@ -75,27 +92,11 @@ class _HomeScreen extends State<HomeScreen> {
   List<_PieData> _piData =[];
 
   int flock_total = 0;
-  int _selectedTab = 0;
 
-  _changeTab(int index) {
-    setState(() {
-      _selectedTab = index;
-    });
-  }
 
-  List _pages = [
-    Center(
-      child: DashboardScreen(),
-    ),
-    Center(
-      child: ReportsScreen(),
-    ),
-    Center(
-      child:EggCollectionScreen(),
-    ),
-
-  ];
-
+  int gross_income = 0;
+  int total_expense = 0;
+  int net_income = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -109,20 +110,8 @@ class _HomeScreen extends State<HomeScreen> {
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
     return SafeArea(child: Scaffold(
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedTab,
-        onTap: (index) => _changeTab(index),
-        selectedItemColor: Colors.deepPurple,
-        unselectedItemColor: Colors.black,
-        backgroundColor: Colors.white,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Dashboard"),
-          BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: "Reports"),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings"),
-        ],
 
-      ),
-      body: _pages[_selectedTab])); /*SafeArea(
+      body:  SafeArea(
         top: false,
 
           child:Container(
@@ -132,37 +121,129 @@ class _HomeScreen extends State<HomeScreen> {
             child:Center(
 
             child: SingleChildScrollView(
-
             child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
-              Container(
-                  margin: EdgeInsets.only(left: 10,top: 20),
-                  child: Text(
-                    "All FLocks( $flock_total)",
-                    textAlign: TextAlign.start,
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold),
-                  )),
-              InkWell(
-                onTap: () async {
-                 await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ADDFlockScreen()),
-                  );
+              ClipRRect(
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                child: Container(
+                  width: widthScreen,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.deepPurple, //(x,y)
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                     /* Container(
+                        alignment: Alignment.center,
+                        width: 60,
+                        height: 60,
+                        *//*child: Container(
+                            width: 30,
+                            height: 30,
+                            child: Icon(Icons.home, color: Colors.white,),
 
-                 getList();
+                        )*//*
+                      ),*/
+                      Container(
+                          margin: EdgeInsets.only(left: 10),
+                          child: Expanded(
+                            child: Text(
+                              "Poultary Dashboard",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),),
 
-                },
-                child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Container(margin: EdgeInsets.only(right: 15, top: 20), child: Text("Add New Flock", style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),))),
+                    ],
+                  ),
+                ),
               ),
+              Container(
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.white, //(x,y)
+                    ),
+                  ],
+                ),
+                child: Column(children: [
+                  Align(
+                      alignment: Alignment.topLeft,
+                      child: Row(
+                        children: [
+                          Text('Financial Summary ',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                          Text('(Current month)',style: TextStyle(fontSize: 12, fontWeight: FontWeight.normal, color: Colors.black),),
+                        ],
+                      )),
+                  SizedBox(height: 10,width: widthScreen,),
 
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Gross Income',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                      Text('$gross_income',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
+
+                    ],),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Total Expense',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                      Text('-$total_expense',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.red),),
+
+                    ],),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Net Income',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),),
+                      Text('$net_income',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: net_income>=0? Colors.black:Colors.red),),
+
+                    ],)
+                ],),),
+              Container(
+                margin: EdgeInsets.only(left: 20, right: 20, top: 20),
+                child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Text('All Flocks ',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                            Text("(" + flocks.length.toString() + ")",style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+
+                          ],
+                        ),
+                        InkWell(
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const ADDFlockScreen()),
+                            );
+
+                            getList();
+
+                          },
+                          child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Container( child: Text("+New Flock", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),))),
+                        ),
+
+
+                      ],
+                    )),
+              ),
               Container(
                 height: heightScreen/2,
                 width: widthScreen,
@@ -178,34 +259,33 @@ class _HomeScreen extends State<HomeScreen> {
                           MaterialPageRoute(
                               builder: (context) => const SingleFlockScreen()),
                         );
-
                         getList();
 
                         },
                         child: Card(
                           margin: EdgeInsets.all(10),
                           color: Colors.white,
-                          elevation: 3,
+                          elevation: 2,
                           child: Container(
                             height: 130,
-                            *//*decoration: BoxDecoration(
-                              color: Colors.transparent,
+                             width: widthScreen,
+                             decoration: BoxDecoration(
+                               color: Colors.white,
                               borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
-                            ),*//*
+                                  Radius.circular(5.0)),
+                            ),
                             child: Row( children: [
                               Expanded(
                                 child: Container(
-                                  alignment: Alignment.topLeft,
+
                                   margin: EdgeInsets.all(10),
-                                  child: Column( children: [
-                                    Container(margin: EdgeInsets.all(5), child: Text(flocks.elementAt(index).f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),)),
-                                    Container(margin: EdgeInsets.all(0), child: Text(flocks.elementAt(index).acqusition_type, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
-                                    Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+                                  padding: EdgeInsets.all(10),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                    Container( child: Text(flocks.elementAt(index).f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),)),
+                                    Container( child: Text(flocks.elementAt(index).acqusition_type, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
+                                    Container( child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
 
                                   ],),
                                 ),
@@ -220,8 +300,8 @@ class _HomeScreen extends State<HomeScreen> {
                                     margin: EdgeInsets.only(right: 10),
                                     child: Row(
                                       children: [
-                                        Container( margin: EdgeInsets.only(right: 5), child: Text(flocks.elementAt(index).active_bird_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),)),
-                                        Text("Birds", style: TextStyle(color: Colors.black, fontSize: 16),)
+                                        Container( margin: EdgeInsets.only(right: 5), child: Text(flocks.elementAt(index).active_bird_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),)),
+                                        Text("Birds", style: TextStyle(color: Colors.black, fontSize: 14),)
                                       ],
                                     ),
                                   ),
@@ -259,7 +339,7 @@ class _HomeScreen extends State<HomeScreen> {
                     alignment: Alignment.centerRight,
                     child: Container(margin: EdgeInsets.only(right: 15, top: 20), child: Text("Reports", style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),))),
               ),
-              *//*Center(
+              /*Center(
                     child: SfCircularChart(
                         title: ChartTitle(text: 'Income/Expense'),
                         legend: Legend(isVisible: true),
@@ -510,6 +590,7 @@ class _HomeScreen extends State<HomeScreen> {
                   ]
       ),),
         ),),),),);*/
+    ])))))));
   }
 
 

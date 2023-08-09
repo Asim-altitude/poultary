@@ -355,7 +355,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
 
                                   DatabaseHelper.updateFlockBirds(active_birds, getFlockID());
 
-                                  int? id = await DatabaseHelper.insertFlockDetail(Flock_Detail(f_id: getFlockID(), item_type: isCollection? 'Addition':'Reduction', item_count: int.parse(totalBirdsController.text), acqusition_type: _acqusitionselectedValue, acqusition_date: date, reason: _reductionReasonValue, short_note: notesController.text));
+                                  int? id = await DatabaseHelper.insertFlockDetail(Flock_Detail(f_id: getFlockID(), item_type: isCollection? 'Addition':'Reduction', item_count: int.parse(totalBirdsController.text), acqusition_type: _acqusitionselectedValue, acqusition_date: date, reason: _reductionReasonValue, short_note: notesController.text, f_name: _purposeselectedValue));
                                   Utils.showToast("Birds Added");
 
                                   Navigator.pop(context);
@@ -382,8 +382,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                                         acqusition_type: _acqusitionselectedValue,
                                         acqusition_date: date,
                                         reason: _reductionReasonValue,
-                                        short_note: notesController.text));
-
+                                        short_note: notesController.text, f_name: _purposeselectedValue));
 
                                     Utils.showToast("Birds Reduced");
                                     Navigator.pop(context);

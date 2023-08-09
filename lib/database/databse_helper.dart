@@ -15,6 +15,7 @@ import '../model/feed_item.dart';
 import '../model/flock_detail.dart';
 import '../model/flock_image.dart';
 import '../model/transaction_item.dart';
+import '../model/used_item.dart';
 class DatabaseHelper  {
   static const _databaseName = "assets/poultary.db";
 
@@ -573,6 +574,96 @@ class DatabaseHelper  {
 
   }
 
+  // INCOME/EXPENSE
+
+  static Future<int> getTransactionsTotal(int f_id, String type, String str_date, String end_date) async {
+
+    var result;
+
+    if(type.isEmpty){
+      type = "type = 'Income' or type='Expense'";
+    }else{
+      type = "type = '$type'";
+    }
+    if(f_id == -1) {
+      result = await _database?.rawQuery(
+          "SELECT sum(amount) FROM Transactions where $type and date BETWEEN '$str_date'and '$end_date'");
+    }else if(f_id != -1) {
+      result = await _database?.rawQuery(
+          "SELECT sum(bird_count) FROM Transactions where $type and f_id = $f_id ");
+    }
+
+    Map<String,dynamic> map = result![0];
+    print(map.values.first);
+
+    if(map.values.first.toString().toLowerCase() == 'null')
+      return 0;
+    else
+      return int.parse(map.values.first.toString());
+
+  }
+
+
+  //HEALTH
+
+  static Future<int> getHealthTotal(int f_id, String type, String str_date, String end_date) async {
+
+    var result;
+
+    if(type.isEmpty){
+      type = "type = 'Vaccination' or type='Medication'";
+    }else{
+      type = "type = '$type'";
+    }
+    if(f_id == -1) {
+      result = await _database?.rawQuery(
+          "SELECT count(*) FROM Vaccination_Medication where $type and date BETWEEN '$str_date'and '$end_date'");
+    }else if(f_id != -1) {
+      result = await _database?.rawQuery(
+          "SELECT count(*) FROM Vaccination_Medication where $type and f_id = $f_id ");
+    }
+
+    Map<String,dynamic> map = result![0];
+    print(map.values.first);
+
+    if(map.values.first.toString().toLowerCase() == 'null')
+      return 0;
+    else
+      return int.parse(map.values.first.toString());
+
+  }
+
+  static Future<List<BirdUsage>> getBirdUSage(int f_id) async {
+
+    var result = null;
+    List<BirdUsage> _transactionList = [];
+    try {
+      result = await _database?.rawQuery(
+          "select reason,sum(item_count) from Flock_Detail where item_type = 'Reduction' and f_id = $f_id GROUP BY reason ");
+
+      BirdUsage _transaction;
+      if (result != null) {
+        if (result.isNotEmpty) {
+          if (result.isNotEmpty) {
+            for (int i = 0; i < result.length; i ++) {
+              Map<String, dynamic> json = result[i];
+
+              _transaction = BirdUsage.fromJson(json);
+              _transactionList.add(_transaction);
+              print(_transactionList);
+            }
+          }
+
+          Map<String, dynamic> json = result[0];
+          _transaction = BirdUsage.fromJson(json);
+        }
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+    return _transactionList;
+  }
 
   static Future<int> getAllFlockBirdsCount(int f_id,String str_date, String end_date) async {
 

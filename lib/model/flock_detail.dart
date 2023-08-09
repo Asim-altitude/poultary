@@ -9,6 +9,7 @@ class Flock_Detail{
   int? f_detail_id;
   int item_count = 0;
   String item_type = "";
+  String f_name = "";
   String acqusition_type = "";
   String acqusition_date = "";
   String short_note = "";
@@ -16,7 +17,7 @@ class Flock_Detail{
 
   Flock_Detail(
       {
-        required this.f_id, required this.item_type,required this.item_count
+        required this.f_id, required this.f_name, required this.item_type,required this.item_count
         ,required this.acqusition_type,required this.acqusition_date,required this.reason,required this.short_note
       });
 
@@ -24,6 +25,7 @@ class Flock_Detail{
     f_id = json['f_id'];
     f_detail_id = json['f_detail_id'];
     item_type = json['item_type'].toString();
+    f_name = json['f_name'].toString();
     item_count = json['item_count'];
     acqusition_date = json['acqusition_date'].toString();
     short_note = json['short_note'].toString();
@@ -39,6 +41,7 @@ class Flock_Detail{
 
     data["f_id"] = this.f_id;
     data['item_type'] = this.item_type;
+    data['f_name'] = this.f_name;
     data['reason'] = this.reason;
     data['acqusition_date'] = this.acqusition_date;
     data['acqusition_type'] = this.acqusition_type;

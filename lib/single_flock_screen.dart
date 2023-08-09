@@ -17,6 +17,7 @@ import 'database/databse_helper.dart';
 import 'egg_collection.dart';
 import 'medication_vaccination.dart';
 import 'model/flock.dart';
+import 'model/used_item.dart';
 
 class SingleFlockScreen extends StatefulWidget {
   const SingleFlockScreen({Key? key}) : super(key: key);
@@ -40,6 +41,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
   List<Flock_Image> images = [];
   List<Uint8List> byteimages = [];
+  List<BirdUsage> birdUsageList = [];
   void getImages() async {
 
    await DatabaseHelper.instance.database;
@@ -54,8 +56,9 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
      print(images.elementAt(i).image);
    }
 
+   birdUsageList = await DatabaseHelper.getBirdUSage(Utils.selected_flock!.f_id);
 
-   if (byteimages.length > 0){
+   if (byteimages.length > 0) {
      imagesAdded = true;
      setState(() {
 
@@ -63,7 +66,6 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
    }
 
   }
-
 
   bool imagesAdded = false;
 
@@ -139,36 +141,34 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                   ),
                 ),
               ),
+
               Container(
-                  margin: EdgeInsets.only(left: 10,top: 20),
-                  child: Text(
-                    Utils.selected_flock!.f_name,
-                    textAlign: TextAlign.start,
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold),
-                  )),
-              Container(
-                height: 130,
-                /*decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(10.0)),
-                            border: Border.all(
-                              color:  Colors.black,
-                              width: 1.0,
-                            ),
-                          ),*/
+                height: 170,
                 child: Row( children: [
                   Expanded(
                     child: Container(
-                      alignment: Alignment.topLeft,
-                      margin: EdgeInsets.all(10),
-                      child: Column( children: [
-                        Container(margin: EdgeInsets.all(5), child: Text(Utils.selected_flock!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),)),
-                        Container(margin: EdgeInsets.all(0), child: Text(Utils.selected_flock!.acqusition_type, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
-                        Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(Utils.selected_flock!.acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+                      margin: EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                        Container( child: Text(Utils.selected_flock!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color: Colors.deepPurple),)),
+                        Row(
+                          children: [
+                            Container( child: Text(Utils.selected_flock!.acqusition_type, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Container( child: Text('Acquired On ', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+                            Container( child: Text(Utils.getFormattedDate(Utils.selected_flock!.acqusition_date), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black),)),
+                          ],
+                        ),
+                          Row(
+                            children: [
+                              Container( child: Text('Purpose ', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+                              Container( child: Text(Utils.selected_flock!.purpose == 'Both'? 'Egg and Meat':Utils.selected_flock!.purpose, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black),)),
+                            ],
+                          ),
 
                       ],),
                     ),
@@ -176,8 +176,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                   Column(
                     children: [
                       Container(
-                        margin: EdgeInsets.all(5),
-                        height: 80, width: 80,
+                        height: 120, width: 120,
                         child: Image.asset(Utils.selected_flock!.icon, fit: BoxFit.contain,),),
                       Container(
                         margin: EdgeInsets.only(right: 10),
@@ -193,20 +192,56 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
                 ]),
               ),
+              birdUsageList.length > 0? Container(height: 40, width: widthScreen,
+              margin: EdgeInsets.only(left: 10, right: 10),
+              child: ListView.builder(
+                  itemCount: birdUsageList.length,
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Container(
+                      width: 160,
+                      height: 35,
+                      margin: EdgeInsets.all(5),
+                      decoration: const BoxDecoration(
+                        color: Colors.deepPurple,
+                        borderRadius:
+                        BorderRadius.all(Radius.circular(30))),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Text(birdUsageList.elementAt(index).reason, style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold,color: Colors.white),),
+                        Text(birdUsageList.elementAt(index).sum, style: TextStyle(fontSize: 14,color: Colors.white),),
 
+                      ],
+                    ),);
+                  }),) : SizedBox(width: 0, height: 0,),
+              !Utils.selected_flock!.notes.isEmpty? Container(
+                width: widthScreen,
+                  margin: EdgeInsets.only(left: 20,right: 10),
+                  child: Text(
+                    "Flock Description",
+                    textAlign: TextAlign.start,
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold),
+                  )) : SizedBox(width: 0,height: 0,),
+              !Utils.selected_flock!.notes.isEmpty?Container(
+                  margin: EdgeInsets.only(left: 20,right: 10),
+                  child: Text(Utils.selected_flock!.notes, style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)): SizedBox(width: 0,height: 0,),
               imagesAdded? Container(
                 height: 80,
-                width: widthScreen - 135,
-                margin: EdgeInsets.only(left: 15),
+                width: widthScreen ,
+                margin: EdgeInsets.only(left: 10,right: 10),
                 child: ListView.builder(
                     itemCount: byteimages!.length,
                     scrollDirection: Axis.horizontal,
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
-                          margin: EdgeInsets.all(10),
-                          height: 80, width: 80,
-                          child: Image.memory(byteimages.elementAt(index), fit: BoxFit.contain,),
-                          );
+                        margin: EdgeInsets.all(10),
+                        height: 80, width: 80,
+                        child: Image.memory(byteimages.elementAt(index), fit: BoxFit.fill,),
+                      );
                     }),
               ): SizedBox(height: 0,width: 0,),
 
@@ -215,29 +250,28 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                 padding: EdgeInsets.all(10),
                 child: Column(
                   children: [
-                    Text(
+                    /*Text(
                       "Manage Flock",
                       textAlign: TextAlign.start,
                       style: TextStyle(
                           color: Colors.black,
                           fontSize: 22,
                           fontWeight: FontWeight.bold),
-                    ),
+                    ),*/
 
                     SizedBox(width: widthScreen, height: 10,),
                     InkWell(
                         child: Container(
-                          width: widthScreen - (widthScreen / 4),
+                          width: widthScreen ,
                           height: 60,
                           padding: const EdgeInsets.all(10),
-                          margin: const EdgeInsets.only(left: 10, right: 10),
                           decoration: const BoxDecoration(
-                              color: Colors.blueGrey,
+                              color: Colors.deepPurple,
                               borderRadius:
-                              BorderRadius.all(Radius.circular(50))),
+                              BorderRadius.all(Radius.circular(10))),
                           child: Container(
                             width: 40,height: 40,
-                            margin: EdgeInsets.only(left: 30),
+                            margin: EdgeInsets.only(left: 10),
                             child: Row(
                               children: [
                                 Image(image: AssetImage(
@@ -268,17 +302,16 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                     SizedBox(width: widthScreen, height: 10,),
                     InkWell(
                         child: Container(
-                          width: widthScreen - (widthScreen / 4),
+                          width: widthScreen ,
                           height: 60,
                           padding: const EdgeInsets.all(10),
-                          margin: const EdgeInsets.only(left: 10, right: 10),
                           decoration: const BoxDecoration(
-                              color: Colors.blueGrey,
+                              color: Colors.deepPurple,
                               borderRadius:
-                              BorderRadius.all(Radius.circular(50))),
+                              BorderRadius.all(Radius.circular(10))),
                           child: Container(
                             width: 40,height: 40,
-                            margin: EdgeInsets.only(left: 30),
+                            margin: EdgeInsets.only(left: 10),
                             child: Row(
                               children: [
                                 Image(image: AssetImage(
@@ -313,17 +346,16 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                     SizedBox(width: widthScreen, height: 10,),
                     InkWell(
                         child: Container(
-                          width: widthScreen - (widthScreen / 4),
+                          width: widthScreen ,
                           height: 60,
                           padding: const EdgeInsets.all(10),
-                          margin: const EdgeInsets.only(left: 10, right: 10),
                           decoration: const BoxDecoration(
-                              color: Colors.blueGrey,
+                              color: Colors.deepPurple,
                               borderRadius:
-                              BorderRadius.all(Radius.circular(50))),
+                              BorderRadius.all(Radius.circular(10))),
                           child: Container(
                             width: 40,height: 40,
-                            margin: EdgeInsets.only(left: 30),
+                            margin: EdgeInsets.only(left: 10),
                             child: Row(
                               children: [
                                 Image(image: AssetImage(
@@ -333,7 +365,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                 ),
                                 Expanded(
                                   child: Text(
-                                    "Daily Feed",
+                                    "Daily Feeding",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontSize: 16,
@@ -359,17 +391,16 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                     SizedBox(width: widthScreen, height: 10,),
                     InkWell(
                         child: Container(
-                          width: widthScreen - (widthScreen / 4),
+                          width: widthScreen ,
                           height: 60,
                           padding: const EdgeInsets.all(10),
-                          margin: const EdgeInsets.only(left: 10, right: 10),
                           decoration: const BoxDecoration(
-                              color: Colors.blueGrey,
+                              color: Colors.deepPurple,
                               borderRadius:
-                              BorderRadius.all(Radius.circular(50))),
+                              BorderRadius.all(Radius.circular(10))),
                           child: Container(
                             width: 40,height: 40,
-                            margin: EdgeInsets.only(left: 30),
+                            margin: EdgeInsets.only(left: 10),
                             child: Row(
                               children: [
                                 Image(image: AssetImage(
@@ -404,14 +435,13 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                     SizedBox(width: widthScreen, height: 10,),
                     InkWell(
                         child: Container(
-                          width: widthScreen - (widthScreen / 4),
+                          width: widthScreen ,
                           height: 60,
                           padding: const EdgeInsets.all(10),
-                          margin: const EdgeInsets.only(left: 10, right: 10),
                           decoration: const BoxDecoration(
-                              color: Colors.blueGrey,
+                              color: Colors.deepPurple,
                               borderRadius:
-                              BorderRadius.all(Radius.circular(50))),
+                              BorderRadius.all(Radius.circular(10))),
                           child: Container(
                             width: 40,height: 40,
                             margin: EdgeInsets.only(left: 30),
