@@ -118,7 +118,7 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
           width: widthScreen,
           height: heightScreen ,
 
-          color: Colors.white,
+          color: Utils.getScreenBackground(),
             child:SingleChildScrollView(
             child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

@@ -138,7 +138,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
           child: Container(
             width: widthScreen,
             height: heightScreen,
-            color: Colors.white,
+            color: Utils.getScreenBackground(),
             child: SingleChildScrollView(
               child: Column(
                 children: [
@@ -197,7 +197,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                             padding: EdgeInsets.all(10),
                             margin: EdgeInsets.only(left: 20, right: 20),
                             decoration: BoxDecoration(
-                              color: Colors.transparent,
+                              color: Colors.white,
                               borderRadius: const BorderRadius.all(
                                   Radius.circular(10.0)),
                               border: Border.all(
@@ -216,7 +216,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                             padding: EdgeInsets.all(10),
                             margin: EdgeInsets.only(left: 20, right: 20),
                             decoration: BoxDecoration(
-                              color: Colors.transparent,
+                              color: Colors.white,
                               borderRadius: const BorderRadius.all(
                                   Radius.circular(10.0)),
                               border: Border.all(
@@ -233,7 +233,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                             height: 70,
                             margin: EdgeInsets.only(left: 20, right: 20),
                             decoration: BoxDecoration(
-                                color: Colors.white60,
+                                color: Colors.white,
                                 borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
                             child: Container(
@@ -268,7 +268,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                             padding: EdgeInsets.all(0),
                             margin: EdgeInsets.only(left: 20, right: 20),
                             decoration: BoxDecoration(
-                                color: Colors.white60,
+                                color: Colors.white,
                                 borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
                             child: Container(
@@ -302,7 +302,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                             height: 70,
                             margin: EdgeInsets.only(left: 20, right: 20),
                             decoration: BoxDecoration(
-                                color: Colors.white60,
+                                color: Colors.white,
                                 borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
                             child: InkWell(
@@ -313,7 +313,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                 alignment: Alignment.centerLeft,
                                 padding: EdgeInsets.only(left: 10),
                                 decoration: BoxDecoration(
-                                  color: Colors.transparent,
+                                  color: Colors.white,
                                   borderRadius: const BorderRadius.all(
                                       Radius.circular(10.0)),
                                   border: Border.all(
@@ -333,7 +333,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                             height: 70,
                             margin: EdgeInsets.only(left: 20, right: 20),
                             decoration: BoxDecoration(
-                                color: Colors.white60,
+                                color: Colors.white,
                                 borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
                             child: Container(
@@ -364,11 +364,11 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                           SizedBox(height: 10,width: widthScreen),
                           Container(
                             width: widthScreen,
-                            height: 150,
+                            height: 120,
                             padding: EdgeInsets.all(5),
                             margin: EdgeInsets.only(left: 10, right: 10),
                             decoration: BoxDecoration(
-                                color: Colors.white60,
+                                color: Colors.white,
                                 borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
                             child: Container(
@@ -376,8 +376,8 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                 width: widthScreen,
                                 height: 100,
                                 child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
+                                  maxLines: 2,
+                                  maxLength: 80,
                                   controller: notesController,
                                   keyboardType: TextInputType.multiline,
                                   textAlign: TextAlign.start,
@@ -404,7 +404,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                               if(validate){
                                 print("Everything Okay");
                                 await DatabaseHelper.instance.database;
-                                Vaccination_Medication med_vacc = Vaccination_Medication(f_id : getFlockID(), disease: _diseaseelectedValue, medicine: medicineController.text, date: date, type: Utils.vaccine_medicine.toLowerCase().contains("medi")? 'Medication':'Vaccination', short_note: notesController.text, bird_count: int.parse(bird_countController.text), doctor_name: doctorController.text,);
+                                Vaccination_Medication med_vacc = Vaccination_Medication(f_id : getFlockID(), disease: _diseaseelectedValue, medicine: medicineController.text, date: date, type: Utils.vaccine_medicine.toLowerCase().contains("medi")? 'Medication':'Vaccination', short_note: notesController.text, bird_count: int.parse(bird_countController.text), doctor_name: doctorController.text, f_name: _purposeselectedValue,);
                                 int? id = await DatabaseHelper.insertMedVac(med_vacc);
                                 Utils.showToast("New Med_Vac Added");
                                 Navigator.pop(context);
@@ -418,7 +418,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                               height: 60,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: Colors.transparent,
+                                color: Colors.deepPurple,
                                 borderRadius: const BorderRadius.all(
                                     Radius.circular(10.0)),
                                 border: Border.all(
@@ -431,7 +431,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                 "Confirm",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    color: Colors.deepPurple,
+                                    color: Colors.white,
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold),
                               ),

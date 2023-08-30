@@ -42,7 +42,8 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
     '--Select Purpose--',
     'Egg',
     'Meat',
-    'Both',
+    'Egg and Meat',
+    'Other',
   ];
 
   List<String> acqusitionList = [
@@ -77,6 +78,9 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
       print(birds.elementAt(i).image);
       print(birds.elementAt(i).id);
     }
+
+    birds.add(Bird(id: 100, image: "assets/other.jpg", name: 'Other'));
+
     setState(() {
 
     });
@@ -113,7 +117,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
           child: Container(
             width: widthScreen,
             height: heightScreen,
-            color: Colors.white,
+            color: Utils.getScreenBackground(),
             child: SingleChildScrollView(
               child: Column(
                 children: [
@@ -174,44 +178,25 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                         itemCount: birds.length,
                         scrollDirection: Axis.horizontal,
                         itemBuilder: (BuildContext context, int index) {
-                          return  index == chosen_index? Container(
-                            margin: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.deepPurple,
-                                width: 3.0,
-                              ),
-                            ),
-                            child: Column( children: [
-                            InkWell( onTap: () {
+                          return  index == chosen_index? InkWell(
+                            onTap: () {
                               chosen_index = index;
                               setState(() {
 
                               });
                             },
-                              child: Container(
-
-                              margin: EdgeInsets.all(10),
-                              height: 100, width: 100,
-                              child: Image.asset(birds.elementAt(index).image, fit: BoxFit.contain,),),
-                            ),
-                            Text(birds.elementAt(index).name, style: TextStyle( fontSize: 16, color: Colors.black),)
-                            ]),
-                          ): Container(
-                            margin: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
+                            child: Container(
+                              margin: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(10.0)),
+                                border: Border.all(
+                                  color:  Colors.deepPurple,
+                                  width: 3.0,
+                                ),
                               ),
-                            ),
-                            child: Column( children: [
+                              child: Column( children: [
                               InkWell( onTap: () {
                                 chosen_index = index;
                                 setState(() {
@@ -219,12 +204,44 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                                 });
                               },
                                 child: Container(
-                                  margin: EdgeInsets.all(10),
-                                  height: 100, width: 100,
-                                  child: Image.asset(birds.elementAt(index).image, fit: BoxFit.contain,),),
+
+                                margin: EdgeInsets.all(10),
+                                height: 100, width: 100,
+                                child: Image.asset(birds.elementAt(index).image, fit: BoxFit.contain,),),
                               ),
                               Text(birds.elementAt(index).name, style: TextStyle( fontSize: 16, color: Colors.black),)
-                            ]),
+                              ]),
+                            ),
+                          ): InkWell(
+                            onTap: (){
+                              chosen_index = index;
+                              setState(() {
+
+                              });
+                            },
+                            child: Container(
+                              margin: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(10.0)),
+                                border: Border.all(
+                                  color:  Colors.black,
+                                  width: 1.0,
+                                ),
+                              ),
+                              child: Column( children: [
+                                InkWell( onTap: () {
+
+                                },
+                                  child: Container(
+                                    margin: EdgeInsets.all(10),
+                                    height: 100, width: 100,
+                                    child: Image.asset(birds.elementAt(index).image, fit: BoxFit.contain,),),
+                                ),
+                                Text(birds.elementAt(index).name, style: TextStyle( fontSize: 16, color: Colors.black),)
+                              ]),
+                            ),
                           );
 
                         }),
@@ -236,7 +253,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                       children: [
                         Container(
                           width: widthScreen,
-                          height: 70,
+                          height: 100,
                           padding: EdgeInsets.all(0),
                           margin: EdgeInsets.only(left: 20, right: 20),
                           decoration: BoxDecoration(
@@ -246,10 +263,10 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                           child: Container(
                             child: SizedBox(
                               width: widthScreen,
-                              height: 60,
+                              height: 100,
                               child: TextFormField(
-                                maxLines: null,
-                                expands: true,
+                                maxLines: 1,
+                                maxLength: 25,
                                 controller: nameController,
                                 decoration: const InputDecoration(
                                   border: OutlineInputBorder(
@@ -272,7 +289,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                           padding: EdgeInsets.all(0),
                           margin: EdgeInsets.only(left: 20, right: 20),
                           decoration: BoxDecoration(
-                              color: Colors.white60,
+                              color: Colors.white,
                               borderRadius:
                               BorderRadius.all(Radius.circular(10))),
                           child: Container(
@@ -308,7 +325,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                           padding: EdgeInsets.all(10),
                           margin: EdgeInsets.only(left: 20, right: 20),
                           decoration: BoxDecoration(
-                            color: Colors.transparent,
+                            color: Colors.white,
                             borderRadius: const BorderRadius.all(
                                 Radius.circular(10.0)),
                             border: Border.all(
@@ -326,7 +343,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                           padding: EdgeInsets.all(10),
                           margin: EdgeInsets.only(left: 20, right: 20),
                           decoration: BoxDecoration(
-                            color: Colors.transparent,
+                            color: Colors.white,
                             borderRadius: const BorderRadius.all(
                                 Radius.circular(10.0)),
                             border: Border.all(
@@ -344,7 +361,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                           height: 70,
                           margin: EdgeInsets.only(left: 20, right: 20),
                           decoration: BoxDecoration(
-                              color: Colors.white60,
+                              color: Colors.white,
                               borderRadius:
                               BorderRadius.all(Radius.circular(10))),
                           child: InkWell(
@@ -355,7 +372,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                               alignment: Alignment.centerLeft,
                               padding: EdgeInsets.only(left: 10),
                               decoration: BoxDecoration(
-                                color: Colors.transparent,
+                                color: Colors.white,
                                 borderRadius: const BorderRadius.all(
                                     Radius.circular(10.0)),
                                 border: Border.all(
@@ -412,11 +429,11 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                         SizedBox(height: 10,width: widthScreen),
                         Container(
                           width: widthScreen,
-                          height: 150,
+                          height: 120,
                           padding: EdgeInsets.all(5),
                           margin: EdgeInsets.only(left: 10, right: 10),
                           decoration: BoxDecoration(
-                              color: Colors.white60,
+                              color: Colors.white,
                               borderRadius:
                               BorderRadius.all(Radius.circular(10))),
                           child: Container(
@@ -424,8 +441,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                               width: widthScreen,
                               height: 100,
                               child: TextFormField(
-                                maxLines: null,
-                                expands: true,
+                                maxLines: 2,
                                 controller: notesController,
                                 keyboardType: TextInputType.multiline,
                                 textAlign: TextAlign.start,
@@ -471,7 +487,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                             height: 60,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: Colors.transparent,
+                              color: Colors.deepPurple,
                               borderRadius: const BorderRadius.all(
                                   Radius.circular(10.0)),
                               border: Border.all(
@@ -484,7 +500,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                               "Confirm",
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                  color: Colors.deepPurple,
+                                  color: Colors.white,
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold),
                             ),

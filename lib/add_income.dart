@@ -165,7 +165,7 @@ class _NewIncome extends State<NewIncome>
           child: Container(
             width: widthScreen,
             height: heightScreen,
-            color: Colors.white,
+            color: Utils.getScreenBackground(),
             child: SingleChildScrollView(
               child: Column(
                 children: [
@@ -224,7 +224,7 @@ class _NewIncome extends State<NewIncome>
                             padding: EdgeInsets.all(10),
                             margin: EdgeInsets.only(left: 20, right: 20),
                             decoration: BoxDecoration(
-                              color: Colors.transparent,
+                              color: Colors.white,
                               borderRadius: const BorderRadius.all(
                                   Radius.circular(10.0)),
                               border: Border.all(
@@ -243,7 +243,7 @@ class _NewIncome extends State<NewIncome>
                             padding: EdgeInsets.all(10),
                             margin: EdgeInsets.only(left: 20, right: 20),
                             decoration: BoxDecoration(
-                              color: Colors.transparent,
+                              color: Colors.white,
                               borderRadius: const BorderRadius.all(
                                   Radius.circular(10.0)),
                               border: Border.all(
@@ -267,7 +267,7 @@ class _NewIncome extends State<NewIncome>
                                   padding: EdgeInsets.all(0),
                                   margin: EdgeInsets.only(left: 20,right: 5,),
                                   decoration: BoxDecoration(
-                                      color: Colors.white60,
+                                      color: Colors.white,
                                       borderRadius:
                                       BorderRadius.all(Radius.circular(10))),
                                   child: Container(
@@ -300,7 +300,7 @@ class _NewIncome extends State<NewIncome>
                                padding: EdgeInsets.all(0),
                                margin: EdgeInsets.only( right: 20),
                                decoration: BoxDecoration(
-                                   color: Colors.white60,
+                                   color: Colors.white,
                                    borderRadius:
                                    BorderRadius.all(Radius.circular(10))),
                                child: Container(
@@ -337,7 +337,7 @@ class _NewIncome extends State<NewIncome>
                             padding: EdgeInsets.all(10),
                             margin: EdgeInsets.only(left: 20, right: 20),
                             decoration: BoxDecoration(
-                              color: Colors.transparent,
+                              color: Colors.white,
                               borderRadius: const BorderRadius.all(
                                   Radius.circular(10.0)),
                               border: Border.all(
@@ -356,7 +356,7 @@ class _NewIncome extends State<NewIncome>
                             padding: EdgeInsets.all(10),
                             margin: EdgeInsets.only(left: 20, right: 20),
                             decoration: BoxDecoration(
-                              color: Colors.transparent,
+                              color: Colors.white,
                               borderRadius: const BorderRadius.all(
                                   Radius.circular(10.0)),
                               border: Border.all(
@@ -374,7 +374,7 @@ class _NewIncome extends State<NewIncome>
                             padding: EdgeInsets.all(0),
                             margin: EdgeInsets.only(left: 20, right: 20),
                             decoration: BoxDecoration(
-                                color: Colors.white60,
+                                color: Colors.white,
                                 borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
                             child: Container(
@@ -408,7 +408,7 @@ class _NewIncome extends State<NewIncome>
                             height: 70,
                             margin: EdgeInsets.only(left: 20, right: 20),
                             decoration: BoxDecoration(
-                                color: Colors.white60,
+                                color: Colors.white,
                                 borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
                             child: InkWell(
@@ -419,7 +419,7 @@ class _NewIncome extends State<NewIncome>
                                 alignment: Alignment.centerLeft,
                                 padding: EdgeInsets.only(left: 10),
                                 decoration: BoxDecoration(
-                                  color: Colors.transparent,
+                                  color: Colors.white,
                                   borderRadius: const BorderRadius.all(
                                       Radius.circular(10.0)),
                                   border: Border.all(
@@ -436,11 +436,11 @@ class _NewIncome extends State<NewIncome>
                           SizedBox(height: 10,width: widthScreen),
                           Container(
                             width: widthScreen,
-                            height: 150,
+                            height: 120,
                             padding: EdgeInsets.all(5),
                             margin: EdgeInsets.only(left: 10, right: 10),
                             decoration: BoxDecoration(
-                                color: Colors.white60,
+                                color: Colors.white,
                                 borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
                             child: Container(
@@ -448,8 +448,8 @@ class _NewIncome extends State<NewIncome>
                                 width: widthScreen,
                                 height: 100,
                                 child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
+                                  maxLines: 2,
+                                  maxLength: 80,
                                   controller: notesController,
                                   keyboardType: TextInputType.multiline,
                                   textAlign: TextAlign.start,
@@ -488,7 +488,7 @@ class _NewIncome extends State<NewIncome>
                               height: 60,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: Colors.transparent,
+                                color: Colors.deepPurple,
                                 borderRadius: const BorderRadius.all(
                                     Radius.circular(10.0)),
                                 border: Border.all(
@@ -501,7 +501,7 @@ class _NewIncome extends State<NewIncome>
                                 "Confirm",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    color: Colors.deepPurple,
+                                    color: Colors.white,
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold),
                               ),

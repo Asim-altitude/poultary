@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:poultary/add_birds.dart';
 import 'package:poultary/add_eggs.dart';
 import 'package:poultary/inventory.dart';
+import 'package:poultary/pdf_screen.dart';
 import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/utils/utils.dart';
 
@@ -171,7 +172,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
           child:Container(
           width: widthScreen,
           height: heightScreen,
-          color: Colors.white,
+            color: Utils.getScreenBackground(),
             child:SingleChildScrollView(
             child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -211,6 +212,23 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold),
                           )),
+                      Container(
+                        alignment: Alignment.center,
+                        width: 60,
+                        height: 60,
+                        padding: EdgeInsets.all(10),
+                        child: InkWell(
+                          child: Image.asset("assets/pdf_icon.png"),
+                          onTap: () {
+                            Utils.setupInvoiceInitials(_purposeselectedValue,pdf_formatted_date_filter);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>  PDFScreen()),
+                            );
+                          },
+                        ),
+                      ),
 
                     ],
                   ),
@@ -224,14 +242,14 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                       height: 45,
                       alignment: Alignment.centerRight,
                       padding: EdgeInsets.only(left: 10),
-                      margin: EdgeInsets.only(top: 10,left: 25,right: 5),
+                      margin: EdgeInsets.only(top: 10,left: 10,right: 5),
                       decoration: BoxDecoration(
-                        color: Colors.transparent,
+                        color: Colors.white,
                         borderRadius: const BorderRadius.all(
                             Radius.circular(10.0)),
                         border: Border.all(
                           color:  Colors.deepPurple,
-                          width: 2.0,
+                          width: 1.0,
                         ),
                       ),
                       child: getDropDownList(),
@@ -246,15 +264,15 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                         child: Container(
                           height: 45,
                           decoration: BoxDecoration(
-                            color: Colors.transparent,
+                            color: Colors.white,
                             borderRadius: const BorderRadius.all(
                                 Radius.circular(10.0)),
                             border: Border.all(
                               color:  Colors.deepPurple,
-                              width: 2.0,
+                              width: 1.0,
                             ),
                           ),
-                          margin: EdgeInsets.only(right: 30,top: 15,bottom: 5),
+                          margin: EdgeInsets.only(right: 10,top: 15,bottom: 5),
                           padding: EdgeInsets.only(left: 5,right: 5),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
@@ -270,7 +288,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
               Container(
                 height: 50,
                 width: widthScreen ,
-                margin: EdgeInsets.only(left: 25,right: 25,bottom: 5),
+                margin: EdgeInsets.only(left: 10,right: 10,bottom: 5),
                 child: Row(children: [
 
                   Expanded(
@@ -284,12 +302,12 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                         height: 40,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: selected == 1 ? Colors.deepPurple : Colors.transparent,
+                          color: selected == 1 ? Colors.deepPurple : Colors.white,
                           borderRadius: BorderRadius.only(topLeft: Radius.circular(10)
                               ,bottomLeft: Radius.circular(10)),
                           border: Border.all(
                             color:  Colors.deepPurple,
-                            width: 2.0,
+                            width: 1.0,
                           ),
                         ),
                         child: Text('All', style: TextStyle(
@@ -309,12 +327,12 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                         height: 40,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: selected==2 ? Colors.deepPurple : Colors.transparent,
+                          color: selected==2 ? Colors.deepPurple : Colors.white,
 
 
                           border: Border.all(
                             color: Colors.deepPurple,
-                            width: 2.0,
+                            width: 1.0,
                           ),
                         ),
                         child: Text('Addition', style: TextStyle(
@@ -333,12 +351,12 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                         height: 40,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: selected==3 ? Colors.deepPurple : Colors.transparent,
+                          color: selected==3 ? Colors.deepPurple : Colors.white,
                           borderRadius: BorderRadius.only(topRight: Radius.circular(10)
                               ,bottomRight: Radius.circular(10)),
                           border: Border.all(
                             color:  Colors.deepPurple,
-                            width: 2.0,
+                            width: 1.0,
                           ),
                         ),
                         child: Text('Reduction', style: TextStyle(
@@ -350,7 +368,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
               ),
 
               list.length > 0 ? Container(
-                height: heightScreen - 220,
+                height: heightScreen - 290,
                 width: widthScreen,
                 child: ListView.builder(
                     itemCount: list.length,
@@ -360,40 +378,98 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                         onTap: () {
                           },
                         child: Card(
-                          margin: EdgeInsets.all(10),
+                        color: Colors.white,
+                        elevation: 2,
+                        shadowColor: Colors.grey,
+                        margin: EdgeInsets.all(5),
+                        child: Container(
+                          height: 190,
                           color: Colors.white,
-                          elevation: 3,
-                          child: Container(
-                            height: 100,
-                            child: Row( children: [
-                              Expanded(
-                                child: Container(
-                                  alignment: Alignment.topLeft,
-                                  margin: EdgeInsets.all(10),
-                                  child: Column( children: [
-                                    Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index)!.item_type, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),)),
-                                    Container(margin: EdgeInsets.all(5), child: Text(list.elementAt(index).acqusition_date.toString(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-                                   // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                  ],),
-                                ),
-                              ),
-                              Column(
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.only(right: 10),
-                                    child: Row(
-                                      children: [
-                                        Container( margin: EdgeInsets.only(right: 5), child: Text(list.elementAt(index).item_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color:list.elementAt(index).item_type.toLowerCase().contains("add") == 0?Colors.green:Colors.red),)),
-                                        Text("Birds", style: TextStyle(color: Colors.black, fontSize: 12),)
-                                      ],
+                          child:Column(
+                            children: [
+                              Align(
+                                alignment: Alignment.topRight,
+                                child:
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    GestureDetector(
+                                      onTapDown: (TapDownDetails details) {
+                                        selected_id = list.elementAt(index).f_detail_id;
+                                        showMemberMenu(details.globalPosition);
+                                      },
+                                      child: Container(
+                                        width: 30,
+                                        height: 30,
+                                        padding: EdgeInsets.all(5),
+                                        child: Image.asset('assets/options.png'),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
 
-                            ]),
-                          ),
+                                  ],
+                                ),),
+                              Row( children: [
+                                Expanded(
+                                  child: Container(
+                                    color: Colors.white,
+                                    padding: EdgeInsets.all(10),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,children: [
+                                      Row(
+                                        children: [
+                                          Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index)!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
+                                          Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index)!.item_type+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: list.elementAt(index)!.item_type=='Reduction'? Colors.red:Colors.green),)),
+                                        ],
+                                      ),
+                                      Container(
+                                        child: Column(
+                                          children: [
+                                            Container(
+                                              child: Row(
+                                                children: [
+                                                  Container( margin: EdgeInsets.only(right: 5), child: Text(list.elementAt(index).item_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color:list.elementAt(index).item_type == 'Addition'?Colors.black:Colors.black),)),
+                                                  Text("Birds", style: TextStyle(color: Colors.black, fontSize: 12),),
+                                                  Text("  On", style: TextStyle(color: Colors.deepPurple,fontWeight: FontWeight.bold, fontSize: 14),),
+                                                  Align(
+                                                      alignment: Alignment.topLeft,
+                                                      child: Container(margin: EdgeInsets.all(5), child: Text(Utils.getFormattedDate(list.elementAt(index).acqusition_date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),))),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      list.elementAt(index).item_type == 'Reduction'? Align(
+                                          alignment: Alignment.topLeft,
+                                          child: Container( child: Text(list.elementAt(index).reason.toString().toUpperCase(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.deepPurple),))) : Align(
+                                          alignment: Alignment.topLeft,
+                                          child: Container( child: Text(list.elementAt(index).acqusition_type.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.deepPurple),))),
+                                      // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+                                    ],),
+                                  ),
+                                ),
+
+                              ]),
+                              Container(
+                                margin: EdgeInsets.only(left: 10,right: 10),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.format_quote,size: 15,),
+                                    SizedBox(width: 3,),
+                                    Container(
+                                      width: widthScreen - 60,
+                                      child: Text(
+                                        list.elementAt(index).short_note.isEmpty? 'No notes taken' : list.elementAt(index).short_note
+                                      ,maxLines: 3, style: TextStyle(fontSize: 14, color: Colors.black),),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
+                          )
                         ),
+                      ),
                       );
 
                     }),
@@ -758,6 +834,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
     'Last Year','All Time'];
 
   String date_filter_name = "This Month";
+  String pdf_formatted_date_filter = "This Month";
   String str_date='',end_date='';
   void getData(String filter){
     int index = 0;
@@ -771,6 +848,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       end_date = inputFormat.format(today);
       print(str_date+" "+end_date);
 
+      pdf_formatted_date_filter = "Today ("+str_date+")";
       getFilteredTransactions(str_date,end_date);
     }
     else if (filter == 'Yesterday'){
@@ -782,6 +860,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       end_date = inputFormat.format(today);
       print(str_date+" "+end_date);
 
+      pdf_formatted_date_filter = "Yesterday ("+str_date+")";
       getFilteredTransactions(str_date,end_date);
     }
     else if (filter == 'This Month'){
@@ -796,6 +875,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       print(str_date+" "+end_date);
       getFilteredTransactions(str_date,end_date);
 
+      pdf_formatted_date_filter = "This Month ("+str_date+"-"+end_date+")";
     }else if (filter == 'Last Month'){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
@@ -809,6 +889,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       print(str_date+" "+end_date);
       getFilteredTransactions(str_date,end_date);
 
+      pdf_formatted_date_filter = "Last Month ("+str_date+"-"+end_date+")";
 
     }else if (filter == 'Last 3 months'){
       index = 4;
@@ -821,6 +902,8 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
       getFilteredTransactions(str_date,end_date);
+
+      pdf_formatted_date_filter = "Last 3 months ("+str_date+"-"+end_date+")";
     }else if (filter == 'Last 6 months'){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
@@ -832,6 +915,8 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
       getFilteredTransactions(str_date,end_date);
+
+      pdf_formatted_date_filter = "Last 6 months ("+str_date+"-"+end_date+")";
     }else if (filter == 'This Year'){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
@@ -842,6 +927,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
       getFilteredTransactions(str_date,end_date);
+      pdf_formatted_date_filter = "This Year ("+str_date+"-"+end_date+")";
     }else if (filter == 'Last Year'){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
@@ -852,12 +938,17 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
       getFilteredTransactions(str_date,end_date);
+
+      pdf_formatted_date_filter = "Last Year ("+str_date+"-"+end_date+")";
+
     }else if (filter == 'All Time'){
       index = 8;
       str_date ="";
       end_date ="";
       print(str_date+" "+end_date);
       getFilteredTransactions(str_date,end_date);
+
+      pdf_formatted_date_filter = "All Time ";
     }
 
   }
@@ -875,6 +966,95 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
     return f_id;
   }
 
+
+  //RECORD DELETEION AND PDF
+
+  int? selected_id = 0;
+  int? selected_index = 0;
+  void showMemberMenu(Offset offset) async {
+    double left = offset.dx;
+    double top = offset.dy;
+    await showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(left, top, 0, 0),
+
+      items: [
+        PopupMenuItem(
+          value: 1,
+          child: Text(
+            "Delete Item",
+            style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Colors.black),
+          ),
+        ),
+        PopupMenuItem(
+          value: 2,
+          child: Text(
+            "Genearet PDF",
+            style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Colors.black),
+          ),
+        ),
+
+      ],
+      elevation: 8.0,
+    ).then((value) {
+      if (value != null) {
+        if(value == 1){
+          showAlertDialog(context);
+        }else {
+          print(value);
+        }
+      }
+    });
+  }
+
+  showAlertDialog(BuildContext context) {
+
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: Text("Cancel"),
+      onPressed:  () {
+        Navigator.pop(context);
+      },
+    );
+    Widget continueButton = TextButton(
+      child: Text("Delete"),
+      onPressed:  () {
+        DatabaseHelper.deleteItem("Flock_Detail", selected_id!);
+        list.removeAt(selected_index!);
+        Utils.showToast("Record Deleted");
+        Navigator.pop(context);
+        setState(() {
+
+        });
+
+
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Confirmation"),
+      content: Text("Are you sure you want to delete this Record?"),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
 
 }
 

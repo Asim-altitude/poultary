@@ -11,7 +11,7 @@ class Bird{
 
   Bird(
       {
-        required this.id, required this.image
+        required this.id,required this.name, required this.image
       });
 
   Bird.fromJson(Map<String, dynamic> json) {

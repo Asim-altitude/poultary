@@ -9,19 +9,20 @@ import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/utils/utils.dart';
 
+import 'model/egg_item.dart';
 import 'model/feed_item.dart';
 import 'model/flock.dart';
 import 'model/flock_detail.dart';
 
-class BirdsReportsScreen extends StatefulWidget {
-  const BirdsReportsScreen({Key? key}) : super(key: key);
+class EggsReportsScreen extends StatefulWidget {
+  const EggsReportsScreen({Key? key}) : super(key: key);
 
   @override
-  _BirdsReportsScreen createState() => _BirdsReportsScreen();
+  _EggsReportsScreen createState() => _EggsReportsScreen();
 }
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerProviderStateMixin{
+class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProviderStateMixin{
 
   double widthScreen = 0;
   double heightScreen = 0;
@@ -47,39 +48,22 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
 
   }
 
-  List<Flock_Detail> list = [];
+  List<Eggs> eggs = [];
   List<String> flock_name = [];
 
   int egg_total = 0;
 
-  void getEggCollectionList() async {
 
-    await DatabaseHelper.instance.database;
-
-    list = await DatabaseHelper.getFlockDetails();
-
-    egg_total = list.length;
-
-    setState(() {
-
-    });
-
-  }
-
-  int total_flock_birds = 0;
-  int total_birds_added = 0;
-  int total_birds_reduced = 0;
-  int current_birds = 0;
-
-
+  int total_eggs_collected = 0;
+  int total_eggs_reduced = 0;
+  int total_eggs = 0;
 
   void clearValues(){
 
-    total_flock_birds = 0;
-    total_birds_reduced = 0;
-    total_birds_added = 0;
-    current_birds = 0;
-    list = [];
+     total_eggs_collected = 0;
+     total_eggs_reduced = 0;
+     total_eggs = 0;
+     eggs = [];
 
   }
 
@@ -89,16 +73,27 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
 
     clearValues();
 
-    total_flock_birds = await DatabaseHelper.getAllFlockBirdsCount(f_id, str_date, end_date);
+    total_eggs_collected = await DatabaseHelper.getEggCalculations(f_id, 1, str_date, end_date);
 
-    total_birds_added = await DatabaseHelper.getBirdsCalculations(f_id, "Addition", str_date, end_date);
+    total_eggs_reduced = await DatabaseHelper.getEggCalculations(f_id, 0, str_date, end_date);
 
-    total_birds_reduced = await DatabaseHelper.getBirdsCalculations(f_id, "Reduction", str_date, end_date);
+    total_eggs = total_eggs_collected - total_eggs_reduced;
 
-    total_birds_added = total_birds_added + total_flock_birds;
-    current_birds = total_birds_added - total_birds_reduced;
+    getFilteredEggsCollections(str_date, end_date);
 
-    getFilteredBirds(str_date, end_date);
+    setState(() {
+
+    });
+
+  }
+
+  void getFilteredEggsCollections(String st,String end) async {
+
+    await DatabaseHelper.instance.database;
+
+
+    eggs = await DatabaseHelper.getFilteredEggs(f_id,"All",st,end);
+
 
     setState(() {
 
@@ -160,7 +155,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                         child: Container(
                             margin: EdgeInsets.only(left: 5),
                             child: Text(
-                              "Birds Report",
+                              "Eggs Report",
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                   color: Colors.white,
@@ -236,113 +231,108 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                 color: Colors.white,
                 margin: EdgeInsets.all(10),
                 child: Container(
-                  width: widthScreen,
-                   padding: EdgeInsets.all(10),
-                   decoration: BoxDecoration(
-                     color: Colors.white,
-                     borderRadius: BorderRadius.all(Radius.circular(5)),
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.white, //(x,y)
+                      ),
+                    ],
+                  ),
+                  child: Column(children: [
+                    Align(
+                        alignment: Alignment.topLeft,
+                        child: Row(
+                          children: [
 
-                   ),
-                 child: Column(children: [
-                 Align(
-                     alignment: Alignment.topLeft,
-                     child: Row(
-                       children: [
+                            Text('Summary',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                          ],
+                        )),
+                    SizedBox(height: 20,width: widthScreen,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Total Collected',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                        Text('$total_eggs_collected',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
 
-                         Text('Summary',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
-                       ],
-                     )),
+                      ],),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Total Used',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                        Text('-$total_eggs_reduced',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.red),),
 
-                 Row(
-                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                   children: [
-                   Text('Total Added',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                   Text('$total_birds_added',style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, color: Colors.black),),
+                      ],),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Remaining Eggs',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
+                        Text('$total_eggs',style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: total_eggs>=0 ? Colors.black : Colors.red),),
 
-                 ],),
-                   Row(
-                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                     children: [
-                       Text('Total Reduced',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                       Text('-$total_birds_reduced',style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, color: Colors.red),),
-
-                     ],),
-                   Row(
-                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                     children: [
-                       Text('Current Birds',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
-                       Text('$current_birds',style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
-
-                     ],)
-             ],),),
+                      ],)
+                  ],),),
               ),
               Align(
                 alignment: Alignment.topLeft,
                 child: Container(
                     margin: EdgeInsets.all(10),
-                    child: Text('Addition/Reductions',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),)),
+                    child: Text('Collections/Reductions',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),)),
               ),
 
-              list.length > 0 ? Container(
+              eggs.length > 0 ? Container(
                 height: heightScreen - 220,
                 width: widthScreen,
                 child: ListView.builder(
-                    itemCount: list.length,
+                    itemCount: eggs.length,
                     scrollDirection: Axis.vertical,
                     physics: NeverScrollableScrollPhysics(),
                     itemBuilder: (BuildContext context, int index) {
-                      return InkWell(
-                        onTap: () {
-                        },
-                        child: Card(
+                      return Card(
+                        margin: EdgeInsets.all(5),
+                        color: Colors.white,
+                        elevation: 3,
+                        child: Container(
                           color: Colors.white,
-                          elevation: 2,
-                          shadowColor: Colors.grey,
-                          margin: EdgeInsets.all(5),
-                          child: Container(
-                            height: 130,
-                            color: Colors.white,
-                            child: Row( children: [
-                              Expanded(
-                                child: Container(
-                                  color: Colors.white,
-                                  padding: EdgeInsets.all(10),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,children: [
-                                    Row(
-                                      children: [
-                                        Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index)!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
-                                        Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index)!.item_type+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: list.elementAt(index)!.item_type=='Reduction'? Colors.red:Colors.black),)),
-                                      ],
-                                    ),
-                                    Align(
-                                        alignment: Alignment.topLeft,
-                                        child: Container(margin: EdgeInsets.all(5), child: Text(Utils.getFormattedDate(list.elementAt(index).acqusition_date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),))),
-                                    list.elementAt(index).item_type == 'Reduction'? Align(
-                                        alignment: Alignment.topLeft,
-                                        child: Container(margin: EdgeInsets.all(5), child: Text(list.elementAt(index).reason.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),))) : Align(
-                                        alignment: Alignment.topLeft,
-                                        child: Container(margin: EdgeInsets.all(5), child: Text(list.elementAt(index).acqusition_type.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),))),
-                                    // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                  ],),
-                                ),
-                              ),
-                              Column(
-                                children: [
-                                  Container(
-                                    color: Colors.white,
-                                    child: Row(
-                                      children: [
-                                        Container( margin: EdgeInsets.only(right: 5), child: Text(list.elementAt(index).item_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color:list.elementAt(index).item_type == 'Addition'?Colors.black:Colors.black),)),
-                                        Text("Birds", style: TextStyle(color: Colors.black, fontSize: 12),)
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
+                          height: 100,
+                          child: Row( children: [
+                            Expanded(
+                              child: Container(
+                                alignment: Alignment.topLeft,
+                                margin: EdgeInsets.all(10),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                  Row(
+                                    children: [
+                                      Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).f_name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
+                                      Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).isCollection == 1? '(Collected)':'(Reduced)', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: eggs.elementAt(index).isCollection == 1? Colors.green:Colors.red),)),
 
-                            ]),
-                          ),
+                                    ],
+                                  ),
+                                  Container(margin: EdgeInsets.all(5), child: Text(Utils.getFormattedDate(eggs.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+
+                                    // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+                                ],),
+                              ),
+                            ),
+                            Column(
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.only(right: 10),
+                                  child: Row(
+                                    children: [
+                                      Container( margin: EdgeInsets.only(right: 5), child: Text(eggs.elementAt(index).total_eggs.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color:eggs.elementAt(index).isCollection == 0?Colors.black:Colors.black),)),
+                                      Text("Eggs", style: TextStyle(color: Colors.black, fontSize: 12),)
+                                    ],
+                                  ),
+                                ),
+                                Container(margin: EdgeInsets.all(5), child: Text(eggs.elementAt(index).isCollection==0? eggs.elementAt(index).reduction_reason!:'', style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
+
+                              ],
+                            ),
+
+                          ]),
                         ),
                       );
 
@@ -352,7 +342,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                   margin: EdgeInsets.only(top: 50),
                   child: Column(
                     children: [
-                      Text('No Birds Added/Reduced in given period', style: TextStyle(fontSize: 18, color: Colors.black),),
+                      Text('No Eggs Collected/Reduced in given period', style: TextStyle(fontSize: 18, color: Colors.black),),
                     ],
                   ),
                 ),
@@ -362,17 +352,6 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       ),),),),),);
   }
 
-  void getFilteredBirds(String st,String end) async {
-
-    await DatabaseHelper.instance.database;
-
-    list = await DatabaseHelper.getFilteredFlockDetails(f_id,"All",st,end);
-
-    setState(() {
-
-    });
-
-  }
 
   //FILTER WORK
   List<Flock> flocks = [];

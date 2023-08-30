@@ -11,6 +11,7 @@ import 'package:path/path.dart';
 
 import '../model/bird_item.dart';
 import '../model/category_item.dart';
+import '../model/farm_item.dart';
 import '../model/feed_item.dart';
 import '../model/flock_detail.dart';
 import '../model/flock_image.dart';
@@ -108,6 +109,28 @@ class DatabaseHelper  {
     return _categoryList;
   }
 
+  static Future<List<FarmSetup>>  getFarmInfo() async {
+    var result = await _database?.rawQuery("SELECT * FROM FarmSetup");
+    List<FarmSetup> _birdList = [];
+    FarmSetup bird;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            bird = FarmSetup.fromJson(json);
+            _birdList.add(bird);
+            print(_birdList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        bird = FarmSetup.fromJson(json);
+      }
+    }
+    return _birdList;
+  }
 
   static Future<List<Bird>>  getBirds() async {
     var result = await _database?.rawQuery("SELECT * FROM Bird");
@@ -139,6 +162,8 @@ class DatabaseHelper  {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
+
+
 
   static Future<int?> insertNewFeeding(Feeding feeding) async {
 
@@ -452,7 +477,7 @@ class DatabaseHelper  {
     }
     return _transactionList;
   }
-  static Future<List<Feeding>> getAllMostUsedFeeds(int f_id, String type,String str_date, String end_date) async {
+  static Future<List<Feeding>> getAllMostUsedFeeds(int f_id,String str_date, String end_date) async {
 
     var result;
 
@@ -590,7 +615,7 @@ class DatabaseHelper  {
           "SELECT sum(amount) FROM Transactions where $type and date BETWEEN '$str_date'and '$end_date'");
     }else if(f_id != -1) {
       result = await _database?.rawQuery(
-          "SELECT sum(bird_count) FROM Transactions where $type and f_id = $f_id ");
+          "SELECT sum(amount) FROM Transactions where $type and f_id = $f_id and date BETWEEN '$str_date'and '$end_date' ");
     }
 
     Map<String,dynamic> map = result![0];
@@ -740,6 +765,40 @@ class DatabaseHelper  {
     else
         return int.parse(map.values.first.toString());
 
+  }
+
+  static Future<List<TransactionItem>>  getReportFilteredTransactions(int f_id,String type,String str_date,String end_date) async {
+
+    var result = null;
+
+    if (f_id == -1) {
+      result = await _database?.rawQuery(
+          "SELECT * FROM Transactions where date BETWEEN '$str_date' and '$end_date'");
+    } else if(f_id!= -1) {
+      result = await _database?.rawQuery(
+          "SELECT * FROM Transactions where f_id = $f_id and date BETWEEN  '$str_date' and '$end_date'");
+    }
+
+    print(result);
+    List<TransactionItem> _transactionList = [];
+    TransactionItem _transaction;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            _transaction = TransactionItem.fromJson(json);
+            _transactionList.add(_transaction);
+            print(_transactionList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        _transaction = TransactionItem.fromJson(json);
+      }
+    }
+    return _transactionList;
   }
 
 
@@ -961,12 +1020,36 @@ class DatabaseHelper  {
     return 1;
   }
 
+  static Future<int>  deleteItem(String table, int id) async {
+    if(table == 'Flock_Detail'){
+
+      var result = await _database?.rawQuery("DELETE FROM $table WHERE f_detail_id = $id");
+    }else{
+
+      var result = await _database?.rawQuery("DELETE FROM $table WHERE id = $id");
+    }
+    return 1;
+  }
+
   static Future<int>  deleteFlock (Flock flock) async {
     var result = await _database?.rawQuery("DELETE FROM Flock WHERE f_id = '${flock.f_id}\'");
     return 1;
   }
   static Future<int>  updateFlockBirds (int count, int id) async {
     var result = await _database?.rawUpdate("UPDATE Flock SET active_bird_count = '${count}' WHERE f_id = ${id}");
+    return 1;
+  }
+
+  static Future<int>  updateCurrency(String currency) async {
+    var result = await _database?.rawUpdate("UPDATE FarmSetup SET currency = '${currency}' WHERE id = 1");
+    return 1;
+  }
+
+  static Future<int>  updateFarmSetup (FarmSetup? farmSetup) async {
+    var result = await _database?.rawUpdate("UPDATE FarmSetup SET name = '${farmSetup!.name}'"
+        ",image = '${farmSetup!.image}'"
+        ",modified = 1,date = '${farmSetup!.date}',location = '${farmSetup!.location}'"
+        "  WHERE id = 1");
     return 1;
   }
 

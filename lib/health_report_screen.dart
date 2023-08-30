@@ -7,21 +7,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
+import 'package:poultary/model/med_vac_item.dart';
 import 'package:poultary/utils/utils.dart';
 
+import 'model/egg_item.dart';
 import 'model/feed_item.dart';
 import 'model/flock.dart';
 import 'model/flock_detail.dart';
 
-class BirdsReportsScreen extends StatefulWidget {
-  const BirdsReportsScreen({Key? key}) : super(key: key);
+class HealthReportScreen extends StatefulWidget {
+  const HealthReportScreen({Key? key}) : super(key: key);
 
   @override
-  _BirdsReportsScreen createState() => _BirdsReportsScreen();
+  _HealthReportScreen createState() => _HealthReportScreen();
 }
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerProviderStateMixin{
+class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerProviderStateMixin{
 
   double widthScreen = 0;
   double heightScreen = 0;
@@ -47,39 +49,21 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
 
   }
 
-  List<Flock_Detail> list = [];
+  List<Vaccination_Medication> list = [];
   List<String> flock_name = [];
 
   int egg_total = 0;
 
-  void getEggCollectionList() async {
-
-    await DatabaseHelper.instance.database;
-
-    list = await DatabaseHelper.getFlockDetails();
-
-    egg_total = list.length;
-
-    setState(() {
-
-    });
-
-  }
-
-  int total_flock_birds = 0;
-  int total_birds_added = 0;
-  int total_birds_reduced = 0;
-  int current_birds = 0;
-
-
+  int vac_count = 0;
+  int med_count = 0;
+  int total_health_count = 0;
 
   void clearValues(){
 
-    total_flock_birds = 0;
-    total_birds_reduced = 0;
-    total_birds_added = 0;
-    current_birds = 0;
-    list = [];
+     vac_count = 0;
+     med_count = 0;
+     total_health_count = 0;
+     list = [];
 
   }
 
@@ -89,16 +73,12 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
 
     clearValues();
 
-    total_flock_birds = await DatabaseHelper.getAllFlockBirdsCount(f_id, str_date, end_date);
+    vac_count = await DatabaseHelper.getHealthTotal(f_id, "Vaccination", str_date, end_date);
+    med_count = await DatabaseHelper.getHealthTotal(f_id, "Medication", str_date, end_date);
 
-    total_birds_added = await DatabaseHelper.getBirdsCalculations(f_id, "Addition", str_date, end_date);
+    total_health_count = med_count + vac_count;
 
-    total_birds_reduced = await DatabaseHelper.getBirdsCalculations(f_id, "Reduction", str_date, end_date);
-
-    total_birds_added = total_birds_added + total_flock_birds;
-    current_birds = total_birds_added - total_birds_reduced;
-
-    getFilteredBirds(str_date, end_date);
+    getFilteredTransactions(str_date, end_date);
 
     setState(() {
 
@@ -106,6 +86,18 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
 
   }
 
+  void getFilteredTransactions(String st,String end) async {
+
+    await DatabaseHelper.instance.database;
+
+
+    list = await DatabaseHelper.getFilteredMedication(f_id,"All",st,end);
+
+    setState(() {
+
+    });
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -160,7 +152,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                         child: Container(
                             margin: EdgeInsets.only(left: 5),
                             child: Text(
-                              "Birds Report",
+                              "Eggs Report",
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                   color: Colors.white,
@@ -234,53 +226,55 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                 elevation: 2,
                 shadowColor: Colors.grey,
                 color: Colors.white,
-                margin: EdgeInsets.all(10),
+                margin: EdgeInsets.all(5),
                 child: Container(
-                  width: widthScreen,
-                   padding: EdgeInsets.all(10),
-                   decoration: BoxDecoration(
-                     color: Colors.white,
-                     borderRadius: BorderRadius.all(Radius.circular(5)),
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.white, //(x,y)
+                      ),
+                    ],
+                  ),
+                  child: Column(children: [
+                    Align(
+                        alignment: Alignment.topLeft,
+                        child: Row(
+                          children: [
 
-                   ),
-                 child: Column(children: [
-                 Align(
-                     alignment: Alignment.topLeft,
-                     child: Row(
-                       children: [
+                            Text('Health Summary',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                          ],
+                        )),
+                    SizedBox(height: 20,width: widthScreen,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Vaccinations',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                        Text('$vac_count',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
 
-                         Text('Summary',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
-                       ],
-                     )),
+                      ],),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Medications',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                        Text('$med_count',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
 
-                 Row(
-                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                   children: [
-                   Text('Total Added',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                   Text('$total_birds_added',style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, color: Colors.black),),
+                      ],),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Total',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
+                        Text('$total_health_count',style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
 
-                 ],),
-                   Row(
-                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                     children: [
-                       Text('Total Reduced',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                       Text('-$total_birds_reduced',style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, color: Colors.red),),
-
-                     ],),
-                   Row(
-                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                     children: [
-                       Text('Current Birds',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
-                       Text('$current_birds',style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
-
-                     ],)
-             ],),),
+                      ],)
+                  ],),),
               ),
               Align(
                 alignment: Alignment.topLeft,
                 child: Container(
                     margin: EdgeInsets.all(10),
-                    child: Text('Addition/Reductions',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),)),
+                    child: Text('Medications/Vaccinations',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),)),
               ),
 
               list.length > 0 ? Container(
@@ -291,58 +285,64 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                     scrollDirection: Axis.vertical,
                     physics: NeverScrollableScrollPhysics(),
                     itemBuilder: (BuildContext context, int index) {
-                      return InkWell(
-                        onTap: () {
-                        },
-                        child: Card(
+                      return Card(
+                        margin: EdgeInsets.all(5),
+                        color: Colors.white,
+                        elevation: 3,
+                        child: Container(
                           color: Colors.white,
-                          elevation: 2,
-                          shadowColor: Colors.grey,
-                          margin: EdgeInsets.all(5),
-                          child: Container(
-                            height: 130,
-                            color: Colors.white,
-                            child: Row( children: [
-                              Expanded(
-                                child: Container(
-                                  color: Colors.white,
-                                  padding: EdgeInsets.all(10),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,children: [
-                                    Row(
-                                      children: [
-                                        Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index)!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
-                                        Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index)!.item_type+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: list.elementAt(index)!.item_type=='Reduction'? Colors.red:Colors.black),)),
-                                      ],
-                                    ),
-                                    Align(
-                                        alignment: Alignment.topLeft,
-                                        child: Container(margin: EdgeInsets.all(5), child: Text(Utils.getFormattedDate(list.elementAt(index).acqusition_date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),))),
-                                    list.elementAt(index).item_type == 'Reduction'? Align(
-                                        alignment: Alignment.topLeft,
-                                        child: Container(margin: EdgeInsets.all(5), child: Text(list.elementAt(index).reason.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),))) : Align(
-                                        alignment: Alignment.topLeft,
-                                        child: Container(margin: EdgeInsets.all(5), child: Text(list.elementAt(index).acqusition_type.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),))),
-                                    // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                  ],),
-                                ),
-                              ),
-                              Column(
-                                children: [
-                                  Container(
-                                    color: Colors.white,
+                          height: 180,
+                          child: Row( children: [
+                            Expanded(
+                              child: Container(
+                                alignment: Alignment.topLeft,
+                                margin: EdgeInsets.all(10),
+                                child: Column( children: [
+                                  Row(
+                                    children: [
+                                      Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).medicine!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),)),
+                                      Container(margin: EdgeInsets.all(0), child: Text("("+list.elementAt(index).f_name!+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.deepPurple),)),
+
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).type == 'Medication'?'Medicated by: ':'Vaccinated by: ', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+                                      Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).doctor_name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
+
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Container(margin: EdgeInsets.all(0), child: Text('Disease: ', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+                                      Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).disease!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
+
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).type == 'Medication'?'Medicated on: ':'Vaccinated on: ', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+                                      Container(margin: EdgeInsets.all(5), child: Text(Utils.getFormattedDate(list.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
+
+                                    ],
+                                  ),
+                                  Align(
+                                    alignment: Alignment.bottomRight,
                                     child: Row(
                                       children: [
-                                        Container( margin: EdgeInsets.only(right: 5), child: Text(list.elementAt(index).item_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color:list.elementAt(index).item_type == 'Addition'?Colors.black:Colors.black),)),
-                                        Text("Birds", style: TextStyle(color: Colors.black, fontSize: 12),)
+                                        Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).type == 'Medication'? 'Medicated birds: ':'Vaccinated birds: ', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+                                        Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).bird_count!.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
+
                                       ],
                                     ),
                                   ),
-                                ],
+                                  // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+                                ],),
                               ),
+                            ),
 
-                            ]),
-                          ),
+
+                          ]),
                         ),
                       );
 
@@ -352,27 +352,15 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                   margin: EdgeInsets.only(top: 50),
                   child: Column(
                     children: [
-                      Text('No Birds Added/Reduced in given period', style: TextStyle(fontSize: 18, color: Colors.black),),
+                      Text('No Medications/Vaccinations in given period', style: TextStyle(fontSize: 18, color: Colors.black),),
                     ],
                   ),
                 ),
               ),
-
             ]
       ),),),),),);
   }
 
-  void getFilteredBirds(String st,String end) async {
-
-    await DatabaseHelper.instance.database;
-
-    list = await DatabaseHelper.getFilteredFlockDetails(f_id,"All",st,end);
-
-    setState(() {
-
-    });
-
-  }
 
   //FILTER WORK
   List<Flock> flocks = [];
@@ -462,11 +450,9 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
         itemBuilder: (BuildContext context, int index) {
           return InkWell(
             onTap: () {
-
               setState(() {
                 date_filter_name = filterList.elementAt(index);
               });
-
               getData(date_filter_name);
               Navigator.pop(bcontext);
             },

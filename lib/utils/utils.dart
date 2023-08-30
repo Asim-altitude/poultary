@@ -8,7 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 
+import '../database/databse_helper.dart';
 import '../model/egg_item.dart';
+import '../model/farm_item.dart';
 import '../model/feed_item.dart';
 import '../model/flock.dart';
 import '../model/flock_detail.dart';
@@ -35,6 +37,8 @@ class Utils {
   static final String testIOS     = "ca-app-pub-3940256099942544~1458002511";
   static final String testAndroid = "ca-app-pub-3940256099942544~3347511713";
 
+  static String currency = "USD";
+
   //static final totalSecondsInDay = 5;
   static final totalSecondsInDay = 86400;
 
@@ -47,6 +51,25 @@ class Utils {
   static TransactionItem? selected_transaction;
   static Vaccination_Medication? selected_med;
   static String vaccine_medicine = "All Medications/Vaccinations";
+  static String INVOICE_LOGO_STR = "";
+  static String INVOICE_HEADING = "";
+  static String INVOICE_DATE = "";
+
+
+  static setupInvoiceInitials(String invoiceHeading,String date) async {
+    await DatabaseHelper.instance.database;
+
+    List<FarmSetup> farmSetup = await DatabaseHelper.getFarmInfo();
+
+    Utils.INVOICE_LOGO_STR = farmSetup
+        .elementAt(0)
+        .image;
+    Utils.INVOICE_HEADING = invoiceHeading;
+    Utils.INVOICE_DATE = date;
+
+    print(date);
+    print(invoiceHeading);
+  }
 
   static double getWidthResized(double input) {
     double tempVar = 0;
@@ -58,6 +81,11 @@ class Utils {
     }
     return tempVar;
   }
+
+  static Color getScreenBackground(){
+   return Color(0xFFF0F0F3);
+  }
+
   static Future onSelectNotification(String? payload) async {
     // showDialog(
     //   context: context,
@@ -198,6 +226,7 @@ class Utils {
     Color themeColor = Color.fromRGBO(2, 83, 179, 1);
     return themeColor;
   }
+
 
 
 

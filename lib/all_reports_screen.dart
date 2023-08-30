@@ -10,6 +10,10 @@ import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'birds_report_screen.dart';
+import 'eggs_report_screen.dart';
+import 'feed_report_screen.dart';
+import 'financial_report_screen.dart';
+import 'health_report_screen.dart';
 import 'model/feed_item.dart';
 import 'model/flock.dart';
 
@@ -53,7 +57,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
   int total_birds_added = 0;
   int total_birds_reduced = 0;
   int current_birds = 0;
-  int total_eggs = 0;
+
 
   int gross_income = 0;
   int total_expense = 0;
@@ -65,6 +69,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
   int total_eggs_collected = 0;
   int total_eggs_reduced = 0;
+  int total_eggs = 0;
 
   int total_feed_consumption = 0;
 
@@ -146,7 +151,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
          child:Container(
           width: widthScreen,
           height: heightScreen,
-          color: Color(0x00D3D3D3),
+           color: Utils.getScreenBackground(),
             child: SingleChildScrollView(
             child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -210,12 +215,12 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                       padding: EdgeInsets.only(left: 10),
                       margin: EdgeInsets.only(top: 10,left: 10,right: 5),
                       decoration: BoxDecoration(
-                        color: Colors.transparent,
+                        color: Colors.white,
                         borderRadius: const BorderRadius.all(
                             Radius.circular(5.0)),
                         border: Border.all(
                           color:  Colors.deepPurple,
-                          width: 2.0,
+                          width: 1.0,
                         ),
                       ),
                       child: getDropDownList(),
@@ -230,12 +235,12 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                         child: Container(
                           height: 45,
                           decoration: BoxDecoration(
-                            color: Colors.transparent,
+                            color: Colors.white,
                             borderRadius: const BorderRadius.all(
                                 Radius.circular(5.0)),
                             border: Border.all(
                               color:  Colors.deepPurple,
-                              width: 2.0,
+                              width: 1.0,
                             ),
                           ),
                           margin: EdgeInsets.only(right: 10,top: 15,bottom: 5),
@@ -264,7 +269,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                   elevation: 2,
                   shadowColor: Colors.grey,
                   color: Colors.white,
-                  margin: EdgeInsets.all(10),
+                  margin: EdgeInsets.all(5),
                   child: Container(
                     width: widthScreen,
                      padding: EdgeInsets.all(10),
@@ -308,205 +313,243 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                 ),
               ),
 
-              Card(
-                elevation: 2,
-                shadowColor: Colors.grey,
-                color: Colors.white,
-                margin: EdgeInsets.all(10),
-                child: Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.white, //(x,y)
-                      ),
-                    ],
-                  ),
-                  child: Column(children: [
-                    Align(
-                        alignment: Alignment.topLeft,
-                        child: Row(
-                          children: [
+              InkWell(
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const EggsReportsScreen()),
+                  );
 
-                            Text('Eggs Summary',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
-                          ],
-                        )),
-                    SizedBox(height: 20,width: widthScreen,),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Total Collected',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                        Text('$total_eggs_collected',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
-
-                      ],),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Total Used',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                        Text('-$total_eggs_reduced',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.red),),
-
-                      ],),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Remaining Eggs',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
-                        Text('$total_eggs',style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: total_eggs>=0 ? Colors.black : Colors.red),),
-
-                      ],)
-                  ],),),
-              ),
-
-              Card(
-                elevation: 2,
-                shadowColor: Colors.grey,
-                color: Colors.white,
-                margin: EdgeInsets.all(10),
-                child: Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.white, //(x,y)
-                      ),
-                    ],
-                  ),
-                  child: Column(children: [
-                    Align(
-                        alignment: Alignment.topLeft,
-                        child: Row(
-                          children: [
-
-                            Text('Feed Consumption',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
-                          ],
-                        )),
-                    SizedBox(height: 20,width: widthScreen,),
-                    Container(
-                      height: 100,
-                      width: widthScreen,
-                      child: ListView.builder(
-                          itemCount: feedings.length,
-                          scrollDirection: Axis.vertical,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(feedings.elementAt(index).feed_name!,style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                                Text(feedings.elementAt(index).quantity! +" kg",style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
-
-                              ],);
-
-                          }),
+                },
+                child: Card(
+                  elevation: 2,
+                  shadowColor: Colors.grey,
+                  color: Colors.white,
+                  margin: EdgeInsets.all(5),
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white, //(x,y)
+                        ),
+                      ],
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Total Consumption',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
-                        Text(total_feed_consumption.toString() +" kg",style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
+                    child: Column(children: [
+                      Align(
+                          alignment: Alignment.topLeft,
+                          child: Row(
+                            children: [
 
-                      ],)
-                  ],),),
+                              Text('Eggs Summary',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                            ],
+                          )),
+                      SizedBox(height: 20,width: widthScreen,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Total Collected',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                          Text('$total_eggs_collected',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
+
+                        ],),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Total Used',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                          Text('-$total_eggs_reduced',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.red),),
+
+                        ],),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Remaining Eggs',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
+                          Text('$total_eggs',style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: total_eggs>=0 ? Colors.black : Colors.red),),
+
+                        ],)
+                    ],),),
+                ),
               ),
 
-              Card(
-                elevation: 2,
-                shadowColor: Colors.grey,
-                color: Colors.white,
-                margin: EdgeInsets.all(10),
-                child: Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.white, //(x,y)
+              InkWell(
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const FeedReportsScreen()),
+                  );
+                },
+                child: Card(
+                  elevation: 2,
+                  shadowColor: Colors.grey,
+                  color: Colors.white,
+                  margin: EdgeInsets.all(5),
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white, //(x,y)
+                        ),
+                      ],
+                    ),
+                    child: Column(children: [
+                      Align(
+                          alignment: Alignment.topLeft,
+                          child: Row(
+                            children: [
+
+                              Text('Feed Consumption',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                            ],
+                          )),
+                      SizedBox(height: 20,width: widthScreen,),
+                      Container(
+                        height: 100,
+                        width: widthScreen,
+                        child: ListView.builder(
+                            itemCount: feedings.length,
+                            scrollDirection: Axis.vertical,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemBuilder: (BuildContext context, int index) {
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(feedings.elementAt(index).feed_name!,style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                                  Text(feedings.elementAt(index).quantity! +" kg",style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
+
+                                ],);
+
+                            }),
                       ),
-                    ],
-                  ),
-                  child: Column(children: [
-                    Align(
-                        alignment: Alignment.topLeft,
-                        child: Row(
-                          children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Total Consumption',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
+                          Text(total_feed_consumption.toString() +" kg",style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
 
-                            Text('Income/Expense',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
-                          ],
-                        )),
-                    SizedBox(height: 20,width: widthScreen,),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Gross Income',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                        Text('$gross_income',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
-
-                      ],),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Total Expense',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                        Text('-$total_expense',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.red),),
-
-                      ],),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Net Income',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
-                        Text('$net_income',style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
-
-                      ],)
-                  ],),),
+                        ],)
+                    ],),),
+                ),
               ),
 
-               Card(
-                elevation: 2,
-                shadowColor: Colors.grey,
-                color: Colors.white,
-                margin: EdgeInsets.all(10),
-                child: Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.white, //(x,y)
-                      ),
-                    ],
-                  ),
-                  child: Column(children: [
-                    Align(
-                        alignment: Alignment.topLeft,
-                        child: Row(
-                          children: [
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const FinanceReportsScreen()),
+                  );
+                },
+                child: Card(
+                  elevation: 2,
+                  shadowColor: Colors.grey,
+                  color: Colors.white,
+                  margin: EdgeInsets.all(5),
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white, //(x,y)
+                        ),
+                      ],
+                    ),
+                    child: Column(children: [
+                      Align(
+                          alignment: Alignment.topLeft,
+                          child: Row(
+                            children: [
 
-                            Text('Health Summary',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
-                          ],
-                        )),
-                    SizedBox(height: 20,width: widthScreen,),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Vaccinations',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                        Text('$vac_count',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
+                              Text('Income/Expense',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                            ],
+                          )),
+                      SizedBox(height: 20,width: widthScreen,),
 
-                      ],),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Medications',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                        Text('$med_count',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Gross Income',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                          Text('$gross_income'+ Utils.currency,style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
 
-                      ],),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Total',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
-                        Text('$total_health_count',style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
+                        ],),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Total Expense',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                          Text('-$total_expense'+ Utils.currency,style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.red),),
 
-                      ],)
-                  ],),),
+                        ],),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Net Income',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
+                          Text('$net_income'+ Utils.currency,style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
+
+                        ],)
+                    ],),),
+                ),
               ),
+
+               InkWell(
+                 onTap: (){
+                   Navigator.push(
+                     context,
+                     MaterialPageRoute(
+                         builder: (context) => const HealthReportScreen()),
+                   );
+                 },
+                 child: Card(
+                  elevation: 2,
+                  shadowColor: Colors.grey,
+                  color: Colors.white,
+                  margin: EdgeInsets.all(5),
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white, //(x,y)
+                        ),
+                      ],
+                    ),
+                    child: Column(children: [
+                      Align(
+                          alignment: Alignment.topLeft,
+                          child: Row(
+                            children: [
+
+                              Text('Health Summary',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                            ],
+                          )),
+                      SizedBox(height: 20,width: widthScreen,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Vaccinations',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                          Text('$vac_count',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
+
+                        ],),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Medications',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                          Text('$med_count',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
+
+                        ],),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Total',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
+                          Text('$total_health_count',style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
+
+                        ],)
+                    ],),),
+              ),
+               ),
 
              /* Container( margin: EdgeInsets.all(20),
                 padding: EdgeInsets.all(10),

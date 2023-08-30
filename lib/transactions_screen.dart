@@ -187,7 +187,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
           child:Container(
           width: widthScreen,
           height: heightScreen,
-          color: Colors.white,
+            color: Utils.getScreenBackground(),
             child:SingleChildScrollView(
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -240,14 +240,14 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                       height: 45,
                       alignment: Alignment.centerRight,
                       padding: EdgeInsets.only(left: 10),
-                      margin: EdgeInsets.only(top: 10,left: 25,right: 5),
+                      margin: EdgeInsets.only(top: 10,left: 10,right: 5),
                       decoration: BoxDecoration(
-                        color: Colors.transparent,
+                        color: Colors.white,
                         borderRadius: const BorderRadius.all(
                             Radius.circular(10.0)),
                         border: Border.all(
                           color:  Colors.deepPurple,
-                          width: 2.0,
+                          width: 1.0,
                         ),
                       ),
                       child: getDropDownList(),
@@ -262,15 +262,15 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                         child: Container(
                           height: 45,
                           decoration: BoxDecoration(
-                            color: Colors.transparent,
+                            color: Colors.white,
                             borderRadius: const BorderRadius.all(
                                 Radius.circular(10.0)),
                             border: Border.all(
                               color:  Colors.deepPurple,
-                              width: 2.0,
+                              width: 1.0,
                             ),
                           ),
-                          margin: EdgeInsets.only(right: 30,top: 15,bottom: 5),
+                          margin: EdgeInsets.only(right: 10,top: 15,bottom: 5),
                           padding: EdgeInsets.only(left: 5,right: 5),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
@@ -286,7 +286,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
               Container(
                 height: 50,
                 width: widthScreen ,
-                margin: EdgeInsets.only(left: 25,right: 25,bottom: 5),
+                margin: EdgeInsets.only(left: 10,right: 10,bottom: 5),
                 child: Row(children: [
 
                   Expanded(
@@ -300,12 +300,12 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                   height: 40,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: selected == 1 ? Colors.deepPurple : Colors.transparent,
+                    color: selected == 1 ? Colors.deepPurple : Colors.white,
                     borderRadius: BorderRadius.only(topLeft: Radius.circular(10)
                     ,bottomLeft: Radius.circular(10)),
                     border: Border.all(
                       color:  Colors.deepPurple,
-                      width: 2.0,
+                      width: 1.0,
                     ),
                   ),
                   child: Text('All', style: TextStyle(
@@ -325,12 +325,11 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                         height: 40,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: selected==2 ? Colors.deepPurple : Colors.transparent,
-
+                          color: selected==2 ? Colors.deepPurple : Colors.white,
 
                           border: Border.all(
                             color: Colors.deepPurple,
-                            width: 2.0,
+                            width: 1.0,
                           ),
                         ),
                         child: Text('Income', style: TextStyle(
@@ -350,12 +349,12 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                         height: 40,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: selected==3 ? Colors.deepPurple : Colors.transparent,
+                          color: selected==3 ? Colors.deepPurple : Colors.white,
                           borderRadius: BorderRadius.only(topRight: Radius.circular(10)
                               ,bottomRight: Radius.circular(10)),
                           border: Border.all(
                             color:  Colors.deepPurple,
-                            width: 2.0,
+                            width: 1.0,
                           ),
                         ),
                         child: Text('Expense', style: TextStyle(
@@ -374,57 +373,102 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                     itemCount: transactionList.length,
                     scrollDirection: Axis.vertical,
                     itemBuilder: (BuildContext context, int index) {
-                      return InkWell(
-                        onTap: () {
-                          Utils.selected_transaction = transactionList.elementAt(index);
-                          Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const SingleFlockScreen()),
-                        );},
-                        child: Card(
-                          margin: EdgeInsets.all(10),
+                      return Card(
+                        margin: EdgeInsets.all(5),
+                        color: Colors.white,
+                        elevation: 2,
+
+                        child: Container(
                           color: Colors.white,
-                          elevation: 2,
-
-                          child: Container(
-                            height: 130,
-                            child: Column(
-                              children: [
-                                Container(child: Text(style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black), transactionList.elementAt(index).type.toLowerCase().contains("income")? (transactionList.elementAt(index).sale_item +"( "+transactionList.elementAt(index).f_name+" )")  : (transactionList.elementAt(index).expense_item) + "( "+transactionList.elementAt(index).f_name+" )"),),
-                                Row( children: [
-                                  Expanded(
-                                    child: Container(
-                                      margin: EdgeInsets.all(10),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            margin: EdgeInsets.only(right: 10),
-                                            child: Row(
-                                              children: [
-                                                Container(  child: Text(transactionList.elementAt(index).amount.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),)),
-                                                Text("USD", style: TextStyle(color: Colors.black, fontSize: 14),)
-                                              ],
-                                            ),
-                                          ),
-
-                                          Container(child: Text(Utils.getFormattedDate(transactionList.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-                                          // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                        ],),
-                                    ),
-                                  ),
-                                  Column(
+                          padding: EdgeInsets.all(10),
+                          height: 210,
+                          child: Column(
+                            children: [
+                              Align(
+                                  alignment: Alignment.topRight,
+                                  child:
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
-                                      Container(margin: EdgeInsets.all(5), child: Text(transactionList.elementAt(index).type!, style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color:transactionList.elementAt(index).type!.toLowerCase().contains("income")? Colors.green : Colors.red),)),
-                                    ],
-                                  ),
+                                       GestureDetector(
+                                         onTapDown: (TapDownDetails details) {
+                                           selected_id = transactionList.elementAt(index).id;
+                                           showMemberMenu(details.globalPosition);
+                                         },
+                                         child: Container(
+                                          width: 30,
+                                          height: 30,
+                                          padding: EdgeInsets.all(5),
+                                          child: Image.asset('assets/options.png'),
+                                      ),
+                                       ),
 
-                                ]),
-                              ],
-                            ) ,
-                          ),
+                                    ],
+                                  ),),
+                              Container(child: Text(style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple), transactionList.elementAt(index).type == 'Income'? transactionList.elementAt(index).sale_item : transactionList.elementAt(index).expense_item),),
+                              Row(
+                                children: [
+                                  Container(child: Text(style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black), transactionList.elementAt(index).f_name,)),
+                                  Container(child: Text(style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black), "("+transactionList.elementAt(index).how_many+" Items)",)),
+
+                                ],
+                              ),
+
+                              Row( children: [
+                                Expanded(
+                                  child: Container(
+                                    margin: EdgeInsets.only(top: 5),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Container(  child: Text(transactionList.elementAt(index).type!.toLowerCase() == 'income'? 'Sold To: ':'Paid To: ', style: TextStyle(fontSize: 14, color: Colors.black),)),
+                                            Text(transactionList.elementAt(index).sold_purchased_from, style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black, fontSize: 14),),
+                                            Text(" On ", style: TextStyle(color: Colors.black, fontSize: 14),),
+                                            Container(child: Text(Utils.getFormattedDate(transactionList.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
+
+                                          ],
+                                        ),
+
+                                        Container(
+                                          margin: EdgeInsets.only(right: 10,top: 5),
+                                          child: Row(
+                                            children: [
+                                              Container(  child: Text(transactionList.elementAt(index).type!.toUpperCase()+": ", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: transactionList.elementAt(index).type!.toLowerCase() == 'income'? Colors.green: Colors.red),)),
+
+                                              Container( margin: EdgeInsets.only(left: 5),  child: Text(transactionList.elementAt(index).amount.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
+                                              Text(Utils.currency, style: TextStyle(color: Colors.black, fontSize: 14),),
+                                              Text(" ("+transactionList.elementAt(index).payment_status+")", style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black, fontSize: 14),)
+
+                                            ],
+                                          ),
+                                        ),
+
+                                        Container(
+                                          margin: EdgeInsets.only(top: 5),
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.format_quote,size: 15,),
+                                              SizedBox(width: 3,),
+                                              Container(
+                                                width: widthScreen-70,
+                                                child: Text(
+                                                  transactionList.elementAt(index).short_note!.isEmpty ? 'No notes taken' : transactionList.elementAt(index).short_note!
+                                                  ,maxLines: 3, style: TextStyle(fontSize: 14, color: Colors.black),),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                        // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+                                      ],),
+                                  ),
+                                ),
+
+                              ]),
+                            ],
+                          ) ,
                         ),
                       );
 
@@ -894,6 +938,93 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
       getFilteredTransactions(str_date,end_date);
     }
 
+  }
+
+  int? selected_id = 0;
+  int? selected_index = 0;
+  void showMemberMenu(Offset offset) async {
+    double left = offset.dx;
+    double top = offset.dy;
+    await showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(left, top, 0, 0),
+
+      items: [
+        PopupMenuItem(
+          value: 1,
+          child: Text(
+            "Delete Item",
+            style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Colors.black),
+          ),
+        ),
+        PopupMenuItem(
+          value: 2,
+          child: Text(
+            "Genearet PDF",
+            style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Colors.black),
+          ),
+        ),
+
+      ],
+      elevation: 8.0,
+    ).then((value) {
+      if (value != null) {
+        if(value == 1){
+          showAlertDialog(context);
+        }else {
+          print(value);
+        }
+      }
+    });
+  }
+
+  showAlertDialog(BuildContext context) {
+
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: Text("Cancel"),
+      onPressed:  () {
+        Navigator.pop(context);
+      },
+    );
+    Widget continueButton = TextButton(
+      child: Text("Delete"),
+      onPressed:  () {
+        DatabaseHelper.deleteItem("Transactions", selected_id!);
+        transactionList.removeAt(selected_index!);
+        Utils.showToast("Record Deleted");
+        Navigator.pop(context);
+        setState(() {
+
+        });
+
+
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Confirmation"),
+      content: Text("Are you sure you want to delete this Record?"),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
 }

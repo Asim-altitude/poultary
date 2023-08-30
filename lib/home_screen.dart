@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:poultary/category_screen.dart';
 import 'package:poultary/dashboard.dart';
 import 'package:poultary/inventory.dart';
+import 'package:poultary/settings_screen.dart';
 import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/transactions_screen.dart';
 import 'package:poultary/utils/utils.dart';
@@ -16,6 +17,7 @@ import 'add_flocks.dart';
 import 'all_reports_screen.dart';
 import 'database/databse_helper.dart';
 import 'egg_collection.dart';
+import 'model/farm_item.dart';
 import 'model/flock.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -44,8 +46,8 @@ class _HomeScreen extends State<HomeScreen> {
     _piData.add(_PieData("Income", 2000,'2000'));
     _piData.add(_PieData("Expense", 500,'500'));
 
-
     getList();
+    getCurrency();
   }
 
 
@@ -91,7 +93,7 @@ class _HomeScreen extends State<HomeScreen> {
       child: ReportsScreen(),
     ),
     Center(
-      child:EggCollectionScreen(),
+      child: SettingsScreen(),
     ),
 
   ];
@@ -112,9 +114,9 @@ class _HomeScreen extends State<HomeScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedTab,
         onTap: (index) => _changeTab(index),
-        selectedItemColor: Colors.deepPurple,
-        unselectedItemColor: Colors.black,
-        backgroundColor: Colors.white,
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.grey,
+        backgroundColor: Colors.deepPurple,
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Dashboard"),
           BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: "Reports"),
@@ -510,6 +512,22 @@ class _HomeScreen extends State<HomeScreen> {
                   ]
       ),),
         ),),),),);*/
+  }
+
+  void getCurrency() async{
+    try {
+      await DatabaseHelper.instance.database;
+
+      List<FarmSetup> farmSetup = await DatabaseHelper.getFarmInfo();
+      Utils.currency = farmSetup
+          .elementAt(0)
+          .currency;
+
+    }
+    catch(ex){
+      print(ex);
+    }
+
   }
 
 

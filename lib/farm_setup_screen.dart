@@ -3,75 +3,74 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:poultary/model/feed_item.dart';
-import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
 import 'model/bird_item.dart';
 import 'model/egg_item.dart';
+import 'model/farm_item.dart';
 import 'model/flock.dart';
 import 'model/flock_image.dart';
 
-class NewFeeding extends StatefulWidget {
-  const NewFeeding({Key? key}) : super(key: key);
+class FarmSetupScreen extends StatefulWidget {
+  const FarmSetupScreen({Key? key}) : super(key: key);
 
   @override
-  _NewFeeding createState() => _NewFeeding();
+  _FarmSetupScreen createState() => _FarmSetupScreen();
 }
 
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _NewFeeding extends State<NewFeeding>
+class _FarmSetupScreen extends State<FarmSetupScreen>
     with SingleTickerProviderStateMixin {
   double widthScreen = 0;
   double heightScreen = 0;
 
+
+
   @override
   void dispose() {
     super.dispose();
+
   }
 
   String _purposeselectedValue = "";
-  String _feedselectedValue = "";
-  String _acqusitionselectedValue = "";
+  String _reductionReasonValue = "";
 
-  List<String> _purposeList = [];
-  List<String> _feedList = [];
-  List<SubItem> _subItemList = [];
 
   int chosen_index = 0;
-
-
 
   @override
   void initState() {
     super.initState();
-    getList();
-    getFeedList();
+
+    getInfo();
   }
 
-  List<Flock> flocks = [];
-  void getList() async {
+  FarmSetup? farmSetup = null;
+  void getInfo() async {
 
     await DatabaseHelper.instance.database;
+    List<FarmSetup> list = await DatabaseHelper.getFarmInfo();
+    farmSetup = list.elementAt(0);
 
-    flocks = await DatabaseHelper.getFlocks();
-
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0));
-
-    for(int i=0;i<flocks.length;i++){
-      _purposeList.add(flocks.elementAt(i).f_name);
+    if(farmSetup!.image.toLowerCase().contains("asset")){
+      modified = 0;
+    }else{
+      modified = 1;
     }
+    locationController.text = farmSetup!.location;
+    nameController.text = farmSetup!.name;
+    date = farmSetup!.date;
 
-    _purposeselectedValue = _purposeList[0];
-
+    selectedCurrency = farmSetup!.currency;
 
     setState(() {
 
@@ -79,40 +78,13 @@ class _NewFeeding extends State<NewFeeding>
 
   }
 
-  void getFeedList() async {
-    await DatabaseHelper.instance.database;
+  int modified = 0;
 
-    _subItemList = await DatabaseHelper.getSubCategoryList(3);
+  String selectedCurrency = "USD";
+  String date = "Date Created";
+  final locationController = TextEditingController();
+  final nameController = TextEditingController();
 
-    _subItemList.insert(0,SubItem(c_id: 3,id: -1,name: 'Choose Feed'));
-
-    for(int i=0;i<_subItemList.length;i++){
-      _feedList.add(_subItemList.elementAt(i).name!);
-    }
-
-    _feedselectedValue = _feedList[0];
-
-    print(_feedselectedValue);
-
-
-    setState(() {
-
-    });
-
-  }
-
-  Flock? currentFlock = null;
-
-  bool _validate = false;
-
-  String date = "Choose Date";
-  final quantityController = TextEditingController();
-  final notesController = TextEditingController();
-
-  bool imagesAdded = false;
-
-  int good_eggs = 0;
-  int bad_eggs = 0;
 
 
   @override
@@ -133,7 +105,7 @@ class _NewFeeding extends State<NewFeeding>
           child: Container(
             width: widthScreen,
             height: heightScreen,
-              color: Utils.getScreenBackground(),
+            color: Utils.getScreenBackground(),
             child: SingleChildScrollView(
               child: Column(
                 children: [
@@ -164,7 +136,7 @@ class _NewFeeding extends State<NewFeeding>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                "New Feeding",
+                                 'Farm Setup',
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -183,68 +155,53 @@ class _NewFeeding extends State<NewFeeding>
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
+
+                          InkWell(
+                            onTap: () {
+                              selectImage();
+                            },
+                            child: Container(
+                              margin: EdgeInsets.all(10),
+                              child: Stack(
+                                children: [
+                                 Container(
+                                   width: widthScreen,
+                                   height: 160,
+                                   child: modified==0? Image.asset('assets/farm.jpg', fit: BoxFit.contain,)
+                                       : Image.memory(Base64Decoder().convert(farmSetup!.image), fit: BoxFit.contain,),
+                                 ),
+                                 Align(
+                                     alignment: Alignment.bottomRight,
+                                     child: Icon(Icons.edit, color: Colors.deepPurple,)), 
+                                ],
                               ),
                             ),
-                            child: getDropDownList(),
                           ),
 
                           SizedBox(height: 10,width: widthScreen),
                           Container(
                             width: widthScreen,
-                            height: 70,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.only(left: 20, right: 20),
+                            height: 80,
+                            padding: EdgeInsets.all(5),
+                            margin: EdgeInsets.only(left: 10, right: 10),
                             decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
-                            ),
-                            child: getFeedTypeList(),
-                          ),
-
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            padding: EdgeInsets.all(0),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: Colors.white60,
                                 borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
                             child: Container(
                               child: SizedBox(
                                 width: widthScreen,
-                                height: 60,
+                                height: 70,
                                 child: TextFormField(
                                   maxLines: null,
                                   expands: true,
-                                  controller: quantityController,
-                                  keyboardType: TextInputType.number,
+                                  controller: nameController,
+                                  textAlign: TextAlign.start,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Feed Quantity (kgs)',
+                                    hintText: 'Farm Name',
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -255,6 +212,79 @@ class _NewFeeding extends State<NewFeeding>
                             ),
                           ),
 
+                          SizedBox(height: 10,width: widthScreen),
+                          Container(
+                            width: widthScreen,
+                            height: 80,
+                            padding: EdgeInsets.all(5),
+                            margin: EdgeInsets.only(left: 10, right: 10),
+                            decoration: BoxDecoration(
+                                color: Colors.white60,
+                                borderRadius:
+                                BorderRadius.all(Radius.circular(10))),
+                            child: Container(
+                              child: SizedBox(
+                                width: widthScreen,
+                                height: 70,
+                                child: TextFormField(
+                                  maxLines: null,
+                                  expands: true,
+                                  controller: locationController,
+                                  textAlign: TextAlign.start,
+                                  decoration: const InputDecoration(
+                                    border: OutlineInputBorder(
+                                        borderRadius:
+                                        BorderRadius.all(Radius.circular(10))),
+                                    hintText: 'Location name (Country/City etc)',
+                                    hintStyle: TextStyle(
+                                        color: Colors.grey, fontSize: 16),
+                                    labelStyle: TextStyle(
+                                        color: Colors.black, fontSize: 16),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(height: 10,width: widthScreen),
+                          InkWell(
+                            onTap: () {
+                              chooseCurrency();
+                            },
+                            child: Container(
+                              width: widthScreen,
+                              height: 80,
+                              padding: EdgeInsets.all(5),
+                              margin: EdgeInsets.only(left: 10, right: 10),
+                              decoration: BoxDecoration(
+                                  color: Colors.white60,
+                                  borderRadius:
+                                  BorderRadius.all(Radius.circular(10))),
+                              child: Container(
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(10.0)),
+                                  border: Border.all(
+                                    color:  Colors.grey,
+                                    width: 2.0,
+                                  ),
+                                ),
+                                child: SizedBox(
+                                  height: 70,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text("Currency", style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal),),
+                                      Text(selectedCurrency, style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+
+                                    ],
+                                  )
+                                ),
+                              ),
+                            ),
+                          ),
 
                           SizedBox(height: 10,width: widthScreen),
                           Container(
@@ -262,7 +292,7 @@ class _NewFeeding extends State<NewFeeding>
                             height: 70,
                             margin: EdgeInsets.only(left: 20, right: 20),
                             decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: Colors.white60,
                                 borderRadius:
                                 BorderRadius.all(Radius.circular(10))),
                             child: InkWell(
@@ -287,40 +317,7 @@ class _NewFeeding extends State<NewFeeding>
                             ),
                           ),
 
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 120,
-                            padding: EdgeInsets.all(5),
-                            margin: EdgeInsets.only(left: 10, right: 10),
-                            decoration: BoxDecoration(
-                                color: Colors.white60,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
-                                width: widthScreen,
-                                height: 100,
-                                child: TextFormField(
-                                  maxLines: 2,
-                                  maxLength: 80,
-                                  controller: notesController,
-                                  keyboardType: TextInputType.multiline,
-                                  textAlign: TextAlign.start,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Write short note',
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
+
                           SizedBox(height: 10,width: widthScreen),
                           InkWell(
                             onTap: () async {
@@ -329,8 +326,17 @@ class _NewFeeding extends State<NewFeeding>
                               if(validate){
                                 print("Everything Okay");
                                 await DatabaseHelper.instance.database;
-                                int? id = await DatabaseHelper.insertNewFeeding(Feeding(f_id: getFlockID(), short_note: notesController.text, date: date, feed_name: _feedselectedValue, quantity: quantityController.text, f_name: _purposeselectedValue,));
-                                Utils.showToast("New Feeding Added");
+                                if(!locationController.text.isEmpty){
+                                  farmSetup!.location = locationController.text;
+                                }
+                                if(!nameController.text.isEmpty){
+                                  farmSetup!.name = nameController.text;
+                                }
+                                farmSetup!.date = date;
+                                farmSetup!.modified = 1;
+                                DatabaseHelper.updateFarmSetup(farmSetup);
+
+                                Utils.showToast('Farm Updated');
                                 Navigator.pop(context);
 
                               }else{
@@ -352,7 +358,7 @@ class _NewFeeding extends State<NewFeeding>
                               ),
                               margin: EdgeInsets.all( 20),
                               child: Text(
-                                "Confirm",
+                                "Save",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -369,75 +375,6 @@ class _NewFeeding extends State<NewFeeding>
             ),
           ),
         ),
-      ),
-    );
-  }
-
-
-  Widget getDropDownList() {
-    return Container(
-      width: widthScreen,
-      child: DropdownButtonFormField<String>(
-        decoration: InputDecoration.collapsed(hintText: ''),
-        isDense: true,
-        value: _purposeselectedValue,
-        elevation: 16,
-        isExpanded: true,
-        onChanged: (String? newValue) {
-          setState(() {
-            _purposeselectedValue = newValue!;
-
-          });
-        },
-        items: _purposeList.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              style: new TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.black,
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget getFeedTypeList() {
-    return Container(
-      width: widthScreen,
-      child: DropdownButtonFormField<String>(
-        decoration: InputDecoration.collapsed(hintText: ''),
-        isDense: true,
-        value: _feedselectedValue,
-        elevation: 16,
-        isExpanded: true,
-        onChanged: (String? newValue) {
-          setState(() {
-            _feedselectedValue = newValue!;
-
-            print("Selected Feed $_feedselectedValue");
-
-          });
-        },
-        items: _feedList.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              style: new TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.normal,
-                color: Colors.black,
-              ),
-            ),
-          );
-        }).toList(),
       ),
     );
   }
@@ -474,47 +411,47 @@ class _NewFeeding extends State<NewFeeding>
       print("Select Date");
     }
 
-    if(quantityController.text.length == 0){
+    if(nameController.text.length == 0){
       valid = false;
-      print("Add quantity added");
+      print("No name");
     }
-    
-    if (getFeedID() == -1){
-      valid = false;
-      print("Add feed type");
-    }
+
+
 
     return valid;
 
   }
 
 
-  int getFlockID() {
+  final ImagePicker imagePicker = ImagePicker();
+  List<XFile>? imageFileList = [];
 
-    int selected_id = -1;
-    for(int i=0;i<flocks.length;i++){
-      if(_purposeselectedValue == flocks.elementAt(i).f_name){
-        selected_id = flocks.elementAt(i).f_id;
-        break;
-      }
-    }
-
-    return selected_id;
+  void selectImage() async {
+    final XFile? image = await
+    imagePicker.pickImage(source: ImageSource.gallery);
+    final bytes = File(image!.path).readAsBytesSync();
+    String base64Image =  base64Encode(bytes);
+    farmSetup!.image = base64Image;
+    modified = 1;
+    setState((){});
   }
 
-  int getFeedID() {
+  void chooseCurrency() {
+    showCurrencyPicker(
+      context: context,
+      showFlag: true,
+      showCurrencyName: true,
+      showCurrencyCode: true,
+      onSelect: (Currency currency) {
+        selectedCurrency = currency.symbol;
+        DatabaseHelper.updateCurrency(selectedCurrency);
+        Utils.currency = selectedCurrency;
+        setState(() {
 
-    int selected_id = -1;
-    for(int i=0;i<_subItemList.length;i++){
-      if(_feedselectedValue.toLowerCase() == _subItemList.elementAt(i).name!.toLowerCase()){
-        selected_id = _subItemList.elementAt(i).id!;
-        break;
-      }
-    }
-
-    print("selected feed id $selected_id");
-
-    return selected_id;
+        });
+        Utils.showToast("Currency Updated");
+      },
+    );
   }
 
 }

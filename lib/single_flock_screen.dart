@@ -95,7 +95,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
           child:Container(
           width: widthScreen,
           height: heightScreen,
-          color: Colors.white,
+            color: Colors.white,
             child: SingleChildScrollView(
 
             child: Column(
@@ -144,6 +144,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
               Container(
                 height: 170,
+                color: Colors.white,
                 child: Row( children: [
                   Expanded(
                     child: Container(
@@ -410,7 +411,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                 ),
                                 Expanded(
                                   child: Text(
-                                    "Health",
+                                    "Birds Health",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontSize: 16,
@@ -444,7 +445,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                               BorderRadius.all(Radius.circular(10))),
                           child: Container(
                             width: 40,height: 40,
-                            margin: EdgeInsets.only(left: 30),
+                            margin: EdgeInsets.only(left: 10),
                             child: Row(
                               children: [
                                 Image(image: AssetImage(

@@ -11,17 +11,19 @@ class Vaccination_Medication{
   String medicine = "";
   String date = "";
   String type = "";
+  String f_name = "";
   String short_note = "";
   String doctor_name = "";
   int bird_count = 0;
 
 
-  Vaccination_Medication({this.id,required this.f_id,required this.disease,required this.medicine,
+  Vaccination_Medication({this.id,required this.f_id,required this.f_name,required this.disease,required this.medicine,
     required this.date,required this.type,required this.short_note,required this.bird_count,required this.doctor_name});
 
   Vaccination_Medication.fromJson(Map<String, dynamic> json) {
     id = json["id"];
     f_id = json["f_id"];
+    f_name = json["f_name"];
     disease = json['disease'].toString();
     medicine = json['medicine'].toString();
     date = json['date'].toString();
@@ -42,10 +44,11 @@ class Vaccination_Medication{
     data['short_note'] = this.short_note;
     data['bird_count'] = this.bird_count;
     data['doctor_name'] = this.doctor_name;
-
+    data['f_name'] = this.f_name;
 
     return data;
   }
+
 }
 
 

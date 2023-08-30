@@ -113,17 +113,13 @@ class _DashboardScreen extends State<DashboardScreen> {
 
       body:  SafeArea(
         top: false,
-
           child:Container(
           width: widthScreen,
           height: heightScreen,
-          color: Colors.white,
-            child:Center(
-
-            child: SingleChildScrollView(
+          color: Utils.getScreenBackground(),
+            child:SingleChildScrollView(
             child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children:  [
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
@@ -139,19 +135,19 @@ class _DashboardScreen extends State<DashboardScreen> {
                   ),
                   child: Row(
                     children: [
-                     /* Container(
+                      Container(
                         alignment: Alignment.center,
                         width: 60,
                         height: 60,
-                        *//*child: Container(
-                            width: 30,
-                            height: 30,
+                        child: Container(
+                            width: 40,
+                            height: 40,
                             child: Icon(Icons.home, color: Colors.white,),
 
-                        )*//*
-                      ),*/
+                        )
+                      ),
                       Container(
-                          margin: EdgeInsets.only(left: 10),
+
                           child: Expanded(
                             child: Text(
                               "Poultary Dashboard",
@@ -192,21 +188,21 @@ class _DashboardScreen extends State<DashboardScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('Gross Income',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                      Text('$gross_income',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
+                      Text('$gross_income'+ Utils.currency,style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
 
                     ],),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('Total Expense',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                      Text('-$total_expense',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.red),),
+                      Text('-$total_expense'+ Utils.currency,style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.red),),
 
                     ],),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('Net Income',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),),
-                      Text('$net_income',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: net_income>=0? Colors.black:Colors.red),),
+                      Text('$net_income'+ Utils.currency,style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: net_income>=0? Colors.black:Colors.red),),
 
                     ],)
                 ],),),
@@ -219,7 +215,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                       children: [
                         Row(
                           children: [
-                            Text('All Flocks ',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                            Text('All Flocks ',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
                             Text("(" + flocks.length.toString() + ")",style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
 
                           ],
@@ -237,14 +233,26 @@ class _DashboardScreen extends State<DashboardScreen> {
                           },
                           child: Align(
                               alignment: Alignment.centerRight,
-                              child: Container( child: Text("+New Flock", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),))),
+                              child: Container(
+                                width: 130,
+                                alignment: Alignment.center,
+                                padding: EdgeInsets.all(7),
+                                  decoration: BoxDecoration(
+                                    color: Colors.deepPurple,
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(30.0)),
+                                    border: Border.all(
+                                      color:  Colors.deepPurple,
+                                      width: 2.0,
+                                    ),
+                                  ),child: Text("+New Flock", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.white),))),
                         ),
 
 
                       ],
                     )),
               ),
-              Container(
+              flocks.length > 0 ? Container(
                 height: heightScreen/2,
                 width: widthScreen,
                 child: ListView.builder(
@@ -262,7 +270,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                         getList();
 
                         },
-                        child: Card(
+                        child:Card(
                           margin: EdgeInsets.all(10),
                           color: Colors.white,
                           elevation: 2,
@@ -310,35 +318,14 @@ class _DashboardScreen extends State<DashboardScreen> {
 
                             ]),
                           ),
-                        ),
+                        )
                       );
 
                     }),
-              ),
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const CategoryScreen()),
-                  );
-                },
-                child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Container(margin: EdgeInsets.only(right: 15, top: 20), child: Text("Category Set up", style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),))),
-              ),
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ReportsScreen()),
-                  );
-                },
-                child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Container(margin: EdgeInsets.only(right: 15, top: 20), child: Text("Reports", style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),))),
-              ),
+              ) : Container(
+                  alignment:  Alignment.center,
+                  margin: EdgeInsets.only(top: 20),
+                  child: Text('No Flocks Added Yet.',style: TextStyle( fontSize: 14,color: Colors.black),)),
               /*Center(
                     child: SfCircularChart(
                         title: ChartTitle(text: 'Income/Expense'),
@@ -590,7 +577,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                   ]
       ),),
         ),),),),);*/
-    ])))))));
+    ]))))));
   }
 
 

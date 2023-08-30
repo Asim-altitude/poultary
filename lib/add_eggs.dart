@@ -118,7 +118,7 @@ class _NewEggCollection extends State<NewEggCollection>
           child: Container(
             width: widthScreen,
             height: heightScreen,
-            color: Colors.white,
+            color: Utils.getScreenBackground(),
             child: SingleChildScrollView(
               child: Column(
                 children: [
@@ -176,7 +176,7 @@ class _NewEggCollection extends State<NewEggCollection>
                             padding: EdgeInsets.all(10),
                             margin: EdgeInsets.only(left: 20, right: 20),
                             decoration: BoxDecoration(
-                              color: Colors.transparent,
+                              color: Colors.white,
                               borderRadius: const BorderRadius.all(
                                   Radius.circular(10.0)),
                               border: Border.all(
@@ -362,7 +362,7 @@ class _NewEggCollection extends State<NewEggCollection>
                           SizedBox(height: 10,width: widthScreen),
                           Container(
                             width: widthScreen,
-                            height: 150,
+                            height: 120,
                             padding: EdgeInsets.all(5),
                             margin: EdgeInsets.only(left: 10, right: 10),
                             decoration: BoxDecoration(
@@ -374,8 +374,8 @@ class _NewEggCollection extends State<NewEggCollection>
                                 width: widthScreen,
                                 height: 100,
                                 child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
+                                  maxLines: 2,
+                                  maxLength: 80,
                                   controller: notesController,
                                   keyboardType: TextInputType.multiline,
                                   textAlign: TextAlign.start,
@@ -402,11 +402,11 @@ class _NewEggCollection extends State<NewEggCollection>
                                 print("Everything Okay");
                                 await DatabaseHelper.instance.database;
                                 if (isCollection){
-                                  int? id = await DatabaseHelper.insertEggCollection(Eggs(f_id: getFlockID(), f_name: _purposeselectedValue, image: '', good_eggs: this.good_eggs, bad_eggs: bad_eggs, total_eggs: int.parse(totalEggsController.text),short_note: '', date: date,reduction_reason: '', isCollection: 1));
+                                  int? id = await DatabaseHelper.insertEggCollection(Eggs(f_id: getFlockID(), f_name: _purposeselectedValue, image: '', good_eggs: this.good_eggs, bad_eggs: bad_eggs, total_eggs: int.parse(totalEggsController.text),short_note: notesController.text, date: date,reduction_reason: '', isCollection: 1));
                                   Utils.showToast("Eggs Collection Added");
                                   Navigator.pop(context,"Egg ADDED");
                                 }else{
-                                  int? id = await DatabaseHelper.insertEggCollection(Eggs(f_id: getFlockID(), f_name: _purposeselectedValue, image: '', good_eggs: this.good_eggs, bad_eggs: bad_eggs, total_eggs: int.parse(totalEggsController.text),short_note: '', date: date,reduction_reason: _reductionReasonValue, isCollection: 0));
+                                  int? id = await DatabaseHelper.insertEggCollection(Eggs(f_id: getFlockID(), f_name: _purposeselectedValue, image: '', good_eggs: this.good_eggs, bad_eggs: bad_eggs, total_eggs: int.parse(totalEggsController.text),short_note: notesController.text, date: date,reduction_reason: _reductionReasonValue, isCollection: 0));
                                   Utils.showToast("Eggs Reduction Added");
                                   Navigator.pop(context,"Egg Reduced");
                                 }
@@ -421,7 +421,7 @@ class _NewEggCollection extends State<NewEggCollection>
                               height: 60,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: Colors.transparent,
+                                color: Colors.deepPurple,
                                 borderRadius: const BorderRadius.all(
                                     Radius.circular(10.0)),
                                 border: Border.all(
@@ -434,7 +434,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                 "Confirm",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    color: Colors.deepPurple,
+                                    color: Colors.white,
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold),
                               ),

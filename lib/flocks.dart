@@ -92,7 +92,7 @@ class _FlockScreen extends State<FlockScreen>
             child: Container(
               width: widthScreen,
               height: heightScreen,
-              color: Colors.white,
+              color: Utils.getScreenBackground(),
               child: Column(
                 children: [
                   Row(
