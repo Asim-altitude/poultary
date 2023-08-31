@@ -9,21 +9,14 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:poultary/utils/utils.dart';
 
-import '../data.dart';
+import '../../data.dart';
+import '../model/egg_report_item.dart';
 
-Future<Uint8List> generateInvoice(
+Future<Uint8List> generateEggReport(
     PdfPageFormat pageFormat, CustomData data) async {
   final lorem = pw.LoremText();
 
-  final products = <Product>[
-    Product('19874', lorem.sentence(4), 3.99, 2),
-    Product('98452', lorem.sentence(6), 15, 2),
-    Product('28375', lorem.sentence(4), 6.95, 3),
-    Product('95673', lorem.sentence(3), 49.99, 4),
-    Product('23763', lorem.sentence(2), 560.03, 1),
-    Product('55209', lorem.sentence(5), 26, 1),
-
-  ];
+  final products = Utils.egg_report_list;
 
   final invoice = Invoice(
     invoiceNumber: '982347',
@@ -52,7 +45,7 @@ class Invoice {
     required this.accentColor,
   });
 
-  final List<Product> products;
+  final List<Egg_Report_Item> products;
   final String customerName;
   final String customerAddress;
   final String invoiceNumber;
@@ -69,7 +62,7 @@ class Invoice {
   PdfColor get _accentTextColor => baseColor.isLight ? _lightColor : _darkColor;
 
   double get _total =>
-      products.map<double>((p) => p.total).reduce((a, b) => a + b);
+      products.map<double>((p) => 0).reduce((a, b) => a + b);
 
   double get _grandTotal => _total * (1 + tax);
 
@@ -98,8 +91,11 @@ class Invoice {
 
 
     _bgShape = await rootBundle.loadString('assets/invoice.svg');
-    final font = await rootBundle.load("assets/font/Roboto-Bold.ttf");
-    final ttfF = pw.Font.ttf(font);
+    final font = await rootBundle.load("assets/font/Roboto-Regular.ttf");
+    final ttfFLight = pw.Font.ttf(font);
+
+    final font1 = await rootBundle.load("assets/font/Roboto-Bold.ttf");
+    final ttfFBold = pw.Font.ttf(font1);
 
 
     // Add page to the PDF
@@ -107,16 +103,44 @@ class Invoice {
       pw.MultiPage(
         pageTheme: _buildTheme(
           pageFormat,
-          ttfF,
-          ttfF,ttfF,
+          ttfFLight,
+          ttfFBold,ttfFLight,
         ),
         header: _buildHeader,
-        footer: _buildFooter,
         build: (context) => [
-          _contentHeader(context),
+         // _contentHeader(context),
+          _buildSummary(context),
           _contentTable(context),
+          pw.Container(
+              margin: pw.EdgeInsets.only(top: 10),
+              child: pw.Row(
+                  children: [
+                    pw.Container(
+                      alignment: pw.Alignment.topLeft,
+                      child: pw.Text(
+                        'Report Generated On: ',
+                        style: pw.TextStyle(
+                          color: PdfColors.black,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),pw.Container(
+                      margin: pw.EdgeInsets.only(left: 10),
+                      alignment: pw.Alignment.topLeft,
+                      child: pw.Text(
+                        DateTime.now().toString(),
+                        style: pw.TextStyle(
+                          color: PdfColors.black,
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                  ]
+              )
+          ),
           pw.SizedBox(height: 20),
-          _contentFooter(context),
+          //_contentFooter(context),
           // pw.SizedBox(height: 20),
           // _termsAndConditions(context),
         ],
@@ -128,80 +152,190 @@ class Invoice {
   }
 
   pw.Widget _buildHeader(pw.Context context) {
-    return pw.Column(
-      children: [
-        pw.Row(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Expanded(
-              child: pw.Column(
-                children: [
-                  pw.Container(
-                    height: 50,
-                    padding: const pw.EdgeInsets.only(left: 20),
-                    alignment: pw.Alignment.centerLeft,
-                    child: pw.Text(
-                      Utils.INVOICE_HEADING,
-                      style: pw.TextStyle(
-                        color: baseColor,
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 40,
-                      ),
-                    ),
-                  ),
-                  pw.Container(
-                    decoration: pw.BoxDecoration(
-                      borderRadius:
-                      const pw.BorderRadius.all(pw.Radius.circular(2)),
-                      color: accentColor,
-                    ),
-                    padding: const pw.EdgeInsets.only(
-                        left: 40, top: 10, bottom: 10, right: 20),
-                    alignment: pw.Alignment.centerLeft,
-                    height: 50,
-                    child: pw.DefaultTextStyle(
-                      style: pw.TextStyle(
-                        color: _accentTextColor,
-                        fontSize: 12,
-                      ),
-                      child: pw.GridView(
-                        crossAxisCount: 2,
-                        children: [
-                          /*pw.Text('Invoice #'),
-                          pw.Text(invoiceNumber),*/
-                          pw.Text('Date:'),
-                          pw.Text(Utils.INVOICE_DATE),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+    return pw.Container(
+      height: 175,
+      child: pw.Column(
+        children: [
+          pw.Expanded(
+            child: pw.Column(
+              mainAxisSize: pw.MainAxisSize.min,
+              children: [
+                pw.Container(
+                  alignment: pw.Alignment.center,
+                  padding: const pw.EdgeInsets.only(bottom: 8, left: 30),
+                  height: 70,
+                  child:
+                  imageData != null ? pw.Image(pw.MemoryImage(imageData!), ) : pw.PdfLogo(),
+                ),
+                // pw.Container(
+                //   color: baseColor,
+                //   padding: pw.EdgeInsets.only(top: 3),
+                // ),
+              ],
             ),
-            pw.Expanded(
-              child: pw.Column(
-                mainAxisSize: pw.MainAxisSize.min,
-                children: [
-                  pw.Container(
-                    alignment: pw.Alignment.topRight,
-                    padding: const pw.EdgeInsets.only(bottom: 8, left: 30),
-                    height: 72,
-                    child:
-                    imageData != null ? pw.Image(pw.MemoryImage(imageData!)) : pw.PdfLogo(),
+          ),
+          pw.Expanded(
+            child: pw.Column(
+              children: [
+                pw.Container(
+                  height: 30,
+                  padding: const pw.EdgeInsets.only(left: 20),
+                  alignment: pw.Alignment.center,
+                  child: pw.Text(
+                    Utils.INVOICE_HEADING,
+                    style: pw.TextStyle(
+                      color: PdfColors.deepPurple,
+                      fontWeight: pw.FontWeight.bold,
+                      fontSize: 24,
+                    ),
                   ),
-                  // pw.Container(
-                  //   color: baseColor,
-                  //   padding: pw.EdgeInsets.only(top: 3),
-                  // ),
-                ],
-              ),
+                ),
+
+                pw.Container(
+                  height: 30,
+                  padding: const pw.EdgeInsets.only(left: 20),
+                  alignment: pw.Alignment.center,
+                  child: pw.Text(
+                    'Eggs Inventory Report',
+                    style: pw.TextStyle(
+                      color: PdfColors.black,
+                      fontWeight: pw.FontWeight.normal,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+
+                pw.Container(
+                  height: 20,
+                  padding: const pw.EdgeInsets.only(left: 20),
+                  alignment: pw.Alignment.center,
+                  child: pw.Text(
+                    Utils.INVOICE_DATE,
+                    style: pw.TextStyle(
+                      color: PdfColors.black,
+                      fontWeight: pw.FontWeight.normal,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+
+              ],
             ),
-          ],
-        ),
-        if (context.pageNumber > 1) pw.SizedBox(height: 20)
-      ],
+          ),
+          if (context.pageNumber > 1) pw.SizedBox(height: 20)
+        ],
+      ),
     );
   }
+
+  pw.Widget _buildSummary(pw.Context context) {
+    return pw.Container(
+      height: 120,
+      margin: pw.EdgeInsets.only(top: 10),
+      child: pw.Column(
+        children: [
+
+          pw.Expanded(
+            child: pw.Column(
+              children: [
+                pw.Container(
+                  height: 30,
+                  alignment: pw.Alignment.topLeft,
+                  child: pw.Text(
+                    "Summary",
+                    style: pw.TextStyle(
+                      color: PdfColors.deepPurple,
+                      fontWeight: pw.FontWeight.bold,
+                      fontSize: 24,
+                    ),
+                  ),
+                ),
+
+                pw.Row(
+                  children: [
+                    pw.Container(
+                      alignment: pw.Alignment.topLeft,
+                      child: pw.Text(
+                        'Collcted Eggs: ',
+                        style: pw.TextStyle(
+                          color: PdfColors.black,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),pw.Container(
+                      alignment: pw.Alignment.topLeft,
+                      child: pw.Text(
+                        Utils.TOTAL_EGG_COLLECTED,
+                        style: pw.TextStyle(
+                          color: PdfColors.black,
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ]
+                ),
+
+                pw.Row(
+                    children: [
+                      pw.Container(
+                        alignment: pw.Alignment.topLeft,
+                        child: pw.Text(
+                          'Reduced Eggs: ',
+                          style: pw.TextStyle(
+                            color: PdfColors.black,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),pw.Container(
+                        alignment: pw.Alignment.topLeft,
+
+                        child: pw.Text(
+                          Utils.TOTAL_EGG_REDUCED,
+                          style: pw.TextStyle(
+                            color: PdfColors.black,
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ]
+                ),
+
+                pw.Row(
+                    children: [
+                      pw.Container(
+                        alignment: pw.Alignment.topLeft,
+                        child: pw.Text(
+                          'Reserve Eggs:  ',
+                          style: pw.TextStyle(
+                            color: PdfColors.black,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),pw.Container(
+                        alignment: pw.Alignment.topLeft,
+                         child: pw.Text(
+                          Utils.EGG_RESERVE,
+                          style: pw.TextStyle(
+                            color: PdfColors.black,
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ]
+                )
+
+              ],
+            ),
+          ),
+
+        ],
+      ),
+    );
+  }
+
 
   pw.Widget _buildFooter(pw.Context context) {
     return pw.Row(
@@ -312,6 +446,7 @@ class Invoice {
       ],
     );
   }
+
 
   pw.Widget _contentFooter(pw.Context context) {
     return pw.Row(
@@ -441,11 +576,10 @@ class Invoice {
 
   pw.Widget _contentTable(pw.Context context) {
     const tableHeaders = [
-      'SKU#',
-      'Item Description',
-      'Price',
-      'Quantity',
-      'Total'
+      'Flock Name',
+      'Collected Eggs',
+      'Reduced Eggs',
+      'Reserve Eggs'
     ];
 
     return pw.TableHelper.fromTextArray(
@@ -453,7 +587,7 @@ class Invoice {
       cellAlignment: pw.Alignment.centerLeft,
       headerDecoration: pw.BoxDecoration(
         borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
-        color: baseColor,
+        color: PdfColors.deepPurple,
       ),
       headerHeight: 25,
       cellHeight: 40,

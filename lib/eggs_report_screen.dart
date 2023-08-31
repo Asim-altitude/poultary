@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
+import 'package:poultary/model/egg_report_item.dart';
+import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'model/egg_item.dart';
@@ -163,11 +165,23 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                                   fontWeight: FontWeight.bold),
                             )),
                       ),
-                      Container(
-                        width: 30,
-                        height: 30,
-                        margin: EdgeInsets.only(right: 10),
-                        child: Image.asset('assets/pdf_icon.png'),
+                      InkWell(
+                        onTap: () {
+                          Utils.setupInvoiceInitials("Egg Report",pdf_formatted_date_filter);
+                          prepareListData();
+
+                           Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>  PDFScreen(item: 1,)),
+                          );
+                        },
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          margin: EdgeInsets.only(right: 10),
+                          child: Image.asset('assets/pdf_icon.png'),
+                        ),
                       )
                     ],
                   ),
@@ -464,6 +478,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
     'Last Year','All Time'];
 
   String date_filter_name = "This Month";
+  String pdf_formatted_date_filter = "This Month";
   String str_date = '',end_date = '';
   void getData(String filter){
     int index = 0;
@@ -569,6 +584,12 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       getAllData();
     }
 
+    if(filter == 'Today' || filter == 'Yesterday'){
+      pdf_formatted_date_filter = filter +"("+str_date+")";
+    }else{
+      pdf_formatted_date_filter = filter +"("+str_date+" to "+end_date+")";
+    }
+
   }
 
   int getFlockID() {
@@ -582,6 +603,65 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
     }
 
     return f_id;
+  }
+
+  void prepareListData() async {
+
+    int collected = 0, reduced = 0, reserve = 0;
+
+    Utils.egg_report_list.clear();
+    Utils.TOTAL_EGG_COLLECTED = total_eggs_collected.toString();
+    Utils.TOTAL_EGG_REDUCED = total_eggs_reduced.toString();
+    Utils.EGG_RESERVE = total_eggs.toString();
+
+    if(f_id == -1)
+    {
+       for(int i=0; i<flocks.length; i++){
+
+
+         collected = await DatabaseHelper.getUniqueEggCalculations(flocks
+             .elementAt(i)
+             .f_id, 1, str_date, end_date);
+         reduced = await DatabaseHelper.getUniqueEggCalculations(flocks
+             .elementAt(i)
+             .f_id, 0, str_date, end_date);
+         reserve = collected - reduced;
+
+         Utils.egg_report_list.add(Egg_Report_Item(f_name: flocks
+             .elementAt(i)
+             .f_name,
+             collected: collected,
+             reduced: reduced,
+             reserve: reserve));
+       }
+
+    } else
+    {
+      collected = await DatabaseHelper.getEggCalculations(f_id, 1, str_date, end_date);
+      reduced = await DatabaseHelper.getEggCalculations(f_id, 0, str_date, end_date);
+      reserve = collected - reduced;
+
+      Flock? flock = await getSelectedFlock();
+
+      Utils.egg_report_list.add(Egg_Report_Item(f_name: flock!.f_name, collected: collected, reduced: reduced, reserve: reserve));
+
+    }
+
+  }
+
+  Future<Flock?> getSelectedFlock() async{
+
+    Flock? flock = null;
+
+    for(int i=0;i<flocks.length;i++){
+      if(f_id == flocks.elementAt(i).f_id){
+        flock = flocks.elementAt(i);
+        break;
+      }
+    }
+
+    return flock;
+
   }
 
 }

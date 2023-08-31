@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:poultary/add_birds.dart';
 import 'package:poultary/add_eggs.dart';
 import 'package:poultary/inventory.dart';
-import 'package:poultary/pdf_screen.dart';
+import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/utils/utils.dart';
 
@@ -212,23 +212,6 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold),
                           )),
-                      Container(
-                        alignment: Alignment.center,
-                        width: 60,
-                        height: 60,
-                        padding: EdgeInsets.all(10),
-                        child: InkWell(
-                          child: Image.asset("assets/pdf_icon.png"),
-                          onTap: () {
-                            Utils.setupInvoiceInitials(_purposeselectedValue,pdf_formatted_date_filter);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>  PDFScreen()),
-                            );
-                          },
-                        ),
-                      ),
 
                     ],
                   ),

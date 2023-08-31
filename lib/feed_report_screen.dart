@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/model/transaction_item.dart';
+import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'model/egg_item.dart';
@@ -41,6 +42,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
      {
        getList();
        getData(date_filter_name);
+
      }
      catch(ex){
        print(ex);
@@ -138,11 +140,23 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                                   fontWeight: FontWeight.bold),
                             )),
                       ),
-                      Container(
-                        width: 30,
-                        height: 30,
-                        margin: EdgeInsets.only(right: 10),
-                        child: Image.asset('assets/pdf_icon.png'),
+                      InkWell(
+                        onTap: (){
+                          Utils.setupInvoiceInitials("Feeding Report",pdf_formatted_date_filter);
+                          prepareListData();
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>  PDFScreen(item: 2)),
+                          );
+                        },
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          margin: EdgeInsets.only(right: 10),
+                          child: Image.asset('assets/pdf_icon.png'),
+                        ),
                       )
                     ],
                   ),
@@ -360,6 +374,9 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
     _purposeselectedValue = _purposeList[0];
 
+
+
+
     setState(() {
 
     });
@@ -452,7 +469,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
   List<String> filterList = ['Today','Yesterday','This Month', 'Last Month','Last 3 months', 'Last 6 months','This Year',
     'Last Year','All Time'];
 
-  String date_filter_name = "This Month";
+  String date_filter_name = "This Month", pdf_formatted_date_filter = "This Month";
   String str_date = '',end_date = '';
   void getData(String filter){
     int index = 0;
@@ -558,6 +575,12 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
       getAllData();
     }
 
+    if(filter == 'Today' || filter == 'Yesterday'){
+      pdf_formatted_date_filter = filter +"("+str_date+")";
+    }else{
+      pdf_formatted_date_filter = filter +"("+str_date+" to "+end_date+")";
+    }
+
   }
 
   int getFlockID() {
@@ -572,6 +595,15 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
     return f_id;
   }
+
+  void prepareListData() async {
+
+    Utils.feed_report_list = await DatabaseHelper.getAllFeedingsReport(str_date,end_date);
+    Utils.feed_flock_report_list = await DatabaseHelper.getAllFeedingsReportByFlock(str_date,end_date);
+
+  }
+
+
 
 }
 

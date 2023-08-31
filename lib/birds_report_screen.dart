@@ -7,11 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
+import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'model/feed_item.dart';
 import 'model/flock.dart';
 import 'model/flock_detail.dart';
+import 'model/flock_report_item.dart';
 
 class BirdsReportsScreen extends StatefulWidget {
   const BirdsReportsScreen({Key? key}) : super(key: key);
@@ -39,6 +41,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
      try
      {
        getList();
+
        getData(date_filter_name);
      }
      catch(ex){
@@ -168,11 +171,25 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                                   fontWeight: FontWeight.bold),
                             )),
                       ),
-                      Container(
-                        width: 30,
-                        height: 30,
-                        margin: EdgeInsets.only(right: 10),
-                        child: Image.asset('assets/pdf_icon.png'),
+                      InkWell(
+                        onTap: (){
+                          Utils.setupInvoiceInitials("Flock Report",pdf_formatted_date_filter);
+                          prepareListData();
+
+                          Utils.TOTAL_BIRDS_ADDED = total_birds_added.toString();
+                          Utils.TOTAL_BIRDS_REDUCED = total_birds_reduced.toString();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>  PDFScreen(item: 0,)),
+                          );
+                        },
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          margin: EdgeInsets.only(right: 10),
+                          child: Image.asset('assets/pdf_icon.png'),
+                        ),
                       )
                     ],
                   ),
@@ -485,7 +502,8 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
     'Last Year','All Time'];
 
   String date_filter_name = "This Month";
-  String str_date = '',end_date = '';
+  String pdf_formatted_date_filter = "This Month";
+  String str_date='',end_date='';
   void getData(String filter){
     int index = 0;
 
@@ -498,7 +516,8 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       end_date = inputFormat.format(today);
       print(str_date+" "+end_date);
 
-      getAllData();
+      pdf_formatted_date_filter = "Today ("+str_date+")";
+
     }
     else if (filter == 'Yesterday'){
       index = 1;
@@ -509,19 +528,21 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       end_date = inputFormat.format(today);
       print(str_date+" "+end_date);
 
-      getAllData();
+      pdf_formatted_date_filter = "Yesterday ("+Utils.getFormattedDate(str_date)+")";
+
     }
     else if (filter == 'This Month'){
       index = 2;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
+
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month + 1).subtract(Duration(days: 1));
 
       var inputFormat = DateFormat('yyyy-MM-dd');
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getAllData();
 
+      pdf_formatted_date_filter = "This Month ("+Utils.getFormattedDate(str_date)+" to "+Utils.getFormattedDate(end_date)+")";
     }else if (filter == 'Last Month'){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
@@ -533,8 +554,8 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getAllData();
 
+      pdf_formatted_date_filter = "Last Month ("+Utils.getFormattedDate(str_date)+" to "+Utils.getFormattedDate(end_date)+"))";
 
     }else if (filter == 'Last 3 months'){
       index = 4;
@@ -546,7 +567,9 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getAllData();
+
+
+      pdf_formatted_date_filter = "Last 3 months ("+Utils.getFormattedDate(str_date)+" to "+Utils.getFormattedDate(end_date)+"))";
     }else if (filter == 'Last 6 months'){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
@@ -557,7 +580,9 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getAllData();
+
+
+      pdf_formatted_date_filter = "Last 6 months ("+Utils.getFormattedDate(str_date)+" to "+Utils.getFormattedDate(end_date)+"))";
     }else if (filter == 'This Year'){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
@@ -567,7 +592,8 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getAllData();
+
+      pdf_formatted_date_filter = "This Year ("+Utils.getFormattedDate(str_date)+" to "+Utils.getFormattedDate(end_date)+"))";
     }else if (filter == 'Last Year'){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
@@ -577,18 +603,19 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getAllData();
+
+      pdf_formatted_date_filter = "Last Year ("+Utils.getFormattedDate(str_date)+" to "+Utils.getFormattedDate(end_date)+"))";
+
     }else if (filter == 'All Time'){
       index = 8;
-      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-50,1,1);
-      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
-
-      var inputFormat = DateFormat('yyyy-MM-dd');
-      str_date = inputFormat.format(firstDayCurrentMonth);
-      end_date = inputFormat.format(lastDayCurrentMonth);
+      str_date ="";
+      end_date ="";
       print(str_date+" "+end_date);
-      getAllData();
+
+      pdf_formatted_date_filter = "All Time (START to END)";
     }
+
+    getAllData();
 
   }
 
@@ -603,6 +630,91 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
     }
 
     return f_id;
+  }
+
+  void prepareListData() async{
+
+    List<Flock_Report_Item> list = [];
+    int? added = 0,reduced = 0,init_flock_birds = 0,active_birds = 0,total_added =0,total_reduced=0;
+
+    if(f_id == -1) {
+      for (int i = 0; i < flocks.length; i++) {
+        if (flocks
+            .elementAt(i)
+            .f_id != -1) {
+          init_flock_birds = await DatabaseHelper.getAllFlockBirdsCount(flocks
+              .elementAt(i)
+              .f_id, str_date, end_date);
+
+          added = await DatabaseHelper.getBirdsCalculations(flocks
+              .elementAt(i)
+              .f_id, "Addition", str_date, end_date);
+
+          reduced = await DatabaseHelper.getBirdsCalculations(flocks
+              .elementAt(i)
+              .f_id, "Reduction", str_date, end_date);
+
+          list.add(Flock_Report_Item(f_name: flocks
+              .elementAt(i)
+              .f_name,
+              date: flocks
+                  .elementAt(i)
+                  .acqusition_date,
+              active_bird_count: flocks
+                  .elementAt(i)
+                  .active_bird_count,
+              addition: (added + init_flock_birds),
+              reduction: reduced));
+
+           total_added = total_added! + init_flock_birds! + added;
+           total_reduced = total_reduced! + reduced;
+          active_birds = active_birds! + flocks
+              .elementAt(i)
+              .active_bird_count!;
+        }
+      }
+    }else{
+      init_flock_birds = await DatabaseHelper.getAllFlockBirdsCount(f_id, str_date, end_date);
+
+      added = await DatabaseHelper.getBirdsCalculations(f_id, "Addition", str_date, end_date);
+
+      reduced = await DatabaseHelper.getBirdsCalculations(f_id, "Reduction", str_date, end_date);
+
+      Flock? f = await getSelectedFlock();
+
+      list.add(Flock_Report_Item(f_name: f!.f_name,
+          date: f!
+              .acqusition_date,
+          active_bird_count: f!
+              .active_bird_count,
+          addition: (added + init_flock_birds),
+          reduction: reduced));
+
+       total_added = total_added! + init_flock_birds! + added;
+        total_reduced = total_reduced! + reduced;
+      active_birds = f!
+          .active_bird_count!;
+    }
+    Utils.TOTAL_ACTIVE_BIRDS = active_birds.toString();
+    Utils.TOTAL_BIRDS_ADDED = total_added.toString();
+    Utils.TOTAL_BIRDS_REDUCED = total_reduced.toString();
+    Utils.flock_report_list = list;
+
+  }
+
+  Future<Flock?> getSelectedFlock() async{
+
+    Flock? flock = null;
+
+    for(int i=0;i<flocks.length;i++){
+      if(f_id == flocks.elementAt(i).f_id){
+        flock = flocks.elementAt(i);
+        break;
+      }
+    }
+
+    return flock;
+
   }
 
 }

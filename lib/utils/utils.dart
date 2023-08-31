@@ -10,10 +10,15 @@ import 'package:intl/intl.dart';
 
 import '../database/databse_helper.dart';
 import '../model/egg_item.dart';
+import '../model/egg_report_item.dart';
 import '../model/farm_item.dart';
 import '../model/feed_item.dart';
+import '../model/feed_report_item.dart';
+import '../model/feedflock_report_item.dart';
+import '../model/finance_report_item.dart';
 import '../model/flock.dart';
 import '../model/flock_detail.dart';
+import '../model/flock_report_item.dart';
 import '../model/med_vac_item.dart';
 import '../model/transaction_item.dart';
 
@@ -55,6 +60,24 @@ class Utils {
   static String INVOICE_HEADING = "";
   static String INVOICE_DATE = "";
 
+  static String TOTAL_BIRDS_ADDED = "0";
+  static String TOTAL_BIRDS_REDUCED = "0";
+  static String TOTAL_ACTIVE_BIRDS = "0";
+
+  static String TOTAL_EGG_COLLECTED = "100";
+  static String TOTAL_EGG_REDUCED = "20";
+  static String EGG_RESERVE = "80";
+
+  static String TOTAL_INCOME = "0";
+  static String TOTAL_EXPENSE = "0";
+  static String NET_INCOME = "0";
+
+  static List<Flock_Report_Item> flock_report_list = [];
+  static List<Egg_Report_Item> egg_report_list = [];
+  static List<Feed_Report_Item> feed_report_list = [];
+  static List<FeedFlock_Report_Item> feed_flock_report_list = [];
+  static List<Finance_Report_Item> finance_report_list = [];
+
 
   static setupInvoiceInitials(String invoiceHeading,String date) async {
     await DatabaseHelper.instance.database;
@@ -64,7 +87,8 @@ class Utils {
     Utils.INVOICE_LOGO_STR = farmSetup
         .elementAt(0)
         .image;
-    Utils.INVOICE_HEADING = invoiceHeading;
+    Utils.INVOICE_HEADING = farmSetup
+        .elementAt(0).name;
     Utils.INVOICE_DATE = date;
 
     print(date);

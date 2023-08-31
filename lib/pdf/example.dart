@@ -3,17 +3,17 @@ import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 
-import 'data.dart';
-import 'invoice.dart';
+import '../data.dart';
+import 'birds_pdf.dart';
 
 
 const examples = <Example>[
-  Example('INVOICE', 'invoice.dart', generateInvoice),
-  Example('INVOICE', 'invoice.dart', generateInvoice),
-  Example('INVOICE', 'invoice.dart', generateInvoice),
-  Example('INVOICE', 'invoice.dart', generateInvoice),
-  Example('INVOICE', 'invoice.dart', generateInvoice),
-  Example('INVOICE', 'invoice.dart', generateInvoice),
+  Example('INVOICE', 'birds_pdf.dart', generateInvoice),
+  Example('INVOICE', 'birds_pdf.dart', generateInvoice),
+  Example('INVOICE', 'birds_pdf.dart', generateInvoice),
+  Example('INVOICE', 'birds_pdf.dart', generateInvoice),
+  Example('INVOICE', 'birds_pdf.dart', generateInvoice),
+  Example('INVOICE', 'birds_pdf.dart', generateInvoice),
 ];
 
 typedef LayoutCallbackWithData = Future<Uint8List> Function(

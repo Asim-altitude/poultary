@@ -13,6 +13,8 @@ import '../model/bird_item.dart';
 import '../model/category_item.dart';
 import '../model/farm_item.dart';
 import '../model/feed_item.dart';
+import '../model/feed_report_item.dart';
+import '../model/feedflock_report_item.dart';
 import '../model/flock_detail.dart';
 import '../model/flock_image.dart';
 import '../model/transaction_item.dart';
@@ -744,6 +746,25 @@ class DatabaseHelper  {
 
   }
 
+  static Future<int> getUniqueEggCalculations(int f_id,int type,String str_date, String end_date) async {
+
+    var result;
+
+    result = await _database?.rawQuery(
+        "SELECT sum(total_eggs) FROM Eggs where isCollection = $type and f_id = $f_id and collection_date BETWEEN '$str_date'and '$end_date'");
+    print("SELECT sum(total_eggs) FROM Eggs where isCollection = $type and f_id = $f_id and collection_date BETWEEN '$str_date'and '$end_date'");
+
+
+    Map<String,dynamic> map = result![0];
+    print(map.values.first);
+    if(map.values.first.toString().toLowerCase() == 'null')
+      return 0;
+    else
+      return int.parse(map.values.first.toString());
+
+  }
+
+
   static Future<int> getEggCalculations(int f_id,int type,String str_date, String end_date) async {
 
     var result;
@@ -901,6 +922,56 @@ class DatabaseHelper  {
     }
     return _transactionList;
   }
+
+  static Future<List<Feed_Report_Item>>  getAllFeedingsReport(String strDate,String endDate) async {
+    var result = await _database?.rawQuery("SELECT feed_name,sum(quantity) FROM Feeding WHERE feeding_date >= '$strDate' and feeding_date <= '$endDate' GROUP BY feed_name");
+    List<Feed_Report_Item> _feedList = [];
+    Feed_Report_Item feed;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            feed = Feed_Report_Item.fromJson(json);
+            _feedList.add(feed);
+            print(_feedList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        feed = Feed_Report_Item.fromJson(json);
+      }
+    }
+
+    print(_feedList);
+    return _feedList;
+  }
+
+  static Future<List<FeedFlock_Report_Item>>  getAllFeedingsReportByFlock(String strDate,String endDate) async {
+    var result = await _database?.rawQuery("SELECT f_name,sum(quantity) FROM Feeding WHERE feeding_date >= '$strDate' and feeding_date <= '$endDate' GROUP BY f_name");
+    List<FeedFlock_Report_Item> _feedList = [];
+    FeedFlock_Report_Item feed;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+            feed = FeedFlock_Report_Item.fromJson(json);
+            _feedList.add(feed);
+            print(_feedList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        feed = FeedFlock_Report_Item.fromJson(json);
+      }
+    }
+
+    print(_feedList);
+    return _feedList;
+  }
+
 
   static Future<List<Feeding>>  getAllFeedings() async {
     var result = await _database?.rawQuery("SELECT * FROM Feeding");

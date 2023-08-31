@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
+import 'package:poultary/model/finance_report_item.dart';
 import 'package:poultary/model/transaction_item.dart';
+import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'model/egg_item.dart';
@@ -161,11 +163,23 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                                   fontWeight: FontWeight.bold),
                             )),
                       ),
-                      Container(
-                        width: 30,
-                        height: 30,
-                        margin: EdgeInsets.only(right: 10),
-                        child: Image.asset('assets/pdf_icon.png'),
+                      InkWell(
+                        onTap: () {
+                          Utils.setupInvoiceInitials("Financial Report",pdf_formatted_date_filter);
+                          prepareListData();
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>  PDFScreen(item: 3,)),
+                          );
+                        },
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          margin: EdgeInsets.only(right: 10),
+                          child: Image.asset('assets/pdf_icon.png'),
+                        ),
                       )
                     ],
                   ),
@@ -478,7 +492,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
   List<String> filterList = ['Today','Yesterday','This Month', 'Last Month','Last 3 months', 'Last 6 months','This Year',
     'Last Year','All Time'];
 
-  String date_filter_name = "This Month";
+  String date_filter_name = "This Month",pdf_formatted_date_filter = "This Month";
   String str_date = '',end_date = '';
   void getData(String filter){
     int index = 0;
@@ -584,6 +598,12 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
       getAllData();
     }
 
+    if(filter == 'Today' || filter == 'Yesterday'){
+      pdf_formatted_date_filter = filter +"("+str_date+")";
+    }else{
+      pdf_formatted_date_filter = filter +"("+str_date+" to "+end_date+")";
+    }
+
   }
 
   int getFlockID() {
@@ -597,6 +617,22 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
     }
 
     return f_id;
+  }
+
+  void prepareListData() {
+
+    Utils.TOTAL_INCOME = gross_income.toString();
+    Utils.TOTAL_EXPENSE = total_expense.toString();
+    Utils.NET_INCOME = net_income.toString();
+
+    Utils.finance_report_list.clear();
+    for(int i=0;i<list.length;i++){
+
+      TransactionItem transactionItem = list.elementAt(i);
+      Utils.finance_report_list.add(Finance_Report_Item(f_name: transactionItem.f_name, date: Utils.getFormattedDate(transactionItem.date), salePurchaseItem: transactionItem.type == 'Income'? transactionItem.sale_item : transactionItem.expense_item, income:  transactionItem.type == 'Income'? transactionItem.amount : '0', expense:  transactionItem.type == 'Income'? '0' : transactionItem.amount));
+
+    }
+
   }
 
 }
