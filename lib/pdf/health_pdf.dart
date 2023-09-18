@@ -10,18 +10,22 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:poultary/utils/utils.dart';
 
 import '../../data.dart';
-import '../model/flock.dart';
-import '../model/flock_report_item.dart';
+import '../model/egg_report_item.dart';
+import '../model/feed_report_item.dart';
+import '../model/feedflock_report_item.dart';
+import '../model/health_report_item.dart';
 
-Future<Uint8List> generateInvoice(
+Future<Uint8List> generateHealthReport(
     PdfPageFormat pageFormat, CustomData data) async {
   final lorem = pw.LoremText();
 
-  final products = Utils.flock_report_list;
+  final products = Utils.medication_report_list;
+  final feedbyflock = Utils.vaccine_report_list;
 
   final invoice = Invoice(
     invoiceNumber: '982347',
     products: products,
+    flockFeedList: feedbyflock,
     customerName: 'Abraham Swearegin',
     customerAddress: '54 rue de Rivoli\n75001 Paris, France',
     paymentInfo:
@@ -37,6 +41,7 @@ Future<Uint8List> generateInvoice(
 class Invoice {
   Invoice({
     required this.products,
+    required this.flockFeedList,
     required this.customerName,
     required this.customerAddress,
     required this.invoiceNumber,
@@ -46,7 +51,8 @@ class Invoice {
     required this.accentColor,
   });
 
-  final List<Flock_Report_Item> products;
+  final List<Health_Report_Item> products;
+  final List<Health_Report_Item> flockFeedList;
   final String customerName;
   final String customerAddress;
   final String invoiceNumber;
@@ -65,7 +71,12 @@ class Invoice {
   double get _total =>
       products.map<double>((p) => 0).reduce((a, b) => a + b);
 
+  int get _feedTotal => products.map<int>((e) => 0).reduce((a, b) => a + b);
+  int get _flockTotal => flockFeedList.map<int>((e) => 0).reduce((a, b) => a + b);
+
   double get _grandTotal => _total * (1 + tax);
+
+
 
   Uint8List? _logo;
   Uint8List? imageData;
@@ -111,7 +122,35 @@ class Invoice {
         build: (context) => [
          // _contentHeader(context),
           _buildSummary(context),
+          pw.Container(
+            height: 30,
+            alignment: pw.Alignment.topLeft,
+            child: pw.Text(
+              'Medication Report',
+              style: pw.TextStyle(
+                color: PdfColors.deepPurple,
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ),
           _contentTable(context),
+
+          pw.SizedBox(height: 10),
+          pw.Container(
+            height: 30,
+            alignment: pw.Alignment.topLeft,
+            child: pw.Text(
+              'Vaccination Report',
+              style: pw.TextStyle(
+                color: PdfColors.deepPurple,
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ),
+          _contentTable1(context),
+
           pw.Container(
               margin: pw.EdgeInsets.only(top: 10),
               child: pw.Row(
@@ -140,7 +179,6 @@ class Invoice {
                   ]
               )
           ),
-          pw.SizedBox(height: 20),
           //_contentFooter(context),
           // pw.SizedBox(height: 20),
           // _termsAndConditions(context),
@@ -197,7 +235,7 @@ class Invoice {
                   padding: const pw.EdgeInsets.only(left: 20),
                   alignment: pw.Alignment.center,
                   child: pw.Text(
-                    'Flock Inventory Report',
+                    'Birds Medication Report',
                     style: pw.TextStyle(
                       color: PdfColors.black,
                       fontWeight: pw.FontWeight.normal,
@@ -257,17 +295,16 @@ class Invoice {
                     pw.Container(
                       alignment: pw.Alignment.topLeft,
                       child: pw.Text(
-                        'Birds Added: ',
+                        'Total Vaccinations: ',
                         style: pw.TextStyle(
                           color: PdfColors.black,
                           fontSize: 16,
                         ),
                       ),
                     ),pw.Container(
-                      margin: pw.EdgeInsets.only(left: 10),
                       alignment: pw.Alignment.topLeft,
                       child: pw.Text(
-                        Utils.TOTAL_BIRDS_ADDED,
+                        Utils.vaccine_report_list.length.toString(),
                         style: pw.TextStyle(
                           color: PdfColors.black,
                           fontWeight: pw.FontWeight.bold,
@@ -283,7 +320,7 @@ class Invoice {
                       pw.Container(
                         alignment: pw.Alignment.topLeft,
                         child: pw.Text(
-                          'Birds Reduced:',
+                          'Total Medications: ',
                           style: pw.TextStyle(
                             color: PdfColors.black,
                             fontSize: 16,
@@ -291,9 +328,9 @@ class Invoice {
                         ),
                       ),pw.Container(
                         alignment: pw.Alignment.topLeft,
-                        margin: pw.EdgeInsets.only(left: 10),
+
                         child: pw.Text(
-                          Utils.TOTAL_BIRDS_REDUCED,
+                          Utils.medication_report_list.length.toString(),
                           style: pw.TextStyle(
                             color: PdfColors.black,
                             fontWeight: pw.FontWeight.bold,
@@ -303,32 +340,6 @@ class Invoice {
                       ),
                     ]
                 ),
-
-                pw.Row(
-                    children: [
-                      pw.Container(
-                        alignment: pw.Alignment.topLeft,
-                        child: pw.Text(
-                          'Active Birds:',
-                          style: pw.TextStyle(
-                            color: PdfColors.black,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),pw.Container(
-                        alignment: pw.Alignment.topLeft,
-                        margin: pw.EdgeInsets.only(left: 10),
-                        child: pw.Text(
-                          Utils.TOTAL_ACTIVE_BIRDS,
-                          style: pw.TextStyle(
-                            color: PdfColors.black,
-                            fontWeight: pw.FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ]
-                )
 
               ],
             ),
@@ -579,11 +590,11 @@ class Invoice {
 
   pw.Widget _contentTable(pw.Context context) {
     const tableHeaders = [
+      'Medicine name',
+      'Diseaese Name',
       'Flock Name',
-      'Date Created',
-      'Addition',
-      'Reduction',
-      'Active Birds'
+      'Date',
+      'Birds'
     ];
 
     return pw.TableHelper.fromTextArray(
@@ -632,44 +643,63 @@ class Invoice {
       ),
     );
   }
+  pw.Widget _contentTable1(pw.Context context) {
+    const tableHeaders = [
+      'Vaccine name',
+      'Diseaese Name',
+      'Flock Name',
+      'Date',
+      'Birds'
+    ];
+
+    return pw.TableHelper.fromTextArray(
+      border: null,
+      cellAlignment: pw.Alignment.centerLeft,
+      headerDecoration: pw.BoxDecoration(
+        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
+        color: PdfColors.deepPurple,
+      ),
+      headerHeight: 25,
+      cellHeight: 40,
+      cellAlignments: {
+        0: pw.Alignment.centerLeft,
+        1: pw.Alignment.centerLeft,
+        2: pw.Alignment.centerRight,
+        3: pw.Alignment.center,
+        4: pw.Alignment.centerRight,
+      },
+      headerStyle: pw.TextStyle(
+        color: _baseTextColor,
+        fontSize: 10,
+        fontWeight: pw.FontWeight.bold,
+      ),
+      cellStyle: const pw.TextStyle(
+        color: _darkColor,
+        fontSize: 10,
+      ),
+      rowDecoration: pw.BoxDecoration(
+        border: pw.Border(
+          bottom: pw.BorderSide(
+            color: accentColor,
+            width: .5,
+          ),
+        ),
+      ),
+      headers: List<String>.generate(
+        tableHeaders.length,
+            (col) => tableHeaders[col],
+      ),
+      data: List<List<String>>.generate(
+        flockFeedList.length,
+            (row) => List<String>.generate(
+          tableHeaders.length,
+              (col) => flockFeedList[row].getIndex(col),
+        ),
+      ),
+    );
+  }
 }
 
 String _formatCurrency(double amount) {
   return '\$${amount.toStringAsFixed(2)}';
-}
-
-String _formatDate(DateTime date) {
-  final format = DateFormat.yMMMd('en_US');
-  return format.format(date);
-}
-
-class Product {
-  const Product(
-      this.sku,
-      this.productName,
-      this.price,
-      this.quantity,
-      );
-
-  final String sku;
-  final String productName;
-  final double price;
-  final int quantity;
-  double get total => price * quantity;
-
-  String getIndex(int index) {
-    switch (index) {
-      case 0:
-        return sku;
-      case 1:
-        return productName;
-      case 2:
-        return _formatCurrency(price);
-      case 3:
-        return quantity.toString();
-      case 4:
-        return _formatCurrency(total);
-    }
-    return '';
-  }
 }

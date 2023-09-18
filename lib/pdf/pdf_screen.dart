@@ -21,20 +21,13 @@ import '../data.dart';
 import 'egg_example.dart';
 import 'example.dart';
 import 'finance_example.dart';
+import 'health_example.dart';
 
 
 class PDFScreen extends StatefulWidget {
    PDFScreen({Key? key,required this.item}) : super(key: key);
 
   int item = 0;
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
 
   @override
@@ -42,7 +35,6 @@ class PDFScreen extends StatefulWidget {
 }
 
 class _PDFScreen extends State<PDFScreen> {
-  int _counter = 0;
   int _tab = 0;
   var _data = const CustomData();
   int item = 0;
@@ -73,6 +65,24 @@ class _PDFScreen extends State<PDFScreen> {
 
   }
 
+  Future<void> _shareAsFile(
+      BuildContext context,
+      LayoutCallback build,
+      PdfPageFormat pageFormat,
+      ) async {
+    final bytes = await build(pageFormat);
+
+    final appDocDir = await getApplicationDocumentsDirectory();
+    final appDocPath = appDocDir.path;
+    final file = File('$appDocPath/document.pdf');
+    print('Save as file ${file.path} ...');
+    await file.writeAsBytes(bytes);
+    // await OpenFile.open(file.path);
+     Share.shareFiles(['${file.path}'], text: 'Poultary Pdf');
+    await Printing.layoutPdf(onLayout: (_) => bytes);
+
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -88,59 +98,108 @@ class _PDFScreen extends State<PDFScreen> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return Scaffold(
-      backgroundColor: Colors.black87,
-      appBar: AppBar(
-        backgroundColor: Colors.deepPurple,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text('PDF',
-          style: new TextStyle(
-            fontSize: 18.0,
-            color: Colors.white,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+    return SafeArea(
+      child: Scaffold(
+        body:
+        Center(
+          child:Container(
+            width: Utils.WIDTH_SCREEN,
+            height: Utils.HEIGHT_SCREEN,
+            color: Color.fromRGBO(199, 199,204, 1),
+            // Center is a layout widget. It takes a single child and positions it
+            // in the middle of the parent.
+            child:
+            SingleChildScrollView(
+              child: Column(
+
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  ClipRRect(
+                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.deepPurple, //(x,y)
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            alignment: Alignment.center,
+                            width: 60,
+                            height: 60,
+                            child: InkWell(
+                              child: Icon(Icons.arrow_back,
+                                  color: Colors.white, size: 30),
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                                margin: EdgeInsets.only(left: 5),
+                                child: Text(
+                                  "Pdf Report",
+                                  textAlign: TextAlign.start,
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
+                                )),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              _saveAsFile(context, (format) => getSelectedPdf(format,item), PdfPageFormat.a4);
+                            },
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              margin: EdgeInsets.only(right: 10),
+                              child: Icon(Icons.download,color: Colors.white,),
+                            ),
+                          ),InkWell(
+                            onTap: () {
+                              _shareAsFile(context, (format) => getSelectedPdf(format,item), PdfPageFormat.a4);
+
+                            },
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              margin: EdgeInsets.only(right: 10),
+                              child: Icon(Icons.share,color: Colors.white,),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  Container(
+                    height: Utils.HEIGHT_SCREEN-100,
+                  child: PdfPreview(
+                    maxPageWidth: 700,
+                    build: (format) => getSelectedPdf(format,item),
+                    allowPrinting: false,
+                    allowSharing: false,
+                    canChangeOrientation: false,
+                    canDebug: false,
+                    canChangePageFormat: false,
+                    onPrinted: _showPrintedToast,
+                    onShared: _showSharedToast,
+                    // actions: actions,
+                  ),),
+                ],
+              ),
+            ),),),
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: _incrementCounter,
+        //   tooltip: 'Increment',
+        //   child: const Icon(Icons.add),
+        // ), // This trailing comma makes auto-formatting nicer for build methods.
       ),
-      body:
-      Center(
-        child:Container(
-          width: Utils.WIDTH_SCREEN,
-          height: Utils.HEIGHT_SCREEN,
-          color: Color.fromRGBO(199, 199,204, 1),
-          // Center is a layout widget. It takes a single child and positions it
-          // in the middle of the parent.
-          child:
-          SingleChildScrollView(
-            child: Column(
-
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-
-
-
-                Container(
-                  height: Utils.HEIGHT_SCREEN-100,
-                child:PdfPreview(
-                  maxPageWidth: 700,
-                  build: (format) => getSelectedPdf(format,item),
-                  allowPrinting: false,
-                  allowSharing: false,
-                  canChangeOrientation: false,
-                  canDebug: false,
-                  canChangePageFormat: false,
-                  onPrinted: _showPrintedToast,
-                  onShared: _showSharedToast,
-                  // actions: actions,
-                ),),
-              ],
-            ),
-          ),),),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: _incrementCounter,
-      //   tooltip: 'Increment',
-      //   child: const Icon(Icons.add),
-      // ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
   void _showPrintedToast(BuildContext context) {
@@ -191,6 +250,7 @@ class _PDFScreen extends State<PDFScreen> {
         uint8list = await financeexamples[_tab].builder(format, _data);
         break;
       case 4:
+        uint8list = await healthexamples[_tab].builder(format, _data);
         break;
 
     }

@@ -37,13 +37,12 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
   }
 
 
-
-
   @override
   void initState() {
     super.initState();
      try
      {
+       Utils.applied_filter = date_filter_name;
        getList();
        getData(date_filter_name);
      }
@@ -195,12 +194,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                                   fontWeight: FontWeight.bold),
                             )),
                       ),
-                      Container(
-                        width: 30,
-                        height: 30,
-                        margin: EdgeInsets.only(right: 10),
-                        child: Image.asset('assets/pdf_icon.png'),
-                      )
+
                     ],
                   ),
                 ),
@@ -785,7 +779,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -866,6 +860,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
               setState(() {
                 date_filter_name = filterList.elementAt(index);
+                Utils.applied_filter = date_filter_name;
               });
 
               getData(date_filter_name);

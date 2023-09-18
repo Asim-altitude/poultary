@@ -1052,7 +1052,6 @@ class DatabaseHelper  {
 
   }
 
-
   static Future<int> getFlockActiveBirds(int id) async {
 
     print(id);
@@ -1064,6 +1063,29 @@ class DatabaseHelper  {
   }
 
   static Future<List<Flock>>  getFlocks() async {
+    var result = await _database?.rawQuery("SELECT * FROM Flock where active = 1");
+    List<Flock> _birdList = [];
+    Flock flock;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            flock = Flock.fromJson(json);
+            _birdList.add(flock);
+            print(_birdList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        flock = Flock.fromJson(json);
+      }
+    }
+    return _birdList;
+  }
+
+  static Future<List<Flock>>  getAllFlocks() async {
     var result = await _database?.rawQuery("SELECT * FROM Flock");
     List<Flock> _birdList = [];
     Flock flock;
@@ -1099,6 +1121,11 @@ class DatabaseHelper  {
 
       var result = await _database?.rawQuery("DELETE FROM $table WHERE id = $id");
     }
+    return 1;
+  }
+
+  static Future<int>  updateFlockStatus (int active, int id) async {
+    var result = await _database?.rawUpdate("UPDATE Flock SET active = '${active}' WHERE f_id = ${id}");
     return 1;
   }
 

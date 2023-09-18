@@ -65,7 +65,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -246,6 +246,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                   controller: medicineController,
                                   keyboardType: TextInputType.multiline,
                                   textAlign: TextAlign.start,
+                                  textInputAction: TextInputAction.next,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
@@ -280,6 +281,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                   expands: true,
                                   controller: bird_countController,
                                   keyboardType: TextInputType.number,
+                                  textInputAction: TextInputAction.next,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
@@ -346,6 +348,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                   controller: doctorController,
                                   keyboardType: TextInputType.multiline,
                                   textAlign: TextAlign.start,
+                                  textInputAction: TextInputAction.next,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
@@ -381,6 +384,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                   controller: notesController,
                                   keyboardType: TextInputType.multiline,
                                   textAlign: TextAlign.start,
+                                  textInputAction: TextInputAction.done,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:

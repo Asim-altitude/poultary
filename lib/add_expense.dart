@@ -69,7 +69,7 @@ class _NewExpense extends State<NewExpense>
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -278,6 +278,7 @@ class _NewExpense extends State<NewExpense>
                                         expands: true,
                                         controller: howmanyController,
                                         keyboardType: TextInputType.number,
+                                        textInputAction: TextInputAction.next,
                                         decoration: const InputDecoration(
                                           border: OutlineInputBorder(
                                               borderRadius:
@@ -311,6 +312,7 @@ class _NewExpense extends State<NewExpense>
                                      expands: true,
                                      controller: amountController,
                                      keyboardType: TextInputType.number,
+                                     textInputAction: TextInputAction.next,
                                      decoration: const InputDecoration(
                                        border: OutlineInputBorder(
                                            borderRadius:
@@ -384,6 +386,7 @@ class _NewExpense extends State<NewExpense>
                                   maxLines: null,
                                   expands: true,
                                   controller: soldtoController,
+                                  textInputAction: TextInputAction.next,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
@@ -452,6 +455,7 @@ class _NewExpense extends State<NewExpense>
                                   controller: notesController,
                                   keyboardType: TextInputType.multiline,
                                   textAlign: TextAlign.start,
+                                  textInputAction: TextInputAction.done,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:

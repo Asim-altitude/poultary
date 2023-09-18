@@ -152,7 +152,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                        Container( child: Text(Utils.selected_flock!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color: Colors.deepPurple),)),
+                        Container( child: Text(Utils.selected_flock!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 17, color: Colors.deepPurple),)),
                         Row(
                           children: [
                             Container( child: Text(Utils.selected_flock!.acqusition_type, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),

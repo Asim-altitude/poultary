@@ -217,6 +217,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                                   expands: true,
                                   controller: totalBirdsController,
                                   keyboardType: TextInputType.number,
+                                  textInputAction: TextInputAction.next,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
@@ -322,6 +323,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                                   controller: notesController,
                                   keyboardType: TextInputType.multiline,
                                   textAlign: TextAlign.start,
+                                  textInputAction: TextInputAction.done,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:

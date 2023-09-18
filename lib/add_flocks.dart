@@ -268,6 +268,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                                 maxLines: 1,
                                 maxLength: 25,
                                 controller: nameController,
+                                textInputAction: TextInputAction.next,
                                 decoration: const InputDecoration(
                                   border: OutlineInputBorder(
                                       borderRadius:
@@ -301,6 +302,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                                 expands: true,
                                 controller: birdcountController,
                                 keyboardType: TextInputType.number,
+                                textInputAction: TextInputAction.next,
                                 decoration: const InputDecoration(
                                   border: OutlineInputBorder(
                                       borderRadius:
@@ -445,6 +447,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                                 controller: notesController,
                                 keyboardType: TextInputType.multiline,
                                 textAlign: TextAlign.start,
+                                textInputAction: TextInputAction.done,
                                 decoration: const InputDecoration(
                                   border: OutlineInputBorder(
                                       borderRadius:
@@ -468,7 +471,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                               print("Everything Okay");
                               await DatabaseHelper.instance.database;
                               int? id = await DatabaseHelper.insertFlock(Flock(f_id: 1, f_name: nameController.text, bird_count: int.parse(birdcountController.text)
-                                , purpose: _purposeselectedValue, acqusition_type: _acqusitionselectedValue, acqusition_date: date, notes: notesController.text, icon: birds.elementAt(chosen_index).image, active_bird_count: int.parse(birdcountController.text),
+                                , purpose: _purposeselectedValue, acqusition_type: _acqusitionselectedValue, acqusition_date: date, notes: notesController.text, icon: birds.elementAt(chosen_index).image, active_bird_count: int.parse(birdcountController.text), active: 1,
                               ));
 
                               if (base64Images.length > 0){

@@ -695,7 +695,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -948,16 +948,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                 color: Colors.black),
           ),
         ),
-        PopupMenuItem(
-          value: 2,
-          child: Text(
-            "Genearet PDF",
-            style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: Colors.black),
-          ),
-        ),
+
 
       ],
       elevation: 8.0,

@@ -18,6 +18,7 @@ import 'package:poultary/utils/utils.dart';
 import 'add_flocks.dart';
 import 'database/databse_helper.dart';
 import 'farm_setup_screen.dart';
+import 'manage_flock_screen.dart';
 import 'model/egg_item.dart';
 import 'model/flock.dart';
 
@@ -176,6 +177,43 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                             children: [
 
                               Text('Category Managment',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                            ],
+                          )),
+
+                    ],),),
+                ),
+              ),
+              InkWell(
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ManageFlockScreen()),
+                  );
+                },
+                child: Card(
+                  elevation: 2,
+                  shadowColor: Colors.grey,
+                  color: Colors.white,
+                  margin: EdgeInsets.all(10),
+                  child: Container(
+                    height: 60,
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white, //(x,y)
+                        ),
+                      ],
+                    ),
+                    child: Column(children: [
+                      Align(
+                          alignment: Alignment.topLeft,
+                          child: Row(
+                            children: [
+
+                              Text('Flock Managment',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
                             ],
                           )),
 

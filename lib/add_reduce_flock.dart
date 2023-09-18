@@ -54,7 +54,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -966,16 +966,6 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
           value: 1,
           child: Text(
             "Delete Item",
-            style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: Colors.black),
-          ),
-        ),
-        PopupMenuItem(
-          value: 2,
-          child: Text(
-            "Genearet PDF",
             style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,

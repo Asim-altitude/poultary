@@ -19,6 +19,7 @@ import '../model/finance_report_item.dart';
 import '../model/flock.dart';
 import '../model/flock_detail.dart';
 import '../model/flock_report_item.dart';
+import '../model/health_report_item.dart';
 import '../model/med_vac_item.dart';
 import '../model/transaction_item.dart';
 
@@ -72,11 +73,18 @@ class Utils {
   static String TOTAL_EXPENSE = "0";
   static String NET_INCOME = "0";
 
+  static String TOTAL_MEDICATIONS = "0";
+  static String TOTAL_VACCINATIONS = "0";
+  static String applied_filter = "";
+
   static List<Flock_Report_Item> flock_report_list = [];
   static List<Egg_Report_Item> egg_report_list = [];
   static List<Feed_Report_Item> feed_report_list = [];
   static List<FeedFlock_Report_Item> feed_flock_report_list = [];
   static List<Finance_Report_Item> finance_report_list = [];
+
+  static List<Health_Report_Item> vaccine_report_list = [];
+  static List<Health_Report_Item> medication_report_list = [];
 
 
   static setupInvoiceInitials(String invoiceHeading,String date) async {

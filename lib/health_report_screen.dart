@@ -8,12 +8,14 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/model/med_vac_item.dart';
+import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'model/egg_item.dart';
 import 'model/feed_item.dart';
 import 'model/flock.dart';
 import 'model/flock_detail.dart';
+import 'model/health_report_item.dart';
 
 class HealthReportScreen extends StatefulWidget {
   const HealthReportScreen({Key? key}) : super(key: key);
@@ -40,6 +42,8 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
     super.initState();
      try
      {
+       date_filter_name = Utils.applied_filter;
+
        getList();
        getData(date_filter_name);
      }
@@ -114,7 +118,6 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
     return SafeArea(child: Scaffold(
       body:SafeArea(
         top: false,
-
          child:Container(
           width: widthScreen,
           height: heightScreen,
@@ -152,7 +155,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                         child: Container(
                             margin: EdgeInsets.only(left: 5),
                             child: Text(
-                              "Eggs Report",
+                              "Birds Health Report",
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                   color: Colors.white,
@@ -160,11 +163,23 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                                   fontWeight: FontWeight.bold),
                             )),
                       ),
-                      Container(
-                        width: 30,
-                        height: 30,
-                        margin: EdgeInsets.only(right: 10),
-                        child: Image.asset('assets/pdf_icon.png'),
+                      InkWell(
+                        onTap: () {
+                          Utils.setupInvoiceInitials("Birds Health Report",pdf_formatted_date_filter);
+                          prepareListData();
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>  PDFScreen(item: 4,)),
+                          );
+                        },
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          margin: EdgeInsets.only(right: 10),
+                          child: Image.asset('assets/pdf_icon.png'),
+                        ),
                       )
                     ],
                   ),
@@ -278,7 +293,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
               ),
 
               list.length > 0 ? Container(
-                height: heightScreen - 220,
+                height: heightScreen - 120,
                 width: widthScreen,
                 child: ListView.builder(
                     itemCount: list.length,
@@ -372,7 +387,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -470,7 +485,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
   List<String> filterList = ['Today','Yesterday','This Month', 'Last Month','Last 3 months', 'Last 6 months','This Year',
     'Last Year','All Time'];
 
-  String date_filter_name = "This Month";
+  String date_filter_name = "This Month",pdf_formatted_date_filter = "This Month";
   String str_date = '',end_date = '';
   void getData(String filter){
     int index = 0;
@@ -576,6 +591,12 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
       getAllData();
     }
 
+    if(filter == 'Today' || filter == 'Yesterday'){
+      pdf_formatted_date_filter = filter +"("+str_date+")";
+    }else{
+      pdf_formatted_date_filter = filter +"("+str_date+" to "+end_date+")";
+    }
+
   }
 
   int getFlockID() {
@@ -589,6 +610,26 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
     }
 
     return f_id;
+  }
+
+  void prepareListData() {
+
+    Utils.TOTAL_MEDICATIONS = med_count.toString();
+    Utils.TOTAL_VACCINATIONS = vac_count.toString();
+
+    Utils.medication_report_list.clear();
+    Utils.vaccine_report_list.clear();
+    for(int i=0;i<list.length;i++){
+
+      Vaccination_Medication vaccination_medication = list.elementAt(i);
+      if(vaccination_medication.type == 'Medication'){
+        Utils.medication_report_list.add(Health_Report_Item(f_name: vaccination_medication.f_name, date: Utils.getFormattedDate(vaccination_medication.date), medicine_name: vaccination_medication.medicine, disease_name: vaccination_medication.disease, birds: vaccination_medication.bird_count.toString()));
+      }else{
+        Utils.vaccine_report_list.add(Health_Report_Item(f_name: vaccination_medication.f_name, date: Utils.getFormattedDate(vaccination_medication.date), medicine_name: vaccination_medication.medicine, disease_name: vaccination_medication.disease, birds: vaccination_medication.bird_count.toString()));
+
+      }
+    }
+
   }
 
 }
