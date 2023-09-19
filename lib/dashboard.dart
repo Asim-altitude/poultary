@@ -169,14 +169,14 @@ class _DashboardScreen extends State<DashboardScreen> {
                 margin: EdgeInsets.all(16),
 
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                  borderRadius: BorderRadius.all(Radius.circular(3)),
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 5,
-                      blurRadius: 7,
-                      offset: Offset(0, 3), // changes position of shadow
+                      spreadRadius: 2,
+                      blurRadius: 2,
+                      offset: Offset(0, 2), // changes position of shadow
                     ),
                   ],
 
@@ -291,6 +291,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                       ],
                     )),
               ),
+              SizedBox(height: 8,),
               flocks.length > 0 ? Container(
                 height: heightScreen/2,
                 width: widthScreen,
@@ -309,12 +310,16 @@ class _DashboardScreen extends State<DashboardScreen> {
                         getList();
 
                         },
-                        child:Card(
-                          margin: EdgeInsets.all(10),
-                          color: Colors.white,
-                          elevation: 2,
+                        child:Container(
+                          margin: EdgeInsets.only(left: 16,right: 16,top: 8,bottom: 0),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                              color: Colors.white,
+                              border: Border.all(color: Colors.blueAccent,width: 1.0)
+                          ),
                           child: Container(
-                            height: 130,
+                            height: 120,
                              width: widthScreen,
                              decoration: BoxDecoration(
                                color: Colors.white,
@@ -325,14 +330,15 @@ class _DashboardScreen extends State<DashboardScreen> {
                               Expanded(
                                 child: Container(
 
-                                  margin: EdgeInsets.all(10),
+                                  margin: EdgeInsets.all(5),
                                   padding: EdgeInsets.all(10),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                    Container( child: Text(flocks.elementAt(index).f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),)),
-                                    Container( child: Text(flocks.elementAt(index).acqusition_type, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
-                                    Container( child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+                                    Container( child: Text(flocks.elementAt(index).f_name, style: TextStyle( fontWeight: FontWeight.w600, fontSize: 17, color: Utils.getThemeColorBlue()),)),
+                                    Container( child: Text(flocks.elementAt(index).acqusition_type, style: TextStyle( fontWeight: FontWeight.w500, fontSize: 14, color: Colors.black,    decoration: TextDecoration.underline,
+                                    ),)),
+                                    Container( child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black54),)),
 
                                   ],),
                                 ),
@@ -347,7 +353,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                                     margin: EdgeInsets.only(right: 10),
                                     child: Row(
                                       children: [
-                                        Container( margin: EdgeInsets.only(right: 5), child: Text(flocks.elementAt(index).active_bird_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),)),
+                                        Container( margin: EdgeInsets.only(right: 5), child: Text(flocks.elementAt(index).active_bird_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 17, color: Utils.getThemeColorBlue()),)),
                                         Text("Birds", style: TextStyle(color: Colors.black, fontSize: 14),)
                                       ],
                                     ),
