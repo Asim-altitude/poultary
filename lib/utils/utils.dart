@@ -43,7 +43,7 @@ class Utils {
   static final String testIOS     = "ca-app-pub-3940256099942544~1458002511";
   static final String testAndroid = "ca-app-pub-3940256099942544~3347511713";
 
-  static String currency = "USD";
+  static String currency = "\$";
 
   //static final totalSecondsInDay = 5;
   static final totalSecondsInDay = 86400;
@@ -148,6 +148,7 @@ class Utils {
   static Color getThemeColor(){
     return const Color.fromRGBO(255, 255, 255, 1);
   }
+
   static double getHeightResized(double input) {
     double tempVar = 0;
     tempVar = (HEIGHT_SCREEN / _standardheight) * input;
@@ -258,6 +259,7 @@ class Utils {
     Color themeColor = Color.fromRGBO(2, 83, 179, 1);
     return themeColor;
   }
+
 
 
 

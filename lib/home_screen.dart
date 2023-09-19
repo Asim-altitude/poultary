@@ -111,19 +111,27 @@ class _HomeScreen extends State<HomeScreen> {
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
     return SafeArea(child: Scaffold(
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar:
+    ClipRRect(
+    borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(10.0),
+    topRight: Radius.circular(10.0),
+    ),
+    child:
+    BottomNavigationBar(
         currentIndex: _selectedTab,
         onTap: (index) => _changeTab(index),
         selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.grey,
-        backgroundColor: Colors.deepPurple,
+        unselectedItemColor: Colors.white70,
+        backgroundColor: Utils.getThemeColorBlue(),
+
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Dashboard"),
           BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: "Reports"),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings"),
         ],
 
-      ),
+      ),),
       body: _pages[_selectedTab])); /*SafeArea(
         top: false,
 

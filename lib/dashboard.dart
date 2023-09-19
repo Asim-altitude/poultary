@@ -113,6 +113,7 @@ class _DashboardScreen extends State<DashboardScreen> {
 
       body:  SafeArea(
         top: false,
+
           child:Container(
           width: widthScreen,
           height: heightScreen,
@@ -122,14 +123,14 @@ class _DashboardScreen extends State<DashboardScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children:  [
               ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   width: widthScreen,
-                  height: 60,
+                  height: 52,
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.deepPurple, //(x,y)
+                        color: Utils.getThemeColorBlue()
                       ),
                     ],
                   ),
@@ -137,8 +138,8 @@ class _DashboardScreen extends State<DashboardScreen> {
                     children: [
                       Container(
                         alignment: Alignment.center,
-                        width: 60,
-                        height: 60,
+                        width: 52,
+                        height: 52,
                         child: Container(
                             width: 40,
                             height: 40,
@@ -153,8 +154,8 @@ class _DashboardScreen extends State<DashboardScreen> {
                               "Poultary Dashboard",
                               style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700),
                             ),
                           ),),
 
@@ -162,52 +163,90 @@ class _DashboardScreen extends State<DashboardScreen> {
                   ),
                 ),
               ),
+
               Container(
                 padding: EdgeInsets.all(10),
-                margin: EdgeInsets.all(10),
+                margin: EdgeInsets.all(16),
+
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(5)),
+                  color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.white, //(x,y)
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 5,
+                      blurRadius: 7,
+                      offset: Offset(0, 3), // changes position of shadow
                     ),
                   ],
+
                 ),
-                child: Column(children: [
+
+                child:
+
+                Column(children: [
                   Align(
-                      alignment: Alignment.topLeft,
+                      alignment: Alignment.center,
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Financial Summary ',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
-                          Text('(Current month)',style: TextStyle(fontSize: 12, fontWeight: FontWeight.normal, color: Colors.black),),
+                          Text('Financial Summary ',style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Utils.getThemeColorBlue()),),
                         ],
                       )),
+                  Text('(This month)',style: TextStyle(fontSize: 12, fontWeight: FontWeight.normal, color: Colors.black),),
+
                   SizedBox(height: 10,width: widthScreen,),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Gross Income',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                      Text('$gross_income'+ Utils.currency,style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
+                      Container(
+                        width:140,
+                        child:Align(
+                          alignment: Alignment.centerLeft,
+                          child:Text('Gross Income',style: TextStyle(fontSize: 15, fontWeight: FontWeight.normal, color: Colors.black),),
 
+                        ),),
+
+                      Container(
+                        width:140,
+                        child:Align(
+                          alignment: Alignment.centerRight,
+                        child:Text('$gross_income'+ Utils.currency,style: TextStyle(fontSize: 19, fontWeight: FontWeight.normal, color: Colors.black),),
+
+                      ),),
                     ],),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Total Expense',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                      Text('-$total_expense'+ Utils.currency,style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.red),),
+                      Container(
+                        width:140,
+                        child:Align(
+                          alignment: Alignment.centerLeft,
+                          child:Text('Gross Expense',style: TextStyle(fontSize: 15, fontWeight: FontWeight.normal, color: Colors.black),),
+
+                        ),),
+
+                      Container(
+                        width:140,
+                        child:Align(
+                          alignment: Alignment.centerRight,
+                          child:Text('-$total_expense'+ Utils.currency,style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.red),),
+
+                        ),),
+
 
                     ],),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Net Income',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),),
-                      Text('$net_income'+ Utils.currency,style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: net_income>=0? Colors.black:Colors.red),),
+                      Text('Net Income',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),),
+                      Text('$net_income'+ Utils.currency,style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: net_income>=0? Utils.getThemeColorBlue():Colors.red),),
 
                     ],)
                 ],),),
               Container(
-                margin: EdgeInsets.only(left: 20, right: 20, top: 20),
+                margin: EdgeInsets.only(left: 20, right: 20, top: 10),
                 child: Align(
                     alignment: Alignment.topLeft,
                     child: Row(
@@ -238,11 +277,11 @@ class _DashboardScreen extends State<DashboardScreen> {
                                 alignment: Alignment.center,
                                 padding: EdgeInsets.all(7),
                                   decoration: BoxDecoration(
-                                    color: Colors.deepPurple,
+                                    color: Utils.getThemeColorBlue(),
                                     borderRadius: const BorderRadius.all(
                                         Radius.circular(30.0)),
                                     border: Border.all(
-                                      color:  Colors.deepPurple,
+                                      color:  Utils.getThemeColorBlue(),
                                       width: 2.0,
                                     ),
                                   ),child: Text("+New Flock", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.white),))),
