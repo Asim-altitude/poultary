@@ -16,6 +16,7 @@ import 'add_flocks.dart';
 import 'all_reports_screen.dart';
 import 'database/databse_helper.dart';
 import 'egg_collection.dart';
+import 'financial_report_screen.dart';
 import 'model/flock.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -151,7 +152,7 @@ class _DashboardScreen extends State<DashboardScreen> {
 
                           child: Expanded(
                             child: Text(
-                              "Poultary Dashboard",
+                              "Poultry Dashboard",
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
@@ -164,9 +165,18 @@ class _DashboardScreen extends State<DashboardScreen> {
                 ),
               ),
 
-              Container(
+
+              InkWell(
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const FinanceReportsScreen()),
+                  );
+                },
+              child:Container(
                 padding: EdgeInsets.all(10),
-                margin: EdgeInsets.all(16),
+                margin: EdgeInsets.all(12),
 
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(3)),
@@ -244,7 +254,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                       Text('$net_income'+ Utils.currency,style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: net_income>=0? Utils.getThemeColorBlue():Colors.red),),
 
                     ],)
-                ],),),
+                ],),),),
               Container(
                 margin: EdgeInsets.only(left: 20, right: 20, top: 10),
                 child: Align(
@@ -311,7 +321,7 @@ class _DashboardScreen extends State<DashboardScreen> {
 
                         },
                         child:Container(
-                          margin: EdgeInsets.only(left: 16,right: 16,top: 8,bottom: 0),
+                          margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.all(Radius.circular(3)),
 

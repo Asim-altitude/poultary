@@ -157,12 +157,12 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
               ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.deepPurple, //(x,y)
+                        color: Utils.getThemeColorBlue(),
                       ),
                     ],
                   ),
@@ -170,12 +170,12 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                     children: [
                       Container(
                         alignment: Alignment.center,
-                        width: 60,
-                        height: 60,
+                        width: 50,
+                        height: 50,
                         child: InkWell(
                           child: Container(
-                              width: 30,
-                              height: 30,
+                              width: 25,
+                              height: 25,
                               child: Image.asset("assets/income.png", color: Colors.white,)),
                           onTap: () {
                             Navigator.pop(context);
@@ -207,13 +207,13 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                       height: 45,
                       alignment: Alignment.centerRight,
                       padding: EdgeInsets.only(left: 10),
-                      margin: EdgeInsets.only(top: 10,left: 10,right: 5),
+                      margin: EdgeInsets.only(top: 10,left: 12,right: 5),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: const BorderRadius.all(
                             Radius.circular(5.0)),
                         border: Border.all(
-                          color:  Colors.deepPurple,
+                          color:  Utils.getThemeColorBlue(),
                           width: 1.0,
                         ),
                       ),
@@ -233,17 +233,17 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                             borderRadius: const BorderRadius.all(
                                 Radius.circular(5.0)),
                             border: Border.all(
-                              color:  Colors.deepPurple,
+                              color:  Utils.getThemeColorBlue(),
                               width: 1.0,
                             ),
                           ),
-                          margin: EdgeInsets.only(right: 10,top: 15,bottom: 5),
+                          margin: EdgeInsets.only(right: 12,top: 15,bottom: 5),
                           padding: EdgeInsets.only(left: 5,right: 5),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Text(date_filter_name, style: TextStyle(fontSize: 14),),
-                              Icon(Icons.arrow_drop_down, color: Colors.deepPurple,),
+                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
                             ],
                           ),
                         ),
@@ -259,14 +259,17 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                         builder: (context) => const BirdsReportsScreen()),
                   );
                 },
-                child: Card(
-                  elevation: 2,
-                  shadowColor: Colors.grey,
-                  color: Colors.white,
-                  margin: EdgeInsets.all(5),
+                child: Container(
+                  margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                      color: Colors.white,
+                      border: Border.all(color: Colors.blueAccent,width: 1.0)
+                  ),
                   child: Container(
                     width: widthScreen,
-                     padding: EdgeInsets.all(10),
+                     padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                      decoration: BoxDecoration(
                        color: Colors.white,
                        borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -274,11 +277,12 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                      ),
                    child: Column(children: [
                    Align(
-                       alignment: Alignment.topLeft,
+                       alignment: Alignment.center,
                        child: Row(
+                         mainAxisAlignment: MainAxisAlignment.center,
                          children: [
 
-                           Text('Birds Summary',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                           Text('Birds Summary',style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
                          ],
                        )),
 
@@ -286,21 +290,21 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                      children: [
                      Text('Total Added',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                     Text('$total_birds_added',style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, color: Colors.black),),
+                     Text('$total_birds_added',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black),),
 
                    ],),
                      Row(
                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                        children: [
                          Text('Total Reduced',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                         Text('-$total_birds_reduced',style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, color: Colors.red),),
+                         Text('-$total_birds_reduced',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.red),),
 
                        ],),
-                     Row(
-                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                     SizedBox(height: 4,),
+                     Column(
                        children: [
-                         Text('Current Birds',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
-                         Text('$current_birds',style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
+                         Text('$current_birds',style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
+                         Text('Current Birds',style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
 
                        ],)
              ],),),
@@ -308,63 +312,66 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
               ),
 
               InkWell(
-                onTap: (){
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const EggsReportsScreen()),
                   );
-
                 },
-                child: Card(
-                  elevation: 2,
-                  shadowColor: Colors.grey,
-                  color: Colors.white,
-                  margin: EdgeInsets.all(5),
+                child: Container(
+                  margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                      color: Colors.white,
+                      border: Border.all(color: Colors.blueAccent,width: 1.0)
+                  ),
                   child: Container(
-                    padding: EdgeInsets.all(10),
+                    width: widthScreen,
+                    padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                     decoration: BoxDecoration(
+                      color: Colors.white,
                       borderRadius: BorderRadius.all(Radius.circular(5)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.white, //(x,y)
-                        ),
-                      ],
+
                     ),
                     child: Column(children: [
                       Align(
-                          alignment: Alignment.topLeft,
+                          alignment: Alignment.center,
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
 
-                              Text('Eggs Summary',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                              Text('Eggs Summary',style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
                             ],
                           )),
-                      SizedBox(height: 20,width: widthScreen,),
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Total Collected',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                          Text('$total_eggs_collected',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
+                          Text('$total_eggs_collected',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black),),
 
                         ],),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Total Used',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                          Text('-$total_eggs_reduced',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.red),),
+                          Text('-$total_eggs_reduced',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.red),),
 
                         ],),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      SizedBox(height: 4,),
+                      Column(
                         children: [
-                          Text('Remaining Eggs',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
-                          Text('$total_eggs',style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: total_eggs>=0 ? Colors.black : Colors.red),),
+                          Text('$total_eggs',style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
+                          Text('Remaining Eggs',style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
 
                         ],)
                     ],),),
                 ),
               ),
+
+
 
               InkWell(
                 onTap: (){
@@ -374,13 +381,16 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                         builder: (context) => const FeedReportsScreen()),
                   );
                 },
-                child: Card(
-                  elevation: 2,
-                  shadowColor: Colors.grey,
-                  color: Colors.white,
-                  margin: EdgeInsets.all(5),
+                child: Container(
+                  margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                      color: Colors.white,
+                      border: Border.all(color: Colors.blueAccent,width: 1.0)
+                  ),
                   child: Container(
-                    padding: EdgeInsets.all(10),
+                    padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(5)),
                       boxShadow: [
@@ -389,18 +399,21 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                         ),
                       ],
                     ),
-                    child: Column(children: [
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
                       Align(
-                          alignment: Alignment.topLeft,
+                          alignment: Alignment.center,
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              Text('Feed Consumption',style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
 
-                              Text('Feed Consumption',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
                             ],
                           )),
-                      SizedBox(height: 20,width: widthScreen,),
+                      SizedBox(height: 10,width: widthScreen,),
                       Container(
-                        height: 100,
+                        height: feedings.length==0?10:feedings.length*33,
                         width: widthScreen,
                         child: ListView.builder(
                             itemCount: feedings.length,
@@ -413,15 +426,17 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                                   Text(feedings.elementAt(index).feed_name!,style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
                                   Text(feedings.elementAt(index).quantity! +" kg",style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
 
+
                                 ],);
 
                             }),
                       ),
-                      Row(
+                      Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Total Consumption',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
-                          Text(total_feed_consumption.toString() +" kg",style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
+
+                          Text(total_feed_consumption.toString() +" kg",style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
+                          Text('Total Consumption',style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
 
                         ],)
                     ],),),
@@ -436,13 +451,16 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                         builder: (context) => const FinanceReportsScreen()),
                   );
                 },
-                child: Card(
-                  elevation: 2,
-                  shadowColor: Colors.grey,
-                  color: Colors.white,
-                  margin: EdgeInsets.all(5),
+                child: Container(
+                  margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                      color: Colors.white,
+                      border: Border.all(color: Colors.blueAccent,width: 1.0)
+                  ),
                   child: Container(
-                    padding: EdgeInsets.all(10),
+                    padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(5)),
                       boxShadow: [
@@ -453,36 +471,38 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                     ),
                     child: Column(children: [
                       Align(
-                          alignment: Alignment.topLeft,
+                          alignment: Alignment.center,
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              Text('Income/Expense',style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
 
-                              Text('Income/Expense',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
                             ],
                           )),
-                      SizedBox(height: 20,width: widthScreen,),
-
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Gross Income',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                          Text('$gross_income'+ Utils.currency,style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
+                          Text('$gross_income'+ Utils.currency,style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black),),
 
                         ],),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Total Expense',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                          Text('-$total_expense'+ Utils.currency,style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.red),),
+                          Text('-$total_expense'+ Utils.currency,style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.red),),
 
                         ],),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      SizedBox(height: 4,),
+                      Column(
                         children: [
-                          Text('Net Income',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
-                          Text('$net_income'+ Utils.currency,style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
+                          Text('$net_income'+ Utils.currency,style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
+                          Text('Net Income',style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
 
-                        ],)
+                        ],),
+
+
+
                     ],),),
                 ),
               ),
@@ -495,55 +515,64 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                          builder: (context) => const HealthReportScreen()),
                    );
                  },
-                 child: Card(
-                  elevation: 2,
-                  shadowColor: Colors.grey,
-                  color: Colors.white,
-                  margin: EdgeInsets.all(5),
-                  child: Container(
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.white, //(x,y)
-                        ),
-                      ],
-                    ),
-                    child: Column(children: [
-                      Align(
-                          alignment: Alignment.topLeft,
-                          child: Row(
-                            children: [
+                 child: Container(
+                   margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
+                   decoration: BoxDecoration(
+                       borderRadius: BorderRadius.all(Radius.circular(3)),
 
-                              Text('Health Summary',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                       color: Colors.white,
+                       border: Border.all(color: Colors.blueAccent,width: 1.0)
+                   ),
+                   child: Container(
+                     padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
+                     decoration: BoxDecoration(
+                       borderRadius: BorderRadius.all(Radius.circular(5)),
+                       boxShadow: [
+                         BoxShadow(
+                           color: Colors.white, //(x,y)
+                         ),
+                       ],
+                     ),
+                     child:  Column(children: [
+                      Align(
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('Health Summary',style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
+
                             ],
                           )),
-                      SizedBox(height: 20,width: widthScreen,),
+
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Vaccinations',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                          Text('$vac_count',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
+                          Text('$vac_count',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black),),
 
                         ],),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Medications',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                          Text('$med_count',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
+                          Text('$med_count',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.red),),
 
                         ],),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      SizedBox(height: 4,),
+                      Column(
                         children: [
-                          Text('Total',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
-                          Text('$total_health_count',style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
+                          Text('$total_health_count',style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
+                          Text('Total',style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
 
-                        ],)
+                        ],),
+
+
+
                     ],),),
               ),
                ),
+             SizedBox(height: 20,),
 
              /* Container( margin: EdgeInsets.all(20),
                 padding: EdgeInsets.all(10),
@@ -818,6 +847,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
         items: _purposeList.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
             value: value,
+
             child: Text(
               value,
               textAlign: TextAlign.right,

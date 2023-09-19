@@ -75,12 +75,12 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
             children:  [
 
               ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
                      boxShadow: [
                       BoxShadow(
-                        color: Colors.deepPurple, //(x,y)
+                        color: Utils.getThemeColorBlue(), //(x,y)
                       ),
                     ],
                   ),
@@ -88,10 +88,10 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                     children: [
                       Container(
                         alignment: Alignment.center,
-                        width: 60,
-                        height: 60,
+                        width: 52,
+                        height: 52,
                         child: Icon(Icons.settings,
-                            color: Colors.white, size: 30),
+                            color: Colors.white),
                       ),
                       Container(
 
@@ -117,13 +117,16 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                         builder: (context) => const FarmSetupScreen()),
                   );
                 },
-                child: Card(
-                  elevation: 2,
-                  shadowColor: Colors.grey,
-                  color: Colors.white,
-                  margin: EdgeInsets.all(10),
+                child: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                      color: Colors.white,
+                      border: Border.all(color: Colors.blueAccent,width: 1.0)
+                  ),
+                  margin: EdgeInsets.only(left: 12,right: 12,top: 12,bottom: 8),
                   child: Container(
-                    height: 60,
+                    height: 50,
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -133,13 +136,17 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                         ),
                       ],
                     ),
-                    child: Column(children: [
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
                       Align(
                           alignment: Alignment.topLeft,
                           child: Row(
                             children: [
 
-                              Text('Farm Managment',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                              Icon(Icons.settings_applications,color: Utils.getThemeColorBlue(),),
+                              SizedBox(width: 4,),
+                              Text('Farm Management',style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                             ],
                           )),
 
@@ -147,20 +154,24 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                 ),
               ),
               InkWell(
-                onTap: (){
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const CategoryScreen()),
+
                   );
                 },
-                child: Card(
-                  elevation: 2,
-                  shadowColor: Colors.grey,
-                  color: Colors.white,
-                  margin: EdgeInsets.all(10),
+                child: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                      color: Colors.white,
+                      border: Border.all(color: Colors.blueAccent,width: 1.0)
+                  ),
+                  margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
                   child: Container(
-                    height: 60,
+                    height: 50,
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -170,34 +181,43 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                         ),
                       ],
                     ),
-                    child: Column(children: [
-                      Align(
-                          alignment: Alignment.topLeft,
-                          child: Row(
-                            children: [
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Align(
+                            alignment: Alignment.topLeft,
+                            child: Row(
+                              children: [
 
-                              Text('Category Managment',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
-                            ],
-                          )),
+                                Icon(Icons.settings_applications,color: Utils.getThemeColorBlue(),),
+                                SizedBox(width: 4,),
+                                Text('Category Management',style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                              ],
+                            )),
 
-                    ],),),
+                      ],),),
                 ),
               ),
+
               InkWell(
-                onTap: (){
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const ManageFlockScreen()),
+
                   );
                 },
-                child: Card(
-                  elevation: 2,
-                  shadowColor: Colors.grey,
-                  color: Colors.white,
-                  margin: EdgeInsets.all(10),
+                child: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                      color: Colors.white,
+                      border: Border.all(color: Colors.blueAccent,width: 1.0)
+                  ),
+                  margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
                   child: Container(
-                    height: 60,
+                    height: 50,
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -207,19 +227,24 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                         ),
                       ],
                     ),
-                    child: Column(children: [
-                      Align(
-                          alignment: Alignment.topLeft,
-                          child: Row(
-                            children: [
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Align(
+                            alignment: Alignment.topLeft,
+                            child: Row(
+                              children: [
 
-                              Text('Flock Managment',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
-                            ],
-                          )),
+                                Icon(Icons.settings_applications,color: Utils.getThemeColorBlue(),),
+                                SizedBox(width: 4,),
+                                Text('Flock Management',style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                              ],
+                            )),
 
-                    ],),),
+                      ],),),
                 ),
               ),
+
 
                   ]
       ),),),),),);
