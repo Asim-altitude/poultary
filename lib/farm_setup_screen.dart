@@ -115,7 +115,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.deepPurple, //(x,y)
+                            color: Utils.getThemeColorBlue()
                           ),
                         ],
                       ),
@@ -123,11 +123,11 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                         children: [
                           Container(
                             alignment: Alignment.center,
-                            width: 60,
-                            height: 60,
+                            width: 50,
+                            height: 50,
                             child: InkWell(
                               child: Icon(Icons.arrow_back,
-                                  color: Colors.white, size: 30),
+                                  color: Colors.white, size: 25),
                               onTap: () {
                                 Navigator.pop(context);
                               },
@@ -172,7 +172,8 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                                  ),
                                  Align(
                                      alignment: Alignment.bottomRight,
-                                     child: Icon(Icons.edit, color: Colors.deepPurple,)), 
+                                     child: Icon(Icons.edit, color:  Utils.getThemeColorBlue(),
+                                         )),
                                 ],
                               ),
                             ),
@@ -181,26 +182,26 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                           SizedBox(height: 10,width: widthScreen),
                           Container(
                             width: widthScreen,
-                            height: 80,
-                            padding: EdgeInsets.all(5),
-                            margin: EdgeInsets.only(left: 10, right: 10),
+                            height: 60,
+                            padding: EdgeInsets.all(0),
+                            margin: EdgeInsets.only(left: 16, right: 16),
                             decoration: BoxDecoration(
                                 color: Colors.white60,
                                 borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
+                                BorderRadius.all(Radius.circular(5))),
                             child: Container(
+
                               child: SizedBox(
                                 width: widthScreen,
-                                height: 70,
+                                height: 60,
                                 child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
+                                  expands: false,
                                   controller: nameController,
                                   textAlign: TextAlign.start,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
+                                        BorderRadius.all(Radius.circular(5))),
                                     hintText: 'Farm Name',
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
@@ -215,26 +216,25 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                           SizedBox(height: 10,width: widthScreen),
                           Container(
                             width: widthScreen,
-                            height: 80,
-                            padding: EdgeInsets.all(5),
-                            margin: EdgeInsets.only(left: 10, right: 10),
+                            height: 60,
+                            padding: EdgeInsets.all(0),
+                            margin: EdgeInsets.only(left: 16, right: 16),
                             decoration: BoxDecoration(
                                 color: Colors.white60,
                                 borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
+                                BorderRadius.all(Radius.circular(5))),
                             child: Container(
                               child: SizedBox(
                                 width: widthScreen,
-                                height: 70,
+                                height: 60,
                                 child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
+
                                   controller: locationController,
                                   textAlign: TextAlign.start,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
+                                        BorderRadius.all(Radius.circular(5))),
                                     hintText: 'Location name (Country/City etc)',
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
@@ -253,26 +253,26 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                             },
                             child: Container(
                               width: widthScreen,
-                              height: 80,
-                              padding: EdgeInsets.all(5),
-                              margin: EdgeInsets.only(left: 10, right: 10),
+                              height: 60,
+                              padding: EdgeInsets.all(0),
+                              margin: EdgeInsets.only(left: 16, right: 16),
                               decoration: BoxDecoration(
                                   color: Colors.white60,
                                   borderRadius:
-                                  BorderRadius.all(Radius.circular(10))),
+                                  BorderRadius.all(Radius.circular(5))),
                               child: Container(
                                 padding: EdgeInsets.all(10),
                                 decoration: BoxDecoration(
                                   color: Colors.transparent,
                                   borderRadius: const BorderRadius.all(
-                                      Radius.circular(10.0)),
+                                      Radius.circular(5.0)),
                                   border: Border.all(
                                     color:  Colors.grey,
-                                    width: 2.0,
+                                    width: 1.0,
                                   ),
                                 ),
                                 child: SizedBox(
-                                  height: 70,
+                                  height: 60,
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
@@ -289,23 +289,23 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                           SizedBox(height: 10,width: widthScreen),
                           Container(
                             width: widthScreen,
-                            height: 70,
-                            margin: EdgeInsets.only(left: 20, right: 20),
+                            height: 60,
+                            margin: EdgeInsets.only(left: 16, right: 16),
                             decoration: BoxDecoration(
                                 color: Colors.white60,
                                 borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
+                                BorderRadius.all(Radius.circular(5))),
                             child: InkWell(
                               onTap: () {
                                 pickDate();
                               },
                               child: Container(
                                 alignment: Alignment.centerLeft,
-                                padding: EdgeInsets.only(left: 10),
+                                padding: EdgeInsets.only(left: 8),
                                 decoration: BoxDecoration(
                                   color: Colors.transparent,
                                   borderRadius: const BorderRadius.all(
-                                      Radius.circular(10.0)),
+                                      Radius.circular(5.0)),
                                   border: Border.all(
                                     color:  Colors.black,
                                     width: 1.0,
@@ -345,20 +345,20 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                             },
                             child: Container(
                               width: widthScreen,
-                              height: 60,
+                              height: 58,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: Colors.deepPurple,
+                                color:  Utils.getThemeColorBlue(),
                                 borderRadius: const BorderRadius.all(
-                                    Radius.circular(10.0)),
+                                    Radius.circular(5.0)),
                                 border: Border.all(
-                                  color:  Colors.deepPurple,
-                                  width: 2.0,
+                                  color:  Utils.getThemeColorBlue(),
+                                  width: 1.0,
                                 ),
                               ),
-                              margin: EdgeInsets.all( 20),
+                              margin: EdgeInsets.only( left: 16,right: 16,top: 4),
                               child: Text(
-                                "Save",
+                                "SAVE",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.white,
