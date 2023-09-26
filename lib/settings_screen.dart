@@ -189,7 +189,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                             child: Row(
                               children: [
 
-                                Icon(Icons.settings_applications,color: Utils.getThemeColorBlue(),),
+                                Icon(Icons.api,color: Utils.getThemeColorBlue(),),
                                 SizedBox(width: 4,),
                                 Text('Category Management',style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                               ],
@@ -235,7 +235,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                             child: Row(
                               children: [
 
-                                Icon(Icons.settings_applications,color: Utils.getThemeColorBlue(),),
+                                Icon(Icons.album,color: Utils.getThemeColorBlue(),),
                                 SizedBox(width: 4,),
                                 Text('Flock Management',style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                               ],

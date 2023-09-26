@@ -87,18 +87,18 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
       },
       child: Container(
         width: widthScreen,
-        height: 60,
+        height: 50,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: Colors.deepPurple,
+          color: Utils.getThemeColorBlue(),
           borderRadius: const BorderRadius.all(
-              Radius.circular(10.0)),
+              Radius.circular(6.0)),
           border: Border.all(
-            color:  Colors.deepPurple,
+            color:  Utils.getThemeColorBlue(),
             width: 2.0,
           ),
         ),
-        margin: EdgeInsets.only(left: 10, right: 10),
+        margin: EdgeInsets.only(left: 0, right: 0),
         child: Text(
           "Add New",
           textAlign: TextAlign.center,
@@ -125,12 +125,12 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
               ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
                      boxShadow: [
                       BoxShadow(
-                        color: Colors.deepPurple, //(x,y)
+                        color: Utils.getThemeColorBlue(), //(x,y)
                       ),
                     ],
                   ),
@@ -138,8 +138,8 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
                     children: [
                       Container(
                         alignment: Alignment.center,
-                        width: 60,
-                        height: 60,
+                        width: 50,
+                        height: 50,
                         child: InkWell(
                           child: Icon(Icons.arrow_back,
                               color: Colors.white, size: 30),
@@ -164,6 +164,7 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
                 ),
               ),
 
+              SizedBox(height: 10,),
               Container(
                 height: heightScreen - 220,
                 width: widthScreen,
@@ -180,18 +181,22 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
                           MaterialPageRoute(
                               builder: (context) => const SingleFlockScreen()),
                         );},
-                        child: Card(
-                          margin: EdgeInsets.all(10),
-                          color: Colors.white,
-                          elevation: 3,
+                        child: Container(
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                              color: Colors.white,
+                              border: Border.all(color: Colors.grey,width: 1.0)
+                          ),
+                          margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
                           child: Row(
                             children: [
                               Row( children: [
                                 Column( children: [
                                   Container(
 
-                                      width: widthScreen - widthScreen/4,
-                                      margin: EdgeInsets.all(10) , padding: EdgeInsets.all(10), child: Text(categoryList.elementAt(index).name!, style: TextStyle( fontWeight: FontWeight.normal, fontSize: 18, color: Colors.black),)),
+                                      width: (widthScreen - widthScreen/4)+6,
+                                      margin: EdgeInsets.all(4) , padding: EdgeInsets.all(10), child: Text(categoryList.elementAt(index).name!, style: TextStyle( fontWeight: FontWeight.normal, fontSize: 18, color: Colors.black),)),
    // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
                                 ],),
 
@@ -199,7 +204,7 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
                               InkWell(
                                 onTap: () {
                                   showAlertDialog(context,index);
-                                },child: Container(width: 40,height: 40,child: Icon(Icons.cancel, color: Colors.deepPurple,),))
+                                },child: Container(width: 40,height: 40,child: Icon(Icons.cancel, color: Colors.red,),))
                             ],
                           ),
                         ),
@@ -285,14 +290,14 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
                       },
                       child: Container(
                         width: widthScreen,
-                        height: 60,
+                        height: 50,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: Colors.transparent,
+                          color: Utils.getThemeColorBlue(),
                           borderRadius: const BorderRadius.all(
-                              Radius.circular(10.0)),
+                              Radius.circular(50.0)),
                           border: Border.all(
-                            color:  Colors.deepPurple,
+                            color:  Utils.getThemeColorBlue(),
                             width: 2.0,
                           ),
                         ),
@@ -301,7 +306,7 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
                           "Confirm",
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                              color: Colors.deepPurple,
+                              color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.bold),
                         ),

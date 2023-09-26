@@ -91,12 +91,12 @@ class _ManageFlockScreen extends State<ManageFlockScreen> with SingleTickerProvi
             children:  [
 
               ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
                      boxShadow: [
                       BoxShadow(
-                        color: Colors.deepPurple, //(x,y)
+                        color: Utils.getThemeColorBlue(), //(x,y)
                       ),
                     ],
                   ),
@@ -108,8 +108,8 @@ class _ManageFlockScreen extends State<ManageFlockScreen> with SingleTickerProvi
                         },
                         child: Container(
                           alignment: Alignment.center,
-                          width: 60,
-                          height: 60,
+                          width: 50,
+                          height: 50,
                           child: Icon(Icons.arrow_back,
                               color: Colors.white, size: 30),
                         ),
@@ -133,19 +133,20 @@ class _ManageFlockScreen extends State<ManageFlockScreen> with SingleTickerProvi
                   Container(
                       alignment:  Alignment.center,
                       margin: EdgeInsets.only(top: 20),
-                      child: Text('Click Any FLock to Activate or Expire.',style: TextStyle( fontSize: 14,color: Colors.black, fontWeight:  FontWeight.bold),)),
+                      child: Text('Click any flock to Activate or Expire.',style: TextStyle( fontSize: 14,color: Colors.black, fontWeight:  FontWeight.bold),)),
                   Row(
                     children: [
                       Container(
-                        width: widthScreen - 20,
+                        width: widthScreen - 32,
                           alignment:  Alignment.center,
-                          margin: EdgeInsets.only(top: 10,left: 10,right: 10),
-                          child: Text(' Expired flocks will no longer appear in the app except this screen.',style: TextStyle( fontSize: 14,color: Colors.grey),)),
+                          margin: EdgeInsets.only(top: 10,left: 16,right: 16),
+                          child: Text(' Expired flocks will no longer appear in the app except this screen.',textAlign: TextAlign.center,style: TextStyle( fontSize: 14,color: Colors.grey),)),
 
                     ],
                   )
                 ],
               ) : SizedBox(width: 0,height: 0,),
+              SizedBox(height: 8,),
               flocks.length > 0 ? Container(
                 height: heightScreen - 100,
                 width: widthScreen,
@@ -163,12 +164,16 @@ class _ManageFlockScreen extends State<ManageFlockScreen> with SingleTickerProvi
 
                             });
                           },
-                          child:Card(
-                            margin: EdgeInsets.all(10),
-                            color: Colors.white,
-                            elevation: 2,
+                          child:Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                                color: Colors.white,
+                                border: Border.all(color: Colors.blueAccent,width: 1.0)
+                            ),
+                            margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
                             child: Container(
-                              height: 160,
+                              height: 150,
                               width: widthScreen,
                               decoration: BoxDecoration(
                                 color: Colors.white,
@@ -224,10 +229,14 @@ class _ManageFlockScreen extends State<ManageFlockScreen> with SingleTickerProvi
                       );
 
                     }),
-              ) : Container(
+              ) :
+              Align(
+                alignment: Alignment.center,
+              child:Container(
+
                   alignment:  Alignment.center,
-                  margin: EdgeInsets.only(top: 20),
-                  child: Text('No Flocks Added Yet. Add new from Dashboard',style: TextStyle( fontSize: 14,color: Colors.black),)),
+                  margin: EdgeInsets.only(top: 50,left: 16,right: 16),
+                  child: Text('No Flocks Added Yet. Add new from Dashboard',textAlign: TextAlign.center,style: TextStyle( fontSize: 16,color: Colors.black,),),),),
 
                   ]
       ),),),),),);

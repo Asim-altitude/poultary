@@ -110,7 +110,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
               child: Column(
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                     child: Container(
                       decoration: BoxDecoration(
                         boxShadow: [
