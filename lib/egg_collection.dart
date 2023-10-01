@@ -151,12 +151,12 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
               ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.deepPurple, //(x,y)
+                        color: Utils.getThemeColorBlue(), //(x,y)
                       ),
                     ],
                   ),
@@ -164,8 +164,8 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                     children: [
                       Container(
                         alignment: Alignment.center,
-                        width: 60,
-                        height: 60,
+                        width: 50,
+                        height: 50,
                         child: InkWell(
                           child: Icon(Icons.arrow_back,
                               color: Colors.white, size: 30),
@@ -203,7 +203,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                         borderRadius: const BorderRadius.all(
                             Radius.circular(10.0)),
                         border: Border.all(
-                          color:  Colors.deepPurple,
+                          color:  Utils.getThemeColorBlue(),
                           width: 1.0,
                         ),
                       ),
@@ -223,7 +223,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                             borderRadius: const BorderRadius.all(
                                 Radius.circular(10.0)),
                             border: Border.all(
-                              color:  Colors.deepPurple,
+                              color:  Utils.getThemeColorBlue(),
                               width: 1.0,
                             ),
                           ),
@@ -233,7 +233,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Text(date_filter_name, style: TextStyle(fontSize: 14),),
-                              Icon(Icons.arrow_drop_down, color: Colors.deepPurple,),
+                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
                             ],
                           ),
                         ),
@@ -257,16 +257,16 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                         height: 40,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: selected == 1 ? Colors.deepPurple : Colors.white,
+                          color: selected == 1 ? Utils.getThemeColorBlue() : Colors.white,
                           borderRadius: BorderRadius.only(topLeft: Radius.circular(10)
                               ,bottomLeft: Radius.circular(10)),
                           border: Border.all(
-                            color:  Colors.deepPurple,
+                            color:  Utils.getThemeColorBlue(),
                             width: 1.0,
                           ),
                         ),
                         child: Text('All', style: TextStyle(
-                            color: selected==1 ? Colors.white : Colors.deepPurple, fontSize: 14),),
+                            color: selected==1 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                       ),
                     ),
                   ),
@@ -283,16 +283,16 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                         height: 40,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: selected==2 ? Colors.deepPurple : Colors.white,
+                          color: selected==2 ? Utils.getThemeColorBlue() : Colors.white,
 
 
                           border: Border.all(
-                            color: Colors.deepPurple,
+                            color: Utils.getThemeColorBlue(),
                             width: 1.0,
                           ),
                         ),
                         child: Text('Collection', style: TextStyle(
-                            color: selected==2 ? Colors.white : Colors.deepPurple, fontSize: 14),),
+                            color: selected==2 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                       ),
                     ),
                   ),
@@ -309,16 +309,16 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                         height: 40,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: selected==3 ? Colors.deepPurple : Colors.white,
+                          color: selected==3 ? Utils.getThemeColorBlue() : Colors.white,
                           borderRadius: BorderRadius.only(topRight: Radius.circular(10)
                               ,bottomRight: Radius.circular(10)),
                           border: Border.all(
-                            color:  Colors.deepPurple,
+                            color:  Utils.getThemeColorBlue(),
                             width: 1.0,
                           ),
                         ),
                         child: Text('Reduction', style: TextStyle(
-                            color: selected==3 ? Colors.white : Colors.deepPurple, fontSize: 14),),
+                            color: selected==3 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                       ),
                     ),
                   ),
@@ -336,18 +336,21 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                         onTap: () {
 
                         },
-                        child: Card(
-                          margin: EdgeInsets.all(5),
-                          color: Colors.white,
-                          elevation: 3,
+                        child: Container(
+                          margin: EdgeInsets.only(left: 8,right: 8,top: 8,bottom: 0),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                              color: Colors.white,
+                              border: Border.all(color: Colors.blueAccent,width: 1.0)
+                          ),
                           child: Container(
                             color: Colors.white,
-                            height: 200,
                             child: Row( children: [
                               Expanded(
                                 child: Container(
                                   alignment: Alignment.topLeft,
-                                  margin: EdgeInsets.all(10),
+                                  margin: EdgeInsets.only(left: 10,right: 10,top: 4,bottom: 10),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -375,7 +378,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                                       Row(
                                         children: [
                                           Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).f_name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
-                                          Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).isCollection == 1? '(Collected)':'(Reduced)', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: eggs.elementAt(index).isCollection == 1? Colors.green:Colors.red),)),
+                                          Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).isCollection == 1? ' (Collected)':' (Reduced)', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: eggs.elementAt(index).isCollection == 1? Colors.green:Colors.red),)),
 
                                         ],
                                       ),
@@ -391,7 +394,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                                           ],
                                         ),
                                       ),
-                                      Container(margin: EdgeInsets.all(5), child: Text(eggs.elementAt(index).isCollection==0? eggs.elementAt(index).reduction_reason!.toUpperCase() :'COLLECTED', style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.deepPurple),)),
+                                      Container(margin: EdgeInsets.all(5), child: Text(eggs.elementAt(index).isCollection==0? eggs.elementAt(index).reduction_reason!.toUpperCase() :'COLLECTED', style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Utils.getThemeColorBlue()),)),
                                       Container(
                                         child: Row(
                                           children: [
@@ -433,7 +436,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 24,
-                  color: Colors.deepPurple,
+                  color: Utils.getThemeColorBlue(),
                   fontFamily: 'Roboto',
                   fontWeight: FontWeight.bold
               ),
@@ -446,7 +449,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                           padding: const EdgeInsets.all(10),
                           margin: const EdgeInsets.only(left: 20, right: 20),
                           decoration: const BoxDecoration(
-                              color: Colors.deepPurple,
+                              color: Utils.getThemeColorBlue(),
                               borderRadius:
                                   BorderRadius.all(Radius.circular(10))),
                           child: Container(
@@ -490,7 +493,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                     padding: const EdgeInsets.all(10),
                     margin: const EdgeInsets.only(left: 20, right: 20),
                     decoration: const BoxDecoration(
-                        color: Colors.deepPurple,
+                        color: Utils.getThemeColorBlue(),
                         borderRadius:
                         BorderRadius.all(Radius.circular(10))),
                     child: Container(
@@ -534,7 +537,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                     padding: const EdgeInsets.all(10),
                     margin: const EdgeInsets.only(left: 20, right: 20),
                     decoration: const BoxDecoration(
-                        color: Colors.deepPurple,
+                        color: Utils.getThemeColorBlue(),
                         borderRadius:
                         BorderRadius.all(Radius.circular(10))),
                     child: Container(
@@ -578,7 +581,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                     padding: const EdgeInsets.all(10),
                     margin: const EdgeInsets.only(left: 20, right: 20),
                     decoration: const BoxDecoration(
-                        color: Colors.deepPurple,
+                        color: Utils.getThemeColorBlue(),
                         borderRadius:
                         BorderRadius.all(Radius.circular(10))),
                     child: Container(
@@ -622,7 +625,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                     padding: const EdgeInsets.all(10),
                     margin: const EdgeInsets.only(left: 20, right: 20),
                     decoration: const BoxDecoration(
-                        color: Colors.deepPurple,
+                        color: Utils.getThemeColorBlue(),
                         borderRadius:
                         BorderRadius.all(Radius.circular(10))),
                     child: Container(

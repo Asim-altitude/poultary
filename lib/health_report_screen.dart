@@ -128,12 +128,12 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
               ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.deepPurple, //(x,y)
+                        color: Utils.getThemeColorBlue(), //(x,y)
                       ),
                     ],
                   ),
@@ -141,8 +141,8 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                     children: [
                       Container(
                         alignment: Alignment.center,
-                        width: 60,
-                        height: 60,
+                        width: 50,
+                        height: 50,
                         child: InkWell(
                           child: Icon(Icons.arrow_back,
                               color: Colors.white, size: 30),
@@ -199,7 +199,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                         borderRadius: const BorderRadius.all(
                             Radius.circular(5.0)),
                         border: Border.all(
-                          color:  Colors.deepPurple,
+                          color:  Utils.getThemeColorBlue(),
                           width: 1.0,
                         ),
                       ),
@@ -219,7 +219,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                             borderRadius: const BorderRadius.all(
                                 Radius.circular(5.0)),
                             border: Border.all(
-                              color:  Colors.deepPurple,
+                              color:  Utils.getThemeColorBlue(),
                               width: 1.0,
                             ),
                           ),
@@ -229,7 +229,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Text(date_filter_name, style: TextStyle(fontSize: 14),),
-                              Icon(Icons.arrow_drop_down, color: Colors.deepPurple,),
+                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
                             ],
                           ),
                         ),
@@ -258,7 +258,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                         child: Row(
                           children: [
 
-                            Text('Health Summary',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                            Text('Health Summary',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
                           ],
                         )),
                     SizedBox(height: 20,width: widthScreen,),
@@ -289,7 +289,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                 alignment: Alignment.topLeft,
                 child: Container(
                     margin: EdgeInsets.all(10),
-                    child: Text('Medications/Vaccinations',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),)),
+                    child: Text('Medications/Vaccinations',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
               ),
 
               list.length > 0 ? Container(
@@ -315,8 +315,8 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                                 child: Column( children: [
                                   Row(
                                     children: [
-                                      Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).medicine!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),)),
-                                      Container(margin: EdgeInsets.all(0), child: Text("("+list.elementAt(index).f_name!+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.deepPurple),)),
+                                      Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).medicine!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),)),
+                                      Container(margin: EdgeInsets.all(0), child: Text("("+list.elementAt(index).f_name!+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Utils.getThemeColorBlue()),)),
 
                                     ],
                                   ),

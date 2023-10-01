@@ -170,7 +170,7 @@ class _HomeScreen extends State<HomeScreen> {
                 },
                 child: Align(
                     alignment: Alignment.centerRight,
-                    child: Container(margin: EdgeInsets.only(right: 15, top: 20), child: Text("Add New Flock", style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),))),
+                    child: Container(margin: EdgeInsets.only(right: 15, top: 20), child: Text("Add New Flock", style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),))),
               ),
 
               Container(
@@ -213,7 +213,7 @@ class _HomeScreen extends State<HomeScreen> {
                                   alignment: Alignment.topLeft,
                                   margin: EdgeInsets.all(10),
                                   child: Column( children: [
-                                    Container(margin: EdgeInsets.all(5), child: Text(flocks.elementAt(index).f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),)),
+                                    Container(margin: EdgeInsets.all(5), child: Text(flocks.elementAt(index).f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Utils.getThemeColorBlue()),)),
                                     Container(margin: EdgeInsets.all(0), child: Text(flocks.elementAt(index).acqusition_type, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
                                     Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
 
@@ -230,7 +230,7 @@ class _HomeScreen extends State<HomeScreen> {
                                     margin: EdgeInsets.only(right: 10),
                                     child: Row(
                                       children: [
-                                        Container( margin: EdgeInsets.only(right: 5), child: Text(flocks.elementAt(index).active_bird_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),)),
+                                        Container( margin: EdgeInsets.only(right: 5), child: Text(flocks.elementAt(index).active_bird_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Utils.getThemeColorBlue()),)),
                                         Text("Birds", style: TextStyle(color: Colors.black, fontSize: 16),)
                                       ],
                                     ),
@@ -255,7 +255,7 @@ class _HomeScreen extends State<HomeScreen> {
                 },
                 child: Align(
                     alignment: Alignment.centerRight,
-                    child: Container(margin: EdgeInsets.only(right: 15, top: 20), child: Text("Category Set up", style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),))),
+                    child: Container(margin: EdgeInsets.only(right: 15, top: 20), child: Text("Category Set up", style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),))),
               ),
               InkWell(
                 onTap: () {
@@ -267,7 +267,7 @@ class _HomeScreen extends State<HomeScreen> {
                 },
                 child: Align(
                     alignment: Alignment.centerRight,
-                    child: Container(margin: EdgeInsets.only(right: 15, top: 20), child: Text("Reports", style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),))),
+                    child: Container(margin: EdgeInsets.only(right: 15, top: 20), child: Text("Reports", style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),))),
               ),
               *//*Center(
                     child: SfCircularChart(
@@ -292,7 +292,7 @@ class _HomeScreen extends State<HomeScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 24,
-                  color: Colors.deepPurple,
+                  color: Utils.getThemeColorBlue(),
                   fontFamily: 'Roboto',
                   fontWeight: FontWeight.bold
               ),
@@ -305,7 +305,7 @@ class _HomeScreen extends State<HomeScreen> {
                           padding: const EdgeInsets.all(10),
                           margin: const EdgeInsets.only(left: 20, right: 20),
                           decoration: const BoxDecoration(
-                              color: Colors.deepPurple,
+                              color: Utils.getThemeColorBlue(),
                               borderRadius:
                                   BorderRadius.all(Radius.circular(10))),
                           child: Container(
@@ -349,7 +349,7 @@ class _HomeScreen extends State<HomeScreen> {
                     padding: const EdgeInsets.all(10),
                     margin: const EdgeInsets.only(left: 20, right: 20),
                     decoration: const BoxDecoration(
-                        color: Colors.deepPurple,
+                        color: Utils.getThemeColorBlue(),
                         borderRadius:
                         BorderRadius.all(Radius.circular(10))),
                     child: Container(
@@ -393,7 +393,7 @@ class _HomeScreen extends State<HomeScreen> {
                     padding: const EdgeInsets.all(10),
                     margin: const EdgeInsets.only(left: 20, right: 20),
                     decoration: const BoxDecoration(
-                        color: Colors.deepPurple,
+                        color: Utils.getThemeColorBlue(),
                         borderRadius:
                         BorderRadius.all(Radius.circular(10))),
                     child: Container(
@@ -437,7 +437,7 @@ class _HomeScreen extends State<HomeScreen> {
                     padding: const EdgeInsets.all(10),
                     margin: const EdgeInsets.only(left: 20, right: 20),
                     decoration: const BoxDecoration(
-                        color: Colors.deepPurple,
+                        color: Utils.getThemeColorBlue(),
                         borderRadius:
                         BorderRadius.all(Radius.circular(10))),
                     child: Container(
@@ -481,7 +481,7 @@ class _HomeScreen extends State<HomeScreen> {
                     padding: const EdgeInsets.all(10),
                     margin: const EdgeInsets.only(left: 20, right: 20),
                     decoration: const BoxDecoration(
-                        color: Colors.deepPurple,
+                        color: Utils.getThemeColorBlue(),
                         borderRadius:
                         BorderRadius.all(Radius.circular(10))),
                     child: Container(

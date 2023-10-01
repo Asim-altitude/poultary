@@ -277,7 +277,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text("Currency", style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal),),
-                                      Text(selectedCurrency, style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                                      Text(selectedCurrency, style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
 
                                     ],
                                   )

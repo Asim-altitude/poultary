@@ -137,7 +137,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.deepPurple, //(x,y)
+                        color: Utils.getThemeColorBlue(), //(x,y)
                       ),
                     ],
                   ),
@@ -203,7 +203,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                         borderRadius: const BorderRadius.all(
                             Radius.circular(5.0)),
                         border: Border.all(
-                          color:  Colors.deepPurple,
+                          color:  Utils.getThemeColorBlue(),
                           width: 1.0,
                         ),
                       ),
@@ -223,7 +223,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                             borderRadius: const BorderRadius.all(
                                 Radius.circular(5.0)),
                             border: Border.all(
-                              color:  Colors.deepPurple,
+                              color:  Utils.getThemeColorBlue(),
                               width: 1.0,
                             ),
                           ),
@@ -233,7 +233,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Text(date_filter_name, style: TextStyle(fontSize: 14),),
-                              Icon(Icons.arrow_drop_down, color: Colors.deepPurple,),
+                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
                             ],
                           ),
                         ),
@@ -262,7 +262,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                         child: Row(
                           children: [
 
-                            Text('Summary',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                            Text('Summary',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
                           ],
                         )),
                     SizedBox(height: 20,width: widthScreen,),
@@ -293,7 +293,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                 alignment: Alignment.topLeft,
                 child: Container(
                     margin: EdgeInsets.all(10),
-                    child: Text('Collections/Reductions',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),)),
+                    child: Text('Collections/Reductions',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
               ),
 
               eggs.length > 0 ? Container(

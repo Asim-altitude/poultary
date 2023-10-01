@@ -142,7 +142,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.deepPurple, //(x,y)
+                        color: Utils.getThemeColorBlue(), //(x,y)
                       ),
                     ],
                   ),
@@ -210,7 +210,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                         borderRadius: const BorderRadius.all(
                             Radius.circular(5.0)),
                         border: Border.all(
-                          color:  Colors.deepPurple,
+                          color:  Utils.getThemeColorBlue(),
                           width: 1.0,
                         ),
                       ),
@@ -230,7 +230,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                             borderRadius: const BorderRadius.all(
                                 Radius.circular(5.0)),
                             border: Border.all(
-                              color:  Colors.deepPurple,
+                              color:  Utils.getThemeColorBlue(),
                               width: 1.0,
                             ),
                           ),
@@ -240,7 +240,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Text(date_filter_name, style: TextStyle(fontSize: 14),),
-                              Icon(Icons.arrow_drop_down, color: Colors.deepPurple,),
+                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
                             ],
                           ),
                         ),
@@ -267,7 +267,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                      child: Row(
                        children: [
 
-                         Text('Summary',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                         Text('Summary',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
                        ],
                      )),
 
@@ -298,7 +298,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                 alignment: Alignment.topLeft,
                 child: Container(
                     margin: EdgeInsets.all(10),
-                    child: Text('Addition/Reductions',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),)),
+                    child: Text('Addition/Reductions',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
               ),
 
               list.length > 0 ? Container(

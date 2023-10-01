@@ -112,7 +112,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.deepPurple, //(x,y)
+                        color: Utils.getThemeColorBlue(), //(x,y)
                       ),
                     ],
                   ),
@@ -178,7 +178,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                         borderRadius: const BorderRadius.all(
                             Radius.circular(5.0)),
                         border: Border.all(
-                          color:  Colors.deepPurple,
+                          color:  Utils.getThemeColorBlue(),
                           width: 1.0,
                         ),
                       ),
@@ -198,7 +198,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                             borderRadius: const BorderRadius.all(
                                 Radius.circular(5.0)),
                             border: Border.all(
-                              color:  Colors.deepPurple,
+                              color:  Utils.getThemeColorBlue(),
                               width: 1.0,
                             ),
                           ),
@@ -208,7 +208,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Text(date_filter_name, style: TextStyle(fontSize: 14),),
-                              Icon(Icons.arrow_drop_down, color: Colors.deepPurple,),
+                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
                             ],
                           ),
                         ),
@@ -236,7 +236,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                         child: Row(
                           children: [
 
-                            Text('Feed Consumption',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                            Text('Feed Consumption',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
                           ],
                         )),
                     SizedBox(height: 20,width: widthScreen,),
@@ -272,7 +272,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                 alignment: Alignment.topLeft,
                 child: Container(
                     margin: EdgeInsets.all(10),
-                    child: Text('All Feeding ',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),)),
+                    child: Text('All Feeding ',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
               ),
 
               list.length > 0 ? Container(
@@ -301,7 +301,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                                 child: Column(children: [
                                   Row(
                                     children: [
-                                      Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).feed_name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),)),
+                                      Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).feed_name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),)),
                                       Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index).f_name!+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
                                     ],
                                   ),
@@ -325,7 +325,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                                   margin: EdgeInsets.only(right: 10),
                                   child: Row(
                                     children: [
-                                      Container(  child: Text(list.elementAt(index).quantity.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),)),
+                                      Container(  child: Text(list.elementAt(index).quantity.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Utils.getThemeColorBlue()),)),
                                       Text("kg", style: TextStyle(color: Colors.black, fontSize: 16),)
                                     ],
                                   ),

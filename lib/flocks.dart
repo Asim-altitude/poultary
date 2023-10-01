@@ -143,8 +143,8 @@ class _FlockScreen extends State<FlockScreen>
                               height: 60,
                               padding: const EdgeInsets.all(10),
                               margin: const EdgeInsets.only(left: 20, right: 20),
-                              decoration: const BoxDecoration(
-                                  color: Colors.deepPurple,
+                              decoration:  BoxDecoration(
+                                  color: Utils.getThemeColorBlue(),
                                   borderRadius:
                                   BorderRadius.all(Radius.circular(10))),
                               child: Container(
@@ -199,7 +199,7 @@ class _FlockScreen extends State<FlockScreen>
       Container(
           width: widthScreen,
           margin: EdgeInsets.all(10),
-          child: Text(flocks.elementAt(index).f_name, style: TextStyle( fontSize: 22, color: Colors.deepPurple, fontWeight: FontWeight.bold),)),
+          child: Text(flocks.elementAt(index).f_name, style: TextStyle( fontSize: 22, color: Utils.getThemeColorBlue(), fontWeight: FontWeight.bold),)),
       Row(
             children: [
       Text("Current Birds", style: TextStyle( fontSize: 16, color: Colors.black, fontWeight: FontWeight.normal),),

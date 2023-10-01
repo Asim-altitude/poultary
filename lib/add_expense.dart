@@ -170,12 +170,12 @@ class _NewExpense extends State<NewExpense>
                 children: [
 
                   ClipRRect(
-                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                     child: Container(
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.deepPurple, //(x,y)
+                            color: Utils.getThemeColorBlue(), //(x,y)
                           ),
                         ],
                       ),
@@ -183,8 +183,8 @@ class _NewExpense extends State<NewExpense>
                         children: [
                           Container(
                             alignment: Alignment.center,
-                            width: 60,
-                            height: 60,
+                            width: 50,
+                            height: 50,
                             child: InkWell(
                               child: Icon(Icons.arrow_back,
                                   color: Colors.white, size: 30),
@@ -491,11 +491,11 @@ class _NewExpense extends State<NewExpense>
                               height: 60,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: Colors.deepPurple,
+                                color: Utils.getThemeColorBlue(),
                                 borderRadius: const BorderRadius.all(
                                     Radius.circular(10.0)),
                                 border: Border.all(
-                                  color:  Colors.deepPurple,
+                                  color:  Utils.getThemeColorBlue(),
                                   width: 2.0,
                                 ),
                               ),

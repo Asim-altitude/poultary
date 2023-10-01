@@ -65,7 +65,7 @@ class _Inventory extends State<Inventory> with SingleTickerProviderStateMixin{
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 24,
-                  color: Colors.deepPurple,
+                  color: Utils.getThemeColorBlue(),
                   fontFamily: 'Roboto',
                   fontWeight: FontWeight.bold
               ),
@@ -77,8 +77,8 @@ class _Inventory extends State<Inventory> with SingleTickerProviderStateMixin{
                           height: 60,
                           padding: const EdgeInsets.all(10),
                           margin: const EdgeInsets.only(left: 20, right: 20),
-                          decoration: const BoxDecoration(
-                              color: Colors.deepPurple,
+                          decoration:  BoxDecoration(
+                              color: Utils.getThemeColorBlue(),
                               borderRadius:
                                   BorderRadius.all(Radius.circular(10))),
                           child: Container(
@@ -121,8 +121,8 @@ class _Inventory extends State<Inventory> with SingleTickerProviderStateMixin{
                     height: 60,
                     padding: const EdgeInsets.all(10),
                     margin: const EdgeInsets.only(left: 20, right: 20),
-                    decoration: const BoxDecoration(
-                        color: Colors.deepPurple,
+                    decoration:  BoxDecoration(
+                        color: Utils.getThemeColorBlue(),
                         borderRadius:
                         BorderRadius.all(Radius.circular(10))),
                     child: Container(
@@ -165,8 +165,8 @@ class _Inventory extends State<Inventory> with SingleTickerProviderStateMixin{
                     height: 60,
                     padding: const EdgeInsets.all(10),
                     margin: const EdgeInsets.only(left: 20, right: 20),
-                    decoration: const BoxDecoration(
-                        color: Colors.deepPurple,
+                    decoration:  BoxDecoration(
+                        color: Utils.getThemeColorBlue(),
                         borderRadius:
                         BorderRadius.all(Radius.circular(10))),
                     child: Container(

@@ -118,12 +118,12 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
             children:  [
 
               ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
                      boxShadow: [
                       BoxShadow(
-                        color: Colors.deepPurple, //(x,y)
+                        color: Utils.getThemeColorBlue(), //(x,y)
                       ),
                     ],
                   ),
@@ -131,8 +131,8 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                     children: [
                       Container(
                         alignment: Alignment.center,
-                        width: 60,
-                        height: 60,
+                        width: 50,
+                        height: 50,
                         child: InkWell(
                           child: Icon(Icons.arrow_back,
                               color: Colors.white, size: 30),
@@ -169,7 +169,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                         borderRadius: const BorderRadius.all(
                             Radius.circular(10.0)),
                         border: Border.all(
-                          color:  Colors.deepPurple,
+                          color:  Utils.getThemeColorBlue(),
                           width: 1.0,
                         ),
                       ),
@@ -189,7 +189,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                             borderRadius: const BorderRadius.all(
                                 Radius.circular(10.0)),
                             border: Border.all(
-                              color:  Colors.deepPurple,
+                              color:  Utils.getThemeColorBlue(),
                               width: 1.0,
                             ),
                           ),
@@ -199,7 +199,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Text(date_filter_name, style: TextStyle(fontSize: 14),),
-                              Icon(Icons.arrow_drop_down, color: Colors.deepPurple,),
+                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
                             ],
                           ),
                         ),
@@ -223,16 +223,16 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                         height: 40,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: selected == 1 ? Colors.deepPurple : Colors.transparent,
+                          color: selected == 1 ? Utils.getThemeColorBlue() : Colors.transparent,
                           borderRadius: BorderRadius.only(topLeft: Radius.circular(10)
                               ,bottomLeft: Radius.circular(10)),
                           border: Border.all(
-                            color:  Colors.deepPurple,
+                            color:  Utils.getThemeColorBlue(),
                             width: 2.0,
                           ),
                         ),
                         child: Text('All', style: TextStyle(
-                            color: selected==1 ? Colors.white : Colors.deepPurple, fontSize: 14),),
+                            color: selected==1 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                       ),
                     ),
                   ),
@@ -249,16 +249,16 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                         height: 40,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: selected==2 ? Colors.deepPurple : Colors.transparent,
+                          color: selected==2 ? Utils.getThemeColorBlue() : Colors.transparent,
 
 
                           border: Border.all(
-                            color: Colors.deepPurple,
+                            color: Utils.getThemeColorBlue(),
                             width: 2.0,
                           ),
                         ),
                         child: Text('Medication', style: TextStyle(
-                            color: selected==2 ? Colors.white : Colors.deepPurple, fontSize: 14),),
+                            color: selected==2 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                       ),
                     ),
                   ),
@@ -275,16 +275,16 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                         height: 40,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: selected==3 ? Colors.deepPurple : Colors.transparent,
+                          color: selected==3 ? Utils.getThemeColorBlue() : Colors.transparent,
                           borderRadius: BorderRadius.only(topRight: Radius.circular(10)
                               ,bottomRight: Radius.circular(10)),
                           border: Border.all(
-                            color:  Colors.deepPurple,
+                            color:  Utils.getThemeColorBlue(),
                             width: 2.0,
                           ),
                         ),
                         child: Text('Vaccination', style: TextStyle(
-                            color: selected==3 ? Colors.white : Colors.deepPurple, fontSize: 14),),
+                            color: selected==3 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                       ),
                     ),
                   ),
@@ -297,13 +297,16 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                     itemCount: feedings.length,
                     scrollDirection: Axis.vertical,
                     itemBuilder: (BuildContext context, int index) {
-                      return Card(
-                        margin: EdgeInsets.all(10),
-                        color: Colors.white,
-                        elevation: 3,
+                      return Container(
+                        margin: EdgeInsets.only(left: 8,right: 8,top: 8,bottom: 0),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                            color: Colors.white,
+                            border: Border.all(color: Colors.blueAccent,width: 1.0)
+                        ),
                         child: Container(
                           color: Colors.white,
-                          height: 185,
                           child: Row( children: [
                             Expanded(
                               child: Container(
@@ -334,7 +337,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                                     ),),
                                   Row(
                                     children: [
-                                      Container(margin: EdgeInsets.all(0), child: Text(feedings.elementAt(index).feed_name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),)),
+                                      Container(margin: EdgeInsets.all(0), child: Text(feedings.elementAt(index).feed_name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),)),
                                       Container(margin: EdgeInsets.all(0), child: Text(" ("+feedings.elementAt(index).f_name!+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
                                     ],
                                   ),
@@ -399,7 +402,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 24,
-                  color: Colors.deepPurple,
+                  color: Utils.getThemeColorBlue(),
                   fontFamily: 'Roboto',
                   fontWeight: FontWeight.bold
               ),
@@ -412,7 +415,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                           padding: const EdgeInsets.all(10),
                           margin: const EdgeInsets.only(left: 20, right: 20),
                           decoration: const BoxDecoration(
-                              color: Colors.deepPurple,
+                              color: Utils.getThemeColorBlue(),
                               borderRadius:
                                   BorderRadius.all(Radius.circular(10))),
                           child: Container(
@@ -456,7 +459,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                     padding: const EdgeInsets.all(10),
                     margin: const EdgeInsets.only(left: 20, right: 20),
                     decoration: const BoxDecoration(
-                        color: Colors.deepPurple,
+                        color: Utils.getThemeColorBlue(),
                         borderRadius:
                         BorderRadius.all(Radius.circular(10))),
                     child: Container(
@@ -500,7 +503,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                     padding: const EdgeInsets.all(10),
                     margin: const EdgeInsets.only(left: 20, right: 20),
                     decoration: const BoxDecoration(
-                        color: Colors.deepPurple,
+                        color: Utils.getThemeColorBlue(),
                         borderRadius:
                         BorderRadius.all(Radius.circular(10))),
                     child: Container(
@@ -544,7 +547,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                     padding: const EdgeInsets.all(10),
                     margin: const EdgeInsets.only(left: 20, right: 20),
                     decoration: const BoxDecoration(
-                        color: Colors.deepPurple,
+                        color: Utils.getThemeColorBlue(),
                         borderRadius:
                         BorderRadius.all(Radius.circular(10))),
                     child: Container(
@@ -588,7 +591,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                     padding: const EdgeInsets.all(10),
                     margin: const EdgeInsets.only(left: 20, right: 20),
                     decoration: const BoxDecoration(
-                        color: Colors.deepPurple,
+                        color: Utils.getThemeColorBlue(),
                         borderRadius:
                         BorderRadius.all(Radius.circular(10))),
                     child: Container(

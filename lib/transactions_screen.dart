@@ -124,7 +124,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
       bottomNavigationBar: BottomAppBar(
         color: Colors.transparent,
         child: Container(
-          height: 60,
+          height: 50,
           width: widthScreen,
           child: Row(children: [
 
@@ -195,12 +195,12 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                 mainAxisAlignment: MainAxisAlignment.end,
             children:  [
               ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.deepPurple, //(x,y)
+                        color: Utils.getThemeColorBlue(), //(x,y)
                       ),
                     ],
                   ),
@@ -208,8 +208,8 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                     children: [
                       Container(
                         alignment: Alignment.center,
-                        width: 60,
-                        height: 60,
+                        width: 50,
+                        height: 50,
                         child: InkWell(
                           child: Icon(Icons.arrow_back,
                               color: Colors.white, size: 30),
@@ -246,7 +246,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                         borderRadius: const BorderRadius.all(
                             Radius.circular(10.0)),
                         border: Border.all(
-                          color:  Colors.deepPurple,
+                          color:  Utils.getThemeColorBlue(),
                           width: 1.0,
                         ),
                       ),
@@ -266,7 +266,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                             borderRadius: const BorderRadius.all(
                                 Radius.circular(10.0)),
                             border: Border.all(
-                              color:  Colors.deepPurple,
+                              color:  Utils.getThemeColorBlue(),
                               width: 1.0,
                             ),
                           ),
@@ -276,7 +276,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Text(date_filter_name, style: TextStyle(fontSize: 14),),
-                              Icon(Icons.arrow_drop_down, color: Colors.deepPurple,),
+                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
                             ],
                           ),
                         ),
@@ -300,16 +300,16 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                   height: 40,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: selected == 1 ? Colors.deepPurple : Colors.white,
+                    color: selected == 1 ? Utils.getThemeColorBlue() : Colors.white,
                     borderRadius: BorderRadius.only(topLeft: Radius.circular(10)
                     ,bottomLeft: Radius.circular(10)),
                     border: Border.all(
-                      color:  Colors.deepPurple,
+                      color:  Utils.getThemeColorBlue(),
                       width: 1.0,
                     ),
                   ),
                   child: Text('All', style: TextStyle(
-                      color: selected==1 ? Colors.white : Colors.deepPurple, fontSize: 14),),
+                      color: selected==1 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                 ),
               ),
       ),
@@ -325,15 +325,15 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                         height: 40,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: selected==2 ? Colors.deepPurple : Colors.white,
+                          color: selected==2 ? Utils.getThemeColorBlue() : Colors.white,
 
                           border: Border.all(
-                            color: Colors.deepPurple,
+                            color: Utils.getThemeColorBlue(),
                             width: 1.0,
                           ),
                         ),
                         child: Text('Income', style: TextStyle(
-                           color: selected==2 ? Colors.white : Colors.deepPurple, fontSize: 14),),
+                           color: selected==2 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                       ),
                     ),
                   ),
@@ -349,16 +349,16 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                         height: 40,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: selected==3 ? Colors.deepPurple : Colors.white,
+                          color: selected==3 ? Utils.getThemeColorBlue() : Colors.white,
                           borderRadius: BorderRadius.only(topRight: Radius.circular(10)
                               ,bottomRight: Radius.circular(10)),
                           border: Border.all(
-                            color:  Colors.deepPurple,
+                            color:  Utils.getThemeColorBlue(),
                             width: 1.0,
                           ),
                         ),
                         child: Text('Expense', style: TextStyle(
-                            color: selected==3 ? Colors.white : Colors.deepPurple, fontSize: 14),),
+                            color: selected==3 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                       ),
                     ),
                   ),
@@ -373,15 +373,18 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                     itemCount: transactionList.length,
                     scrollDirection: Axis.vertical,
                     itemBuilder: (BuildContext context, int index) {
-                      return Card(
-                        margin: EdgeInsets.all(5),
-                        color: Colors.white,
-                        elevation: 2,
+                      return Container(
+                        margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                            color: Colors.white,
+                            border: Border.all(color: Colors.blueAccent,width: 1.0)
+                        ),
 
                         child: Container(
                           color: Colors.white,
                           padding: EdgeInsets.all(10),
-                          height: 210,
                           child: Column(
                             children: [
                               Align(
@@ -405,7 +408,9 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
 
                                     ],
                                   ),),
-                              Container(child: Text(style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple), transactionList.elementAt(index).type == 'Income'? transactionList.elementAt(index).sale_item : transactionList.elementAt(index).expense_item),),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                              child:Container(child: Text( textAlign:TextAlign.left,style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()), transactionList.elementAt(index).type == 'Income'? transactionList.elementAt(index).sale_item : transactionList.elementAt(index).expense_item),),),
                               Row(
                                 children: [
                                   Container(child: Text(style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black), transactionList.elementAt(index).f_name,)),
@@ -495,7 +500,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 24,
-                  color: Colors.deepPurple,
+                  color: Utils.getThemeColorBlue(),
                   fontFamily: 'Roboto',
                   fontWeight: FontWeight.bold
               ),
@@ -508,7 +513,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                           padding: const EdgeInsets.all(10),
                           margin: const EdgeInsets.only(left: 20, right: 20),
                           decoration: const BoxDecoration(
-                              color: Colors.deepPurple,
+                              color: Utils.getThemeColorBlue(),
                               borderRadius:
                                   BorderRadius.all(Radius.circular(10))),
                           child: Container(
@@ -552,7 +557,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                     padding: const EdgeInsets.all(10),
                     margin: const EdgeInsets.only(left: 20, right: 20),
                     decoration: const BoxDecoration(
-                        color: Colors.deepPurple,
+                        color: Utils.getThemeColorBlue(),
                         borderRadius:
                         BorderRadius.all(Radius.circular(10))),
                     child: Container(
@@ -596,7 +601,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                     padding: const EdgeInsets.all(10),
                     margin: const EdgeInsets.only(left: 20, right: 20),
                     decoration: const BoxDecoration(
-                        color: Colors.deepPurple,
+                        color: Utils.getThemeColorBlue(),
                         borderRadius:
                         BorderRadius.all(Radius.circular(10))),
                     child: Container(
@@ -640,7 +645,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                     padding: const EdgeInsets.all(10),
                     margin: const EdgeInsets.only(left: 20, right: 20),
                     decoration: const BoxDecoration(
-                        color: Colors.deepPurple,
+                        color: Utils.getThemeColorBlue(),
                         borderRadius:
                         BorderRadius.all(Radius.circular(10))),
                     child: Container(
@@ -684,7 +689,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                     padding: const EdgeInsets.all(10),
                     margin: const EdgeInsets.only(left: 20, right: 20),
                     decoration: const BoxDecoration(
-                        color: Colors.deepPurple,
+                        color: Utils.getThemeColorBlue(),
                         borderRadius:
                         BorderRadius.all(Radius.circular(10))),
                     child: Container(

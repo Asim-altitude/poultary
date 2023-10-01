@@ -128,7 +128,7 @@ class Invoice {
             child: pw.Text(
               'Medication Report',
               style: pw.TextStyle(
-                color: PdfColors.deepPurple,
+                color: PdfColors.blue,
                 fontWeight: pw.FontWeight.bold,
                 fontSize: 14,
               ),
@@ -143,7 +143,7 @@ class Invoice {
             child: pw.Text(
               'Vaccination Report',
               style: pw.TextStyle(
-                color: PdfColors.deepPurple,
+                color: PdfColors.blue,
                 fontWeight: pw.FontWeight.bold,
                 fontSize: 14,
               ),
@@ -223,7 +223,7 @@ class Invoice {
                   child: pw.Text(
                     Utils.INVOICE_HEADING,
                     style: pw.TextStyle(
-                      color: PdfColors.deepPurple,
+                      color: PdfColors.blue,
                       fontWeight: pw.FontWeight.bold,
                       fontSize: 24,
                     ),
@@ -283,7 +283,7 @@ class Invoice {
                   child: pw.Text(
                     "Summary",
                     style: pw.TextStyle(
-                      color: PdfColors.deepPurple,
+                      color: PdfColors.blue,
                       fontWeight: pw.FontWeight.bold,
                       fontSize: 24,
                     ),
@@ -602,7 +602,7 @@ class Invoice {
       cellAlignment: pw.Alignment.centerLeft,
       headerDecoration: pw.BoxDecoration(
         borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
-        color: PdfColors.deepPurple,
+        color: PdfColors.blue,
       ),
       headerHeight: 25,
       cellHeight: 40,
@@ -657,7 +657,7 @@ class Invoice {
       cellAlignment: pw.Alignment.centerLeft,
       headerDecoration: pw.BoxDecoration(
         borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
-        color: PdfColors.deepPurple,
+        color: PdfColors.blue,
       ),
       headerHeight: 25,
       cellHeight: 40,

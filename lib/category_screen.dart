@@ -205,7 +205,7 @@ class _CategoryScreen extends State<CategoryScreen> with SingleTickerProviderSta
                                   alignment: Alignment.topLeft,
                                   margin: EdgeInsets.all(10),
                                   child: Column( children: [
-                                    Container(margin: EdgeInsets.all(0), child: Text(categoryList.elementAt(index).name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),)),
+                                    Container(margin: EdgeInsets.all(0), child: Text(categoryList.elementAt(index).name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Utils.getThemeColorBlue()),)),
    // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
                                   ],),
                                 ),

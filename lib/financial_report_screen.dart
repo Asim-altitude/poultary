@@ -135,7 +135,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.deepPurple, //(x,y)
+                        color: Utils.getThemeColorBlue(), //(x,y)
                       ),
                     ],
                   ),
@@ -201,7 +201,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                         borderRadius: const BorderRadius.all(
                             Radius.circular(5.0)),
                         border: Border.all(
-                          color:  Colors.deepPurple,
+                          color:  Utils.getThemeColorBlue(),
                           width: 1.0,
                         ),
                       ),
@@ -221,7 +221,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                             borderRadius: const BorderRadius.all(
                                 Radius.circular(5.0)),
                             border: Border.all(
-                              color:  Colors.deepPurple,
+                              color:  Utils.getThemeColorBlue(),
                               width: 1.0,
                             ),
                           ),
@@ -231,7 +231,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Text(date_filter_name, style: TextStyle(fontSize: 14),),
-                              Icon(Icons.arrow_drop_down, color: Colors.deepPurple,),
+                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
                             ],
                           ),
                         ),
@@ -260,7 +260,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                         child: Row(
                           children: [
 
-                            Text('Income/Expense',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),),
+                            Text('Income/Expense',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
                           ],
                         )),
                     SizedBox(height: 20,width: widthScreen,),
@@ -293,7 +293,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                 alignment: Alignment.topLeft,
                 child: Container(
                     margin: EdgeInsets.all(10),
-                    child: Text('Income/Expense',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),)),
+                    child: Text('Income/Expense',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
               ),
 
               list.length > 0 ? Container(
@@ -339,7 +339,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                                             margin: EdgeInsets.only(right: 10),
                                             child: Row(
                                               children: [
-                                                Container(  child: Text(list.elementAt(index).amount.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple),)),
+                                                Container(  child: Text(list.elementAt(index).amount.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),)),
                                                 Text(Utils.currency, style: TextStyle(color: Colors.black, fontSize: 14),)
                                               ],
                                             ),

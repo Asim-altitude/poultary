@@ -120,7 +120,7 @@ class _PDFScreen extends State<PDFScreen> {
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.deepPurple, //(x,y)
+                            color: Utils.getThemeColorBlue(), //(x,y)
                           ),
                         ],
                       ),
