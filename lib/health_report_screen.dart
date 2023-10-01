@@ -238,10 +238,10 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
               ),
 
               Card(
-                elevation: 2,
-                shadowColor: Colors.grey,
+                elevation: 10,
+                shadowColor: Colors.blue,
                 color: Colors.white,
-                margin: EdgeInsets.all(5),
+                margin: EdgeInsets.all(10),
                 child: Container(
                   padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
@@ -300,13 +300,17 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                     scrollDirection: Axis.vertical,
                     physics: NeverScrollableScrollPhysics(),
                     itemBuilder: (BuildContext context, int index) {
-                      return Card(
-                        margin: EdgeInsets.all(5),
-                        color: Colors.white,
-                        elevation: 3,
+                      return Container(
+                        margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                            color: Colors.white,
+                            border: Border.all(color: Colors.blueAccent,width: 1.0)
+                        ),
+
                         child: Container(
                           color: Colors.white,
-                          height: 180,
                           child: Row( children: [
                             Expanded(
                               child: Container(
@@ -367,7 +371,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                   margin: EdgeInsets.only(top: 50),
                   child: Column(
                     children: [
-                      Text('No Medications/Vaccinations in given period', style: TextStyle(fontSize: 18, color: Colors.black),),
+                      Text('No Medications/Vaccinations in given period', style: TextStyle(fontSize: 15, color: Colors.black54),),
                     ],
                   ),
                 ),

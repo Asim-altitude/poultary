@@ -130,7 +130,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
               ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
                     boxShadow: [
@@ -143,8 +143,8 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                     children: [
                       Container(
                         alignment: Alignment.center,
-                        width: 60,
-                        height: 60,
+                        width: 50,
+                        height: 50,
                         child: InkWell(
                           child: Icon(Icons.arrow_back,
                               color: Colors.white, size: 30),
@@ -240,8 +240,8 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
               ),
 
               Card(
-                elevation: 2,
-                shadowColor: Colors.grey,
+                elevation: 10,
+                shadowColor: Colors.blue,
                 color: Colors.white,
                 margin: EdgeInsets.all(10),
                 child: Container(
@@ -310,14 +310,18 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                         onTap: () {
 
                           },
-                        child: Card(
-                          margin: EdgeInsets.all(5),
-                          color: Colors.white,
-                          elevation: 2,
+                        child: Container(
+                          margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                              color: Colors.white,
+                              border: Border.all(color: Colors.blueAccent,width: 1.0)
+                          ),
+
                           child: Container(
                             color: Colors.white,
                             padding: EdgeInsets.all(10),
-                            height: 130,
                             child: Column(
                               children: [
                                 Row(
@@ -372,7 +376,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                     width: widthScreen,
                     child: Column(
                       children: [
-                        Text('No Income/Expense added in current period', style: TextStyle(fontSize: 18, color: Colors.black),),
+                        Text('No Income/Expense added in current period', style: TextStyle(fontSize: 15, color: Colors.black54),),
                       ],
                     ),
                   ),

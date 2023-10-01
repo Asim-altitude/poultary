@@ -107,7 +107,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
               ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
                     boxShadow: [
@@ -120,8 +120,8 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                     children: [
                       Container(
                         alignment: Alignment.center,
-                        width: 60,
-                        height: 60,
+                        width: 50,
+                        height: 50,
                         child: InkWell(
                           child: Icon(Icons.arrow_back,
                               color: Colors.white, size: 30),
@@ -216,8 +216,8 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                 ],
               ),
               Card(
-                elevation: 2,
-                shadowColor: Colors.grey,
+                elevation: 10,
+                shadowColor: Colors.blue,
                 color: Colors.white,
                 margin: EdgeInsets.all(10),
                 child: Container(
@@ -285,13 +285,17 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                     scrollDirection: Axis.vertical,
                     physics: NeverScrollableScrollPhysics(),
                     itemBuilder: (BuildContext context, int index) {
-                      return Card(
-                        margin: EdgeInsets.all(5),
-                        color: Colors.white,
-                        elevation: 3,
+                      return Container(
+                        margin: EdgeInsets.only(left: 8,right: 8,top: 8,bottom: 0),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                            color: Colors.white,
+                            border: Border.all(color: Colors.blueAccent,width: 1.0)
+                        ),
+
                         child: Container(
                           color: Colors.white,
-                          height: 100,
                           child: Row( children: [
                             Expanded(
                               child: Container(

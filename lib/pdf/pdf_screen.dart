@@ -79,7 +79,7 @@ class _PDFScreen extends State<PDFScreen> {
     await file.writeAsBytes(bytes);
     // await OpenFile.open(file.path);
      Share.shareFiles(['${file.path}'], text: 'Poultary Pdf');
-    await Printing.layoutPdf(onLayout: (_) => bytes);
+    // await Printing.layoutPdf(onLayout: (_) => bytes);
 
   }
 
@@ -115,7 +115,7 @@ class _PDFScreen extends State<PDFScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   ClipRRect(
-                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                     child: Container(
                       decoration: BoxDecoration(
                         boxShadow: [
@@ -128,8 +128,8 @@ class _PDFScreen extends State<PDFScreen> {
                         children: [
                           Container(
                             alignment: Alignment.center,
-                            width: 60,
-                            height: 60,
+                            width: 50,
+                            height: 50,
                             child: InkWell(
                               child: Icon(Icons.arrow_back,
                                   color: Colors.white, size: 30),
