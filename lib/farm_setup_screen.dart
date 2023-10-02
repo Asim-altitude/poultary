@@ -80,7 +80,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
 
   int modified = 0;
 
-  String selectedCurrency = "USD";
+  String selectedCurrency = "\$";
   String date = "Date Created";
   final locationController = TextEditingController();
   final nameController = TextEditingController();
