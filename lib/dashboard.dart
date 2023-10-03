@@ -318,6 +318,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                               builder: (context) => const SingleFlockScreen()),
                         );
                         getList();
+                        getData();
 
                         },
                         child:Container(
