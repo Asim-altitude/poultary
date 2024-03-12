@@ -60,6 +60,9 @@ class _NewExpense extends State<NewExpense>
     getList();
     getExpenseCategoryList();
     getPayMethodList();
+    Utils.showInterstitial();
+    Utils.setupAds();
+
   }
 
   List<Flock> flocks = [];
@@ -168,6 +171,7 @@ class _NewExpense extends State<NewExpense>
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  Utils.getAdBar(),
 
                   ClipRRect(
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),

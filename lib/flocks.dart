@@ -41,7 +41,8 @@ class _FlockScreen extends State<FlockScreen>
 
     
     getList();
-    
+    Utils.setupAds();
+
   }
   List<Flock> flocks = [];
   void getList() async {
@@ -95,6 +96,8 @@ class _FlockScreen extends State<FlockScreen>
               color: Utils.getScreenBackground(),
               child: Column(
                 children: [
+                  Utils.getAdBar(),
+
                   Row(
                     children: [
                       Container(

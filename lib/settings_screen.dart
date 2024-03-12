@@ -13,6 +13,7 @@ import 'package:poultary/model/category_item.dart';
 import 'package:poultary/model/feed_item.dart';
 import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/sub_category_screen.dart';
+import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'add_flocks.dart';
@@ -21,7 +22,13 @@ import 'farm_setup_screen.dart';
 import 'manage_flock_screen.dart';
 import 'model/egg_item.dart';
 import 'model/flock.dart';
-
+import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_android/billing_client_wrappers.dart';
+import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
+import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
+import 'consume_store.dart';
+import 'package:prompt_dialog/prompt_dialog.dart';
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
@@ -35,17 +42,47 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
   double widthScreen = 0;
   double heightScreen = 0;
 
+  String adRemovalID = "removeadspoultry";
+  final bool _kAutoConsume = Platform.isIOS || true;
+  List<String> _kProductIds = <String>[
+  ];
+
+  final InAppPurchase _inAppPurchase = InAppPurchase.instance;
+  late StreamSubscription<List<PurchaseDetails>> _subscription;
+  List<String> _notFoundIds = <String>[];
+  List<ProductDetails> _products = <ProductDetails>[];
+  List<PurchaseDetails> _purchases = <PurchaseDetails>[];
+  List<String> _consumables = <String>[];
+  bool _isAvailable = false;
+  bool _purchasePending = false;
+  bool _loading = true;
+  String? _queryProductError;
+
   @override
   void dispose() {
+    _subscription.cancel();
     super.dispose();
 
   }
 
   @override
   void initState() {
+    loadInAppData();
+    beforeInit();
     super.initState();
+    setUpInitial();
+    Utils.setupAds();
+    Utils.setupAds();
 
-
+  }
+  setUpInitial() async {
+    bool isInApp = await SessionManager.getInApp();
+    if(isInApp){
+      Utils.isShowAdd = false;
+    }
+    else{
+      Utils.isShowAdd = true;
+    }
   }
 
 
@@ -73,6 +110,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
+              Utils.getAdBar(),
 
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
@@ -245,6 +283,116 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                 ),
               ),
 
+              if(Utils.isShowAdd)
+              Container(width: Utils.WIDTH_SCREEN,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                    color: Colors.white,
+                    border: Border.all(color: Colors.blueAccent,width: 1.0)
+                ),
+                margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                padding: EdgeInsets.only(left: 0,right: 0,top: 10,bottom: 10),
+
+                child: Column(
+                children: [
+                  Text('Get Unlimited Access & Remove Ads',style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                  Text('For only \$3.99',style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Utils.getThemeColorBlue()),),
+                  SizedBox(height: 8,),
+                  InkWell(
+                    onTap: () {
+                      PurchaseParam purchaseParam = PurchaseParam(productDetails: _products[0]);
+                      _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
+
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                          color: Utils.getThemeColorBlue(),
+                          border: Border.all(color: Colors.pink,width: 2.0)
+                      ),
+                      margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                      child: Container(
+                        height: 50,
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Utils.getThemeColorBlue(),
+
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white, //(x,y)
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Align(
+                                alignment: Alignment.topLeft,
+                                child: Row(
+                                  children: [
+
+                                    Icon(Icons.check_circle_outline,color: Colors.white,size: 30,),
+                                    SizedBox(width: 4,),
+                                    Text('Remove Ads',style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white),),
+                                  ],
+                                )),
+
+                          ],),),
+                    ),
+                  ),
+                  SizedBox(height: 0,),
+                  InkWell(
+                    onTap: () {
+                      _inAppPurchase.restorePurchases();
+
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                          color: Utils.getThemeColorBlue(),
+                          border: Border.all(color: Colors.red,width: 2.0)
+                      ),
+                      margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                      child: Container(
+                        height: 50,
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Utils.getThemeColorBlue(),
+
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white, //(x,y)
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Align(
+                                alignment: Alignment.topLeft,
+                                child: Row(
+                                  children: [
+
+                                    Icon(Icons.cloud_upload_outlined,color: Colors.white,size: 30,),
+                                    SizedBox(width: 4,),
+                                    Text('Restore (If you purchased)',style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white),),
+                                  ],
+                                )),
+
+                          ],),),
+                    ),
+                  ),
+                ],
+              ),
+              ),
+
 
                   ]
       ),),),),),);
@@ -258,6 +406,342 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
       MaterialPageRoute(
           builder: (context) => const NewFeeding()),
     );
+  }
+  showInAppDialog(BuildContext context, String message) {
+
+    // set up the button
+    Widget okButton = TextButton(
+      child: Container(height: Utils.getHeightResized(44),width: Utils.WIDTH_SCREEN-Utils.getWidthResized(0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(Utils.getHeightResized(4))),
+          color:Utils.getSciFiThemeColor(),
+
+        ),
+        child:Align(
+          alignment: Alignment.center,
+          child:Text("PURCHASE NOW",
+            textAlign: TextAlign.center,
+            style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+                fontFamily: 'PTSans'
+            ),
+          ),),
+      ),
+      onPressed: () {
+        Navigator.of(context).pop();
+        PurchaseParam purchaseParam = PurchaseParam(productDetails: _products[0]);
+
+        _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
+
+
+      },
+    );
+    Widget restoreButton = TextButton(
+      child:
+      Container(height: Utils.getHeightResized(44),width: Utils.WIDTH_SCREEN-Utils.getWidthResized(0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(Utils.getHeightResized(4))),
+          color:Utils.getSciFiThemeColor(),
+
+        ),
+        child:Align(
+          alignment: Alignment.center,
+          child:Text("Restore (If you purchased)",
+            textAlign: TextAlign.center,
+            style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+                fontFamily: 'PTSans'
+            ),
+          ),),
+      ),
+
+      onPressed: () {
+        Navigator.of(context).pop();
+        _inAppPurchase.restorePurchases();
+
+      },
+    );
+    Widget cancelButton = TextButton(
+      child: Text("CANCEL",
+        style: new TextStyle(
+            fontSize: 14.0,
+            fontWeight: FontWeight.normal,
+            color: Colors.black,
+            fontFamily: 'PTSans'
+        ),
+      ),
+      onPressed: () {
+        Navigator.of(context).pop();
+
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Align(
+        alignment: Alignment.center,
+        child:Text("APP_NAME",
+          textAlign: TextAlign.center,
+          style: new TextStyle(
+              fontSize: 22.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'PTSans'
+          ),
+        ),),
+      backgroundColor: Colors.pink,
+      content: Text(message,
+        style: new TextStyle(
+            fontSize: 14.0,
+            fontWeight: FontWeight.normal,
+            color: Colors.white,
+            fontFamily: 'PTSans'
+        ),),
+      actions: [
+        okButton,
+        restoreButton,
+        cancelButton
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+  callRemoveAdsFunction(){
+    showInAppDialog(context,"Purchase the plan one time & Remove Ads Forever.");
+
+  }
+  Future<void> consume(String id) async {
+    await ConsumableStore.consume(id);
+    final List<String> consumables = await ConsumableStore.load();
+    setState(() {
+      _consumables = consumables;
+    });
+  }
+  void showPendingUI() {
+    setState(() {
+      _purchasePending = true;
+    });
+  }
+
+
+
+  Future<void> deliverProduct(PurchaseDetails purchaseDetails) async {
+    print("Payment successfull");
+
+
+    // IMPORTANT!! Always verify purchase details before delivering the product.
+    if (purchaseDetails.productID == adRemovalID) {
+      await ConsumableStore.save(purchaseDetails.purchaseID!);
+      final List<String> consumables = await ConsumableStore.load();
+      await SessionManager.setInApp(true);
+      Utils.isShowAdd = false;
+      Utils.setupAds();
+      setState(() {
+        _purchasePending = false;
+        _consumables = consumables;
+      });
+    } else {
+      setState(() {
+        _purchases.add(purchaseDetails);
+        _purchasePending = false;
+      });
+    }
+  }
+
+  void handleError(IAPError error) {
+    setState(() {
+      _purchasePending = false;
+    });
+  }
+
+  Future<bool> _verifyPurchase(PurchaseDetails purchaseDetails) {
+    // IMPORTANT!! Always verify a purchase before delivering the product.
+    // For the purpose of an example, we directly return true.
+    return Future<bool>.value(true);
+  }
+
+  void _handleInvalidPurchase(PurchaseDetails purchaseDetails) {
+    // handle invalid purchase here if  _verifyPurchase` failed.
+  }
+  Future<void> _listenToPurchaseUpdated(
+      List<PurchaseDetails> purchaseDetailsList) async {
+    for (final PurchaseDetails purchaseDetails in purchaseDetailsList) {
+      if (purchaseDetails.status == PurchaseStatus.pending) {
+        showPendingUI();
+      } else {
+        if (purchaseDetails.status == PurchaseStatus.error) {
+          handleError(purchaseDetails.error!);
+        } else if (purchaseDetails.status == PurchaseStatus.purchased ||
+            purchaseDetails.status == PurchaseStatus.restored) {
+          final bool valid = await _verifyPurchase(purchaseDetails);
+          if (valid) {
+            deliverProduct(purchaseDetails);
+          } else {
+            _handleInvalidPurchase(purchaseDetails);
+            return;
+          }
+        }
+        if (Platform.isAndroid) {
+          if (!_kAutoConsume && purchaseDetails.productID == adRemovalID) {
+            final InAppPurchaseAndroidPlatformAddition androidAddition =
+            _inAppPurchase.getPlatformAddition<
+                InAppPurchaseAndroidPlatformAddition>();
+            await androidAddition.consumePurchase(purchaseDetails);
+          }
+        }
+        if (purchaseDetails.pendingCompletePurchase) {
+          await _inAppPurchase.completePurchase(purchaseDetails);
+        }
+      }
+    }
+  }
+
+  Future<void> confirmPriceChange(BuildContext context) async {
+    // if (Platform.isAndroid) {
+    //   final InAppPurchaseAndroidPlatformAddition androidAddition =
+    //   _inAppPurchase
+    //       .getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
+    //   final BillingResultWrapper priceChangeConfirmationResult =
+    //   await androidAddition.launchPriceChangeConfirmationFlow(
+    //     sku: 'purchaseId',
+    //   );
+    //   if (priceChangeConfirmationResult.responseCode == BillingResponse.ok) {
+    //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+    //       content: Text('Price change accepted'),
+    //     ));
+    //   } else {
+    //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    //       content: Text(
+    //         priceChangeConfirmationResult.debugMessage ??
+    //             'Price change failed with code ${priceChangeConfirmationResult.responseCode}',
+    //       ),
+    //     ));
+    //   }
+    // }
+    if (Platform.isIOS) {
+      final InAppPurchaseStoreKitPlatformAddition iapStoreKitPlatformAddition =
+      _inAppPurchase
+          .getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
+      await iapStoreKitPlatformAddition.showPriceConsentIfNeeded();
+    }
+  }
+  GooglePlayPurchaseDetails? _getOldSubscription(
+      ProductDetails productDetails, Map<String, PurchaseDetails> purchases) {
+    // This is just to demonstrate a subscription upgrade or downgrade.
+    // This method assumes that you have only 2 subscriptions under a group, 'subscription_silver' & 'subscription_gold'.
+    // The 'subscription_silver' subscription can be upgraded to 'subscription_gold' and
+    // the 'subscription_gold' subscription can be downgraded to 'subscription_silver'.
+    // Please remember to replace the logic of finding the old subscription Id as per your app.
+    // The old subscription is only required on Android since Apple handles this internally
+    // by using the subscription group feature in iTunesConnect.
+    GooglePlayPurchaseDetails? oldSubscription;
+    if (productDetails.id == adRemovalID &&
+        purchases[adRemovalID] != null) {
+      oldSubscription =
+      purchases[adRemovalID]! as GooglePlayPurchaseDetails;
+    }
+    return oldSubscription;
+  }
+  loadInAppData(){
+    _kProductIds.add(adRemovalID);
+  }
+  beforeInit(){
+    final Stream<List<PurchaseDetails>> purchaseUpdated =
+        _inAppPurchase.purchaseStream;
+    _subscription =
+        purchaseUpdated.listen((List<PurchaseDetails> purchaseDetailsList) {
+          _listenToPurchaseUpdated(purchaseDetailsList);
+        }, onDone: () {
+          _subscription.cancel();
+        }, onError: (Object error) {
+          // handle error here.
+        });
+    initStoreInfo();
+  }
+
+  Future<void> initStoreInfo() async {
+    final bool isAvailable = await _inAppPurchase.isAvailable();
+    if (!isAvailable) {
+      setState(() {
+        _isAvailable = isAvailable;
+        _products = <ProductDetails>[];
+        _purchases = <PurchaseDetails>[];
+        _notFoundIds = <String>[];
+        _consumables = <String>[];
+        _purchasePending = false;
+        _loading = false;
+      });
+      return;
+    }
+
+    if (Platform.isIOS) {
+      final InAppPurchaseStoreKitPlatformAddition iosPlatformAddition =
+      _inAppPurchase
+          .getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
+      await iosPlatformAddition.setDelegate(ExamplePaymentQueueDelegate());
+    }
+
+    final ProductDetailsResponse productDetailResponse =
+    await _inAppPurchase.queryProductDetails(_kProductIds.toSet());
+    if (productDetailResponse.error != null) {
+      setState(() {
+        _queryProductError = productDetailResponse.error!.message;
+        _isAvailable = isAvailable;
+        _products = productDetailResponse.productDetails;
+        _purchases = <PurchaseDetails>[];
+        _notFoundIds = productDetailResponse.notFoundIDs;
+        _consumables = <String>[];
+        _purchasePending = false;
+        _loading = false;
+      });
+      return;
+    }
+
+    if (productDetailResponse.productDetails.isEmpty) {
+      setState(() {
+        _queryProductError = null;
+        _isAvailable = isAvailable;
+        _products = productDetailResponse.productDetails;
+        _purchases = <PurchaseDetails>[];
+        _notFoundIds = productDetailResponse.notFoundIDs;
+        _consumables = <String>[];
+        _purchasePending = false;
+        _loading = false;
+      });
+      return;
+    }
+
+    final List<String> consumables = await ConsumableStore.load();
+    setState(() {
+      _isAvailable = isAvailable;
+      _products = productDetailResponse.productDetails;
+      _notFoundIds = productDetailResponse.notFoundIDs;
+      _consumables = consumables;
+      _purchasePending = false;
+      _loading = false;
+    });
+  }
+}
+class ExamplePaymentQueueDelegate implements SKPaymentQueueDelegateWrapper {
+  @override
+  bool shouldContinueTransaction(
+      SKPaymentTransactionWrapper transaction, SKStorefrontWrapper storefront) {
+    return true;
+  }
+
+  @override
+  bool shouldShowPriceConsent() {
+    return false;
   }
 }
 

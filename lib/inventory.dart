@@ -29,6 +29,7 @@ class _Inventory extends State<Inventory> with SingleTickerProviderStateMixin{
   @override
   void initState() {
     super.initState();
+    Utils.setupAds();
 
   }
 
@@ -60,6 +61,8 @@ class _Inventory extends State<Inventory> with SingleTickerProviderStateMixin{
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
+              Utils.getAdBar(),
+
               Text(
               "Inventory",
               textAlign: TextAlign.center,

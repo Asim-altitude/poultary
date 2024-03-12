@@ -43,6 +43,8 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
     getList();
     getEggCollectionList();
+    Utils.setupAds();
+
   }
 
   List<Flock> flocks = [];
@@ -178,6 +180,8 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
+              Utils.getAdBar(),
+
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(

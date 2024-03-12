@@ -12,12 +12,14 @@ import 'package:poultary/transactions_screen.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+import 'CAS_Ads.dart';
 import 'add_flocks.dart';
 import 'all_reports_screen.dart';
 import 'database/databse_helper.dart';
 import 'egg_collection.dart';
 import 'financial_report_screen.dart';
 import 'model/flock.dart';
+
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -41,10 +43,10 @@ class _DashboardScreen extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-
-
     getData();
     getList();
+    Utils.setupAds();
+    // Utils.showInterstitial();
   }
 
   String str_date='',end_date='';
@@ -123,6 +125,7 @@ class _DashboardScreen extends State<DashboardScreen> {
             child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children:  [
+              // Utils.getAdBar(),
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
@@ -301,6 +304,8 @@ class _DashboardScreen extends State<DashboardScreen> {
                       ],
                     )),
               ),
+              // Container(width: widthScreen,height: 60,
+              // ),
               SizedBox(height: 8,),
               flocks.length > 0 ? Container(
                 height: heightScreen/2,
@@ -635,7 +640,6 @@ class _DashboardScreen extends State<DashboardScreen> {
         ),),),),);*/
     ]))))));
   }
-
 
 
 }

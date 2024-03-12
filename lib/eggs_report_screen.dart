@@ -49,6 +49,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
      catch(ex){
        print(ex);
      }
+    Utils.setupAds();
 
   }
 
@@ -131,6 +132,8 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
+              Utils.getAdBar(),
+
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(

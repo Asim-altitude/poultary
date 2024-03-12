@@ -50,6 +50,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
      catch(ex){
        print(ex);
      }
+    Utils.setupAds();
 
   }
 
@@ -127,6 +128,8 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
+              Utils.getAdBar(),
+
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(

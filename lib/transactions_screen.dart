@@ -46,6 +46,8 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
 
     getList();
     getData(date_filter_name);
+    Utils.setupAds();
+
   }
 
   bool no_colection = true;
@@ -194,6 +196,8 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.end,
             children:  [
+              Utils.getAdBar(),
+
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(

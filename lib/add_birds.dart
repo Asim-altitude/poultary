@@ -71,6 +71,8 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
     _reductionReasonValue = _reductionReasons[0];
     _acqusitionselectedValue = acqusitionList[0];
     getList();
+    Utils.showInterstitial();
+    Utils.setupAds();
 
   }
 
@@ -132,6 +134,8 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  Utils.getAdBar(),
+
                   ClipRRect(
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                     child: Container(

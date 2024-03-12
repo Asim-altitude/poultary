@@ -73,6 +73,8 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
   void initState() {
     super.initState();
     getImages();
+    Utils.setupAds();
+
   }
 
 
@@ -102,6 +104,8 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
+              Utils.getAdBar(),
+
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(

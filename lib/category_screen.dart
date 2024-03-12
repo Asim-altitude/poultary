@@ -43,6 +43,8 @@ class _CategoryScreen extends State<CategoryScreen> with SingleTickerProviderSta
     super.initState();
 
     getCategoriesList();
+    Utils.setupAds();
+
   }
 
 
@@ -87,6 +89,7 @@ class _CategoryScreen extends State<CategoryScreen> with SingleTickerProviderSta
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
+              Utils.getAdBar(),
 
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),

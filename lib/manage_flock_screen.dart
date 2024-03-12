@@ -44,6 +44,8 @@ class _ManageFlockScreen extends State<ManageFlockScreen> with SingleTickerProvi
   void initState() {
     super.initState();
     getList();
+    Utils.setupAds();
+
   }
 
   bool no_flock = false;
@@ -89,6 +91,7 @@ class _ManageFlockScreen extends State<ManageFlockScreen> with SingleTickerProvi
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
+              Utils.getAdBar(),
 
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),

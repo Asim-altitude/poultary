@@ -58,6 +58,9 @@ class _NewEggCollection extends State<NewEggCollection>
 
     _reductionReasonValue = _reductionReasons[0];
     getList();
+    Utils.showInterstitial();
+    Utils.setupAds();
+
   }
 
   List<Flock> flocks = [];
@@ -122,6 +125,8 @@ class _NewEggCollection extends State<NewEggCollection>
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  Utils.getAdBar(),
+
                   ClipRRect(
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                     child: Container(

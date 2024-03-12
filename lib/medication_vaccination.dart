@@ -51,6 +51,8 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
 
     getList();
     getvaccMedList();
+    Utils.setupAds();
+
   }
 
   bool no_colection = true;
@@ -161,6 +163,8 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
+              Utils.getAdBar(),
+
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(

@@ -44,6 +44,9 @@ class _PDFScreen extends State<PDFScreen> {
   @override
   void initState() {
     super.initState();
+    Utils.showInterstitial();
+    Utils.setupAds();
+
   }
 
 
@@ -114,6 +117,8 @@ class _PDFScreen extends State<PDFScreen> {
 
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
+                  Utils.getAdBar(),
+
                   ClipRRect(
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                     child: Container(

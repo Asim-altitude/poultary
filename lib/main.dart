@@ -1,14 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:poultary/utils/utils.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'home_screen.dart';
 
-void main() {
-
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
-}
+  requestGDPR();
+  await MobileAds.instance.initialize();
 
+}
+void requestGDPR(){
+
+  // Test
+  // ConsentInformation.instance.reset();
+  // ConsentDebugSettings debugSettings = ConsentDebugSettings(
+  //     debugGeography: DebugGeography.debugGeographyEea,
+  //     testIdentifiers: ['5BC971590B20B4500231D53345928594']);
+
+  final params = ConsentRequestParameters();
+  ConsentInformation.instance.requestConsentInfoUpdate(
+    params,
+        () async {
+      if (await ConsentInformation.instance.isConsentFormAvailable()) {
+        loadForm();
+      }
+    },
+        (FormError error) {
+      // Handle the error
+    },
+  );
+}
+void loadForm() {
+  ConsentForm.loadConsentForm(
+        (ConsentForm consentForm) async {
+      var status = await ConsentInformation.instance.getConsentStatus();
+      print('ConsentStatus:${status}');
+      if (status == ConsentStatus.required) {
+        consentForm.show(
+              (FormError? formError) {
+            // Handle dismissal by reloading form
+            loadForm();
+          },
+        );
+      }
+    },
+        (formError) {
+      // Handle the error
+    },
+  );
+}
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 

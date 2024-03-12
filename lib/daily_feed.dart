@@ -42,6 +42,8 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
 
     getList();
     getEggCollectionList();
+    Utils.setupAds();
+
   }
 
   bool no_colection = true;
@@ -116,6 +118,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
+              Utils.getAdBar(),
 
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),

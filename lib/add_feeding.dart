@@ -55,6 +55,9 @@ class _NewFeeding extends State<NewFeeding>
     super.initState();
     getList();
     getFeedList();
+    Utils.showInterstitial();
+    Utils.setupAds();
+
   }
 
   List<Flock> flocks = [];
@@ -137,6 +140,8 @@ class _NewFeeding extends State<NewFeeding>
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  Utils.getAdBar(),
+
                   ClipRRect(
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                     child: Container(

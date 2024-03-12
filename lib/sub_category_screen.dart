@@ -43,6 +43,8 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
     super.initState();
 
     getSubCategoriesList();
+    Utils.setupAds();
+
   }
 
 
@@ -124,6 +126,8 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
+              Utils.getAdBar(),
+
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(

@@ -40,6 +40,8 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
     getList();
     getEggCollectionList();
+    Utils.setupAds();
+
   }
 
   bool no_colection = true;
@@ -150,6 +152,8 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
+              Utils.getAdBar(),
+
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(

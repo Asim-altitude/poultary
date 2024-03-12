@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
-
+import 'package:poultary/utils/session_manager.dart';
+import '../CAS_Ads.dart';
 import '../database/databse_helper.dart';
 import '../model/egg_item.dart';
 import '../model/egg_report_item.dart';
@@ -33,10 +35,12 @@ class Utils {
   static double HEIGHT_SCREEN = 0;
   static double _standardWidth = 414;
   static double _standardheight = 736;
-  static final bool ISTESTACCOUNT = true;
-  static late bool isShowAdd = false;
+  static final bool ISTESTACCOUNT = false;
+  static late bool isShowAdd = true;
+  static late bool iShowInterStitial = false;
+
   static final String appIdIOS     = "ca-app-pub-2367135251513556~4114934168";
-  static final String appIdAndroid = "ca-app-pub-2367135251513556~7089416015";
+  static final String appIdAndroid = "ca-app-pub-2367135251513556~8724531818";
   static var box;
 
 
@@ -85,7 +89,12 @@ class Utils {
 
   static List<Health_Report_Item> vaccine_report_list = [];
   static List<Health_Report_Item> medication_report_list = [];
+  static BannerAd? _bannerAd ;
+  static bool _isBannerAdReady = false;
+  static InterstitialAd? _interstitialAd;
 
+  // static MediationManager? manager;
+  // static CASBannerView? view;
 
   static setupInvoiceInitials(String invoiceHeading,String date) async {
     await DatabaseHelper.instance.database;
@@ -101,6 +110,99 @@ class Utils {
 
     print(date);
     print(invoiceHeading);
+  }
+
+  static Future<void> setupAds() async {
+    bool isInApp = await SessionManager.getInApp();
+    if(isInApp){
+      Utils.isShowAdd = false;
+      hideBanner();
+    }
+    else{
+      Utils.isShowAdd = true;
+      inititalize();
+    }
+}
+  static Future<void> inititalize() async {
+    // CAS.setDebugMode(true);
+
+    // CAS.setFlutterVersion("3.10.3");
+    //
+    // ManagerBuilder builder = CAS.buildManager();
+    // builder.withInitializationListener(new InitializationListenerWrapper());
+    // // builder.withTestMode(true);
+    // // CAS.addTestDeviceId("5BC971590B20B4500231D53345928594");
+    // builder.withCasId("com.zaheer.poultry");
+    //
+    // builder.withConsentFlow(CAS.buildConsentFlow().withDismissListener(new DismissListenerWrapper()));
+    // builder.withAdTypes(
+    //     AdTypeFlags.Interstitial | AdTypeFlags.Banner );
+    // manager = builder.initialize();
+    //
+    // CAS.validateIntegration();
+    if(Utils.isShowAdd){
+      createBanner();
+    }
+  }
+  static Future<void> showInterstitial() async {
+    if(Utils.isShowAdd){
+
+      Future.delayed(const Duration(seconds: 5), () {
+        if(iShowInterStitial){
+          iShowInterStitial = false;
+          _createInterstitialAd();
+          // manager?.showInterstitial(new InterstitialListenerWrapper());
+        }
+        else{
+          iShowInterStitial = true;
+        }
+      });
+    }
+  }
+  static void _createInterstitialAd() {
+    InterstitialAd.load(
+        adUnitId: Utils.interstitialAdUnitId,
+        request: AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (InterstitialAd ad) {
+            print('$ad loaded');
+            _interstitialAd = ad;
+            _interstitialAd!.setImmersiveMode(true);
+            Future.delayed(Duration(seconds: 1), () {
+              _interstitialAd!.show();
+            });
+          },
+          onAdFailedToLoad: (LoadAdError error) {
+            print('InterstitialAd failed to load: $error.');
+          },
+        ));
+  }
+   static Future<void> createBanner() async {
+      _bannerAd = BannerAd(
+        adUnitId: Utils.bannerAdUnitId,
+        request: AdRequest(),
+        size: AdSize.banner,
+        listener: BannerAdListener(
+          onAdLoaded: (_) {
+              _isBannerAdReady = true;
+          },
+          onAdFailedToLoad: (ad, err) {
+            print('Failed to load a banner ad: ${err.message}');
+            _isBannerAdReady = false;
+            ad.dispose();
+          },
+        ),
+      );
+
+      _bannerAd?.load();
+
+    // view = manager?.getAdView(AdSize.Adaptive);
+    // view?.setAdListener(new AdaptiveBannerListener());
+    // view?.setBannerPosition(AdPosition.TopCenter);
+    // view?.showBanner();
+  }
+  static Future<void> hideBanner() async {
+    // view?.hideBanner();
   }
 
   static double getWidthResized(double input) {
@@ -173,7 +275,7 @@ class Utils {
       }
     } else {
       if (Platform.isAndroid) {
-        return 'ca-app-pub-2367135251513556/9916542295';
+        return 'ca-app-pub-2367135251513556/4686866841';
       } else if (Platform.isIOS) {
         return 'ca-app-pub-2367135251513556/6925764489';
       } else {
@@ -193,7 +295,7 @@ class Utils {
       }
     } else {
       if (Platform.isAndroid) {
-        return 'ca-app-pub-2367135251513556/3351133949';
+        return 'ca-app-pub-2367135251513556/5356132442';
       } else if (Platform.isIOS) {
         return 'ca-app-pub-2367135251513556/1481866110';
       } else {
@@ -258,6 +360,22 @@ class Utils {
   static Color getThemeColorBlue() {
     Color themeColor = Color.fromRGBO(2, 83, 179, 1);
     return themeColor;
+  }
+  static Widget getAdBar(){
+    if(isShowAdd){
+      return Container(width: WIDTH_SCREEN,height: 60,
+        child:_isBannerAdReady?Align(
+          alignment: Alignment.topCenter,
+          child: Container(
+            height: 60.0 ,
+            width: Utils.WIDTH_SCREEN,
+            child: AdWidget(ad: _bannerAd!),
+          ),
+        ):Container(),
+      );
+
+    }
+    return Container(width: WIDTH_SCREEN,height: 0,);
   }
 
 

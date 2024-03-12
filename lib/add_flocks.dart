@@ -62,11 +62,12 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
   void initState() {
     super.initState();
 
-
     _purposeselectedValue = _purposeList[0];
     _acqusitionselectedValue = acqusitionList[0];
 
     getBirds();
+    Utils.showInterstitial();
+    Utils.setupAds();
 
   }
 
@@ -121,8 +122,10 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  Utils.getAdBar(),
+
                   ClipRRect(
-                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                     child: Container(
                       decoration: BoxDecoration(
                         boxShadow: [

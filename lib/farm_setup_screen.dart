@@ -52,6 +52,8 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
     super.initState();
 
     getInfo();
+    Utils.setupAds();
+
   }
 
   FarmSetup? farmSetup = null;
@@ -109,6 +111,8 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  Utils.getAdBar(),
+
                   ClipRRect(
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                     child: Container(

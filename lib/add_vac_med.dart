@@ -56,6 +56,8 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
     super.initState();
     getList();
     getDiseaseList();
+    Utils.setupAds();
+
   }
 
   List<Flock> flocks = [];
@@ -142,6 +144,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  Utils.getAdBar(),
 
                   ClipRRect(
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),

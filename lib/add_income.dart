@@ -60,6 +60,8 @@ class _NewIncome extends State<NewIncome>
     getList();
     getIncomeCategoryList();
     getPayMethodList();
+    Utils.setupAds();
+
   }
 
   List<Flock> flocks = [];
@@ -169,6 +171,7 @@ class _NewIncome extends State<NewIncome>
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  Utils.getAdBar(),
 
                   ClipRRect(
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
