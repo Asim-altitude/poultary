@@ -20,7 +20,8 @@ import 'model/flock.dart';
 import 'model/flock_image.dart';
 
 class NewFeeding extends StatefulWidget {
-  const NewFeeding({Key? key}) : super(key: key);
+   Feeding? feeding;
+   NewFeeding({Key? key, this.feeding}) : super(key: key);
 
   @override
   _NewFeeding createState() => _NewFeeding();
@@ -47,12 +48,23 @@ class _NewFeeding extends State<NewFeeding>
   List<SubItem> _subItemList = [];
 
   int chosen_index = 0;
-
+  bool isEdit = false;
 
 
   @override
   void initState() {
     super.initState();
+
+    if(widget.feeding != null)
+    {
+      isEdit = true;
+      date = widget.feeding!.date!;
+      _purposeselectedValue = widget.feeding!.f_name;
+      _feedselectedValue = widget.feeding!.feed_name!;
+      quantityController.text = widget.feeding!.quantity!;
+      notesController.text = widget.feeding!.short_note!;
+
+    }
     getList();
     getFeedList();
     Utils.showInterstitial();
@@ -67,7 +79,7 @@ class _NewFeeding extends State<NewFeeding>
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -169,7 +181,7 @@ class _NewFeeding extends State<NewFeeding>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                "New Feeding",
+                                isEdit?"Edit Feeding":"New Feeding",
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -335,10 +347,36 @@ class _NewFeeding extends State<NewFeeding>
 
                               if(validate){
                                 print("Everything Okay");
-                                await DatabaseHelper.instance.database;
-                                int? id = await DatabaseHelper.insertNewFeeding(Feeding(f_id: getFlockID(), short_note: notesController.text, date: date, feed_name: _feedselectedValue, quantity: quantityController.text, f_name: _purposeselectedValue,));
-                                Utils.showToast("New Feeding Added");
-                                Navigator.pop(context);
+
+                                if(isEdit){
+                                  await DatabaseHelper.instance.database;
+
+                                  Feeding feeding = Feeding(
+                                    f_id: getFlockID(),
+                                    short_note: notesController.text,
+                                    date: date,
+                                    feed_name: _feedselectedValue,
+                                    quantity: quantityController.text,
+                                    f_name: _purposeselectedValue,);
+                                  feeding.id = widget.feeding!.id;
+                                  int? id = await DatabaseHelper
+                                      .updateFeeding(feeding);
+
+                                  Utils.showToast("Feeding Record Updated");
+                                  Navigator.pop(context);
+                                } else {
+                                  await DatabaseHelper.instance.database;
+                                  int? id = await DatabaseHelper
+                                      .insertNewFeeding(Feeding(
+                                    f_id: getFlockID(),
+                                    short_note: notesController.text,
+                                    date: date,
+                                    feed_name: _feedselectedValue,
+                                    quantity: quantityController.text,
+                                    f_name: _purposeselectedValue,));
+                                  Utils.showToast("New Feeding Added");
+                                  Navigator.pop(context);
+                                }
 
                               }else{
                                 Utils.showToast("Provide all required info");

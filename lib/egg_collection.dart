@@ -367,6 +367,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                                             GestureDetector(
                                               onTapDown: (TapDownDetails details) {
                                                 selected_id = eggs.elementAt(index).id;
+                                                selected_index = index;
                                                 showMemberMenu(details.globalPosition);
                                               },
                                               child: Container(
@@ -669,12 +670,12 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
       ),),),),),);
   }
 
-  Future<void> addNewCollection() async{
+  Future<void> addNewCollection() async {
 
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) =>  NewEggCollection(isCollection: true,)),
+          builder: (context) =>  NewEggCollection(isCollection: true,eggs: null,)),
     );
     print(result);
     getEggCollectionList();
@@ -685,7 +686,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) =>  NewEggCollection(isCollection: false,)),
+          builder: (context) =>  NewEggCollection(isCollection: false,eggs: null)),
     );
     print(result);
     getFilteredTransactions(str_date, end_date);
@@ -702,7 +703,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -946,6 +947,16 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
       items: [
         PopupMenuItem(
+          value: 2,
+          child: Text(
+            "Edit Item",
+            style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Colors.black),
+          ),
+        ),
+        PopupMenuItem(
           value: 1,
           child: Text(
             "Delete Item",
@@ -954,14 +965,30 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                 fontWeight: FontWeight.bold,
                 color: Colors.black),
           ),
-        ),
-
-
+        )
       ],
       elevation: 8.0,
-    ).then((value) {
+    ).then((value) async {
       if (value != null) {
-        if(value == 1){
+        if(value == 2){
+          if(eggs.elementAt(selected_index!).isCollection == 1) {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>  NewEggCollection(isCollection: true,eggs: eggs.elementAt(selected_index!))),
+            );
+
+            getEggCollectionList();
+          }else{
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>  NewEggCollection(isCollection: false,eggs: eggs.elementAt(selected_index!))),
+            );
+            getEggCollectionList();
+          }
+        }
+        else if(value == 1){
           showAlertDialog(context);
         }else {
           print(value);

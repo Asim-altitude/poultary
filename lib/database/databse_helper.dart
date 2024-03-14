@@ -207,6 +207,127 @@ class DatabaseHelper  {
 
   }
 
+  static Future<int?> updateFlock(Flock_Detail? flock_detail) async {
+
+    // get a reference to the database
+    // because this is an expensive operation we use async and await
+
+    // row to update
+
+
+    // We'll update the first row just as an example
+    int id = 1;
+
+    // do the update and get the number of affected rows
+    int? updateCount = await _database?.update(
+        "Flock_Detail",
+        flock_detail!.toJson(),
+        where: 'f_detail_id= ?',
+        whereArgs: [flock_detail.f_detail_id]);
+
+    print("Updated...");
+
+    // show the results: print all rows in the db
+
+  }
+
+  static Future<int?> updateEggCollection(Eggs eggs) async {
+
+    // get a reference to the database
+    // because this is an expensive operation we use async and await
+
+    // row to update
+
+
+    // We'll update the first row just as an example
+    int id = 1;
+
+    // do the update and get the number of affected rows
+    int? updateCount = await _database?.update(
+        "Eggs",
+        eggs.toJson(),
+        where: 'id= ?',
+        whereArgs: [eggs.id]);
+
+    print("Updated...");
+
+    // show the results: print all rows in the db
+
+  }
+
+  static Future<int?> updateTransaction(TransactionItem transactionItem) async {
+
+    // get a reference to the database
+    // because this is an expensive operation we use async and await
+
+    // row to update
+
+
+    // We'll update the first row just as an example
+    int id = 1;
+
+    // do the update and get the number of affected rows
+    int? updateCount = await _database?.update(
+        "Transactions",
+        transactionItem.toJson(),
+        where: 'id = ?',
+        whereArgs: [transactionItem.id]);
+
+    print("Updated...");
+
+    // show the results: print all rows in the db
+
+  }
+
+  static Future<int?> updateFeeding(Feeding feeding) async {
+
+    // get a reference to the database
+    // because this is an expensive operation we use async and await
+
+    // row to update
+
+
+    // We'll update the first row just as an example
+    int id = 1;
+
+    // do the update and get the number of affected rows
+    int? updateCount = await _database?.update(
+        "Feeding",
+        feeding.toJson(),
+        where: 'id= ?',
+        whereArgs: [feeding.id]);
+
+    print("Updated...");
+
+    // show the results: print all rows in the db
+
+  }
+
+  static Future<int?> updateHealth(Vaccination_Medication vaccination_medication) async {
+
+    // get a reference to the database
+    // because this is an expensive operation we use async and await
+
+    // row to update
+
+
+    // We'll update the first row just as an example
+    int id = 1;
+
+    // do the update and get the number of affected rows
+    int? updateCount = await _database?.update(
+        "Vaccination_Medication",
+        vaccination_medication.toJson(),
+        where: 'id= ?',
+        whereArgs: [vaccination_medication.id]);
+
+    print("Updated...");
+
+    // show the results: print all rows in the db
+
+  }
+
+
   static Future<int?> insertMedVac(Vaccination_Medication vaccination_medication) async {
 
     return await _database?.insert(

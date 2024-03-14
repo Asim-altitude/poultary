@@ -19,7 +19,8 @@ import 'model/flock.dart';
 import 'model/flock_detail.dart';
 
 class AddReduceFlockScreen extends StatefulWidget {
-  const AddReduceFlockScreen({Key? key}) : super(key: key);
+
+  AddReduceFlockScreen({Key? key}) : super(key: key);
 
   @override
   _AddReduceFlockScreen createState() => _AddReduceFlockScreen();
@@ -31,6 +32,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
   double widthScreen = 0;
   double heightScreen = 0;
 
+
   @override
   void dispose() {
     super.dispose();
@@ -40,6 +42,8 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
   @override
   void initState() {
     super.initState();
+
+
 
     getList();
     getEggCollectionList();
@@ -56,7 +60,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -385,6 +389,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                                     GestureDetector(
                                       onTapDown: (TapDownDetails details) {
                                         selected_id = list.elementAt(index).f_detail_id;
+                                        selected_index = index;
                                         showMemberMenu(details.globalPosition);
                                       },
                                       child: Container(
@@ -711,7 +716,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) =>  NewBirdsCollection(isCollection: true,)),
+          builder: (context) =>  NewBirdsCollection(isCollection: true,flock_detail: null)),
     );
 
     getEggCollectionList();
@@ -721,7 +726,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) =>  NewBirdsCollection(isCollection: false,)),
+          builder: (context) =>  NewBirdsCollection(isCollection: false,flock_detail: null)),
     );
 
     getEggCollectionList();
@@ -969,6 +974,15 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
       items: [
         PopupMenuItem(
+          value: 2,
+          child: Text(
+            "Edit Item",
+            style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Colors.black),
+          ),
+        ), PopupMenuItem(
           value: 1,
           child: Text(
             "Delete Item",
@@ -981,9 +995,32 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
       ],
       elevation: 8.0,
-    ).then((value) {
+    ).then((value) async {
       if (value != null) {
-        if(value == 1){
+        if(value == 2){
+          if(list.elementAt(selected_index!).item_type == "Addition") {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      NewBirdsCollection(isCollection: true,
+                          flock_detail: list.elementAt(selected_index!))),
+            );
+
+            getEggCollectionList();
+          }else{
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      NewBirdsCollection(isCollection: false,
+                          flock_detail: list.elementAt(selected_index!))),
+            );
+
+            getEggCollectionList();
+          }
+        }
+        else if(value == 1){
           showAlertDialog(context);
         }else {
           print(value);

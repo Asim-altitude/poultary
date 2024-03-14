@@ -43,9 +43,6 @@ class _HomeScreen extends State<HomeScreen> {
   void initState() {
     super.initState();
 
-    _piData.add(_PieData("Income", 2000,'2000'));
-    _piData.add(_PieData("Expense", 500,'500'));
-
     getList();
     getCurrency();
   }

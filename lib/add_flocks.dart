@@ -49,7 +49,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
   List<String> acqusitionList = [
     '--Acqusition Type--',
     'Purchased',
-    'Hatched on Form',
+    'Hatched on Farm',
     'Gift',
     'Other',
   ];

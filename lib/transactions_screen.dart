@@ -94,7 +94,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -400,6 +400,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                                        GestureDetector(
                                          onTapDown: (TapDownDetails details) {
                                            selected_id = transactionList.elementAt(index).id;
+                                           selected_index = index;
                                            showMemberMenu(details.globalPosition);
                                          },
                                          child: Container(
@@ -737,7 +738,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
     var txt = await Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => const NewIncome()),
+          builder: (context) =>  NewIncome(transactionItem: null,)),
     );
 
     getAllTransactions();
@@ -747,7 +748,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
    var txt = await Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => const NewExpense()),
+          builder: (context) =>  NewExpense(transactionItem: null,)),
     );
 
     getFilteredTransactions(str_date, end_date);
@@ -960,9 +961,19 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
 
       items: [
         PopupMenuItem(
+          value: 2,
+          child: Text(
+            "Edit Record",
+            style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Colors.black),
+          ),
+        ),
+        PopupMenuItem(
           value: 1,
           child: Text(
-            "Delete Item",
+            "Delete Record",
             style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
@@ -973,9 +984,28 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
 
       ],
       elevation: 8.0,
-    ).then((value) {
+    ).then((value) async {
       if (value != null) {
-        if(value == 1){
+        if(value == 2){
+          if(transactionList.elementAt(selected_index!).type == "Income") {
+            var txt = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>  NewIncome(transactionItem: transactionList.elementAt(selected_index!),)),
+            );
+
+            getAllTransactions();
+          }else{
+            var txt = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>  NewExpense(transactionItem: transactionList.elementAt(selected_index!),)),
+            );
+
+            getAllTransactions();
+          }
+        }
+        else if(value == 1){
           showAlertDialog(context);
         }else {
           print(value);

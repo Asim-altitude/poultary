@@ -404,7 +404,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => const NewFeeding()),
+          builder: (context) => NewFeeding()),
     );
   }
   showInAppDialog(BuildContext context, String message) {

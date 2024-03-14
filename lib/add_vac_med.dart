@@ -21,7 +21,8 @@ import 'model/flock.dart';
 import 'model/flock_image.dart';
 
 class NewVaccineMedicine extends StatefulWidget {
-  const NewVaccineMedicine({Key? key}) : super(key: key);
+  Vaccination_Medication? vaccination_medication;
+  NewVaccineMedicine({Key? key, this.vaccination_medication}) : super(key: key);
 
   @override
   _NewVaccineMedicine createState() => _NewVaccineMedicine();
@@ -49,11 +50,32 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
   int chosen_index = 0;
 
+  bool isEdit = false;
+
+  String date = "Choose Date";
+  final bird_countController = TextEditingController();
+  final doctorController = TextEditingController();
+  final medicineController = TextEditingController();
+  final notesController = TextEditingController();
 
 
   @override
   void initState() {
     super.initState();
+
+    if(widget.vaccination_medication != null){
+      isEdit = true;
+      _purposeselectedValue = widget.vaccination_medication!.f_name!;
+      _diseaseelectedValue = widget.vaccination_medication!.disease!;
+      date = widget.vaccination_medication!.date!;
+      bird_countController.text = "${widget.vaccination_medication!.bird_count!}";
+      doctorController.text = "${widget.vaccination_medication!.doctor_name!}";
+      medicineController.text = "${widget.vaccination_medication!.medicine!}";
+      notesController.text = "${widget.vaccination_medication!.short_note!}";
+
+
+    }
+
     getList();
     getDiseaseList();
     Utils.setupAds();
@@ -67,7 +89,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -108,11 +130,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
   bool _validate = false;
 
-  String date = "Choose Date";
-  final bird_countController = TextEditingController();
-  final doctorController = TextEditingController();
-  final medicineController = TextEditingController();
-  final notesController = TextEditingController();
+
 
   bool imagesAdded = false;
 
@@ -173,7 +191,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                Utils.vaccine_medicine.toLowerCase().contains("medi")? 'New Medication':'New Vaccination',
+                                Utils.vaccine_medicine.toLowerCase().contains("medi")? isEdit?'Edit Medication':'New Medication':isEdit?'Edit Vaccination':'New Vaccination',
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -410,11 +428,50 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
                               if(validate){
                                 print("Everything Okay");
+
                                 await DatabaseHelper.instance.database;
-                                Vaccination_Medication med_vacc = Vaccination_Medication(f_id : getFlockID(), disease: _diseaseelectedValue, medicine: medicineController.text, date: date, type: Utils.vaccine_medicine.toLowerCase().contains("medi")? 'Medication':'Vaccination', short_note: notesController.text, bird_count: int.parse(bird_countController.text), doctor_name: doctorController.text, f_name: _purposeselectedValue,);
-                                int? id = await DatabaseHelper.insertMedVac(med_vacc);
-                                Utils.showToast("New Med_Vac Added");
-                                Navigator.pop(context);
+
+                                if(isEdit) {
+                                  Vaccination_Medication med_vacc = Vaccination_Medication(
+                                    f_id: getFlockID(),
+                                    disease: _diseaseelectedValue,
+                                    medicine: medicineController.text,
+                                    date: date,
+                                    type: Utils.vaccine_medicine.toLowerCase()
+                                        .contains("medi")
+                                        ? 'Medication'
+                                        : 'Vaccination',
+                                    short_note: notesController.text,
+                                    bird_count: int.parse(
+                                        bird_countController.text),
+                                    doctor_name: doctorController.text,
+                                    f_name: _purposeselectedValue,);
+                                  med_vacc.id = widget.vaccination_medication!.id!;
+                                  int? id = await DatabaseHelper.updateHealth(
+                                      med_vacc);
+                                  Utils.showToast("${Utils.vaccine_medicine} Record Updated");
+                                  Navigator.pop(context);
+                                }
+                                else {
+                                  Vaccination_Medication med_vacc = Vaccination_Medication(
+                                    f_id: getFlockID(),
+                                    disease: _diseaseelectedValue,
+                                    medicine: medicineController.text,
+                                    date: date,
+                                    type: Utils.vaccine_medicine.toLowerCase()
+                                        .contains("medi")
+                                        ? 'Medication'
+                                        : 'Vaccination',
+                                    short_note: notesController.text,
+                                    bird_count: int.parse(
+                                        bird_countController.text),
+                                    doctor_name: doctorController.text,
+                                    f_name: _purposeselectedValue,);
+                                  int? id = await DatabaseHelper.insertMedVac(
+                                      med_vacc);
+                                  Utils.showToast("New ${Utils.vaccine_medicine} Added");
+                                  Navigator.pop(context);
+                                }
 
                               }else{
                                 Utils.showToast("Provide all required info");

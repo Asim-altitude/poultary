@@ -21,7 +21,8 @@ import 'model/flock_image.dart';
 import 'model/transaction_item.dart';
 
 class NewIncome extends StatefulWidget {
-  const NewIncome({Key? key}) : super(key: key);
+  TransactionItem? transactionItem;
+   NewIncome({Key? key, required this.transactionItem}) : super(key: key);
 
   @override
   _NewIncome createState() => _NewIncome();
@@ -50,13 +51,44 @@ class _NewIncome extends State<NewIncome>
 
   int chosen_index = 0;
 
-
   bool includeExtras = false;
+  bool isEdit = false;
 
+  Flock? currentFlock = null;
+
+  bool _validate = false;
+
+  String date = "Choose Date";
+  String displayDate = "";
+  String payment_method = "Payment Method";
+  String payment_status = "Payment Status";
+
+  final quantityController = TextEditingController();
+  final notesController = TextEditingController();
+  final amountController = TextEditingController();
+  final howmanyController = TextEditingController();
+  final soldtoController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+
+    if(widget.transactionItem != null)
+    {
+      isEdit = true;
+
+      _purposeselectedValue = widget.transactionItem!.f_name;
+      date = widget.transactionItem!.date;
+      _saleselectedValue = widget.transactionItem!.sale_item;
+      payment_status = widget.transactionItem!.payment_status;
+      payment_method = widget.transactionItem!.payment_method;
+      notesController.text = widget.transactionItem!.short_note;
+      howmanyController.text = widget.transactionItem!.how_many;
+      soldtoController.text = widget.transactionItem!.sold_purchased_from;
+      amountController.text = widget.transactionItem!.amount;
+
+    }
+
     getList();
     getIncomeCategoryList();
     getPayMethodList();
@@ -71,7 +103,7 @@ class _NewIncome extends State<NewIncome>
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -128,20 +160,7 @@ class _NewIncome extends State<NewIncome>
 
   }
 
-  Flock? currentFlock = null;
 
-  bool _validate = false;
-
-  String date = "Choose Date";
-  String displayDate = "";
-  String payment_method = "Payment Method";
-  String payment_status = "Payment Status";
-
-  final quantityController = TextEditingController();
-  final notesController = TextEditingController();
-  final amountController = TextEditingController();
-  final howmanyController = TextEditingController();
-  final soldtoController = TextEditingController();
 
   bool imagesAdded = false;
 
@@ -200,7 +219,7 @@ class _NewIncome extends State<NewIncome>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                "New Income",
+                                isEdit?'Edit Income':"New Income",
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -480,12 +499,57 @@ class _NewIncome extends State<NewIncome>
                               bool validate = checkValidation();
 
                               if(validate){
-                                print("Everything Okay");
-                                await DatabaseHelper.instance.database;
-                                TransactionItem transaction_item = TransactionItem(f_id: getFlockID(), date: date, sale_item: _saleselectedValue, expense_item: "", type: "Income", amount: amountController.text, payment_method: payment_method, payment_status: payment_status, sold_purchased_from: soldtoController.text, short_note: notesController.text, how_many: howmanyController.text, extra_cost: "", extra_cost_details: "", f_name: _purposeselectedValue);
-                                int? id = await DatabaseHelper.insertNewTransaction(transaction_item);
-                                Utils.showToast("New Income Added");
-                                Navigator.pop(context);
+
+                                if(isEdit){
+
+                                  await DatabaseHelper.instance.database;
+                                  TransactionItem transaction_item = TransactionItem(
+                                      f_id: getFlockID(),
+                                      date: date,
+                                      sale_item: _saleselectedValue,
+                                      expense_item: "",
+                                      type: "Income",
+                                      amount: amountController.text,
+                                      payment_method: payment_method,
+                                      payment_status: payment_status,
+                                      sold_purchased_from: soldtoController
+                                          .text,
+                                      short_note: notesController.text,
+                                      how_many: howmanyController.text,
+                                      extra_cost: "",
+                                      extra_cost_details: "",
+                                      f_name: _purposeselectedValue);
+
+                                  transaction_item.id = widget.transactionItem!.id;
+
+                                  int? id = await DatabaseHelper
+                                      .updateTransaction(transaction_item);
+                                  Utils.showToast("Income Record Updated");
+                                  Navigator.pop(context);
+                                }else {
+                                  print("Everything Okay");
+                                  await DatabaseHelper.instance.database;
+                                  TransactionItem transaction_item = TransactionItem(
+                                      f_id: getFlockID(),
+                                      date: date,
+                                      sale_item: _saleselectedValue,
+                                      expense_item: "",
+                                      type: "Income",
+                                      amount: amountController.text,
+                                      payment_method: payment_method,
+                                      payment_status: payment_status,
+                                      sold_purchased_from: soldtoController
+                                          .text,
+                                      short_note: notesController.text,
+                                      how_many: howmanyController.text,
+                                      extra_cost: "",
+                                      extra_cost_details: "",
+                                      f_name: _purposeselectedValue);
+                                  int? id = await DatabaseHelper
+                                      .insertNewTransaction(transaction_item);
+                                  Utils.showToast("New Income Added");
+                                  Navigator.pop(context);
+                                }
                               }else{
                                 Utils.showToast("Provide all required info");
                               }

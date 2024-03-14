@@ -281,6 +281,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                             );
 
                             getList();
+                            getData();
 
                           },
                           child: Align(

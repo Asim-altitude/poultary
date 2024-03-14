@@ -742,7 +742,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => const AddReduceFlockScreen()),
+          builder: (context) => AddReduceFlockScreen()),
     );
 
     Utils.selected_flock = await DatabaseHelper.findFlock(Utils.selected_flock!.f_id);

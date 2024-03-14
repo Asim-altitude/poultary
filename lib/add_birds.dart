@@ -21,7 +21,8 @@ import 'model/flock_image.dart';
 class NewBirdsCollection extends StatefulWidget {
 
   bool isCollection;
-  NewBirdsCollection({Key? key, required this.isCollection}) : super(key: key);
+  Flock_Detail? flock_detail;
+  NewBirdsCollection({Key? key, required this.isCollection, this.flock_detail}) : super(key: key);
 
   @override
   _NewBirdsCollection createState() => _NewBirdsCollection(this.isCollection);
@@ -40,7 +41,6 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
   @override
   void dispose() {
     super.dispose();
-
   }
 
   String _purposeselectedValue = "";
@@ -54,7 +54,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
   List<String> acqusitionList = [
     '--Acqusition Type--',
     'Purchased',
-    'Hatched on Form',
+    'Hatched on Farm',
     'Gift',
     'Other',
   ];
@@ -63,10 +63,21 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
   int active_bird_count = 0;
 
   String max_hint = "";
+  bool isEdit = false;
 
   @override
   void initState() {
     super.initState();
+
+    if(widget.flock_detail != null)
+    {
+      isEdit = true;
+      notesController.text = widget.flock_detail!.short_note;
+      totalBirdsController.text = "${widget.flock_detail?.item_count}";
+      date = widget.flock_detail!.acqusition_date;
+      _acqusitionselectedValue = widget.flock_detail!.acqusition_type;
+    }
+
 
     _reductionReasonValue = _reductionReasons[0];
     _acqusitionselectedValue = acqusitionList[0];
@@ -163,7 +174,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                isCollection? 'Add Birds' : 'Reduce Birds',
+                                isCollection? isEdit?'Edit Addition':'Add Birds' :isEdit?'Edit Reduction':'Reduce Birds',
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -351,26 +362,32 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                                 print("Everything Okay");
                                 await DatabaseHelper.instance.database;
 
-
                                 if(isCollection){
+                                   if(isEdit) {
+                                     int active_birds = getFlockActiveBirds();
+                                     active_birds = active_birds - widget.flock_detail!.item_count;
+                                     active_birds = active_birds +
+                                         int.parse(totalBirdsController.text);
+                                     print(active_birds);
 
-                                  int active_birds = getFlockActiveBirds();
-                                  active_birds = active_birds + int.parse(totalBirdsController.text);
-                                  print(active_birds);
+                                     DatabaseHelper.updateFlockBirds(
+                                         active_birds, getFlockID());
 
-                                  DatabaseHelper.updateFlockBirds(active_birds, getFlockID());
+                                     widget.flock_detail?.item_count = int.parse(totalBirdsController.text);
+                                     widget.flock_detail?.acqusition_type = _acqusitionselectedValue;
+                                     widget.flock_detail?.acqusition_date = date;
+                                     widget.flock_detail?.short_note = notesController.text;
+                                     widget.flock_detail?.f_id = getFlockID();
 
-                                  int? id = await DatabaseHelper.insertFlockDetail(Flock_Detail(f_id: getFlockID(), item_type: isCollection? 'Addition':'Reduction', item_count: int.parse(totalBirdsController.text), acqusition_type: _acqusitionselectedValue, acqusition_date: date, reason: _reductionReasonValue, short_note: notesController.text, f_name: _purposeselectedValue));
-                                  Utils.showToast("Birds Added");
+                                     await DatabaseHelper.updateFlock(widget.flock_detail);
+                                     Utils.showToast("Birds Record Updated");
+                                     Navigator.pop(context);
 
-                                  Navigator.pop(context);
-
-                                }else{
-                                  int active_birds = getFlockActiveBirds();
-
-                                  if (int.parse(totalBirdsController.text) < active_birds) {
-
-                                    active_birds = active_birds - int.parse(totalBirdsController.text);
+                                   }
+                                   else {
+                                    int active_birds = getFlockActiveBirds();
+                                    active_birds = active_birds +
+                                        int.parse(totalBirdsController.text);
                                     print(active_birds);
 
                                     DatabaseHelper.updateFlockBirds(
@@ -387,17 +404,74 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                                         acqusition_type: _acqusitionselectedValue,
                                         acqusition_date: date,
                                         reason: _reductionReasonValue,
-                                        short_note: notesController.text, f_name: _purposeselectedValue));
+                                        short_note: notesController.text,
+                                        f_name: _purposeselectedValue));
+                                    Utils.showToast("Birds Added");
 
-                                    Utils.showToast("Birds Reduced");
                                     Navigator.pop(context);
-                                  }else{
+                                  }
 
-                                    max_hint = "Cannot reduce more than $active_birds";
-                                    setState(() {
+                                }else {
+                                  if (isEdit) {
+                                    int active_birds = getFlockActiveBirds();
+                                    active_birds = active_birds +
+                                        widget.flock_detail!.item_count;
 
-                                    });
+                                    active_birds = active_birds -
+                                        int.parse(totalBirdsController.text);
+                                    print(active_birds);
 
+                                    DatabaseHelper.updateFlockBirds(
+                                        active_birds, getFlockID());
+
+                                    widget.flock_detail?.item_count =
+                                        int.parse(totalBirdsController.text);
+                                    widget.flock_detail?.reason =
+                                        _reductionReasonValue;
+                                    widget.flock_detail?.acqusition_date = date;
+                                    widget.flock_detail?.short_note =
+                                        notesController.text;
+                                    widget.flock_detail?.f_id = getFlockID();
+
+                                    await DatabaseHelper.updateFlock(
+                                        widget.flock_detail);
+                                    Utils.showToast("Birds Record Updated");
+                                    Navigator.pop(context);
+                                  } else {
+                                    int active_birds = getFlockActiveBirds();
+
+                                    if (int.parse(totalBirdsController.text) <
+                                        active_birds) {
+                                      active_birds = active_birds -
+                                          int.parse(totalBirdsController.text);
+                                      print(active_birds);
+
+                                      DatabaseHelper.updateFlockBirds(
+                                          active_birds, getFlockID());
+
+                                      int? id = await DatabaseHelper
+                                          .insertFlockDetail(Flock_Detail(
+                                          f_id: getFlockID(),
+                                          item_type: isCollection
+                                              ? 'Addition'
+                                              : 'Reduction',
+                                          item_count: int.parse(
+                                              totalBirdsController.text),
+                                          acqusition_type: _acqusitionselectedValue,
+                                          acqusition_date: date,
+                                          reason: _reductionReasonValue,
+                                          short_note: notesController.text,
+                                          f_name: _purposeselectedValue));
+
+                                      Utils.showToast("Birds Reduced");
+                                      Navigator.pop(context);
+                                    } else {
+                                      max_hint =
+                                      "Cannot reduce more than $active_birds";
+                                      setState(() {
+
+                                      });
+                                    }
                                   }
                                 }
 

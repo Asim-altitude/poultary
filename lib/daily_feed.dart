@@ -638,7 +638,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
     await Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => const NewFeeding()),
+          builder: (context) => NewFeeding()),
     );
 
     getFilteredTransactions(str_date, end_date);
@@ -656,7 +656,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Form Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -897,9 +897,19 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
       color: Colors.white,
       items: [
         PopupMenuItem(
+          value: 2,
+          child: Text(
+            "Edit Record",
+            style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Colors.black),
+          ),
+        ),
+        PopupMenuItem(
           value: 1,
           child: Text(
-            "Delete Item",
+            "Delete Record",
             style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
@@ -910,9 +920,18 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
 
       ],
       elevation: 8.0,
-    ).then((value) {
+    ).then((value) async{
       if (value != null) {
-        if(value == 1){
+        if(value == 2){
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => NewFeeding(feeding: feedings.elementAt(selected_index!),)),
+          );
+
+          getFilteredTransactions(str_date, end_date);
+        }
+        else if(value == 1){
           showAlertDialog(context);
         }else {
           print(value);
