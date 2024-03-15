@@ -19,6 +19,7 @@ class SessionManager {
   static final String last_time_saved = "last_time_saved";
   static final String reward_time = "reward_time";
   static final String in_app = "in_app";
+  static final String selected_language = "selected_language";
 
   static Future<void> setUserID(int userid) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -169,5 +170,15 @@ class SessionManager {
     in_app = pref.getBool(SessionManager.in_app) ?? false;
     return in_app;
   }
+  static Future<void> setSelectedLanguage(String selectedLanguage) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString(SessionManager.selected_language, selectedLanguage);
+  }
 
+  static Future<String?> getSelectedLanguage() async {
+    final SharedPreferences pref = await SharedPreferences.getInstance();
+    String selectedLanguage;
+    selectedLanguage = pref.getString(SessionManager.selected_language) ?? 'en';
+    return selectedLanguage;
+  }
 }

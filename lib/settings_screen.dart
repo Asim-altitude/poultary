@@ -1,10 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:language_picker/language_picker.dart';
+import 'package:language_picker/languages.dart';
 import 'package:poultary/add_eggs.dart';
 import 'package:poultary/add_feeding.dart';
 import 'package:poultary/category_screen.dart';
@@ -15,6 +19,7 @@ import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/sub_category_screen.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'add_flocks.dart';
 import 'database/databse_helper.dart';
@@ -57,7 +62,72 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
   bool _purchasePending = false;
   bool _loading = true;
   String? _queryProductError;
+  final supportedLanguages = [
+    Languages.english,
+    Languages.arabic,
+    Languages.russian,
+    Languages.persian,
+    Languages.german,
+    Languages.japanese,
+    Languages.korean,
+    Languages.portuguese,
+    Languages.turkish,
+    Languages.french,
+    Languages.indonesian,
+    Languages.hindi,
+    Languages.spanish,
+    Languages.chineseSimplified,
+    Languages.ukrainian,
+    Languages.polish,
+    Languages.bengali,
+    Languages.telugu,
+    Languages.tamil,
+    Languages.urdu
 
+  ];
+  late Language _selectedCupertinoLanguage;
+  bool isGetLanguage = false;
+  getLanguage() async {
+    _selectedCupertinoLanguage = await Utils.getSelectedLanguage();
+    setState(() {
+      isGetLanguage = true;
+
+    });
+
+  }
+  Widget _buildDropdownItem(Language language) {
+    return Row(
+      children: <Widget>[
+        SizedBox(
+          width: 8.0,
+        ),
+        if(language.isoCode !="pt" && language.isoCode !="zh_Hans")
+          Text("${language.name} (${language.isoCode})",
+            style: new TextStyle(
+                fontSize: 14.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontFamily: 'PTSans'),
+          ),
+        if(language.isoCode =="pt")
+          Text("${'Portuguese'} (${language.isoCode})",
+            style: new TextStyle(
+                fontSize: 14.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontFamily: 'PTSans'),
+          ),
+        if(language.isoCode =="zh_Hans")
+          Text("${'Chinese'} (zh)",
+            style: new TextStyle(
+                fontSize: 14.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontFamily: 'PTSans'),
+          ),
+      ],
+    );
+  }
   @override
   void dispose() {
     _subscription.cancel();
@@ -73,7 +143,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
     setUpInitial();
     Utils.setupAds();
     Utils.setupAds();
-
+    getLanguage();
   }
   setUpInitial() async {
     bool isInApp = await SessionManager.getInApp();
@@ -84,7 +154,16 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
       Utils.isShowAdd = true;
     }
   }
+  shareFiles() async {
+    File newPath = await DatabaseHelper.getFilePathDB();
+    XFile file = new XFile(newPath.path);
 
+    final result = await Share.shareXFiles([file], text: 'Database backup');
+
+    if (result.status == ShareResultStatus.success) {
+      print('Backup completed');
+    }
+  }
 
 
   @override
@@ -282,6 +361,114 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                       ],),),
                 ),
               ),
+              SizedBox(height: 12,),
+              InkWell(
+                onTap: () async {
+                  shareFiles();
+                },
+                child:
+                Container(
+                  height: 40,
+                  width:  200,
+
+                  alignment: Alignment.center,
+                  child:  Align(
+                    alignment: Alignment.center,
+                    child:Text("BACKUP_NOW".tr(),
+                      textAlign: TextAlign.center,
+                      style: new TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.normal,
+                          color: Colors.white,
+                          fontFamily: 'PTSANS'
+                      ),
+                    ),),
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: const BorderRadius.all(
+                        Radius.circular(4.0)),
+                    border: Border.all(
+                      color:  Colors.transparent,
+                      width: 0.0,
+                    ),
+                  ),
+                ),),
+              SizedBox(height: 12,),
+
+              InkWell(
+                onTap: () async {
+                  await DatabaseHelper.importDataBaseFile(context);
+                },
+                child:Container(
+                  height: 40,
+                  width:  200,
+
+                  alignment: Alignment.center,
+                  child:  Align(
+                    alignment: Alignment.center,
+                    child:Text("RESTORE_NOW".tr(),
+                      textAlign: TextAlign.center,
+                      style: new TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.normal,
+                          color: Colors.white,
+                          fontFamily: 'PTSANS'
+                      ),
+                    ),),
+                  decoration: BoxDecoration(
+                    color: Utils.getThemeColorBlue(),
+                    borderRadius: const BorderRadius.all(
+                        Radius.circular(4.0)),
+                    border: Border.all(
+                      color:  Colors.transparent,
+                      width: 0.0,
+                    ),
+                  ),
+                ),),
+              SizedBox(height: 12,),
+
+              if(isGetLanguage)
+                Container(
+                  color: Colors.white,
+                  width: Utils.getWidthResized(130),
+                  height: 60,
+                  child:
+
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(height: 20,
+
+                        color: Colors.white,
+                        child: Align(
+                          alignment: Alignment.center,
+                          child:Text("Language".tr(),
+                            textAlign: TextAlign.center,
+                            style: new TextStyle(
+                              fontSize: 13.0,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.black54,
+
+                            ),
+                          ),),
+                      ),
+
+                      Container(
+                        width: Utils.getWidthResized(130),height:24,color: Colors.white,
+                        child: LanguagePickerDropdown(
+                          initialValue: _selectedCupertinoLanguage,
+                          itemBuilder: _buildDropdownItem,
+                          languages: supportedLanguages,
+                          onValuePicked: (Language language) {
+                            _selectedCupertinoLanguage = language;
+                            Utils.setSelectedLanguage(_selectedCupertinoLanguage,context);
+                          },
+                        ),
+                      ),
+
+                    ],)
+
+                  ,),
 
               if(Utils.isShowAdd)
               Container(width: Utils.WIDTH_SCREEN,

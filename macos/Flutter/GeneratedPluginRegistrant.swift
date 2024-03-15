@@ -9,7 +9,7 @@ import file_selector_macos
 import in_app_purchase_storekit
 import path_provider_foundation
 import printing
-import share_plus
+import share_plus_macos
 import shared_preferences_foundation
 import sqflite
 import url_launcher_macos

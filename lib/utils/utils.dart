@@ -1,6 +1,7 @@
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
+import 'package:language_picker/languages.dart';
 import 'package:poultary/utils/session_manager.dart';
 import '../CAS_Ads.dart';
 import '../database/databse_helper.dart';
@@ -378,6 +380,142 @@ class Utils {
 
     }
     return Container(width: WIDTH_SCREEN,height: 0,);
+  }
+  static getSelectedLanguage() async {
+
+    String? language = await SessionManager.getSelectedLanguage();
+    if(language == "" || language == "en"){
+      return Languages.english;
+    }
+    else if(language == "ar"){
+      return Languages.arabic;
+    }
+    else if(language == "ar"){
+      return Languages.arabic;
+    }
+    else if(language == "ru"){
+      return Languages.russian;
+    }
+    else if(language == "fa"){
+      return Languages.persian;
+    }
+    else if(language == "de"){
+      return Languages.german;
+    }
+    else if(language == "ja"){
+      return Languages.japanese;
+    }
+    else if(language == "ko"){
+      return Languages.korean;
+    }
+    else if(language == "pt"){
+      return Languages.portuguese;
+    }
+    else if(language == "tr"){
+      return Languages.turkish;
+    }
+    else if(language =="fr"){
+      return Languages.french;
+    }
+    else if(language =="id"){
+      return Languages.indonesian;
+    }
+    else if(language =="hi"){
+      return Languages.hindi;
+    }
+    else if(language =="es"){
+      return Languages.spanish;
+    }
+    else if(language =="zh_Hans" || language =="zh"){
+      return Languages.chineseSimplified;
+    }
+    else if(language =="uk"){
+      return Languages.ukrainian;
+    }
+    else if(language =="pl"){
+      return Languages.polish;
+    }
+    else if(language =="bn"){
+      return Languages.bengali;
+    }
+    else if(language =="te"){
+      return Languages.telugu;
+    }
+    else if(language =="ta"){
+      return Languages.tamil;
+    }
+    else if(language =="ur"){
+      return Languages.urdu;
+    }
+    return Languages.english;
+  }
+  static setSelectedLanguage(Language language,BuildContext context) async {
+
+    String languageName = "";
+    if(language.isoCode =="en"){
+      languageName = "en";
+    }
+    else if(language.isoCode =="ar"){
+      languageName = "ar";
+    }
+    else if(language.isoCode =="ru"){
+      languageName = "ru";
+    }
+    else if(language.isoCode =="fa"){
+      languageName = "fa";
+    }
+    else if(language.isoCode =="de"){
+      languageName = "de";
+    }
+    else if(language.isoCode =="ja"){
+      languageName = "ja";
+    }
+    else if(language.isoCode =="ko"){
+      languageName = "ko";
+    }
+    else if(language.isoCode =="pt"){
+      languageName = "pt";
+    }
+    else if(language.isoCode =="tr"){
+      languageName = "tr";
+    }
+    else if(language.isoCode =="fr"){
+      languageName = "fr";
+    }
+    else if(language.isoCode =="id"){
+      languageName = "id";
+    }
+    else if(language.isoCode =="hi"){
+      languageName = "hi";
+    }
+    else if(language.isoCode =="es"){
+      languageName = "es";
+    }
+    else if(language.isoCode =="zh_Hans"){
+      languageName = "zh";
+    }
+    else if(language.isoCode =="uk"){
+      languageName = "uk";
+    }
+    else if(language.isoCode =="pl"){
+      languageName = "pl";
+    }
+    else if(language.isoCode =="bn"){
+      languageName = "bn";
+    }
+    else if(language.isoCode =="te"){
+      languageName = "te";
+    }
+    else if(language.isoCode =="ta"){
+      languageName = "ta";
+    }
+    else if(language.isoCode =="ur"){
+      languageName = "ur";
+    }
+
+    print(language.isoCode);
+    EasyLocalization.of(context)?.setLocale(Locale(languageName));
+    await SessionManager.setSelectedLanguage(languageName);
   }
 
 

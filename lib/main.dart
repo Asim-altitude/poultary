@@ -2,12 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'dart:ui' as ui;
 
 import 'home_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  await EasyLocalization.ensureInitialized();
+
+  runApp(
+      EasyLocalization(
+          supportedLocales: [Locale('en'), Locale('ar'),Locale('de'),Locale('ru'),Locale('fa'),Locale('ja'),Locale('ko'),Locale('pt'),Locale('tr'),Locale('fr'),Locale('id'),Locale('hi'),Locale('es'),Locale('zh'),Locale('uk'),Locale('pl'),Locale('bn'),Locale('te'),Locale('ta'),Locale('ur')],
+          path: 'assets/translations', // <-- change the path of the translation files
+          fallbackLocale: Locale('en'),
+      child: MyApp()),);
   requestGDPR();
   await MobileAds.instance.initialize();
 
@@ -59,9 +68,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Text & Emoji Repeater',
+      title: 'Easy Poultry Manager',
       debugShowCheckedModeBanner: false,
-
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -82,7 +93,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Utils.getThemeColorBlue()),
         useMaterial3: true,
       ),
-      home: HomeScreen(),
+      home: Directionality(
+        textDirection: ui.TextDirection.ltr,
+        child: HomeScreen(),),
     );
   }
 }

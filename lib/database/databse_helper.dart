@@ -1,10 +1,14 @@
 import 'dart:ffi';
 
+import 'package:easy_localization/easy_localization.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:poultary/model/egg_item.dart';
 import 'package:poultary/model/flock.dart';
 import 'package:poultary/model/med_vac_item.dart';
 import 'package:poultary/model/sub_category_item.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:io';
 import 'package:path/path.dart';
@@ -67,6 +71,82 @@ class DatabaseHelper  {
     }
 // open the database
     return await openDatabase(path, readOnly: false);
+  }
+  static getFilePathDB() async {
+    // File result = await _db.dBToCopy();
+    // print("lllllllllllllllllll ${result.absolute.path}");
+    //
+    // Directory documentsDirectory =
+    // Directory("storage/emulated/0/Download/");
+    File abcd = await _db.dBToCopy();
+
+    String recoveryPath =
+        "${abcd.absolute.path}/assets/poultary.db";
+
+    String newPath = recoveryPath;
+    print('Path:${newPath}');
+    File file = new File(recoveryPath);
+
+
+    return file;
+  }
+  static importDataBaseFile (BuildContext context) async {
+    File abcd = await _db.dBToCopy();
+
+    bool? clear = await FilePicker.platform.clearTemporaryFiles();
+    print(clear);
+    FilePickerResult? result =
+    await FilePicker.platform.pickFiles(
+
+    );
+    String recoveryPath =
+        "${abcd.absolute.path}/assets/poultary.db";
+    String newPath = "${result?.files.single.path}";
+    if(newPath.contains(".db")){
+      File backupFile = File(newPath);
+      backupFile.copy(recoveryPath);
+      Alert(
+        context: context,
+        type: AlertType.success,
+        title: "RESTORE_SUCCESSFUL".tr(),
+        desc: "Please check your data now.",
+        buttons: [
+          DialogButton(
+            child: Text(
+              "OK".tr(),
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+            onPressed: () => Navigator.pop(context),
+            width: 120,
+          )
+        ],
+      ).show();
+    }
+    else{
+      Alert(
+        context: context,
+        type: AlertType.error,
+        title: "Restore Problem",
+        desc: "Please select the hatching.db file. If you are still facing an issue, send an email to abc@gmail.com",
+        buttons: [
+          DialogButton(
+            child: Text(
+              "OK".tr(),
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+            onPressed: () => Navigator.pop(context),
+            width: 120,
+          )
+        ],
+      ).show();
+    }
+
+  }
+  Future<File> dBToCopy() async {
+    final db = await instance.database;
+    final dbPath = await getDatabasesPath();
+    var afile = File(dbPath);
+    return afile;
   }
   static Future<int?>  insertFlock(Flock flock) async {
 
