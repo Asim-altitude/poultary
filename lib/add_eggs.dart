@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -48,8 +49,8 @@ class _NewEggCollection extends State<NewEggCollection>
   String _acqusitionselectedValue = "";
 
   List<String> _purposeList = [];
-  List<String> _reductionReasons = ['--Reduction Reason--',
-    'Sold','Broken','Personal Use','Lost/Stolen','Other'];
+  List<String> _reductionReasons = ['REDUCTION_REASON'.tr(),
+    'SOLD'.tr(),'PERSONAL_USE'.tr(),'MORTALITY'.tr(),'LOST'.tr(),'OTHER'.tr()];
 
   int chosen_index = 0;
 
@@ -84,7 +85,7 @@ class _NewEggCollection extends State<NewEggCollection>
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'FARM_WIDE'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -103,7 +104,7 @@ class _NewEggCollection extends State<NewEggCollection>
 
   bool _validate = false;
 
-  String date = "Choose Date";
+  String date = "CHOOSE_DATE".tr();
   final nameController = TextEditingController();
   final totalEggsController = TextEditingController();
   final goodEggsController = TextEditingController();
@@ -167,7 +168,7 @@ class _NewEggCollection extends State<NewEggCollection>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                isCollection? isEdit?'Edit Collection':'New Collection' : isEdit? 'Edit Reduction':'New Reduction',
+                                isCollection? isEdit? "EDIT".tr() + "COLLECTION".tr(): "NEW".tr()+ "Collection" : isEdit? "EDIT".tr() + "REDUCTION".tr():"NEW".tr()+ "REDUCTION".tr(),
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -278,11 +279,11 @@ class _NewEggCollection extends State<NewEggCollection>
                                   controller: badEggsController,
                                   keyboardType: TextInputType.number,
                                   textInputAction: TextInputAction.next,
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Bad Eggs',
+                                    hintText: "BAD".tr()+"EGGS".tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -313,11 +314,11 @@ class _NewEggCollection extends State<NewEggCollection>
                                   readOnly: true,
                                   controller: totalEggsController,
                                   keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Total Eggs',
+                                    hintText: "TOTAL".tr() + "EGGS".tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -400,11 +401,11 @@ class _NewEggCollection extends State<NewEggCollection>
                                   keyboardType: TextInputType.multiline,
                                   textAlign: TextAlign.start,
                                   textInputAction: TextInputAction.done,
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Write short note',
+                                    hintText: 'NOTES_HINT'.tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -434,7 +435,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                     widget.eggs!.short_note = notesController.text;
                                     await DatabaseHelper.updateEggCollection(widget.eggs!);
 
-                                    Utils.showToast("Eggs Collection Updated");
+                                    Utils.showToast("SUCCESSFUL".tr());
                                     Navigator.pop(context, "Egg ADDED");
                                   }else {
                                     int? id = await DatabaseHelper
@@ -450,7 +451,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                         date: date,
                                         reduction_reason: '',
                                         isCollection: 1));
-                                    Utils.showToast("Eggs Collection Added");
+                                    Utils.showToast("SUCCESSFUL".tr());
                                     Navigator.pop(context, "Egg ADDED");
                                   }
                                 }else{
@@ -466,7 +467,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                     widget.eggs!.short_note = notesController.text;
                                     await DatabaseHelper.updateEggCollection(widget.eggs!);
 
-                                    Utils.showToast("Eggs Collection Updated");
+                                    Utils.showToast("SUCCESSFUL".tr());
                                     Navigator.pop(context, "Egg ADDED");
                                   }else {
                                     int? id = await DatabaseHelper
@@ -482,12 +483,12 @@ class _NewEggCollection extends State<NewEggCollection>
                                         date: date,
                                         reduction_reason: _reductionReasonValue,
                                         isCollection: 0));
-                                    Utils.showToast("Eggs Reduction Added");
+                                    Utils.showToast("SUCCESSFUL".tr());
                                     Navigator.pop(context, "Egg Reduced");
                                   }
                                 }
                               }else{
-                                Utils.showToast("Provide all required info");
+                                Utils.showToast("PROVIDE_ALL".tr());
                               }
                             },
                             child: Container(
@@ -505,7 +506,7 @@ class _NewEggCollection extends State<NewEggCollection>
                               ),
                               margin: EdgeInsets.all( 20),
                               child: Text(
-                                "Confirm",
+                                "CONFIRM".tr(),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -619,7 +620,7 @@ class _NewEggCollection extends State<NewEggCollection>
   bool checkValidation() {
     bool valid = true;
 
-    if(date.toLowerCase().contains("date")){
+    if(date.toLowerCase().contains("DATE".tr())){
       valid = false;
       print("Select Date");
     }

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -39,19 +40,19 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
   String _acqusitionselectedValue = "";
 
   List<String> _purposeList = [
-    '--Select Purpose--',
-    'Egg',
-    'Meat',
-    'Egg and Meat',
-    'Other',
+    'SELECT_PURPOSE'.tr(),
+    'EGG'.tr(),
+    'MEAT'.tr(),
+    'EGG_MEAT'.tr(),
+    'OTHER'.tr(),
   ];
 
   List<String> acqusitionList = [
-    '--Acqusition Type--',
-    'Purchased',
-    'Hatched on Farm',
-    'Gift',
-    'Other',
+    'ACQUSITION_TYPE'.tr(),
+    'PURCHASED'.tr(),
+    'HATCHED'.tr(),
+    'GIFT'.tr(),
+    'OTHER'.tr(),
   ];
 
   List<Bird> birds = [];
@@ -92,7 +93,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
 
   bool _validate = false;
 
-  String date = "Choose Date";
+  String date = "CHOOSE_DATE".tr();
   final nameController = TextEditingController();
   final birdcountController = TextEditingController();
   final notesController = TextEditingController();
@@ -151,7 +152,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                "New Flock",
+                                "NEW_FLOCK".tr(),
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -166,7 +167,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                   Container(
                       margin: EdgeInsets.only(left: 10,top: 16,bottom: 8),
                       child: Text(
-                        "Select Birds Type",
+                        "BIRD_TYPES".tr(),
                         textAlign: TextAlign.start,
                         style: TextStyle(
                             color: Utils.getThemeColorBlue(),
@@ -269,11 +270,11 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                                 maxLength: 25,
                                 controller: nameController,
                                 textInputAction: TextInputAction.next,
-                                decoration: const InputDecoration(
+                                decoration:  InputDecoration(
                                   border: OutlineInputBorder(
                                       borderRadius:
                                       BorderRadius.all(Radius.circular(10))),
-                                  hintText: 'Flock/Batch Name',
+                                  hintText: 'FLOCK_NAME'.tr(),
                                   hintStyle: TextStyle(
                                       color: Colors.grey, fontSize: 16),
                                   labelStyle: TextStyle(
@@ -303,11 +304,11 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                                 controller: birdcountController,
                                 keyboardType: TextInputType.number,
                                 textInputAction: TextInputAction.next,
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   border: OutlineInputBorder(
                                       borderRadius:
                                       BorderRadius.all(Radius.circular(10))),
-                                  hintText: 'Number of Birds',
+                                  hintText: 'NUMBER_BIRDS'.tr(),
                                   hintStyle: TextStyle(
                                       color: Colors.grey, fontSize: 16),
                                   labelStyle: TextStyle(
@@ -421,7 +422,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                                     BorderRadius.all(Radius.circular(10))),
                                 child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
                                   Icon(Icons.add, color: Colors.white,),
-                                  Text('Images', style: TextStyle(
+                                  Text('IMAGES'.tr(), style: TextStyle(
                                       color: Colors.white, fontSize: 14),)
                                 ],),
                               ),
@@ -448,11 +449,11 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                                 keyboardType: TextInputType.multiline,
                                 textAlign: TextAlign.start,
                                 textInputAction: TextInputAction.done,
-                                decoration: const InputDecoration(
+                                decoration:  InputDecoration(
                                   border: OutlineInputBorder(
                                       borderRadius:
                                       BorderRadius.all(Radius.circular(10))),
-                                  hintText: 'Write short note',
+                                  hintText: 'NOTES_HINT'.tr(),
                                   hintStyle: TextStyle(
                                       color: Colors.grey, fontSize: 16),
                                   labelStyle: TextStyle(
@@ -477,12 +478,12 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                               if (base64Images.length > 0){
                                 insertFlockImages(id);
                               }else{
-                                Utils.showToast("New Flock Created");
+                                Utils.showToast("FLOCK_CREATED".tr());
                                 Navigator.pop(context);
                               }
 
                             }else{
-                              Utils.showToast("Provide all required info");
+                              Utils.showToast("PROVIDE_ALL".tr());
                             }
                           },
                           child: Container(
@@ -500,7 +501,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                             ),
                             margin: EdgeInsets.all( 20),
                             child: Text(
-                              "Confirm",
+                              "CONFIRM".tr(),
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                   color: Colors.white,
@@ -632,17 +633,17 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
   bool checkValidation() {
     bool valid = true;
 
-    if(date.toLowerCase().contains("date")){
+    if(date.toLowerCase().contains("DATE".tr())){
       valid = false;
       print("Select Date");
     }
 
-    if(_acqusitionselectedValue.toLowerCase().contains("acqusition")){
+    if(_acqusitionselectedValue.toLowerCase().contains("ACQUSITION".tr())){
       valid = false;
       print("Select Acqusition Type");
     }
 
-    if(_purposeselectedValue.toLowerCase().contains("purpose")){
+    if(_purposeselectedValue.toLowerCase().contains("PURPOSE1".tr())){
       valid = false;
       print("Select Purpose");
     }
@@ -687,7 +688,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
       }
 
       print("Images Inserted");
-      Utils.showToast("New Flock Created");
+      Utils.showToast("FLOCK_CREATED".tr());
       Navigator.pop(context);
     }
 

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -52,7 +53,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
   bool isEdit = false;
 
-  String date = "Choose Date";
+  String date = "CHOOSE_DATE".tr();
   final bird_countController = TextEditingController();
   final doctorController = TextEditingController();
   final medicineController = TextEditingController();
@@ -89,7 +90,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'FARM_WIDE'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -191,7 +192,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                Utils.vaccine_medicine.toLowerCase().contains("medi")? isEdit?'Edit Medication':'New Medication':isEdit?'Edit Vaccination':'New Vaccination',
+                                Utils.vaccine_medicine.toLowerCase().contains("medi")? isEdit?'EDIT'.tr() + 'MEDICATION'.tr():'NEW_MEDICATION'.tr():isEdit?'EDIT'.tr() + 'VACCINATION'.tr():'NEW_VACCINATION'.tr(),
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -268,11 +269,11 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                   keyboardType: TextInputType.multiline,
                                   textAlign: TextAlign.start,
                                   textInputAction: TextInputAction.next,
-                                  decoration: const InputDecoration(
+                                  decoration:  InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Medicine name',
+                                    hintText: 'MED_NAME'.tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -303,11 +304,11 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                   controller: bird_countController,
                                   keyboardType: TextInputType.number,
                                   textInputAction: TextInputAction.next,
-                                  decoration: const InputDecoration(
+                                  decoration:  InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Birds count',
+                                    hintText: 'BIRDS_COUNT'.tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -370,11 +371,11 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                   keyboardType: TextInputType.multiline,
                                   textAlign: TextAlign.start,
                                   textInputAction: TextInputAction.next,
-                                  decoration: const InputDecoration(
+                                  decoration:  InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: "Vaccinated/Medicated by",
+                                    hintText: "VAC_MED_BY".tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 14),
                                     labelStyle: TextStyle(
@@ -406,11 +407,11 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                   keyboardType: TextInputType.multiline,
                                   textAlign: TextAlign.start,
                                   textInputAction: TextInputAction.done,
-                                  decoration: const InputDecoration(
+                                  decoration:  InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Write short note',
+                                    hintText: 'NOTES_HINT'.tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -449,7 +450,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                   med_vacc.id = widget.vaccination_medication!.id!;
                                   int? id = await DatabaseHelper.updateHealth(
                                       med_vacc);
-                                  Utils.showToast("${Utils.vaccine_medicine} Record Updated");
+                                  Utils.showToast("SUCCESSFUL".tr());
                                   Navigator.pop(context);
                                 }
                                 else {
@@ -469,12 +470,12 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                     f_name: _purposeselectedValue,);
                                   int? id = await DatabaseHelper.insertMedVac(
                                       med_vacc);
-                                  Utils.showToast("New ${Utils.vaccine_medicine} Added");
+                                  Utils.showToast("SUCCESSFUL".tr());
                                   Navigator.pop(context);
                                 }
 
                               }else{
-                                Utils.showToast("Provide all required info");
+                                Utils.showToast("PROVIDE_ALL".tr());
                               }
                             },
                             child: Container(
@@ -492,7 +493,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                               ),
                               margin: EdgeInsets.all( 20),
                               child: Text(
-                                "Confirm",
+                                "CONFIRM".tr(),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -609,7 +610,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
   bool checkValidation() {
     bool valid = true;
 
-    if(date.toLowerCase().contains("date")){
+    if(date.toLowerCase().contains("DATE".tr())){
       valid = false;
       print("Select Date");
     }

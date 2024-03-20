@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -60,7 +61,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'FARM_WIDE'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -138,7 +139,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                   ),
                   child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
                     Icon(Icons.add_circle_outline_sharp, color: Colors.white, size: 25,),SizedBox(width: 4,),
-                    Text('Add Birds', style: TextStyle(
+                    Text('ADD_BIRDS'.tr(), style: TextStyle(
                         color: Colors.white, fontSize: 16),)
                   ],),
                 ),
@@ -163,7 +164,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                   ),
                   child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
                     Icon(Icons.indeterminate_check_box_outlined, color: Colors.white, size: 25,),SizedBox(width: 4,),
-                    Text('Reduce Birds', style: TextStyle(
+                    Text('REDUCE_BIRDS'.tr(), style: TextStyle(
                         color: Colors.white, fontSize: 16),)
                   ],),
                 ),
@@ -301,7 +302,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                             width: 1.0,
                           ),
                         ),
-                        child: Text('All', style: TextStyle(
+                        child: Text('ALL'.tr(), style: TextStyle(
                             color: selected==1 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                       ),
                     ),
@@ -326,7 +327,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                             width: 1.0,
                           ),
                         ),
-                        child: Text('Addition', style: TextStyle(
+                        child: Text('ADDITION'.tr(), style: TextStyle(
                             color: selected==2 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                       ),
                     ),
@@ -350,7 +351,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                             width: 1.0,
                           ),
                         ),
-                        child: Text('Reduction', style: TextStyle(
+                        child: Text('REDUCTION'.tr(), style: TextStyle(
                             color: selected==3 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                       ),
                     ),
@@ -422,8 +423,8 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                                               child: Row(
                                                 children: [
                                                   Container( margin: EdgeInsets.only(right: 5), child: Text(list.elementAt(index).item_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color:list.elementAt(index).item_type == 'Addition'?Colors.black:Colors.black),)),
-                                                  Text("Birds", style: TextStyle(color: Colors.black, fontSize: 12),),
-                                                  Text("  On", style: TextStyle(color: Utils.getThemeColorBlue(),fontWeight: FontWeight.bold, fontSize: 14),),
+                                                  Text("BIRDS".tr(), style: TextStyle(color: Colors.black, fontSize: 12),),
+                                                  Text("  "+"ON".tr() , style: TextStyle(color: Utils.getThemeColorBlue(),fontWeight: FontWeight.bold, fontSize: 14),),
                                                   Align(
                                                       alignment: Alignment.topLeft,
                                                       child: Container(margin: EdgeInsets.all(5), child: Text(Utils.getFormattedDate(list.elementAt(index).acqusition_date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),))),
@@ -454,7 +455,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                                     Container(
                                       width: widthScreen - 60,
                                       child: Text(
-                                        list.elementAt(index).short_note.isEmpty? 'No notes taken' : list.elementAt(index).short_note
+                                        list.elementAt(index).short_note.isEmpty? 'NO_NOTES'.tr() : list.elementAt(index).short_note
                                       ,maxLines: 3, style: TextStyle(fontSize: 14, color: Colors.black),),
                                     ),
                                   ],
@@ -472,7 +473,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                   margin: EdgeInsets.only(top: 50),
                   child: Column(
                     children: [
-                      Text('No Birds Added/Reduced', style: TextStyle(fontSize: 18, color: Colors.black),),
+                      Text('NO_BIRDS_ADD_REDUCE'.tr(), style: TextStyle(fontSize: 18, color: Colors.black),),
                     ],
                   ),
                 ),
@@ -774,7 +775,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
         context: context,
         builder: (BuildContext bcontext) {
           return AlertDialog(
-            title: Text('Date Filter'),
+            title: Text("DATE_FILTER".tr()),
             content: setupAlertDialoadContainer(bcontext,widthScreen - 40, widthScreen),
           );
         });
@@ -824,16 +825,16 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
   }
 
 
-  List<String> filterList = ['Today','Yesterday','This Month', 'Last Month','Last 3 months', 'Last 6 months','This Year',
-    'Last Year','All Time'];
+  List<String> filterList = ['TODAY'.tr(),'YESTERDAY'.tr(),'THIS_MONTH'.tr(), 'LAST_MONTH'.tr(),'LAST3_MONTHS'.tr(), 'LAST6_MONTHS'.tr(),'THIS_YEAR'.tr(),
+    'LAST_YEAR'.tr(),'ALL_TIME'.tr()];
 
-  String date_filter_name = "This Month";
-  String pdf_formatted_date_filter = "This Month";
+  String date_filter_name = 'THIS_MONTH'.tr();
+  String pdf_formatted_date_filter = 'THIS_MONTH'.tr();
   String str_date='',end_date='';
   void getData(String filter){
     int index = 0;
 
-    if (filter == 'Today'){
+    if (filter == 'TODAY'.tr()){
       index = 0;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
@@ -845,7 +846,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       pdf_formatted_date_filter = "Today ("+str_date+")";
       getFilteredTransactions(str_date,end_date);
     }
-    else if (filter == 'Yesterday'){
+    else if (filter == 'YESTERDAY'.tr()){
       index = 1;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day -1);
 
@@ -854,10 +855,10 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       end_date = inputFormat.format(today);
       print(str_date+" "+end_date);
 
-      pdf_formatted_date_filter = "Yesterday ("+str_date+")";
+      pdf_formatted_date_filter = "YESTERDAY".tr() + " ("+str_date+")";
       getFilteredTransactions(str_date,end_date);
     }
-    else if (filter == 'This Month'){
+    else if (filter == 'THIS_MONTH'.tr()){
       index = 2;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
 
@@ -870,7 +871,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       getFilteredTransactions(str_date,end_date);
 
       pdf_formatted_date_filter = "This Month ("+str_date+"-"+end_date+")";
-    }else if (filter == 'Last Month'){
+    }else if (filter == 'LAST_MONTH'.tr()){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
 
@@ -883,9 +884,9 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       print(str_date+" "+end_date);
       getFilteredTransactions(str_date,end_date);
 
-      pdf_formatted_date_filter = "Last Month ("+str_date+"-"+end_date+")";
+      pdf_formatted_date_filter = 'LAST_MONTH'.tr()+ " ("+str_date+"-"+end_date+")";
 
-    }else if (filter == 'Last 3 months'){
+    }else if (filter == 'LAST3_MONTHS'.tr()){
       index = 4;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -2, 1);
 
@@ -897,8 +898,8 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       print(str_date+" "+end_date);
       getFilteredTransactions(str_date,end_date);
 
-      pdf_formatted_date_filter = "Last 3 months ("+str_date+"-"+end_date+")";
-    }else if (filter == 'Last 6 months'){
+      pdf_formatted_date_filter = "LAST3_MONTHS".tr()+ " ("+str_date+"-"+end_date+")";
+    }else if (filter == 'LAST6_MONTHS'.tr()){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
 
@@ -910,8 +911,8 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       print(str_date+" "+end_date);
       getFilteredTransactions(str_date,end_date);
 
-      pdf_formatted_date_filter = "Last 6 months ("+str_date+"-"+end_date+")";
-    }else if (filter == 'This Year'){
+      pdf_formatted_date_filter = "LAST6_MONTHS".tr()+" ("+str_date+"-"+end_date+")";
+    }else if (filter == 'THIS_YEAR'.tr()){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
@@ -921,8 +922,8 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
       getFilteredTransactions(str_date,end_date);
-      pdf_formatted_date_filter = "This Year ("+str_date+"-"+end_date+")";
-    }else if (filter == 'Last Year'){
+      pdf_formatted_date_filter = 'THIS_YEAR'.tr()+ " ("+str_date+"-"+end_date+")";
+    }else if (filter == 'LAST_YEAR'.tr()){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year-1, 12,31);
@@ -933,16 +934,16 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       print(str_date+" "+end_date);
       getFilteredTransactions(str_date,end_date);
 
-      pdf_formatted_date_filter = "Last Year ("+str_date+"-"+end_date+")";
+      pdf_formatted_date_filter = 'LAST_YEAR'.tr() +" ("+str_date+"-"+end_date+")";
 
-    }else if (filter == 'All Time'){
+    }else if (filter == 'ALL_TIME'.tr()){
       index = 8;
       str_date ="";
       end_date ="";
       print(str_date+" "+end_date);
       getFilteredTransactions(str_date,end_date);
 
-      pdf_formatted_date_filter = "All Time ";
+      pdf_formatted_date_filter = 'ALL_TIME'.tr();
     }
 
   }
@@ -976,7 +977,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
         PopupMenuItem(
           value: 2,
           child: Text(
-            "Edit Item",
+            "EDIT_RECORD".tr(),
             style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
@@ -985,7 +986,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
         ), PopupMenuItem(
           value: 1,
           child: Text(
-            "Delete Item",
+            "DELETE_RECORD".tr(),
             style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
@@ -1033,17 +1034,17 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
     // set up the buttons
     Widget cancelButton = TextButton(
-      child: Text("Cancel"),
+      child: Text("CANCEL".tr()),
       onPressed:  () {
         Navigator.pop(context);
       },
     );
     Widget continueButton = TextButton(
-      child: Text("Delete"),
+      child: Text("DELETE".tr()),
       onPressed:  () {
         DatabaseHelper.deleteItem("Flock_Detail", selected_id!);
         list.removeAt(selected_index!);
-        Utils.showToast("Record Deleted");
+        Utils.showToast("RECORD_DELETED".tr());
         Navigator.pop(context);
         setState(() {
 
@@ -1055,8 +1056,8 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
-      title: Text("Confirmation"),
-      content: Text("Are you sure you want to delete this Record?"),
+      title: Text("CONFIRMATION".tr()),
+      content: Text("RU_SURE".tr()),
       actions: [
         cancelButton,
         continueButton,

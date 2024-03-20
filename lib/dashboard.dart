@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -61,8 +62,8 @@ class _DashboardScreen extends State<DashboardScreen> {
     str_date = inputFormat.format(firstDayCurrentMonth);
     end_date = inputFormat.format(lastDayCurrentMonth);
 
-    gross_income = await DatabaseHelper.getTransactionsTotal(-1, "Income", str_date, end_date);
-    total_expense = await DatabaseHelper.getTransactionsTotal(-1, "Expense", str_date, end_date);
+    gross_income = await DatabaseHelper.getTransactionsTotal(-1, "INCOME".tr(), str_date, end_date);
+    total_expense = await DatabaseHelper.getTransactionsTotal(-1, "EXPENSE".tr(), str_date, end_date);
 
     net_income = gross_income - total_expense;
 
@@ -81,7 +82,7 @@ class _DashboardScreen extends State<DashboardScreen> {
     if(flocks.length == 0)
     {
       no_flock = true;
-      print('No Flocks');
+      print("NO_FLOCKS".tr());
     }
 
     flock_total = flocks.length;
@@ -155,7 +156,7 @@ class _DashboardScreen extends State<DashboardScreen> {
 
                           child: Expanded(
                             child: Text(
-                              "Poultry Dashboard",
+                              "TITLE_DASHBOARD".tr(),
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
@@ -203,10 +204,10 @@ class _DashboardScreen extends State<DashboardScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Financial Summary ',style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Utils.getThemeColorBlue()),),
+                          Text("HEADING_DASHBOARD".tr(),style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Utils.getThemeColorBlue()),),
                         ],
                       )),
-                  Text('(This month)',style: TextStyle(fontSize: 12, fontWeight: FontWeight.normal, color: Colors.black),),
+                  Text("THIS_MONTH".tr(),style: TextStyle(fontSize: 12, fontWeight: FontWeight.normal, color: Colors.black),),
 
                   SizedBox(height: 10,width: widthScreen,),
 
@@ -217,7 +218,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                         width:140,
                         child:Align(
                           alignment: Alignment.centerLeft,
-                          child:Text('Gross Income',style: TextStyle(fontSize: 15, fontWeight: FontWeight.normal, color: Colors.black),),
+                          child:Text("GROSS_INCOME".tr(),style: TextStyle(fontSize: 15, fontWeight: FontWeight.normal, color: Colors.black),),
 
                         ),),
 
@@ -236,7 +237,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                         width:140,
                         child:Align(
                           alignment: Alignment.centerLeft,
-                          child:Text('Gross Expense',style: TextStyle(fontSize: 15, fontWeight: FontWeight.normal, color: Colors.black),),
+                          child:Text("GROSS_EXPENSE".tr(),style: TextStyle(fontSize: 15, fontWeight: FontWeight.normal, color: Colors.black),),
 
                         ),),
 
@@ -253,7 +254,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Net Income',style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),),
+                      Text("NET_INCOME".tr(),style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),),
                       Text('$net_income'+ Utils.currency,style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: net_income>=0? Utils.getThemeColorBlue():Colors.red),),
 
                     ],)
@@ -267,7 +268,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                       children: [
                         Row(
                           children: [
-                            Text('All Flocks ',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
+                            Text("ALL_FLOCKS".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
                             Text("(" + flocks.length.toString() + ")",style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
 
                           ],
@@ -298,7 +299,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                                       color:  Utils.getThemeColorBlue(),
                                       width: 2.0,
                                     ),
-                                  ),child: Text("+New Flock", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.white),))),
+                                  ),child: Text("NEW_FLOCK".tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.white),))),
                         ),
 
 
@@ -371,7 +372,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                                     child: Row(
                                       children: [
                                         Container( margin: EdgeInsets.only(right: 5), child: Text(flocks.elementAt(index).active_bird_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 17, color: Utils.getThemeColorBlue()),)),
-                                        Text("Birds", style: TextStyle(color: Colors.black, fontSize: 14),)
+                                        Text("BIRDS".tr(), style: TextStyle(color: Colors.black, fontSize: 14),)
                                       ],
                                     ),
                                   ),
@@ -387,7 +388,7 @@ class _DashboardScreen extends State<DashboardScreen> {
               ) : Container(
                   alignment:  Alignment.center,
                   margin: EdgeInsets.only(top: 20),
-                  child: Text('No Flocks Added Yet.',style: TextStyle( fontSize: 14,color: Colors.black),)),
+                  child: Text("NO_FLOCKS".tr(),style: TextStyle( fontSize: 14,color: Colors.black),)),
               /*Center(
                     child: SfCircularChart(
                         title: ChartTitle(text: 'Income/Expense'),

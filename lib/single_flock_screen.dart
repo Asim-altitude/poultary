@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -133,7 +134,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                       Container(
                           margin: EdgeInsets.only(left: 10),
                           child: Text(
-                            "Flock Details",
+                            "FLOCK_DETAILS".tr(),
                             textAlign: TextAlign.start,
                             style: TextStyle(
                                 color: Colors.white,
@@ -164,13 +165,13 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                         ),
                         Row(
                           children: [
-                            Container( child: Text('Acquired On ', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black54),)),
+                            Container( child: Text('ACQUIRED_ON'.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black54),)),
                             Container( child: Text(Utils.getFormattedDate(Utils.selected_flock!.acqusition_date), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
                           ],
                         ),
                           Row(
                             children: [
-                              Container( child: Text('Purpose: ', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black54),)),
+                              Container( child: Text('PURPOSE'.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black54),)),
                               Container( child: Text(Utils.selected_flock!.purpose == 'Both'? 'Egg and Meat':Utils.selected_flock!.purpose, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
                             ],
                           ),
@@ -188,7 +189,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                         child: Row(
                           children: [
                             Container( margin: EdgeInsets.only(right: 3), child: Text(Utils.selected_flock!.active_bird_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color: Utils.getThemeColorBlue()),)),
-                            Text("Birds", style: TextStyle(color: Colors.black, fontSize: 14),)
+                            Text("BIRDS".tr(), style: TextStyle(color: Colors.black, fontSize: 14),)
                           ],
                         ),
                       ),
@@ -224,7 +225,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                 width: widthScreen,
                   margin: EdgeInsets.only(left: 20,right: 10),
                   child: Text(
-                    "Flock Description",
+                    "FLOCK_DESC".tr(),
                     textAlign: TextAlign.start,
                     style: TextStyle(
                         color: Colors.black,
@@ -291,7 +292,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                 ),),
                                 Expanded(
                                   child: Text(
-                                    "Add/Reduce Birds",
+                                    "ADD_REDUCE_BIRDS".tr(),
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontSize: 16,
@@ -334,7 +335,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                 ),),
                                 Expanded(
                                   child: Text(
-                                    "Egg Collection",
+                                    "EGG_COLLECTION".tr(),
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontSize: 16,
@@ -382,7 +383,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                 ),),
                                 Expanded(
                                   child: Text(
-                                    "Daily Feeding",
+                                    "DAILY_FEEDING".tr(),
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontSize: 16,
@@ -431,7 +432,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                 ),),
                                 Expanded(
                                   child: Text(
-                                    "Birds Health",
+                                    "BIRDS_HEALTH".tr(),
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontSize: 16,
@@ -478,7 +479,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                 ),),
                                 Expanded(
                                   child: Text(
-                                    "Income/Expense",
+                                    "INCOME_EXPENSE".tr(),
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontSize: 16,

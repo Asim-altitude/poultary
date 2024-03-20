@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -98,9 +99,9 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
     total_flock_birds = await DatabaseHelper.getAllFlockBirdsCount(f_id, str_date, end_date);
 
-    total_birds_added = await DatabaseHelper.getBirdsCalculations(f_id, "Addition", str_date, end_date);
+    total_birds_added = await DatabaseHelper.getBirdsCalculations(f_id, "ADDITION".tr(), str_date, end_date);
 
-    total_birds_reduced = await DatabaseHelper.getBirdsCalculations(f_id, "Reduction", str_date, end_date);
+    total_birds_reduced = await DatabaseHelper.getBirdsCalculations(f_id, "REDUCTION".tr(), str_date, end_date);
 
     total_birds_added = total_birds_added + total_flock_birds;
     current_birds = total_birds_added - total_birds_reduced;
@@ -115,13 +116,13 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
     total_feed_consumption = await DatabaseHelper.getTotalFeedConsumption(f_id, str_date, end_date);
 
-    gross_income = await DatabaseHelper.getTransactionsTotal(f_id, "Income", str_date, end_date);
-    total_expense = await DatabaseHelper.getTransactionsTotal(f_id, "Expense", str_date, end_date);
+    gross_income = await DatabaseHelper.getTransactionsTotal(f_id, "INCOME".tr(), str_date, end_date);
+    total_expense = await DatabaseHelper.getTransactionsTotal(f_id, "EXPENSE".tr(), str_date, end_date);
 
     net_income = gross_income - total_expense;
 
-    vac_count = await DatabaseHelper.getHealthTotal(f_id, "Vaccination", str_date, end_date);
-    med_count = await DatabaseHelper.getHealthTotal(f_id, "Medication", str_date, end_date);
+    vac_count = await DatabaseHelper.getHealthTotal(f_id, "VACCINATION".tr(), str_date, end_date);
+    med_count = await DatabaseHelper.getHealthTotal(f_id, "MEDICATION".tr(), str_date, end_date);
 
     total_health_count = med_count + vac_count;
 
@@ -189,7 +190,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                         child: Container(
                             margin: EdgeInsets.only(left: 5),
                             child: Text(
-                              "All Reports",
+                              "ALL_REPORTS".tr(),
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                   color: Colors.white,
@@ -285,21 +286,21 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                          mainAxisAlignment: MainAxisAlignment.center,
                          children: [
 
-                           Text('Birds Summary',style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
+                           Text("BIRDS_SUMMARY".tr(),style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
                          ],
                        )),
 
                    Row(
                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                      children: [
-                     Text('Total Added',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                     Text("TOTAL_ADDED".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
                      Text('$total_birds_added',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black),),
 
                    ],),
                      Row(
                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                        children: [
-                         Text('Total Reduced',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                         Text("TOTAL_REDUCED".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
                          Text('-$total_birds_reduced',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.red),),
 
                        ],),
@@ -307,10 +308,10 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                      Column(
                        children: [
                          Text('$current_birds',style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
-                         Text('Current Birds',style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
+                         Text("CURRENT_BIRDS".tr(),style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
 
                        ],)
-             ],),),
+                   ],),),
                 ),
               ),
 
@@ -345,21 +346,21 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
 
-                              Text('Eggs Summary',style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
+                              Text("EGGS_SUMMARY".tr(),style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
                             ],
                           )),
 
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Total Collected',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                          Text("TOTAL_COLLECTED".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
                           Text('$total_eggs_collected',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black),),
 
                         ],),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Total Used',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                          Text('TOTAL_USED'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
                           Text('-$total_eggs_reduced',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.red),),
 
                         ],),
@@ -367,7 +368,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                       Column(
                         children: [
                           Text('$total_eggs',style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
-                          Text('Remaining Eggs',style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
+                          Text('REMAINING_EGGS'.tr(),style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
 
                         ],)
                     ],),),
@@ -410,7 +411,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('Feed Consumption',style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
+                              Text('FEED_CONSUMPTION'.tr(), style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
 
                             ],
                           )),
@@ -438,8 +439,8 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
 
-                          Text(total_feed_consumption.toString() +" kg",style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
-                          Text('Total Consumption',style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
+                          Text(total_feed_consumption.toString() +"KG".tr(),style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
+                          Text('TOTAL_CONSUMPTION'.tr(),style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
 
                         ],)
                     ],),),
@@ -478,21 +479,21 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('Income/Expense',style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
+                              Text('INCOME_EXPENSE'.tr(),style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
 
                             ],
                           )),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Gross Income',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                          Text('GROSS_INCOME'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
                           Text('$gross_income'+ Utils.currency,style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black),),
 
                         ],),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Total Expense',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                          Text('TOTAL_EXPENSE'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
                           Text('-$total_expense'+ Utils.currency,style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.red),),
 
                         ],),
@@ -500,7 +501,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                       Column(
                         children: [
                           Text('$net_income'+ Utils.currency,style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
-                          Text('Net Income',style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
+                          Text('NET_INCOME'.tr(),style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
 
                         ],),
 
@@ -542,7 +543,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('Health Summary',style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
+                              Text('HEALTH_SUMMARY'.tr(),style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
 
                             ],
                           )),
@@ -551,14 +552,14 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Vaccinations',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                          Text('VACCINATIONS'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
                           Text('$vac_count',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black),),
 
                         ],),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Medications',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                          Text('MEDICATIONS'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
                           Text('$med_count',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.red),),
 
                         ],),
@@ -566,7 +567,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                       Column(
                         children: [
                           Text('$total_health_count',style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
-                          Text('Total',style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
+                          Text('TOTAL'.tr(),style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
 
                         ],),
 
@@ -811,7 +812,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: "FARM_WIDE".tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -872,7 +873,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
         context: context,
         builder: (BuildContext bcontext) {
           return AlertDialog(
-            title: Text('Date Filter'),
+            title: Text("DATE_FILTER".tr()),
             content: setupAlertDialoadContainer(bcontext,widthScreen - 40, widthScreen),
           );
         });

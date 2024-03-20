@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -41,7 +42,7 @@ class _NewIncome extends State<NewIncome>
   }
 
   String _purposeselectedValue = "";
-  String _saleselectedValue = "Sale Item";
+  String _saleselectedValue = "SALE_ITEM".tr();
 
   List<String> _purposeList = [];
   List<String> _saleItemList = [];
@@ -58,10 +59,10 @@ class _NewIncome extends State<NewIncome>
 
   bool _validate = false;
 
-  String date = "Choose Date";
+  String date = "CHOOSE_DATE".tr();
   String displayDate = "";
-  String payment_method = "Payment Method";
-  String payment_status = "Payment Status";
+  String payment_method = "PAYMENT_METHOD".tr();
+  String payment_status = "PAYMENT_STATUS".tr();
 
   final quantityController = TextEditingController();
   final notesController = TextEditingController();
@@ -103,7 +104,7 @@ class _NewIncome extends State<NewIncome>
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'FARM_WIDE'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -219,7 +220,7 @@ class _NewIncome extends State<NewIncome>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                isEdit?'Edit Income':"New Income",
+                                isEdit?'Edit'.tr() + "Income" : "NEW_INCOME".tr(),
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -302,11 +303,11 @@ class _NewIncome extends State<NewIncome>
                                         controller: howmanyController,
                                         keyboardType: TextInputType.number,
                                         textInputAction: TextInputAction.next,
-                                        decoration: const InputDecoration(
+                                        decoration:  InputDecoration(
                                           border: OutlineInputBorder(
                                               borderRadius:
                                               BorderRadius.all(Radius.circular(10))),
-                                          hintText: 'How many?',
+                                          hintText: 'HOW_MANY'.tr(),
                                           hintStyle: TextStyle(
                                               color: Colors.grey, fontSize: 16),
                                           labelStyle: TextStyle(
@@ -336,11 +337,11 @@ class _NewIncome extends State<NewIncome>
                                      controller: amountController,
                                      keyboardType: TextInputType.number,
                                      textInputAction: TextInputAction.next,
-                                     decoration: const InputDecoration(
+                                     decoration:  InputDecoration(
                                        border: OutlineInputBorder(
                                            borderRadius:
                                            BorderRadius.all(Radius.circular(10))),
-                                       hintText: 'Sale Amount',
+                                       hintText: 'SALE_AMOUNT'.tr(),
                                        hintStyle: TextStyle(
                                            color: Colors.grey, fontSize: 16),
                                        labelStyle: TextStyle(
@@ -410,11 +411,11 @@ class _NewIncome extends State<NewIncome>
                                   expands: true,
                                   controller: soldtoController,
                                   textInputAction: TextInputAction.next,
-                                  decoration: const InputDecoration(
+                                  decoration:  InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Sold To (Person name)',
+                                    hintText: 'SOLD_TO_HINT'.tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -479,11 +480,11 @@ class _NewIncome extends State<NewIncome>
                                   keyboardType: TextInputType.multiline,
                                   textAlign: TextAlign.start,
                                   textInputAction: TextInputAction.done,
-                                  decoration: const InputDecoration(
+                                  decoration:  InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Write short note',
+                                    hintText: 'NOTES_HINT'.tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -524,7 +525,7 @@ class _NewIncome extends State<NewIncome>
 
                                   int? id = await DatabaseHelper
                                       .updateTransaction(transaction_item);
-                                  Utils.showToast("Income Record Updated");
+                                  Utils.showToast("SUCCESSFUL".tr());
                                   Navigator.pop(context);
                                 }else {
                                   print("Everything Okay");
@@ -547,11 +548,11 @@ class _NewIncome extends State<NewIncome>
                                       f_name: _purposeselectedValue);
                                   int? id = await DatabaseHelper
                                       .insertNewTransaction(transaction_item);
-                                  Utils.showToast("New Income Added");
+                                  Utils.showToast("SUCCESSFUL".tr());
                                   Navigator.pop(context);
                                 }
                               }else{
-                                Utils.showToast("Provide all required info");
+                                Utils.showToast("PROVIDE_ALL".tr());
                               }
                             },
                             child: Container(
@@ -569,7 +570,7 @@ class _NewIncome extends State<NewIncome>
                               ),
                               margin: EdgeInsets.all( 20),
                               child: Text(
-                                "Confirm",
+                                "CONFIRM".tr(),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -692,8 +693,8 @@ class _NewIncome extends State<NewIncome>
     );
   }
 
+  List<String> paymentStatusList = ['PAYMENT_STATUS'.tr(),'CLEARED'.tr(),'UNCLEAR'.tr(),'RECONCILED'.tr()];
 
-  List<String> paymentStatusList = ['Payment Status','Cleared','UnClear','Reconciled'];
   Widget getPaymentStatusList() {
     return Container(
       width: widthScreen,
@@ -754,7 +755,7 @@ class _NewIncome extends State<NewIncome>
   bool checkValidation() {
     bool valid = true;
 
-    if(date.toLowerCase().contains("date")){
+    if(date.toLowerCase().contains("DATE".tr())){
       valid = false;
       print("Select Date");
     }
@@ -774,17 +775,17 @@ class _NewIncome extends State<NewIncome>
       print("Add amount");
     }
     
-    if (_saleselectedValue.toLowerCase().contains("item")){
+    if (_saleselectedValue.toLowerCase().contains("ITEM".tr())){
       valid = false;
       print("No sale item slected");
     }
 
-    if (payment_method.toLowerCase().contains("payment")){
+    if (payment_method.toLowerCase().contains("PAYMENT".tr())){
       valid = false;
       print("No payment method slected");
     }
 
-    if (payment_status.toLowerCase().contains("status")){
+    if (payment_status.toLowerCase().contains("STATUS".tr())){
       valid = false;
       print("No payment status slected");
     }

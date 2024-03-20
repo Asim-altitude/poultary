@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -79,7 +80,7 @@ class _NewFeeding extends State<NewFeeding>
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'FARM_WIDE'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -120,7 +121,7 @@ class _NewFeeding extends State<NewFeeding>
 
   bool _validate = false;
 
-  String date = "Choose Date";
+  String date = "CHOOSE_DATE".tr();
   final quantityController = TextEditingController();
   final notesController = TextEditingController();
 
@@ -181,7 +182,7 @@ class _NewFeeding extends State<NewFeeding>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                isEdit?"Edit Feeding":"New Feeding",
+                                isEdit?"EDIT".tr() + "FEEDING".tr():"NEW_FEEDING".tr(),
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -258,11 +259,11 @@ class _NewFeeding extends State<NewFeeding>
                                   controller: quantityController,
                                   keyboardType: TextInputType.number,
                                   textInputAction: TextInputAction.next,
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Feed Quantity (kgs)',
+                                    hintText: "FEED_QUANTITY_HINT".tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -326,11 +327,11 @@ class _NewFeeding extends State<NewFeeding>
                                   keyboardType: TextInputType.multiline,
                                   textAlign: TextAlign.start,
                                   textInputAction: TextInputAction.done,
-                                  decoration: const InputDecoration(
+                                  decoration:  InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Write short note',
+                                    hintText: 'NOTES_HINT'.tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -362,7 +363,7 @@ class _NewFeeding extends State<NewFeeding>
                                   int? id = await DatabaseHelper
                                       .updateFeeding(feeding);
 
-                                  Utils.showToast("Feeding Record Updated");
+                                  Utils.showToast("SUCCESSFUL".tr());
                                   Navigator.pop(context);
                                 } else {
                                   await DatabaseHelper.instance.database;
@@ -374,12 +375,12 @@ class _NewFeeding extends State<NewFeeding>
                                     feed_name: _feedselectedValue,
                                     quantity: quantityController.text,
                                     f_name: _purposeselectedValue,));
-                                  Utils.showToast("New Feeding Added");
+                                  Utils.showToast("SUCCESSFUL".tr());
                                   Navigator.pop(context);
                                 }
 
                               }else{
-                                Utils.showToast("Provide all required info");
+                                Utils.showToast("PROVIDE_ALL".tr());
                               }
                             },
                             child: Container(
@@ -397,7 +398,7 @@ class _NewFeeding extends State<NewFeeding>
                               ),
                               margin: EdgeInsets.all( 20),
                               child: Text(
-                                "Confirm",
+                                "CONFIRM".tr(),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -514,9 +515,9 @@ class _NewFeeding extends State<NewFeeding>
   bool checkValidation() {
     bool valid = true;
 
-    if(date.toLowerCase().contains("date")){
+    if(date.toLowerCase().contains("DATE".tr())){
       valid = false;
-      print("Select Date");
+      print("SELECT_DATE".tr());
     }
 
     if(quantityController.text.length == 0){

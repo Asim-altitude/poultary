@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -48,15 +49,15 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
   String _acqusitionselectedValue = "";
 
   List<String> _purposeList = [];
-  List<String> _reductionReasons = ['--Reduction Reason--',
-    'Sold','Personal Use','Mortality','Lost/Stolen','Other'];
+  List<String> _reductionReasons = ['REDUCTION_REASON'.tr(),
+    'SOLD'.tr(),'PERSONAL_USE'.tr(),'MORTALITY'.tr(),'LOST'.tr(),'OTHER'.tr()];
 
   List<String> acqusitionList = [
-    '--Acqusition Type--',
-    'Purchased',
-    'Hatched on Farm',
-    'Gift',
-    'Other',
+    'ACQUSITION_TYPE'.tr(),
+    'PURCHASED'.tr(),
+    'HATCHED'.tr(),
+    'GIFT'.tr(),
+    'OTHER'.tr(),
   ];
   int chosen_index = 0;
 
@@ -112,7 +113,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
 
   bool _validate = false;
 
-  String date = "Choose Date";
+  String date = "CHOOSE_DATE".tr();
   final nameController = TextEditingController();
   final totalBirdsController = TextEditingController();
   final notesController = TextEditingController();
@@ -174,7 +175,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                isCollection? isEdit?'Edit Addition':'Add Birds' :isEdit?'Edit Reduction':'Reduce Birds',
+                                isCollection? isEdit? "EDIT".tr() + 'ADDITION'.tr() : 'ADD_BIRDS'.tr() :isEdit? "EDIT".tr() + "REDUCTION".tr() :'REDUCE_BIRDS'.tr(),
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -380,7 +381,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                                      widget.flock_detail?.f_id = getFlockID();
 
                                      await DatabaseHelper.updateFlock(widget.flock_detail);
-                                     Utils.showToast("Birds Record Updated");
+                                     Utils.showToast("SUCCESSFUL".tr());
                                      Navigator.pop(context);
 
                                    }
@@ -406,7 +407,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                                         reason: _reductionReasonValue,
                                         short_note: notesController.text,
                                         f_name: _purposeselectedValue));
-                                    Utils.showToast("Birds Added");
+                                    Utils.showToast("SUCCESSFUL".tr());
 
                                     Navigator.pop(context);
                                   }
@@ -435,7 +436,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
 
                                     await DatabaseHelper.updateFlock(
                                         widget.flock_detail);
-                                    Utils.showToast("Birds Record Updated");
+                                    Utils.showToast("SUCCESSFUL".tr());
                                     Navigator.pop(context);
                                   } else {
                                     int active_birds = getFlockActiveBirds();
@@ -463,11 +464,11 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                                           short_note: notesController.text,
                                           f_name: _purposeselectedValue));
 
-                                      Utils.showToast("Birds Reduced");
+                                      Utils.showToast("SUCCESSFUL".tr());
                                       Navigator.pop(context);
                                     } else {
                                       max_hint =
-                                      "Cannot reduce more than $active_birds";
+                                      "CANNOT_REDUCE".tr() + "$active_birds";
                                       setState(() {
 
                                       });
@@ -476,7 +477,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                                 }
 
                               }else{
-                                Utils.showToast("Provide all required info");
+                                Utils.showToast("PROVIDE_ALL".tr());
                               }
                             },
                             child: Container(
@@ -494,7 +495,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                               ),
                               margin: EdgeInsets.all( 20),
                               child: Text(
-                                "Confirm",
+                                "CONFIRM".tr(),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -641,21 +642,21 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
   bool checkValidation() {
     bool valid = true;
 
-    if(date.toLowerCase().contains("date")){
+    if(date.toLowerCase().contains("DATE".tr())){
       valid = false;
       print("Select Date");
     }
 
 
     if(isCollection) {
-      if (_acqusitionselectedValue.toLowerCase().contains("acqusition")) {
+      if (_acqusitionselectedValue.toLowerCase().contains("ACQUSITION".tr())) {
         valid = false;
         print("Select Acqusition Type");
       }
     }
 
     if(!isCollection) {
-      if (_reductionReasonValue.toLowerCase().contains("reduction")) {
+      if (_reductionReasonValue.toLowerCase().contains("REDUCTION".tr())) {
         valid = false;
         print("Select Reduction reason");
       }

@@ -109,7 +109,7 @@ class DatabaseHelper  {
         context: context,
         type: AlertType.success,
         title: "RESTORE_SUCCESSFUL".tr(),
-        desc: "Please check your data now.",
+        desc: "RESTORE_SUCCESSFUL_DESC".tr(),
         buttons: [
           DialogButton(
             child: Text(
@@ -126,8 +126,8 @@ class DatabaseHelper  {
       Alert(
         context: context,
         type: AlertType.error,
-        title: "Restore Problem",
-        desc: "Please select the hatching.db file. If you are still facing an issue, send an email to abc@gmail.com",
+        title: "BACKUP_FAILED".tr(),
+        desc: "BACKUP_FAILED_DESC1".tr() + "BACKUP_FAILED_DESC2".tr() + "BACKUP_FAILED_DESC3".tr(),
         buttons: [
           DialogButton(
             child: Text(

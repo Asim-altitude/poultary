@@ -158,7 +158,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
     File newPath = await DatabaseHelper.getFilePathDB();
     XFile file = new XFile(newPath.path);
 
-    final result = await Share.shareXFiles([file], text: 'Database backup');
+    final result = await Share.shareXFiles([file], text: 'BACKUP'.tr());
 
     if (result.status == ShareResultStatus.success) {
       print('Backup completed');
@@ -213,7 +213,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                       Container(
 
                           child: Text(
-                            'Settings',
+                            'SETTINGS'.tr(),
                             textAlign: TextAlign.start,
                             style: TextStyle(
                                 color: Colors.white,
@@ -263,7 +263,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
 
                               Icon(Icons.settings_applications,color: Utils.getThemeColorBlue(),),
                               SizedBox(width: 4,),
-                              Text('Farm Management',style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                              Text('FARM_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                             ],
                           )),
 
@@ -308,14 +308,13 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
 
                                 Icon(Icons.api,color: Utils.getThemeColorBlue(),),
                                 SizedBox(width: 4,),
-                                Text('Category Management',style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                Text('CATEGORY_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                               ],
                             )),
 
                       ],),),
                 ),
               ),
-
               InkWell(
                 onTap: () {
                   Navigator.push(
@@ -354,78 +353,93 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
 
                                 Icon(Icons.album,color: Utils.getThemeColorBlue(),),
                                 SizedBox(width: 4,),
-                                Text('Flock Management',style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                Text('FLOCK_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                               ],
                             )),
 
                       ],),),
                 ),
               ),
-              SizedBox(height: 12,),
               InkWell(
-                onTap: () async {
+                onTap: () {
                   shareFiles();
                 },
-                child:
-                Container(
-                  height: 40,
-                  width:  200,
-
-                  alignment: Alignment.center,
-                  child:  Align(
-                    alignment: Alignment.center,
-                    child:Text("BACKUP_NOW".tr(),
-                      textAlign: TextAlign.center,
-                      style: new TextStyle(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.normal,
-                          color: Colors.white,
-                          fontFamily: 'PTSANS'
-                      ),
-                    ),),
+                child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: const BorderRadius.all(
-                        Radius.circular(4.0)),
-                    border: Border.all(
-                      color:  Colors.transparent,
-                      width: 0.0,
-                    ),
-                  ),
-                ),),
-              SizedBox(height: 12,),
+                      borderRadius: BorderRadius.all(Radius.circular(3)),
 
+                      color: Colors.white,
+                      border: Border.all(color: Colors.blueAccent,width: 1.0)
+                  ),
+                  margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                  child: Container(
+                    height: 50,
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white, //(x,y)
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Align(
+                            alignment: Alignment.topLeft,
+                            child: Row(
+                              children: [
+
+                                Icon(Icons.backup,color: Utils.getThemeColorBlue(),),
+                                SizedBox(width: 4,),
+                                Text("BACKUP".tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                              ],
+                            )),
+
+                      ],),),
+                ),
+              ),
               InkWell(
                 onTap: () async {
                   await DatabaseHelper.importDataBaseFile(context);
                 },
-                child:Container(
-                  height: 40,
-                  width:  200,
-
-                  alignment: Alignment.center,
-                  child:  Align(
-                    alignment: Alignment.center,
-                    child:Text("RESTORE_NOW".tr(),
-                      textAlign: TextAlign.center,
-                      style: new TextStyle(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.normal,
-                          color: Colors.white,
-                          fontFamily: 'PTSANS'
-                      ),
-                    ),),
+                child: Container(
                   decoration: BoxDecoration(
-                    color: Utils.getThemeColorBlue(),
-                    borderRadius: const BorderRadius.all(
-                        Radius.circular(4.0)),
-                    border: Border.all(
-                      color:  Colors.transparent,
-                      width: 0.0,
-                    ),
+                      borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                      color: Colors.white,
+                      border: Border.all(color: Colors.blueAccent,width: 1.0)
                   ),
-                ),),
-              SizedBox(height: 12,),
+                  margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                  child: Container(
+                    height: 50,
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white, //(x,y)
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Align(
+                            alignment: Alignment.topLeft,
+                            child: Row(
+                              children: [
+
+                                Icon(Icons.restore,color: Utils.getThemeColorBlue(),),
+                                SizedBox(width: 4,),
+                                Text("RESTORE".tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                              ],
+                            )),
+
+                      ],),),
+                ),
+              ),
 
               if(isGetLanguage)
                 Container(
@@ -483,8 +497,8 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
 
                 child: Column(
                 children: [
-                  Text('Get Unlimited Access & Remove Ads',style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
-                  Text('For only \$3.99',style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Utils.getThemeColorBlue()),),
+                  Text('ADS_REMOVAL'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                  Text("ONLY_FOR".tr() + "\$3.99",style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Utils.getThemeColorBlue()),),
                   SizedBox(height: 8,),
                   InkWell(
                     onTap: () {
@@ -524,7 +538,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
 
                                     Icon(Icons.check_circle_outline,color: Colors.white,size: 30,),
                                     SizedBox(width: 4,),
-                                    Text('Remove Ads',style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white),),
+                                    Text('REMOVE_ADS'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white),),
                                   ],
                                 )),
 
@@ -569,7 +583,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
 
                                     Icon(Icons.cloud_upload_outlined,color: Colors.white,size: 30,),
                                     SizedBox(width: 4,),
-                                    Text('Restore (If you purchased)',style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white),),
+                                    Text('RESTORE_PREMIUM'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white),),
                                   ],
                                 )),
 
@@ -635,7 +649,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
         ),
         child:Align(
           alignment: Alignment.center,
-          child:Text("Restore (If you purchased)",
+          child:Text("RESTORE_PREMIUM".tr(),
             textAlign: TextAlign.center,
             style: new TextStyle(
                 fontSize: 16.0,
@@ -653,7 +667,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
       },
     );
     Widget cancelButton = TextButton(
-      child: Text("CANCEL",
+      child: Text("CANCEL".tr(),
         style: new TextStyle(
             fontSize: 14.0,
             fontWeight: FontWeight.normal,
@@ -704,7 +718,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
     );
   }
   callRemoveAdsFunction(){
-    showInAppDialog(context,"Purchase the plan one time & Remove Ads Forever.");
+    showInAppDialog(context,"PURCHASE_ONE_TIME".tr());
 
   }
   Future<void> consume(String id) async {

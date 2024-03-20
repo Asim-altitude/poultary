@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -167,7 +168,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                         child: Container(
                             margin: EdgeInsets.only(left: 5),
                             child: Text(
-                              "Birds Report",
+                              "BIRDS".tr()+ "REPORT".tr(),
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                   color: Colors.white,
@@ -177,7 +178,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                       ),
                       InkWell(
                         onTap: (){
-                          Utils.setupInvoiceInitials("Flock Report",pdf_formatted_date_filter);
+                          Utils.setupInvoiceInitials("FLOCK_REPORT".tr(),pdf_formatted_date_filter);
                           prepareListData();
 
                           Utils.TOTAL_BIRDS_ADDED = total_birds_added.toString();
@@ -271,28 +272,28 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                      child: Row(
                        children: [
 
-                         Text('Summary',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
+                         Text('SUMMARY'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
                        ],
                      )),
 
                  Row(
                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                    children: [
-                   Text('Total Added',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                   Text('TOTAL_ADDED'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
                    Text('$total_birds_added',style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, color: Colors.black),),
 
                  ],),
                    Row(
                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                      children: [
-                       Text('Total Reduced',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                       Text('TOTAL_REDUCED'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
                        Text('-$total_birds_reduced',style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, color: Colors.red),),
 
                      ],),
                    Row(
                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                      children: [
-                       Text('Current Birds',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
+                       Text('CURRENT_BIRDS'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
                        Text('$current_birds',style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
 
                      ],)
@@ -302,7 +303,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                 alignment: Alignment.topLeft,
                 child: Container(
                     margin: EdgeInsets.all(10),
-                    child: Text('Addition/Reductions',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
+                    child: Text('ADITION_RDCTIN'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
               ),
 
               list.length > 0 ? Container(
@@ -360,7 +361,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                                     child: Row(
                                       children: [
                                         Container( margin: EdgeInsets.only(right: 5), child: Text(list.elementAt(index).item_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color:list.elementAt(index).item_type == 'Addition'?Colors.black:Colors.black),)),
-                                        Text("Birds", style: TextStyle(color: Colors.black, fontSize: 12),)
+                                        Text("BIRDS".tr(), style: TextStyle(color: Colors.black, fontSize: 12),)
                                       ],
                                     ),
                                   ),
@@ -378,7 +379,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                   margin: EdgeInsets.only(top: 50),
                   child: Column(
                     children: [
-                      Text('No Birds Added/Reduced in given period', style: TextStyle(fontSize: 15, color: Colors.black54),),
+                      Text('NO_BIRD_ADDED'.tr(), style: TextStyle(fontSize: 15, color: Colors.black54),),
                     ],
                   ),
                 ),
@@ -410,7 +411,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'FARM_WIDE'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -470,7 +471,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
         context: context,
         builder: (BuildContext bcontext) {
           return AlertDialog(
-            title: Text('Date Filter'),
+            title: Text('DATE_FILTER'.tr()),
             content: setupAlertDialoadContainer(bcontext,widthScreen - 40, widthScreen),
           );
         });
@@ -507,16 +508,16 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
 
 
 
-  List<String> filterList = ['Today','Yesterday','This Month', 'Last Month','Last 3 months', 'Last 6 months','This Year',
-    'Last Year','All Time'];
+  List<String> filterList = ['TODAY'.tr(),'YESTERDAY'.tr(),'THIS_MONTH'.tr(), 'LAST_MONTH'.tr(),'LAST3_MONTHS'.tr(), 'LAST6_MONTHS'.tr(),'THIS_YEAR'.tr(),
+    'LAST_YEAR'.tr(),'ALL_TIME'.tr()];
 
-  String date_filter_name = "This Month";
-  String pdf_formatted_date_filter = "This Month";
+  String date_filter_name = 'THIS_MONTH'.tr();
+  String pdf_formatted_date_filter = 'THIS_MONTH'.tr();
   String str_date='',end_date='';
   void getData(String filter){
     int index = 0;
 
-    if (filter == 'Today'){
+    if (filter == 'TODAY'.tr()){
       index = 0;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
@@ -528,7 +529,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       pdf_formatted_date_filter = "Today ("+str_date+")";
 
     }
-    else if (filter == 'Yesterday'){
+    else if (filter == 'YESTERDAY'.tr()){
       index = 1;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day -1);
 
@@ -537,10 +538,10 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       end_date = inputFormat.format(today);
       print(str_date+" "+end_date);
 
-      pdf_formatted_date_filter = "Yesterday ("+Utils.getFormattedDate(str_date)+")";
+      pdf_formatted_date_filter = "YESTERDAY".tr() + " ("+str_date+")";
 
     }
-    else if (filter == 'This Month'){
+    else if (filter == 'THIS_MONTH'.tr()){
       index = 2;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
 
@@ -551,8 +552,9 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
 
-      pdf_formatted_date_filter = "This Month ("+Utils.getFormattedDate(str_date)+" to "+Utils.getFormattedDate(end_date)+")";
-    }else if (filter == 'Last Month'){
+
+      pdf_formatted_date_filter = "This Month ("+str_date+"-"+end_date+")";
+    }else if (filter == 'LAST_MONTH'.tr()){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
 
@@ -564,9 +566,10 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
 
-      pdf_formatted_date_filter = "Last Month ("+Utils.getFormattedDate(str_date)+" to "+Utils.getFormattedDate(end_date)+"))";
 
-    }else if (filter == 'Last 3 months'){
+      pdf_formatted_date_filter = 'LAST_MONTH'.tr()+ " ("+str_date+"-"+end_date+")";
+
+    }else if (filter == 'LAST3_MONTHS'.tr()){
       index = 4;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -2, 1);
 
@@ -578,8 +581,8 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       print(str_date+" "+end_date);
 
 
-      pdf_formatted_date_filter = "Last 3 months ("+Utils.getFormattedDate(str_date)+" to "+Utils.getFormattedDate(end_date)+"))";
-    }else if (filter == 'Last 6 months'){
+      pdf_formatted_date_filter = "LAST3_MONTHS".tr()+ " ("+str_date+"-"+end_date+")";
+    }else if (filter == 'LAST6_MONTHS'.tr()){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
 
@@ -591,8 +594,8 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       print(str_date+" "+end_date);
 
 
-      pdf_formatted_date_filter = "Last 6 months ("+Utils.getFormattedDate(str_date)+" to "+Utils.getFormattedDate(end_date)+"))";
-    }else if (filter == 'This Year'){
+      pdf_formatted_date_filter = "LAST6_MONTHS".tr()+" ("+str_date+"-"+end_date+")";
+    }else if (filter == 'THIS_YEAR'.tr()){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
@@ -602,8 +605,8 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
 
-      pdf_formatted_date_filter = "This Year ("+Utils.getFormattedDate(str_date)+" to "+Utils.getFormattedDate(end_date)+"))";
-    }else if (filter == 'Last Year'){
+      pdf_formatted_date_filter = 'THIS_YEAR'.tr()+ " ("+str_date+"-"+end_date+")";
+    }else if (filter == 'LAST_YEAR'.tr()){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year-1, 12,31);
@@ -613,17 +616,18 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
 
-      pdf_formatted_date_filter = "Last Year ("+Utils.getFormattedDate(str_date)+" to "+Utils.getFormattedDate(end_date)+"))";
 
-    }else if (filter == 'All Time'){
+      pdf_formatted_date_filter = 'LAST_YEAR'.tr() +" ("+str_date+"-"+end_date+")";
+
+    }else if (filter == 'ALL_TIME'.tr()){
       index = 8;
       str_date ="";
       end_date ="";
       print(str_date+" "+end_date);
 
-      pdf_formatted_date_filter = "All Time (START to END)";
-    }
 
+      pdf_formatted_date_filter = 'ALL_TIME'.tr();
+    }
     getAllData();
 
   }
