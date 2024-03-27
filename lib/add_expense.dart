@@ -56,8 +56,8 @@ class _NewExpense extends State<NewExpense>
   bool includeExtras = false;
 
   String date = "CHOOSE_DATE".tr();
-  String payment_method = "PAYMENT_METHOD".tr();
-  String payment_status = "PAYMENT_STATUS".tr();
+  String payment_method = "Payment Method";
+  String payment_status = "Payment Status".tr();
 
   final quantityController = TextEditingController();
   final notesController = TextEditingController();
@@ -102,7 +102,7 @@ class _NewExpense extends State<NewExpense>
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'FARM_WIDE'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -121,7 +121,7 @@ class _NewExpense extends State<NewExpense>
 
     _paymentMethodList = await DatabaseHelper.getSubCategoryList(5);
 
-    _paymentMethodList.insert(0,SubItem(c_id: 3,id: -1,name: 'Payment Method'));
+    _paymentMethodList.insert(0,SubItem(c_id: 3,id: -1,name: 'Payment Method'.tr()));
 
     for(int i=0;i<_paymentMethodList.length;i++){
       _visiblePaymentMethodList.add(_paymentMethodList.elementAt(i).name!);
@@ -142,7 +142,7 @@ class _NewExpense extends State<NewExpense>
 
     _subItemList = await DatabaseHelper.getSubCategoryList(2);
 
-    _subItemList.insert(0,SubItem(c_id: 3,id: -1,name: 'Expense Item'));
+    _subItemList.insert(0,SubItem(c_id: 3,id: -1,name: 'Expense Item'.tr()));
 
     for(int i=0;i<_subItemList.length;i++){
       _saleItemList.add(_subItemList.elementAt(i).name!);
@@ -221,7 +221,7 @@ class _NewExpense extends State<NewExpense>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                isEdit?"EDIT".tr() + "EXPENSE".tr():"NEW".tr() +  "EXPENSE".tr(),
+                                isEdit?"EDIT".tr() +" "+ "Expense".tr():"NEW".tr() +" "+  "Expense".tr(),
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -454,7 +454,7 @@ class _NewExpense extends State<NewExpense>
                                     width: 1.0,
                                   ),
                                 ),
-                                child: Text(Utils.getFormattedDate(date), style: TextStyle(
+                                child: Text(Utils.getFormattedDate(date.tr()), style: TextStyle(
                                     color: Colors.black, fontSize: 16),),
                               ),
                             ),
@@ -663,7 +663,7 @@ class _NewExpense extends State<NewExpense>
   }
 
 
-  List<String> paymentStatusList = ['PAYMENT_STATUS'.tr(),'CLEARED'.tr(),'UNCLEAR'.tr(),'RECONCILED'.tr()];
+  List<String> paymentStatusList = ['Payment Status'.tr(),'CLEARED'.tr(),'UNCLEAR'.tr(),'RECONCILED'.tr()];
   Widget getPaymentStatusList() {
     return Container(
       width: widthScreen,
@@ -749,7 +749,7 @@ class _NewExpense extends State<NewExpense>
       print("No sale item slected");
     }
 
-    if (payment_method.toLowerCase().contains("PAYMENT".tr())){
+    if (payment_method.toLowerCase().contains("Pyament")){
       valid = false;
       print("No payment method slected");
     }

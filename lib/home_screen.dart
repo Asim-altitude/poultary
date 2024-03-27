@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -123,9 +124,9 @@ class _HomeScreen extends State<HomeScreen> {
         backgroundColor: Utils.getThemeColorBlue(),
 
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Dashboard"),
-          BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: "Reports"),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings"),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "DASHBOARD".tr()),
+          BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: "REPORTS".tr()),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "SETTINGS".tr()),
         ],
 
       ),),

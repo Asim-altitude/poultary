@@ -53,7 +53,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
   bool isEdit = false;
 
-  String date = "CHOOSE_DATE".tr();
+  String date = "Choose date";
   final bird_countController = TextEditingController();
   final doctorController = TextEditingController();
   final medicineController = TextEditingController();
@@ -90,7 +90,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'FARM_WIDE'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr() ,bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -110,7 +110,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
     _subItemList = await DatabaseHelper.getSubCategoryList(4);
 
-    _subItemList.insert(0,SubItem(c_id: 3,id: -1,name: 'Choose Disease'));
+    _subItemList.insert(0,SubItem(c_id: 3,id: -1,name: 'Choose Disease'.tr()));
 
     for(int i=0;i<_subItemList.length;i++){
       _diseaseList.add(_subItemList.elementAt(i).name!);
@@ -345,7 +345,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                     width: 1.0,
                                   ),
                                 ),
-                                child: Text(Utils.getFormattedDate(date), style: TextStyle(
+                                child: Text(Utils.getFormattedDate(date.tr()), style: TextStyle(
                                     color: Colors.black, fontSize: 16),),
                               ),
                             ),
@@ -610,7 +610,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
   bool checkValidation() {
     bool valid = true;
 
-    if(date.toLowerCase().contains("DATE".tr())){
+    if(date.toLowerCase().contains("date")){
       valid = false;
       print("Select Date");
     }

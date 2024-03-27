@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -162,7 +163,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                         child: Container(
                             margin: EdgeInsets.only(left: 5),
                             child: Text(
-                              "Eggs Report",
+                              "EGGS_REPORT".tr(),
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                   color: Colors.white,
@@ -172,7 +173,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                       ),
                       InkWell(
                         onTap: () {
-                          Utils.setupInvoiceInitials("Egg Report",pdf_formatted_date_filter);
+                          Utils.setupInvoiceInitials("EGGS_REPORT".tr(),pdf_formatted_date_filter);
                           prepareListData();
 
                            Navigator.push(
@@ -265,28 +266,28 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                         child: Row(
                           children: [
 
-                            Text('Summary',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
+                            Text('SUMMARY'.tr(),style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
                           ],
                         )),
                     SizedBox(height: 20,width: widthScreen,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Total Collected',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                        Text('Total Collected'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
                         Text('$total_eggs_collected',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
 
                       ],),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Total Used',style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                        Text('Total Used'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
                         Text('-$total_eggs_reduced',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.red),),
 
                       ],),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Remaining Eggs',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
+                        Text('Remaining Eggs'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
                         Text('$total_eggs',style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: total_eggs>=0 ? Colors.black : Colors.red),),
 
                       ],)
@@ -296,7 +297,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                 alignment: Alignment.topLeft,
                 child: Container(
                     margin: EdgeInsets.all(10),
-                    child: Text('Collections/Reductions',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
+                    child: Text('Collections/Reductions'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
               ),
 
               eggs.length > 0 ? Container(
@@ -329,8 +330,8 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                                   children: [
                                   Row(
                                     children: [
-                                      Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).f_name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
-                                      Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).isCollection == 1? '(Collected)':'(Reduced)', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: eggs.elementAt(index).isCollection == 1? Colors.green:Colors.red),)),
+                                      Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).f_name!.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
+                                      Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).isCollection == 1? '(Collected)'.tr():'(Reduced)'.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: eggs.elementAt(index).isCollection == 1? Colors.green:Colors.red),)),
 
                                     ],
                                   ),
@@ -347,7 +348,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                                   child: Row(
                                     children: [
                                       Container( margin: EdgeInsets.only(right: 5), child: Text(eggs.elementAt(index).total_eggs.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color:eggs.elementAt(index).isCollection == 0?Colors.black:Colors.black),)),
-                                      Text("Eggs", style: TextStyle(color: Colors.black, fontSize: 12),)
+                                      Text("Eggs".tr(), style: TextStyle(color: Colors.black, fontSize: 12),)
                                     ],
                                   ),
                                 ),
@@ -366,7 +367,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                   margin: EdgeInsets.only(top: 50),
                   child: Column(
                     children: [
-                      Text('No Eggs Collected/Reduced in given period', style: TextStyle(fontSize: 15, color: Colors.black54),),
+                      Text('No Eggs Collected/Reduced in given period'.tr(), style: TextStyle(fontSize: 15, color: Colors.black54),),
                     ],
                   ),
                 ),
@@ -387,7 +388,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -447,7 +448,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
         context: context,
         builder: (BuildContext bcontext) {
           return AlertDialog(
-            title: Text('Date Filter'),
+            title: Text('DATE_FILTER'.tr()),
             content: setupAlertDialoadContainer(bcontext,widthScreen - 40, widthScreen),
           );
         });
@@ -484,16 +485,16 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
 
 
 
-  List<String> filterList = ['Today','Yesterday','This Month', 'Last Month','Last 3 months', 'Last 6 months','This Year',
-    'Last Year','All Time'];
+  List<String> filterList = ['TODAY'.tr(),'YESTERDAY'.tr(),'THIS_MONTH'.tr(), 'LAST_MONTH'.tr(),'LAST3_MONTHS'.tr(), 'LAST6_MONTHS'.tr(),'THIS_YEAR'.tr(),
+    'LAST_YEAR'.tr(),'ALL_TIME'.tr()];
 
-  String date_filter_name = "This Month";
-  String pdf_formatted_date_filter = "This Month";
+  String date_filter_name = 'THIS_MONTH'.tr();
+  String pdf_formatted_date_filter = 'THIS_MONTH'.tr();
   String str_date = '',end_date = '';
   void getData(String filter){
     int index = 0;
 
-    if (filter == 'Today'){
+    if (filter == 'TODAY'.tr()){
       index = 0;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
@@ -503,8 +504,9 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       print(str_date+" "+end_date);
 
       getAllData();
+
     }
-    else if (filter == 'Yesterday'){
+    else if (filter == 'YESTERDAY'.tr()){
       index = 1;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day -1);
 
@@ -513,20 +515,23 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       end_date = inputFormat.format(today);
       print(str_date+" "+end_date);
 
-      getAllData();
+       getAllData();
+
     }
-    else if (filter == 'This Month'){
+    else if (filter == 'THIS_MONTH'.tr()){
       index = 2;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
+
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month + 1).subtract(Duration(days: 1));
 
       var inputFormat = DateFormat('yyyy-MM-dd');
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getAllData();
 
-    }else if (filter == 'Last Month'){
+
+       getAllData();
+    }else if (filter == 'LAST_MONTH'.tr()){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
 
@@ -537,10 +542,11 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getAllData();
 
 
-    }else if (filter == 'Last 3 months'){
+       getAllData();
+
+    }else if (filter == 'LAST3_MONTHS'.tr()){
       index = 4;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -2, 1);
 
@@ -550,8 +556,10 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getAllData();
-    }else if (filter == 'Last 6 months'){
+
+
+       getAllData();
+    }else if (filter == 'LAST6_MONTHS'.tr()){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
 
@@ -561,8 +569,10 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getAllData();
-    }else if (filter == 'This Year'){
+
+
+       getAllData();
+    }else if (filter == 'THIS_YEAR'.tr()){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
@@ -571,8 +581,9 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getAllData();
-    }else if (filter == 'Last Year'){
+
+       getAllData();
+    }else if (filter == 'LAST_YEAR'.tr()){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year-1, 12,31);
@@ -581,24 +592,20 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getAllData();
-    }else if (filter == 'All Time'){
+
+
+       getAllData();
+
+    }else if (filter == 'ALL_TIME'.tr()){
       index = 8;
-      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-50,1,1);
-      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
-
-      var inputFormat = DateFormat('yyyy-MM-dd');
-      str_date = inputFormat.format(firstDayCurrentMonth);
-      end_date = inputFormat.format(lastDayCurrentMonth);
+      str_date ="";
+      end_date ="";
       print(str_date+" "+end_date);
-      getAllData();
-    }
 
-    if(filter == 'Today' || filter == 'Yesterday'){
-      pdf_formatted_date_filter = filter +"("+str_date+")";
-    }else{
-      pdf_formatted_date_filter = filter +"("+str_date+" to "+end_date+")";
+
+       getAllData();
     }
+     getAllData();
 
   }
 

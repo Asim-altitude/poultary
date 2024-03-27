@@ -93,7 +93,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
 
   bool _validate = false;
 
-  String date = "CHOOSE_DATE".tr();
+  String date = "Choose date";
   final nameController = TextEditingController();
   final birdcountController = TextEditingController();
   final notesController = TextEditingController();
@@ -383,7 +383,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                                   width: 1.0,
                                 ),
                               ),
-                              child: Text(Utils.getFormattedDate(date), style: TextStyle(
+                              child: Text(Utils.getFormattedDate(date.tr()), style: TextStyle(
                                   color: Colors.black, fontSize: 16),),
                             ),
                           ),
@@ -633,17 +633,17 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
   bool checkValidation() {
     bool valid = true;
 
-    if(date.toLowerCase().contains("DATE".tr())){
+    if(date.toLowerCase().contains("date")){
       valid = false;
       print("Select Date");
     }
 
-    if(_acqusitionselectedValue.toLowerCase().contains("ACQUSITION".tr())){
+    if(_acqusitionselectedValue.toLowerCase().contains("ACQUSITION_TYPE".tr())){
       valid = false;
       print("Select Acqusition Type");
     }
 
-    if(_purposeselectedValue.toLowerCase().contains("PURPOSE1".tr())){
+    if(_purposeselectedValue.toLowerCase().contains("SELECT_PURPOSE".tr())){
       valid = false;
       print("Select Purpose");
     }

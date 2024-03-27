@@ -4,6 +4,7 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:currency_picker/currency_picker.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -83,7 +84,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
   int modified = 0;
 
   String selectedCurrency = "\$";
-  String date = "Date Created";
+  String date = "Choose date";
   final locationController = TextEditingController();
   final nameController = TextEditingController();
 
@@ -140,7 +141,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                 'Farm Setup',
+                                 'FARM_SETUP'.tr(),
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -202,11 +203,11 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                                   expands: false,
                                   controller: nameController,
                                   textAlign: TextAlign.start,
-                                  decoration: const InputDecoration(
+                                  decoration:  InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(5))),
-                                    hintText: 'Farm Name',
+                                    hintText: 'FARM_NAME'.tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -235,11 +236,11 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
 
                                   controller: locationController,
                                   textAlign: TextAlign.start,
-                                  decoration: const InputDecoration(
+                                  decoration:  InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(5))),
-                                    hintText: 'Location name (Country/City etc)',
+                                    hintText: 'LOCATION_HINT'.tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -280,7 +281,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text("Currency", style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal),),
+                                      Text("CURRENCY".tr(), style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal),),
                                       Text(selectedCurrency, style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
 
                                     ],
@@ -315,7 +316,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                                     width: 1.0,
                                   ),
                                 ),
-                                child: Text(Utils.getFormattedDate(date), style: TextStyle(
+                                child: Text(Utils.getFormattedDate(date.tr()), style: TextStyle(
                                     color: Colors.black, fontSize: 16),),
                               ),
                             ),
@@ -340,7 +341,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                                 farmSetup!.modified = 1;
                                 DatabaseHelper.updateFarmSetup(farmSetup);
 
-                                Utils.showToast('Farm Updated');
+                                Utils.showToast('SUCCESSFUL'.tr());
                                 Navigator.pop(context);
 
                               }else{
@@ -362,7 +363,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                               ),
                               margin: EdgeInsets.only( left: 16,right: 16,top: 4),
                               child: Text(
-                                "SAVE",
+                                "SAVE".tr(),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -453,7 +454,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
         setState(() {
 
         });
-        Utils.showToast("Currency Updated");
+        Utils.showToast("SUCCESSFUL".tr());
       },
     );
   }

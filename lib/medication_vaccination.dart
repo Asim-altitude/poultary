@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -115,7 +116,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                   ),
                   child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
                     Icon(Icons.add, color: Colors.white, size: 30,),
-                    Text('Vaccination', style: TextStyle(
+                    Text('Vaccination'.tr(), style: TextStyle(
                         color: Colors.white, fontSize: 18),)
                   ],),
                 ),
@@ -141,7 +142,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                   ),
                   child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
                     Icon(Icons.add, color: Colors.white, size: 30,),
-                    Text('Medication', style: TextStyle(
+                    Text('Medication'.tr(), style: TextStyle(
                         color: Colors.white, fontSize: 18),)
                   ],),
                 ),
@@ -192,7 +193,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                       Container(
                           margin: EdgeInsets.only(left: 10),
                           child: Text(
-                            applied_filter_name,
+                            applied_filter_name.tr(),
                             textAlign: TextAlign.start,
                             style: TextStyle(
                                 color: Colors.white,
@@ -280,7 +281,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                             width: 1.0,
                           ),
                         ),
-                        child: Text('All', style: TextStyle(
+                        child: Text('All'.tr(), style: TextStyle(
                             color: selected==1 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                       ),
                     ),
@@ -305,7 +306,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                             width: 1.0,
                           ),
                         ),
-                        child: Text('Medication', style: TextStyle(
+                        child: Text('Medication'.tr(), style: TextStyle(
                             color: selected==2 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                       ),
                     ),
@@ -331,7 +332,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                             width: 1.0,
                           ),
                         ),
-                        child: Text('Vaccination', style: TextStyle(
+                        child: Text('Vaccination'.tr(), style: TextStyle(
                             color: selected==3 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                       ),
                     ),
@@ -397,7 +398,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                                     alignment: Alignment.bottomRight,
                                     child: Row(
                                       children: [
-                                        Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).type == 'Medication'? 'Birds: ':'Birds: ', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+                                        Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).type == 'Medication'? 'Birds: '.tr():'Birds: '.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
                                         Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).bird_count!.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
 
                                       ],
@@ -405,7 +406,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                                   ),
                                   Row(
                                     children: [
-                                      Container(margin: EdgeInsets.all(0), child: Text('Disease: ', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+                                      Container(margin: EdgeInsets.all(0), child: Text('Disease: '.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
                                       Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).disease!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
 
                                     ],
@@ -414,14 +415,14 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                                     children: [
                                       Row(
                                         children: [
-                                          Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).type == 'Medication'?'Med by: ':'Vac by: ', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+                                          Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).type == 'Medication'?'Med by: '.tr():'Vac by: ', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
                                           Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).doctor_name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
 
                                         ],
                                       ),
                                       Row(
                                         children: [
-                                          Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).type == 'Medication'?'  On: ':'  On: ', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+                                          Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).type == 'Medication'?'  On: '.tr():'  On: '.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
                                           Container(margin: EdgeInsets.all(5), child: Text(Utils.getFormattedDate(vac_med_list.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
 
                                         ],
@@ -439,7 +440,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                                         Container(
                                           width: widthScreen-70,
                                           child: Text(
-                                            vac_med_list.elementAt(index).short_note!.isEmpty ? 'No notes taken' : vac_med_list.elementAt(index).short_note!
+                                            vac_med_list.elementAt(index).short_note!.isEmpty ? 'NO_NOTES'.tr() : vac_med_list.elementAt(index).short_note!
                                             ,maxLines: 3, style: TextStyle(fontSize: 14, color: Colors.black),),
                                         ),
                                       ],
@@ -721,7 +722,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr() ,bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -781,7 +782,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
         context: context,
         builder: (BuildContext bcontext) {
           return AlertDialog(
-            title: Text('Date Filter'),
+            title: Text('DATE_FILTER'.tr()),
             content: setupAlertDialoadContainer(bcontext,widthScreen - 40, widthScreen),
           );
         });
@@ -830,15 +831,16 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
   }
 
 
-  List<String> filterList = ['Today','Yesterday','This Month', 'Last Month','Last 3 months', 'Last 6 months','This Year',
-    'Last Year','All Time'];
+  List<String> filterList = ['TODAY'.tr(),'YESTERDAY'.tr(),'THIS_MONTH'.tr(), 'LAST_MONTH'.tr(),'LAST3_MONTHS'.tr(), 'LAST6_MONTHS'.tr(),'THIS_YEAR'.tr(),
+    'LAST_YEAR'.tr(),'ALL_TIME'.tr()];
 
-  String date_filter_name = "This Month";
-  String str_date='',end_date='';
+  String date_filter_name = 'THIS_MONTH'.tr();
+  String pdf_formatted_date_filter = 'THIS_MONTH'.tr();
+  String str_date = '',end_date = '';
   void getData(String filter){
     int index = 0;
 
-    if (filter == 'Today'){
+    if (filter == 'TODAY'.tr()){
       index = 0;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
@@ -847,9 +849,10 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
       end_date = inputFormat.format(today);
       print(str_date+" "+end_date);
 
-      getFilteredTransactions(str_date,end_date);
+      getFilteredTransactions(str_date, end_date);
+
     }
-    else if (filter == 'Yesterday'){
+    else if (filter == 'YESTERDAY'.tr()){
       index = 1;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day -1);
 
@@ -858,9 +861,10 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
       end_date = inputFormat.format(today);
       print(str_date+" "+end_date);
 
-      getFilteredTransactions(str_date,end_date);
+      getFilteredTransactions(str_date, end_date);
+
     }
-    else if (filter == 'This Month'){
+    else if (filter == 'THIS_MONTH'.tr()){
       index = 2;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
 
@@ -870,9 +874,10 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getFilteredTransactions(str_date,end_date);
 
-    }else if (filter == 'Last Month'){
+
+      getFilteredTransactions(str_date, end_date);
+    }else if (filter == 'LAST_MONTH'.tr()){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
 
@@ -883,10 +888,11 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getFilteredTransactions(str_date,end_date);
 
 
-    }else if (filter == 'Last 3 months'){
+      getFilteredTransactions(str_date, end_date);
+
+    }else if (filter == 'LAST3_MONTHS'.tr()){
       index = 4;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -2, 1);
 
@@ -896,8 +902,10 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getFilteredTransactions(str_date,end_date);
-    }else if (filter == 'Last 6 months'){
+
+
+      getFilteredTransactions(str_date, end_date);
+    }else if (filter == 'LAST6_MONTHS'.tr()){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
 
@@ -907,8 +915,10 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getFilteredTransactions(str_date,end_date);
-    }else if (filter == 'This Year'){
+
+
+      getFilteredTransactions(str_date, end_date);
+    }else if (filter == 'THIS_YEAR'.tr()){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
@@ -917,8 +927,9 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getFilteredTransactions(str_date,end_date);
-    }else if (filter == 'Last Year'){
+
+      getFilteredTransactions(str_date, end_date);
+    }else if (filter == 'LAST_YEAR'.tr()){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year-1, 12,31);
@@ -927,14 +938,20 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getFilteredTransactions(str_date,end_date);
-    }else if (filter == 'All Time'){
+
+
+      getFilteredTransactions(str_date, end_date);
+
+    }else if (filter == 'ALL_TIME'.tr()){
       index = 8;
       str_date ="";
       end_date ="";
       print(str_date+" "+end_date);
-      getFilteredTransactions(str_date,end_date);
+
+
+      getFilteredTransactions(str_date, end_date);
     }
+    getFilteredTransactions(str_date, end_date);
 
   }
 
@@ -966,7 +983,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
         PopupMenuItem(
           value: 2,
           child: Text(
-            "Edit Record",
+            "EDIT_RECORD".tr(),
             style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
@@ -976,7 +993,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
         PopupMenuItem(
           value: 1,
           child: Text(
-            "Delete Record",
+            "DELETE RECORD".tr(),
             style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
@@ -1029,17 +1046,17 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
 
     // set up the buttons
     Widget cancelButton = TextButton(
-      child: Text("Cancel"),
+      child: Text("CANCEL".tr()),
       onPressed:  () {
         Navigator.pop(context);
       },
     );
     Widget continueButton = TextButton(
-      child: Text("Delete"),
+      child: Text("DELETE".tr()),
       onPressed:  () {
         DatabaseHelper.deleteItem("Vaccination_Medication", selected_id!);
         vac_med_list.removeAt(selected_index!);
-        Utils.showToast("Record Deleted");
+        Utils.showToast("DONE".tr());
         Navigator.pop(context);
         setState(() {
 
@@ -1051,8 +1068,8 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
 
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
-      title: Text("Confirmation"),
-      content: Text("Are you sure you want to delete this Record?"),
+      title: Text("CONFIRMATION".tr()),
+      content: Text("RU_SURE".tr()),
       actions: [
         cancelButton,
         continueButton,

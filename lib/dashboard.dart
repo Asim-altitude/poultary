@@ -62,8 +62,8 @@ class _DashboardScreen extends State<DashboardScreen> {
     str_date = inputFormat.format(firstDayCurrentMonth);
     end_date = inputFormat.format(lastDayCurrentMonth);
 
-    gross_income = await DatabaseHelper.getTransactionsTotal(-1, "INCOME".tr(), str_date, end_date);
-    total_expense = await DatabaseHelper.getTransactionsTotal(-1, "EXPENSE".tr(), str_date, end_date);
+    gross_income = await DatabaseHelper.getTransactionsTotal(-1, "Income", str_date, end_date);
+    total_expense = await DatabaseHelper.getTransactionsTotal(-1, "Expense", str_date, end_date);
 
     net_income = gross_income - total_expense;
 

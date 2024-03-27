@@ -42,7 +42,7 @@ class _NewIncome extends State<NewIncome>
   }
 
   String _purposeselectedValue = "";
-  String _saleselectedValue = "SALE_ITEM".tr();
+  String _saleselectedValue = "Sale Item".tr();
 
   List<String> _purposeList = [];
   List<String> _saleItemList = [];
@@ -61,8 +61,8 @@ class _NewIncome extends State<NewIncome>
 
   String date = "CHOOSE_DATE".tr();
   String displayDate = "";
-  String payment_method = "PAYMENT_METHOD".tr();
-  String payment_status = "PAYMENT_STATUS".tr();
+  String payment_method = "Payment Method".tr();
+  String payment_status = "Payment Status".tr();
 
   final quantityController = TextEditingController();
   final notesController = TextEditingController();
@@ -104,7 +104,7 @@ class _NewIncome extends State<NewIncome>
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'FARM_WIDE'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -123,7 +123,7 @@ class _NewIncome extends State<NewIncome>
 
     _paymentMethodList = await DatabaseHelper.getSubCategoryList(5);
 
-    _paymentMethodList.insert(0,SubItem(c_id: 3,id: -1,name: 'Payment Method'));
+    _paymentMethodList.insert(0,SubItem(c_id: 3,id: -1,name: 'Payment Method'.tr()));
 
     for(int i=0;i<_paymentMethodList.length;i++){
       _visiblePaymentMethodList.add(_paymentMethodList.elementAt(i).name!);
@@ -144,7 +144,7 @@ class _NewIncome extends State<NewIncome>
 
     _subItemList = await DatabaseHelper.getSubCategoryList(1);
 
-    _subItemList.insert(0,SubItem(c_id: 3,id: -1,name: 'Sale Item'));
+    _subItemList.insert(0,SubItem(c_id: 3,id: -1,name: 'Sale Item'.tr()));
 
     for(int i=0;i<_subItemList.length;i++){
       _saleItemList.add(_subItemList.elementAt(i).name!);
@@ -220,7 +220,7 @@ class _NewIncome extends State<NewIncome>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                isEdit?'Edit'.tr() + "Income" : "NEW_INCOME".tr(),
+                                isEdit?'Edit'.tr() +" "+ "Income".tr() : "NEW_INCOME".tr(),
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -453,7 +453,7 @@ class _NewIncome extends State<NewIncome>
                                     width: 1.0,
                                   ),
                                 ),
-                                child: Text(Utils.getFormattedDate(date), style: TextStyle(
+                                child: Text(Utils.getFormattedDate(date.tr()), style: TextStyle(
                                     color: Colors.black, fontSize: 16),),
                               ),
                             ),
@@ -693,7 +693,7 @@ class _NewIncome extends State<NewIncome>
     );
   }
 
-  List<String> paymentStatusList = ['PAYMENT_STATUS'.tr(),'CLEARED'.tr(),'UNCLEAR'.tr(),'RECONCILED'.tr()];
+  List<String> paymentStatusList = ['Payment Status'.tr(),'CLEARED'.tr(),'UNCLEAR'.tr(),'RECONCILED'.tr()];
 
   Widget getPaymentStatusList() {
     return Container(
@@ -755,7 +755,7 @@ class _NewIncome extends State<NewIncome>
   bool checkValidation() {
     bool valid = true;
 
-    if(date.toLowerCase().contains("DATE".tr())){
+    if(date.toLowerCase().contains("CHOOSE_DATE".tr())){
       valid = false;
       print("Select Date");
     }
@@ -775,17 +775,17 @@ class _NewIncome extends State<NewIncome>
       print("Add amount");
     }
     
-    if (_saleselectedValue.toLowerCase().contains("ITEM".tr())){
+    if (_saleselectedValue.toLowerCase().contains("Sale Item".tr())){
       valid = false;
       print("No sale item slected");
     }
 
-    if (payment_method.toLowerCase().contains("PAYMENT".tr())){
+    if (payment_method.toLowerCase().contains("Payment Method".tr())){
       valid = false;
       print("No payment method slected");
     }
 
-    if (payment_status.toLowerCase().contains("STATUS".tr())){
+    if (payment_status.toLowerCase().contains("Payment Status".tr())){
       valid = false;
       print("No payment status slected");
     }

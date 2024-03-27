@@ -337,7 +337,7 @@ class Utils {
 
   static String getFormattedDate(String date){
 
-    if (date.toLowerCase().contains("date")){
+    if (date.contains("Choose date".tr())){
       return date;
     }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -118,7 +119,7 @@ class _CategoryScreen extends State<CategoryScreen> with SingleTickerProviderSta
                       Container(
                           margin: EdgeInsets.only(left: 10),
                           child: Text(
-                            applied_filter_name,
+                            applied_filter_name.tr(),
                             textAlign: TextAlign.start,
                             style: TextStyle(
                                 color: Colors.white,
@@ -160,7 +161,7 @@ class _CategoryScreen extends State<CategoryScreen> with SingleTickerProviderSta
                           ),
                           margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
                           child: Container(
-                            height: 50,
+                            height: 60,
                             padding: EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -180,7 +181,7 @@ class _CategoryScreen extends State<CategoryScreen> with SingleTickerProviderSta
 
                                         Icon(Icons.keyboard_arrow_right,color: Utils.getThemeColorBlue(),size: 20,),
                                         SizedBox(width: 6,),
-                                        Text(categoryList.elementAt(index).name!,style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                        Text(categoryList.elementAt(index).name!.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                                       ],
                                     )),
 

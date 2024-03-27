@@ -108,6 +108,12 @@ flutter:
       fonts:
         - asset: assets/font/Roboto-Regular.ttf
         - asset: assets/font/Roboto-Bold.ttf
+        - asset: assets/font/Amiri-Bold.ttf
+        - asset: assets/font/Amiri-Regular.ttf
+        - asset: assets/font/OpenSans-SemiBold.ttf
+        - asset: assets/font/OpenSans-Bold.ttf
+        - asset: assets/font/arabic_regular.ttf
+        - asset: assets/font/arbic_bold.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:

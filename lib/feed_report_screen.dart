@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -137,7 +138,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                         child: Container(
                             margin: EdgeInsets.only(left: 5),
                             child: Text(
-                              "Feeding Report",
+                              "Feeding Report".tr(),
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                   color: Colors.white,
@@ -147,7 +148,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                       ),
                       InkWell(
                         onTap: (){
-                          Utils.setupInvoiceInitials("Feeding Report",pdf_formatted_date_filter);
+                          Utils.setupInvoiceInitials("Feeding Report".tr(),pdf_formatted_date_filter);
                           prepareListData();
 
                           Navigator.push(
@@ -239,7 +240,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                         child: Row(
                           children: [
 
-                            Text('Feed Consumption',style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
+                            Text('FEED_CONSUMPTION'.tr(),style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
                           ],
                         )),
                     SizedBox(height: 20,width: widthScreen,),
@@ -255,7 +256,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(list.elementAt(index).feed_name!,style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                                Text(list.elementAt(index).quantity! +" kg",style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
+                                Text(list.elementAt(index).quantity! + "KG".tr(),style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
 
                               ],);
 
@@ -264,8 +265,8 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Total Consumption',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
-                        Text(total_feed_consumption.toString() +" kg",style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
+                        Text('TOTAL_CONSUMPTION'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
+                        Text(total_feed_consumption.toString() +"KG".tr(),style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
 
                       ],)
                   ],),),
@@ -275,7 +276,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                 alignment: Alignment.topLeft,
                 child: Container(
                     margin: EdgeInsets.all(10),
-                    child: Text('All Feeding ',style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
+                    child: Text('All Feedings'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
               ),
 
               list.length > 0 ? Container(
@@ -308,15 +309,15 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                                 child: Column(children: [
                                   Row(
                                     children: [
-                                      Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).feed_name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),)),
-                                      Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index).f_name!+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+                                      Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).feed_name!.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),)),
+                                      Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index).f_name!.tr()+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
                                     ],
                                   ),
                                   Align(
                                       alignment: Alignment.topLeft,
                                       child: Row(
                                         children: [
-                                          Container(margin: EdgeInsets.all(5), child: Text('Feeding on', style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
+                                          Container(margin: EdgeInsets.all(5), child: Text('Feeding on'.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
 
                                           Container(margin: EdgeInsets.all(5), child: Text(Utils.getFormattedDate(list.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
                                         ],
@@ -333,7 +334,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                                   child: Row(
                                     children: [
                                       Container(  child: Text(list.elementAt(index).quantity.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Utils.getThemeColorBlue()),)),
-                                      Text("kg", style: TextStyle(color: Colors.black, fontSize: 16),)
+                                      Text("KG".tr(), style: TextStyle(color: Colors.black, fontSize: 16),)
                                     ],
                                   ),
                                 ),
@@ -353,7 +354,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                     width: widthScreen,
                     child: Column(
                       children: [
-                        Text('No Feeding added in current period', style: TextStyle(fontSize: 18, color: Colors.black),),
+                        Text('No Feeding added in current period'.tr(), style: TextStyle(fontSize: 18, color: Colors.black),),
                       ],
                     ),
                   ),
@@ -375,7 +376,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide',bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -438,7 +439,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
         context: context,
         builder: (BuildContext bcontext) {
           return AlertDialog(
-            title: Text('Date Filter'),
+            title: Text('DATE_FILTER'.tr()),
             content: setupAlertDialoadContainer(bcontext,widthScreen - 40, widthScreen),
           );
         });
@@ -475,15 +476,16 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
 
 
-  List<String> filterList = ['Today','Yesterday','This Month', 'Last Month','Last 3 months', 'Last 6 months','This Year',
-    'Last Year','All Time'];
+  List<String> filterList = ['TODAY'.tr(),'YESTERDAY'.tr(),'THIS_MONTH'.tr(), 'LAST_MONTH'.tr(),'LAST3_MONTHS'.tr(), 'LAST6_MONTHS'.tr(),'THIS_YEAR'.tr(),
+    'LAST_YEAR'.tr(),'ALL_TIME'.tr()];
 
-  String date_filter_name = "This Month", pdf_formatted_date_filter = "This Month";
+  String date_filter_name = 'THIS_MONTH'.tr();
+  String pdf_formatted_date_filter = 'THIS_MONTH'.tr();
   String str_date = '',end_date = '';
   void getData(String filter){
     int index = 0;
 
-    if (filter == 'Today'){
+    if (filter == 'TODAY'.tr()){
       index = 0;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
@@ -493,8 +495,9 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
       print(str_date+" "+end_date);
 
       getAllData();
+
     }
-    else if (filter == 'Yesterday'){
+    else if (filter == 'YESTERDAY'.tr()){
       index = 1;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day -1);
 
@@ -504,19 +507,22 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
       print(str_date+" "+end_date);
 
       getAllData();
+
     }
-    else if (filter == 'This Month'){
+    else if (filter == 'THIS_MONTH'.tr()){
       index = 2;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
+
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month + 1).subtract(Duration(days: 1));
 
       var inputFormat = DateFormat('yyyy-MM-dd');
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getAllData();
 
-    }else if (filter == 'Last Month'){
+
+      getAllData();
+    }else if (filter == 'LAST_MONTH'.tr()){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
 
@@ -527,10 +533,11 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
+
+
       getAllData();
 
-
-    }else if (filter == 'Last 3 months'){
+    }else if (filter == 'LAST3_MONTHS'.tr()){
       index = 4;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -2, 1);
 
@@ -540,8 +547,10 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
+
+
       getAllData();
-    }else if (filter == 'Last 6 months'){
+    }else if (filter == 'LAST6_MONTHS'.tr()){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
 
@@ -551,8 +560,10 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
+
+
       getAllData();
-    }else if (filter == 'This Year'){
+    }else if (filter == 'THIS_YEAR'.tr()){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
@@ -561,8 +572,9 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
+
       getAllData();
-    }else if (filter == 'Last Year'){
+    }else if (filter == 'LAST_YEAR'.tr()){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year-1, 12,31);
@@ -571,24 +583,20 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
+
+
       getAllData();
-    }else if (filter == 'All Time'){
+
+    }else if (filter == 'ALL_TIME'.tr()){
       index = 8;
-      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-50,1,1);
-      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
-
-      var inputFormat = DateFormat('yyyy-MM-dd');
-      str_date = inputFormat.format(firstDayCurrentMonth);
-      end_date = inputFormat.format(lastDayCurrentMonth);
+      str_date ="";
+      end_date ="";
       print(str_date+" "+end_date);
+
+
       getAllData();
     }
-
-    if(filter == 'Today' || filter == 'Yesterday'){
-      pdf_formatted_date_filter = filter +"("+str_date+")";
-    }else{
-      pdf_formatted_date_filter = filter +"("+str_date+" to "+end_date+")";
-    }
+    getAllData();
 
   }
 

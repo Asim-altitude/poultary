@@ -168,7 +168,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                         child: Container(
                             margin: EdgeInsets.only(left: 5),
                             child: Text(
-                              "BIRDS".tr()+ "REPORT".tr(),
+                              "BIRDS".tr() +" "+"REPORT".tr(),
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                   color: Colors.white,
@@ -338,8 +338,8 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                                     mainAxisAlignment: MainAxisAlignment.start,children: [
                                     Row(
                                       children: [
-                                        Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index)!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
-                                        Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index)!.item_type+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: list.elementAt(index)!.item_type=='Reduction'? Colors.red:Colors.black),)),
+                                        Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index)!.f_name.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
+                                        Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index)!.item_type.tr()+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: list.elementAt(index)!.item_type=='Reduction'? Colors.red:Colors.black),)),
                                       ],
                                     ),
                                     Align(
@@ -411,7 +411,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'FARM_WIDE'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr() ,bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -526,7 +526,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       end_date = inputFormat.format(today);
       print(str_date+" "+end_date);
 
-      pdf_formatted_date_filter = "Today ("+str_date+")";
+      pdf_formatted_date_filter = 'TODAY'.tr()+" ("+str_date+")";
 
     }
     else if (filter == 'YESTERDAY'.tr()){
@@ -553,7 +553,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       print(str_date+" "+end_date);
 
 
-      pdf_formatted_date_filter = "This Month ("+str_date+"-"+end_date+")";
+      pdf_formatted_date_filter = 'THIS_MONTH'.tr()+" ("+str_date+"-"+end_date+")";
     }else if (filter == 'LAST_MONTH'.tr()){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);

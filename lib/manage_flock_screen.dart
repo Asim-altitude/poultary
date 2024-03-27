@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -119,7 +120,7 @@ class _ManageFlockScreen extends State<ManageFlockScreen> with SingleTickerProvi
                       ),
                       Container(
                           child: Text(
-                            'Manage Flocks',
+                            'MANAGE_FLCOKS'.tr(),
                             textAlign: TextAlign.start,
                             style: TextStyle(
                                 color: Colors.white,
@@ -136,14 +137,14 @@ class _ManageFlockScreen extends State<ManageFlockScreen> with SingleTickerProvi
                   Container(
                       alignment:  Alignment.center,
                       margin: EdgeInsets.only(top: 20),
-                      child: Text('Click any flock to Activate or Expire.',style: TextStyle( fontSize: 14,color: Colors.black, fontWeight:  FontWeight.bold),)),
+                      child: Text('FLOCK_TXT_1'.tr(),style: TextStyle( fontSize: 14,color: Colors.black, fontWeight:  FontWeight.bold),)),
                   Row(
                     children: [
                       Container(
                         width: widthScreen - 32,
                           alignment:  Alignment.center,
                           margin: EdgeInsets.only(top: 10,left: 16,right: 16),
-                          child: Text(' Expired flocks will no longer appear in the app except this screen.',textAlign: TextAlign.center,style: TextStyle( fontSize: 14,color: Colors.grey),)),
+                          child: Text('FLOCK_TXT_2_1'.tr() + "FLOCK_TXT_2_2".tr(),textAlign: TextAlign.center,style: TextStyle( fontSize: 14,color: Colors.grey),)),
 
                     ],
                   )
@@ -203,7 +204,7 @@ class _ManageFlockScreen extends State<ManageFlockScreen> with SingleTickerProvi
 
                                              });
                                           },
-                                            child: Container(margin: EdgeInsets.only(top: 10), child: Text(flocks.elementAt(index).active == 1? "ACTIVE" : "EXPIRED", style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: flocks.elementAt(index).active == 1? Colors.green: Colors.red),))),
+                                            child: Container(margin: EdgeInsets.only(top: 10), child: Text(flocks.elementAt(index).active == 1? "ACTIVE".tr() : "EXPIRED".tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: flocks.elementAt(index).active == 1? Colors.green: Colors.red),))),
 
                                       ],),
                                   ),
@@ -219,7 +220,7 @@ class _ManageFlockScreen extends State<ManageFlockScreen> with SingleTickerProvi
                                       child: Row(
                                         children: [
                                           Container( margin: EdgeInsets.only(right: 5), child: Text(flocks.elementAt(index).active_bird_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),)),
-                                          Text("Birds", style: TextStyle(color: Colors.black, fontSize: 14),)
+                                          Text("BIRDS".tr(), style: TextStyle(color: Colors.black, fontSize: 14),)
                                         ],
                                       ),
                                     ),
@@ -239,7 +240,7 @@ class _ManageFlockScreen extends State<ManageFlockScreen> with SingleTickerProvi
 
                   alignment:  Alignment.center,
                   margin: EdgeInsets.only(top: 50,left: 16,right: 16),
-                  child: Text('No Flocks Added Yet. Add new from Dashboard',textAlign: TextAlign.center,style: TextStyle( fontSize: 16,color: Colors.black,),),),),
+                  child: Text('No Flocks Added Yet. Add new from Dashboard'.tr(),textAlign: TextAlign.center,style: TextStyle( fontSize: 16,color: Colors.black,),),),),
 
                   ]
       ),),),),),);

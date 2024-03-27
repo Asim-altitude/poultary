@@ -61,7 +61,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'FARM_WIDE'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -214,7 +214,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                       Container(
                           margin: EdgeInsets.only(left: 10),
                           child: Text(
-                            applied_filter_name,
+                            applied_filter_name.tr(),
                             textAlign: TextAlign.start,
                             style: TextStyle(
                                 color: Colors.white,
@@ -302,7 +302,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                             width: 1.0,
                           ),
                         ),
-                        child: Text('ALL'.tr(), style: TextStyle(
+                        child: Text('All'.tr(), style: TextStyle(
                             color: selected==1 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                       ),
                     ),
@@ -327,7 +327,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                             width: 1.0,
                           ),
                         ),
-                        child: Text('ADDITION'.tr(), style: TextStyle(
+                        child: Text('Addition'.tr(), style: TextStyle(
                             color: selected==2 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                       ),
                     ),
@@ -351,7 +351,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                             width: 1.0,
                           ),
                         ),
-                        child: Text('REDUCTION'.tr(), style: TextStyle(
+                        child: Text('Reduction'.tr(), style: TextStyle(
                             color: selected==3 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                       ),
                     ),

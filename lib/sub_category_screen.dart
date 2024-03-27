@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -102,7 +103,7 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
         ),
         margin: EdgeInsets.only(left: 0, right: 0),
         child: Text(
-          "Add New",
+          "ADD_NEW".tr(),
           textAlign: TextAlign.center,
           style: TextStyle(
               color: Colors.white,
@@ -155,7 +156,7 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
                       Container(
                           margin: EdgeInsets.only(left: 10),
                           child: Text(
-                            applied_filter_name,
+                            applied_filter_name.tr(),
                             textAlign: TextAlign.start,
                             style: TextStyle(
                                 color: Colors.white,
@@ -225,13 +226,13 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
 
     // set up the buttons
     Widget cancelButton = TextButton(
-      child: Text("Cancel"),
+      child: Text("CANCEL".tr()),
       onPressed:  () {
         Navigator.pop(context);
       },
     );
     Widget continueButton = TextButton(
-      child: Text("Delete"),
+      child: Text("DELETE".tr()),
       onPressed:  () {
         DatabaseHelper.deleteSubItem(categoryList.elementAt(index));
 
@@ -242,8 +243,8 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
 
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
-      title: Text("Confirmation"),
-      content: Text("Are you sure you want to delete this item?"),
+      title: Text("CONFIRMATION".tr()),
+      content: Text("RU_SURE".tr()),
       actions: [
         cancelButton,
         continueButton,
@@ -267,7 +268,7 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
         builder: (BuildContext context) {
           return AlertDialog(
             scrollable: true,
-            title: Text("New "+Utils.selected_category_name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
+            title: Text("New ".tr()+Utils.selected_category_name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
             content: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Form(
@@ -276,7 +277,7 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
                     TextFormField(
                       controller: nameController,
                       decoration: InputDecoration(
-                        labelText: 'Enter Name',
+                        labelText: 'Enter Name'.tr(),
                       ),
                     ),
 
@@ -307,7 +308,7 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
                         ),
                         margin: EdgeInsets.all( 20),
                         child: Text(
-                          "Confirm",
+                          "CONFIRM".tr(),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               color: Colors.white,

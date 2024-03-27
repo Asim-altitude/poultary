@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
@@ -118,10 +119,10 @@ class Invoice {
 
 
     _bgShape = await rootBundle.loadString('assets/invoice.svg');
-    final font = await rootBundle.load("assets/font/Roboto-Regular.ttf");
+    final font = await rootBundle.load("assets/font/arabic_regular.ttf");
     final ttfFLight = pw.Font.ttf(font);
 
-    final font1 = await rootBundle.load("assets/font/Roboto-Bold.ttf");
+    final font1 = await rootBundle.load("assets/font/arbic_bold.ttf");
     final ttfFBold = pw.Font.ttf(font1);
 
 
@@ -141,7 +142,7 @@ class Invoice {
             height: 30,
             alignment: pw.Alignment.topLeft,
             child: pw.Text(
-              'By Feed Type',
+              'By Feed Type'.tr(),
               style: pw.TextStyle(
                 color: PdfColors.blue,
                 fontWeight: pw.FontWeight.bold,
@@ -157,7 +158,7 @@ class Invoice {
             child: pw.Row(
                 children: [
                   pw.Text(
-                    'Total Consumption: ',
+                    'Total Consumption: '.tr(),
                     style: pw.TextStyle(
                       color: PdfColors.black,
                       fontWeight: pw.FontWeight.normal,
@@ -179,7 +180,7 @@ class Invoice {
             height: 30,
             alignment: pw.Alignment.topLeft,
             child: pw.Text(
-              'By Flock Name',
+              'By Flock Name'.tr(),
               style: pw.TextStyle(
                 color: PdfColors.blue,
                 fontWeight: pw.FontWeight.bold,
@@ -195,7 +196,7 @@ class Invoice {
               child: pw.Row(
                   children: [
                     pw.Text(
-                      'Total Consumption: ',
+                      'Total Consumption: '.tr(),
                       style: pw.TextStyle(
                         color: PdfColors.black,
                         fontWeight: pw.FontWeight.normal,
@@ -220,7 +221,7 @@ class Invoice {
                     pw.Container(
                       alignment: pw.Alignment.topLeft,
                       child: pw.Text(
-                        'Report Generated On: ',
+                        'Report Generated On: '.tr(),
                         style: pw.TextStyle(
                           color: PdfColors.black,
                           fontSize: 10,
@@ -283,7 +284,7 @@ class Invoice {
                   padding: const pw.EdgeInsets.only(left: 20),
                   alignment: pw.Alignment.center,
                   child: pw.Text(
-                    Utils.INVOICE_HEADING,
+                    Utils.INVOICE_HEADING.tr(),
                     style: pw.TextStyle(
                       color: PdfColors.blue,
                       fontWeight: pw.FontWeight.bold,
@@ -297,7 +298,7 @@ class Invoice {
                   padding: const pw.EdgeInsets.only(left: 20),
                   alignment: pw.Alignment.center,
                   child: pw.Text(
-                    'Feed Consumption Report',
+                    'Feed Consumption Report'.tr(),
                     style: pw.TextStyle(
                       color: PdfColors.black,
                       fontWeight: pw.FontWeight.normal,
@@ -343,7 +344,7 @@ class Invoice {
                   height: 30,
                   alignment: pw.Alignment.topLeft,
                   child: pw.Text(
-                    "Summary",
+                    "SUMMARY".tr(),
                     style: pw.TextStyle(
                       color: PdfColors.blue,
                       fontWeight: pw.FontWeight.bold,
@@ -489,7 +490,7 @@ class Invoice {
             height: 70,
             child: pw.FittedBox(
               child: pw.Text(
-                'Total: ${_formatCurrency(_grandTotal)}',
+                'TOTAL'.tr()+': ${_formatCurrency(_grandTotal)}',
                 style: pw.TextStyle(
                   color: baseColor,
                   fontStyle: pw.FontStyle.italic,
@@ -716,13 +717,13 @@ class Invoice {
       ),
       headers: List<String>.generate(
         tableHeaders.length,
-            (col) => tableHeaders[col],
+            (col) => tableHeaders[col].tr(),
       ),
       data: List<List<String>>.generate(
         products.length,
             (row) => List<String>.generate(
           tableHeaders.length,
-              (col) => products[row].getIndex(col),
+              (col) => products[row].getIndex(col).tr(),
         ),
       ),
     );
@@ -768,13 +769,13 @@ class Invoice {
       ),
       headers: List<String>.generate(
         tableHeaders.length,
-            (col) => tableHeaders[col],
+            (col) => tableHeaders[col].tr(),
       ),
       data: List<List<String>>.generate(
         flockFeedList.length,
             (row) => List<String>.generate(
           tableHeaders.length,
-              (col) => flockFeedList[row].getIndex(col),
+              (col) => flockFeedList[row].getIndex(col).tr(),
         ),
       ),
     );

@@ -85,7 +85,7 @@ class _NewEggCollection extends State<NewEggCollection>
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'FARM_WIDE'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -168,7 +168,7 @@ class _NewEggCollection extends State<NewEggCollection>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                isCollection? isEdit? "EDIT".tr() + "COLLECTION".tr(): "NEW".tr()+ "Collection" : isEdit? "EDIT".tr() + "REDUCTION".tr():"NEW".tr()+ "REDUCTION".tr(),
+                                isCollection? isEdit? "EDIT".tr() +" "+ "COLLECTION".tr(): "NEW".tr()+" "+ "Collection" : isEdit? "EDIT".tr() +" "+ "REDUCTION".tr():"NEW".tr()+" "+"REDUCTION".tr(),
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -235,11 +235,11 @@ class _NewEggCollection extends State<NewEggCollection>
                                   controller: goodEggsController,
                                   keyboardType: TextInputType.number,
                                   textInputAction: TextInputAction.next,
-                                  decoration: const InputDecoration(
+                                  decoration:  InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Good Eggs',
+                                    hintText: 'Good Eggs'.tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -283,7 +283,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: "BAD".tr()+"EGGS".tr(),
+                                    hintText: "Bad Eggs".tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -318,7 +318,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: "TOTAL".tr() + "EGGS".tr(),
+                                    hintText: "Total Eggs".tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -374,7 +374,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                     width: 1.0,
                                   ),
                                 ),
-                                child: Text(Utils.getFormattedDate(date), style: TextStyle(
+                                child: Text(Utils.getFormattedDate(date.tr()), style: TextStyle(
                                     color: Colors.black, fontSize: 16),),
                               ),
                             ),
@@ -620,7 +620,7 @@ class _NewEggCollection extends State<NewEggCollection>
   bool checkValidation() {
     bool valid = true;
 
-    if(date.toLowerCase().contains("DATE".tr())){
+    if(date.toLowerCase().contains("CHOOSE_DATE".tr())){
       valid = false;
       print("Select Date");
     }

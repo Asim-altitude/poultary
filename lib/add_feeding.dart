@@ -80,7 +80,7 @@ class _NewFeeding extends State<NewFeeding>
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'FARM_WIDE'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -100,7 +100,7 @@ class _NewFeeding extends State<NewFeeding>
 
     _subItemList = await DatabaseHelper.getSubCategoryList(3);
 
-    _subItemList.insert(0,SubItem(c_id: 3,id: -1,name: 'Choose Feed'));
+    _subItemList.insert(0,SubItem(c_id: 3,id: -1,name: 'Choose Feed'.tr()));
 
     for(int i=0;i<_subItemList.length;i++){
       _feedList.add(_subItemList.elementAt(i).name!);
@@ -121,7 +121,7 @@ class _NewFeeding extends State<NewFeeding>
 
   bool _validate = false;
 
-  String date = "CHOOSE_DATE".tr();
+  String date = "Choose date";
   final quantityController = TextEditingController();
   final notesController = TextEditingController();
 
@@ -300,7 +300,7 @@ class _NewFeeding extends State<NewFeeding>
                                     width: 1.0,
                                   ),
                                 ),
-                                child: Text(Utils.getFormattedDate(date), style: TextStyle(
+                                child: Text(Utils.getFormattedDate(date.tr()), style: TextStyle(
                                     color: Colors.black, fontSize: 16),),
                               ),
                             ),
@@ -515,7 +515,7 @@ class _NewFeeding extends State<NewFeeding>
   bool checkValidation() {
     bool valid = true;
 
-    if(date.toLowerCase().contains("DATE".tr())){
+    if(date.toLowerCase().contains("date")){
       valid = false;
       print("SELECT_DATE".tr());
     }
@@ -524,7 +524,6 @@ class _NewFeeding extends State<NewFeeding>
       valid = false;
       print("Add quantity added");
     }
-    
     if (getFeedID() == -1){
       valid = false;
       print("Add feed type");

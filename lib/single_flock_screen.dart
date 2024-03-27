@@ -160,7 +160,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                         Container( child: Text(Utils.selected_flock!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 17, color: Utils.getThemeColorBlue(),),)),
                         Row(
                           children: [
-                            Container( child: Text(Utils.selected_flock!.acqusition_type, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black,decoration: TextDecoration.underline,),)),
+                            Container( child: Text(Utils.selected_flock!.acqusition_type.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black,decoration: TextDecoration.underline,),)),
                           ],
                         ),
                         Row(
@@ -171,8 +171,8 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                         ),
                           Row(
                             children: [
-                              Container( child: Text('PURPOSE'.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black54),)),
-                              Container( child: Text(Utils.selected_flock!.purpose == 'Both'? 'Egg and Meat':Utils.selected_flock!.purpose, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
+                              Container( child: Text('PURPOSE1'.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black54),)),
+                              Container( child: Text(Utils.selected_flock!.purpose, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
                             ],
                           ),
 

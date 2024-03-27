@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
@@ -147,7 +148,7 @@ class _PDFScreen extends State<PDFScreen> {
                             child: Container(
                                 margin: EdgeInsets.only(left: 5),
                                 child: Text(
-                                  "Pdf Report",
+                                  "Pdf Report".tr(),
                                   textAlign: TextAlign.start,
                                   style: TextStyle(
                                       color: Colors.white,

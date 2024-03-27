@@ -99,9 +99,9 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
     total_flock_birds = await DatabaseHelper.getAllFlockBirdsCount(f_id, str_date, end_date);
 
-    total_birds_added = await DatabaseHelper.getBirdsCalculations(f_id, "ADDITION".tr(), str_date, end_date);
+    total_birds_added = await DatabaseHelper.getBirdsCalculations(f_id, "Addition", str_date, end_date);
 
-    total_birds_reduced = await DatabaseHelper.getBirdsCalculations(f_id, "REDUCTION".tr(), str_date, end_date);
+    total_birds_reduced = await DatabaseHelper.getBirdsCalculations(f_id, "Reduction", str_date, end_date);
 
     total_birds_added = total_birds_added + total_flock_birds;
     current_birds = total_birds_added - total_birds_reduced;
@@ -116,13 +116,13 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
     total_feed_consumption = await DatabaseHelper.getTotalFeedConsumption(f_id, str_date, end_date);
 
-    gross_income = await DatabaseHelper.getTransactionsTotal(f_id, "INCOME".tr(), str_date, end_date);
-    total_expense = await DatabaseHelper.getTransactionsTotal(f_id, "EXPENSE".tr(), str_date, end_date);
+    gross_income = await DatabaseHelper.getTransactionsTotal(f_id, "Income", str_date, end_date);
+    total_expense = await DatabaseHelper.getTransactionsTotal(f_id, "Expense", str_date, end_date);
 
     net_income = gross_income - total_expense;
 
-    vac_count = await DatabaseHelper.getHealthTotal(f_id, "VACCINATION".tr(), str_date, end_date);
-    med_count = await DatabaseHelper.getHealthTotal(f_id, "MEDICATION".tr(), str_date, end_date);
+    vac_count = await DatabaseHelper.getHealthTotal(f_id, "Vaccination", str_date, end_date);
+    med_count = await DatabaseHelper.getHealthTotal(f_id, "Medication", str_date, end_date);
 
     total_health_count = med_count + vac_count;
 
@@ -368,7 +368,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                       Column(
                         children: [
                           Text('$total_eggs',style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
-                          Text('REMAINING_EGGS'.tr(),style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
+                          Text('Remaining Eggs'.tr(),style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
 
                         ],)
                     ],),),
@@ -427,7 +427,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                               return Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(feedings.elementAt(index).feed_name!,style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                                  Text(feedings.elementAt(index).feed_name!.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
                                   Text(feedings.elementAt(index).quantity! +" kg",style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
 
 
@@ -812,7 +812,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: "FARM_WIDE".tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: "Farm Wide".tr() ,bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
@@ -911,15 +911,15 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
 
 
-  List<String> filterList = ['Today','Yesterday','This Month', 'Last Month','Last 3 months', 'Last 6 months','This Year',
-    'Last Year','All Time'];
+  List<String> filterList = ['TODAY'.tr(),'YESTERDAY'.tr(),'THIS_MONTH'.tr(), 'LAST_MONTH'.tr(),'LAST3_MONTHS'.tr(), 'LAST6_MONTHS'.tr(),'THIS_YEAR'.tr(),
+    'LAST_YEAR'.tr(),'ALL_TIME'.tr()];
 
-  String date_filter_name = "This Month";
+  String date_filter_name = 'THIS_MONTH'.tr();
   String str_date = '',end_date = '';
   void getData(String filter){
     int index = 0;
 
-    if (filter == 'Today'){
+    if (filter == 'TODAY'.tr()){
       index = 0;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
@@ -929,8 +929,9 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
       print(str_date+" "+end_date);
 
       getAllData();
+
     }
-    else if (filter == 'Yesterday'){
+    else if (filter == 'YESTERDAY'.tr()){
       index = 1;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day -1);
 
@@ -940,19 +941,22 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
       print(str_date+" "+end_date);
 
       getAllData();
+
     }
-    else if (filter == 'This Month'){
+    else if (filter == 'THIS_MONTH'.tr()){
       index = 2;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
+
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month + 1).subtract(Duration(days: 1));
 
       var inputFormat = DateFormat('yyyy-MM-dd');
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getAllData();
 
-    }else if (filter == 'Last Month'){
+
+      getAllData();
+    }else if (filter == 'LAST_MONTH'.tr()){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
 
@@ -963,10 +967,11 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
+
+
       getAllData();
 
-
-    }else if (filter == 'Last 3 months'){
+    }else if (filter == 'LAST3_MONTHS'.tr()){
       index = 4;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -2, 1);
 
@@ -976,8 +981,10 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
+
+
       getAllData();
-    }else if (filter == 'Last 6 months'){
+    }else if (filter == 'LAST6_MONTHS'.tr()){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
 
@@ -987,8 +994,10 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
+
+
       getAllData();
-    }else if (filter == 'This Year'){
+    }else if (filter == 'THIS_YEAR'.tr()){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
@@ -997,8 +1006,9 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
+
       getAllData();
-    }else if (filter == 'Last Year'){
+    }else if (filter == 'LAST_YEAR'.tr()){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year-1, 12,31);
@@ -1007,18 +1017,20 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
-      getAllData();
-    }else if (filter == 'All Time'){
-      index = 8;
-      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-50,1,1);
-      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
 
-      var inputFormat = DateFormat('yyyy-MM-dd');
-      str_date = inputFormat.format(firstDayCurrentMonth);
-      end_date = inputFormat.format(lastDayCurrentMonth);
+
+      getAllData();
+
+    }else if (filter == 'ALL_TIME'.tr()){
+      index = 8;
+      str_date ="";
+      end_date ="";
       print(str_date+" "+end_date);
+
+
       getAllData();
     }
+    getAllData();
 
   }
 

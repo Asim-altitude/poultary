@@ -113,7 +113,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
 
   bool _validate = false;
 
-  String date = "CHOOSE_DATE".tr();
+  String date = "Choose date";
   final nameController = TextEditingController();
   final totalBirdsController = TextEditingController();
   final notesController = TextEditingController();
@@ -175,7 +175,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                isCollection? isEdit? "EDIT".tr() + 'ADDITION'.tr() : 'ADD_BIRDS'.tr() :isEdit? "EDIT".tr() + "REDUCTION".tr() :'REDUCE_BIRDS'.tr(),
+                                isCollection? isEdit? "EDIT".tr() +" "+ 'Addition'.tr() : 'ADD_BIRDS'.tr() :isEdit? "EDIT".tr() +" "+ "Reduction".tr() :'REDUCE_BIRDS'.tr(),
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -234,11 +234,11 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                                   controller: totalBirdsController,
                                   keyboardType: TextInputType.number,
                                   textInputAction: TextInputAction.next,
-                                  decoration: const InputDecoration(
+                                  decoration:  InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Birds count',
+                                    hintText: 'BIRDS_COUNT'.tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -313,7 +313,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                                     width: 1.0,
                                   ),
                                 ),
-                                child: Text(Utils.getFormattedDate(date), style: TextStyle(
+                                child: Text(Utils.getFormattedDate(date.tr()), style: TextStyle(
                                     color: Colors.black, fontSize: 16),),
                               ),
                             ),
@@ -340,11 +340,11 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                                   keyboardType: TextInputType.multiline,
                                   textAlign: TextAlign.start,
                                   textInputAction: TextInputAction.done,
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Write short note',
+                                    hintText: 'NOTES_HINT'.tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -642,21 +642,21 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
   bool checkValidation() {
     bool valid = true;
 
-    if(date.toLowerCase().contains("DATE".tr())){
+    if(date.contains("Choose date".tr())){
       valid = false;
       print("Select Date");
     }
 
 
     if(isCollection) {
-      if (_acqusitionselectedValue.toLowerCase().contains("ACQUSITION".tr())) {
+      if (_acqusitionselectedValue.contains("ACQUSITION_TYPE".tr())) {
         valid = false;
         print("Select Acqusition Type");
       }
     }
 
     if(!isCollection) {
-      if (_reductionReasonValue.toLowerCase().contains("REDUCTION".tr())) {
+      if (_reductionReasonValue.contains("REDUCTION_REASON".tr())) {
         valid = false;
         print("Select Reduction reason");
       }

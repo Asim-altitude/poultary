@@ -243,7 +243,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                   ),
                   margin: EdgeInsets.only(left: 12,right: 12,top: 12,bottom: 8),
                   child: Container(
-                    height: 50,
+                    height: 60,
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -288,7 +288,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                   ),
                   margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
                   child: Container(
-                    height: 50,
+                    height: 60,
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -333,7 +333,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                   ),
                   margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
                   child: Container(
-                    height: 50,
+                    height: 60,
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -373,7 +373,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                   ),
                   margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
                   child: Container(
-                    height: 50,
+                    height: 60,
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -413,7 +413,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                   ),
                   margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
                   child: Container(
-                    height: 50,
+                    height: 60,
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -560,7 +560,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                       ),
                       margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
                       child: Container(
-                        height: 50,
+                        height: 60,
                         padding: EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: Utils.getThemeColorBlue(),
