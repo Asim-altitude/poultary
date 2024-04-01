@@ -290,5 +290,9 @@
  "Total Medications": "総薬剤数",
  "Medicine name": "薬名",
  "Diseaese Name": "病名",
- "Vaccine name": "ワクチン名"
+ "Vaccine name": "ワクチン名",
+ "Sold To": "に売却",
+ "Paid To": "支払先",
+ "My Farm": "ファーム名(更新設定)",
+ "My Location": "場所がありません(設定を更新)"
 }

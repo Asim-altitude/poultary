@@ -290,5 +290,9 @@
   "Total Medications": "कुल औषधियाँ",
   "Medicine name": "दवा का नाम",
   "Diseaese Name": "रोग का नाम",
-  "Vaccine name": "वैक्सीन का नाम"
+  "Vaccine name": "वैक्सीन का नाम",
+  "Sold To": "को बेचा",
+  "Paid To": "को भुगतान किया",
+  "My Farm": "फार्म का नाम (अद्यतन सेटिंग्स)",
+  "My Location": "कोई स्थान नहीं (अद्यतन सेटिंग्स)"
 }

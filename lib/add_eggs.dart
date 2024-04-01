@@ -104,7 +104,7 @@ class _NewEggCollection extends State<NewEggCollection>
 
   bool _validate = false;
 
-  String date = "CHOOSE_DATE".tr();
+  String date = "Choose date";
   final nameController = TextEditingController();
   final totalEggsController = TextEditingController();
   final goodEggsController = TextEditingController();
@@ -374,7 +374,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                     width: 1.0,
                                   ),
                                 ),
-                                child: Text(Utils.getFormattedDate(date.tr()), style: TextStyle(
+                                child: Text(Utils.getFormattedDate(date), style: TextStyle(
                                     color: Colors.black, fontSize: 16),),
                               ),
                             ),
@@ -620,7 +620,7 @@ class _NewEggCollection extends State<NewEggCollection>
   bool checkValidation() {
     bool valid = true;
 
-    if(date.toLowerCase().contains("CHOOSE_DATE".tr())){
+    if(date.toLowerCase().contains("Choose date")){
       valid = false;
       print("Select Date");
     }

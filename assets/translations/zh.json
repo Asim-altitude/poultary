@@ -290,5 +290,11 @@
   "Total Medications": "药物总量",
   "Medicine name": "药品名称",
   "Diseaese Name": "疾病名称",
-  "Vaccine name": "疫苗名称"
+  "Vaccine name": "疫苗名称",
+  "Sold To": "卖给",
+  "Paid To": "支付给",
+  "My Farm": "我的农场",
+  "My Location": "未添加位置",
+  "My Farm": "农场名称（更新设置）",
+  "My Location": "无位置（更新设置）"
 }

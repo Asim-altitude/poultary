@@ -290,5 +290,10 @@
  "Total Medications": "Gesamtmedikamente",
  "Medicine name": "Name des Arzneimittels",
  "Diseaese Name": "Krankheitsname",
- "Vaccine name": "Impfstoffname"
+ "Vaccine name": "Impfstoffname",
+ "Sold To": "Verkauft an",
+ "Paid To": "Bezahlt um",
+ "My Farm": "Farmname (Einstellungen aktualisieren)",
+ "My Location": "Kein Standort (Einstellungen aktualisieren)"
+
 }

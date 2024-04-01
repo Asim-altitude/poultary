@@ -290,5 +290,9 @@
  "Total Medications": "مجموع داروها",
  "Medicine name": "نام دارو",
  "Diseaese Name": "نام بیماری",
- "Vaccine name": "نام واکسن"
+ "Vaccine name": "نام واکسن",
+ "Sold To": "فروخته شد به",
+ "Paid To": "پرداخت شده به",
+ "My Farm": "نام مزرعه (به روز رسانی تنظیمات)",
+ "My Location": "بدون مکان (به روز رسانی تنظیمات)"
 }

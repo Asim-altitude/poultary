@@ -118,13 +118,13 @@ class Invoice {
     }
 
 
+    String regular = await Utils.getPdfregularFont();
+    String bold = await Utils.getPdfBoldFont();
     _bgShape = await rootBundle.loadString('assets/invoice.svg');
-    final font = await rootBundle.load("assets/font/arabic_regular.ttf");
+    final font = await rootBundle.load(regular);
     final ttfFLight = pw.Font.ttf(font);
-
-    final font1 = await rootBundle.load("assets/font/arbic_bold.ttf");
+    final font1 = await rootBundle.load(bold);
     final ttfFBold = pw.Font.ttf(font1);
-
 
     // Add page to the PDF
     doc.addPage(

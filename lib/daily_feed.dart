@@ -341,8 +341,8 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                                     ),),
                                   Row(
                                     children: [
-                                      Container(margin: EdgeInsets.all(0), child: Text(feedings.elementAt(index).feed_name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),)),
-                                      Container(margin: EdgeInsets.all(0), child: Text(" ("+feedings.elementAt(index).f_name!+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+                                      Container(margin: EdgeInsets.all(0), child: Text(feedings.elementAt(index).feed_name!.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),)),
+                                      Container(margin: EdgeInsets.all(0), child: Text(" ("+feedings.elementAt(index).f_name!.tr()+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
                                     ],
                                   ),
                                   Container(

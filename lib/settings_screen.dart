@@ -443,9 +443,14 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
 
               if(isGetLanguage)
                 Container(
-                  color: Colors.white,
-                  width: Utils.getWidthResized(130),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(3)),
+                      color: Colors.white,
+                      border: Border.all(color: Colors.blueAccent,width: 1.0)
+                  ),
                   height: 60,
+                  margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+
                   child:
 
                   Column(
@@ -468,13 +473,14 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                       ),
 
                       Container(
-                        width: Utils.getWidthResized(130),height:24,color: Colors.white,
+                        width: Utils.getWidthResized(200),height:24,color: Colors.white,
                         child: LanguagePickerDropdown(
                           initialValue: _selectedCupertinoLanguage,
                           itemBuilder: _buildDropdownItem,
                           languages: supportedLanguages,
                           onValuePicked: (Language language) {
                             _selectedCupertinoLanguage = language;
+                           // Utils.showToast(language.isoCode);
                             Utils.setSelectedLanguage(_selectedCupertinoLanguage,context);
                           },
                         ),

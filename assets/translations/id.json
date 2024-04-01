@@ -290,5 +290,9 @@
   "Total Medications": "Jumlah Obat",
   "Medicine name": "Nama obat",
   "Diseaese Name": "Nama Penyakit",
-  "Vaccine name": "Nama vaksin"
+  "Vaccine name": "Nama vaksin",
+  "Sold To": "Dijual ke",
+  "Paid To": "Dibayarkan kepada",
+  "My Farm": "Nama Peternakan (Pengaturan Pembaruan)",
+  "My Location": "Tidak Ada Lokasi (Perbarui Pengaturan)"
 }

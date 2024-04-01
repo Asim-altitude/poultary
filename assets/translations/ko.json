@@ -290,5 +290,9 @@
  "Total Medications": "총 약물",
  "Medicine name": "약명",
  "Diseaese Name": "질병명",
- "Vaccine name": "백신명"
+ "Vaccine name": "백신명",
+ "Sold To": "판매 대상",
+ "Paid To": "지불 대상",
+ "My Farm": "농장 이름(업데이트 설정)",
+ "My Location": "위치 없음(설정 업데이트)"
 }

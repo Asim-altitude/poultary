@@ -98,10 +98,222 @@ class Utils {
   // static MediationManager? manager;
   // static CASBannerView? view;
 
+ static Future<bool> getDirection() async{
+
+   String? language = await SessionManager.getSelectedLanguage();
+
+
+   if(language =="en"){
+     return true;
+   }
+   else if(language =="ar"){
+     return false;
+   }
+   else if(language =="ru"){
+     return true;
+   }
+   else if(language =="fa"){
+     return true;
+   }
+   else if(language =="de"){
+     return true;
+   }
+   else if(language =="ja"){
+     return true;
+   }
+   else if(language =="ko"){
+     return true;
+   }
+   else if(language =="pt"){
+     return true;
+   }
+   else if(language =="tr"){
+     return true;
+   }
+   else if(language =="fr"){
+     return true;
+   }
+   else if(language =="id"){
+     return true;
+   }
+   else if(language =="hi"){
+     return true;
+   }
+   else if(language =="es"){
+     return true;
+   }
+   else if(language =="zh"){
+     return true;
+   }
+   else if(language =="uk"){
+     return true;
+   }
+   else if(language =="pl"){
+     return true;
+   }
+   else if(language =="bn"){
+     return true;
+   }
+   else if(language =="te"){
+     return true;
+   }
+   else if(language =="ta"){
+     return true;
+   }
+   else if(language =="ur"){
+     return false;
+   }
+
+   return true;
+ }
+
+  static Future<String> getPdfregularFont() async{
+
+   String language = await SessionManager.getSelectedLanguage();
+
+    if(language =="en"){
+      return "assets/font/Roboto-Regular.ttf";
+    }
+    else if(language =="ar"){
+      return "assets/font/arabic_regular.ttf";
+    }
+    else if(language =="ru"){
+      return "assets/font/Roboto-Regular.ttf";
+    }
+    else if(language =="fa"){
+      return "assets/font/Roboto-Regular.ttf";
+    }
+    else if(language =="de"){
+      return "assets/font/Roboto-Regular.ttf";
+    }
+    else if(language =="ja"){
+      return "assets/font/Roboto-Regular.ttf";
+    }
+    else if(language =="ko"){
+      return "assets/font/Roboto-Regular.ttf";
+    }
+    else if(language =="pt"){
+      return "assets/font/Roboto-Regular.ttf";
+    }
+    else if(language =="tr"){
+      return "assets/font/Roboto-Regular.ttf";
+    }
+    else if(language =="fr"){
+      return "assets/font/Roboto-Regular.ttf";
+    }
+    else if(language =="id"){
+      return "assets/font/Roboto-Regular.ttf";
+    }
+    else if(language =="hi"){
+      return "assets/font/Hind-Regular.ttf";
+    }
+    else if(language =="es"){
+      return "assets/font/Roboto-Regular.ttf";
+    }
+    else if(language =="zh"){
+      return "assets/font/NotoSansSC.ttf";
+    }
+    else if(language =="uk"){
+      return "assets/font/Roboto-Regular.ttf";
+    }
+    else if(language =="pl"){
+      return "assets/font/Roboto-Regular.ttf";
+    }
+    else if(language =="bn"){
+      return "assets/font/NotoSansBengali.ttf";
+    }
+    else if(language =="te"){
+      return "assets/font/NotoSerifTelugu.ttf";
+    }
+    else if(language =="ta"){
+      return "assets/font/NotoSansTamil.ttf";
+    }
+    else if(language =="ur"){
+      return "assets/font/NotoSansArabic.ttf";
+    }else{
+      return "assets/font/Roboto-Regular.ttf";
+    }
+
+
+  }
+
+  static Future<String> getPdfBoldFont() async{
+    String language = await SessionManager.getSelectedLanguage();
+
+    if(language =="en"){
+      return "assets/font/Roboto-Bold.ttf";
+    }
+    else if(language =="ar"){
+      return "assets/font/arbic_bold.ttf";
+    }
+    else if(language =="ru"){
+      return "assets/font/Roboto-Bold.ttf";
+    }
+    else if(language =="fa"){
+      return "assets/font/Roboto-Bold.ttf";
+    }
+    else if(language =="de"){
+      return "assets/font/Roboto-Bold.ttf";
+    }
+    else if(language =="ja"){
+      return "assets/font/Roboto-Bold.ttf";
+    }
+    else if(language =="ko"){
+      return "assets/font/Roboto-Bold.ttf";
+    }
+    else if(language =="pt"){
+      return "assets/font/Roboto-Bold.ttf";
+    }
+    else if(language =="tr"){
+      return "assets/font/Roboto-Bold.ttf";
+    }
+    else if(language =="fr"){
+      return "assets/font/Roboto-Bold.ttf";
+    }
+    else if(language =="id"){
+      return "assets/font/Roboto-Bold.ttf";
+    }
+    else if(language =="hi"){
+      return "assets/font/Hind-Bold.ttf";
+    }
+    else if(language =="es"){
+      return "assets/font/Roboto-Bold.ttf";
+    }
+    else if(language =="zh"){
+      return "assets/font/NotoSansSC.ttf";
+    }
+    else if(language =="uk"){
+      return "assets/font/Roboto-Bold.ttf";
+    }
+    else if(language =="pl"){
+      return "assets/font/Roboto-Bold.ttf";
+    }
+    else if(language =="bn"){
+      return "assets/font/NotoSansBengali.ttf";
+    }
+    else if(language =="te"){
+      return "assets/font/NotoSerifTelugu.ttf";
+    }
+    else if(language =="ta"){
+      return "assets/font/NotoSansTamil.ttf";
+    }
+    else if(language =="ur"){
+      return "assets/font/NotoSansArabic.ttf";
+    } else{
+      return "assets/font/Roboto-Bold.ttf";
+    }
+
+
+  }
+
   static setupInvoiceInitials(String invoiceHeading,String date) async {
     await DatabaseHelper.instance.database;
 
     List<FarmSetup> farmSetup = await DatabaseHelper.getFarmInfo();
+    print('NAME '+farmSetup.elementAt(0).name);
+    print("LOCATION "+farmSetup.elementAt(0).location);
+    print("IMAGE "+farmSetup.elementAt(0).image);
+    print("DATE "+farmSetup.elementAt(0).date);
 
     Utils.INVOICE_LOGO_STR = farmSetup
         .elementAt(0)
@@ -337,8 +549,8 @@ class Utils {
 
   static String getFormattedDate(String date){
 
-    if (date.contains("Choose date".tr())){
-      return date;
+    if (date.toLowerCase().contains("date")){
+      return "Choose date".tr();
     }
 
     var inputFormat = DateFormat('yyyy-MM-dd');

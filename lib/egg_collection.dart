@@ -383,8 +383,8 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                                         ),),
                                       Row(
                                         children: [
-                                          Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).f_name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
-                                          Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).isCollection == 1? ' (Collected)':' (Reduced)', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: eggs.elementAt(index).isCollection == 1? Colors.green:Colors.red),)),
+                                          Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).f_name!.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
+                                          Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).isCollection == 1? '(Collected)'.tr():'(Reduced)'.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: eggs.elementAt(index).isCollection == 1? Colors.green:Colors.red),)),
 
                                         ],
                                       ),
@@ -400,7 +400,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                                           ],
                                         ),
                                       ),
-                                      Container(margin: EdgeInsets.all(5), child: Text(eggs.elementAt(index).isCollection==0? eggs.elementAt(index).reduction_reason!.toUpperCase() :'COLLECTED', style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Utils.getThemeColorBlue()),)),
+                                      Container(margin: EdgeInsets.all(5), child: Text(eggs.elementAt(index).isCollection==0? eggs.elementAt(index).reduction_reason!.toUpperCase() :'(Collected)'.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Utils.getThemeColorBlue()),)),
                                       Container(
                                         child: Row(
                                           children: [
@@ -409,7 +409,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                                             Container(
                                               width: widthScreen-60,
                                               child: Text(
-                                                eggs.elementAt(index).short_note!.isEmpty ? 'No notes taken' : eggs.elementAt(index).short_note!
+                                                eggs.elementAt(index).short_note!.isEmpty ? 'NO_NOTES'.tr() : eggs.elementAt(index).short_note!
                                                 ,maxLines: 3, style: TextStyle(fontSize: 14, color: Colors.black),),
                                             ),
                                           ],

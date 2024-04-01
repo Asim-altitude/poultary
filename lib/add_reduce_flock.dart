@@ -413,7 +413,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                                       Row(
                                         children: [
                                           Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index)!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
-                                          Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index)!.item_type+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: list.elementAt(index)!.item_type=='Reduction'? Colors.red:Colors.green),)),
+                                          Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index)!.item_type.tr()+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: list.elementAt(index)!.item_type=='Reduction'? Colors.red:Colors.green),)),
                                         ],
                                       ),
                                       Container(

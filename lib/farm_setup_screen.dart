@@ -316,7 +316,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                                     width: 1.0,
                                   ),
                                 ),
-                                child: Text(Utils.getFormattedDate(date.tr()), style: TextStyle(
+                                child: Text(Utils.getFormattedDate(date), style: TextStyle(
                                     color: Colors.black, fontSize: 16),),
                               ),
                             ),

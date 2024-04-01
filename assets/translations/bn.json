@@ -290,5 +290,9 @@
   "Total Medications": "মোট ওষুধ",
   "Medicine name": "ওষুধের নাম",
   "Diseaese Name": "রোগের নাম",
-  "Vaccine name": "ভ্যাকসিনের নাম"
+  "Vaccine name": "ভ্যাকসিনের নাম",
+  "Sold To": "বিক্রি",
+  "Paid To": "দেওয়া",
+  "My Farm": "খামারের নাম (আপডেট সেটিংস)",
+  "My Location": "কোন অবস্থান নেই (আপডেট সেটিংস)"
 }

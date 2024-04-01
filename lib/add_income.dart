@@ -59,7 +59,7 @@ class _NewIncome extends State<NewIncome>
 
   bool _validate = false;
 
-  String date = "CHOOSE_DATE".tr();
+  String date = "Choose date";
   String displayDate = "";
   String payment_method = "Payment Method".tr();
   String payment_status = "Payment Status".tr();
@@ -144,7 +144,7 @@ class _NewIncome extends State<NewIncome>
 
     _subItemList = await DatabaseHelper.getSubCategoryList(1);
 
-    _subItemList.insert(0,SubItem(c_id: 3,id: -1,name: 'Sale Item'.tr()));
+    _subItemList.insert(0,SubItem(c_id: 3,id: -1,name: 'Sale item'.tr()));
 
     for(int i=0;i<_subItemList.length;i++){
       _saleItemList.add(_subItemList.elementAt(i).name!);
@@ -453,7 +453,7 @@ class _NewIncome extends State<NewIncome>
                                     width: 1.0,
                                   ),
                                 ),
-                                child: Text(Utils.getFormattedDate(date.tr()), style: TextStyle(
+                                child: Text(Utils.getFormattedDate(date), style: TextStyle(
                                     color: Colors.black, fontSize: 16),),
                               ),
                             ),
@@ -645,7 +645,7 @@ class _NewIncome extends State<NewIncome>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                 fontSize: 16.0,
@@ -679,7 +679,7 @@ class _NewIncome extends State<NewIncome>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                 fontSize: 16.0,
@@ -755,7 +755,7 @@ class _NewIncome extends State<NewIncome>
   bool checkValidation() {
     bool valid = true;
 
-    if(date.toLowerCase().contains("CHOOSE_DATE".tr())){
+    if(date.toLowerCase().contains("date")){
       valid = false;
       print("Select Date");
     }

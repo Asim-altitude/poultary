@@ -290,5 +290,9 @@
   "Total Medications": "Razem leki",
   "Medicine name": "Nazwa leku",
   "Diseaese Name": "Nazwa choroby",
-  "Vaccine name": "Nazwa szczepionki"
+  "Vaccine name": "Nazwa szczepionki",
+  "Sold To": "Sprzedany",
+  "Paid To": "Płatne dla",
+  "My Farm": "Nazwa farmy (ustawienia aktualizacji)",
+  "My Location": "Brak lokalizacji (ustawienia aktualizacji)"
 }

@@ -295,6 +295,12 @@
   "Total Medications": "Total Medications",
   "Medicine name": "Medicine name",
   "Diseaese Name": "Diseaese Name",
-  "Vaccine name": "Vaccine name"
+  "Vaccine name": "Vaccine name",
+
+  "Sold To": "Sold To",
+  "Paid To": "Paid To",
+  "My Farm": "Farm Name(Update Settings)",
+  "My Location": "No Location(Update Settings)"
+
 
 }

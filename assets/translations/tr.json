@@ -290,5 +290,9 @@
  "Total Medications": "Toplam İlaçlar",
  "Medicine name": "İlaç adı",
  "Diseaese Name": "Hastalığın Adı",
- "Vaccine name": "Aşı adı"
+ "Vaccine name": "Aşı adı",
+ "Sold To": "Şuna satıldı",
+ "Paid To": "Ödenen",
+ "My Farm": "Çiftlik Adı(Ayarları Güncelle)",
+ "My Location": "Konum Yok(Ayarları Güncelle)"
 }

@@ -290,5 +290,10 @@
  "Total Medications": "مجموع الأدوية",
  "Medicine name": "اسم الطب",
  "Diseaese Name": "اسم المرض",
- "Vaccine name": "اسم اللقاح"
+ "Vaccine name": "اسم اللقاح",
+
+ "Sold To": "بيعت ل",
+ "Paid To": "المدفوعة لل",
+ "My Farm": "اسم المزرعة (تحديث الإعدادات)",
+ "My Location": "لا يوجد موقع (تحديث الإعدادات)"
 }

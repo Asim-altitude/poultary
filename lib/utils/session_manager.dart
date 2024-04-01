@@ -175,7 +175,7 @@ class SessionManager {
     prefs.setString(SessionManager.selected_language, selectedLanguage);
   }
 
-  static Future<String?> getSelectedLanguage() async {
+  static Future<String> getSelectedLanguage() async {
     final SharedPreferences pref = await SharedPreferences.getInstance();
     String selectedLanguage;
     selectedLanguage = pref.getString(SessionManager.selected_language) ?? 'en';

@@ -55,7 +55,7 @@ class _NewExpense extends State<NewExpense>
 
   bool includeExtras = false;
 
-  String date = "CHOOSE_DATE".tr();
+  String date = "Choose date";
   String payment_method = "Payment Method";
   String payment_status = "Payment Status".tr();
 
@@ -454,7 +454,7 @@ class _NewExpense extends State<NewExpense>
                                     width: 1.0,
                                   ),
                                 ),
-                                child: Text(Utils.getFormattedDate(date.tr()), style: TextStyle(
+                                child: Text(Utils.getFormattedDate(date), style: TextStyle(
                                     color: Colors.black, fontSize: 16),),
                               ),
                             ),
@@ -579,7 +579,7 @@ class _NewExpense extends State<NewExpense>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                   fontSize: 16.0,
@@ -614,7 +614,7 @@ class _NewExpense extends State<NewExpense>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                 fontSize: 16.0,
@@ -648,7 +648,7 @@ class _NewExpense extends State<NewExpense>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                 fontSize: 16.0,
@@ -683,7 +683,7 @@ class _NewExpense extends State<NewExpense>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                 fontSize: 16.0,
@@ -724,7 +724,7 @@ class _NewExpense extends State<NewExpense>
   bool checkValidation() {
     bool valid = true;
 
-    if(date.toLowerCase().contains("DATE".tr())){
+    if(date.toLowerCase().contains("date")){
       valid = false;
       print("Select Date");
     }
@@ -749,7 +749,7 @@ class _NewExpense extends State<NewExpense>
       print("No sale item slected");
     }
 
-    if (payment_method.toLowerCase().contains("Pyament")){
+    if (payment_method.contains("Payment Method".tr())){
       valid = false;
       print("No payment method slected");
     }

@@ -290,5 +290,9 @@
  "Total Medications": "Medicamentos totais",
  "Medicine name": "Nome do medicamento",
  "Diseaese Name": "Nome da doença",
- "Vaccine name": "Nome da vacina"
+ "Vaccine name": "Nome da vacina",
+ "Sold To": "Vendido a",
+ "Paid To": "Paga para",
+ "My Farm": "Nome da Fazenda (Atualizar Configurações)",
+ "My Location": "Sem localização (atualizar configurações)"
 }

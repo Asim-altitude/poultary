@@ -389,8 +389,8 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
 
                                   Row(
                                     children: [
-                                      Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).medicine!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),)),
-                                      Container(margin: EdgeInsets.all(0), child: Text(" ("+vac_med_list.elementAt(index).f_name!+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+                                      Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).medicine!.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),)),
+                                      Container(margin: EdgeInsets.all(0), child: Text(" ("+vac_med_list.elementAt(index).f_name!.tr()+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
 
                                     ],
                                   ),

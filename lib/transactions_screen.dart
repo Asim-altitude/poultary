@@ -416,10 +416,10 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                                   ),),
                               Align(
                                 alignment: Alignment.centerLeft,
-                              child:Container(child: Text( textAlign:TextAlign.left,style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()), transactionList.elementAt(index).type == 'Income'? transactionList.elementAt(index).sale_item : transactionList.elementAt(index).expense_item),),),
+                              child:Container(child: Text( textAlign:TextAlign.left,style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()), transactionList.elementAt(index).type == 'Income'? transactionList.elementAt(index).sale_item.tr() : transactionList.elementAt(index).expense_item.tr()),),),
                               Row(
                                 children: [
-                                  Container(child: Text(style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black), transactionList.elementAt(index).f_name,)),
+                                  Container(child: Text(style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black), transactionList.elementAt(index).f_name.tr(),)),
                                   Container(child: Text(style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black), "("+transactionList.elementAt(index).how_many+" Items)",)),
 
                                 ],
@@ -435,7 +435,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                                       children: [
                                         Row(
                                           children: [
-                                            Container(  child: Text(transactionList.elementAt(index).type!.toLowerCase() == 'income'? 'Sold To: ':'Paid To: ', style: TextStyle(fontSize: 14, color: Colors.black),)),
+                                            Container(  child: Text(transactionList.elementAt(index).type!.toLowerCase() == 'income'? 'Sold To'.tr()+":":'Paid To'.tr()+":", style: TextStyle(fontSize: 14, color: Colors.black),)),
                                             Text(transactionList.elementAt(index).sold_purchased_from, style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black, fontSize: 14),),
                                             Text(" On ".tr(), style: TextStyle(color: Colors.black, fontSize: 14),),
                                             Container(child: Text(Utils.getFormattedDate(transactionList.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
@@ -447,11 +447,11 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                                           margin: EdgeInsets.only(right: 10,top: 5),
                                           child: Row(
                                             children: [
-                                              Container(  child: Text(transactionList.elementAt(index).type!.toUpperCase()+": ", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: transactionList.elementAt(index).type!.toLowerCase() == 'income'? Colors.green: Colors.red),)),
+                                              Container(  child: Text(transactionList.elementAt(index).type!.tr()+": ", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: transactionList.elementAt(index).type!.toLowerCase() == 'income'? Colors.green: Colors.red),)),
 
                                               Container( margin: EdgeInsets.only(left: 5),  child: Text(transactionList.elementAt(index).amount.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
                                               Text(Utils.currency, style: TextStyle(color: Colors.black, fontSize: 14),),
-                                              Text(" ("+transactionList.elementAt(index).payment_status+")", style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black, fontSize: 14),)
+                                              Text(" ("+transactionList.elementAt(index).payment_status.toUpperCase().tr()+")", style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black, fontSize: 14),)
 
                                             ],
                                           ),

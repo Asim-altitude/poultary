@@ -290,5 +290,9 @@
   "Total Medications": "کل ادویات",
   "Medicine name": "دوا کا نام",
   "Diseaese Name": "بیماری کا نام",
-  "Vaccine name": "ویکسین کا نام"
+  "Vaccine name": "ویکسین کا نام",
+  "Sold To": "کو فروخت",
+  "Paid To": "کو ادائیگی",
+  "My Farm": "فارم کا نام (اپ ڈیٹ سیٹنگز)",
+  "My Location": "کوئی مقام نہیں (ترتیبات اپ ڈیٹ کریں)"
 }

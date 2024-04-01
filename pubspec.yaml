@@ -41,7 +41,7 @@ dependencies:
   syncfusion_flutter_datepicker: ^22.2.7
   syncfusion_flutter_charts: ^22.2.8
   currency_picker: ^2.0.15
-  pdf: ^3.10.4
+  pdf: ^3.10.8
   google_fonts: ^5.1.0
   printing: ^5.11.0
   open_file: ^3.3.2
@@ -114,6 +114,14 @@ flutter:
         - asset: assets/font/OpenSans-Bold.ttf
         - asset: assets/font/arabic_regular.ttf
         - asset: assets/font/arbic_bold.ttf
+        - asset: assets/font/Hind-Bold.ttf
+        - asset: assets/font/Hind-Regular.ttf
+        - asset: assets/font/NotoSansTamil.ttf
+        - asset: assets/font/urdu.ttf
+        - asset: assets/font/NotoSerifTelugu.ttf
+        - asset: assets/font/NotoSansBengali.ttf
+        - asset: assets/font/NotoSansSC.ttf
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:

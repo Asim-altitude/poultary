@@ -313,7 +313,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                                     width: 1.0,
                                   ),
                                 ),
-                                child: Text(Utils.getFormattedDate(date.tr()), style: TextStyle(
+                                child: Text(Utils.getFormattedDate(date), style: TextStyle(
                                     color: Colors.black, fontSize: 16),),
                               ),
                             ),
@@ -642,7 +642,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
   bool checkValidation() {
     bool valid = true;
 
-    if(date.contains("Choose date".tr())){
+    if(date.toLowerCase().contains("Choose date".tr())){
       valid = false;
       print("Select Date");
     }
