@@ -110,7 +110,7 @@ class Invoice {
       pw.MultiPage(
         pageTheme: _buildTheme(
           pageFormat,
-          ttfFLight,
+          direction? ttfFLight:ttfFBold,
           ttfFBold,ttfFLight,
         ),
         header: _buildHeader,
@@ -125,7 +125,7 @@ class Invoice {
                     pw.Container(
                       alignment: pw.Alignment.topLeft,
                   child: pw.Directionality(
-                    textDirection: pw.TextDirection.rtl,
+                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
                       child: pw.Text(
                         'Report Generated On: '.tr(),
                         style: pw.TextStyle(
@@ -140,7 +140,6 @@ class Invoice {
                         DateTime.now().toString(),
                         style: pw.TextStyle(
                           color: PdfColors.black,
-                          fontWeight: pw.FontWeight.bold,
                           fontSize: 10,
                         ),
                       ),
@@ -244,7 +243,10 @@ class Invoice {
   }
 
   pw.Widget _buildSummary(pw.Context context) {
-    return pw.Container(
+    return
+      pw.Directionality(
+        textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+      child:pw.Container(
       height: 120,
       margin: pw.EdgeInsets.only(top: 10),
       child: pw.Column(
@@ -252,40 +254,39 @@ class Invoice {
 
           pw.Expanded(
             child: pw.Column(
+
               children: [
                 pw.Container(
                   height: 30,
-                  alignment: pw.Alignment.topLeft,
 
 
-                  child: pw.Directionality(
-                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                    child: pw.Text(
+                  child:  pw.Text(
                       "SUMMARY".tr(),
                       style: pw.TextStyle(
                         color: PdfColors.blue,
                         fontWeight: pw.FontWeight.bold,
                         fontSize: 20,
                       ),
-                    ),),
+                    ),
 
                 ),
 
                 pw.Row(
+
                   children: [
                     pw.Container(
                       alignment: pw.Alignment.topLeft,
 
 
-                      child: pw.Directionality(
-                        textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                        child: pw.Text(
+                      child: pw.Text(
                           'Birds Added'.tr()+": ",
                           style: pw.TextStyle(
                             color: PdfColors.black,
                             fontSize: 16,
+
+
                           ),
-                        ),),
+                        ),
 
                     ),pw.Container(
                       margin: pw.EdgeInsets.only(left: 10),
@@ -308,15 +309,13 @@ class Invoice {
                         alignment: pw.Alignment.topLeft,
 
 
-                        child: pw.Directionality(
-                          textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                          child: pw.Text(
+                        child:  pw.Text(
                             'Birds Reduced'.tr()+": ",
                             style: pw.TextStyle(
                               color: PdfColors.black,
                               fontSize: 16,
                             ),
-                          ),),
+                          ),
 
                       ),pw.Container(
                         alignment: pw.Alignment.topLeft,
@@ -339,15 +338,13 @@ class Invoice {
                         alignment: pw.Alignment.topLeft,
 
 
-                        child: pw.Directionality(
-                          textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                          child: pw.Text(
+                        child:  pw.Text(
                             'Active Birds'.tr()+":",
                             style: pw.TextStyle(
                               color: PdfColors.black,
                               fontSize: 16,
                             ),
-                          ),),
+                          ),
 
                       ),pw.Container(
                         alignment: pw.Alignment.topLeft,
@@ -369,7 +366,7 @@ class Invoice {
           ),
 
         ],
-      ),
+      ),),
     );
   }
 

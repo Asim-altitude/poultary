@@ -44,6 +44,7 @@ class _HomeScreen extends State<HomeScreen> {
   void initState() {
     super.initState();
 
+    getDirection();
     getList();
     getCurrency();
   }
@@ -71,6 +72,8 @@ class _HomeScreen extends State<HomeScreen> {
     });
 
   }
+
+  bool direction = true;
 
   List<_PieData> _piData =[];
 
@@ -534,6 +537,10 @@ class _HomeScreen extends State<HomeScreen> {
       print(ex);
     }
 
+  }
+
+  Future<void> getDirection() async {
+    direction = await Utils.getDirection();
   }
 
 

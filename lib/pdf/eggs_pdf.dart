@@ -70,6 +70,7 @@ class Invoice {
   Uint8List? _logo;
   Uint8List? imageData;
   String? _bgShape;
+  bool direction = true;
   Uint8List imageFromBase64String(String base64String) {
     return base64Decode(base64String);
   }
@@ -91,6 +92,7 @@ class Invoice {
     }
 
 
+    direction = await Utils.getDirection();
     String regular = await Utils.getPdfregularFont();
     String bold = await Utils.getPdfBoldFont();
     _bgShape = await rootBundle.loadString('assets/invoice.svg');
@@ -120,13 +122,15 @@ class Invoice {
                   children: [
                     pw.Container(
                       alignment: pw.Alignment.topLeft,
-                      child: pw.Text(
-                        'Report Generated On: '.tr(),
-                        style: pw.TextStyle(
-                          color: PdfColors.black,
-                          fontSize: 10,
-                        ),
-                      ),
+                      child: pw.Directionality(
+                        textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                        child: pw.Text(
+                          'Report Generated On: '.tr(),
+                          style: pw.TextStyle(
+                            color: PdfColors.black,
+                            fontSize: 10,
+                          ),
+                        ),),
                     ),pw.Container(
                       margin: pw.EdgeInsets.only(left: 10),
                       alignment: pw.Alignment.topLeft,
@@ -184,28 +188,32 @@ class Invoice {
                   height: 30,
                   padding: const pw.EdgeInsets.only(left: 20),
                   alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    Utils.INVOICE_HEADING.tr(),
-                    style: pw.TextStyle(
-                      color: PdfColors.blue,
-                      fontWeight: pw.FontWeight.bold,
-                      fontSize: 24,
-                    ),
-                  ),
+                  child: pw.Directionality(
+                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                    child: pw.Text(
+                      Utils.INVOICE_HEADING.tr(),
+                      style: pw.TextStyle(
+                        color: PdfColors.black,
+                        fontSize: 10,
+                      ),
+                    ),),
                 ),
 
                 pw.Container(
                   height: 30,
                   padding: const pw.EdgeInsets.only(left: 20),
                   alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    'Eggs Inventory Report'.tr(),
-                    style: pw.TextStyle(
-                      color: PdfColors.black,
-                      fontWeight: pw.FontWeight.normal,
-                      fontSize: 20,
-                    ),
-                  ),
+
+                  child: pw.Directionality(
+                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                    child: pw.Text(
+                      'Eggs Inventory Report'.tr(),
+                      style: pw.TextStyle(
+                        color: PdfColors.black,
+                        fontSize: 10,
+                      ),
+                    ),),
+
                 ),
 
                 pw.Container(
@@ -244,28 +252,38 @@ class Invoice {
                 pw.Container(
                   height: 30,
                   alignment: pw.Alignment.topLeft,
-                  child: pw.Text(
-                    "SUMMARY".tr(),
-                    textDirection: pw.TextDirection.rtl,
-                    style: pw.TextStyle(
-                      color: PdfColors.blue,
-                      fontWeight: pw.FontWeight.bold,
-                      fontSize: 24,
-                    ),
-                  ),
+
+
+                  child: pw.Directionality(
+                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                    child: pw.Text(
+                      "SUMMARY".tr(),
+                      textDirection: pw.TextDirection.rtl,
+                      style: pw.TextStyle(
+                        color: PdfColors.blue,
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 24,
+                      ),
+                    ),),
+
                 ),
 
                 pw.Row(
                   children: [
                     pw.Container(
                       alignment: pw.Alignment.topLeft,
-                      child: pw.Text(
-                        'Collcted Eggs'.tr()+": ",
-                        style: pw.TextStyle(
-                          color: PdfColors.black,
-                          fontSize: 16,
-                        ),
-                      ),
+                      child: pw.Directionality(
+                        textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                        child: pw.Text(
+                          "Collcted Eggs".tr(),
+                          textDirection: pw.TextDirection.rtl,
+                          style: pw.TextStyle(
+                            color: PdfColors.blue,
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 24,
+                          ),
+                        ),),
+
                     ),pw.Container(
                       alignment: pw.Alignment.topLeft,
                       child: pw.Text(
@@ -284,13 +302,18 @@ class Invoice {
                     children: [
                       pw.Container(
                         alignment: pw.Alignment.topLeft,
-                        child: pw.Text(
-                          'Reduced Eggs'.tr()+": ",
-                          style: pw.TextStyle(
-                            color: PdfColors.black,
-                            fontSize: 16,
-                          ),
-                        ),
+                        child: pw.Directionality(
+                          textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                          child: pw.Text(
+                            "Reduced Eggs".tr(),
+                            textDirection: pw.TextDirection.rtl,
+                            style: pw.TextStyle(
+                              color: PdfColors.blue,
+                              fontWeight: pw.FontWeight.bold,
+                              fontSize: 24,
+                            ),
+                          ),),
+
                       ),pw.Container(
                         alignment: pw.Alignment.topLeft,
 
@@ -310,13 +333,19 @@ class Invoice {
                     children: [
                       pw.Container(
                         alignment: pw.Alignment.topLeft,
-                        child: pw.Text(
-                          'Reserve Eggs'.tr()+":  ",
-                          style: pw.TextStyle(
-                            color: PdfColors.black,
-                            fontSize: 16,
-                          ),
-                        ),
+
+                        child: pw.Directionality(
+                          textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                          child: pw.Text(
+                            "Reserve Eggs".tr(),
+                            textDirection: pw.TextDirection.rtl,
+                            style: pw.TextStyle(
+                              color: PdfColors.blue,
+                              fontWeight: pw.FontWeight.bold,
+                              fontSize: 24,
+                            ),
+                          ),),
+
                       ),pw.Container(
                         alignment: pw.Alignment.topLeft,
                          child: pw.Text(

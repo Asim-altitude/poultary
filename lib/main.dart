@@ -4,6 +4,7 @@ import 'package:poultary/utils/utils.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui' as ui;
+import 'package:poultary/utils/utils.dart';
 
 import 'home_screen.dart';
 
@@ -19,6 +20,7 @@ Future<void> main() async {
       child: MyApp()),);
   requestGDPR();
   await MobileAds.instance.initialize();
+  Utils.direction = await Utils.getDirection();
 
 }
 void requestGDPR(){
@@ -67,12 +69,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return
+
+      MaterialApp(
       title: 'Easy Poultry Manager',
       debugShowCheckedModeBanner: false,
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
+
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -93,9 +98,10 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Utils.getThemeColorBlue()),
         useMaterial3: true,
       ),
+
       home: Directionality(
-        textDirection: ui.TextDirection.ltr,
-        child: HomeScreen(),),
+          textDirection: ui.TextDirection.ltr,
+          child: HomeScreen()),
     );
   }
 }
