@@ -182,7 +182,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                               height: 25,
                               child: Image.asset("assets/income.png", color: Colors.white,)),
                           onTap: () {
-                            Navigator.pop(context);
+                            // Navigator.pop(context);
                           },
                         ),
                       ),

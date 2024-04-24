@@ -340,7 +340,6 @@ class Utils {
       inititalize();
     }
 
-    Utils.isShowAdd = false;
 }
   static Future<void> inititalize() async {
     // CAS.setDebugMode(true);
@@ -583,12 +582,28 @@ class Utils {
   static Widget getAdBar(){
     if(isShowAdd){
       return Container(width: WIDTH_SCREEN,height: 60,
+        color: Colors.white,
         child:_isBannerAdReady?Align(
           alignment: Alignment.topCenter,
           child: Container(
             height: 60.0 ,
             width: Utils.WIDTH_SCREEN,
             child: AdWidget(ad: _bannerAd!),
+          ),
+        ):Container(),
+      );
+
+    }
+    return Container(width: WIDTH_SCREEN,height: 0,);
+  }
+  static Widget getDistanceBar(){
+    if(isShowAdd){
+      return Container(width: WIDTH_SCREEN,height: 60,
+        child:_isBannerAdReady?Align(
+          alignment: Alignment.topCenter,
+          child: SizedBox(
+            height: 60.0 ,
+            width: Utils.WIDTH_SCREEN,
           ),
         ):Container(),
       );
