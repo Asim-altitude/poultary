@@ -9,6 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'package:printing/printing.dart';
@@ -113,12 +114,12 @@ class _PDFScreen extends State<PDFScreen> {
             // Center is a layout widget. It takes a single child and positions it
             // in the middle of the parent.
             child:
-            SingleChildScrollView(
+            SingleChildScrollViewWithStickyFirstWidget(
               child: Column(
 
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Utils.getAdBar(),
+                  Utils.getDistanceBar(),
 
                   ClipRRect(
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),

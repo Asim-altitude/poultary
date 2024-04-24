@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:poultary/inventory.dart';
 import 'package:poultary/model/flock_image.dart';
+import 'package:poultary/sticky.dart';
 import 'package:poultary/transactions_screen.dart';
 import 'package:poultary/utils/utils.dart';
 
@@ -99,13 +100,13 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
           width: widthScreen,
           height: heightScreen,
             color: Colors.white,
-            child: SingleChildScrollView(
+            child: SingleChildScrollViewWithStickyFirstWidget(
 
             child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
-              Utils.getAdBar(),
+              Utils.getDistanceBar(),
 
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),

@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:poultary/add_eggs.dart';
 import 'package:poultary/inventory.dart';
 import 'package:poultary/single_flock_screen.dart';
+import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'add_flocks.dart';
@@ -148,12 +149,12 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
           width: widthScreen,
           height: heightScreen,
             color: Utils.getScreenBackground(),
-            child:SingleChildScrollView(
+            child:SingleChildScrollViewWithStickyFirstWidget(
             child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
-              Utils.getAdBar(),
+              Utils.getDistanceBar(),
 
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),

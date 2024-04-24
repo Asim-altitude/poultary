@@ -6,9 +6,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:language_picker/language_picker_dropdown.dart';
+import 'package:language_picker/languages.dart';
 import 'package:poultary/category_screen.dart';
 import 'package:poultary/inventory.dart';
 import 'package:poultary/single_flock_screen.dart';
+import 'package:poultary/sticky.dart';
 import 'package:poultary/transactions_screen.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -32,9 +35,75 @@ String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
 class _DashboardScreen extends State<DashboardScreen> {
 
+  final supportedLanguages = [
+    Languages.english,
+    Languages.arabic,
+    Languages.russian,
+    Languages.persian,
+    Languages.german,
+    Languages.japanese,
+    Languages.korean,
+    Languages.portuguese,
+    Languages.turkish,
+    Languages.french,
+    Languages.indonesian,
+    Languages.hindi,
+    Languages.spanish,
+    Languages.chineseSimplified,
+    Languages.ukrainian,
+    Languages.polish,
+    Languages.bengali,
+    Languages.telugu,
+    Languages.tamil,
+    // Languages.urdu
+
+  ];
   double widthScreen = 0;
   double heightScreen = 0;
+  late Language _selectedCupertinoLanguage;
+  bool isGetLanguage = false;
+  getLanguage() async {
+    _selectedCupertinoLanguage = await Utils.getSelectedLanguage();
+    setState(() {
+      isGetLanguage = true;
 
+    });
+
+  }
+
+  Widget _buildDropdownItem(Language language) {
+    return Row(
+      children: <Widget>[
+        SizedBox(
+          width: 8.0,
+        ),
+        if(language.isoCode !="pt" && language.isoCode !="zh_Hans")
+          Text("${language.name} (${language.isoCode})",
+            style: new TextStyle(
+                fontSize: 14.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontFamily: 'PTSans'),
+          ),
+        if(language.isoCode =="pt")
+          Text("${'Portuguese'} (${language.isoCode})",
+            style: new TextStyle(
+                fontSize: 14.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontFamily: 'PTSans'),
+          ),
+        if(language.isoCode =="zh_Hans")
+          Text("${'Chinese'} (zh)",
+            style: new TextStyle(
+                fontSize: 14.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontFamily: 'PTSans'),
+          ),
+      ],
+    );
+  }
   @override
   void dispose() {
     super.dispose();
@@ -47,6 +116,8 @@ class _DashboardScreen extends State<DashboardScreen> {
     getData();
     getList();
     Utils.setupAds();
+    getLanguage();
+
     // Utils.showInterstitial();
   }
 
@@ -126,7 +197,8 @@ class _DashboardScreen extends State<DashboardScreen> {
             child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children:  [
-              // Utils.getAdBar(),
+              // Utils.getDistanceBar(),
+
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
@@ -168,7 +240,53 @@ class _DashboardScreen extends State<DashboardScreen> {
                   ),
                 ),
               ),
+              if(isGetLanguage)
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(3)),
+                      color: Colors.transparent,
+                      border: Border.all(color: Colors.transparent,width: 0.0)
+                  ),
+                  margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
 
+                  child:
+
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(height: 22,
+
+                        color: Colors.transparent,
+                        child: Align(
+                          alignment: Alignment.center,
+                          child:Text("Language".tr(),
+                            textAlign: TextAlign.center,
+                            style: new TextStyle(
+                              fontSize: 15.0,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.black54,
+
+                            ),
+                          ),),
+                      ),
+
+                      Container(
+                        width: Utils.getWidthResized(200),height:24,color: Colors.white,
+                        child: LanguagePickerDropdown(
+                          initialValue: _selectedCupertinoLanguage,
+                          itemBuilder: _buildDropdownItem,
+                          languages: supportedLanguages,
+                          onValuePicked: (Language language) {
+                            _selectedCupertinoLanguage = language;
+                            // Utils.showToast(language.isoCode);
+                            Utils.setSelectedLanguage(_selectedCupertinoLanguage,context);
+                          },
+                        ),
+                      ),
+
+                    ],)
+
+                  ,),
 
               InkWell(
                 onTap: (){
@@ -310,12 +428,14 @@ class _DashboardScreen extends State<DashboardScreen> {
               // ),
               SizedBox(height: 8,),
               flocks.length > 0 ? Container(
-                height: heightScreen/2,
+                height: flocks.length*140,
                 width: widthScreen,
                 child: ListView.builder(
                     itemCount: flocks.length,
                     scrollDirection: Axis.vertical,
-                    itemBuilder: (BuildContext context, int index) {
+    physics: const NeverScrollableScrollPhysics(),
+
+    itemBuilder: (BuildContext context, int index) {
                       return  InkWell(
                         onTap: () async{
                           Utils.selected_flock = flocks.elementAt(index);

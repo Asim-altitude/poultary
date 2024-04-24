@@ -143,7 +143,6 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
     super.initState();
     setUpInitial();
     Utils.setupAds();
-    Utils.setupAds();
     getLanguage();
   }
   setUpInitial() async {
@@ -414,6 +413,14 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                       ],),),
                 ),
               ),
+              SizedBox(height: 4,),
+              Align(
+                  alignment: Alignment.center,
+                  child:
+                      Text('BACK_UP_RESTORE_MESSAGE'.tr(),style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                   ),
+              SizedBox(height: 4,),
+
               InkWell(
                 onTap: () {
                   shareFiles();

@@ -13,6 +13,7 @@ import 'package:intl/intl.dart';
 import 'package:poultary/model/feed_item.dart';
 import 'package:poultary/model/med_vac_item.dart';
 import 'package:poultary/model/sub_category_item.dart';
+import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
@@ -160,10 +161,10 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
             width: widthScreen,
             height: heightScreen,
             color: Utils.getScreenBackground(),
-            child: SingleChildScrollView(
+            child: SingleChildScrollViewWithStickyFirstWidget(
               child: Column(
                 children: [
-                  Utils.getAdBar(),
+                  Utils.getDistanceBar(),
 
                   ClipRRect(
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),

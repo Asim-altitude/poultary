@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/model/med_vac_item.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
+import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'model/egg_item.dart';
@@ -124,12 +125,12 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
           width: widthScreen,
           height: heightScreen,
            color: Utils.getScreenBackground(),
-            child: SingleChildScrollView(
+            child: SingleChildScrollViewWithStickyFirstWidget(
             child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
-              Utils.getAdBar(),
+              Utils.getDistanceBar(),
 
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),

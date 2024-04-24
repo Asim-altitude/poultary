@@ -365,7 +365,7 @@ class Utils {
   static Future<void> showInterstitial() async {
     if(Utils.isShowAdd){
 
-      Future.delayed(const Duration(seconds: 5), () {
+      Future.delayed(const Duration(seconds: 0), () {
         if(iShowInterStitial){
           iShowInterStitial = false;
           _createInterstitialAd();
@@ -386,7 +386,7 @@ class Utils {
             print('$ad loaded');
             _interstitialAd = ad;
             _interstitialAd!.setImmersiveMode(true);
-            Future.delayed(Duration(seconds: 1), () {
+            Future.delayed(Duration(seconds: 0), () {
               _interstitialAd!.show();
             });
           },

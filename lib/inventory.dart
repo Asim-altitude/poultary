@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:poultary/flocks.dart';
+import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
 
 class Inventory extends StatefulWidget {
@@ -55,13 +56,13 @@ class _Inventory extends State<Inventory> with SingleTickerProviderStateMixin{
           color: Colors.white,
             child:Center(
 
-            child: SingleChildScrollView(
+            child: SingleChildScrollViewWithStickyFirstWidget(
 
             child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
-              Utils.getAdBar(),
+              Utils.getDistanceBar(),
 
               Text(
               "Inventory",

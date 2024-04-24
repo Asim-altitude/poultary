@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:poultary/add_flocks.dart';
+import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
@@ -89,14 +90,14 @@ class _FlockScreen extends State<FlockScreen>
       child: Scaffold(
         body: SafeArea(
           top: false,
-          child: SingleChildScrollView(
+          child: SingleChildScrollViewWithStickyFirstWidget(
             child: Container(
               width: widthScreen,
               height: heightScreen,
               color: Utils.getScreenBackground(),
               child: Column(
                 children: [
-                  Utils.getAdBar(),
+                  Utils.getDistanceBar(),
 
                   Row(
                     children: [
