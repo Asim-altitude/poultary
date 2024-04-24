@@ -1,7 +1,7 @@
 {
  "BACKUP_SUCCESSFUL": "Sicherung erfolgreich",
  "BACKUP_FAILED": "Problem wiederherstellen",
- "BACKUP_FAILED_DESC1": "Bitte wählen Sie die Datei hatching.db aus.",
+ "BACKUP_FAILED_DESC1": "Bitte wählen Sie die Datei poultary.db aus.",
  "BACKUP_FAILED_DESC2": "Wenn Sie immer noch ein Problem haben,",
  "BACKUP_FAILED_DESC3": "Senden Sie eine E-Mail an zaheer6110@gmail.com",
  "OK": "OK",
@@ -294,6 +294,13 @@
  "Sold To": "Verkauft an",
  "Paid To": "Bezahlt um",
  "My Farm": "Farmname (Einstellungen aktualisieren)",
- "My Location": "Kein Standort (Einstellungen aktualisieren)"
+ "My Location": "Kein Standort (Einstellungen aktualisieren)",
+
+ "BACK_UP_RESTORE_MESSAGE": "Sichern & Wiederherstellen",
+ "NOTE_DETAIL": "HINWEIS: Wir fügen ständig weitere Funktionen für die Benutzer hinzu. Wenn Sie ein Problem haben, senden Sie bitte eine E-Mail an zaheer6110@gmail.com",
+ "BACKUP_DETAIL1": "Eine Datenbankdatei mit dem Namen (poultry.db) wird zum Sichern/Ihrem Daten gemeinsam genutzt/gespeichert. Sie können sie überall speichern (WhatsApp, Gmail, Google Drive, Dateien, Bluetooth usw.). Sie können sie wiederherstellen, wenn Daten verloren gehen oder Sie sie auf einem anderen Telefon verwenden möchten.",
+ "RESTORE_DETAIL1": "HINWEIS: Bitte wählen Sie die Datei (poultry.db) aus, die Sie zuvor als Sicherungsdatei erstellt haben. Wenn Sie sie nicht heruntergeladen haben, laden Sie sie herunter und speichern Sie sie, und drücken Sie dann auf Wiederherstellen. Wenn Sie sie auf einem anderen Telefon verwenden möchten, erstellen Sie ein Backup auf dem alten Telefon und stellen Sie es auf dem neuen Telefon wieder her. Drücken Sie nicht auf die Schaltfläche Jetzt wiederherstellen, wenn Sie Ihre Daten nicht verloren haben."
+
+
 
 }

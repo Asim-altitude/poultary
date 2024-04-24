@@ -1,7 +1,7 @@
 {
   "BACKUP_SUCCESSFUL": "备份成功",
   "BACKUP_FAILED": "恢复问题",
-  "BACKUP_FAILED_DESC1": "请选择hatching.db 文件。",
+  "BACKUP_FAILED_DESC1": "请选择poultary.db 文件。",
   "BACKUP_FAILED_DESC2": "如果您仍然遇到问题，",
   "BACKUP_FAILED_DESC3": "发送电子邮件至 zaheer6110@gmail.com",
   "OK": "好的",
@@ -296,5 +296,9 @@
   "My Farm": "我的农场",
   "My Location": "未添加位置",
   "My Farm": "农场名称（更新设置）",
-  "My Location": "无位置（更新设置）"
+  "My Location": "无位置（更新设置）",
+  "BACK_UP_RESTORE_MESSAGE": "备份和恢复",
+  "NOTE_DETAIL": "注意：我们不断为用户添加新功能。如果您遇到任何问题，请发送电子邮件至 zaheer6110@gmail.com",
+  "BACKUP_DETAIL1": "将名为（poultry.db）的数据库文件共享/保存为备份您的数据。您可以将其保存在任何地方（WhatsApp、Gmail、Google Drive、文件、蓝牙等）。当数据丢失或您想在另一部手机上使用它时，您可以恢复它。",
+  "RESTORE_DETAIL1": "注意：请选择先前创建的备份文件（poultry.db）文件。如果您尚未下载它，请下载并保存，然后按恢复。如果您想在另一部手机上使用它，请在旧手机上备份，然后在新手机上恢复。如果您的数据尚未丢失，请不要立即点击恢复按钮。"
 }

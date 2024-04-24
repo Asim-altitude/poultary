@@ -1,7 +1,7 @@
 {
   "BACKUP_SUCCESSFUL": "Pencadangan Berhasil",
   "BACKUP_FAILED": "Pulihkan Masalah",
-  "BACKUP_FAILED_DESC1": "Silakan pilih file hatching.db.",
+  "BACKUP_FAILED_DESC1": "Silakan pilih file poultary.db.",
   "BACKUP_FAILED_DESC2": "Jika Anda masih menghadapi masalah,",
   "BACKUP_FAILED_DESC3": "kirim email ke zaheer6110@gmail.com",
   "OK": "OKE",
@@ -294,5 +294,10 @@
   "Sold To": "Dijual ke",
   "Paid To": "Dibayarkan kepada",
   "My Farm": "Nama Peternakan (Pengaturan Pembaruan)",
-  "My Location": "Tidak Ada Lokasi (Perbarui Pengaturan)"
+  "My Location": "Tidak Ada Lokasi (Perbarui Pengaturan)",
+  "BACK_UP_RESTORE_MESSAGE": "Cadangkan & Pulihkan",
+  "NOTE_DETAIL": "CATATAN: Kami terus menambahkan fitur-fitur baru untuk para pengguna. Jika Anda mengalami masalah, silakan kirim email ke zaheer6110@gmail.com",
+  "BACKUP_DETAIL1": "Sebuah file basis data dengan nama (poultry.db) akan dibagikan/disimpan untuk mencadangkan data Anda. Anda dapat menyimpannya di mana saja (WhatsApp, Gmail, Google Drive, file, Bluetooth, dll). Anda dapat memulihkannya ketika data hilang atau jika Anda ingin menggunakannya di ponsel lain.",
+  "RESTORE_DETAIL1": "CATATAN: Silakan pilih file (poultry.db) yang telah Anda buat sebelumnya sebagai file cadangan. Jika Anda belum mengunduhnya, unduh dan simpan, lalu tekan Pulihkan. Jika Anda ingin menggunakannya di ponsel lain, buat cadangan di ponsel lama dan pulihkan di ponsel baru. Jangan tekan tombol Pulihkan sekarang jika Anda belum kehilangan data Anda."
+
 }

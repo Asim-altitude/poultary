@@ -1,7 +1,7 @@
 {
   "BACKUP_SUCCESSFUL": "Sauvegarde réussie",
   "BACKUP_FAILED": "Problème de restauration",
-  "BACKUP_FAILED_DESC1": "Veuillez sélectionner le fichier hating.db.",
+  "BACKUP_FAILED_DESC1": "Veuillez sélectionner le fichier poultary.db.",
   "BACKUP_FAILED_DESC2": "Si vous rencontrez toujours un problème,",
   "BACKUP_FAILED_DESC3": "envoyer un email à zaheer6110@gmail.com",
   "OK": "D'ACCORD",
@@ -294,5 +294,9 @@
   "Sold To": "Vendu à",
   "Paid To": "Versée à",
   "My Farm": "Nom de la ferme (paramètres de mise à jour)",
-  "My Location": "Aucun emplacement (paramètres de mise à jour)"
+  "My Location": "Aucun emplacement (paramètres de mise à jour)",
+  "BACK_UP_RESTORE_MESSAGE": "Sauvegarde & Restauration",
+  "NOTE_DETAIL": "REMARQUE : Nous ajoutons constamment de nouvelles fonctionnalités pour les utilisateurs. Si vous rencontrez un problème, veuillez envoyer un e-mail à zaheer6110@gmail.com",
+  "BACKUP_DETAIL1": "Un fichier de base de données portant le nom (poultry.db) sera partagé/sauvegardé pour sauvegarder vos données. Vous pouvez le sauvegarder n'importe où (WhatsApp, Gmail, Google Drive, fichiers, Bluetooth, etc.). Vous pouvez le restaurer en cas de perte de données ou si vous souhaitez l'utiliser sur un autre téléphone.",
+  "RESTORE_DETAIL1": "REMARQUE : Veuillez sélectionner le fichier (poultry.db) que vous avez précédemment créé comme fichier de sauvegarde. Si vous ne l'avez pas téléchargé, téléchargez-le, sauvegardez-le, puis appuyez sur Restaurer. Si vous souhaitez l'utiliser sur un autre téléphone, créez une sauvegarde sur l'ancien téléphone et restaurez-la sur le nouveau téléphone. Ne cliquez pas sur le bouton Restaurer maintenant si vous n'avez pas perdu vos données."
 }

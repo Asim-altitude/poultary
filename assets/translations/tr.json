@@ -1,7 +1,7 @@
 {
  "BACKUP_SUCCESSFUL": "Yedekleme Başarılı",
  "BACKUP_FAILED": "Sorunu Geri Yükleme",
- "BACKUP_FAILED_DESC1": "Lütfen hatching.db dosyasını seçin.",
+ "BACKUP_FAILED_DESC1": "Lütfen poultary.db dosyasını seçin.",
  "BACKUP_FAILED_DESC2": "Hala bir sorunla karşılaşıyorsanız,",
  "BACKUP_FAILED_DESC3": "zaheer6110@gmail.com adresine bir e-posta gönderin",
  "OK": "TAMAM",
@@ -294,5 +294,9 @@
  "Sold To": "Şuna satıldı",
  "Paid To": "Ödenen",
  "My Farm": "Çiftlik Adı(Ayarları Güncelle)",
- "My Location": "Konum Yok(Ayarları Güncelle)"
+ "My Location": "Konum Yok(Ayarları Güncelle)",
+ "BACK_UP_RESTORE_MESSAGE": "Yedekle ve Geri Yükle",
+ "NOTE_DETAIL": "NOT: Sürekli olarak kullanıcılar için yeni özellikler ekliyoruz. Herhangi bir sorunla karşılaşırsanız, lütfen zaheer6110@gmail.com adresine bir e-posta gönderin",
+ "BACKUP_DETAIL1": "Verilerinizi yedeklemek için (poultry.db) adında bir veritabanı dosyası paylaşılacak/saklanacaktır. Herhangi bir yere (WhatsApp, Gmail, Google Drive, dosyalar, Bluetooth vb.) kaydedebilirsiniz. Veriler kaybolursa veya başka bir telefonda kullanmak isterseniz geri yükleyebilirsiniz.",
+ "RESTORE_DETAIL1": "NOT: Lütfen önceden oluşturulan bir yedek dosyası olarak (poultry.db) dosyasını seçin. İndirmediyseniz, indirin ve kaydedin, ardından Geri Yükle'ye basın. Başka bir telefonda kullanmak istiyorsanız, eski telefonda bir yedek oluşturun ve yeni telefonda geri yükleyin. Verileriniz kaybolmadıysa, şimdi Geri Yükle düğmesine basmayın."
 }

@@ -2,7 +2,7 @@
 
   "BACKUP_SUCCESSFUL": "Backup Successful",
   "BACKUP_FAILED": "Restore Problem",
-  "BACKUP_FAILED_DESC1": "Please select the poultry.db file.",
+  "BACKUP_FAILED_DESC1": "Please select the poultary.db file.",
   "BACKUP_FAILED_DESC2": "If you are still facing an issue,",
   "BACKUP_FAILED_DESC3": "send an email to zaheer6110@gmail.com",
   "OK": "OK",
