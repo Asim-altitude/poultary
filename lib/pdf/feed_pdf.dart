@@ -97,6 +97,7 @@ class Invoice {
   Uint8List? _logo;
   Uint8List? imageData;
   String? _bgShape;
+  bool direction = true;
   Uint8List imageFromBase64String(String base64String) {
     return base64Decode(base64String);
   }
@@ -117,7 +118,7 @@ class Invoice {
 
     }
 
-
+    direction = await Utils.getDirection();
     String regular = await Utils.getPdfregularFont();
     String bold = await Utils.getPdfBoldFont();
     _bgShape = await rootBundle.loadString('assets/invoice.svg');
@@ -131,7 +132,7 @@ class Invoice {
       pw.MultiPage(
         pageTheme: _buildTheme(
           pageFormat,
-          ttfFLight,
+          direction? ttfFLight:ttfFBold,
           ttfFBold,ttfFLight,
         ),
         header: _buildHeader,
@@ -141,14 +142,16 @@ class Invoice {
           pw.Container(
             height: 30,
             alignment: pw.Alignment.topLeft,
-            child: pw.Text(
-              'By Feed Type'.tr(),
-              style: pw.TextStyle(
-                color: PdfColors.blue,
-                fontWeight: pw.FontWeight.bold,
-                fontSize: 14,
-              ),
-            ),
+            child: pw.Directionality(
+              textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+              child: pw.Text(
+                'By Feed Type'.tr(),
+                style: pw.TextStyle(
+                  color: PdfColors.black,
+                  fontSize: 10,
+                ),
+              ),),
+
           ),
           _contentTable(context),
           pw.Container(
@@ -157,14 +160,15 @@ class Invoice {
             margin: pw.EdgeInsets.only(top: 10),
             child: pw.Row(
                 children: [
-                  pw.Text(
-                    'Total Consumption: '.tr(),
-                    style: pw.TextStyle(
-                      color: PdfColors.black,
-                      fontWeight: pw.FontWeight.normal,
-                      fontSize: 14,
-                    ),
-                  ),pw.Text(
+                  pw.Directionality(
+                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                    child: pw.Text(
+                      'Total Consumption: '.tr(),
+                      style: pw.TextStyle(
+                        color: PdfColors.black,
+                        fontSize: 10,
+                      ),
+                    ),), pw.Text(
                     getFeedTotal().toString(),
                     style: pw.TextStyle(
                       color: PdfColors.black,
@@ -179,14 +183,16 @@ class Invoice {
           pw.Container(
             height: 30,
             alignment: pw.Alignment.topLeft,
-            child: pw.Text(
-              'By Flock Name'.tr(),
-              style: pw.TextStyle(
-                color: PdfColors.blue,
-                fontWeight: pw.FontWeight.bold,
-                fontSize: 14,
-              ),
-            ),
+            child: pw.Directionality(
+              textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+              child: pw.Text(
+                'By FLock Name'.tr(),
+                style: pw.TextStyle(
+                  color: PdfColors.black,
+                  fontSize: 10,
+                ),
+              ),),
+
           ),
           _contentTable1(context),
           pw.Container(
@@ -195,14 +201,16 @@ class Invoice {
               margin: pw.EdgeInsets.only(top: 10),
               child: pw.Row(
                   children: [
-                    pw.Text(
-                      'Total Consumption: '.tr(),
-                      style: pw.TextStyle(
-                        color: PdfColors.black,
-                        fontWeight: pw.FontWeight.normal,
-                        fontSize: 14,
-                      ),
-                    ),pw.Text(
+                    pw.Directionality(
+                      textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                      child: pw.Text(
+                        'Total Consumption: '.tr(),
+                        style: pw.TextStyle(
+                          color: PdfColors.black,
+                          fontSize: 10,
+                        ),
+                      ),),
+                  pw.Text(
                       getFLockTotal().toString(),
                       style: pw.TextStyle(
                         color: PdfColors.black,
@@ -220,13 +228,16 @@ class Invoice {
                   children: [
                     pw.Container(
                       alignment: pw.Alignment.topLeft,
-                      child: pw.Text(
-                        'Report Generated On: '.tr(),
-                        style: pw.TextStyle(
-                          color: PdfColors.black,
-                          fontSize: 10,
-                        ),
-                      ),
+                      child: pw.Directionality(
+                        textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                        child: pw.Text(
+                          'Report Generated On: '.tr(),
+                          style: pw.TextStyle(
+                            color: PdfColors.black,
+                            fontSize: 10,
+                          ),
+                        ),),
+
                     ),pw.Container(
                       margin: pw.EdgeInsets.only(left: 10),
                       alignment: pw.Alignment.topLeft,
@@ -254,7 +265,9 @@ class Invoice {
   }
 
   pw.Widget _buildHeader(pw.Context context) {
-    return pw.Container(
+    return pw.Directionality(
+        textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+        child:pw.Container(
       height: 175,
       child: pw.Column(
         children: [
@@ -283,28 +296,32 @@ class Invoice {
                   height: 30,
                   padding: const pw.EdgeInsets.only(left: 20),
                   alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    Utils.INVOICE_HEADING.tr(),
-                    style: pw.TextStyle(
-                      color: PdfColors.blue,
-                      fontWeight: pw.FontWeight.bold,
-                      fontSize: 24,
-                    ),
-                  ),
+                  child: pw.Directionality(
+                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                    child: pw.Text(
+                      Utils.INVOICE_HEADING.tr(),
+                      style: pw.TextStyle(
+                        color: PdfColors.black,
+                        fontSize: 10,
+                      ),
+                    ),),
+
                 ),
 
                 pw.Container(
                   height: 30,
                   padding: const pw.EdgeInsets.only(left: 20),
                   alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    'Feed Consumption Report'.tr(),
-                    style: pw.TextStyle(
-                      color: PdfColors.black,
-                      fontWeight: pw.FontWeight.normal,
-                      fontSize: 20,
-                    ),
-                  ),
+                  child: pw.Directionality(
+                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                    child: pw.Text(
+                      'Feed Consumption Report'.tr(),
+                      style: pw.TextStyle(
+                        color: PdfColors.black,
+                        fontSize: 10,
+                      ),
+                    ),),
+
                 ),
 
                 pw.Container(
@@ -327,11 +344,13 @@ class Invoice {
           if (context.pageNumber > 1) pw.SizedBox(height: 20)
         ],
       ),
-    );
+    ),);
   }
 
   pw.Widget _buildSummary(pw.Context context) {
-    return pw.Container(
+    return pw.Directionality(
+      textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+      child:pw.Container(
       height: 120,
       margin: pw.EdgeInsets.only(top: 10),
       child: pw.Column(
@@ -343,27 +362,32 @@ class Invoice {
                 pw.Container(
                   height: 30,
                   alignment: pw.Alignment.topLeft,
-                  child: pw.Text(
-                    "SUMMARY".tr(),
-                    style: pw.TextStyle(
-                      color: PdfColors.blue,
-                      fontWeight: pw.FontWeight.bold,
-                      fontSize: 24,
-                    ),
-                  ),
+                  child: pw.Directionality(
+                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                    child: pw.Text(
+                      'SUMMARY'.tr(),
+                      style: pw.TextStyle(
+                        color: PdfColors.black,
+                        fontSize: 10,
+                      ),
+                    ),),
+
                 ),
 
                 pw.Row(
                   children: [
                     pw.Container(
                       alignment: pw.Alignment.topLeft,
-                      child: pw.Text(
-                        'Collcted Eggs: ',
-                        style: pw.TextStyle(
-                          color: PdfColors.black,
-                          fontSize: 16,
-                        ),
-                      ),
+                      child: pw.Directionality(
+                        textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                        child: pw.Text(
+                          'Collcted Eggs'.tr(),
+                          style: pw.TextStyle(
+                            color: PdfColors.black,
+                            fontSize: 10,
+                          ),
+                        ),),
+
                     ),pw.Container(
                       alignment: pw.Alignment.topLeft,
                       child: pw.Text(
@@ -382,13 +406,15 @@ class Invoice {
                     children: [
                       pw.Container(
                         alignment: pw.Alignment.topLeft,
-                        child: pw.Text(
-                          'Reduced Eggs: ',
-                          style: pw.TextStyle(
-                            color: PdfColors.black,
-                            fontSize: 16,
-                          ),
-                        ),
+                        child: pw.Directionality(
+                          textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                          child: pw.Text(
+                            'Reduced Eggs'.tr(),
+                            style: pw.TextStyle(
+                              color: PdfColors.black,
+                              fontSize: 10,
+                            ),
+                          ),),
                       ),pw.Container(
                         alignment: pw.Alignment.topLeft,
 
@@ -408,13 +434,16 @@ class Invoice {
                     children: [
                       pw.Container(
                         alignment: pw.Alignment.topLeft,
-                        child: pw.Text(
-                          'Reserve Eggs:  ',
-                          style: pw.TextStyle(
-                            color: PdfColors.black,
-                            fontSize: 16,
-                          ),
-                        ),
+                        child: pw.Directionality(
+                          textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                          child: pw.Text(
+                            'Reserve Eggs'.tr(),
+                            style: pw.TextStyle(
+                              color: PdfColors.black,
+                              fontSize: 10,
+                            ),
+                          ),),
+
                       ),pw.Container(
                         alignment: pw.Alignment.topLeft,
                          child: pw.Text(
@@ -435,7 +464,7 @@ class Invoice {
 
         ],
       ),
-    );
+    ),);
   }
 
 
@@ -698,6 +727,8 @@ class Invoice {
         3: pw.Alignment.center,
         4: pw.Alignment.centerRight,
       },
+      headerDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+      tableDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
       headerStyle: pw.TextStyle(
         color: _baseTextColor,
         fontSize: 10,
@@ -750,6 +781,8 @@ class Invoice {
         3: pw.Alignment.center,
         4: pw.Alignment.centerRight,
       },
+      headerDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+      tableDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
       headerStyle: pw.TextStyle(
         color: _baseTextColor,
         fontSize: 10,

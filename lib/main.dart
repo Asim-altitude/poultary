@@ -4,21 +4,25 @@ import 'package:poultary/utils/utils.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui' as ui;
+import 'package:poultary/utils/utils.dart';
 
 import 'home_screen.dart';
 
+bool direction = true;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
   runApp(
       EasyLocalization(
-          supportedLocales: [Locale('en'), Locale('ar'),Locale('de'),Locale('ru'),Locale('fa'),Locale('ja'),Locale('ko'),Locale('pt'),Locale('tr'),Locale('fr'),Locale('id'),Locale('hi'),Locale('es'),Locale('zh'),Locale('uk'),Locale('pl'),Locale('bn'),Locale('te'),Locale('ta'),Locale('ur')],
+          supportedLocales: [Locale('en'), Locale('ar'),Locale('de'),Locale('ru'),Locale('fa'),Locale('ja'),Locale('ko'),Locale('pt'),Locale('tr'),Locale('fr'),Locale('id'),Locale('hi'),Locale('es'),Locale('zh'),Locale('uk'),Locale('pl'),Locale('bn'),Locale('te'),Locale('ta')],
           path: 'assets/translations', // <-- change the path of the translation files
           fallbackLocale: Locale('en'),
       child: MyApp()),);
   requestGDPR();
+  direction = await Utils.getDirection();
   await MobileAds.instance.initialize();
+  Utils.direction = await Utils.getDirection();
 
 }
 void requestGDPR(){
@@ -67,12 +71,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return
+
+      MaterialApp(
       title: 'Easy Poultry Manager',
       debugShowCheckedModeBanner: false,
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
+
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -93,9 +100,10 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Utils.getThemeColorBlue()),
         useMaterial3: true,
       ),
+
       home: Directionality(
-        textDirection: ui.TextDirection.ltr,
-        child: HomeScreen(),),
+          textDirection: direction? ui.TextDirection.ltr: ui.TextDirection.ltr,
+          child: HomeScreen()),
     );
   }
 }

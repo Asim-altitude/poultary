@@ -255,7 +255,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(list.elementAt(index).feed_name!,style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                                Text(list.elementAt(index).feed_name!.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
                                 Text(list.elementAt(index).quantity! + "KG".tr(),style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
 
                               ],);

@@ -98,6 +98,9 @@ class Utils {
   // static MediationManager? manager;
   // static CASBannerView? view;
 
+
+  static bool direction = true;
+
  static Future<bool> getDirection() async{
 
    String? language = await SessionManager.getSelectedLanguage();
@@ -113,7 +116,7 @@ class Utils {
      return true;
    }
    else if(language =="fa"){
-     return true;
+     return false;
    }
    else if(language =="de"){
      return true;
@@ -199,7 +202,7 @@ class Utils {
       return "assets/font/Roboto-Regular.ttf";
     }
     else if(language =="fr"){
-      return "assets/font/Roboto-Regular.ttf";
+      return "assets/font/persian2.ttf";
     }
     else if(language =="id"){
       return "assets/font/Roboto-Regular.ttf";
@@ -250,7 +253,7 @@ class Utils {
       return "assets/font/Roboto-Bold.ttf";
     }
     else if(language =="fa"){
-      return "assets/font/Roboto-Bold.ttf";
+      return "assets/font/persian2.ttf";
     }
     else if(language =="de"){
       return "assets/font/Roboto-Bold.ttf";

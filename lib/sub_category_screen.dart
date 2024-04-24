@@ -201,7 +201,7 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
                                   Container(
 
                                       width: (widthScreen - widthScreen/4)+6,
-                                      margin: EdgeInsets.all(4) , padding: EdgeInsets.all(10), child: Text(categoryList.elementAt(index).name!, style: TextStyle( fontWeight: FontWeight.normal, fontSize: 18, color: Colors.black),)),
+                                      margin: EdgeInsets.all(4) , padding: EdgeInsets.all(10), child: Text(categoryList.elementAt(index).name!.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 18, color: Colors.black),)),
    // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
                                 ],),
 
