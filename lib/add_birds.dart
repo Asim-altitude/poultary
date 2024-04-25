@@ -196,6 +196,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SizedBox(height: 10,width: widthScreen),
+                          if(_purposeList!=null && _purposeList.length>0)
                           Container(
                             width: widthScreen,
                             height: 70,

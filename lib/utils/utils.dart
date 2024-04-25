@@ -41,7 +41,7 @@ class Utils {
   static late bool isShowAdd = true;
   static late bool iShowInterStitial = false;
 
-  static final String appIdIOS     = "ca-app-pub-2367135251513556~4114934168";
+  static final String appIdIOS     = "ca-app-pub-2367135251513556~6965974738";
   static final String appIdAndroid = "ca-app-pub-2367135251513556~8724531818";
   static var box;
 
@@ -339,7 +339,6 @@ class Utils {
       Utils.isShowAdd = true;
       inititalize();
     }
-
 }
   static Future<void> inititalize() async {
     // CAS.setDebugMode(true);
@@ -588,7 +587,7 @@ class Utils {
           child: Container(
             height: 60.0 ,
             width: Utils.WIDTH_SCREEN,
-            child: AdWidget(ad: _bannerAd!),
+            child: new AdWidget(ad: _bannerAd!),
           ),
         ):Container(),
       );
