@@ -339,7 +339,9 @@ class Utils {
       Utils.isShowAdd = true;
       inititalize();
     }
-}
+    Utils.isShowAdd = false;
+
+  }
   static Future<void> inititalize() async {
     // CAS.setDebugMode(true);
 
@@ -494,7 +496,7 @@ class Utils {
       if (Platform.isAndroid) {
         return 'ca-app-pub-2367135251513556/4686866841';
       } else if (Platform.isIOS) {
-        return 'ca-app-pub-2367135251513556/6925764489';
+        return 'ca-app-pub-2367135251513556/3026729721';
       } else {
         throw new UnsupportedError('Unsupported platform');
       }
@@ -514,7 +516,7 @@ class Utils {
       if (Platform.isAndroid) {
         return 'ca-app-pub-2367135251513556/5356132442';
       } else if (Platform.isIOS) {
-        return 'ca-app-pub-2367135251513556/1481866110';
+        return 'ca-app-pub-2367135251513556/3625162389';
       } else {
         throw new UnsupportedError('Unsupported platform');
       }
