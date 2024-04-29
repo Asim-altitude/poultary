@@ -1,7 +1,7 @@
 {
  "BACKUP_SUCCESSFUL": "Backup bem-sucedido",
  "BACKUP_FAILED": "Problema de restauração",
- "BACKUP_FAILED_DESC1": "Selecione o arquivo hatching.db.",
+ "BACKUP_FAILED_DESC1": "Selecione o arquivo poultary.db.",
  "BACKUP_FAILED_DESC2": "Se você ainda estiver enfrentando um problema,",
  "BACKUP_FAILED_DESC3": "envie um e-mail para zaheer6110@gmail.com",
  "OK": "OK",
@@ -294,5 +294,9 @@
  "Sold To": "Vendido a",
  "Paid To": "Paga para",
  "My Farm": "Nome da Fazenda (Atualizar Configurações)",
- "My Location": "Sem localização (atualizar configurações)"
+ "My Location": "Sem localização (atualizar configurações)",
+ "BACK_UP_RESTORE_MESSAGE": "Backup e Restauração",
+ "NOTE_DETAIL": "NOTA: Estamos constantemente adicionando mais recursos para os usuários. Se estiver enfrentando algum problema, por favor envie um email para zaheer6110@gmail.com",
+ "BACKUP_DETAIL1": "Um arquivo de banco de dados com o nome (poultry.db) será compartilhado/salvo para fazer backup de seus dados. Você pode salvá-lo em qualquer lugar (WhatsApp, Gmail, Google Drive, arquivos, Bluetooth, etc.). Você pode restaurá-lo quando os dados estiverem perdidos ou se quiser usá-lo em outro telefone.",
+ "RESTORE_DETAIL1": "NOTA: Por favor, selecione o arquivo (poultry.db) que você criou anteriormente como arquivo de backup. Se você não o baixou, baixe e salve e depois pressione Restaurar. Se você quiser usá-lo em outro telefone, faça um backup no telefone antigo e restaure no novo telefone. Não pressione o botão Restaurar agora se você não perdeu seus dados."
 }

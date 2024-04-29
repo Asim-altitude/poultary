@@ -41,7 +41,7 @@ class Utils {
   static late bool isShowAdd = true;
   static late bool iShowInterStitial = false;
 
-  static final String appIdIOS     = "ca-app-pub-2367135251513556~4114934168";
+  static final String appIdIOS     = "ca-app-pub-2367135251513556~6965974738";
   static final String appIdAndroid = "ca-app-pub-2367135251513556~8724531818";
   static var box;
 
@@ -339,9 +339,9 @@ class Utils {
       Utils.isShowAdd = true;
       inititalize();
     }
-
     Utils.isShowAdd = false;
-}
+
+  }
   static Future<void> inititalize() async {
     // CAS.setDebugMode(true);
 
@@ -366,7 +366,7 @@ class Utils {
   static Future<void> showInterstitial() async {
     if(Utils.isShowAdd){
 
-      Future.delayed(const Duration(seconds: 5), () {
+      Future.delayed(const Duration(seconds: 0), () {
         if(iShowInterStitial){
           iShowInterStitial = false;
           _createInterstitialAd();
@@ -387,7 +387,7 @@ class Utils {
             print('$ad loaded');
             _interstitialAd = ad;
             _interstitialAd!.setImmersiveMode(true);
-            Future.delayed(Duration(seconds: 1), () {
+            Future.delayed(Duration(seconds: 0), () {
               _interstitialAd!.show();
             });
           },
@@ -496,7 +496,7 @@ class Utils {
       if (Platform.isAndroid) {
         return 'ca-app-pub-2367135251513556/4686866841';
       } else if (Platform.isIOS) {
-        return 'ca-app-pub-2367135251513556/6925764489';
+        return 'ca-app-pub-2367135251513556/3026729721';
       } else {
         throw new UnsupportedError('Unsupported platform');
       }
@@ -516,7 +516,7 @@ class Utils {
       if (Platform.isAndroid) {
         return 'ca-app-pub-2367135251513556/5356132442';
       } else if (Platform.isIOS) {
-        return 'ca-app-pub-2367135251513556/1481866110';
+        return 'ca-app-pub-2367135251513556/3625162389';
       } else {
         throw new UnsupportedError('Unsupported platform');
       }
@@ -583,12 +583,28 @@ class Utils {
   static Widget getAdBar(){
     if(isShowAdd){
       return Container(width: WIDTH_SCREEN,height: 60,
+        color: Colors.white,
         child:_isBannerAdReady?Align(
           alignment: Alignment.topCenter,
           child: Container(
             height: 60.0 ,
             width: Utils.WIDTH_SCREEN,
-            child: AdWidget(ad: _bannerAd!),
+            child: new AdWidget(ad: _bannerAd!),
+          ),
+        ):Container(),
+      );
+
+    }
+    return Container(width: WIDTH_SCREEN,height: 0,);
+  }
+  static Widget getDistanceBar(){
+    if(isShowAdd){
+      return Container(width: WIDTH_SCREEN,height: 60,
+        child:_isBannerAdReady?Align(
+          alignment: Alignment.topCenter,
+          child: SizedBox(
+            height: 60.0 ,
+            width: Utils.WIDTH_SCREEN,
           ),
         ):Container(),
       );

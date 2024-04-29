@@ -2,7 +2,7 @@
 
   "BACKUP_SUCCESSFUL": "Backup Successful",
   "BACKUP_FAILED": "Restore Problem",
-  "BACKUP_FAILED_DESC1": "Please select the hatching.db file.",
+  "BACKUP_FAILED_DESC1": "Please select the poultary.db file.",
   "BACKUP_FAILED_DESC2": "If you are still facing an issue,",
   "BACKUP_FAILED_DESC3": "send an email to zaheer6110@gmail.com",
   "OK": "OK",
@@ -300,7 +300,10 @@
   "Sold To": "Sold To",
   "Paid To": "Paid To",
   "My Farm": "Farm Name(Update Settings)",
-  "My Location": "No Location(Update Settings)"
+  "My Location": "No Location(Update Settings)",
 
-
+  "BACK_UP_RESTORE_MESSAGE": "Backup & Restore",
+  "NOTE_DETAIL": "NOTE: We are constantly add more features for the users. If you are facing any problem, please send an email to zaheer6110@gmail.com",
+  "BACKUP_DETAIL1": "A database file with name(poultry.db) will be shared/saved to backup your data.You can save it to anywhere (Whatsapp, Gmail, Google Drive, files, Bluetooth etc). You can restore it when data is lost or you want to use it on another phone.",
+  "RESTORE_DETAIL1": "NOTE: Please select the (poultry.db) file you previously created a backup file. If you have not not downloaded it, download and and save it and then press Restore. If you want to use it on another phone, create a backup on Old phone & Restore on new phone. Don't Tap Restore now button if you have not lost your data."
 }

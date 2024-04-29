@@ -1,7 +1,7 @@
 {
  "BACKUP_SUCCESSFUL": "バックアップ成功",
  "BACKUP_FAILED": "復元の問題",
- "BACKUP_FAILED_DESC1": "hatching.db ファイルを選択してください。",
+ "BACKUP_FAILED_DESC1": "poultary.db ファイルを選択してください。",
  "BACKUP_FAILED_DESC2": "それでも問題が解決しない場合は、",
  "BACKUP_FAILED_DESC3": "zaheer6110@gmail.com にメールを送信してください",
  "OK": "わかりました",
@@ -294,5 +294,9 @@
  "Sold To": "に売却",
  "Paid To": "支払先",
  "My Farm": "ファーム名(更新設定)",
- "My Location": "場所がありません(設定を更新)"
+ "My Location": "場所がありません(設定を更新)",
+ "BACK_UP_RESTORE_MESSAGE": "バックアップ＆リストア",
+ "NOTE_DETAIL": "注意：私たちはユーザーのために常に新機能を追加しています。何か問題がある場合は、zaheer6110@gmail.com にメールを送ってください。",
+ "BACKUP_DETAIL1": "データをバックアップするために名前（poultry.db）のデータベースファイルが共有/保存されます。どこにでも保存できます（WhatsApp、Gmail、Google Drive、ファイル、Bluetoothなど）。データが紛失した場合や別の電話で使用したい場合は、リストアできます。",
+ "RESTORE_DETAIL1": "注意：以前にバックアップファイルとして作成したファイル（poultry.db）を選択してください。ダウンロードしていない場合は、ダウンロードして保存し、その後、復元を押してください。別の電話で使用する場合は、古い電話でバックアップを作成して、新しい電話でリストアしてください。データを紛失していない場合は、今すぐリストアボタンを押さないでください。"
 }

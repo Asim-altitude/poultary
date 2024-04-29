@@ -150,6 +150,10 @@ class DatabaseHelper  {
   }
   static Future<int?>  insertFlock(Flock flock) async {
 
+    int count = await getFlocksNamesCount(flock.f_name);
+    if(count>0){
+      flock.f_name = "${flock.f_name} (${(count+1)})";
+    }
      return await _database?.insert(
       'Flock',
       flock.toJson(),
@@ -1284,6 +1288,29 @@ class DatabaseHelper  {
       }
     }
     return _birdList;
+  }
+  static Future<int>  getFlocksNamesCount(String name) async {
+    int index = 0;
+    var result = await _database?.rawQuery("SELECT * FROM Flock where active = 1 AND f_name = '${name}'");
+    List<Flock> _birdList = [];
+    Flock flock;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            flock = Flock.fromJson(json);
+            if(flock.f_name == name){
+              index++;
+            }
+
+          }
+        }
+
+      }
+    }
+    return index;
   }
 
   static Future<List<Flock>>  getAllFlocks() async {

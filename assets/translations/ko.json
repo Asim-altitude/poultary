@@ -1,7 +1,7 @@
 {
  "BACKUP_SUCCESSFUL": "백업 성공",
  "BACKUP_FAILED": "복원 문제",
- "BACKUP_FAILED_DESC1": "atching.db 파일을 선택해주세요.",
+ "BACKUP_FAILED_DESC1": "poultary.db 파일을 선택해주세요.",
  "BACKUP_FAILED_DESC2": "여전히 문제가 발생하는 경우,",
  "BACKUP_FAILED_DESC3": "zaheer6110@gmail.com으로 이메일을 보내주세요",
  "OK": "좋아요",
@@ -294,5 +294,9 @@
  "Sold To": "판매 대상",
  "Paid To": "지불 대상",
  "My Farm": "농장 이름(업데이트 설정)",
- "My Location": "위치 없음(설정 업데이트)"
+ "My Location": "위치 없음(설정 업데이트)",
+ "BACK_UP_RESTORE_MESSAGE": "백업 및 복원",
+ "NOTE_DETAIL": "참고: 우리는 사용자를 위해 지속적으로 새로운 기능을 추가하고 있습니다. 문제가 발생하면 zaheer6110@gmail.com 으로 이메일을 보내주십시오.",
+ "BACKUP_DETAIL1": "이름이 (poultry.db)인 데이터베이스 파일이 백업되어 공유/저장됩니다. 어디서나 저장할 수 있습니다 (WhatsApp, Gmail, Google 드라이브, 파일, 블루투스 등). 데이터가 손실된 경우 또는 다른 전화기에서 사용하려는 경우 복원할 수 있습니다.",
+ "RESTORE_DETAIL1": "참고: 이전에 백업 파일로 생성한 파일 (poultry.db)을 선택하십시오. 다운로드하지 않은 경우 다운로드하고 저장한 다음 복원을 누르십시오. 다른 전화기에서 사용하려는 경우 이전 전화기에서 백업을 만들고 새 전화기에서 복원하십시오. 데이터가 손실되지 않은 경우 지금 복원 버튼을 누르지 마십시오."
 }

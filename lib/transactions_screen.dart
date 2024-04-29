@@ -14,6 +14,7 @@ import 'package:poultary/inventory.dart';
 import 'package:poultary/model/feed_item.dart';
 import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/single_flock_screen.dart';
+import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
@@ -191,13 +192,13 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
           width: widthScreen,
           height: heightScreen,
             color: Utils.getScreenBackground(),
-            child:SingleChildScrollView(
+            child:SingleChildScrollViewWithStickyFirstWidget(
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.end,
             children:  [
-              Utils.getAdBar(),
+              Utils.getDistanceBar(),
 
               ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),

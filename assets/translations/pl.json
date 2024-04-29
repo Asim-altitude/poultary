@@ -1,7 +1,7 @@
 {
   "BACKUP_SUCCESSFUL": "Kopia zapasowa powiodła się",
   "BACKUP_FAILED": "Przywróć problem",
-  "BACKUP_FAILED_DESC1": "Proszę wybrać plik hatching.db.",
+  "BACKUP_FAILED_DESC1": "Proszę wybrać plik poultary.db.",
   "BACKUP_FAILED_DESC2": "Jeśli nadal masz problem,",
   "BACKUP_FAILED_DESC3": "wyślij e-mail na adres zaheer6110@gmail.com",
   "OK": "OK",
@@ -294,5 +294,9 @@
   "Sold To": "Sprzedany",
   "Paid To": "Płatne dla",
   "My Farm": "Nazwa farmy (ustawienia aktualizacji)",
-  "My Location": "Brak lokalizacji (ustawienia aktualizacji)"
+  "My Location": "Brak lokalizacji (ustawienia aktualizacji)",
+  "BACK_UP_RESTORE_MESSAGE": "Kopia zapasowa i przywracanie",
+  "NOTE_DETAIL": "UWAGA: Ciągle dodajemy nowe funkcje dla użytkowników. Jeśli napotkasz jakiś problem, proszę wyślij e-mail na adres zaheer6110@gmail.com",
+  "BACKUP_DETAIL1": "Plik bazy danych o nazwie (poultry.db) zostanie udostępniony/zapisany, aby zabezpieczyć Twoje dane. Możesz go zapisać gdziekolwiek (WhatsApp, Gmail, Google Drive, pliki, Bluetooth itp.). Możesz je przywrócić, gdy dane zostaną utracone lub chcesz je użyć na innym telefonie.",
+  "RESTORE_DETAIL1": "UWAGA: Proszę wybierz plik (poultry.db), który wcześniej utworzyłeś jako plik kopii zapasowej. Jeśli nie pobraliście go, pobierz i zapisz, a następnie naciśnij Przywróć. Jeśli chcesz go użyć na innym telefonie, utwórz kopię zapasową na starym telefonie i przywróć na nowym telefonie. Nie naciskaj przycisku Przywróć teraz, jeśli nie straciłeś danych."
 }

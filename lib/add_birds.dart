@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/model/flock_detail.dart';
+import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
@@ -143,10 +144,10 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
             width: widthScreen,
             height: heightScreen,
             color: Utils.getScreenBackground(),
-            child: SingleChildScrollView(
+            child: SingleChildScrollViewWithStickyFirstWidget(
               child: Column(
                 children: [
-                  Utils.getAdBar(),
+                  Utils.getDistanceBar(),
 
                   ClipRRect(
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
@@ -195,6 +196,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SizedBox(height: 10,width: widthScreen),
+                          if(_purposeList!=null && _purposeList.length>0)
                           Container(
                             width: widthScreen,
                             height: 70,
