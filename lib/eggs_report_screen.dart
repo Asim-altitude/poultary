@@ -12,8 +12,10 @@ import 'package:poultary/model/egg_report_item.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 import 'model/egg_item.dart';
+import 'model/eggs_chart_data.dart';
 import 'model/feed_item.dart';
 import 'model/flock.dart';
 import 'model/flock_detail.dart';
@@ -38,13 +40,23 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
   }
 
 
+
+  late ZoomPanBehavior _zoomPanBehavior;
   @override
   void initState() {
     super.initState();
      try
      {
-       date_filter_name = Utils.applied_filter;
-
+       //date_filter_name = Utils.applied_filter;
+       _zoomPanBehavior = ZoomPanBehavior(
+           enableDoubleTapZooming: true,
+           enablePinching: true,
+           // Enables the selection zooming
+           enableSelectionZooming: true,
+           selectionRectBorderColor: Colors.red,
+           selectionRectBorderWidth: 1,
+           selectionRectColor: Colors.grey
+       );
        getList();
        getData(date_filter_name);
      }
@@ -55,6 +67,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
 
   }
 
+  List<Eggs_Chart_Item> collectionList = [], reductionList = [];
   List<Eggs> eggs = [];
   List<String> flock_name = [];
 
@@ -85,6 +98,20 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
     total_eggs_reduced = await DatabaseHelper.getEggCalculations(f_id, 0, str_date, end_date);
 
     total_eggs = total_eggs_collected - total_eggs_reduced;
+
+    collectionList = await DatabaseHelper.getEggsReportData(str_date, end_date, 1);
+
+    reductionList = await DatabaseHelper.getEggsReportData(str_date, end_date, 0);
+
+    for(int i=0;i<reductionList.length;i++){
+      reductionList.elementAt(i).date = Utils.getFormattedDate(reductionList.elementAt(i).date).substring(0,Utils.getFormattedDate(reductionList.elementAt(i).date).length-4);
+    }
+
+    for(int j=0;j<collectionList.length;j++){
+      collectionList.elementAt(j).date = Utils.getFormattedDate(collectionList.elementAt(j).date).substring(0,Utils.getFormattedDate(collectionList.elementAt(j).date).length-4);
+    }
+
+
 
     getFilteredEggsCollections(str_date, end_date);
 
@@ -128,7 +155,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
          child:Container(
           width: widthScreen,
           height: heightScreen,
-           color: Utils.getScreenBackground(),
+           color: Colors.white,
             child: SingleChildScrollViewWithStickyFirstWidget(
             child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -246,21 +273,10 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                 ],
               ),
 
-              Card(
-                elevation: 10,
-                shadowColor: Colors.blue,
+              Container(
                 color: Colors.white,
-                margin: EdgeInsets.all(10),
                 child: Container(
                   padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.white, //(x,y)
-                      ),
-                    ],
-                  ),
                   child: Column(children: [
                     Align(
                         alignment: Alignment.topLeft,
@@ -270,6 +286,50 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                             Text('SUMMARY'.tr(),style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
                           ],
                         )),
+
+                    Container(
+                      width: widthScreen,
+                      child: Column(children: [
+                        //Initialize the chart widget
+                        SfCartesianChart(
+                            primaryXAxis: CategoryAxis(),
+
+                            zoomPanBehavior: _zoomPanBehavior,
+                            // Chart title
+                            title: ChartTitle(text: date_filter_name),
+
+                            // Enable legend
+                             legend: Legend(isVisible: true, position: LegendPosition.bottom),
+
+                            // Enable tooltip
+                            tooltipBehavior: TooltipBehavior(enable: true),
+                            series: <ChartSeries<Eggs_Chart_Item, String>>[
+
+                              ColumnSeries(borderRadius: BorderRadius.all(Radius.circular(10)),color:Colors.green,name: 'Collections',dataSource: collectionList, xValueMapper: (Eggs_Chart_Item collItem, _) => collItem.date, yValueMapper: (Eggs_Chart_Item collItem, _)=> collItem.total,),
+                              ColumnSeries(borderRadius: BorderRadius.all(Radius.circular(10)),color:Colors.red,name: 'Reductions',dataSource: reductionList, xValueMapper: (Eggs_Chart_Item collItem, _) => collItem.date, yValueMapper: (Eggs_Chart_Item collItem, _)=> collItem.total,),
+
+                            ]),
+                        /*Expanded(
+                       child: Padding(
+                         padding: const EdgeInsets.all(8.0),
+                         //Initialize the spark charts widget
+                         child: SfSparkLineChart.custom(
+                           //Enable the trackball
+                           trackball: SparkChartTrackball(
+                               activationMode: SparkChartActivationMode.tap),
+                           //Enable marker
+                           marker: SparkChartMarker(
+                               displayMode: SparkChartMarkerDisplayMode.all),
+                           //Enable data label
+                           labelDisplayMode: SparkChartLabelDisplayMode.all,
+                           xValueMapper: (int index) => data[index].year,
+                           yValueMapper: (int index) => data[index].sales,
+                           dataCount: data.length,
+                         ),
+                       ),
+                     )*/
+                      ]),) ,
+
                     SizedBox(height: 20,width: widthScreen,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -294,85 +354,112 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                       ],)
                   ],),),
               ),
-              Align(
-                alignment: Alignment.topLeft,
-                child: Container(
-                    margin: EdgeInsets.all(10),
-                    child: Text('Collections/Reductions'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
-              ),
 
-              eggs.length > 0 ? Container(
-                height: heightScreen - 220,
-                width: widthScreen,
-                child: ListView.builder(
-                    itemCount: eggs.length,
-                    scrollDirection: Axis.vertical,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(3)),
+              Container(
+                  padding: EdgeInsets.only(top: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+                    color: Utils.getScreenBackground(),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 2,
+                        offset: Offset(0, 1), // changes position of shadow
+                      ),
+                    ],
+                  ),
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                        margin: EdgeInsets.all(10),
+                        child: Text('Collections/Reductions'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
+                  ),
 
-                            color: Colors.white,
-                            border: Border.all(color: Colors.blueAccent,width: 1.0)
-                        ),
-
-                        child: Container(
-                          color: Colors.white,
-                          height: 100,
-                          child: Row( children: [
-                            Expanded(
-                              child: Container(
-                                alignment: Alignment.topLeft,
-                                margin: EdgeInsets.all(10),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                  Row(
-                                    children: [
-                                      Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).f_name!.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
-                                      Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).isCollection == 1? '(Collected)'.tr():'(Reduced)'.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: eggs.elementAt(index).isCollection == 1? Colors.green:Colors.red),)),
-
-                                    ],
-                                  ),
-                                  Container(margin: EdgeInsets.all(5), child: Text(Utils.getFormattedDate(eggs.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-
-                                    // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                ],),
-                              ),
-                            ),
-                            Column(
-                              children: [
-                                Container(
-                                  margin: EdgeInsets.only(right: 10),
-                                  child: Row(
-                                    children: [
-                                      Container( margin: EdgeInsets.only(right: 5), child: Text(eggs.elementAt(index).total_eggs.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color:eggs.elementAt(index).isCollection == 0?Colors.black:Colors.black),)),
-                                      Text("Eggs".tr(), style: TextStyle(color: Colors.black, fontSize: 12),)
-                                    ],
-                                  ),
+                  eggs.length > 0 ? Container(
+                    width: widthScreen,
+                    height: heightScreen,
+                    child: ListView.builder(
+                        itemCount: eggs.length,
+                        scrollDirection: Axis.vertical,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemBuilder: (BuildContext context, int index) {
+                          return Container(
+                            margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.all(Radius.circular(3)),
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 2,
+                                  blurRadius: 2,
+                                  offset: Offset(0, 1), // changes position of shadow
                                 ),
-                                Container(margin: EdgeInsets.all(5), child: Text(eggs.elementAt(index).isCollection==0? eggs.elementAt(index).reduction_reason!:'', style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
-
                               ],
                             ),
 
-                          ]),
-                        ),
-                      );
+                            child: Container(
+                              color: Colors.white,
+                              height: 100,
+                              child: Row( children: [
+                                Expanded(
+                                  child: Container(
+                                    alignment: Alignment.topLeft,
+                                    margin: EdgeInsets.all(10),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).f_name!.tr() + " ", style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
+                                                Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).isCollection == 1? '(Collected)'.tr():'(Reduced)'.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: eggs.elementAt(index).isCollection == 1? Colors.green:Colors.red),)),
+                                              ],
+                                            ),
+                                            Row(
+                                              children: [
+                                                Image.asset("assets/eggs_count.png", width: 40, height: 40,),
+                                                Container( margin: EdgeInsets.only(right: 5, left: 5), child: Text(eggs.elementAt(index).total_eggs.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color:eggs.elementAt(index).isCollection == 0?Colors.black:Colors.black),)),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.calendar_month, size: 25,),
+                                            Container(margin: EdgeInsets.all(5), child: Text(Utils.getFormattedDate(eggs.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
 
-                    }),
-              ) : Center(
-                child: Container(
-                  margin: EdgeInsets.only(top: 50),
-                  child: Column(
-                    children: [
-                      Text('No Eggs Collected/Reduced in given period'.tr(), style: TextStyle(fontSize: 15, color: Colors.black54),),
-                    ],
+                                          ],
+                                        ),
+
+                                        // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+                                      ],),
+                                  ),
+                                ),
+
+
+                              ]),
+                            ),
+                          );
+
+                        }),
+                  ) : Center(
+                    child: Container(
+                      margin: EdgeInsets.only(top: 50),
+                      child: Column(
+                        children: [
+                          Text('No Eggs Collected/Reduced in given period'.tr(), style: TextStyle(fontSize: 15, color: Colors.black54),),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                ],
+              ),),
 
             ]
       ),),),),),);
@@ -504,7 +591,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       end_date = inputFormat.format(today);
       print(str_date+" "+end_date);
 
-      getAllData();
+      pdf_formatted_date_filter = 'TODAY'.tr()+" ("+Utils.getFormattedDate(str_date)+")";
 
     }
     else if (filter == 'YESTERDAY'.tr()){
@@ -516,7 +603,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       end_date = inputFormat.format(today);
       print(str_date+" "+end_date);
 
-       getAllData();
+      pdf_formatted_date_filter = "YESTERDAY".tr() + " ("+Utils.getFormattedDate(str_date)+")";
 
     }
     else if (filter == 'THIS_MONTH'.tr()){
@@ -531,7 +618,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       print(str_date+" "+end_date);
 
 
-       getAllData();
+      pdf_formatted_date_filter = 'THIS_MONTH'.tr()+" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
     }else if (filter == 'LAST_MONTH'.tr()){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
@@ -545,7 +632,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       print(str_date+" "+end_date);
 
 
-       getAllData();
+      pdf_formatted_date_filter = 'LAST_MONTH'.tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
 
     }else if (filter == 'LAST3_MONTHS'.tr()){
       index = 4;
@@ -559,7 +646,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       print(str_date+" "+end_date);
 
 
-       getAllData();
+      pdf_formatted_date_filter = "LAST3_MONTHS".tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
     }else if (filter == 'LAST6_MONTHS'.tr()){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
@@ -572,7 +659,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       print(str_date+" "+end_date);
 
 
-       getAllData();
+      pdf_formatted_date_filter = "LAST6_MONTHS".tr()+" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
     }else if (filter == 'THIS_YEAR'.tr()){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
@@ -583,7 +670,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
 
-       getAllData();
+      pdf_formatted_date_filter = 'THIS_YEAR'.tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
     }else if (filter == 'LAST_YEAR'.tr()){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
@@ -595,7 +682,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       print(str_date+" "+end_date);
 
 
-       getAllData();
+      pdf_formatted_date_filter = 'LAST_YEAR'.tr() +" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
 
     }else if (filter == 'ALL_TIME'.tr()){
       index = 8;
@@ -604,9 +691,9 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       print(str_date+" "+end_date);
 
 
-       getAllData();
+      pdf_formatted_date_filter = 'ALL_TIME'.tr();
     }
-     getAllData();
+    getAllData();
 
   }
 
@@ -631,6 +718,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
     Utils.TOTAL_EGG_COLLECTED = total_eggs_collected.toString();
     Utils.TOTAL_EGG_REDUCED = total_eggs_reduced.toString();
     Utils.EGG_RESERVE = total_eggs.toString();
+
 
     if(f_id == -1)
     {

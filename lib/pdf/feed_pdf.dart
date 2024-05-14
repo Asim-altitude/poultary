@@ -109,8 +109,8 @@ class Invoice {
     // _logo = (imageLogo).buffer.asUint8List();
     ByteData? image = null;
 
-    if(Utils.INVOICE_LOGO_STR =="assets/farm.jpg"){
-      image = await rootBundle.load('assets/farm.jpg');
+    if(Utils.INVOICE_LOGO_STR =="assets/farm_icon.png"){
+      image = await rootBundle.load('assets/farm_icon.png');
       imageData = (image)?.buffer.asUint8List();
     }
     else{
@@ -269,7 +269,7 @@ class Invoice {
         textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
         child:pw.Container(
       height: 175,
-      child: pw.Column(
+      child: pw.Column( 
         children: [
           pw.Expanded(
             child: pw.Column(
@@ -296,16 +296,16 @@ class Invoice {
                   height: 30,
                   padding: const pw.EdgeInsets.only(left: 20),
                   alignment: pw.Alignment.center,
-                  child: pw.Directionality(
+                  child:pw.Directionality(
                     textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
                     child: pw.Text(
                       Utils.INVOICE_HEADING.tr(),
                       style: pw.TextStyle(
-                        color: PdfColors.black,
-                        fontSize: 10,
+                        color: PdfColors.blue,
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 20,
                       ),
                     ),),
-
                 ),
 
                 pw.Container(
@@ -318,7 +318,8 @@ class Invoice {
                       'Feed Consumption Report'.tr(),
                       style: pw.TextStyle(
                         color: PdfColors.black,
-                        fontSize: 10,
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 18,
                       ),
                     ),),
 

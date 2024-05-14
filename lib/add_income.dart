@@ -53,6 +53,8 @@ class _NewIncome extends State<NewIncome>
 
   int chosen_index = 0;
 
+  int total_birds = 0;
+
   bool includeExtras = false;
   bool isEdit = false;
 
@@ -109,9 +111,11 @@ class _NewIncome extends State<NewIncome>
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
+      total_birds += flocks.elementAt(i).active_bird_count!;
     }
 
     _purposeselectedValue = _purposeList[0];
+    howmanyController.text = total_birds.toString();
 
     setState(() {
 
@@ -604,7 +608,12 @@ class _NewIncome extends State<NewIncome>
         onChanged: (String? newValue) {
           setState(() {
             _purposeselectedValue = newValue!;
-
+            int f_id = getFlockID();
+            if (f_id == -1){
+              howmanyController.text = total_birds.toString();
+            }else {
+              howmanyController.text = getActiveBirds().toString();
+            }
           });
         },
         items: _purposeList.map<DropdownMenuItem<String>>((String value) {
@@ -803,6 +812,19 @@ class _NewIncome extends State<NewIncome>
     for(int i=0;i<flocks.length;i++){
       if(_purposeselectedValue == flocks.elementAt(i).f_name){
         selected_id = flocks.elementAt(i).f_id;
+        break;
+      }
+    }
+
+    return selected_id;
+  }
+
+  int getActiveBirds() {
+
+    int selected_id = -1;
+    for(int i=0;i<flocks.length;i++){
+      if(_purposeselectedValue == flocks.elementAt(i).f_name){
+        selected_id = flocks.elementAt(i).active_bird_count!;
         break;
       }
     }

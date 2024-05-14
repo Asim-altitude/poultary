@@ -84,9 +84,9 @@ class Invoice {
     // _logo = (imageLogo).buffer.asUint8List();
     ByteData? image = null;
 
-    if(Utils.INVOICE_LOGO_STR =="assets/farm.jpg"){
-      image = await rootBundle.load('assets/farm.jpg');
-      imageData = (image)?.buffer.asUint8List();
+    if(Utils.INVOICE_LOGO_STR =="assets/farm_icon.png"){
+      image = await rootBundle.load('assets/farm_icon.png');
+      imageData = (image).buffer.asUint8List();
     }
     else{
       imageData = imageFromBase64String(Utils.INVOICE_LOGO_STR);
@@ -200,7 +200,7 @@ class Invoice {
                     style: pw.TextStyle(
                       color: PdfColors.blue,
                       fontWeight: pw.FontWeight.bold,
-                      fontSize: 24,
+                      fontSize: 20,
                     ),
                   ),),
                 ),
@@ -215,8 +215,8 @@ class Invoice {
                     'Financial Report'.tr(),
                     style: pw.TextStyle(
                       color: PdfColors.black,
-                      fontWeight: pw.FontWeight.normal,
-                      fontSize: 20,
+                      fontWeight: pw.FontWeight.bold,
+                      fontSize: 18,
                     ),
                   ),),
                 ),

@@ -96,6 +96,7 @@ class _NewExpense extends State<NewExpense>
 
   }
 
+  int total_brids = 0;
   List<Flock> flocks = [];
   void getList() async {
 
@@ -107,9 +108,11 @@ class _NewExpense extends State<NewExpense>
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
+       total_brids += flocks.elementAt(i).active_bird_count!;
     }
 
     _purposeselectedValue = _purposeList[0];
+    howmanyController.text = total_brids.toString();
 
     setState(() {
 
@@ -573,7 +576,12 @@ class _NewExpense extends State<NewExpense>
         onChanged: (String? newValue) {
           setState(() {
             _purposeselectedValue = newValue!;
-
+            int f_id = getFlockID();
+            if (f_id == -1){
+              howmanyController.text = total_brids.toString();
+            }else {
+              howmanyController.text = getActiveBirds().toString();
+            }
           });
         },
         items: _purposeList.map<DropdownMenuItem<String>>((String value) {
@@ -678,6 +686,7 @@ class _NewExpense extends State<NewExpense>
           setState(() {
             payment_status = newValue!;
 
+
           });
         },
         items: paymentStatusList.map<DropdownMenuItem<String>>((String value) {
@@ -772,6 +781,19 @@ class _NewExpense extends State<NewExpense>
     for(int i=0;i<flocks.length;i++){
       if(_purposeselectedValue == flocks.elementAt(i).f_name){
         selected_id = flocks.elementAt(i).f_id;
+        break;
+      }
+    }
+
+    return selected_id;
+  }
+
+  int getActiveBirds() {
+
+    int selected_id = -1;
+    for(int i=0;i<flocks.length;i++){
+      if(_purposeselectedValue == flocks.elementAt(i).f_name){
+        selected_id = flocks.elementAt(i).active_bird_count!;
         break;
       }
     }

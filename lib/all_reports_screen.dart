@@ -12,10 +12,13 @@ import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'birds_report_screen.dart';
+import 'daily_feed.dart';
+import 'egg_collection.dart';
 import 'eggs_report_screen.dart';
 import 'feed_report_screen.dart';
 import 'financial_report_screen.dart';
 import 'health_report_screen.dart';
+import 'medication_vaccination.dart';
 import 'model/feed_item.dart';
 import 'model/flock.dart';
 
@@ -153,7 +156,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
          child:Container(
           width: widthScreen,
           height: heightScreen,
-           color: Utils.getScreenBackground(),
+           color: Colors.white,
             child: SingleChildScrollViewWithStickyFirstWidget(
             child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -217,6 +220,14 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                         color: Colors.white,
                         borderRadius: const BorderRadius.all(
                             Radius.circular(5.0)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 2,
+                            offset: Offset(0, 1), // changes position of shadow
+                          ),
+                        ],
                         border: Border.all(
                           color:  Utils.getThemeColorBlue(),
                           width: 1.0,
@@ -241,6 +252,14 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                               color:  Utils.getThemeColorBlue(),
                               width: 1.0,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 2,
+                                offset: Offset(0, 1), // changes position of shadow
+                              ),
+                            ],
                           ),
                           margin: EdgeInsets.only(right: 12,top: 15,bottom: 5),
                           padding: EdgeInsets.only(left: 5,right: 5),
@@ -256,328 +275,286 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                 ],
               ),
 
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const BirdsReportsScreen()),
-                  );
-                },
-                child: Container(
-                  margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(3)),
-
-                      color: Colors.white,
-                      border: Border.all(color: Colors.blueAccent,width: 1.0)
-                  ),
-                  child: Container(
-                    width: widthScreen,
-                     padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
-                     decoration: BoxDecoration(
-                       color: Colors.white,
-                       borderRadius: BorderRadius.all(Radius.circular(5)),
-
-                     ),
-                   child: Column(children: [
-                   Align(
-                       alignment: Alignment.center,
-                       child: Row(
-                         mainAxisAlignment: MainAxisAlignment.center,
-                         children: [
-
-                           Text("BIRDS_SUMMARY".tr(),style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
-                         ],
-                       )),
-
-                   Row(
-                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                     children: [
-                     Text("TOTAL_ADDED".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                     Text('$total_birds_added',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black),),
-
-                   ],),
-                     Row(
-                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                       children: [
-                         Text("TOTAL_REDUCED".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                         Text('-$total_birds_reduced',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.red),),
-
-                       ],),
-                     SizedBox(height: 4,),
-                     Column(
-                       children: [
-                         Text('$current_birds',style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
-                         Text("CURRENT_BIRDS".tr(),style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
-
-                       ],)
-                   ],),),
-                ),
-              ),
-
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const EggsReportsScreen()),
-                  );
-                },
-                child: Container(
-                  margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(3)),
-
-                      color: Colors.white,
-                      border: Border.all(color: Colors.blueAccent,width: 1.0)
-                  ),
-                  child: Container(
-                    width: widthScreen,
-                    padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-
+              Container(
+                padding: EdgeInsets.only(bottom: 30,right: 10,left: 10),
+                decoration: BoxDecoration(
+                  // borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+                  color: Colors.white,
+                 /* boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 2,
+                      offset: Offset(0, 1), // changes position of shadow
                     ),
-                    child: Column(children: [
-                      Align(
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
+                  ],*/
 
-                              Text("EGGS_SUMMARY".tr(),style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
-                            ],
-                          )),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("TOTAL_COLLECTED".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                          Text('$total_eggs_collected',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black),),
-
-                        ],),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('TOTAL_USED'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                          Text('-$total_eggs_reduced',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.red),),
-
-                        ],),
-                      SizedBox(height: 4,),
-                      Column(
-                        children: [
-                          Text('$total_eggs',style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
-                          Text('Remaining Eggs'.tr(),style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
-
-                        ],)
-                    ],),),
                 ),
-              ),
-
-
-
-              InkWell(
-                onTap: (){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const FeedReportsScreen()),
-                  );
-                },
-                child: Container(
-                  margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(3)),
-
-                      color: Colors.white,
-                      border: Border.all(color: Colors.blueAccent,width: 1.0)
-                  ),
-                  child: Container(
-                    padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.white, //(x,y)
+                child: Column(
+                  children: [
+                    Visibility(
+                      visible: false,
+                      child: InkWell(
+                        onTap: () {
+                          openDatePicker();
+                        },
+                        child: Container(
+                          width: widthScreen,
+                          margin: EdgeInsets.all(5),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Icon(Icons.keyboard_arrow_left, color: Colors.white70,),
+                              Container(
+                                  margin: EdgeInsets.only(left: 5, right: 5),
+                                  child:Text(date_filter_name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white),)),
+                              Icon(Icons.keyboard_arrow_right, color: Colors.white70,),
+                            ],),
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                      Align(
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('FEED_CONSUMPTION'.tr(), style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
-
-                            ],
-                          )),
-                      SizedBox(height: 10,width: widthScreen,),
-                      Container(
-                        height: feedings.length==0?10:feedings.length*33,
-                        width: widthScreen,
-                        child: ListView.builder(
-                            itemCount: feedings.length,
-                            scrollDirection: Axis.vertical,
-                            physics: NeverScrollableScrollPhysics(),
-                            itemBuilder: (BuildContext context, int index) {
-                              return Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(feedings.elementAt(index).feed_name!.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                                  Text(feedings.elementAt(index).quantity! +" kg",style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
-
-
-                                ],);
-
-                            }),
                       ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
+                    ),
+                    Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(6)),
+                            color: Utils.getThemeColorBlue(),
+                            border: Border.all(color: Colors.white38,width: 1.0)
+                        ),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 10),
+                        child: InkWell(onTap : () async{
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const FinanceReportsScreen()),
+                          );
+                          getAllData();
+                        },child: Column(
+                          children: [
 
-                          Text(total_feed_consumption.toString() +"KG".tr(),style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
-                          Text('TOTAL_CONSUMPTION'.tr(),style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
+                            Row(
+                              /* mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,*/
+                              children: [
+                                Image.asset("assets/finance_icon.png", color: Colors.white, width: 40, height: 40,),
+                                Text(" "+"Financial Report".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),),
+                              ],
+                            ),
 
-                        ],)
-                    ],),),
-                ),
-              ),
+                            SizedBox(height: 5,),
+                            Text(net_income>=0?Utils.currency+'$net_income' : "-"+Utils.currency+"${-net_income}",style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: net_income>=0? Colors.white : Colors.red),),
+                            Text("NET_INCOME".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white70),),
+                            SizedBox(height: 5,),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Expanded(child: getDashboardDataBox(Colors.white12, "Income".tr(), '$gross_income', Icons.arrow_upward,Colors.green)),
+                                Expanded(child: getDashboardDataBox(Colors.white12, "Expense".tr(), '$total_expense', Icons.arrow_downward, Colors.pink)),
 
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const FinanceReportsScreen()),
-                  );
-                },
-                child: Container(
-                  margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(3)),
+                              ],
+                            ),
+                          ],
+                        ))),
+                    Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(6)),
+                            //  color: Colors.white10.withAlpha(30),
+                            color: Utils.getThemeColorBlue(),
 
-                      color: Colors.white,
-                      border: Border.all(color: Colors.blueAccent,width: 1.0)
-                  ),
-                  child: Container(
-                    padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.white, //(x,y)
+                            border: Border.all(color: Colors.white38,width: 1.0)
+                        ),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 10),
+                        child: InkWell(onTap : () async{
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const BirdsReportsScreen()),
+                          );
+                          getAllData();
+                        },child: Column(
+                          children: [
+
+                            Row(
+                              /* mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,*/
+                              children: [
+                                Image.asset("assets/bird_icon.png", color: Colors.white, width: 40, height: 40,),
+                                Text(" "+"BIRDS_SUMMARY".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),),
+                              ],
+                            ),
+
+                        /*    SizedBox(height: 5,),
+                            Text('$current_birds',style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),),
+                            Text("CURRENT_BIRDS".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white70),),
+                       */     SizedBox(height: 5,),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+
+                                Expanded(child: getCustomDataBox(Colors.white12, "TOTAL_ADDED".tr(), '$total_birds_added', '','')),
+                                Expanded(child: getCustomDataBox(Colors.white12, "TOTAL_REDUCED".tr(), '$total_birds_reduced', '','')),
+                                Expanded(child: getCustomDataBox(Colors.white12, "CURRENT_BIRDS".tr(), '$current_birds', '','')),
+
+                              ],
+                            ),
+                          ],
+                        ))),
+                    Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(6)),
+                        //  color: Colors.white10.withAlpha(30),
+                            color: Utils.getThemeColorBlue(),
+
+                            border: Border.all(color: Colors.white38,width: 1.0)
+                        ),
+                      padding: EdgeInsets.all(10),
+                      margin: EdgeInsets.only(top: 10),
+                      child: InkWell(onTap : () async{
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const EggsReportsScreen()),
+                      );
+                      getAllData();
+                    },child: Column(
+                      children: [
+
+                        Row(
+                         /* mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,*/
+                          children: [
+                            Image.asset("assets/eggs_count.png", color: Colors.white, width: 40, height: 40,),
+                            Text(" "+"EGG_COLLECTION".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),),
+                           ],
+                        ),
+                       
+                        /*SizedBox(height: 5,),
+                        Text('$total_eggs',style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),),
+                        Text("Remaining Eggs".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white70),),
+                        SizedBox(height: 5,),*/
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                            Expanded(child: getCustomDataBox(Colors.white12, "TOTAL_ADDED".tr(), '$total_eggs_collected', '','')),
+                            Expanded(child: getCustomDataBox(Colors.white12, "TOTAL_REDUCED".tr(), '$total_eggs_reduced', '','')),
+                            Expanded(child: getCustomDataBox(Colors.white12, "Remaining".tr(), '$total_eggs', '','')),
+
+                            ],
                         ),
                       ],
-                    ),
-                    child: Column(children: [
-                      Align(
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('INCOME_EXPENSE'.tr(),style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
+                    ))),
+                    Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(6)),
+                            //  color: Colors.white10.withAlpha(30),
+                            color: Utils.getThemeColorBlue(),
 
-                            ],
-                          )),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('GROSS_INCOME'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                          Text('$gross_income'+ Utils.currency,style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black),),
+                            border: Border.all(color: Colors.white38,width: 1.0)
+                        ),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 10),
+                        child: InkWell(onTap : () async{
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const FeedReportsScreen()),
+                          );
+                          getAllData();
+                        },child: Column(
+                          children: [
 
-                        ],),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('TOTAL_EXPENSE'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                          Text('-$total_expense'+ Utils.currency,style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.red),),
+                            Row(
+                              /* mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,*/
+                              children: [
+                                Image.asset("assets/feed.png", color: Colors.white, width: 40, height: 40,),
+                                Text(" "+"Feeding Report".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),),
+                              ],
+                            ),
 
-                        ],),
-                      SizedBox(height: 4,),
-                      Column(
-                        children: [
-                          Text('$net_income'+ Utils.currency,style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
-                          Text('NET_INCOME'.tr(),style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
+                            SizedBox(height: 5,),
+                            Text('$total_feed_consumption' + 'kg',style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),),
+                            Text("TOTAL_CONSUMPTION".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white70),),
+                            SizedBox(height: 5,),
+                            Container(
+                              height: feedings.length==0?10:feedings.length*45,
+                              width: widthScreen,
+                              child: ListView.builder(
+                                  itemCount: feedings.length,
+                                  scrollDirection: Axis.vertical,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemBuilder: (BuildContext context, int index) {
+                                    return Container(
+                                      padding: EdgeInsets.all(5),
+                                      margin: EdgeInsets.only(top: 5),
+                                      decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.all(Radius.circular(6)),
+                                            color: Colors.white12,
+                                          border: Border.all(color: Colors.white12,width: 1.0)
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(feedings.elementAt(index).feed_name!.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.white),),
+                                          Text(feedings.elementAt(index).quantity! +" kg",style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.white),),
 
-                        ],),
+                                        ],),
+                                    );
 
+                                  }),
+                            ),
+                          ],
+                        ))),
+                    Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(6)),
+                            //  color: Colors.white10.withAlpha(30),
+                            color: Utils.getThemeColorBlue(),
 
+                            border: Border.all(color: Colors.white38,width: 1.0)
+                        ),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 10),
+                        child: InkWell(onTap : () async{
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const HealthReportScreen()),
+                          );
+                          getAllData();
+                        },child: Column(
+                          children: [
 
-                    ],),),
+                            Row(
+                              /* mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,*/
+                              children: [
+                                Image.asset("assets/health.png", color: Colors.white, width: 40, height: 40,),
+                                Text(" "+"HEALTH_SUMMARY".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),),
+                              ],
+                            ),
+
+                            /*SizedBox(height: 5,),
+                            Text('$total_health_count',style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),),
+                            Text("TOTAL".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white70),),
+                            SizedBox(height: 5,),*/
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Expanded(child: getCustomDataBox(Colors.white12, "VACCINATIONS".tr(), '$vac_count', '','')),
+                                Expanded(child: getCustomDataBox(Colors.white12, "MEDICATIONS".tr(), '$med_count', '','')),
+                                Expanded(child: getCustomDataBox(Colors.white12, "TOTAL".tr(), '$total_health_count', '','')),
+
+                              ],
+                            ),
+                          ],
+                        ))),
+                   ],
                 ),
               ),
 
-               InkWell(
-                 onTap: (){
-                   Navigator.push(
-                     context,
-                     MaterialPageRoute(
-                         builder: (context) => const HealthReportScreen()),
-                   );
-                 },
-                 child: Container(
-                   margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
-                   decoration: BoxDecoration(
-                       borderRadius: BorderRadius.all(Radius.circular(3)),
 
-                       color: Colors.white,
-                       border: Border.all(color: Colors.blueAccent,width: 1.0)
-                   ),
-                   child: Container(
-                     padding: EdgeInsets.only(left: 10,right: 10,top: 5,bottom: 5),
-                     decoration: BoxDecoration(
-                       borderRadius: BorderRadius.all(Radius.circular(5)),
-                       boxShadow: [
-                         BoxShadow(
-                           color: Colors.white, //(x,y)
-                         ),
-                       ],
-                     ),
-                     child:  Column(children: [
-                      Align(
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('HEALTH_SUMMARY'.tr(),style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: Colors.black87),),
-
-                            ],
-                          )),
-
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('VACCINATIONS'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                          Text('$vac_count',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black),),
-
-                        ],),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('MEDICATIONS'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                          Text('$med_count',style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.red),),
-
-                        ],),
-                      SizedBox(height: 4,),
-                      Column(
-                        children: [
-                          Text('$total_health_count',style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
-                          Text('TOTAL'.tr(),style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black,decoration: TextDecoration.underline),),
-
-                        ],),
-
-
-
-                    ],),),
-              ),
-               ),
-             SizedBox(height: 20,),
 
              /* Container( margin: EdgeInsets.all(20),
                 padding: EdgeInsets.all(10),
@@ -1047,6 +1024,79 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
     return f_id;
   }
+
+  Widget getDashboardDataBox(Color color, String title, String data, IconData icon, Color iconColor) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(5)),
+        color: color,
+
+      ),
+      padding: EdgeInsets.all(10.0),
+      margin: EdgeInsets.all(5.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row (
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+
+              Icon(icon, color: iconColor,),
+              Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white70),)
+            ],),
+
+          Container(
+              margin: EdgeInsets.only(top: 5),
+              child: Text(Utils.currency+data, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),))
+        ],
+      ),
+    );
+  }
+
+
+  Widget getCustomDataBox(Color color, String title, String data, String imageSource,String ext) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(6)),
+        color: color,
+      ),
+      padding: EdgeInsets.only(top: 12,bottom: 12,left: 5,right: 5),
+      margin: EdgeInsets.all(6.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row (
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+
+
+            children: [
+
+              imageSource == ''? SizedBox(width: 0,height: 0,) :  Image.asset(imageSource, width: 40, height: 40,),
+
+              Text(title, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w400, color: Colors.white70),)
+            ],),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                  margin: EdgeInsets.only(top: 3),
+                  child: Text(data, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),)),
+              Container(
+                  margin: EdgeInsets.only(top: 3),
+                  child: Text(ext, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Colors.white),)),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
 
 }
 

@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/sticky.dart';
@@ -76,6 +77,13 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
 
     selectedCurrency = farmSetup!.currency;
 
+    if(date.toLowerCase().contains("date")){
+      var now = DateTime.now();
+      var formatter = DateFormat('yyyy-MM-dd');
+      date = formatter.format(now);
+      print("Select Date");
+    }
+
     setState(() {
 
     });
@@ -88,7 +96,6 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
   String date = "Choose date";
   final locationController = TextEditingController();
   final nameController = TextEditingController();
-
 
 
   @override
@@ -114,7 +121,6 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
               child: Column(
                 children: [
                   Utils.getDistanceBar(),
-
                   ClipRRect(
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                     child: Container(
@@ -156,12 +162,12 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                   ),
 
                   Container(
-                    margin: EdgeInsets.only(top: 30),
+                    margin: EdgeInsets.only(top: 80),
+                    alignment: Alignment.center,
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-
                           InkWell(
                             onTap: () {
                               selectImage();
@@ -173,30 +179,24 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                                  Container(
                                    width: widthScreen,
                                    height: 160,
-                                   child: modified==0? Image.asset('assets/farm.jpg', fit: BoxFit.contain,)
+                                   child: modified==0? Image.asset('assets/farm_icon.png', fit: BoxFit.contain,)
                                        : Image.memory(Base64Decoder().convert(farmSetup!.image), fit: BoxFit.contain,),
                                  ),
-                                 Align(
-                                     alignment: Alignment.bottomRight,
-                                     child: Icon(Icons.edit, color:  Utils.getThemeColorBlue(),
-                                         )),
                                 ],
                               ),
                             ),
                           ),
-
-                          SizedBox(height: 10,width: widthScreen),
+                          SizedBox(height: 30,width: widthScreen),
                           Container(
                             width: widthScreen,
                             height: 60,
-                            padding: EdgeInsets.all(0),
                             margin: EdgeInsets.only(left: 16, right: 16),
-                            decoration: BoxDecoration(
-                                color: Colors.white60,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(5))),
                             child: Container(
-
+                              decoration: BoxDecoration(
+                                color: Colors.grey.withAlpha(70),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(5.0)),
+                              ),
                               child: SizedBox(
                                 width: widthScreen,
                                 height: 60,
@@ -208,7 +208,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                                     border: OutlineInputBorder(
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(5))),
-                                    hintText: 'FARM_NAME'.tr(),
+                                    hintText: 'Poultry Farm'.tr(),
                                     hintStyle: TextStyle(
                                         color: Colors.grey, fontSize: 16),
                                     labelStyle: TextStyle(
@@ -218,40 +218,43 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                               ),
                             ),
                           ),
-
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 60,
-                            padding: EdgeInsets.all(0),
-                            margin: EdgeInsets.only(left: 16, right: 16),
-                            decoration: BoxDecoration(
-                                color: Colors.white60,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(5))),
+                         // SizedBox(height: 10,width: widthScreen),
+                          Visibility(
+                            visible: false,
                             child: Container(
-                              child: SizedBox(
-                                width: widthScreen,
-                                height: 60,
-                                child: TextFormField(
+                              width: widthScreen,
+                              height: 60,
+                              padding: EdgeInsets.all(0),
+                              margin: EdgeInsets.only(left: 16, right: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.withAlpha(70),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(5.0)),
 
-                                  controller: locationController,
-                                  textAlign: TextAlign.start,
-                                  decoration:  InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(5))),
-                                    hintText: 'LOCATION_HINT'.tr(),
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
+                              ),
+                              child: Container(
+                                child: SizedBox(
+                                  width: widthScreen,
+                                  height: 60,
+                                  child: TextFormField(
+
+                                    controller: locationController,
+                                    textAlign: TextAlign.start,
+                                    decoration:  InputDecoration(
+                                      border: OutlineInputBorder(
+                                          borderRadius:
+                                          BorderRadius.all(Radius.circular(5))),
+                                      hintText: 'LOCATION_HINT'.tr(),
+                                      hintStyle: TextStyle(
+                                          color: Colors.grey, fontSize: 16),
+                                      labelStyle: TextStyle(
+                                          color: Colors.black, fontSize: 16),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-
                           SizedBox(height: 10,width: widthScreen),
                           InkWell(
                             onTap: () {
@@ -263,9 +266,11 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                               padding: EdgeInsets.all(0),
                               margin: EdgeInsets.only(left: 16, right: 16),
                               decoration: BoxDecoration(
-                                  color: Colors.white60,
-                                  borderRadius:
-                                  BorderRadius.all(Radius.circular(5))),
+                                color: Colors.grey.withAlpha(70),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(5.0)),
+
+                              ),
                               child: Container(
                                 padding: EdgeInsets.all(10),
                                 decoration: BoxDecoration(
@@ -283,7 +288,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text("CURRENCY".tr(), style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal),),
-                                      Text(selectedCurrency, style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
+                                      Text(selectedCurrency, style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
 
                                     ],
                                   )
@@ -291,16 +296,17 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                               ),
                             ),
                           ),
-
                           SizedBox(height: 10,width: widthScreen),
                           Container(
                             width: widthScreen,
                             height: 60,
                             margin: EdgeInsets.only(left: 16, right: 16),
                             decoration: BoxDecoration(
-                                color: Colors.white60,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(5))),
+                              color: Colors.grey.withAlpha(70),
+                              borderRadius: const BorderRadius.all(
+                                  Radius.circular(5.0)),
+
+                            ),
                             child: InkWell(
                               onTap: () {
                                 pickDate();
@@ -313,7 +319,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                                   borderRadius: const BorderRadius.all(
                                       Radius.circular(5.0)),
                                   border: Border.all(
-                                    color:  Colors.black,
+                                    color:  Colors.grey,
                                     width: 1.0,
                                   ),
                                 ),
@@ -350,6 +356,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                               }
                             },
                             child: Container(
+
                               width: widthScreen,
                               height: 58,
                               alignment: Alignment.center,
@@ -361,8 +368,16 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                                   color:  Utils.getThemeColorBlue(),
                                   width: 1.0,
                                 ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.5),
+                                    spreadRadius: 2,
+                                    blurRadius: 2,
+                                    offset: Offset(0, 1), // changes position of shadow
+                                  ),
+                                ],
                               ),
-                              margin: EdgeInsets.only( left: 16,right: 16,top: 4),
+                              margin: EdgeInsets.only( left: 16,right: 16,top: 15),
                               child: Text(
                                 "SAVE".tr(),
                                 textAlign: TextAlign.center,
@@ -433,16 +448,37 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
   List<XFile>? imageFileList = [];
 
   void selectImage() async {
-    final XFile? image = await
-    imagePicker.pickImage(source: ImageSource.gallery);
-    final bytes = File(image!.path).readAsBytesSync();
+    final XFile? image = await imagePicker.pickImage(source: ImageSource.gallery);
+    cropImage(image);
+  }
+
+  void cropImage(XFile? imageFile) async {
+    CroppedFile? croppedFile = await ImageCropper().cropImage(
+      sourcePath: imageFile!.path,
+      aspectRatioPresets: [
+        CropAspectRatioPreset.square,
+      ],
+      uiSettings: [
+        AndroidUiSettings(
+            toolbarTitle: 'Cropper',
+            toolbarColor: Utils.getThemeColorBlue(),
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.square,
+            lockAspectRatio: false),
+        IOSUiSettings(
+          title: 'Cropper',
+        ),
+      ],
+    );
+    final bytes = File(croppedFile!.path).readAsBytesSync();
     String base64Image =  base64Encode(bytes);
     farmSetup!.image = base64Image;
     modified = 1;
     setState((){});
   }
 
-  void chooseCurrency() {
+  void chooseCurrency()
+  {
     showCurrencyPicker(
       context: context,
       showFlag: true,
@@ -452,12 +488,12 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
         selectedCurrency = currency.symbol;
         DatabaseHelper.updateCurrency(selectedCurrency);
         Utils.currency = selectedCurrency;
-        setState(() {
+        setState(()
+        {
 
         });
         Utils.showToast("SUCCESSFUL".tr());
-      },
-    );
+      },);
   }
 
 }

@@ -309,9 +309,9 @@ class Utils {
 
   }
 
-  static setupInvoiceInitials(String invoiceHeading,String date) async {
+  static setupInvoiceInitials(String invoiceHeading, String date) async {
     await DatabaseHelper.instance.database;
-
+    Utils.INVOICE_DATE = date;
     List<FarmSetup> farmSetup = await DatabaseHelper.getFarmInfo();
     print('NAME '+farmSetup.elementAt(0).name);
     print("LOCATION "+farmSetup.elementAt(0).location);
@@ -323,7 +323,6 @@ class Utils {
         .image;
     Utils.INVOICE_HEADING = farmSetup
         .elementAt(0).name;
-    Utils.INVOICE_DATE = date;
 
     print(date);
     print(invoiceHeading);
@@ -576,6 +575,11 @@ class Utils {
     );
   }
 
+  static Color getThemeColorBlue2() {
+    Color themeColor = Color.fromRGBO(2, 86, 185, 1);
+    return themeColor;
+  }
+
   static Color getThemeColorBlue() {
     Color themeColor = Color.fromRGBO(2, 83, 179, 1);
     return themeColor;
@@ -680,6 +684,18 @@ class Utils {
     }
     return Languages.english;
   }
+
+  static Future<bool> checkAppLaunch() async{
+
+   return SessionManager.getAppLaunch();
+
+  }
+
+  static setupCompleted() async{
+
+   SessionManager.setupComplete();
+  }
+
   static setSelectedLanguage(Language language,BuildContext context) async {
 
     String languageName = "";

@@ -113,7 +113,6 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
 
   }
 
-
   @override
   Widget build(BuildContext context) {
 
@@ -133,7 +132,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
          child:Container(
           width: widthScreen,
           height: heightScreen,
-           color: Utils.getScreenBackground(),
+           color: Colors.white,
             child: SingleChildScrollViewWithStickyFirstWidget(
             child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -253,12 +252,8 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                 ],
               ),
 
-              Card(
-                elevation: 10,
-                shadowColor: Colors.blue,
+              Container(
                 color: Colors.white,
-                margin: EdgeInsets.all(10),
-
                 child: Container(
                   width: widthScreen,
                    padding: EdgeInsets.all(10),
@@ -300,91 +295,130 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                      ],)
              ],),),
               ),
-              Align(
-                alignment: Alignment.topLeft,
-                child: Container(
-                    margin: EdgeInsets.all(10),
-                    child: Text('ADITION_RDCTIN'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
-              ),
 
-              list.length > 0 ? Container(
-                height: heightScreen - 220,
-                width: widthScreen,
-                child: ListView.builder(
-                    itemCount: list.length,
-                    scrollDirection: Axis.vertical,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemBuilder: (BuildContext context, int index) {
-                      return InkWell(
-                        onTap: () {
-                        },
-                        child: Container(
-                          margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(Radius.circular(3)),
+              Container(
+                 height: heightScreen,
+                  padding: EdgeInsets.only(top: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+                    color: Utils.getScreenBackground(),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 2,
+                        offset: Offset(0, 1), // changes position of shadow
+                      ),
+                    ],
+                  ),child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                        margin: EdgeInsets.all(10),
+                        child: Text('ADITION_RDCTIN'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
+                  ),
 
-                              color: Colors.white,
-                              border: Border.all(color: Colors.blueAccent,width: 1.0)
-                          ),
-
-                          child: Container(
-                            height: 130,
-                            color: Colors.white,
-                            child: Row( children: [
-                              Expanded(
-                                child: Container(
+                  list.length > 0 ? Container(
+                    height: heightScreen - 220,
+                    width: widthScreen,
+                    child: ListView.builder(
+                        itemCount: list.length,
+                        scrollDirection: Axis.vertical,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemBuilder: (BuildContext context, int index) {
+                          return InkWell(
+                            onTap: () {
+                            },
+                            child: Container(
+                              margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(3)),
                                   color: Colors.white,
-                                  padding: EdgeInsets.all(10),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,children: [
-                                    Row(
-                                      children: [
-                                        Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index)!.f_name.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
-                                        Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index)!.item_type.tr()+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: list.elementAt(index)!.item_type=='Reduction'? Colors.red:Colors.black),)),
-                                      ],
-                                    ),
-                                    Align(
-                                        alignment: Alignment.topLeft,
-                                        child: Container(margin: EdgeInsets.all(5), child: Text(Utils.getFormattedDate(list.elementAt(index).acqusition_date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),))),
-                                    list.elementAt(index).item_type == 'Reduction'? Align(
-                                        alignment: Alignment.topLeft,
-                                        child: Container(margin: EdgeInsets.all(5), child: Text(list.elementAt(index).reason.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),))) : Align(
-                                        alignment: Alignment.topLeft,
-                                        child: Container(margin: EdgeInsets.all(5), child: Text(list.elementAt(index).acqusition_type.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),))),
-                                    // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                  ],),
-                                ),
-                              ),
-                              Column(
-                                children: [
-                                  Container(
-                                    color: Colors.white,
-                                    child: Row(
-                                      children: [
-                                        Container( margin: EdgeInsets.only(right: 5), child: Text(list.elementAt(index).item_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color:list.elementAt(index).item_type == 'Addition'?Colors.black:Colors.black),)),
-                                        Text("BIRDS".tr(), style: TextStyle(color: Colors.black, fontSize: 12),)
-                                      ],
-                                    ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.5),
+                                    spreadRadius: 2,
+                                    blurRadius: 2,
+                                    offset: Offset(0, 1), // changes position of shadow
                                   ),
                                 ],
                               ),
 
-                            ]),
-                          ),
-                        ),
-                      );
+                              child: Container(
+                                height: 130,
+                                color: Colors.white,
+                                child: Row( children: [
+                                  Expanded(
+                                    child: Container(
+                                      color: Colors.white,
+                                      padding: EdgeInsets.all(10),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.start,children: [
+                                        Row(
+                                          children: [
+                                            Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).f_name.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
+                                            Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index).item_type.tr()+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: list.elementAt(index).item_type=='Reduction'? Colors.red:Colors.black),)),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.calendar_month, size: 25,),
 
-                    }),
-              ) : Center(
-                child: Container(
-                  margin: EdgeInsets.only(top: 50),
-                  child: Column(
-                    children: [
-                      Text('NO_BIRD_ADDED'.tr(), style: TextStyle(fontSize: 15, color: Colors.black54),),
-                    ],
+                                            Align(
+                                                alignment: Alignment.topLeft,
+                                                child: Container(margin: EdgeInsets.all(5), child: Text(Utils.getFormattedDate(list.elementAt(index).acqusition_date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),))),
+                                          ],
+                                        ),
+                                        list.elementAt(index).item_type == 'Reduction'? Row(
+                                          children: [
+                                            Align(
+                                                alignment: Alignment.topLeft,
+                                                child: Container(margin: EdgeInsets.only(top:5), child: Text(list.elementAt(index).reason.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),))),
+                                          ],
+                                        ) : Align(
+                                            alignment: Alignment.topLeft,
+                                            child: Container(margin: EdgeInsets.only(top:5), child: Text(list.elementAt(index).acqusition_type.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),))),
+                                        // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+                                      ],),
+                                    ),
+                                  ),
+                                  Column(
+                                    children: [
+                                      Container(
+                                        margin: EdgeInsets.all(10),
+                                        color: Colors.white,
+                                        child: Row(
+                                          children: [
+                                            Image.asset("assets/bird_icon.png", width: 40, height: 40,),
+                                            Container( margin: EdgeInsets.only(right: 5, left: 5), child: Text(list.elementAt(index).item_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color:list.elementAt(index).item_type == 'Addition'?Colors.black:Colors.black),)),
+                                           // Text("BIRDS".tr(), style: TextStyle(color: Colors.black, fontSize: 12),)
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                ]),
+                              ),
+                            ),
+                          );
+
+                        }),
+                  ) : Center(
+                    child: Container(
+                      margin: EdgeInsets.only(top: 50),
+                      child: Column(
+                        children: [
+                          Text('NO_BIRD_ADDED'.tr(), style: TextStyle(fontSize: 15, color: Colors.black54),),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                ],
+              ),),
+
+
 
             ]
       ),),),),),);
@@ -527,7 +561,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       end_date = inputFormat.format(today);
       print(str_date+" "+end_date);
 
-      pdf_formatted_date_filter = 'TODAY'.tr()+" ("+str_date+")";
+      pdf_formatted_date_filter = 'TODAY'.tr()+" ("+Utils.getFormattedDate(str_date)+")";
 
     }
     else if (filter == 'YESTERDAY'.tr()){
@@ -539,7 +573,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       end_date = inputFormat.format(today);
       print(str_date+" "+end_date);
 
-      pdf_formatted_date_filter = "YESTERDAY".tr() + " ("+str_date+")";
+      pdf_formatted_date_filter = "YESTERDAY".tr() + " ("+Utils.getFormattedDate(str_date)+")";
 
     }
     else if (filter == 'THIS_MONTH'.tr()){
@@ -554,7 +588,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       print(str_date+" "+end_date);
 
 
-      pdf_formatted_date_filter = 'THIS_MONTH'.tr()+" ("+str_date+"-"+end_date+")";
+      pdf_formatted_date_filter = 'THIS_MONTH'.tr()+" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
     }else if (filter == 'LAST_MONTH'.tr()){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
@@ -568,7 +602,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       print(str_date+" "+end_date);
 
 
-      pdf_formatted_date_filter = 'LAST_MONTH'.tr()+ " ("+str_date+"-"+end_date+")";
+      pdf_formatted_date_filter = 'LAST_MONTH'.tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
 
     }else if (filter == 'LAST3_MONTHS'.tr()){
       index = 4;
@@ -582,7 +616,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       print(str_date+" "+end_date);
 
 
-      pdf_formatted_date_filter = "LAST3_MONTHS".tr()+ " ("+str_date+"-"+end_date+")";
+      pdf_formatted_date_filter = "LAST3_MONTHS".tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
     }else if (filter == 'LAST6_MONTHS'.tr()){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
@@ -595,7 +629,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       print(str_date+" "+end_date);
 
 
-      pdf_formatted_date_filter = "LAST6_MONTHS".tr()+" ("+str_date+"-"+end_date+")";
+      pdf_formatted_date_filter = "LAST6_MONTHS".tr()+" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
     }else if (filter == 'THIS_YEAR'.tr()){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
@@ -606,7 +640,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
 
-      pdf_formatted_date_filter = 'THIS_YEAR'.tr()+ " ("+str_date+"-"+end_date+")";
+      pdf_formatted_date_filter = 'THIS_YEAR'.tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
     }else if (filter == 'LAST_YEAR'.tr()){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
@@ -618,7 +652,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       print(str_date+" "+end_date);
 
 
-      pdf_formatted_date_filter = 'LAST_YEAR'.tr() +" ("+str_date+"-"+end_date+")";
+      pdf_formatted_date_filter = 'LAST_YEAR'.tr() +" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
 
     }else if (filter == 'ALL_TIME'.tr()){
       index = 8;
@@ -629,6 +663,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
 
       pdf_formatted_date_filter = 'ALL_TIME'.tr();
     }
+    print(pdf_formatted_date_filter);
     getAllData();
 
   }
@@ -680,7 +715,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
               addition: (added + init_flock_birds),
               reduction: reduced));
 
-           total_added = total_added! + init_flock_birds! + added;
+           total_added = total_added! + init_flock_birds + added;
            total_reduced = total_reduced! + reduced;
           active_birds = active_birds! + flocks
               .elementAt(i)
@@ -697,31 +732,34 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       Flock? f = await getSelectedFlock();
 
       list.add(Flock_Report_Item(f_name: f!.f_name,
-          date: f!
+          date: f
               .acqusition_date,
-          active_bird_count: f!
+          active_bird_count: f
               .active_bird_count,
           addition: (added + init_flock_birds),
           reduction: reduced));
 
-       total_added = total_added! + init_flock_birds! + added;
-        total_reduced = total_reduced! + reduced;
-      active_birds = f!
+       total_added = total_added + init_flock_birds + added;
+        total_reduced = total_reduced + reduced;
+      active_birds = f
           .active_bird_count!;
     }
     Utils.TOTAL_ACTIVE_BIRDS = active_birds.toString();
     Utils.TOTAL_BIRDS_ADDED = total_added.toString();
     Utils.TOTAL_BIRDS_REDUCED = total_reduced.toString();
     Utils.flock_report_list = list;
+   // Utils.INVOICE_DATE = Utils.getFormattedDate(str_date) + " - " + Utils.getFormattedDate(end_date);
 
   }
 
-  Future<Flock?> getSelectedFlock() async{
+  Future<Flock?> getSelectedFlock() async {
 
     Flock? flock = null;
 
-    for(int i=0;i<flocks.length;i++){
-      if(f_id == flocks.elementAt(i).f_id){
+    for(int i=0;i<flocks.length;i++)
+    {
+      if(f_id == flocks.elementAt(i).f_id)
+      {
         flock = flocks.elementAt(i);
         break;
       }

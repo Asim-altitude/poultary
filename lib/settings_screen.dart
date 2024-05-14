@@ -227,286 +227,365 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
               ),
               SizedBox(height: 8,),
               if(isGetLanguage)
-                Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(3)),
-                      color: Colors.white,
-                      border: Border.all(color: Colors.blueAccent,width: 1.0)
-                  ),
-                  height: 60,
-                  margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
-
-                  child:
-
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(height: 20,
-
+                Visibility(
+                  visible: false,
+                  child: Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(3)),
                         color: Colors.white,
-                        child: Align(
-                          alignment: Alignment.center,
-                          child:Text("Language".tr(),
-                            textAlign: TextAlign.center,
-                            style: new TextStyle(
-                              fontSize: 13.0,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.black54,
+                        border: Border.all(color: Colors.blueAccent,width: 1.0)
+                    ),
+                    height: 60,
+                    margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
 
+                    child:
+
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(height: 20,
+
+                          color: Colors.white,
+                          child: Align(
+                            alignment: Alignment.center,
+                            child:Text("Language".tr(),
+                              textAlign: TextAlign.center,
+                              style: new TextStyle(
+                                fontSize: 13.0,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.black54,
+
+                              ),
+                            ),),
+                        ),
+
+                        Container(
+                          width: Utils.getWidthResized(200),height:24,color: Colors.white,
+                          child: LanguagePickerDropdown(
+                            initialValue: _selectedCupertinoLanguage,
+                            itemBuilder: _buildDropdownItem,
+                            languages: supportedLanguages,
+                            onValuePicked: (Language language) {
+                              _selectedCupertinoLanguage = language;
+                              // Utils.showToast(language.isoCode);
+                              Utils.setSelectedLanguage(_selectedCupertinoLanguage,context);
+                            },
+                          ),
+                        ),
+
+                      ],)
+
+                    ,),
+                ),
+
+              Container(
+                  padding: EdgeInsets.all(10),
+                  margin: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(3)),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 1,
+                        blurRadius: 1,
+                        offset: Offset(0, 1), // changes position of shadow
+                      ),
+                    ],
+                  ), child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.center,
+                    child:
+                    Text('Basic Settings'.tr(),style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const FarmSetupScreen()),
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(3)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 2,
+                            offset: Offset(0, 1), // changes position of shadow
+                          ),
+                        ],
+                        color: Colors.white,
+                        //  border: Border.all(color: Colors.blueAccent,width: 1.0)
+                      ),
+                      margin: EdgeInsets.only(left: 12,right: 12,top: 5,bottom: 8),
+                      child: Container(
+                        height: 52,
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white, //(x,y)
                             ),
-                          ),),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Align(
+                                alignment: Alignment.topLeft,
+                                child: Row(
+                                  children: [
+
+                                    Icon(Icons.settings_applications,color: Utils.getThemeColorBlue(),),
+                                    SizedBox(width: 4,),
+                                    Text('FARM_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                  ],
+                                )),
+
+                          ],),),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const CategoryScreen()),
+
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(3)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 2,
+                            offset: Offset(0, 1), // changes position of shadow
+                          ),
+                        ],
+                        color: Colors.white,
+                        // border: Border.all(color: Colors.blueAccent,width: 1.0)
                       ),
-
-                      Container(
-                        width: Utils.getWidthResized(200),height:24,color: Colors.white,
-                        child: LanguagePickerDropdown(
-                          initialValue: _selectedCupertinoLanguage,
-                          itemBuilder: _buildDropdownItem,
-                          languages: supportedLanguages,
-                          onValuePicked: (Language language) {
-                            _selectedCupertinoLanguage = language;
-                            // Utils.showToast(language.isoCode);
-                            Utils.setSelectedLanguage(_selectedCupertinoLanguage,context);
-                          },
+                      margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                      child: Container(
+                        height: 52,
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white, //(x,y)
+                            ),
+                          ],
                         ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+
+                          children: [
+                            Align(
+                                alignment: Alignment.topLeft,
+                                child: Row(
+                                  children: [
+
+                                    Icon(Icons.api,color: Utils.getThemeColorBlue(),),
+                                    SizedBox(width: 4,),
+                                    Text('CATEGORY_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                  ],
+                                )),
+
+                          ],),),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ManageFlockScreen()),
+
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(3)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 2,
+                            offset: Offset(0, 1), // changes position of shadow
+                          ),
+                        ],
+                        color: Colors.white,
+                        //  border: Border.all(color: Colors.blueAccent,width: 1.0)
                       ),
-
-                    ],)
-
-                  ,),
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const FarmSetupScreen()),
-                  );
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(3)),
-
-                      color: Colors.white,
-                      border: Border.all(color: Colors.blueAccent,width: 1.0)
-                  ),
-                  margin: EdgeInsets.only(left: 12,right: 12,top: 0,bottom: 8),
-                  child: Container(
-                    height: 52,
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.white, //(x,y)
+                      margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                      child: Container(
+                        height: 52,
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white, //(x,y)
+                            ),
+                          ],
                         ),
-                      ],
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+
+                          children: [
+                            Align(
+                                alignment: Alignment.topLeft,
+                                child: Row(
+                                  children: [
+
+                                    Icon(Icons.album,color: Utils.getThemeColorBlue(),),
+                                    SizedBox(width: 4,),
+                                    Text('FLOCK_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                  ],
+                                )),
+
+                          ],),),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                      Align(
-                          alignment: Alignment.topLeft,
-                          child: Row(
-                            children: [
-
-                              Icon(Icons.settings_applications,color: Utils.getThemeColorBlue(),),
-                              SizedBox(width: 4,),
-                              Text('FARM_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
-                            ],
-                          )),
-
-                    ],),),
-                ),
-              ),
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const CategoryScreen()),
-
-                  );
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(3)),
-
-                      color: Colors.white,
-                      border: Border.all(color: Colors.blueAccent,width: 1.0)
                   ),
-                  margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
-                  child: Container(
-                    height: 52,
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.white, //(x,y)
-                        ),
-                      ],
+                  SizedBox(height: 4,),
+                ],
+              ),),
+
+
+              Container(
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(3)),
+                    color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 1,
+                      blurRadius: 1,
+                      offset: Offset(0, 1), // changes position of shadow
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-
-                      children: [
-                        Align(
-                            alignment: Alignment.topLeft,
-                            child: Row(
-                              children: [
-
-                                Icon(Icons.api,color: Utils.getThemeColorBlue(),),
-                                SizedBox(width: 4,),
-                                Text('CATEGORY_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
-                              ],
-                            )),
-
-                      ],),),
+                  ],
                 ),
-              ),
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ManageFlockScreen()),
-
-                  );
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(3)),
-
-                      color: Colors.white,
-                      border: Border.all(color: Colors.blueAccent,width: 1.0)
-                  ),
-                  margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
-                  child: Container(
-                    height: 52,
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.white, //(x,y)
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-
-                      children: [
-                        Align(
-                            alignment: Alignment.topLeft,
-                            child: Row(
-                              children: [
-
-                                Icon(Icons.album,color: Utils.getThemeColorBlue(),),
-                                SizedBox(width: 4,),
-                                Text('FLOCK_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
-                              ],
-                            )),
-
-                      ],),),
-                ),
-              ),
-              SizedBox(height: 4,),
-              Align(
+                child: Column(children: [
+                Align(
                   alignment: Alignment.center,
                   child:
-                      Text('BACK_UP_RESTORE_MESSAGE'.tr(),style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
-                   ),
-              SizedBox(height: 4,),
+                  Text('BACK_UP_RESTORE_MESSAGE'.tr(),style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                ),
+                SizedBox(height: 4,),
 
-              InkWell(
-                onTap: () {
-                  shareFiles();
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(3)),
-
-                      color: Colors.white,
-                      border: Border.all(color: Colors.blueAccent,width: 1.0)
-                  ),
-                  margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                InkWell(
+                  onTap: () {
+                    shareFiles();
+                  },
                   child: Container(
-                    height: 52,
-                    padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                      borderRadius: BorderRadius.all(Radius.circular(3)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.white, //(x,y)
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 2,
+                          offset: Offset(0, 1), // changes position of shadow
                         ),
                       ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-
-                      children: [
-                        Align(
-                            alignment: Alignment.topLeft,
-                            child: Row(
-                              children: [
-
-                                Icon(Icons.backup,color: Utils.getThemeColorBlue(),),
-                                SizedBox(width: 4,),
-                                Text("BACKUP".tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
-                              ],
-                            )),
-
-                      ],),),
-                ),
-              ),
-              InkWell(
-                onTap: () async {
-                  await DatabaseHelper.importDataBaseFile(context);
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(3)),
-
                       color: Colors.white,
-                      border: Border.all(color: Colors.blueAccent,width: 1.0)
+                      // border: Border.all(color: Colors.blueAccent,width: 1.0)
+                    ),
+                    margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                    child: Container(
+                      height: 52,
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white, //(x,y)
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+
+                        children: [
+                          Align(
+                              alignment: Alignment.topLeft,
+                              child: Row(
+                                children: [
+
+                                  Icon(Icons.backup,color: Utils.getThemeColorBlue(),),
+                                  SizedBox(width: 4,),
+                                  Text("BACKUP".tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                ],
+                              )),
+
+                        ],),),
                   ),
-                  margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                ),
+                InkWell(
+                  onTap: () async {
+                    await DatabaseHelper.importDataBaseFile(context);
+                  },
                   child: Container(
-                    height: 52,
-                    padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                      borderRadius: BorderRadius.all(Radius.circular(3)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.white, //(x,y)
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 2,
+                          offset: Offset(0, 1), // changes position of shadow
                         ),
                       ],
+                      color: Colors.white,
+                      //border: Border.all(color: Colors.blueAccent,width: 1.0)
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                    child: Container(
+                      height: 52,
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white, //(x,y)
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
 
-                      children: [
-                        Align(
-                            alignment: Alignment.topLeft,
-                            child: Row(
-                              children: [
+                        children: [
+                          Align(
+                              alignment: Alignment.topLeft,
+                              child: Row(
+                                children: [
 
-                                Icon(Icons.restore,color: Utils.getThemeColorBlue(),),
-                                SizedBox(width: 4,),
-                                Text("RESTORE".tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
-                              ],
-                            )),
+                                  Icon(Icons.restore,color: Utils.getThemeColorBlue(),),
+                                  SizedBox(width: 4,),
+                                  Text("RESTORE".tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                ],
+                              )),
 
-                      ],),),
+                        ],),),
+                  ),
                 ),
-              ),
-
-
+              ],),),
 
               if(Utils.isShowAdd)
               Container(width: Utils.WIDTH_SCREEN,

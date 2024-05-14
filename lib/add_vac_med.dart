@@ -95,9 +95,11 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
+      total_birds += flocks.elementAt(i).active_bird_count!;
     }
 
     _purposeselectedValue = _purposeList[0];
+    bird_countController.text = total_birds.toString();
 
 
     setState(() {
@@ -193,7 +195,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                Utils.vaccine_medicine.toLowerCase().contains("medi")? isEdit?'EDIT'.tr() + 'MEDICATION'.tr():'NEW_MEDICATION'.tr():isEdit?'EDIT'.tr() + 'VACCINATION'.tr():'NEW_VACCINATION'.tr(),
+                                Utils.vaccine_medicine.toLowerCase().contains("medi")? isEdit?'EDIT'.tr()+" "+ 'Medication'.tr():'NEW_MEDICATION'.tr():isEdit?'EDIT'.tr()+" "+ 'Vaccination'.tr():'NEW_VACCINATION'.tr(),
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -528,6 +530,15 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
         onChanged: (String? newValue) {
           setState(() {
             _purposeselectedValue = newValue!;
+             int f_id = getFlockID();
+             if (f_id == -1){
+               bird_countController.text = total_birds.toString();
+             }else {
+               bird_countController.text = getBirdsCount().toString();
+             }
+             setState(() {
+
+             });
 
           });
         },
@@ -653,6 +664,21 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
     }
 
     return selected_id;
+  }
+
+  int total_birds = 0;
+
+  int getBirdsCount() {
+
+    int birds_count = 0;
+    for(int i=0;i<flocks.length;i++){
+      if(_purposeselectedValue == flocks.elementAt(i).f_name){
+        birds_count = flocks.elementAt(i).active_bird_count!;
+        break;
+      }
+    }
+
+    return birds_count;
   }
 
   int getDiseaseID() {

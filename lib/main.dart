@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui' as ui;
 import 'package:poultary/utils/utils.dart';
 
+import 'app_setup/language_setup_screen.dart';
 import 'home_screen.dart';
 
 bool direction = true;
@@ -19,7 +20,9 @@ Future<void> main() async {
           path: 'assets/translations', // <-- change the path of the translation files
           fallbackLocale: Locale('en'),
       child: MyApp()),);
+  launch = await Utils.checkAppLaunch();
   requestGDPR();
+
   direction = await Utils.getDirection();
   await MobileAds.instance.initialize();
   Utils.direction = await Utils.getDirection();
@@ -27,6 +30,12 @@ Future<void> main() async {
   //     RequestConfiguration(testDeviceIds: ['C0B856BD630A2928BC9F472E0A5C870A']));
 
 }
+
+ bool launch = true;
+ void checkFirstAppLaunch() async{
+   launch = await Utils.checkAppLaunch();
+ }
+
 void requestGDPR(){
 
   // Test
@@ -105,7 +114,7 @@ class MyApp extends StatelessWidget {
 
       home: Directionality(
           textDirection: direction? ui.TextDirection.ltr: ui.TextDirection.ltr,
-          child: HomeScreen()),
+          child: launch? LanguageSetupScreen() : HomeScreen()),
     );
   }
 }

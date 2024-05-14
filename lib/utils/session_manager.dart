@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class SessionManager {
   static const String user_id = "user_id";
+  static const String app_launch = "app_launch";
   static const String phone_id = "phone_id";
   static const String is_premium = "is_premium";
   static final String countryCode = "countryCode";
@@ -31,6 +32,18 @@ class SessionManager {
     int? user_id;
     user_id = pref.getInt(SessionManager.user_id) ?? null;
     return user_id;
+  }
+
+  static Future<bool> getAppLaunch() async {
+    final SharedPreferences pref = await SharedPreferences.getInstance();
+    bool app_launch;
+    app_launch = pref.getBool(SessionManager.app_launch) ?? true;
+    return app_launch;
+  }
+
+  static setupComplete() async {
+    final SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setBool(SessionManager.app_launch, false);
   }
 
   static Future<void> setPhoneID(String phoneId) async {

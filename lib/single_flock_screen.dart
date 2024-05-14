@@ -1,24 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
-
+import 'package:avatar_view/avatar_view.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:poultary/inventory.dart';
 import 'package:poultary/model/flock_image.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/transactions_screen.dart';
 import 'package:poultary/utils/utils.dart';
-
-import 'add_flocks.dart';
 import 'add_reduce_flock.dart';
 import 'daily_feed.dart';
 import 'database/databse_helper.dart';
 import 'egg_collection.dart';
 import 'medication_vaccination.dart';
-import 'model/flock.dart';
 import 'model/used_item.dart';
 
 class SingleFlockScreen extends StatefulWidget {
@@ -41,6 +36,16 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
   }
 
+  void getUsage() async{
+    birdUsageList = await DatabaseHelper.getBirdUSage(Utils.selected_flock!.f_id);
+
+    print("BIRD USAGES ${birdUsageList.length}");
+
+    setState(() {
+
+    });
+  }
+
   List<Flock_Image> images = [];
   List<Uint8List> byteimages = [];
   List<BirdUsage> birdUsageList = [];
@@ -58,8 +63,6 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
      print(images.elementAt(i).image);
    }
 
-   birdUsageList = await DatabaseHelper.getBirdUSage(Utils.selected_flock!.f_id);
-
    if (byteimages.length > 0) {
      imagesAdded = true;
      setState(() {
@@ -75,6 +78,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
   void initState() {
     super.initState();
     getImages();
+    getUsage();
     Utils.setupAds();
 
   }
@@ -99,13 +103,11 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
           child:Container(
           width: widthScreen,
           height: heightScreen,
-            color: Colors.white,
+            color: Utils.getThemeColorBlue(),
             child: SingleChildScrollViewWithStickyFirstWidget(
 
             child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children:  [
+             children:  [
               Utils.getDistanceBar(),
 
               ClipRRect(
@@ -122,8 +124,8 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                     children: [
                       Container(
                         alignment: Alignment.center,
-                        width: 50,
-                        height: 50,
+                        width: 45,
+                        height: 45,
                         child: InkWell(
                           child: Icon(Icons.arrow_back,
                               color: Colors.white, size: 30),
@@ -135,7 +137,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                       Container(
                           margin: EdgeInsets.only(left: 10),
                           child: Text(
-                            "FLOCK_DETAILS".tr(),
+                            "",
                             textAlign: TextAlign.start,
                             style: TextStyle(
                                 color: Colors.white,
@@ -148,53 +150,61 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                 ),
               ),
 
+              Container( child: Text(Utils.selected_flock!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white,),)),
               Container(
-                height: 170,
-                color: Colors.white,
+                margin: EdgeInsets.only(left: 15, top: 5),
                 child: Row( children: [
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                        Container( child: Text(Utils.selected_flock!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 17, color: Utils.getThemeColorBlue(),),)),
-                        Row(
-                          children: [
-                            Container( child: Text(Utils.selected_flock!.acqusition_type.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black,decoration: TextDecoration.underline,),)),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Container( child: Text('ACQUIRED_ON'.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black54),)),
-                            Container( child: Text(Utils.getFormattedDate(Utils.selected_flock!.acqusition_date), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
-                          ],
-                        ),
-                          Row(
+                  Image.asset(Utils.selected_flock!.icon.replaceAll("jpeg", "png"), width: 125, height: 125,),
+                  /*AvatarView(
+                    radius: 65,
+                    borderColor: Utils.getThemeColorBlue(),
+                    avatarType: AvatarType.RECTANGLE,
+                    backgroundColor: Colors.grey.withAlpha(50),
+                    imagePath:
+                    Utils.selected_flock!.icon,
+                    placeHolder: Container(
+                      child: Icon(Icons.ac_unit, size: 50,),
+                    ),
+                    errorWidget: Container(
+                      child: Icon(Icons.error, size: 50,),
+                    ),
+                  ),*/
+                  Container(
+                    margin: EdgeInsets.all(10),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          margin: EdgeInsets.only(right: 15),
+                          child: Row(
                             children: [
-                              Container( child: Text('PURPOSE1'.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black54),)),
-                              Container( child: Text(Utils.selected_flock!.purpose, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
+                              Container( margin: EdgeInsets.only(right: 3), child: Text(Utils.selected_flock!.active_bird_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 24, color: Colors.white),)),
+                              Text("BIRDS".tr(), style: TextStyle(color: Colors.white70, fontSize: 16),)
                             ],
                           ),
-
-                      ],),
-                    ),
-                  ),
-                  Column(
-                    children: [
-                      Container(
-                        height: 120, width: 120,
-                        child: Image.asset(Utils.selected_flock!.icon, fit: BoxFit.contain,),),
-                      Container(
-                        margin: EdgeInsets.only(right: 10),
-                        child: Row(
+                        ),
+                        Row(
                           children: [
-                            Container( margin: EdgeInsets.only(right: 3), child: Text(Utils.selected_flock!.active_bird_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color: Utils.getThemeColorBlue()),)),
-                            Text("BIRDS".tr(), style: TextStyle(color: Colors.black, fontSize: 14),)
+                            Container( child: Text('PURPOSE1'.tr()+": ", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.white70),)),
+                            Container( child: Text(Utils.selected_flock!.purpose, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white),)),
                           ],
                         ),
-                      ),
-                    ],
+                        Row(
+                          children: [
+                            Container( child: Text('ACQUSITION'.tr()+": ", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.white70),)),
+                            Container( child: Text(Utils.selected_flock!.acqusition_type.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white,decoration: TextDecoration.underline,),)),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            //Icon(Icons.calendar_month, size: 25, color: Colors.white70,),
+                            Container( child: Text('DATE'.tr()+": ", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.white70),)),
+                            Container( child: Text(Utils.getFormattedDate(Utils.selected_flock!.acqusition_date), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white),)),
+                          ],
+                        ),
+
+                    ],),
                   ),
 
                 ]),
@@ -206,265 +216,298 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                   scrollDirection: Axis.horizontal,
                   itemBuilder: (BuildContext context, int index) {
                     return Container(
-                      width: 160,
-                      height: 35,
+                      height: 55,
+                      padding: EdgeInsets.all(5),
                       margin: EdgeInsets.all(5),
                       decoration:  BoxDecoration(
-                        color: Utils.getThemeColorBlue(),
+                        color: Colors.white12,
                         borderRadius:
-                        BorderRadius.all(Radius.circular(20))),
+                        BorderRadius.all(Radius.circular(10))),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Text(birdUsageList.elementAt(index).reason, style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold,color: Colors.white),),
+                        SizedBox(width: 10,),
                         Text(birdUsageList.elementAt(index).sum, style: TextStyle(fontSize: 14,color: Colors.white),),
 
                       ],
                     ),);
                   }),) : SizedBox(width: 0, height: 0,),
+
               !Utils.selected_flock!.notes.isEmpty? Container(
-                width: widthScreen,
                   margin: EdgeInsets.only(left: 20,right: 10),
-                  child: Text(
-                    "FLOCK_DESC".tr(),
-                    textAlign: TextAlign.start,
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold),
-                  )) : SizedBox(width: 0,height: 0,),
-              !Utils.selected_flock!.notes.isEmpty?Container(
-                  margin: EdgeInsets.only(left: 20,right: 10),
-                  child: Text(Utils.selected_flock!.notes, style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)): SizedBox(width: 0,height: 0,),
+                  child: Text(Utils.selected_flock!.notes, style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.white),)): SizedBox(width: 0,height: 0,),
               imagesAdded? Container(
                 height: 80,
                 width: widthScreen ,
                 margin: EdgeInsets.only(left: 10,right: 10),
                 child: ListView.builder(
-                    itemCount: byteimages!.length,
+                    itemCount: byteimages.length,
                     scrollDirection: Axis.horizontal,
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
                         margin: EdgeInsets.all(10),
                         height: 80, width: 80,
-                        child: Image.memory(byteimages.elementAt(index), fit: BoxFit.fill,),
+                        child:  Image.memory(byteimages.elementAt(index), fit: BoxFit.fill,),
                       );
                     }),
               ): SizedBox(height: 0,width: 0,),
 
-
-              Container(margin: EdgeInsets.all(20),
+              Container(
+                height: heightScreen,
+                margin: EdgeInsets.only(top: 30),
                 padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+                  color: Utils.getScreenBackground(),
+
+                ),
                 child: Column(
                   children: [
-                    /*Text(
-                      "Manage Flock",
-                      textAlign: TextAlign.start,
+                    Text(
+                      "Manage_Flock_1".tr(),
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 22,
+                          color: Utils.getThemeColorBlue(),
+                          fontSize: 20,
                           fontWeight: FontWeight.bold),
-                    ),*/
-
+                    ),
                     SizedBox(width: widthScreen, height: 10,),
-                    InkWell(
-                        child: Container(
-                          width: widthScreen ,
-                          height: 60,
-                          padding: const EdgeInsets.all(10),
-                          decoration:  BoxDecoration(
-                              color: Utils.getThemeColorBlue(),
-                              borderRadius:
-                              BorderRadius.all(Radius.circular(8))),
-                          child: Container(
-                            width: 40,height: 40,
-                            margin: EdgeInsets.only(left: 10),
-                            child: Row(
-                              children: [
-                              Container(
-                              width: 36,
-                              height: 36,
-                              child:
-                                Image(image: AssetImage(
-                                    'assets/add_reduce.png'),
-                                  fit: BoxFit.scaleDown,
-                                  color: Colors.white,
 
-                                ),),
-                                Expanded(
-                                  child: Text(
-                                    "ADD_REDUCE_BIRDS".tr(),
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.bold
-                                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                      Expanded(
+                        child: InkWell(
+                            child: Container(
+
+                              margin: EdgeInsets.all(10),
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(10)),
+                                color: Utils.getThemeColorBlue(),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.5),
+                                    spreadRadius: 2,
+                                    blurRadius: 2,
+                                    offset: Offset(0, 1), // changes position of shadow
                                   ),
+                                ],
+
+                              ),
+                              child: Container(
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      width: 80,
+                                      height: 80,
+                                      child:
+                                      Image(image: AssetImage(
+                                          'assets/birds.png'),
+                                        fit: BoxFit.scaleDown,
+                                        color: Colors.white,
+
+                                      ),),
+                                    Text(
+                                      "ADD_REDUCE_BIRDS".tr(),
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.white,
+                                          fontFamily: 'Roboto',
+                                          fontWeight: FontWeight.bold
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            onTap: () {
+                              moveToAddReduceFlock();
+                            }),
+                      ),
+                      Expanded(
+                        child: InkWell(
+                          child: Container(
+                            margin: EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              color: Utils.getThemeColorBlue(),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 2,
+                                  blurRadius: 2,
+                                  offset: Offset(0, 1), // changes position of shadow
                                 ),
                               ],
-                            ),
-                          ),
-                        ),
-                        onTap: () {
-                          moveToAddReduceFlock();
-                        }),
 
-                    SizedBox(width: widthScreen, height: 10,),
-                    InkWell(
-                        child: Container(
-                          width: widthScreen ,
-                          height: 60,
-                          padding: const EdgeInsets.all(10),
-                          decoration:  BoxDecoration(
-                              color: Utils.getThemeColorBlue(),
-                              borderRadius:
-                              BorderRadius.all(Radius.circular(10))),
-                          child: Container(
-                            width: 40,height: 40,
-                            margin: EdgeInsets.only(left: 8),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 36,
-                                height: 36,
-                                child:Image(image: AssetImage(
-                                    'assets/egg.png'),
-                                  fit: BoxFit.scaleDown,
-                                  color: Colors.white,
-                                ),),
-                                Expanded(
-                                  child: Text(
+                            ),
+                            child: Container(
+                              child: Column(
+                                children: [
+                                  Container(
+                                    width: 80,
+                                    height: 80,
+                                    child:Image(image: AssetImage(
+                                        'assets/egg.png'),
+                                      fit: BoxFit.scaleDown,
+                                      color: Colors.white,
+                                    ),),
+                                  Text(
                                     "EGG_COLLECTION".tr(),
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         color: Colors.white,
                                         fontFamily: 'Roboto',
                                         fontWeight: FontWeight.bold
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const EggCollectionScreen()),
+                            );
+                          }),),
+                    ],),
+                    SizedBox(width: widthScreen, height: 10,),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                              child: Container(
+                                margin:   EdgeInsets.all(10),
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                  color: Utils.getThemeColorBlue(),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.5),
+                                      spreadRadius: 2,
+                                      blurRadius: 2,
+                                      offset: Offset(0, 1), // changes position of shadow
+                                    ),
+                                  ],
+
+                                ),
+                                child: Container(
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        width: 80,
+                                        height: 80,
+                                        child:
+                                        Image(image: AssetImage(
+                                            'assets/feed.png'),
+                                          fit: BoxFit.fill,
+                                          color: Colors.white,
+                                        ),),
+                                      Text(
+                                        "DAILY_FEEDING".tr(),
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.white,
+                                            fontFamily: 'Roboto',
+                                            fontWeight: FontWeight.bold
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const DailyFeedScreen()),
+                                );
+                              }),
                         ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const EggCollectionScreen()),
-                          );
-                        }),
+                        Expanded(
+                          child: InkWell(
+                              child: Container(
+                                margin:  EdgeInsets.all(10),
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                  color: Utils.getThemeColorBlue(),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.5),
+                                      spreadRadius: 2,
+                                      blurRadius: 2,
+                                      offset: Offset(0, 1), // changes position of shadow
+                                    ),
+                                  ],
+
+                                ),
+                                child: Container(
+                                   margin: EdgeInsets.only(left: 10),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        width: 80,height: 80,
+                                        child:
+                                        Image(image: AssetImage(
+                                            'assets/health.png'),
+                                          fit: BoxFit.fill,
+                                          color: Colors.white,
+                                        ),),
+                                      Text(
+                                        "BIRDS_HEALTH".tr(),
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.white,
+                                            fontFamily: 'Roboto',
+                                            fontWeight: FontWeight.bold
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const MedicationVaccinationScreen()),
+                                );
+                              }),),
+                      ],),
 
                     SizedBox(width: widthScreen, height: 10,),
                     InkWell(
                         child: Container(
                           width: widthScreen ,
                           height: 60,
+                          margin: EdgeInsets.all(10),
                           padding: const EdgeInsets.all(10),
-                          decoration:  BoxDecoration(
-                              color: Utils.getThemeColorBlue(),
-                              borderRadius:
-                              BorderRadius.all(Radius.circular(10))),
-                          child: Container(
-                            width: 40,height: 40,
-                            margin: EdgeInsets.only(left: 8),
-                            child: Row(
-                              children: [
-                              Container(
-                              width: 36,
-                              height: 36,
-                              child:
-                                Image(image: AssetImage(
-                                    'assets/feed.png'),
-                                  fit: BoxFit.fill,
-                                  color: Colors.white,
-                                ),),
-                                Expanded(
-                                  child: Text(
-                                    "DAILY_FEEDING".tr(),
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.bold
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                            color: Utils.getThemeColorBlue(),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 2,
+                                offset: Offset(0, 1), // changes position of shadow
+                              ),
+                            ],
+
                           ),
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const DailyFeedScreen()),
-                          );
-                        }),
-
-
-                    SizedBox(width: widthScreen, height: 10,),
-                    InkWell(
-                        child: Container(
-                          width: widthScreen ,
-                          height: 60,
-                          padding: const EdgeInsets.all(10),
-                          decoration:  BoxDecoration(
-                              color: Utils.getThemeColorBlue(),
-                              borderRadius:
-                              BorderRadius.all(Radius.circular(8))),
-                          child: Container(
-                            width: 40,height: 40,
-                            margin: EdgeInsets.only(left: 10),
-                            child: Row(
-                              children: [
-                              Container(
-                              width: 36,
-                              height: 36,
-                              child:
-                                Image(image: AssetImage(
-                                    'assets/health.png'),
-                                  fit: BoxFit.fill,
-                                  color: Colors.white,
-                                ),),
-                                Expanded(
-                                  child: Text(
-                                    "BIRDS_HEALTH".tr(),
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.bold
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const MedicationVaccinationScreen()),
-                          );
-                        }),
-
-                    SizedBox(width: widthScreen, height: 10,),
-                    InkWell(
-                        child: Container(
-                          width: widthScreen ,
-                          height: 60,
-                          padding: const EdgeInsets.all(10),
-                          decoration:  BoxDecoration(
-                              color: Utils.getThemeColorBlue(),
-                              borderRadius:
-                              BorderRadius.all(Radius.circular(8))),
                           child: Container(
                             width: 40,height: 40,
                             margin: EdgeInsets.only(left: 10),
