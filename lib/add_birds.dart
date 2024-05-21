@@ -4,6 +4,7 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -50,11 +51,10 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
   String _acqusitionselectedValue = "";
 
   List<String> _purposeList = [];
-  List<String> _reductionReasons = ['REDUCTION_REASON'.tr(),
+  List<String> _reductionReasons = [
     'SOLD'.tr(),'PERSONAL_USE'.tr(),'MORTALITY'.tr(),'LOST'.tr(),'OTHER'.tr()];
 
   List<String> acqusitionList = [
-    'ACQUSITION_TYPE'.tr(),
     'PURCHASED'.tr(),
     'HATCHED'.tr(),
     'GIFT'.tr(),
@@ -78,22 +78,31 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
       totalBirdsController.text = "${widget.flock_detail?.item_count}";
       date = widget.flock_detail!.acqusition_date;
       _acqusitionselectedValue = widget.flock_detail!.acqusition_type;
+      _reductionReasonValue = widget.flock_detail!.reason;
+      _purposeselectedValue = widget.flock_detail!.f_name;
+
+    }else{
+      _reductionReasonValue = _reductionReasons[1];
+      _acqusitionselectedValue = acqusitionList[1];
+      totalBirdsController.text = "5";
     }
 
-
-    _reductionReasonValue = _reductionReasons[0];
-    _acqusitionselectedValue = acqusitionList[0];
     getList();
     Utils.showInterstitial();
     Utils.setupAds();
 
   }
 
+  int activeStep = 0;
+
   List<Flock> flocks = [];
   void getList() async {
 
-    await DatabaseHelper.instance.database;
+    DateTime dateTime = DateTime.now();
 
+    date = DateFormat('yyyy-MM-dd').format(dateTime);
+
+    await DatabaseHelper.instance.database;
 
     flocks = await DatabaseHelper.getFlocks();
 
@@ -102,28 +111,20 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
     }
 
     _purposeselectedValue = _purposeList[0];
-
-
-    setState(() {
-
-    });
+    setState(()
+    { });
 
   }
 
   Flock? currentFlock = null;
-
   bool _validate = false;
-
   String date = "Choose date";
   final nameController = TextEditingController();
   final totalBirdsController = TextEditingController();
   final notesController = TextEditingController();
-
   bool imagesAdded = false;
-
   int good_eggs = 0;
   int bad_eggs = 0;
-
 
   @override
   Widget build(BuildContext context) {
@@ -155,7 +156,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
-                            color: isCollection ? Colors.green : Colors.red, //(x,y)
+                            color: isCollection ? Utils.getScreenBackground() : Utils.getScreenBackground(), //(x,y)
                           ),
                         ],
                       ),
@@ -167,7 +168,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                             height: 50,
                             child: InkWell(
                               child: Icon(Icons.arrow_back,
-                                  color: Colors.white, size: 30),
+                                  color: Colors.black, size: 30),
                               onTap: () {
                                 Navigator.pop(context);
                               },
@@ -176,10 +177,10 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                isCollection? isEdit? "EDIT".tr() +" "+ 'Addition'.tr() : 'ADD_BIRDS'.tr() :isEdit? "EDIT".tr() +" "+ "Reduction".tr() :'REDUCE_BIRDS'.tr(),
+                               "",
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
-                                    color: Colors.white,
+                                    color: Colors.black,
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold),
                               )),
@@ -189,263 +190,318 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                     ),
                   ),
 
+                  SizedBox(height: 20,),
+                  EasyStepper(
+                    activeStep: activeStep,
+                    activeStepTextColor: Utils.getThemeColorBlue(),
+                    finishedStepTextColor: Utils.getThemeColorBlue(),
+                    internalPadding: 30,
+                    showLoadingAnimation: false,
+                    stepRadius: 12,
+                    showStepBorder: true,
+                    steps: [
+                      EasyStep(
+                        customStep: CircleAvatar(
+                          radius: 8,
+                          backgroundColor: Colors.white,
+                          child: CircleAvatar(
+                            radius: 7,
+                            backgroundColor:
+                            activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey,
+                          ),
+                        ),
+                        title: 'Step 1',
+                      ),
+                      EasyStep(
+                        customStep: CircleAvatar(
+                          radius: 8,
+                          backgroundColor: Colors.white,
+                          child: CircleAvatar(
+                            radius: 7,
+                            backgroundColor:
+                            activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
+                          ),
+                        ),
+                        title: 'Step 2',
+
+                      ),
+
+                    ],
+                    onStepReached: (index) =>
+                        setState(() => activeStep = index),
+                  ),
+
                   Container(
-                    margin: EdgeInsets.only(top: 30),
+                    alignment: Alignment.center,
+                    height: heightScreen - 350,
+
                     child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          SizedBox(height: 10,width: widthScreen),
-                          if(_purposeList!=null && _purposeList.length>0)
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
-                            ),
-                            child: getDropDownList(),
-                          ),
+                         activeStep == 0?   Container(
+                            child: Column(
+                              children: [
+                                Container(
+                                  child: Text(
+                                    isCollection? isEdit? "EDIT".tr() +" "+ 'Addition'.tr() : 'ADD_BIRDS'.tr() :isEdit? "EDIT".tr() +" "+ "Reduction".tr() :'REDUCE_BIRDS'.tr(),
 
-
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            padding: EdgeInsets.all(0),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
-                                width: widthScreen,
-                                height: 60,
-                                child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
-                                  controller: totalBirdsController,
-                                  keyboardType: TextInputType.number,
-                                  textInputAction: TextInputAction.next,
-                                  decoration:  InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'BIRDS_COUNT'.tr(),
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
+                                    textAlign: TextAlign.start,
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
                                   ),
                                 ),
-                              ),
-                            ),
-                          ),
-                         Container(
-                             margin: EdgeInsets.only(left: 20),
-                             child: Text(max_hint, style: TextStyle(color: Colors.red, fontSize: 14),)),
-                         !isCollection? SizedBox(height: 10,width: widthScreen): SizedBox(height: 0,width: widthScreen),
-                         !isCollection? Container(
-                            width: widthScreen,
-                            height: 70,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
-                            ),
-                            child: getReductionList(),
-                          ):SizedBox(height: 0,width: widthScreen),
+                                SizedBox(height: 30,width: widthScreen),
+                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('CHOOSE_FLOCK_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
 
-                         isCollection? Container(
-                            width: widthScreen,
-                            height: 70,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
-                            ),
-                            child: getAcqusitionList(),
-                          ):SizedBox(height: 0,width: widthScreen),
+                                Container(
+                                  width: widthScreen,
+                                  height: 70,
+                                  alignment: Alignment.centerRight,
+                                  padding: EdgeInsets.all(10),
+                                  margin: EdgeInsets.only(left: 20, right: 20),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.withAlpha(70),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(20.0)),
+                                    border: Border.all(
+                                      color:  Colors.grey,
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: getDropDownList(),
+                                ),
 
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: InkWell(
-                              onTap: () {
-                                pickDate();
-                              },
-                              child: Container(
-                                alignment: Alignment.centerLeft,
-                                padding: EdgeInsets.only(left: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.transparent,
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(10.0)),
-                                  border: Border.all(
-                                    color:  Colors.black,
-                                    width: 1.0,
+                                SizedBox(height: 20,width: widthScreen),
+                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('BIRDS_COUNT'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+
+                                Container(
+                                  width: widthScreen,
+                                  height: 70,
+                                  padding: EdgeInsets.all(0),
+                                  margin: EdgeInsets.only(left: 20, right: 20),
+                                  decoration: BoxDecoration(
+                                      color: Colors.grey.withAlpha(70),
+                                      borderRadius:
+                                      BorderRadius.all(Radius.circular(20))),
+                                  child: Container(
+                                    child: SizedBox(
+                                      width: widthScreen,
+                                      height: 60,
+                                      child: TextFormField(
+                                        maxLines: null,
+                                        expands: true,
+                                        controller: totalBirdsController,
+                                        keyboardType: TextInputType.number,
+                                        textInputAction: TextInputAction.next,
+                                        decoration:  InputDecoration(
+                                          fillColor: Colors.grey,
+                                          focusColor: Colors.grey,
+                                          border: OutlineInputBorder(
+                                              borderRadius:
+                                              BorderRadius.all(Radius.circular(20))),
+                                          hintText: 'BIRDS_COUNT'.tr(),
+                                          hintStyle: TextStyle(
+                                              color: Colors.grey, fontSize: 16),
+                                          labelStyle: TextStyle(
+                                              color: Colors.black, fontSize: 16),
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
-                                child: Text(Utils.getFormattedDate(date), style: TextStyle(
-                                    color: Colors.black, fontSize: 16),),
-                              ),
-                            ),
-                          ),
 
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 120,
-                            padding: EdgeInsets.all(5),
-                            margin: EdgeInsets.only(left: 10, right: 10),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
-                                width: widthScreen,
-                                height: 100,
-                                child: TextFormField(
-                                  maxLines: 2,
-                                  maxLength: 80,
-                                  controller: notesController,
-                                  keyboardType: TextInputType.multiline,
-                                  textAlign: TextAlign.start,
-                                  textInputAction: TextInputAction.done,
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'NOTES_HINT'.tr(),
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
-                                  ),
-                                ),
-                              ),
+
+                              ],
                             ),
-                          ),
+                          ) : SizedBox(width: 1,),
+
+                          activeStep == 1?   Container(
+                            child: Column(
+                              children: [
+                                Container(
+                                    margin: EdgeInsets.only(left: 20),
+                                    child: Text(max_hint, style: TextStyle(color: Colors.red, fontSize: 14),)),
+
+                                !isCollection? SizedBox(height: 10,width: widthScreen): SizedBox(height: 0,width: widthScreen),
+                                !isCollection? Container(
+                                  child: Column(
+                                    children: [
+                                      Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('REDUCTIONS_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                                      Container(
+                                        width: widthScreen,
+                                        height: 70,
+                                        alignment: Alignment.centerRight,
+                                        padding: EdgeInsets.all(10),
+                                        margin: EdgeInsets.only(left: 20, right: 20),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.withAlpha(70),
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(20.0)),
+                                          border: Border.all(
+                                            color:  Colors.grey,
+                                            width: 1.0,
+                                          ),
+                                        ),
+                                        child: getReductionList(),
+                                      ),
+                                    ],
+                                  ),
+                                ):SizedBox(height: 0, width: widthScreen),
+                                isCollection? Container(
+                                  child: Column(
+                                    children: [
+                                      Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('ACQUSITION'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                                      Container(
+                                        width: widthScreen,
+                                        height: 70,
+                                        alignment: Alignment.centerRight,
+                                        padding: EdgeInsets.all(10),
+                                        margin: EdgeInsets.only(left: 20, right: 20),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.withAlpha(70),
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(20.0)),
+                                          border: Border.all(
+                                            color:  Colors.grey,
+                                            width: 1.0,
+                                          ),
+                                        ),
+                                        child: getAcqusitionList(),
+                                      ),
+                                    ],
+                                  ),
+                                ):SizedBox(height: 0,width: widthScreen),
+
+                                SizedBox(height: 20,width: widthScreen),
+                                Column(
+                                  children: [
+                                    Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DATE'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                                    Container(
+                                      width: widthScreen,
+                                      height: 70,
+                                      margin: EdgeInsets.only(left: 20, right: 20),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.withAlpha(70),
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(20.0)),
+                                        border: Border.all(
+                                          color:  Colors.grey,
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      child: InkWell(
+                                        onTap: () {
+                                          pickDate();
+                                        },
+                                        child: Container(
+                                          alignment: Alignment.centerLeft,
+                                          padding: EdgeInsets.only(left: 10),
+                                          decoration: BoxDecoration(
+                                            color: Colors.transparent,
+
+                                          ),
+                                          child: Text(Utils.getFormattedDate(date), style: TextStyle(
+                                              color: Colors.black, fontSize: 16),),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                SizedBox(height: 20,width: widthScreen),
+                                Column(
+                                  children: [
+                                    Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DESCRIPTION_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                                    Container(
+                                      width: widthScreen,
+                                      height: 100,
+                                      margin: EdgeInsets.only(left: 20, right: 20),
+                                      decoration: BoxDecoration(
+                                          color: Colors.grey.withAlpha(70),
+                                          borderRadius:
+                                          BorderRadius.all(Radius.circular(10))),
+                                      child: Container(
+                                        child: SizedBox(
+                                          width: widthScreen,
+                                          height: 100,
+                                          child: TextFormField(
+                                            maxLines: 2,
+                                            controller: notesController,
+                                            keyboardType: TextInputType.multiline,
+                                            textAlign: TextAlign.start,
+                                            textInputAction: TextInputAction.done,
+                                            decoration:  InputDecoration(
+                                              border: OutlineInputBorder(
+                                                  borderRadius:
+                                                  BorderRadius.all(Radius.circular(10))),
+                                              hintText: 'NOTES_HINT'.tr(),
+                                              hintStyle: TextStyle(
+                                                  color: Colors.black, fontSize: 16),
+                                              labelStyle: TextStyle(
+                                                  color: Colors.black, fontSize: 16),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ) : SizedBox(width: 1,),
+
                           SizedBox(height: 10,width: widthScreen),
                           InkWell(
                             onTap: () async {
-                              bool validate = checkValidation();
 
-                              if(validate){
-                                print("Everything Okay");
-                                await DatabaseHelper.instance.database;
+                              activeStep++;
+                              if(activeStep==1){
+                                if(totalBirdsController.text.isEmpty){
+                                  activeStep--;
+                                  Utils.showToast("PROVIDE_ALL".tr());
+                                }
+                              }
 
-                                if(isCollection){
-                                   if(isEdit) {
-                                     int active_birds = getFlockActiveBirds();
-                                     active_birds = active_birds - widget.flock_detail!.item_count;
-                                     active_birds = active_birds +
-                                         int.parse(totalBirdsController.text);
-                                     print(active_birds);
+                              if(activeStep == 2) {
+                                bool validate = checkValidation();
 
-                                     DatabaseHelper.updateFlockBirds(
-                                         active_birds, getFlockID());
+                                if (validate) {
+                                  print("Everything Okay");
+                                  await DatabaseHelper.instance.database;
 
-                                     widget.flock_detail?.item_count = int.parse(totalBirdsController.text);
-                                     widget.flock_detail?.acqusition_type = _acqusitionselectedValue;
-                                     widget.flock_detail?.acqusition_date = date;
-                                     widget.flock_detail?.short_note = notesController.text;
-                                     widget.flock_detail?.f_id = getFlockID();
-
-                                     await DatabaseHelper.updateFlock(widget.flock_detail);
-                                     Utils.showToast("SUCCESSFUL".tr());
-                                     Navigator.pop(context);
-
-                                   }
-                                   else {
-                                    int active_birds = getFlockActiveBirds();
-                                    active_birds = active_birds +
-                                        int.parse(totalBirdsController.text);
-                                    print(active_birds);
-
-                                    DatabaseHelper.updateFlockBirds(
-                                        active_birds, getFlockID());
-
-                                    int? id = await DatabaseHelper
-                                        .insertFlockDetail(Flock_Detail(
-                                        f_id: getFlockID(),
-                                        item_type: isCollection
-                                            ? 'Addition'
-                                            : 'Reduction',
-                                        item_count: int.parse(
-                                            totalBirdsController.text),
-                                        acqusition_type: _acqusitionselectedValue,
-                                        acqusition_date: date,
-                                        reason: _reductionReasonValue,
-                                        short_note: notesController.text,
-                                        f_name: _purposeselectedValue));
-                                    Utils.showToast("SUCCESSFUL".tr());
-
-                                    Navigator.pop(context);
-                                  }
-
-                                }else {
-                                  if (isEdit) {
-                                    int active_birds = getFlockActiveBirds();
-                                    active_birds = active_birds +
-                                        widget.flock_detail!.item_count;
-
-                                    active_birds = active_birds -
-                                        int.parse(totalBirdsController.text);
-                                    print(active_birds);
-
-                                    DatabaseHelper.updateFlockBirds(
-                                        active_birds, getFlockID());
-
-                                    widget.flock_detail?.item_count =
-                                        int.parse(totalBirdsController.text);
-                                    widget.flock_detail?.reason =
-                                        _reductionReasonValue;
-                                    widget.flock_detail?.acqusition_date = date;
-                                    widget.flock_detail?.short_note =
-                                        notesController.text;
-                                    widget.flock_detail?.f_id = getFlockID();
-
-                                    await DatabaseHelper.updateFlock(
-                                        widget.flock_detail);
-                                    Utils.showToast("SUCCESSFUL".tr());
-                                    Navigator.pop(context);
-                                  } else {
-                                    int active_birds = getFlockActiveBirds();
-
-                                    if (int.parse(totalBirdsController.text) <
-                                        active_birds) {
+                                  if (isCollection) {
+                                    if (isEdit) {
+                                      int active_birds = getFlockActiveBirds();
                                       active_birds = active_birds -
+                                          widget.flock_detail!.item_count;
+                                      active_birds = active_birds +
+                                          int.parse(totalBirdsController.text);
+                                      print(active_birds);
+
+                                      DatabaseHelper.updateFlockBirds(
+                                          active_birds, getFlockID());
+
+                                      widget.flock_detail?.item_count =
+                                          int.parse(totalBirdsController.text);
+                                      widget.flock_detail?.acqusition_type =
+                                          _acqusitionselectedValue;
+                                      widget.flock_detail?.acqusition_date =
+                                          date;
+                                      widget.flock_detail?.short_note =
+                                          notesController.text;
+                                      widget.flock_detail?.f_id = getFlockID();
+
+                                      await DatabaseHelper.updateFlock(
+                                          widget.flock_detail);
+                                      Utils.showToast("SUCCESSFUL".tr());
+                                      Navigator.pop(context);
+                                    }
+                                    else {
+                                      int active_birds = getFlockActiveBirds();
+                                      active_birds = active_birds +
                                           int.parse(totalBirdsController.text);
                                       print(active_birds);
 
@@ -465,22 +521,102 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                                           reason: _reductionReasonValue,
                                           short_note: notesController.text,
                                           f_name: _purposeselectedValue));
-
                                       Utils.showToast("SUCCESSFUL".tr());
-                                      Navigator.pop(context);
-                                    } else {
-                                      max_hint =
-                                      "CANNOT_REDUCE".tr() + "$active_birds";
-                                      setState(() {
 
-                                      });
+                                      Navigator.pop(context);
+                                    }
+                                  } else {
+                                    if (isEdit) {
+                                      int active_birds = getFlockActiveBirds();
+                                      active_birds = active_birds + widget.flock_detail!.item_count;
+                                      if (int.parse(totalBirdsController.text) <
+                                          active_birds) {
+
+                                        active_birds = active_birds -
+                                            int.parse(
+                                                totalBirdsController.text);
+                                        print(active_birds);
+
+                                        DatabaseHelper.updateFlockBirds(
+                                            active_birds, getFlockID());
+
+                                        widget.flock_detail?.item_count =
+                                            int.parse(
+                                                totalBirdsController.text);
+                                        widget.flock_detail?.reason =
+                                            _reductionReasonValue;
+                                        widget.flock_detail?.acqusition_date =
+                                            date;
+                                        widget.flock_detail?.short_note =
+                                            notesController.text;
+                                        widget.flock_detail?.f_id =
+                                            getFlockID();
+
+                                        await DatabaseHelper.updateFlock(
+                                            widget.flock_detail);
+                                        Utils.showToast("SUCCESSFUL".tr());
+                                        Navigator.pop(context);
+                                      }else{
+                                        activeStep--;
+                                        max_hint =
+                                            "CANNOT_REDUCE".tr() +
+                                                "$active_birds";
+                                        Utils.showToast(max_hint);
+                                        setState(() {
+
+                                        });
+                                      }
+                                    } else {
+                                      int active_birds = getFlockActiveBirds();
+
+                                      if (int.parse(totalBirdsController.text) <
+                                          active_birds) {
+                                        active_birds = active_birds -
+                                            int.parse(
+                                                totalBirdsController.text);
+                                        print(active_birds);
+
+                                        DatabaseHelper.updateFlockBirds(
+                                            active_birds, getFlockID());
+
+                                        int? id = await DatabaseHelper
+                                            .insertFlockDetail(Flock_Detail(
+                                            f_id: getFlockID(),
+                                            item_type: isCollection
+                                                ? 'Addition'
+                                                : 'Reduction',
+                                            item_count: int.parse(
+                                                totalBirdsController.text),
+                                            acqusition_type: _acqusitionselectedValue,
+                                            acqusition_date: date,
+                                            reason: _reductionReasonValue,
+                                            short_note: notesController.text,
+                                            f_name: _purposeselectedValue));
+
+                                        Utils.showToast("SUCCESSFUL".tr());
+                                        Navigator.pop(context);
+                                      } else {
+                                        activeStep--;
+                                        max_hint =
+                                            "CANNOT_REDUCE".tr() +
+                                                "$active_birds";
+                                        Utils.showToast(max_hint);
+
+                                        setState(() {
+
+                                        });
+                                      }
                                     }
                                   }
+                                } else {
+                                  activeStep--;
+                                  Utils.showToast("PROVIDE_ALL".tr());
                                 }
-
-                              }else{
-                                Utils.showToast("PROVIDE_ALL".tr());
                               }
+                              setState(() {
+
+                              });
+
                             },
                             child: Container(
                               width: widthScreen,
@@ -497,7 +633,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                               ),
                               margin: EdgeInsets.all( 20),
                               child: Text(
-                                "CONFIRM".tr(),
+                                activeStep==0?"NEXT".tr():"CONFIRM".tr(),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.white,

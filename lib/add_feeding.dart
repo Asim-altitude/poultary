@@ -4,6 +4,7 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -66,7 +67,10 @@ class _NewFeeding extends State<NewFeeding>
       quantityController.text = widget.feeding!.quantity!;
       notesController.text = widget.feeding!.short_note!;
 
+    }else{
+      quantityController.text = "5";
     }
+
     getList();
     getFeedList();
     Utils.showInterstitial();
@@ -76,6 +80,11 @@ class _NewFeeding extends State<NewFeeding>
 
   List<Flock> flocks = [];
   void getList() async {
+    if (!isEdit) {
+    DateTime dateTime = DateTime.now();
+    date = DateFormat('yyyy-MM-dd').format(dateTime);
+  }
+
 
     await DatabaseHelper.instance.database;
 
@@ -87,7 +96,8 @@ class _NewFeeding extends State<NewFeeding>
       _purposeList.add(flocks.elementAt(i).f_name);
     }
 
-    _purposeselectedValue = _purposeList[0];
+    if(!isEdit)
+     _purposeselectedValue = _purposeList[0];
 
 
     setState(() {
@@ -101,12 +111,11 @@ class _NewFeeding extends State<NewFeeding>
 
     _subItemList = await DatabaseHelper.getSubCategoryList(3);
 
-    _subItemList.insert(0,SubItem(c_id: 3,id: -1,name: 'Choose Feed'.tr()));
-
     for(int i=0;i<_subItemList.length;i++){
       _feedList.add(_subItemList.elementAt(i).name!);
     }
 
+    if(!isEdit)
     _feedselectedValue = _feedList[0];
 
     print(_feedselectedValue);
@@ -120,6 +129,7 @@ class _NewFeeding extends State<NewFeeding>
 
   Flock? currentFlock = null;
 
+  int activeStep = 0;
   bool _validate = false;
 
   String date = "Choose date";
@@ -162,7 +172,7 @@ class _NewFeeding extends State<NewFeeding>
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
-                            color: Utils.getThemeColorBlue(), //(x,y)
+                            color: Utils.getScreenBackground(), //(x,y)
                           ),
                         ],
                       ),
@@ -180,209 +190,298 @@ class _NewFeeding extends State<NewFeeding>
                               },
                             ),
                           ),
-                          Container(
-                              margin: EdgeInsets.only(left: 10),
-                              child: Text(
-                                isEdit?"EDIT".tr() + "FEEDING".tr():"NEW_FEEDING".tr(),
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold),
-                              )),
+
 
                         ],
                       ),
                     ),
                   ),
+                  SizedBox(height: 20,),
+                  EasyStepper(
+                    activeStep: activeStep,
+                    activeStepTextColor: Utils.getThemeColorBlue(),
+                    finishedStepTextColor: Utils.getThemeColorBlue(),
+                    internalPadding: 30,
+                    showLoadingAnimation: false,
+                    stepRadius: 12,
+                    showStepBorder: true,
+                    steps: [
+                      EasyStep(
+                        customStep: CircleAvatar(
+                          radius: 8,
+                          backgroundColor: Colors.white,
+                          child: CircleAvatar(
+                            radius: 7,
+                            backgroundColor:
+                            activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey,
+                          ),
+                        ),
+                        title: 'Step 1',
+                      ),
+                      EasyStep(
+                        customStep: CircleAvatar(
+                          radius: 8,
+                          backgroundColor: Colors.white,
+                          child: CircleAvatar(
+                            radius: 7,
+                            backgroundColor:
+                            activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
+                          ),
+                        ),
+                        title: 'Step 2',
 
+                      ),
+
+                    ],
+                    onStepReached: (index) =>
+                        setState(() => activeStep = index),
+                  ),
                   Container(
-                    margin: EdgeInsets.only(top: 30),
+                    alignment: Alignment.center,
+                    height: heightScreen - 250,
                     child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          SizedBox(height: 10,width: widthScreen),
                           Container(
-                            width: widthScreen,
-                            height: 70,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
-                            ),
-                            child: getDropDownList(),
-                          ),
+                              margin: EdgeInsets.only(left: 10),
+                              child: Text(
+                                isEdit?"EDIT".tr() +" "+"FEEDING".tr():"NEW_FEEDING".tr(),
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                    color: Utils.getThemeColorBlue(),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold),
+                              )),
 
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
-                            ),
-                            child: getFeedTypeList(),
-                          ),
+                         activeStep==0? Container(
+                            child: Column(children: [
+                              SizedBox(height: 20,width: widthScreen),
+                              Column(
+                                children: [
+                                  Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('CHOOSE_FLOCK_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
 
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            padding: EdgeInsets.all(0),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
-                                width: widthScreen,
-                                height: 60,
-                                child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
-                                  controller: quantityController,
-                                  keyboardType: TextInputType.number,
-                                  textInputAction: TextInputAction.next,
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(
+                                  Container(
+                                    width: widthScreen,
+                                    height: 70,
+                                    alignment: Alignment.centerRight,
+                                    padding: EdgeInsets.all(10),
+                                    margin: EdgeInsets.only(left: 20, right: 20),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withAlpha(70),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(20.0)),
+                                      border: Border.all(
+                                        color:  Colors.grey,
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                    child: getDropDownList(),
+                                  ),
+                                ],
+                              ),
+
+                              SizedBox(height: 10,width: widthScreen),
+                              Column(
+                                children: [
+                                  Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Choose Feed'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+
+                                  Container(
+                                    width: widthScreen,
+                                    height: 70,
+                                    alignment: Alignment.centerRight,
+                                    padding: EdgeInsets.all(10),
+                                    margin: EdgeInsets.only(left: 20, right: 20),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withAlpha(70),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(20.0)),
+                                      border: Border.all(
+                                        color:  Colors.grey,
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                    child: getFeedTypeList(),
+                                  ),
+                                ],
+                              ),
+
+                              SizedBox(height: 10,width: widthScreen),
+                              Column(
+                                children: [
+                                  Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('FEED_QUANTITY_HINT'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                                  Container(
+                                    width: widthScreen,
+                                    height: 70,
+                                    padding: EdgeInsets.all(0),
+                                    margin: EdgeInsets.only(left: 20, right: 20),
+                                    decoration: BoxDecoration(
+                                        color: Colors.grey.withAlpha(70),
+                                        borderRadius:
+                                        BorderRadius.all(Radius.circular(20))),
+                                    child: Container(
+                                      child: SizedBox(
+                                        width: widthScreen,
+                                        height: 60,
+                                        child: TextFormField(
+                                          maxLines: null,
+                                          expands: true,
+                                          controller: quantityController,
+                                          keyboardType: TextInputType.number,
+                                          textInputAction: TextInputAction.next,
+                                          decoration: InputDecoration(
+                                            border: OutlineInputBorder(
+                                                borderRadius:
+                                                BorderRadius.all(Radius.circular(20))),
+                                            hintText: "FEED_QUANTITY_HINT".tr(),
+                                            hintStyle: TextStyle(
+                                                color: Colors.grey, fontSize: 16),
+                                            labelStyle: TextStyle(
+                                                color: Colors.black, fontSize: 16),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],),
+                          ):SizedBox(width: 1,),
+
+                         activeStep==1? Container(child: Column(
+                            children: [
+                              SizedBox(height: 10,width: widthScreen),
+                              Column(
+                                children: [
+                                  Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DATE'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+
+                                  Container(
+                                    width: widthScreen,
+                                    height: 70,
+                                    margin: EdgeInsets.only(left: 20, right: 20),
+                                    decoration: BoxDecoration(
+
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: "FEED_QUANTITY_HINT".tr(),
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
+                                    child: InkWell(
+                                      onTap: () {
+                                        pickDate();
+                                      },
+                                      child: Container(
+                                        alignment: Alignment.centerLeft,
+                                        padding: EdgeInsets.only(left: 10),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.withAlpha(70),
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(20.0)),
+                                          border: Border.all(
+                                            color:  Colors.grey,
+                                            width: 1.0,
+                                          ),
+                                        ),
+                                        child: Text(Utils.getFormattedDate(date), style: TextStyle(
+                                            color: Colors.black, fontSize: 16),),
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
-                            ),
-                          ),
 
-
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: InkWell(
-                              onTap: () {
-                                pickDate();
-                              },
-                              child: Container(
-                                alignment: Alignment.centerLeft,
-                                padding: EdgeInsets.only(left: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.transparent,
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(10.0)),
-                                  border: Border.all(
-                                    color:  Colors.black,
-                                    width: 1.0,
-                                  ),
-                                ),
-                                child: Text(Utils.getFormattedDate(date), style: TextStyle(
-                                    color: Colors.black, fontSize: 16),),
-                              ),
-                            ),
-                          ),
-
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 120,
-                            padding: EdgeInsets.all(5),
-                            margin: EdgeInsets.only(left: 10, right: 10),
-                            decoration: BoxDecoration(
-                                color: Colors.white60,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
-                                width: widthScreen,
-                                height: 100,
-                                child: TextFormField(
-                                  maxLines: 2,
-                                  maxLength: 80,
-                                  controller: notesController,
-                                  keyboardType: TextInputType.multiline,
-                                  textAlign: TextAlign.start,
-                                  textInputAction: TextInputAction.done,
-                                  decoration:  InputDecoration(
-                                    border: OutlineInputBorder(
+                              SizedBox(height: 10,width: widthScreen),
+                              Column(
+                                children: [
+                                  Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DESCRIPTION_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                                  Container(
+                                    width: widthScreen,
+                                    height: 100,
+                                    margin: EdgeInsets.only(left: 20, right: 20),
+                                    decoration: BoxDecoration(
+                                        color: Colors.grey.withAlpha(70),
                                         borderRadius:
                                         BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'NOTES_HINT'.tr(),
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
+                                    child: Container(
+                                      child: SizedBox(
+                                        width: widthScreen,
+                                        height: 100,
+                                        child: TextFormField(
+                                          maxLines: 2,
+                                          controller: notesController,
+                                          keyboardType: TextInputType.multiline,
+                                          textAlign: TextAlign.start,
+                                          textInputAction: TextInputAction.done,
+                                          decoration:  InputDecoration(
+                                            border: OutlineInputBorder(
+                                                borderRadius:
+                                                BorderRadius.all(Radius.circular(10))),
+                                            hintText: 'NOTES_HINT'.tr(),
+                                            hintStyle: TextStyle(
+                                                color: Colors.black, fontSize: 16),
+                                            labelStyle: TextStyle(
+                                                color: Colors.black, fontSize: 16),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
-                            ),
-                          ),
+                            ],
+                          ),):SizedBox(width: 1,),
+
+
                           SizedBox(height: 10,width: widthScreen),
                           InkWell(
                             onTap: () async {
-                              bool validate = checkValidation();
 
-                              if(validate){
-                                print("Everything Okay");
+                              activeStep++;
 
-                                if(isEdit){
-                                  await DatabaseHelper.instance.database;
-
-                                  Feeding feeding = Feeding(
-                                    f_id: getFlockID(),
-                                    short_note: notesController.text,
-                                    date: date,
-                                    feed_name: _feedselectedValue,
-                                    quantity: quantityController.text,
-                                    f_name: _purposeselectedValue,);
-                                  feeding.id = widget.feeding!.id;
-                                  int? id = await DatabaseHelper
-                                      .updateFeeding(feeding);
-
-                                  Utils.showToast("SUCCESSFUL".tr());
-                                  Navigator.pop(context);
-                                } else {
-                                  await DatabaseHelper.instance.database;
-                                  int? id = await DatabaseHelper
-                                      .insertNewFeeding(Feeding(
-                                    f_id: getFlockID(),
-                                    short_note: notesController.text,
-                                    date: date,
-                                    feed_name: _feedselectedValue,
-                                    quantity: quantityController.text,
-                                    f_name: _purposeselectedValue,));
-                                  Utils.showToast("SUCCESSFUL".tr());
-                                  Navigator.pop(context);
-                                }
-
-                              }else{
+                            if(activeStep==1) {
+                              if (quantityController.text
+                                  .trim()
+                                  .length == 0) {
+                                activeStep--;
                                 Utils.showToast("PROVIDE_ALL".tr());
+                              }else{
+                                setState(() {
+
+                                });
                               }
+                            }
+
+                            if(activeStep==2){
+
+                              if(isEdit){
+                                await DatabaseHelper.instance.database;
+
+                                Feeding feeding = Feeding(
+                                  f_id: getFlockID(),
+                                  short_note: notesController.text,
+                                  date: date,
+                                  feed_name: _feedselectedValue,
+                                  quantity: quantityController.text,
+                                  f_name: _purposeselectedValue,);
+                                feeding.id = widget.feeding!.id;
+                                int? id = await DatabaseHelper
+                                    .updateFeeding(feeding);
+
+                                Utils.showToast("SUCCESSFUL".tr());
+                                Navigator.pop(context);
+                              } else {
+                                await DatabaseHelper.instance.database;
+                                int? id = await DatabaseHelper
+                                    .insertNewFeeding(Feeding(
+                                  f_id: getFlockID(),
+                                  short_note: notesController.text,
+                                  date: date,
+                                  feed_name: _feedselectedValue,
+                                  quantity: quantityController.text,
+                                  f_name: _purposeselectedValue,));
+                                Utils.showToast("SUCCESSFUL".tr());
+                                Navigator.pop(context);
+                              }
+
+                            }
+
                             },
                             child: Container(
                               width: widthScreen,
@@ -399,7 +498,7 @@ class _NewFeeding extends State<NewFeeding>
                               ),
                               margin: EdgeInsets.all( 20),
                               child: Text(
-                                "CONFIRM".tr(),
+                               activeStep==0?"NEXT":"CONFIRM".tr(),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -433,7 +532,6 @@ class _NewFeeding extends State<NewFeeding>
         onChanged: (String? newValue) {
           setState(() {
             _purposeselectedValue = newValue!;
-
           });
         },
         items: _purposeList.map<DropdownMenuItem<String>>((String value) {
@@ -466,7 +564,6 @@ class _NewFeeding extends State<NewFeeding>
         onChanged: (String? newValue) {
           setState(() {
             _feedselectedValue = newValue!;
-
             print("Selected Feed $_feedselectedValue");
 
           });

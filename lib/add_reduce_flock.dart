@@ -112,7 +112,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
     heightScreen = MediaQuery.of(context).size.height;
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
-      child:
+
     return SafeArea(child: Scaffold(
       bottomNavigationBar: BottomAppBar(
         color: Colors.transparent,
@@ -137,6 +137,14 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                       color:  Colors.green,
                       width: 2.0,
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 2,
+                        offset: Offset(0, 1), // changes position of shadow
+                      ),
+                    ],
                   ),
                   child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
                     Icon(Icons.add_circle_outline_sharp, color: Colors.white, size: 25,),SizedBox(width: 4,),
@@ -162,6 +170,14 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                       color:  Colors.red,
                       width: 2.0,
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 2,
+                        offset: Offset(0, 1), // changes position of shadow
+                      ),
+                    ],
                   ),
                   child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
                     Icon(Icons.indeterminate_check_box_outlined, color: Colors.white, size: 25,),SizedBox(width: 4,),
@@ -373,10 +389,16 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                         child: Container(
                           margin: EdgeInsets.only(left: 8,right: 8,top: 8,bottom: 0),
                           decoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(Radius.circular(3)),
-
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 2,
+                                offset: Offset(0, 1), // changes position of shadow
+                              ),
+                            ],
                               color: Colors.white,
-                              border: Border.all(color: Colors.blueAccent,width: 1.0)
                           ),
                         child: Container(
                           color: Colors.white,
@@ -413,8 +435,8 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                                       mainAxisAlignment: MainAxisAlignment.start,children: [
                                       Row(
                                         children: [
-                                          Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index)!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
-                                          Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index)!.item_type.tr()+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: list.elementAt(index)!.item_type=='Reduction'? Colors.red:Colors.green),)),
+                                          Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 17, color: Colors.black),)),
+                                          Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index).item_type.tr()+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: list.elementAt(index)!.item_type=='Reduction'? Colors.red:Colors.green),)),
                                         ],
                                       ),
                                       Container(
@@ -423,7 +445,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                                             Container(
                                               child: Row(
                                                 children: [
-                                                  Container( margin: EdgeInsets.only(right: 5), child: Text(list.elementAt(index).item_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color:list.elementAt(index).item_type == 'Addition'?Colors.black:Colors.black),)),
+                                                  Container( margin: EdgeInsets.only(right: 5), child: Text(list.elementAt(index).item_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color:list.elementAt(index).item_type == 'Addition'?Colors.black:Colors.black),)),
                                                   Text("BIRDS".tr(), style: TextStyle(color: Colors.black, fontSize: 12),),
                                                   Text("  "+"ON".tr() , style: TextStyle(color: Utils.getThemeColorBlue(),fontWeight: FontWeight.bold, fontSize: 14),),
                                                   Align(

@@ -153,7 +153,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
               Container( child: Text(Utils.selected_flock!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white,),)),
               Container(
                 margin: EdgeInsets.only(left: 15, top: 5),
-                child: Row( children: [
+                child: Row(children: [
                   Image.asset(Utils.selected_flock!.icon.replaceAll("jpeg", "png"), width: 125, height: 125,),
                   /*AvatarView(
                     radius: 65,
@@ -273,14 +273,12 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                           fontWeight: FontWeight.bold),
                     ),
                     SizedBox(width: widthScreen, height: 10,),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                       Expanded(
                         child: InkWell(
                             child: Container(
-
                               margin: EdgeInsets.all(10),
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
@@ -294,7 +292,6 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                     offset: Offset(0, 1), // changes position of shadow
                                   ),
                                 ],
-
                               ),
                               child: Container(
                                 child: Column(
@@ -379,7 +376,6 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                           }),),
                     ],),
                     SizedBox(width: widthScreen, height: 10,),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -487,7 +483,6 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                 );
                               }),),
                       ],),
-
                     SizedBox(width: widthScreen, height: 10,),
                     InkWell(
                         child: Container(
@@ -547,7 +542,6 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                   ],
                 ),
               ),
-
 
                    /* Text(
               "Main Menu",

@@ -339,7 +339,8 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                     scrollDirection: Axis.vertical,
                     itemBuilder: (BuildContext context, int index) {
                       return InkWell(
-                        onTap: () {
+                        onTap: ()
+                        {
 
                         },
                         child: Container(
@@ -347,8 +348,15 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.all(Radius.circular(3)),
 
-                              color: Colors.white,
-                              border: Border.all(color: Colors.blueAccent,width: 1.0)
+                           color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 2,
+                                offset: Offset(0, 1), // changes position of shadow
+                              ),
+                            ],
                           ),
                           child: Container(
                             color: Colors.white,

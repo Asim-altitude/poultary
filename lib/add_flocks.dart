@@ -298,8 +298,6 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                             ),
                             child: Column( children: [
                               Container(
-
-
                                 margin: EdgeInsets.all(10),
                                 height: 100, width: 100,
                                 child: Image.asset(birds.elementAt(index).image, fit: BoxFit.contain,),

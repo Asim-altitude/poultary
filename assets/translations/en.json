@@ -323,7 +323,17 @@
   "added on": " added on ",
   "with":" with ",
   "FLOCK_IMAGES": "Flock Images",
-  "Manage_Flock_1": "Manage Flock"
+  "Manage_Flock_1": "Manage Flock",
+  "CHOOSE_FLOCK": " Choose FLock and Birds",
+  "CHOOSE_FLOCK_1": "Choose FLock",
+  "REDUCTIONS_1": "Reduction Reason",
+  "DESCRIPTION_1": "Description",
+  "Doctor_Name": "Doctor Name",
+  "Payment Info": "Payment Info",
+  "Date_DESC": "Date and Description",
+  "SOLD_TO": "Sold To",
+  "PAID_TO1": "Paid To"
+
 
 
 }

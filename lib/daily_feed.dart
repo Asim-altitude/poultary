@@ -92,11 +92,19 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
             height: 50,
             margin: EdgeInsets.all(5),
             decoration: BoxDecoration(
-              color: Colors.green,
+              color: Utils.getThemeColorBlue(),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 2,
+                  blurRadius: 2,
+                  offset: Offset(0, 1), // changes position of shadow
+                ),
+              ],
               borderRadius: const BorderRadius.all(
                   Radius.circular(5.0)),
               border: Border.all(
-                color:  Colors.green,
+                color:  Utils.getThemeColorBlue(),
                 width: 2.0,
               ),
             ),
@@ -303,12 +311,18 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                     scrollDirection: Axis.vertical,
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
-                        margin: EdgeInsets.only(left: 8,right: 8,top: 8,bottom: 0),
+                        margin: EdgeInsets.all(10),
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(3)),
-
                             color: Colors.white,
-                            border: Border.all(color: Colors.blueAccent,width: 1.0)
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 2,
+                              offset: Offset(0, 1), // changes position of shadow
+                            ),
+                          ],
                         ),
                         child: Container(
                           color: Colors.white,

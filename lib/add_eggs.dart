@@ -1,23 +1,16 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:ffi';
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
-import 'model/bird_item.dart';
 import 'model/egg_item.dart';
 import 'model/flock.dart';
-import 'model/flock_image.dart';
 
 class NewEggCollection extends StatefulWidget {
 
@@ -50,7 +43,7 @@ class _NewEggCollection extends State<NewEggCollection>
   String _acqusitionselectedValue = "";
 
   List<String> _purposeList = [];
-  List<String> _reductionReasons = ['REDUCTION_REASON'.tr(),
+  List<String> _reductionReasons = [
     'SOLD'.tr(),'PERSONAL_USE'.tr(),'MORTALITY'.tr(),'LOST'.tr(),'OTHER'.tr()];
 
   int chosen_index = 0;
@@ -60,18 +53,29 @@ class _NewEggCollection extends State<NewEggCollection>
   @override
   void initState() {
     super.initState();
+    if(widget.eggs != null) {
 
-    if(widget.eggs != null){
       isEdit = true;
-      _reductionReasonValue = widget.eggs!.reduction_reason!;
       date = widget.eggs!.date!;
       totalEggsController.text = "${widget.eggs!.total_eggs}";
       goodEggsController.text ="${widget.eggs!.good_eggs}";
       badEggsController.text =  "${widget.eggs!.bad_eggs}";
-      notesController.text = "${widget.eggs!.short_note!}" ;
+      notesController.text = "${widget.eggs!.short_note!}";
+      _reductionReasonValue = "${widget.eggs!.reduction_reason}";
+      _purposeselectedValue = widget.eggs!.f_name!;
+
+    }else
+    {
+      DateTime dateTime = DateTime.now();
+      date = DateFormat('yyyy-MM-dd').format(dateTime);
+
+      _reductionReasonValue = _reductionReasons[0];
+      totalEggsController.text = "10";
+      goodEggsController.text ="5";
+      badEggsController.text =  "5";
+
     }
 
-    _reductionReasonValue = _reductionReasons[0];
     getList();
     Utils.showInterstitial();
     Utils.setupAds();
@@ -83,7 +87,6 @@ class _NewEggCollection extends State<NewEggCollection>
 
     await DatabaseHelper.instance.database;
 
-
     flocks = await DatabaseHelper.getFlocks();
 
     flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
@@ -93,7 +96,6 @@ class _NewEggCollection extends State<NewEggCollection>
     }
 
     _purposeselectedValue = _purposeList[0];
-
 
     setState(() {
 
@@ -116,6 +118,7 @@ class _NewEggCollection extends State<NewEggCollection>
 
   int good_eggs = 0;
   int bad_eggs = 0;
+  int activeStep = 0;
 
 
   @override
@@ -148,7 +151,7 @@ class _NewEggCollection extends State<NewEggCollection>
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
-                            color: isCollection ? Colors.green : Colors.red, //(x,y)
+                            color:  Utils.getScreenBackground(), //(x,y)
                           ),
                         ],
                       ),
@@ -169,7 +172,7 @@ class _NewEggCollection extends State<NewEggCollection>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                isCollection? isEdit? "EDIT".tr() +" "+ "COLLECTION".tr(): "NEW".tr()+" "+ "Collection" : isEdit? "EDIT".tr() +" "+ "REDUCTION".tr():"NEW".tr()+" "+"REDUCTION".tr(),
+                               "",
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -181,256 +184,372 @@ class _NewEggCollection extends State<NewEggCollection>
                       ),
                     ),
                   ),
+                  EasyStepper(
+                    activeStep: activeStep,
+                    activeStepTextColor: Utils.getThemeColorBlue(),
+                    finishedStepTextColor: Utils.getThemeColorBlue(),
+                    internalPadding: 30,
+                    showLoadingAnimation: false,
+                    stepRadius: 12,
+                    showStepBorder: true,
+                    steps: [
+                      EasyStep(
+                        customStep: CircleAvatar(
+                          radius: 8,
+                          backgroundColor: Colors.white,
+                          child: CircleAvatar(
+                            radius: 7,
+                            backgroundColor:
+                            activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey,
+                          ),
+                        ),
+                        title: 'Step 1',
+                      ),
+                      EasyStep(
+                        customStep: CircleAvatar(
+                          radius: 8,
+                          backgroundColor: Colors.white,
+                          child: CircleAvatar(
+                            radius: 7,
+                            backgroundColor:
+                            activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
+                          ),
+                        ),
+                        title: 'Step 2',
 
+                      ),
+
+                    ],
+                    onStepReached: (index) =>
+                        setState(() => activeStep = index),
+                  ),
                   Container(
-                    margin: EdgeInsets.only(top: 30),
+                    alignment: Alignment.center,
                     child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
+                          activeStep == 0? Container(
+                            child: Column(
+                              children: [
+                                Container(
+                                    margin: EdgeInsets.only(left: 10),
+                                    child: Text(
+                                      isCollection? isEdit? "EDIT".tr() +" "+ "COLLECTION".tr(): "NEW".tr()+" "+ "Collection" : isEdit? "EDIT".tr() +" "+ "REDUCTION".tr():"NEW".tr()+" "+"REDUCTION".tr(),
+                                      textAlign: TextAlign.start,
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold),
+                                    )),
+                                SizedBox(height: 20,width: widthScreen),
+                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('CHOOSE_FLOCK_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                                Container(
+                                  width: widthScreen,
+                                  height: 70,
+                                  alignment: Alignment.centerRight,
+                                  padding: EdgeInsets.all(10),
+                                  margin: EdgeInsets.only(left: 20, right: 20),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.withAlpha(70),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(20.0)),
+                                    border: Border.all(
+                                      color:  Colors.black,
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: getDropDownList(),
+                                ),
+
+                                SizedBox(height: 10,width: widthScreen),
+                                Column(
+                                  children: [
+                                    Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Good Eggs'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                                    Container(
+                                      width: widthScreen,
+                                      height: 70,
+                                      padding: EdgeInsets.all(0),
+                                      margin: EdgeInsets.only(left: 20, right: 20),
+                                      decoration: BoxDecoration(
+                                          color: Colors.grey.withAlpha(70),
+                                          borderRadius:
+                                          BorderRadius.all(Radius.circular(20))),
+                                      child: Container(
+                                        child: SizedBox(
+                                          width: widthScreen,
+                                          height: 60,
+                                          child: TextFormField(
+                                            maxLines: null,
+                                            expands: true,
+                                            onChanged: (text) {
+                                              if (text.isEmpty){
+                                                good_eggs = 0;
+                                              }else{
+                                                good_eggs = int.parse(text);
+                                              }
+                                              calculateTotalEggs();
+                                            },
+                                            controller: goodEggsController,
+                                            keyboardType: TextInputType.number,
+                                            textInputAction: TextInputAction.next,
+                                            decoration:  InputDecoration(
+                                              border: OutlineInputBorder(
+                                                  borderRadius:
+                                                  BorderRadius.all(Radius.circular(20))),
+                                              hintText: 'Good Eggs'.tr(),
+                                              hintStyle: TextStyle(
+                                                  color: Colors.grey, fontSize: 16),
+                                              labelStyle: TextStyle(
+                                                  color: Colors.black, fontSize: 16),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                SizedBox(height: 10,width: widthScreen),
+                                Column(
+                                  children: [
+                                    Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Bad Eggs'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+
+                                    Container(
+                                      width: widthScreen,
+                                      height: 70,
+                                      padding: EdgeInsets.all(0),
+                                      margin: EdgeInsets.only(left: 20, right: 20),
+                                      decoration: BoxDecoration(
+                                          color: Colors.grey.withAlpha(70),
+
+                                          borderRadius:
+                                          BorderRadius.all(Radius.circular(20))),
+                                      child: Container(
+                                        child: SizedBox(
+                                          width: widthScreen,
+                                          height: 60,
+                                          child: TextFormField(
+                                            maxLines: null,
+                                            expands: true,
+                                            onChanged: (text) {
+                                              if (text.isEmpty){
+                                                bad_eggs = 0;
+                                              }else{
+                                                bad_eggs = int.parse(text);
+                                              }
+
+                                              calculateTotalEggs();
+                                            },
+                                            controller: badEggsController,
+                                            keyboardType: TextInputType.number,
+                                            textInputAction: TextInputAction.next,
+                                            decoration: InputDecoration(
+                                              border: OutlineInputBorder(
+                                                  borderRadius:
+                                                  BorderRadius.all(Radius.circular(20))),
+                                              hintText: "Bad Eggs".tr(),
+                                              hintStyle: TextStyle(
+                                                  color: Colors.grey, fontSize: 16),
+                                              labelStyle: TextStyle(
+                                                  color: Colors.black, fontSize: 16),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                SizedBox(height: 10,width: widthScreen),
+                                Column(
+                                  children: [
+                                    Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Total Eggs'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+
+                                    Container(
+                                      width: widthScreen,
+                                      height: 70,
+                                      padding: EdgeInsets.all(0),
+                                      margin: EdgeInsets.only(left: 20, right: 20),
+                                      decoration: BoxDecoration(
+                                          color: Colors.grey.withAlpha(70),
+
+                                          borderRadius:
+                                          BorderRadius.all(Radius.circular(20))),
+                                      child: Container(
+                                        child: SizedBox(
+                                          width: widthScreen,
+                                          height: 60,
+                                          child: TextFormField(
+                                            maxLines: null,
+                                            expands: true,
+                                            readOnly: true,
+                                            controller: totalEggsController,
+                                            keyboardType: TextInputType.number,
+                                            decoration: InputDecoration(
+                                              border: OutlineInputBorder(
+                                                  borderRadius:
+                                                  BorderRadius.all(Radius.circular(20))),
+                                              hintText: "Total Eggs".tr(),
+                                              hintStyle: TextStyle(
+                                                  color: Colors.grey, fontSize: 16),
+                                              labelStyle: TextStyle(
+                                                  color: Colors.black, fontSize: 16),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                            child: getDropDownList(),
-                          ),
+                          ):SizedBox(width: 1,),
 
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            padding: EdgeInsets.all(0),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                                color: Colors.white60,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
-                                width: widthScreen,
-                                height: 60,
-                                child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
-                                  onChanged: (text) {
-                                    if (text.isEmpty){
-                                      good_eggs = 0;
-                                    }else{
-                                      good_eggs = int.parse(text);
-                                    }
+                        activeStep==1? Container(
+                            child: Column(
+                              children: [
+                                Container(
+                                    margin: EdgeInsets.only(left: 10),
+                                    child: Text(
+                                      "Choose date".tr() +" and "+"Description".tr(),
+                                      textAlign: TextAlign.start,
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold),
+                                    )),
+                                SizedBox(height: 20,width: widthScreen),
 
-                                    calculateTotalEggs();
-                                  },
-                                  controller: goodEggsController,
-                                  keyboardType: TextInputType.number,
-                                  textInputAction: TextInputAction.next,
-                                  decoration:  InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'Good Eggs'.tr(),
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
+                                !isCollection? SizedBox(height: 10,width: widthScreen): SizedBox(height: 0,width: widthScreen),
+                                !isCollection? Column(
+                                  children: [
+                                    Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('REDUCTIONS_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                                    Container(
+                                      width: widthScreen,
+                                      height: 70,
+                                      alignment: Alignment.centerRight,
+                                      padding: EdgeInsets.all(10),
+                                      margin: EdgeInsets.only(left: 20, right: 20),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.withAlpha(70),
+
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(20.0)),
+                                        border: Border.all(
+                                          color:  Colors.grey,
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      child: getReductionList(),
+                                    ),
+                                  ],
+                                ):SizedBox(height: 0,width: widthScreen),
+
+                                SizedBox(height: 10,width: widthScreen),
+                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DATE'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+
+                                Container(
+                                  width: widthScreen,
+                                  height: 70,
+                                  margin: EdgeInsets.only(left: 20, right: 20),
+                                  decoration: BoxDecoration(
+                                      borderRadius:
+                                      BorderRadius.all(Radius.circular(20))),
+                                  child: InkWell(
+                                    onTap: () {
+                                      pickDate();
+                                    },
+                                    child: Container(
+                                      alignment: Alignment.centerLeft,
+                                      padding: EdgeInsets.only(left: 10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.withAlpha(70),
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(20.0)),
+                                        border: Border.all(
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      child: Text(Utils.getFormattedDate(date), style: TextStyle(
+                                          color: Colors.black, fontSize: 16),),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                          ),
 
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            padding: EdgeInsets.all(0),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                                color: Colors.white60,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
-                                width: widthScreen,
-                                height: 60,
-                                child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
-                                  onChanged: (text) {
-                                    if (text.isEmpty){
-                                      bad_eggs = 0;
-                                    }else{
-                                      bad_eggs = int.parse(text);
-                                    }
+                                SizedBox(height: 10,width: widthScreen),
+                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DESCRIPTION_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
 
-                                    calculateTotalEggs();
-                                  },
-                                  controller: badEggsController,
-                                  keyboardType: TextInputType.number,
-                                  textInputAction: TextInputAction.next,
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    hintText: "Bad Eggs".tr(),
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
+                                Container(
+                                  width: widthScreen,
+                                  height: 100,
+                                  margin: EdgeInsets.only(left: 20, right: 20),
+                                  decoration: BoxDecoration(
+                                      color: Colors.grey.withAlpha(70),
+                                      borderRadius:
+                                      BorderRadius.all(Radius.circular(10))),
+                                  child: Container(
+                                    child: SizedBox(
+                                      width: widthScreen,
+                                      height: 100,
+                                      child: TextFormField(
+                                        maxLines: 2,
+                                        controller: notesController,
+                                        keyboardType: TextInputType.multiline,
+                                        textAlign: TextAlign.start,
+                                        textInputAction: TextInputAction.done,
+                                        decoration:  InputDecoration(
+                                          border: OutlineInputBorder(
+                                              borderRadius:
+                                              BorderRadius.all(Radius.circular(10))),
+                                          hintText: 'NOTES_HINT'.tr(),
+                                          hintStyle: TextStyle(
+                                              color: Colors.black, fontSize: 16),
+                                          labelStyle: TextStyle(
+                                              color: Colors.black, fontSize: 16),
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                          ),
+                                SizedBox(height: 10,width: widthScreen),
 
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            padding: EdgeInsets.all(0),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                                color: Colors.white60,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
-                                width: widthScreen,
-                                height: 60,
-                                child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
-                                  readOnly: true,
-                                  controller: totalEggsController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    hintText: "Total Eggs".tr(),
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
-                                  ),
-                                ),
-                              ),
+                              ],
                             ),
-                          ),
+                          ):SizedBox(width: 1,),
 
 
-                         !isCollection? SizedBox(height: 10,width: widthScreen): SizedBox(height: 0,width: widthScreen),
-                         !isCollection? Container(
-                            width: widthScreen,
-                            height: 70,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
-                            ),
-                            child: getReductionList(),
-                          ):SizedBox(height: 0,width: widthScreen),
-
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                                color: Colors.white60,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: InkWell(
-                              onTap: () {
-                                pickDate();
-                              },
-                              child: Container(
-                                alignment: Alignment.centerLeft,
-                                padding: EdgeInsets.only(left: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.transparent,
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(10.0)),
-                                  border: Border.all(
-                                    color:  Colors.black,
-                                    width: 1.0,
-                                  ),
-                                ),
-                                child: Text(Utils.getFormattedDate(date), style: TextStyle(
-                                    color: Colors.black, fontSize: 16),),
-                              ),
-                            ),
-                          ),
-
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 120,
-                            padding: EdgeInsets.all(5),
-                            margin: EdgeInsets.only(left: 10, right: 10),
-                            decoration: BoxDecoration(
-                                color: Colors.white60,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
-                                width: widthScreen,
-                                height: 100,
-                                child: TextFormField(
-                                  maxLines: 2,
-                                  maxLength: 80,
-                                  controller: notesController,
-                                  keyboardType: TextInputType.multiline,
-                                  textAlign: TextAlign.start,
-                                  textInputAction: TextInputAction.done,
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'NOTES_HINT'.tr(),
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 10,width: widthScreen),
                           InkWell(
                             onTap: () async {
-                              bool validate = checkValidation();
 
-                              if(validate){
-                                print("Everything Okay");
+                              good_eggs = int.parse(goodEggsController.text);
+                              bad_eggs = int.parse(badEggsController.text);
+
+                              activeStep++;
+                              if(activeStep==1) {
+                               bool emptyCheck = true;
+                                if(goodEggsController.text.toString().trim() == ""
+                                    || badEggsController.text.toString().trim() =="")
+                                {
+                                 activeStep--;
+                                 Utils.showToast("PROVIDE_ALL".tr());
+
+                                }
+                               setState(() {
+
+                               });
+                              }
+
+                              if(activeStep==2) {
                                 await DatabaseHelper.instance.database;
                                 if (isCollection){
                                   if(isEdit){
                                     widget.eggs!.f_id = getFlockID();
                                     widget.eggs!.f_name = _purposeselectedValue;
                                     widget.eggs!.date = this.date;
-                                    widget.eggs!.good_eggs = this.good_eggs;
-                                    widget.eggs!.bad_eggs = this.bad_eggs;
+                                    widget.eggs!.good_eggs = int.parse(goodEggsController.text);
+                                    widget.eggs!.bad_eggs =  int.parse(badEggsController.text);
                                     widget.eggs!.total_eggs = int.parse(
                                         totalEggsController.text);
                                     widget.eggs!.short_note = notesController.text;
@@ -460,8 +579,8 @@ class _NewEggCollection extends State<NewEggCollection>
                                     widget.eggs!.f_id = getFlockID();
                                     widget.eggs!.f_name = _purposeselectedValue;
                                     widget.eggs!.date = this.date;
-                                    widget.eggs!.good_eggs = this.good_eggs;
-                                    widget.eggs!.bad_eggs = this.bad_eggs;
+                                    widget.eggs!.good_eggs =  int.parse(goodEggsController.text);
+                                    widget.eggs!.bad_eggs = int.parse(badEggsController.text);
                                     widget.eggs!.reduction_reason = _reductionReasonValue;
                                     widget.eggs!.total_eggs = int.parse(
                                         totalEggsController.text);
@@ -470,16 +589,15 @@ class _NewEggCollection extends State<NewEggCollection>
 
                                     Utils.showToast("SUCCESSFUL".tr());
                                     Navigator.pop(context, "Egg ADDED");
-                                  }else {
+                                  } else {
                                     int? id = await DatabaseHelper
                                         .insertEggCollection(Eggs(
                                         f_id: getFlockID(),
                                         f_name: _purposeselectedValue,
                                         image: '',
-                                        good_eggs: this.good_eggs,
-                                        bad_eggs: bad_eggs,
-                                        total_eggs: int.parse(
-                                            totalEggsController.text),
+                                        good_eggs: int.parse(goodEggsController.text),
+                                        bad_eggs: int.parse(badEggsController.text),
+                                        total_eggs: int.parse(totalEggsController.text),
                                         short_note: notesController.text,
                                         date: date,
                                         reduction_reason: _reductionReasonValue,
@@ -488,8 +606,6 @@ class _NewEggCollection extends State<NewEggCollection>
                                     Navigator.pop(context, "Egg Reduced");
                                   }
                                 }
-                              }else{
-                                Utils.showToast("PROVIDE_ALL".tr());
                               }
                             },
                             child: Container(
@@ -505,9 +621,9 @@ class _NewEggCollection extends State<NewEggCollection>
                                   width: 2.0,
                                 ),
                               ),
-                              margin: EdgeInsets.all( 20),
+                              margin: EdgeInsets.all(20),
                               child: Text(
-                                "CONFIRM".tr(),
+                                activeStep==0? "NEXT".tr() : "CONFIRM".tr(),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.white,

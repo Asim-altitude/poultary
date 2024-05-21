@@ -1,26 +1,17 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:ffi';
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:poultary/model/feed_item.dart';
 import 'package:poultary/model/med_vac_item.dart';
 import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
-import 'model/bird_item.dart';
-import 'model/egg_item.dart';
 import 'model/flock.dart';
-import 'model/flock_image.dart';
 
 class NewVaccineMedicine extends StatefulWidget {
   Vaccination_Medication? vaccination_medication;
@@ -67,14 +58,13 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
     if(widget.vaccination_medication != null){
       isEdit = true;
-      _purposeselectedValue = widget.vaccination_medication!.f_name!;
-      _diseaseelectedValue = widget.vaccination_medication!.disease!;
-      date = widget.vaccination_medication!.date!;
-      bird_countController.text = "${widget.vaccination_medication!.bird_count!}";
-      doctorController.text = "${widget.vaccination_medication!.doctor_name!}";
-      medicineController.text = "${widget.vaccination_medication!.medicine!}";
-      notesController.text = "${widget.vaccination_medication!.short_note!}";
-
+      _purposeselectedValue = widget.vaccination_medication!.f_name;
+      _diseaseelectedValue = widget.vaccination_medication!.disease;
+      date = widget.vaccination_medication!.date;
+      bird_countController.text = "${widget.vaccination_medication!.bird_count}";
+      doctorController.text = "${widget.vaccination_medication!.doctor_name}";
+      medicineController.text = "${widget.vaccination_medication!.medicine}";
+      notesController.text = "${widget.vaccination_medication!.short_note}";
 
     }
 
@@ -84,6 +74,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
   }
 
+  int activeStep = 0;
   List<Flock> flocks = [];
   void getList() async {
 
@@ -98,8 +89,12 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
       total_birds += flocks.elementAt(i).active_bird_count!;
     }
 
-    _purposeselectedValue = _purposeList[0];
-    bird_countController.text = total_birds.toString();
+    if(!isEdit) {
+      DateTime dateTime = DateTime.now();
+      date = DateFormat('yyyy-MM-dd').format(dateTime);
+      _purposeselectedValue = _purposeList[0];
+      bird_countController.text = total_birds.toString();
+    }
 
 
     setState(() {
@@ -113,12 +108,11 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
     _subItemList = await DatabaseHelper.getSubCategoryList(4);
 
-    _subItemList.insert(0,SubItem(c_id: 3,id: -1,name: 'Choose Disease'.tr()));
-
     for(int i=0;i<_subItemList.length;i++){
       _diseaseList.add(_subItemList.elementAt(i).name!);
     }
 
+    if(!isEdit)
     _diseaseelectedValue = _diseaseList[0];
 
     print(_diseaseelectedValue);
@@ -134,11 +128,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
   bool _validate = false;
 
-
-
   bool imagesAdded = false;
-
-
 
   int good_eggs = 0;
   int bad_eggs = 0;
@@ -174,7 +164,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.green, //(x,y)
+                            color: Utils.getScreenBackground(), //(x,y)
                           ),
                         ],
                       ),
@@ -192,294 +182,404 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                               },
                             ),
                           ),
-                          Container(
-                              margin: EdgeInsets.only(left: 10),
-                              child: Text(
-                                Utils.vaccine_medicine.toLowerCase().contains("medi")? isEdit?'EDIT'.tr()+" "+ 'Medication'.tr():'NEW_MEDICATION'.tr():isEdit?'EDIT'.tr()+" "+ 'Vaccination'.tr():'NEW_VACCINATION'.tr(),
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold),
-                              )),
+
 
                         ],
                       ),
                     ),
                   ),
 
+                  SizedBox(height: 20,),
+                  EasyStepper(
+                    activeStep: activeStep,
+                    activeStepTextColor: Utils.getThemeColorBlue(),
+                    finishedStepTextColor: Utils.getThemeColorBlue(),
+                    internalPadding: 30,
+                    showLoadingAnimation: false,
+                    stepRadius: 12,
+                    showStepBorder: true,
+                    steps: [
+                      EasyStep(
+                        customStep: CircleAvatar(
+                          radius: 8,
+                          backgroundColor: Colors.white,
+                          child: CircleAvatar(
+                            radius: 7,
+                            backgroundColor:
+                            activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey,
+                          ),
+                        ),
+                        title: 'Step 1',
+                      ),
+                      EasyStep(
+                        customStep: CircleAvatar(
+                          radius: 8,
+                          backgroundColor: Colors.white,
+                          child: CircleAvatar(
+                            radius: 7,
+                            backgroundColor:
+                            activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
+                          ),
+                        ),
+                        title: 'Step 2',
+
+                      ),
+
+                    ],
+                    onStepReached: (index) =>
+                        setState(() => activeStep = index),
+                  ),
+
                   Container(
-                    margin: EdgeInsets.only(top: 30),
+                    height: heightScreen - 250,
+                    alignment: Alignment.center,
                     child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
-                            ),
-                            child: getDropDownList(),
-                          ),
+                        activeStep==0? Container(
+                            child: Column(children: [
+                              Container(
+                                  margin: EdgeInsets.only(left: 10),
+                                  child: Text(
+                                    Utils.vaccine_medicine.toLowerCase().contains("medi")? isEdit?'EDIT'.tr()+" "+ 'Medication'.tr():'NEW_MEDICATION'.tr():isEdit?'EDIT'.tr()+" "+ 'Vaccination'.tr():'NEW_VACCINATION'.tr(),
+                                    textAlign: TextAlign.start,
+                                    style: TextStyle(
+                                        color: Utils.getThemeColorBlue(),
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  )),
+                              SizedBox(height: 20,width: widthScreen),
+                              Column(
+                                children: [
+                                  Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('CHOOSE_FLOCK_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
 
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
+                                  Container(
+                                    width: widthScreen,
+                                    height: 70,
+                                    alignment: Alignment.centerRight,
+                                    padding: EdgeInsets.all(10),
+                                    margin: EdgeInsets.only(left: 20, right: 20),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withAlpha(70),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(20.0)),
+                                      border: Border.all(
+                                        color:  Colors.grey,
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                    child: getDropDownList(),
+                                  ),
+                                ],
                               ),
-                            ),
-                            child: getDiseaseTypeList(),
-                          ),
+                              SizedBox(height: 10,width: widthScreen),
+                              Column(
+                                children: [
+                                  Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Choose Disease'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
 
+                                  Container(
+                                    width: widthScreen,
+                                    height: 70,
+                                    alignment: Alignment.centerRight,
+                                    padding: EdgeInsets.all(10),
+                                    margin: EdgeInsets.only(left: 20, right: 20),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withAlpha(70),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(20.0)),
+                                      border: Border.all(
+                                        color:  Colors.grey,
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                    child: getDiseaseTypeList(),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10,width: widthScreen),
+                              Column(
+                                children: [
+                                  Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Medicine'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+
+                                  Container(
+                                    width: widthScreen,
+                                    height: 70,
+                                    margin: EdgeInsets.only(left: 20, right: 20),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withAlpha(70),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(20.0)),
+
+                                    ),
+                                    child: Container(
+                                      child: SizedBox(
+                                        width: widthScreen,
+                                        height: 70,
+                                        child: TextFormField(
+                                          maxLines: null,
+                                          expands: true,
+                                          controller: medicineController,
+                                          keyboardType: TextInputType.multiline,
+                                          textAlign: TextAlign.start,
+                                          textInputAction: TextInputAction.next,
+                                          decoration:  InputDecoration(
+                                            border: OutlineInputBorder(
+                                                borderRadius:
+                                                BorderRadius.all(Radius.circular(20))),
+                                            hintText: 'MED_NAME'.tr(),
+                                            hintStyle: TextStyle(
+                                                color: Colors.grey, fontSize: 16),
+                                            labelStyle: TextStyle(
+                                                color: Colors.black, fontSize: 16),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10,width: widthScreen),
+                              Column(
+                                children: [
+                                  Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('BIRDS_COUNT'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+
+                                  Container(
+                                    width: widthScreen,
+                                    height: 70,
+                                    padding: EdgeInsets.all(0),
+                                    margin: EdgeInsets.only(left: 20, right: 20),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withAlpha(70),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(20.0)),
+
+                                    ),
+                                    child: Container(
+                                      child: SizedBox(
+                                        width: widthScreen,
+                                        height: 60,
+                                        child: TextFormField(
+                                          maxLines: null,
+                                          expands: true,
+                                          controller: bird_countController,
+                                          keyboardType: TextInputType.number,
+                                          textInputAction: TextInputAction.next,
+                                          decoration:  InputDecoration(
+                                            border: OutlineInputBorder(
+                                                borderRadius:
+                                                BorderRadius.all(Radius.circular(20))),
+                                            hintText: 'BIRDS_COUNT'.tr(),
+                                            hintStyle: TextStyle(
+                                                color: Colors.grey, fontSize: 16),
+                                            labelStyle: TextStyle(
+                                                color: Colors.black, fontSize: 16),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],),
+                          ): SizedBox(width: 1,),
+                        activeStep==1? Container(child: Column(children: [
                           SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
+                          Column(
+                            children: [
+                              Container(
+                                  margin: EdgeInsets.only(left: 10),
+                                  child: Text(
+                                    "DATE".tr()+" and "+"Doctor_Name".tr(),
+                                    textAlign: TextAlign.start,
+                                    style: TextStyle(
+                                        color: Utils.getThemeColorBlue(),
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  )),
+                              Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DATE'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+
+                              Container(
                                 width: widthScreen,
                                 height: 70,
-                                child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
-                                  controller: medicineController,
-                                  keyboardType: TextInputType.multiline,
-                                  textAlign: TextAlign.start,
-                                  textInputAction: TextInputAction.next,
-                                  decoration:  InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'MED_NAME'.tr(),
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
+                                margin: EdgeInsets.only(left: 20, right: 20),
+                                child: InkWell(
+                                  onTap: () {
+                                    pickDate();
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.centerLeft,
+                                    padding: EdgeInsets.only(left: 10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withAlpha(70),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(20.0)),
+                                      border: Border.all(
+                                        color:  Colors.grey,
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                    child: Text(Utils.getFormattedDate(date), style: TextStyle(
+                                        color: Colors.black, fontSize: 16),),
                                   ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
 
                           SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            padding: EdgeInsets.all(0),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
+                          Column(
+                            children: [
+                              Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Doctor_Name'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                              Container(
                                 width: widthScreen,
-                                height: 60,
-                                child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
-                                  controller: bird_countController,
-                                  keyboardType: TextInputType.number,
-                                  textInputAction: TextInputAction.next,
-                                  decoration:  InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'BIRDS_COUNT'.tr(),
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-
-
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: InkWell(
-                              onTap: () {
-                                pickDate();
-                              },
-                              child: Container(
-                                alignment: Alignment.centerLeft,
-                                padding: EdgeInsets.only(left: 10),
+                                height: 70,
+                                margin: EdgeInsets.only(left: 20, right: 20),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: Colors.grey.withAlpha(70),
                                   borderRadius: const BorderRadius.all(
-                                      Radius.circular(10.0)),
-                                  border: Border.all(
-                                    color:  Colors.black,
-                                    width: 1.0,
-                                  ),
+                                      Radius.circular(20.0)),
                                 ),
-                                child: Text(Utils.getFormattedDate(date), style: TextStyle(
-                                    color: Colors.black, fontSize: 16),),
-                              ),
-                            ),
-                          ),
-
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
-                                width: widthScreen,
-                                height: 70,
-                                child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
-                                  controller: doctorController,
-                                  keyboardType: TextInputType.multiline,
-                                  textAlign: TextAlign.start,
-                                  textInputAction: TextInputAction.next,
-                                  decoration:  InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    hintText: "VAC_MED_BY".tr(),
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 14),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
+                                child: Container(
+                                  child: SizedBox(
+                                    width: widthScreen,
+                                    height: 70,
+                                    child: TextFormField(
+                                      maxLines: null,
+                                      expands: true,
+                                      controller: doctorController,
+                                      keyboardType: TextInputType.multiline,
+                                      textAlign: TextAlign.start,
+                                      textInputAction: TextInputAction.next,
+                                      decoration:  InputDecoration(
+                                        border: OutlineInputBorder(
+                                            borderRadius:
+                                            BorderRadius.all(Radius.circular(20))),
+                                        hintText: "Doctor_Name".tr(),
+                                        hintStyle: TextStyle(
+                                            color: Colors.grey, fontSize: 14),
+                                        labelStyle: TextStyle(
+                                            color: Colors.black, fontSize: 16),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
 
                           SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 120,
-                            padding: EdgeInsets.all(5),
-                            margin: EdgeInsets.only(left: 10, right: 10),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
+                          Column(
+                            children: [
+                              Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DESCRIPTION_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                              Container(
                                 width: widthScreen,
                                 height: 100,
-                                child: TextFormField(
-                                  maxLines: 2,
-                                  maxLength: 80,
-                                  controller: notesController,
-                                  keyboardType: TextInputType.multiline,
-                                  textAlign: TextAlign.start,
-                                  textInputAction: TextInputAction.done,
-                                  decoration:  InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'NOTES_HINT'.tr(),
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
+                                margin: EdgeInsets.only(left: 20, right: 20),
+                                decoration: BoxDecoration(
+                                    color: Colors.grey.withAlpha(70),
+                                    borderRadius:
+                                    BorderRadius.all(Radius.circular(10))),
+                                child: Container(
+                                  child: SizedBox(
+                                    width: widthScreen,
+                                    height: 100,
+                                    child: TextFormField(
+                                      maxLines: 2,
+                                      controller: notesController,
+                                      keyboardType: TextInputType.multiline,
+                                      textAlign: TextAlign.start,
+                                      textInputAction: TextInputAction.done,
+                                      decoration:  InputDecoration(
+                                        border: OutlineInputBorder(
+                                            borderRadius:
+                                            BorderRadius.all(Radius.circular(10))),
+                                        hintText: 'NOTES_HINT'.tr(),
+                                        hintStyle: TextStyle(
+                                            color: Colors.grey, fontSize: 16),
+                                        labelStyle: TextStyle(
+                                            color: Colors.black, fontSize: 16),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
+                        ],),): SizedBox(width: 1,),
+
 
                           SizedBox(height: 10,width: widthScreen),
                           InkWell(
                             onTap: () async {
-                              bool validate = checkValidation();
 
-                              if(validate){
-                                print("Everything Okay");
+                              activeStep++;
 
-                                await DatabaseHelper.instance.database;
+                              if(activeStep==1){
 
-                                if(isEdit) {
-                                  Vaccination_Medication med_vacc = Vaccination_Medication(
-                                    f_id: getFlockID(),
-                                    disease: _diseaseelectedValue,
-                                    medicine: medicineController.text,
-                                    date: date,
-                                    type: Utils.vaccine_medicine.toLowerCase()
-                                        .contains("medi")
-                                        ? 'Medication'
-                                        : 'Vaccination',
-                                    short_note: notesController.text,
-                                    bird_count: int.parse(
-                                        bird_countController.text),
-                                    doctor_name: doctorController.text,
-                                    f_name: _purposeselectedValue,);
-                                  med_vacc.id = widget.vaccination_medication!.id!;
-                                  int? id = await DatabaseHelper.updateHealth(
-                                      med_vacc);
-                                  Utils.showToast("SUCCESSFUL".tr());
-                                  Navigator.pop(context);
-                                }
-                                else {
-                                  Vaccination_Medication med_vacc = Vaccination_Medication(
-                                    f_id: getFlockID(),
-                                    disease: _diseaseelectedValue,
-                                    medicine: medicineController.text,
-                                    date: date,
-                                    type: Utils.vaccine_medicine.toLowerCase()
-                                        .contains("medi")
-                                        ? 'Medication'
-                                        : 'Vaccination',
-                                    short_note: notesController.text,
-                                    bird_count: int.parse(
-                                        bird_countController.text),
-                                    doctor_name: doctorController.text,
-                                    f_name: _purposeselectedValue,);
-                                  int? id = await DatabaseHelper.insertMedVac(
-                                      med_vacc);
-                                  Utils.showToast("SUCCESSFUL".tr());
-                                  Navigator.pop(context);
+                                if(medicineController.text.trim().length==0
+                                    || bird_countController.text.trim().length==0)
+                                {
+                                  activeStep--;
+                                  Utils.showToast("PROVIDE_ALL".tr());
+                                }else{
+                                  setState(() {
+
+                                  });
                                 }
 
-                              }else{
-                                Utils.showToast("PROVIDE_ALL".tr());
                               }
+
+
+                              if(activeStep==2){
+
+                                if(doctorController.text.trim().length==0){
+                                  activeStep--;
+                                  Utils.showToast("PROVIDE_ALL".tr());
+                                }else{
+                                  if(isEdit) {
+                                    Vaccination_Medication med_vacc = Vaccination_Medication(
+                                      f_id: getFlockID(),
+                                      disease: _diseaseelectedValue,
+                                      medicine: medicineController.text,
+                                      date: date,
+                                      type: Utils.vaccine_medicine.toLowerCase()
+                                          .contains("medi")
+                                          ? 'Medication'
+                                          : 'Vaccination',
+                                      short_note: notesController.text,
+                                      bird_count: int.parse(
+                                          bird_countController.text),
+                                      doctor_name: doctorController.text,
+                                      f_name: _purposeselectedValue,);
+                                    med_vacc.id = widget.vaccination_medication!.id!;
+                                    int? id = await DatabaseHelper.updateHealth(
+                                        med_vacc);
+                                    Utils.showToast("SUCCESSFUL".tr());
+                                    Navigator.pop(context);
+                                  } else {
+                                    Vaccination_Medication med_vacc = Vaccination_Medication(
+                                      f_id: getFlockID(),
+                                      disease: _diseaseelectedValue,
+                                      medicine: medicineController.text,
+                                      date: date,
+                                      type: Utils.vaccine_medicine.toLowerCase()
+                                          .contains("medi")
+                                          ? 'Medication'
+                                          : 'Vaccination',
+                                      short_note: notesController.text,
+                                      bird_count: int.parse(
+                                          bird_countController.text),
+                                      doctor_name: doctorController.text,
+                                      f_name: _purposeselectedValue,);
+                                    int? id = await DatabaseHelper.insertMedVac(
+                                        med_vacc);
+                                    Utils.showToast("SUCCESSFUL".tr());
+                                    Navigator.pop(context);
+                                  }
+                                }
+                              }
+
                             },
                             child: Container(
                               width: widthScreen,
@@ -496,7 +596,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                               ),
                               margin: EdgeInsets.all( 20),
                               child: Text(
-                                "CONFIRM".tr(),
+                                activeStep==0? "NEXT" : "CONFIRM".tr(),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.white,

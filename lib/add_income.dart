@@ -4,6 +4,7 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -64,8 +65,8 @@ class _NewIncome extends State<NewIncome>
 
   String date = "Choose date";
   String displayDate = "";
-  String payment_method = "Payment Method".tr();
-  String payment_status = "Payment Status".tr();
+  String payment_method = "Cash".tr();
+  String payment_status = "CLEARED".tr();
 
   final quantityController = TextEditingController();
   final notesController = TextEditingController();
@@ -84,12 +85,15 @@ class _NewIncome extends State<NewIncome>
       _purposeselectedValue = widget.transactionItem!.f_name;
       date = widget.transactionItem!.date;
       _saleselectedValue = widget.transactionItem!.sale_item;
-      payment_status = widget.transactionItem!.payment_status;
+   /*   payment_status = widget.transactionItem!.payment_status;
       payment_method = widget.transactionItem!.payment_method;
-      notesController.text = widget.transactionItem!.short_note;
+   */   notesController.text = widget.transactionItem!.short_note;
       howmanyController.text = widget.transactionItem!.how_many;
       soldtoController.text = widget.transactionItem!.sold_purchased_from;
       amountController.text = widget.transactionItem!.amount;
+
+      print(payment_status);
+      print(payment_method);
 
     }
 
@@ -114,8 +118,13 @@ class _NewIncome extends State<NewIncome>
       total_birds += flocks.elementAt(i).active_bird_count!;
     }
 
-    _purposeselectedValue = _purposeList[0];
-    howmanyController.text = total_birds.toString();
+    if(!isEdit) {
+      _purposeselectedValue = _purposeList[0];
+      howmanyController.text = total_birds.toString();
+      DateTime dateTime = DateTime.now();
+      date = DateFormat('yyyy-MM-dd').format(dateTime);
+
+    }
 
     setState(() {
 
@@ -128,15 +137,14 @@ class _NewIncome extends State<NewIncome>
 
     _paymentMethodList = await DatabaseHelper.getSubCategoryList(5);
 
-    _paymentMethodList.insert(0,SubItem(c_id: 3,id: -1,name: 'Payment Method'.tr()));
-
     for(int i=0;i<_paymentMethodList.length;i++){
       _visiblePaymentMethodList.add(_paymentMethodList.elementAt(i).name!);
     }
 
+    if(!isEdit)
     payment_method = _visiblePaymentMethodList[0];
 
-    print(_visiblePaymentMethodList);
+    print(payment_method);
 
     setState(() {
 
@@ -149,12 +157,12 @@ class _NewIncome extends State<NewIncome>
 
     _subItemList = await DatabaseHelper.getSubCategoryList(1);
 
-    _subItemList.insert(0,SubItem(c_id: 3,id: -1,name: 'Sale item'.tr()));
 
     for(int i=0;i<_subItemList.length;i++){
       _saleItemList.add(_subItemList.elementAt(i).name!);
     }
 
+    if(!isEdit)
     _saleselectedValue = _saleItemList[0];
 
     print(_saleItemList);
@@ -166,7 +174,7 @@ class _NewIncome extends State<NewIncome>
 
   }
 
-
+  int activeStep = 0;
 
   bool imagesAdded = false;
 
@@ -204,7 +212,7 @@ class _NewIncome extends State<NewIncome>
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
-                            color: Utils.getThemeColorBlue(), //(x,y)
+                            color: Utils.getScreenBackground(), //(x,y)
                           ),
                         ],
                       ),
@@ -216,88 +224,312 @@ class _NewIncome extends State<NewIncome>
                             height: 50,
                             child: InkWell(
                               child: Icon(Icons.arrow_back,
-                                  color: Colors.white, size: 30),
+                                  color: Colors.black, size: 30),
                               onTap: () {
                                 Navigator.pop(context);
                               },
                             ),
                           ),
-                          Container(
-                              margin: EdgeInsets.only(left: 10),
-                              child: Text(
-                                isEdit?'Edit'.tr() +" "+ "Income".tr() : "NEW_INCOME".tr(),
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold),
-                              )),
 
                         ],
                       ),
                     ),
                   ),
 
+
+                  SizedBox(height: 20,),
+                  EasyStepper(
+                    activeStep: activeStep,
+                    activeStepTextColor: Utils.getThemeColorBlue(),
+                    finishedStepTextColor: Utils.getThemeColorBlue(),
+                    internalPadding: 30,
+                    showLoadingAnimation: false,
+                    stepRadius: 12,
+                    showStepBorder: true,
+                    steps: [
+                      EasyStep(
+                        customStep: CircleAvatar(
+                          radius: 8,
+                          backgroundColor: Colors.white,
+                          child: CircleAvatar(
+                            radius: 7,
+                            backgroundColor:
+                            activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey,
+                          ),
+                        ),
+                        title: 'Step 1',
+                      ),
+                      EasyStep(
+                        customStep: CircleAvatar(
+                          radius: 8,
+                          backgroundColor: Colors.white,
+                          child: CircleAvatar(
+                            radius: 7,
+                            backgroundColor:
+                            activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
+                          ),
+                        ),
+                        title: 'Step 2',
+
+                      ),  EasyStep(
+                        customStep: CircleAvatar(
+                          radius: 8,
+                          backgroundColor: Colors.white,
+                          child: CircleAvatar(
+                            radius: 7,
+                            backgroundColor:
+                            activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
+                          ),
+                        ),
+                        title: 'Step 3',
+
+                      ),
+
+                    ],
+                    onStepReached: (index) =>
+                        setState(() => activeStep = index),
+                  ),
+
                   Container(
-                    margin: EdgeInsets.only(top: 30),
+                    alignment: Alignment.center,
+                    height: heightScreen - 250,
                     child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
-                            ),
-                            child: getDropDownList(),
-                          ),
 
-                          SizedBox(height: 10,width: widthScreen),
+                        activeStep==0? Column(children: [
                           Container(
-                            width: widthScreen,
-                            height: 70,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
+                              margin: EdgeInsets.only(left: 10),
+                              child: Text(
+                                isEdit?'Edit'.tr() +" "+ "Income".tr() : "NEW_INCOME".tr(),
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                    color: Utils.getThemeColorBlue(),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold),
+                              )),
+                          SizedBox(height: 20,width: widthScreen),
+                            SizedBox(height: 10,width: widthScreen),
+                            Column(
+                              children: [
+                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('CHOOSE_FLOCK_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                                Container(
+                                  width: widthScreen,
+                                  height: 70,
+                                  alignment: Alignment.centerRight,
+                                  padding: EdgeInsets.all(10),
+                                  margin: EdgeInsets.only(left: 20, right: 20),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.withAlpha(70),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(20.0)),
+                                    border: Border.all(
+                                      color:  Colors.grey,
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: getDropDownList(),
+                                ),
+                              ],
                             ),
-                            child: getSaleTypeList(),
-                          ),
 
-                          SizedBox(height: 10,width: widthScreen),
-                          
-                          
-                          Container(
-                            
-                            child: Row(
-                            children: [
-                              Expanded(
-                                child: Container(
+                            SizedBox(height: 10,width: widthScreen),
+                            Column(
+                              children: [
+                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('PURPOSE1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+
+                                Container(
+                                  width: widthScreen,
+                                  height: 70,
+                                  alignment: Alignment.centerRight,
+                                  padding: EdgeInsets.all(10),
+                                  margin: EdgeInsets.only(left: 20, right: 20),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.withAlpha(70),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(20.0)),
+                                    border: Border.all(
+                                      color:  Colors.grey,
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: getSaleTypeList(),
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(height: 10,width: widthScreen),
+                            Container(
+
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('HOW_MANY'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+
+                                        Container(
+                                          height: 70,
+                                          padding: EdgeInsets.all(0),
+                                          margin: EdgeInsets.only(left: 20,right: 5,),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.withAlpha(70),
+                                            borderRadius: const BorderRadius.all(
+                                                Radius.circular(20.0)),
+
+                                          ),
+                                          child: Container(
+
+                                            child: SizedBox(
+                                              width: widthScreen,
+                                              height: 60,
+                                              child: TextFormField(
+                                                maxLines: null,
+                                                expands: true,
+                                                controller: howmanyController,
+                                                keyboardType: TextInputType.number,
+                                                textInputAction: TextInputAction.next,
+                                                decoration:  InputDecoration(
+                                                  border: OutlineInputBorder(
+                                                      borderRadius:
+                                                      BorderRadius.all(Radius.circular(20))),
+                                                  hintText: 'HOW_MANY'.tr(),
+                                                  hintStyle: TextStyle(
+                                                      color: Colors.grey, fontSize: 16),
+                                                  labelStyle: TextStyle(
+                                                      color: Colors.black, fontSize: 16),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                      child: Column(
+                                        children: [
+                                          Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 5,bottom: 5),child: Text('SALE_AMOUNT'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+
+                                          Container(
+                                            height: 70,
+                                            padding: EdgeInsets.all(0),
+                                            margin: EdgeInsets.only( right: 20),
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey.withAlpha(70),
+                                              borderRadius: const BorderRadius.all(
+                                                  Radius.circular(20.0)),
+
+                                            ),
+                                            child: Container(
+                                              child: SizedBox(
+                                                width: widthScreen,
+                                                height: 60,
+                                                child: TextFormField(
+                                                  maxLines: null,
+                                                  expands: true,
+                                                  controller: amountController,
+                                                  keyboardType: TextInputType.number,
+                                                  textInputAction: TextInputAction.next,
+                                                  decoration:  InputDecoration(
+                                                    border: OutlineInputBorder(
+                                                        borderRadius:
+                                                        BorderRadius.all(Radius.circular(20))),
+                                                    hintText: 'SALE_AMOUNT'.tr(),
+                                                    hintStyle: TextStyle(
+                                                        color: Colors.grey, fontSize: 16),
+                                                    labelStyle: TextStyle(
+                                                        color: Colors.black, fontSize: 16),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      )) ,
+                                ],
+                              ),),
+                          ],):SizedBox(width: 1,),
+
+
+                          activeStep==1?  Column(children: [
+                            Container(
+                                margin: EdgeInsets.only(left: 10),
+                                child: Text(
+                                  "Payment Info".tr(),
+                                  textAlign: TextAlign.start,
+                                  style: TextStyle(
+                                      color: Utils.getThemeColorBlue(),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
+                                )),
+                            SizedBox(height: 20,width: widthScreen),
+                            Column(
+                              children: [
+                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Payment Method'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+
+                                Container(
+                                  width: widthScreen,
+                                  height: 70,
+                                  alignment: Alignment.centerRight,
+                                  padding: EdgeInsets.all(10),
+                                  margin: EdgeInsets.only(left: 20, right: 20),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.withAlpha(70),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(20.0)),
+                                    border: Border.all(
+                                      color:  Colors.grey,
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: getPaymentMethodList(),
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(height: 10,width: widthScreen),
+                            Column(
+                              children: [
+                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Payment Status'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+
+                                Container(
+                                  width: widthScreen,
+                                  height: 70,
+                                  alignment: Alignment.centerRight,
+                                  padding: EdgeInsets.all(10),
+                                  margin: EdgeInsets.only(left: 20, right: 20),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.withAlpha(70),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(20.0)),
+                                    border: Border.all(
+                                      color:  Colors.grey,
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: getPaymentStatusList(),
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(height: 10,width: widthScreen),
+                            Column(
+                              children: [
+                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('SOLD_TO'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+
+                                Container(
+                                  width: widthScreen,
                                   height: 70,
                                   padding: EdgeInsets.all(0),
-                                  margin: EdgeInsets.only(left: 20,right: 5,),
+                                  margin: EdgeInsets.only(left: 20, right: 20),
                                   decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius:
-                                      BorderRadius.all(Radius.circular(10))),
+                                    color: Colors.grey.withAlpha(70),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(20.0)),
+
+                                  ),
                                   child: Container(
                                     child: SizedBox(
                                       width: widthScreen,
@@ -305,14 +537,13 @@ class _NewIncome extends State<NewIncome>
                                       child: TextFormField(
                                         maxLines: null,
                                         expands: true,
-                                        controller: howmanyController,
-                                        keyboardType: TextInputType.number,
+                                        controller: soldtoController,
                                         textInputAction: TextInputAction.next,
                                         decoration:  InputDecoration(
                                           border: OutlineInputBorder(
                                               borderRadius:
-                                              BorderRadius.all(Radius.circular(10))),
-                                          hintText: 'HOW_MANY'.tr(),
+                                              BorderRadius.all(Radius.circular(20))),
+                                          hintText: 'SOLD_TO_HINT'.tr(),
                                           hintStyle: TextStyle(
                                               color: Colors.grey, fontSize: 16),
                                           labelStyle: TextStyle(
@@ -322,192 +553,130 @@ class _NewIncome extends State<NewIncome>
                                     ),
                                   ),
                                 ),
-                              ),
-                              Expanded(
-                                 child: Container(
-                               height: 70,
-                               padding: EdgeInsets.all(0),
-                               margin: EdgeInsets.only( right: 20),
-                               decoration: BoxDecoration(
-                                   color: Colors.white,
-                                   borderRadius:
-                                   BorderRadius.all(Radius.circular(10))),
-                               child: Container(
-                                 child: SizedBox(
-                                   width: widthScreen,
-                                   height: 60,
-                                   child: TextFormField(
-                                     maxLines: null,
-                                     expands: true,
-                                     controller: amountController,
-                                     keyboardType: TextInputType.number,
-                                     textInputAction: TextInputAction.next,
-                                     decoration:  InputDecoration(
-                                       border: OutlineInputBorder(
-                                           borderRadius:
-                                           BorderRadius.all(Radius.circular(10))),
-                                       hintText: 'SALE_AMOUNT'.tr(),
-                                       hintStyle: TextStyle(
-                                           color: Colors.grey, fontSize: 16),
-                                       labelStyle: TextStyle(
-                                           color: Colors.black, fontSize: 16),
-                                     ),
-                                   ),
-                                 ),
-                               ),
-                             )) ,
-                            ],
-                          ),),
-
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
+                              ],
                             ),
-                            child: getPaymentMethodList(),
-                          ),
-
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10.0)),
-                              border: Border.all(
-                                color:  Colors.black,
-                                width: 1.0,
-                              ),
-                            ),
-                            child: getPaymentStatusList(),
-                          ),
-
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            padding: EdgeInsets.all(0),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
-                                width: widthScreen,
-                                height: 60,
-                                child: TextFormField(
-                                  maxLines: null,
-                                  expands: true,
-                                  controller: soldtoController,
-                                  textInputAction: TextInputAction.next,
-                                  decoration:  InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'SOLD_TO_HINT'.tr(),
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
+                          ],):SizedBox(width: 1,),
 
 
-
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 70,
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: InkWell(
-                              onTap: () {
-                                pickDate();
-                              },
-                              child: Container(
-                                alignment: Alignment.centerLeft,
-                                padding: EdgeInsets.only(left: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(10.0)),
-                                  border: Border.all(
-                                    color:  Colors.black,
-                                    width: 1.0,
-                                  ),
-                                ),
-                                child: Text(Utils.getFormattedDate(date), style: TextStyle(
-                                    color: Colors.black, fontSize: 16),),
-                              ),
-                            ),
-                          ),
-
-                          SizedBox(height: 10,width: widthScreen),
-                          Container(
-                            width: widthScreen,
-                            height: 120,
-                            padding: EdgeInsets.all(5),
-                            margin: EdgeInsets.only(left: 10, right: 10),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Container(
-                              child: SizedBox(
-                                width: widthScreen,
-                                height: 100,
-                                child: TextFormField(
-                                  maxLines: 2,
-                                  maxLength: 80,
-                                  controller: notesController,
-                                  keyboardType: TextInputType.multiline,
+                          activeStep==2?  Column(children: [
+                            Container(
+                                margin: EdgeInsets.only(left: 10),
+                                child: Text(
+                                  "Date_DESC".tr(),
                                   textAlign: TextAlign.start,
-                                  textInputAction: TextInputAction.done,
-                                  decoration:  InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    hintText: 'NOTES_HINT'.tr(),
-                                    hintStyle: TextStyle(
-                                        color: Colors.grey, fontSize: 16),
-                                    labelStyle: TextStyle(
-                                        color: Colors.black, fontSize: 16),
+                                  style: TextStyle(
+                                      color: Utils.getThemeColorBlue(),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
+                                )),
+                            SizedBox(height: 20,width: widthScreen),
+                            Column(
+                              children: [
+                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DATE'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+
+                                Container(
+                                  width: widthScreen,
+                                  height: 70,
+                                  margin: EdgeInsets.only(left: 20, right: 20),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.withAlpha(70),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(20.0)),
+                                    border: Border.all(
+                                      color:  Colors.grey,
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: InkWell(
+                                    onTap: () {
+                                      pickDate();
+                                    },
+                                    child: Container(
+                                      alignment: Alignment.centerLeft,
+                                      padding: EdgeInsets.only(left: 10),
+
+                                      child: Text(Utils.getFormattedDate(date), style: TextStyle(
+                                          color: Colors.black, fontSize: 16),),
+                                    ),
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
-                          ),
+
+                            SizedBox(height: 10,width: widthScreen),
+                            Column(
+                              children: [
+                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('HOW_MUCH'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                                Container(
+                                  width: widthScreen,
+                                  height: 100,
+                                  margin: EdgeInsets.only(left: 20, right: 20),
+                                  decoration: BoxDecoration(
+                                      color: Colors.grey.withAlpha(70),
+                                      borderRadius:
+                                      BorderRadius.all(Radius.circular(10))),
+                                  child: Container(
+                                    child: SizedBox(
+                                      width: widthScreen,
+                                      height: 100,
+                                      child: TextFormField(
+                                        maxLines: 2,
+                                        controller: notesController,
+                                        keyboardType: TextInputType.multiline,
+                                        textAlign: TextAlign.start,
+                                        textInputAction: TextInputAction.done,
+                                        decoration:  InputDecoration(
+                                          border: OutlineInputBorder(
+                                              borderRadius:
+                                              BorderRadius.all(Radius.circular(10))),
+                                          hintText: 'NOTES_HINT'.tr(),
+                                          hintStyle: TextStyle(
+                                              color: Colors.grey, fontSize: 16),
+                                          labelStyle: TextStyle(
+                                              color: Colors.black, fontSize: 16),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],):SizedBox(width: 1,),
+
+
                           SizedBox(height: 10,width: widthScreen),
                           InkWell(
                             onTap: () async {
                               bool validate = checkValidation();
 
-                              if(validate){
+                              activeStep++;
+                              if(activeStep==1){
+                                if(howmanyController.text.trim().length>0
+                                    && amountController.text.trim().length>0)
+                                {
+                                  setState(() {
 
+                                  });
+                                }else{
+                                  activeStep--;
+                                  Utils.showToast("PROVIDE_ALL".tr());
+                                }
+                              }
+
+                              if(activeStep==2){
+                                if(soldtoController.text.trim().length>0)
+                                {
+                                  setState(() {
+
+                                  });
+                                }else{
+                                  activeStep--;
+                                  Utils.showToast("PROVIDE_ALL".tr());
+                                }
+                              }
+
+                              if(activeStep==3){
                                 if(isEdit){
-
                                   await DatabaseHelper.instance.database;
                                   TransactionItem transaction_item = TransactionItem(
                                       f_id: getFlockID(),
@@ -556,9 +725,8 @@ class _NewIncome extends State<NewIncome>
                                   Utils.showToast("SUCCESSFUL".tr());
                                   Navigator.pop(context);
                                 }
-                              }else{
-                                Utils.showToast("PROVIDE_ALL".tr());
                               }
+
                             },
                             child: Container(
                               width: widthScreen,
@@ -575,7 +743,7 @@ class _NewIncome extends State<NewIncome>
                               ),
                               margin: EdgeInsets.all( 20),
                               child: Text(
-                                "CONFIRM".tr(),
+                                activeStep<=1?"NEXT":"CONFIRM".tr(),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -669,7 +837,6 @@ class _NewIncome extends State<NewIncome>
     );
   }
 
-
   Widget getPaymentMethodList() {
     return Container(
       width: widthScreen,
@@ -703,7 +870,7 @@ class _NewIncome extends State<NewIncome>
     );
   }
 
-  List<String> paymentStatusList = ['Payment Status'.tr(),'CLEARED'.tr(),'UNCLEAR'.tr(),'RECONCILED'.tr()];
+  List<String> paymentStatusList = ['CLEARED'.tr(),'UNCLEAR'.tr(),'RECONCILED'.tr()];
 
   Widget getPaymentStatusList() {
     return Container(
