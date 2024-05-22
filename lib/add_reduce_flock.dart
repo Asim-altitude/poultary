@@ -146,7 +146,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                       ),
                     ],
                   ),
-                  child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
+                  child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                     Icon(Icons.add_circle_outline_sharp, color: Colors.white, size: 25,),SizedBox(width: 4,),
                     Text('ADD_BIRDS'.tr(), style: TextStyle(
                         color: Colors.white, fontSize: 16),)

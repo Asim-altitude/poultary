@@ -434,6 +434,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                                   fontWeight: FontWeight.w600),
                             ),
                           ),),
+                      if(isGetLanguage)
                       Container(
                         width: Utils.getWidthResized(150),height:60,color: Colors.white,
                         child: LanguagePickerDropdown(

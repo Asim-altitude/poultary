@@ -168,7 +168,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                             height: 50,
                             child: InkWell(
                               child: Icon(Icons.arrow_back,
-                                  color: Colors.black, size: 30),
+                                  color: Utils.getThemeColorBlue(), size: 30),
                               onTap: () {
                                 Navigator.pop(context);
                               },
@@ -248,7 +248,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
 
                                     textAlign: TextAlign.start,
                                     style: TextStyle(
-                                        color: Colors.black,
+                                        color: Utils.getThemeColorBlue(),
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold),
                                   ),

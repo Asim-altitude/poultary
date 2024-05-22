@@ -176,7 +176,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                               height: 50,
                               child: InkWell(
                                 child: Icon(Icons.arrow_back,
-                                    color: Colors.white, size: 30),
+                                    color: Utils.getThemeColorBlue(), size: 30),
                                 onTap: () {
                                   Navigator.pop(context);
                                 },

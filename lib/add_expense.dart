@@ -222,7 +222,7 @@ class _NewExpense extends State<NewExpense>
                             height: 50,
                             child: InkWell(
                               child: Icon(Icons.arrow_back,
-                                  color: Colors.black, size: 30),
+                                  color: Utils.getThemeColorBlue(), size: 30),
                               onTap: () {
                                 Navigator.pop(context);
                               },
@@ -367,7 +367,6 @@ class _NewExpense extends State<NewExpense>
                               SizedBox(height: 10,width: widthScreen),
 
                               Container(
-
                                 child: Row(
                                   children: [
                                     Expanded(

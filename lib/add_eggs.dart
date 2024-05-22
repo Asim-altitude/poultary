@@ -163,7 +163,7 @@ class _NewEggCollection extends State<NewEggCollection>
                             height: 50,
                             child: InkWell(
                               child: Icon(Icons.arrow_back,
-                                  color: Colors.white, size: 30),
+                                  color: Utils.getThemeColorBlue(), size: 30),
                               onTap: () {
                                 Navigator.pop(context,"Egg ADDED");
                               },
@@ -239,7 +239,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                       isCollection? isEdit? "EDIT".tr() +" "+ "COLLECTION".tr(): "NEW".tr()+" "+ "Collection" : isEdit? "EDIT".tr() +" "+ "REDUCTION".tr():"NEW".tr()+" "+"REDUCTION".tr(),
                                       textAlign: TextAlign.start,
                                       style: TextStyle(
-                                          color: Colors.black,
+                                          color: Utils.getThemeColorBlue(),
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold),
                                     )),
@@ -407,7 +407,7 @@ class _NewEggCollection extends State<NewEggCollection>
                             ),
                           ):SizedBox(width: 1,),
 
-                        activeStep==1? Container(
+                          activeStep==1? Container(
                             child: Column(
                               children: [
                                 Container(
@@ -416,7 +416,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                       "Choose date".tr() +" and "+"Description".tr(),
                                       textAlign: TextAlign.start,
                                       style: TextStyle(
-                                          color: Colors.black,
+                                          color: Utils.getThemeColorBlue(),
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold),
                                     )),
