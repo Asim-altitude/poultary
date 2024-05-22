@@ -245,6 +245,8 @@ class _LanguageSetupScreen extends State<LanguageSetupScreen>
                           crossAxisAlignment: CrossAxisAlignment.center,
                         */  children: [
 
+
+                          if(isGetLanguage)
                             Container(
                               width: widthScreen - 20,height:60,
                               margin: EdgeInsets.only(left: 15, right: 15),
@@ -558,10 +560,14 @@ class _LanguageSetupScreen extends State<LanguageSetupScreen>
   FarmSetup? farmSetup = null;
   int modified = 0;
   void getInfo() async {
+    print('OKOKOK');
 
     await DatabaseHelper.instance.database;
     List<FarmSetup> list = await DatabaseHelper.getFarmInfo();
+    print('OKOKOK1');
+
     farmSetup = list.elementAt(0);
+    print(list.length);
 
     if(farmSetup!.image.toLowerCase().contains("asset")){
       modified = 0;
@@ -604,6 +610,7 @@ class _LanguageSetupScreen extends State<LanguageSetupScreen>
 
     final bytes = File(croppedFile!.path).readAsBytesSync();
     String base64Image =  base64Encode(bytes);
+
     farmSetup!.image = base64Image;
     modified = 1;
     setState((){});
