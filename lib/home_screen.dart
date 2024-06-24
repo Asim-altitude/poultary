@@ -96,6 +96,9 @@ class _HomeScreen extends State<HomeScreen> {
     Center(
       child: SettingsScreen(),
     ),
+    Center(
+      child: SettingsScreen(),
+    ),
 
   ];
 
@@ -130,6 +133,7 @@ class _HomeScreen extends State<HomeScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "DASHBOARD".tr()),
           BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: "REPORTS".tr()),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "SETTINGS".tr()),
+          BottomNavigationBarItem(icon: Icon(Icons.notification_add), label: "Reminders".tr()),
         ],
 
       ),),

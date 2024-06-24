@@ -38,12 +38,6 @@ Future<void> main() async {
 
 void requestGDPR(){
 
-  // Test
-  // ConsentInformation.instance.reset();
-  // ConsentDebugSettings debugSettings = ConsentDebugSettings(
-  //     debugGeography: DebugGeography.debugGeographyEea,
-  //     testIdentifiers: ['5BC971590B20B4500231D53345928594']);
-
   final params = ConsentRequestParameters();
   ConsentInformation.instance.requestConsentInfoUpdate(
     params,
