@@ -231,7 +231,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                   ),
 
                   Container(
-                    height: heightScreen - 250,
+                    height: heightScreen - 150,
                     alignment: Alignment.center,
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
