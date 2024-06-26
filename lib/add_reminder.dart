@@ -64,7 +64,6 @@ class _NewEventReminder extends State<NewEventReminder>
     }
 
     getList();
-    Utils.showInterstitial();
     Utils.setupAds();
   }
 
@@ -254,6 +253,7 @@ class _NewEventReminder extends State<NewEventReminder>
 
                                 SizedBox(height: 20,width: widthScreen),
                                 Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Reminder Title'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                                if(_reminderValue!='')
                                 Container(
                                   width: widthScreen,
                                   height: 70,
