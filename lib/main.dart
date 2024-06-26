@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui' as ui;
 import 'package:poultary/utils/utils.dart';
 
+import 'app_intro/app_intro_page.dart';
 import 'app_setup/language_setup_screen.dart';
 import 'home_screen.dart';
 
@@ -38,12 +39,6 @@ Future<void> main() async {
  }
 
 void requestGDPR(){
-
-  // Test
-  // ConsentInformation.instance.reset();
-  // ConsentDebugSettings debugSettings = ConsentDebugSettings(
-  //     debugGeography: DebugGeography.debugGeographyEea,
-  //     testIdentifiers: ['5BC971590B20B4500231D53345928594']);
 
   final params = ConsentRequestParameters();
   ConsentInformation.instance.requestConsentInfoUpdate(

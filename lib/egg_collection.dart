@@ -435,16 +435,8 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                       );
 
                     }),
-              ) : Center(
-                child: Container(
-                  margin: EdgeInsets.only(top: 50),
-                  child: Column(
-                    children: [
-                      Text('No Egg Collections Added', style: TextStyle(fontSize: 18, color: Colors.black),),
-                    ],
-                  ),
-                ),
-              ),
+              ) : Utils.getCustomEmptyMessage("assets/egg_collect.png", "No Egg Collections Added")
+
 
                    /* Text(
               "Main Menu",

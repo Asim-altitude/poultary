@@ -23,6 +23,7 @@ import 'package:poultary/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'add_flocks.dart';
+import 'all_events.dart';
 import 'database/databse_helper.dart';
 import 'farm_setup_screen.dart';
 import 'manage_flock_screen.dart';
@@ -453,6 +454,61 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                                     Icon(Icons.album,color: Utils.getThemeColorBlue(),),
                                     SizedBox(width: 4,),
                                     Text('FLOCK_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                  ],
+                                )),
+
+                          ],),),
+                    ),
+                  ),
+                  SizedBox(height: 4,),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const AllEventsScreen()),
+
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(3)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 2,
+                            offset: Offset(0, 1), // changes position of shadow
+                          ),
+                        ],
+                        color: Colors.white,
+                        //  border: Border.all(color: Colors.blueAccent,width: 1.0)
+                      ),
+                      margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                      child: Container(
+                        height: 52,
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white, //(x,y)
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+
+                          children: [
+                            Align(
+                                alignment: Alignment.topLeft,
+                                child: Row(
+                                  children: [
+
+                                    Icon(Icons.notification_add,color: Utils.getThemeColorBlue(),),
+                                    SizedBox(width: 4,),
+                                    Text('Events'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                                   ],
                                 )),
 

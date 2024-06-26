@@ -324,6 +324,28 @@
   "Payment Info": "ادائیگی کی معلومات",
   "Date_DESC": "تاریخ اور تفصیل",
   "SOLD_TO": "کو فروخت",
-  "PAID_TO1": "کو ادائیگی"
+  "PAID_TO1": "کو ادائیگی",
+
+  "Reminders": "یاد دہانیاں",
+  "Reminder": "یاد دہانی",
+  "Reminder date": "یاد دہانی کی تاریخ",
+  "About Reminder": "یاد دہانی کے بارے میں",
+  "Events": "واقعہ کی یاددہانی",
+  "New Event Reminder": "نئی یاد دہانی",
+  "No Reminders Added": "کوئی یاد دہانی شامل نہیں کی گئی۔",
+  "All Reminders": "تمام یاد دہانیاں",
+  "Reminder Added": "نئی یاد دہانی شامل کر دی گئی۔",
+
+  "No Egg Collections Added": "انڈے کا کوئی مجموعہ شامل نہیں کیا گیا۔",
+  "Reminder Title": "یاد دہانی کا عنوان",
+  "Birds Health": "پرندوں کی صحت",
+  "Birds Sale": "پرندوں کی فروخت",
+  "Birds Purchase": "پرندوں کی خریداری",
+  "Egg Collection": "انڈے کا مجموعہ",
+  "Cleanliness": "صفائی",
+  "Inventory Purchase": "انوینٹری کی خریداری",
+  "Financial Settlements": "مالی تصفیہ",
+  "Repairing": "مرمت کرنا",
+  "Other": "دیگر"
 
 }

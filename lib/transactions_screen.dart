@@ -492,22 +492,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                       );
 
                     }),
-              ) : Center(
-                child: Container(
-                  margin: EdgeInsets.only(top: 20),
-                  child: Container(
-                    height: heightScreen - 200,
-                    width: widthScreen,
-                    child: Column(
-                      children: [
-                        Text('No Income/Expense added'.tr(), style: TextStyle(fontSize: 18, color: Colors.black),),
-
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
+              ) : Utils.getCustomEmptyMessage("assets/pfinance.png", "No Income/Expense added")
 
                    /* Text(
               "Main Menu",

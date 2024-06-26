@@ -21,6 +21,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 
 import 'CAS_Ads.dart';
 import 'add_flocks.dart';
+import 'all_events.dart';
 import 'all_reports_screen.dart';
 import 'database/databse_helper.dart';
 import 'egg_collection.dart';
@@ -706,15 +707,19 @@ class _DashboardScreen extends State<DashboardScreen> {
                           margin: EdgeInsets.only(left: 20, right: 20, top: 10),
                           child: Stack(
                             children: [
-                              Container(
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text("ALL_FLOCKS".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
-                                    Text("(" + flocks.length.toString() + ")",style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                              Align(
+                                alignment: Alignment.center,
+                                child: Container(
+                                  width: widthScreen/2,
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text("ALL_FLOCKS".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
+                                      Text("(" + flocks.length.toString() + ")",style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
 
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                              flocks.length > 0 ? InkWell(

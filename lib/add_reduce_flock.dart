@@ -491,16 +491,8 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                       );
 
                     }),
-              ) : Center(
-                child: Container(
-                  margin: EdgeInsets.only(top: 50),
-                  child: Column(
-                    children: [
-                      Text('NO_BIRDS_ADD_REDUCE'.tr(), style: TextStyle(fontSize: 18, color: Colors.black),),
-                    ],
-                  ),
-                ),
-              ),
+              ) : Utils.getCustomEmptyMessage("assets/add_reduce_.png", "NO_BIRDS_ADD_REDUCE")
+
 
                    /* Text(
               "Main Menu",

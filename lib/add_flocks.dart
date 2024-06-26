@@ -614,13 +614,16 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                         if(!checkValidationOption()){
                           activeStep--;
                           Utils.showToast("PROVIDE_ALL".tr());
-                        }else{
+                        }else if (nameController.text != "" && birdcountController.text!= ""){
                           notesController.text = nameController.text +" "+"Added on".tr()+" "+Utils.getFormattedDate(date) +" "+"with".tr() +" "+ birdcountController.text + " " + "BIRDS".tr();
+                        }else{
+                          activeStep--;
+                          Utils.showToast("PROVIDE_ALL".tr());
                         }
                       }
 
                       if(activeStep==3){
-                        if(validate){
+                        if(validate) {
                           print("Everything Okay");
                           await DatabaseHelper.instance.database;
                           int? id = await DatabaseHelper.insertFlock(Flock(f_id: 1, f_name: nameController.text, bird_count: int.parse(birdcountController.text)
@@ -635,6 +638,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                           }
 
                         }else{
+                          activeStep--;
                           Utils.showToast("PROVIDE_ALL".tr());
                         }
                       }
@@ -840,16 +844,6 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
       print("Select Date");
     }
 
-    if(_acqusitionselectedValue.toLowerCase().contains("ACQUSITION_TYPE".tr())){
-      valid = false;
-      print("Select Acqusition Type");
-    }
-
-    if(_purposeselectedValue.toLowerCase().contains("SELECT_PURPOSE".tr())){
-      valid = false;
-      print("Select Purpose");
-    }
-
     if(birdcountController.text.isEmpty){
       valid = false;
       print("Select Bird Count");
@@ -870,8 +864,11 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
 
         base64Images.clear();
 
+        File file;
       for (int i=0;i<imageFileList!.length;i++) {
-        final bytes = File(imageFileList!.elementAt(i).path).readAsBytesSync();
+
+        file = await Utils.convertToJPGFileIfRequiredWithCompression(File(imageFileList!.elementAt(i).path));
+        final bytes = File(file.path).readAsBytesSync();
         String base64Image =  base64Encode(bytes);
         base64Images.add(base64Image);
 

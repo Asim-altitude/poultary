@@ -324,5 +324,26 @@
   "Payment Info": "கட்டண தகவல்",
   "Date_DESC": "தேதி மற்றும் விளக்கம்",
   "SOLD_TO": "விற்கப்பட்டது",
-  "PAID_TO1": "செலுத்தப்பட்டது"
+  "PAID_TO1": "செலுத்தப்பட்டது",
+
+  "Reminders": "நினைவூட்டல்கள்",
+  "Reminder": "நினைவூட்டல்",
+  "Reminder date": "நினைவூட்டல் தேதி",
+  "About Reminder": "நினைவூட்டல் பற்றி",
+  "Events": "நிகழ்வு நினைவூட்டல்கள்",
+  "New Event Reminder": "புதிய நினைவூட்டல்",
+  "No Reminders Added": "நினைவூட்டல்கள் எதுவும் சேர்க்கப்படவில்லை",
+  "All Reminders": "அனைத்து நினைவூட்டல்கள்",
+  "Reminder Added": "புதிய நினைவூட்டல் சேர்க்கப்பட்டது",
+  "No Egg Collections Added": "முட்டை சேகரிப்புகள் சேர்க்கப்படவில்லை",
+  "Reminder Title": "நினைவூட்டல் தலைப்பு",
+  "Birds Health": "பறவைகள் ஆரோக்கியம்",
+  "Birds Sale": "பறவைகள் விற்பனை",
+  "Birds Purchase": "பறவைகள் கொள்முதல்",
+  "Egg Collection": "முட்டை சேகரிப்பு",
+  "Cleanliness": "தூய்மை",
+  "Inventory Purchase": "சரக்கு கொள்முதல்",
+  "Financial Settlements": "நிதி தீர்வுகள்",
+  "Repairing": "பழுதுபார்த்தல்",
+  "Other": "மற்றவை"
 }

@@ -589,7 +589,8 @@ class _LanguageSetupScreen extends State<LanguageSetupScreen>
   }
 
   void cropImage(XFile? imageFile) async{
-    CroppedFile? croppedFile = await ImageCropper().cropImage(
+    CroppedFile? croppedFile = await ImageCropper()
+        .cropImage(
       sourcePath: imageFile!.path,
       aspectRatioPresets: [
         CropAspectRatioPreset.square,

@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:poultary/app_intro/image_slider.dart';
 import 'package:poultary/model/flock_image.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/transactions_screen.dart';
@@ -245,10 +246,19 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                     itemCount: byteimages.length,
                     scrollDirection: Axis.horizontal,
                     itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        margin: EdgeInsets.all(10),
-                        height: 80, width: 80,
-                        child:  Image.memory(byteimages.elementAt(index), fit: BoxFit.fill,),
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => CarouselDemo()),
+                          );
+                        },
+                        child: Container(
+                          margin: EdgeInsets.all(10),
+                          height: 80, width: 80,
+                          child:  Image.memory(byteimages.elementAt(index), fit: BoxFit.fill,),
+                        ),
                       );
                     }),
               ): SizedBox(height: 0,width: 0,),

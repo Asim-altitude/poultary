@@ -326,5 +326,27 @@
   "Payment Info": "付款信息",
   "Date_DESC": "日期和描述",
   "SOLD_TO": "卖给",
-  "PAID_TO1": "支付给"
+  "PAID_TO1": "支付给",
+
+  "Reminders": "提醒事项",
+  "Reminder": "提醒",
+  "Reminder date": "提醒日期",
+  "About Reminder": "关于提醒",
+  "Events": "活动提醒",
+  "New Event Reminder": "新提醒",
+  "No Reminders Added": "未添加提醒",
+  "All Reminders": "所有提醒",
+  "Reminder Added": "添加新提醒",
+
+  "No Egg Collections Added": "未添加鸡蛋收藏",
+  "Reminder Title": "提醒标题",
+  "Birds Health": "鸟类健康",
+  "Birds Sale": "鸟类特卖",
+  "Birds Purchase": "鸟类购买",
+  "Egg Collection": "鸡蛋收集",
+  "Cleanliness": "清洁度",
+  "Inventory Purchase": "库存采购",
+  "Financial Settlements": "财务结算",
+  "Repairing": "修复",
+  "Other": "其他"
 }

@@ -324,5 +324,26 @@
  "Payment Info": "支払い情報",
  "Date_DESC": "日付と説明",
  "SOLD_TO": "に売却",
- "PAID_TO1": "支払先"
+ "PAID_TO1": "支払先",
+
+ "Reminders": "リマインダー",
+ "Reminder": "リマインダー",
+ "Reminder date": "リマインダーの日付",
+ "About Reminder": "リマインダーについて",
+ "Events": "イベントリマインダー",
+ "New Event Reminder": "新しいリマインダー",
+ "No Reminders Added": "リマインダーは追加されていません",
+ "All Reminders": "すべてのリマインダー",
+ "Reminder Added": "新しいリマインダーが追加されました",
+ "No Egg Collections Added": "卵コレクションは追加されていません",
+ "Reminder Title": "リマインダーのタイトル",
+ "Birds Health": "鳥の健康",
+ "Birds Sale": "バードセール",
+ "Birds Purchase": "鳥の購入",
+ "Egg Collection": "エッグコレクション",
+ "Cleanliness": "清潔さ",
+ "Inventory Purchase": "在庫購入",
+ "Financial Settlements": "金銭的決済",
+ "Repairing": "修理",
+ "Other": "他の"
 }

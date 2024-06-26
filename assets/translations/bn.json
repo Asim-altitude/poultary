@@ -324,6 +324,27 @@
   "Payment Info": "পেমেন্ট তথ্য",
   "Date_DESC": "তারিখ এবং বর্ণনা",
   "SOLD_TO": "বিক্রি",
-  "PAID_TO1": "দেওয়া"
+  "PAID_TO1": "দেওয়া",
+
+  "Reminders": "অনুস্মারক",
+  "Reminder": "অনুস্মারক",
+  "Reminder date": "অনুস্মারক তারিখ",
+  "About Reminder": "অনুস্মারক সম্পর্কে",
+  "Events": "ইভেন্ট অনুস্মারক",
+  "New Event Reminder": "নতুন অনুস্মারক",
+  "No Reminders Added": "কোন অনুস্মারক যোগ করা হয়নি",
+  "All Reminders": "সমস্ত অনুস্মারক",
+  "Reminder Added": "নতুন অনুস্মারক যোগ করা হয়েছে",
+  "No Egg Collections Added": "কোন ডিম সংগ্রহ যোগ করা হয়নি",
+  "Reminder Title": "অনুস্মারক শিরোনাম",
+  "Birds Health": "পাখি স্বাস্থ্য",
+  "Birds Sale": "পাখি বিক্রয়",
+  "Birds Purchase": "পাখি ক্রয়",
+  "Egg Collection": "ডিম সংগ্রহ",
+  "Cleanliness": "পরিচ্ছন্নতা",
+  "Inventory Purchase": "ইনভেন্টরি ক্রয়",
+  "Financial Settlements": "আর্থিক নিষ্পত্তি",
+  "Repairing": "মেরামত",
+  "Other": "অন্যান্য"
 
 }

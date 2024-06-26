@@ -324,6 +324,27 @@
   "Payment Info": "Informasi pembayaran",
   "Date_DESC": "Tanggal dan Deskripsi",
   "SOLD_TO": "Dijual ke",
-  "PAID_TO1": "Dibayarkan kepada"
+  "PAID_TO1": "Dibayarkan kepada",
+
+  "Reminders": "Pengingat",
+  "Reminder": "Pengingat",
+  "Reminder date": "Tanggal pengingat",
+  "About Reminder": "Tentang Pengingat",
+  "Events": "Pengingat Acara",
+  "New Event Reminder": "Pengingat Baru",
+  "No Reminders Added": "Tidak Ada Pengingat Ditambahkan",
+  "All Reminders": "Semua Pengingat",
+  "Reminder Added": "Pengingat Baru Ditambahkan",
+  "No Egg Collections Added": "Tidak Ada Koleksi Telur yang Ditambahkan",
+  "Reminder Title": "Judul Pengingat",
+  "Birds Health": "Kesehatan Burung",
+  "Birds Sale": "Penjualan Burung",
+  "Birds Purchase": "Pembelian Burung",
+  "Egg Collection": "Koleksi Telur",
+  "Cleanliness": "Kebersihan",
+  "Inventory Purchase": "Pembelian Persediaan",
+  "Financial Settlements": "Penyelesaian Keuangan",
+  "Repairing": "Memperbaiki",
+  "Other": "Lainnya"
 
 }

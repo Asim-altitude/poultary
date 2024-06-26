@@ -324,5 +324,27 @@
   "Payment Info": "చెల్లింపు సమాచారం",
   "Date_DESC": "తేదీ మరియు వివరణ",
   "SOLD_TO": "అమ్మబడింది",
-  "PAID_TO1": "కు చెల్లించారు"
+  "PAID_TO1": "కు చెల్లించారు",
+
+  "Reminders": "రిమైండర్‌లు",
+  "Reminder": "రిమైండర్",
+  "Reminder date": "రిమైండర్ తేదీ",
+  "About Reminder": "రిమైండర్ గురించి",
+  "Events": "ఈవెంట్ రిమైండర్‌లు",
+  "New Event Reminder": "కొత్త రిమైండర్",
+  "No Reminders Added": "రిమైండర్‌లు ఏవీ జోడించబడలేదు",
+  "All Reminders": "అన్ని రిమైండర్‌లు",
+  "Reminder Added": "కొత్త రిమైండర్ జోడించబడింది",
+
+  "No Egg Collections Added": "గుడ్డు సేకరణలు జోడించబడలేదు",
+  "Reminder Title": "రిమైండర్ శీర్షిక",
+  "Birds Health": "పక్షుల ఆరోగ్యం",
+  "Birds Sale": "పక్షుల విక్రయం",
+  "Birds Purchase": "పక్షుల కొనుగోలు",
+  "Egg Collection": "గుడ్డు సేకరణ",
+  "Cleanliness": "పరిశుభ్రత",
+  "Inventory Purchase": "ఇన్వెంటరీ కొనుగోలు",
+  "Financial Settlements": "ఆర్థిక పరిష్కారాలు",
+  "Repairing": "మరమ్మతు చేయడం",
+  "Other": "ఇతర"
 }

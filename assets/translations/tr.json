@@ -324,5 +324,26 @@
  "Payment Info": "Ödeme bilgisi",
  "Date_DESC": "Tarih ve Açıklama",
  "SOLD_TO": "Şuna satıldı",
- "PAID_TO1": "Ödenen"
+ "PAID_TO1": "Ödenen",
+
+ "Reminders": "Hatırlatıcılar",
+ "Reminder": "Hatırlatma",
+ "Reminder date": "Hatırlatma tarihi",
+ "About Reminder": "Hatırlatıcı Hakkında",
+ "Events": "Etkinlik Hatırlatıcıları",
+ "New Event Reminder": "Yeni Hatırlatma",
+ "No Reminders Added": "Hiçbir Hatırlatıcı Eklenmedi",
+ "All Reminders": "Tüm Hatırlatıcılar",
+ "Reminder Added": "Yeni Hatırlatıcı Eklendi",
+ "No Egg Collections Added": "Yumurta Koleksiyonu Eklenmedi",
+ "Reminder Title": "Hatırlatma Başlığı",
+ "Birds Health": "Kuş Sağlığı",
+ "Birds Sale": "Kuş İndirimi",
+ "Birds Purchase": "Kuş Satın Alma",
+ "Egg Collection": "Yumurta Toplama",
+ "Cleanliness": "Temizlik",
+ "Inventory Purchase": "Envanter Satın Alma",
+ "Financial Settlements": "Finansal Ödemeler",
+ "Repairing": "Tamir",
+ "Other": "Diğer"
 }

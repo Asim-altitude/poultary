@@ -324,6 +324,27 @@
   "Payment Info": "भुगतान की जानकारी",
   "Date_DESC": "दिनांक और विवरण",
   "SOLD_TO": "को बेचा",
-  "PAID_TO1": "को भुगतान किया"
+  "PAID_TO1": "को भुगतान किया",
+
+  "Reminders": "अनुस्मारक",
+  "Reminder": "अनुस्मारक",
+  "Reminder date": "अनुस्मारक दिनांक",
+  "About Reminder": "अनुस्मारक के बारे में",
+  "Events": "घटना अनुस्मारक",
+  "New Event Reminder": "नया अनुस्मारक",
+  "No Reminders Added": "कोई अनुस्मारक नहीं जोड़ा गया",
+  "All Reminders": "सभी अनुस्मारक",
+  "Reminder Added": "नया अनुस्मारक जोड़ा गया",
+  "No Egg Collections Added": "कोई अंडा संग्रह नहीं जोड़ा गया",
+  "Reminder Title": "अनुस्मारक शीर्षक",
+  "Birds Health": "पक्षियों का स्वास्थ्य",
+  "Birds Sale": "पक्षियों की बिक्री",
+  "Birds Purchase": "पक्षियों की खरीद",
+  "Egg Collection": "अंडा संग्रह",
+  "Cleanliness": "स्वच्छता",
+  "Inventory Purchase": "इन्वेंटरी खरीद",
+  "Financial Settlements": "वित्तीय बस्तियाँ",
+  "Repairing": "मरम्मत",
+  "Other": "अन्य"
 
 }
