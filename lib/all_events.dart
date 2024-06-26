@@ -143,19 +143,13 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
                         alignment: Alignment.center,
                         width: 50,
                         height: 50,
-                        child: InkWell(
-                          child: Icon(Icons.arrow_back,
-                              color: Colors.white, size: 30),
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                        ),
+                        child: SizedBox(width: 2,),
                       ),
                       Container(
-                          margin: EdgeInsets.only(left: 10),
+
                           child: Text(
                             applied_filter_name.tr(),
-                            textAlign: TextAlign.start,
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,

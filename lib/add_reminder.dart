@@ -44,7 +44,7 @@ class _NewEventReminder extends State<NewEventReminder>
 
   List<String> _purposeList = [];
 
-  List<String> _reminderList = ["Birds Health".tr(), "Birds Sale".tr(), "Birds Purchase".tr(),"Egg Collection".tr(),"Cleanliness".tr(),"Inventory Purchase".tr(),"Financial Settlements".tr(),"Repairing".tr(),"Other".tr()];
+  List<String> _reminderList = ["Vaccination".tr(),"Medication".tr(),"Birds Sale".tr(), "Birds Purchase".tr(),"Egg Collection".tr(),"Cleanliness".tr(),"Inventory Purchase".tr(),"Financial Settlements".tr(),"Repairing".tr(),"Other".tr()];
 
   int chosen_index = 0;
 
@@ -97,6 +97,7 @@ class _NewEventReminder extends State<NewEventReminder>
   bool _validate = false;
 
   String date = "Choose date";
+  bool isDateChosen = false;
   final nameController = TextEditingController();
   final notesController = TextEditingController();
 
@@ -416,12 +417,12 @@ class _NewEventReminder extends State<NewEventReminder>
 
                               if(activeStep==2)
                               {
-                                if(notesController.text.isEmpty){
+                                if(notesController.text.isEmpty || !isDateChosen) {
                                   activeStep--;
                                   Utils.showToast("PROVIDE_ALL".tr());
-                                }else
+                                }
+                                else
                                 {
-
                                   DateTime datetime = DateFormat("dd MMM yyyy - hh:mm a").parse(Utils.getReminderFormattedDate(date)); // DateTime.parse();
                                   int notification_time = ((datetime.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch) / 1000).round();
                                   print("TIME $notification_time");
@@ -440,7 +441,7 @@ class _NewEventReminder extends State<NewEventReminder>
                                     Utils.showToast("Reminder Added".tr());
                                     Navigator.pop(context);
 
-                                  }else {
+                                  } else {
                                     MyEvent myevent = MyEvent(-1, getFlockID(),
                                         _purposeselectedValue,
                                         isOther
@@ -599,7 +600,8 @@ class _NewEventReminder extends State<NewEventReminder>
       print(pickedTime);//pickedDate output format => 2021-03-10 00:00:00.000
       String formattedDate = DateFormat('yyyy-MM-dd').format(pickedDate);
       String formattedTime = "${pickedTime.hour}:${pickedTime.minute}";
-      print(formattedDate +" "+ formattedTime); //formatted date output using intl package =>  2021-03-16
+      print(formattedDate +" "+ formattedTime);
+      isDateChosen = true;//formatted date output using intl package =>  2021-03-16
       setState(() {
         date =
             formattedDate +" "+ formattedTime; //set output date to TextField value.

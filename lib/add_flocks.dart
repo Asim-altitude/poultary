@@ -614,13 +614,16 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                         if(!checkValidationOption()){
                           activeStep--;
                           Utils.showToast("PROVIDE_ALL".tr());
-                        }else{
+                        }else if (nameController.text != "" && birdcountController.text!= ""){
                           notesController.text = nameController.text +" "+"Added on".tr()+" "+Utils.getFormattedDate(date) +" "+"with".tr() +" "+ birdcountController.text + " " + "BIRDS".tr();
+                        }else{
+                          activeStep--;
+                          Utils.showToast("PROVIDE_ALL".tr());
                         }
                       }
 
                       if(activeStep==3){
-                        if(validate){
+                        if(validate) {
                           print("Everything Okay");
                           await DatabaseHelper.instance.database;
                           int? id = await DatabaseHelper.insertFlock(Flock(f_id: 1, f_name: nameController.text, bird_count: int.parse(birdcountController.text)
@@ -635,6 +638,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                           }
 
                         }else{
+                          activeStep--;
                           Utils.showToast("PROVIDE_ALL".tr());
                         }
                       }
@@ -838,16 +842,6 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
     if(date.toLowerCase().contains("date")){
       valid = false;
       print("Select Date");
-    }
-
-    if(_acqusitionselectedValue.toLowerCase().contains("ACQUSITION_TYPE".tr())){
-      valid = false;
-      print("Select Acqusition Type");
-    }
-
-    if(_purposeselectedValue.toLowerCase().contains("SELECT_PURPOSE".tr())){
-      valid = false;
-      print("Select Purpose");
     }
 
     if(birdcountController.text.isEmpty){

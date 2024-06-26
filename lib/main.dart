@@ -110,7 +110,7 @@ class MyApp extends StatelessWidget {
 
       home: Directionality(
           textDirection: direction? ui.TextDirection.ltr: ui.TextDirection.ltr,
-          child: launch? OnBoardingPage() : HomeScreen()),
+          child: launch? LanguageSetupScreen() : HomeScreen()),
     );
   }
 }
