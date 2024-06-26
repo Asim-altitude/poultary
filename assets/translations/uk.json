@@ -324,5 +324,27 @@
   "Payment Info": "Інформація про оплату",
   "Date_DESC": "Дата та опис",
   "SOLD_TO": "Проданий",
-  "PAID_TO1": "Оплачено"
+  "PAID_TO1": "Оплачено",
+
+  "Reminders": "Нагадування",
+  "Reminder": "Нагадування",
+  "Reminder date": "Дата нагадування",
+  "About Reminder": "Про нагадування",
+  "Events": "Нагадування про події",
+  "New Event Reminder": "Нове нагадування",
+  "No Reminders Added": "Нагадування не додано",
+  "All Reminders": "Усі нагадування",
+  "Reminder Added": "Нове нагадування додано",
+
+  "No Egg Collections Added": "Збір яєць не додано",
+  "Reminder Title": "Назва нагадування",
+  "Birds Health": "Здоров'я птахів",
+  "Birds Sale": "Розпродаж птахів",
+  "Birds Purchase": "Купівля птахів",
+  "Egg Collection": "Збір яєць",
+  "Cleanliness": "Чистота",
+  "Inventory Purchase": "Закупівля запасів",
+  "Financial Settlements": "Фінансові розрахунки",
+  "Repairing": "ремонт",
+  "Other": "Інший"
 }

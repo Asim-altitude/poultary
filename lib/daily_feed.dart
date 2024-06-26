@@ -405,16 +405,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                       );
 
                     }),
-              ) : Center(
-                child: Container(
-                  margin: EdgeInsets.only(top: 50),
-                  child: Column(
-                    children: [
-                      Text('NO_FFEDING'.tr(), style: TextStyle(fontSize: 18, color: Colors.black),),
-                    ],
-                  ),
-                ),
-              ),
+              ) : Utils.getCustomEmptyMessage("assets/pfeed.png", "NO_FFEDING")
 
                    /* Text(
               "Main Menu",

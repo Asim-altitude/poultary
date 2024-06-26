@@ -464,17 +464,8 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                       );
 
                     }),
-              ) : Center(
-                child: Container(
-                  margin: EdgeInsets.only(top: 50),
-                  child: Column(
-                    children: [
-                      Text('No vaccination/medication added', style: TextStyle(fontSize: 18, color: Colors.black),),
+              ) :  Utils.getCustomEmptyMessage("assets/p_health.png", "No vaccination/medication added")
 
-                    ],
-                  ),
-                ),
-              ),
 
                    /* Text(
               "Main Menu",

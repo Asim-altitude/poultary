@@ -324,5 +324,26 @@
  "Payment Info": "Информация о платеже",
  "Date_DESC": "Дата и описание",
  "SOLD_TO": "Продать",
- "PAID_TO1": "Уделяется"
+ "PAID_TO1": "Уделяется",
+
+ "Reminders": "Напоминания",
+ "Reminder": "Напоминание",
+ "Reminder date": "Дата напоминания",
+ "About Reminder": "О напоминании",
+ "Events": "Напоминания о событиях",
+ "New Event Reminder": "Новое напоминание",
+ "No Reminders Added": "Напоминания не добавлены",
+ "All Reminders": "Все напоминания",
+ "Reminder Added": "Добавлено новое напоминание",
+ "No Egg Collections Added": "Коллекции яиц не добавлены",
+ "Reminder Title": "Название напоминания",
+ "Birds Health": "Здоровье птиц",
+ "Birds Sale": "Продажа птиц",
+ "Birds Purchase": "Покупка птиц",
+ "Egg Collection": "Коллекция яиц",
+ "Cleanliness": "Чистота",
+ "Inventory Purchase": "Покупка инвентаря",
+ "Financial Settlements": "Финансовые расчеты",
+ "Repairing": "Ремонт",
+ "Other": "Другой"
 }

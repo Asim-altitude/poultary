@@ -325,8 +325,27 @@
  "Payment Info": "Zahlungsinformationen",
  "Date_DESC": "Datum und Beschreibung",
  "SOLD_TO": "Verkauft an",
- "PAID_TO1": "Bezahlt um"
+ "PAID_TO1": "Bezahlt um",
 
-
+ "Reminders": "Erinnerungen",
+ "Reminder": "Erinnerung",
+ "Reminder date": "Erinnerungsdatum",
+ "About Reminder": "Über Erinnerung",
+ "Events": "Ereigniserinnerungen",
+ "New Event Reminder": "Neue Erinnerung",
+ "No Reminders Added": "Keine Erinnerungen hinzugefügt",
+ "All Reminders": "Alle Erinnerungen",
+ "Reminder Added": "Neue Erinnerung hinzugefügt",
+ "No Egg Collections Added": "Keine Eiersammlungen hinzugefügt",
+ "Reminder Title": "Erinnerungstitel",
+ "Birds Health": "Vogelgesundheit",
+ "Birds Sale": "Vogelverkauf",
+ "Birds Purchase": "Vogelkauf",
+ "Egg Collection": "Eiersammlung",
+ "Cleanliness": "Sauberkeit",
+ "Inventory Purchase": "Inventarkauf",
+ "Financial Settlements": "Finanzielle Abrechnungen",
+ "Repairing": "Reparieren",
+ "Other": "Andere"
 
 }

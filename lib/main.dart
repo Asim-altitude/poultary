@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui' as ui;
 import 'package:poultary/utils/utils.dart';
 
+import 'app_intro/app_intro_page.dart';
 import 'app_setup/language_setup_screen.dart';
 import 'home_screen.dart';
 
@@ -109,7 +110,7 @@ class MyApp extends StatelessWidget {
 
       home: Directionality(
           textDirection: direction? ui.TextDirection.ltr: ui.TextDirection.ltr,
-          child: launch? LanguageSetupScreen() : HomeScreen()),
+          child: launch? OnBoardingPage() : HomeScreen()),
     );
   }
 }

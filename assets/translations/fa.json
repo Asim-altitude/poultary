@@ -324,5 +324,26 @@
  "Payment Info": "اطلاعات پرداخت",
  "Date_DESC": "تاریخ و توضیحات",
  "SOLD_TO": "فروخته شد به",
- "PAID_TO1": "پرداخت شده به"
+ "PAID_TO1": "پرداخت شده به",
+
+ "Reminders": "یادآوری ها",
+ "Reminder": "یادآور",
+ "Reminder date": "تاریخ یادآوری",
+ "About Reminder": "درباره یادآوری",
+ "Events": "یادآوری رویداد",
+ "New Event Reminder": "یادآوری جدید",
+ "No Reminders Added": "هیچ یادآوری اضافه نشده است",
+ "All Reminders": "همه یادآوری ها",
+ "Reminder Added": "یادآوری جدید اضافه شد",
+ "No Egg Collections Added": "هیچ مجموعه تخم مرغ اضافه نشده است",
+ "Reminder Title": "عنوان یادآوری",
+ "Birds Health": "سلامت پرندگان",
+ "Birds Sale": "فروش پرندگان",
+ "Birds Purchase": "خرید پرندگان",
+ "Egg Collection": "مجموعه تخم مرغ",
+ "Cleanliness": "پاکیزگی",
+ "Inventory Purchase": "خرید موجودی",
+ "Financial Settlements": "تسویه حساب های مالی",
+ "Repairing": "تعمیر",
+ "Other": "دیگر"
 }

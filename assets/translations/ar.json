@@ -326,6 +326,28 @@
  "Payment Info": "معلومات الدفع",
  "Date_DESC": "التاريخ والوصف",
  "SOLD_TO": "بيعت ل",
- "PAID_TO1": "المدفوعة لل"
+ "PAID_TO1": "المدفوعة لل",
+
+ "Reminders": "تذكيرات",
+ "Reminder": "تذكير",
+ "Reminder date": "تاريخ التذكير",
+ "About Reminder": "حول تذكير",
+ "Events": "تذكيرات الأحداث",
+ "New Event Reminder": "تذكير جديد",
+ "No Reminders Added": "لم تتم إضافة أي تذكيرات",
+ "All Reminders": "جميع التذكيرات",
+ "Reminder Added": "تمت إضافة تذكير جديد",
+
+ "No Egg Collections Added": "لم تتم إضافة أي مجموعات بيض",
+ "Reminder Title": "عنوان التذكير",
+ "Birds Health": "صحة الطيور",
+ "Birds Sale": "بيع الطيور",
+ "Birds Purchase": "شراء الطيور",
+ "Egg Collection": "جمع البيض",
+ "Cleanliness": "النظافة",
+ "Inventory Purchase": "شراء المخزون",
+ "Financial Settlements": "التسويات المالية",
+ "Repairing": "إصلاح",
+ "Other": "آخر"
 
 }

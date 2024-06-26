@@ -870,8 +870,11 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
 
         base64Images.clear();
 
+        File file;
       for (int i=0;i<imageFileList!.length;i++) {
-        final bytes = File(imageFileList!.elementAt(i).path).readAsBytesSync();
+
+        file = await Utils.convertToJPGFileIfRequiredWithCompression(File(imageFileList!.elementAt(i).path));
+        final bytes = File(file.path).readAsBytesSync();
         String base64Image =  base64Encode(bytes);
         base64Images.add(base64Image);
 

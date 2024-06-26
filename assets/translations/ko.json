@@ -324,5 +324,26 @@
  "Payment Info": "결제 정보",
  "Date_DESC": "날짜 및 설명",
  "SOLD_TO": "판매 대상",
- "PAID_TO1": "지불 대상"
+ "PAID_TO1": "지불 대상",
+
+ "Reminders": "알림",
+ "Reminder": "알림",
+ "Reminder date": "알림 날짜",
+ "About Reminder": "알림 정보",
+ "Events": "이벤트 알림",
+ "New Event Reminder": "새로운 알림",
+ "No Reminders Added": "추가된 알림 없음",
+ "All Reminders": "모든 알림",
+ "Reminder Added": "새로운 알림이 추가되었습니다",
+ "No Egg Collections Added": "계란 컬렉션이 추가되지 않았습니다.",
+ "Reminder Title": "알림 제목",
+ "Birds Health": "조류 건강",
+ "Birds Sale": "새 판매",
+ "Birds Purchase": "새 구매",
+ "Egg Collection": "계란 수집",
+ "Cleanliness": "청결",
+ "Inventory Purchase": "재고 구매",
+ "Financial Settlements": "금융결제",
+ "Repairing": "수리 중",
+ "Other": "다른"
 }

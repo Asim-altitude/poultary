@@ -15,6 +15,7 @@ import 'package:poultary/utils/utils.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import 'add_flocks.dart';
+import 'all_events.dart';
 import 'all_reports_screen.dart';
 import 'database/databse_helper.dart';
 import 'egg_collection.dart';
@@ -97,11 +98,10 @@ class _HomeScreen extends State<HomeScreen> {
       child: SettingsScreen(),
     ),
     Center(
-      child: SettingsScreen(),
+      child: AllEventsScreen(),
     ),
 
   ];
-
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +114,7 @@ class _HomeScreen extends State<HomeScreen> {
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
-    return SafeArea(child: Scaffold(
+       return SafeArea(child: Scaffold(
       bottomNavigationBar:
     ClipRRect(
     borderRadius: BorderRadius.only(
@@ -123,6 +123,7 @@ class _HomeScreen extends State<HomeScreen> {
     ),
     child:
     BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         currentIndex: _selectedTab,
         onTap: (index) => _changeTab(index),
         selectedItemColor: Colors.white,
@@ -133,7 +134,7 @@ class _HomeScreen extends State<HomeScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "DASHBOARD".tr()),
           BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: "REPORTS".tr()),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "SETTINGS".tr()),
-          BottomNavigationBarItem(icon: Icon(Icons.notification_add), label: "Reminders".tr()),
+          BottomNavigationBarItem(icon: Icon(Icons.notifications_active), label: "Reminders".tr()),
         ],
 
       ),),

@@ -163,7 +163,7 @@
   "REDUCE": "Reduce",
   "All Feedings": "All Feedings",
   "NO_FFEDING": "No Feedings added",
-  "NO_FLOCKS": "No Flocks",
+  "NO_FLOCKS": "No Flocks added yet",
   "NEW_FEEDING": "New Feeding",
   "No Feeding added in current period": "No Feeding added in current period",
   "Feeding on": "Feeding on",
@@ -334,8 +334,31 @@
   "SOLD_TO": "Sold To",
   "PAID_TO1": "Paid To",
 
+  "Reminders": "Reminders",
+  "Reminder": "Reminder",
+  "Reminder date": "Reminder date",
+  "About Reminder" : "About Reminder",
+  "Events": "Event Reminders",
+  "New Event Reminder": "New Reminder",
+  "No Reminders Added": "No Reminders Added",
+  "All Reminders": "All Reminders",
+  "Reminder Added": "New Reminder Added",
 
-  "Reminders": "Reminders"
+  "No Egg Collections Added": "No Egg Collections Added",
+  "Reminder Title": "Reminder Title",
+  "Birds Health": "Birds Health",
+  "Birds Sale": "Birds Sale",
+  "Birds Purchase": "Birds Purchase",
+  "Egg Collection": "Egg Collection",
+  "Cleanliness": "Cleanliness",
+  "Inventory Purchase": "Inventory Purchase",
+  "Financial Settlements": "Financial Settlements",
+  "Repairing": "Repairing",
+  "Other": "Other"
+
+
+
+
 
 
 

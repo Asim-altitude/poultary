@@ -1,17 +1,22 @@
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:language_picker/languages.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:poultary/utils/session_manager.dart';
 import '../CAS_Ads.dart';
+import 'package:uuid/uuid.dart';
 import '../database/databse_helper.dart';
 import '../model/egg_item.dart';
 import '../model/egg_report_item.dart';
@@ -26,6 +31,8 @@ import '../model/flock_report_item.dart';
 import '../model/health_report_item.dart';
 import '../model/med_vac_item.dart';
 import '../model/transaction_item.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz;
 
 
 class Utils {
@@ -338,6 +345,8 @@ class Utils {
       Utils.isShowAdd = true;
       inititalize();
     }
+    Utils.isShowAdd = false;
+    hideBanner();
   }
   static Future<void> inititalize() async {
     // CAS.setDebugMode(true);
@@ -561,6 +570,20 @@ class Utils {
     return outputDate;
   }
 
+  static String getReminderFormattedDate(String date){
+
+    if (date.toLowerCase().contains("date")){
+      return "Choose date".tr();
+    }
+
+    var inputFormat = DateFormat('yyyy-MM-dd hh:mm');
+    var inputDate = inputFormat.parse(date); // <-- dd/MM 24H format
+
+    var outputFormat = DateFormat('dd MMM yyyy - hh:mm a');
+    var outputDate = outputFormat.format(inputDate);
+    return outputDate;
+  }
+
   static void showToast(String msg){
     Fluttertoast.showToast(
         msg: msg,
@@ -694,6 +717,21 @@ class Utils {
    SessionManager.setupComplete();
   }
 
+  static Widget getCustomEmptyMessage(String imageName, String message) {
+   return  Center(
+     child: Container(
+       margin: EdgeInsets.only(top: 50),
+       child: Column(
+         children: [
+           Image.asset(imageName, width: 100, height: 100,),
+           SizedBox(height: 10,),
+           Text(message.tr(), style: TextStyle(fontSize: 18, color: Colors.black, fontWeight: FontWeight.bold),),
+         ],
+       ),
+     ),
+   );
+  }
+
   static setSelectedLanguage(Language language,BuildContext context) async {
 
     String languageName = "";
@@ -763,8 +801,164 @@ class Utils {
     await SessionManager.setSelectedLanguage(languageName);
   }
 
+  // COMPRESS IMAGE
+
+  static Future<String> generateRandomFileName() async {
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+
+    if (Platform.isAndroid) {
+      //Exposing the database
+      //we cannot do that for iPhone
+      appDocDir = (await getExternalStorageDirectory())!;
+    }
+
+    String appDocPath = appDocDir.path;
+    var uuid = Uuid();
+    return "$appDocPath/resumeapp-${uuid.v1()}.jpg";
+  }
+  static Future<File> convertToJPGFileIfRequiredWithCompression(
+      File file) async {
+    print(file.path);
+    print("converting file");
+
+    int fileSize = await file.length();
+    int quality = 10;
 
 
 
+    print( "convertToJPGFileIfRequiredWithCompression => ${quality}");
+
+    Uint8List? image = await FlutterImageCompress.compressWithFile(file.path,
+        format: CompressFormat.jpeg, quality: quality);
+    String newfilePath = file.path.toLowerCase();
+    newfilePath = await generateRandomFileName();
+    print("path is now => ${newfilePath}");
+    final fileToWrite = File(newfilePath);
+
+    print("going to write file");
+
+    int length = await file.length();
+
+    print("file lenght before conversion = ${length}");
+
+    File fileToReturn = await fileToWrite.writeAsBytes(image!,
+        flush: true, mode: FileMode.write);
+
+    length = await fileToReturn.length();
+
+    return fileToReturn;
+  }
+
+
+  //LOCAL NOTIFICATION
+
+  static late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+
+  static Future<void> showNotification(int id, String title, String body, int time) async {
+
+    try{
+      initNotification();
+      tz.initializeTimeZones();
+      print("Notification Pressed");
+
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+          generateRandomNumber(),
+          title,
+          body,
+          tz.TZDateTime.now(tz.local).add(Duration(seconds: time)),
+          const NotificationDetails(
+            // Android details
+            android: AndroidNotificationDetails('main_channel', 'Main Channel',
+              channelDescription: "kelsey",
+              importance: Importance.max,
+              priority: Priority.max,
+
+            ),
+            // iOS details
+            iOS: DarwinNotificationDetails(
+              sound: 'default.wav',
+              presentAlert: true,
+              presentBadge: true,
+              presentSound: true,
+            ),
+          ),
+          // Type of time interpretation
+          uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+          androidAllowWhileIdle: true);
+
+    }catch(ex){
+
+    }
+  }
+
+  static initNotification(){
+    var initializationSettingsAndroid =
+    new AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    var initializationSettingsIOS = new DarwinInitializationSettings();
+    var initializationSettings = InitializationSettings(
+        android:initializationSettingsAndroid, iOS:initializationSettingsIOS);
+    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+    flutterLocalNotificationsPlugin.initialize(initializationSettings,
+      onDidReceiveNotificationResponse: (details) {
+        // Click Notification Event Here
+
+      },
+    );
+    flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails().then((value) {
+      // Click Notification Event Here
+    });
+  }
+
+  static int generateRandomNumber(){
+    int max = 327641;
+    int min = 10;
+    Random rnd = new Random();
+    int r = min + rnd.nextInt(max - min);
+    return r;
+  }
+
+  static Future<bool> isAndroidPermissionGranted() async {
+    if (Platform.isAndroid) {
+      final bool granted = await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+          ?.areNotificationsEnabled() ??
+          false;
+
+      return granted;
+    }
+    return false;
+  }
+
+  static Future<void> requestPermissions() async {
+    if (Platform.isIOS || Platform.isMacOS) {
+      await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+          MacOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    } else if (Platform.isAndroid) {
+      final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+      flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+
+      final bool? grantedNotificationPermission =
+      await androidImplementation?.requestNotificationsPermission();
+
+    }
+  }
 
 }
