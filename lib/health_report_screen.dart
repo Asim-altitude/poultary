@@ -304,7 +304,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
 
                             // Enable tooltip
                             tooltipBehavior: TooltipBehavior(enable: true),
-                            series: <ChartSeries<Health_Chart_Item, String>>[
+                            series: <CartesianSeries<Health_Chart_Item, String>>[
 
                               ColumnSeries(borderRadius: BorderRadius.all(Radius.circular(10)),color:Colors.orange,name: 'Medication',dataSource: medlist, xValueMapper: (Health_Chart_Item collItem, _) => collItem.date, yValueMapper: (Health_Chart_Item collItem, _)=> collItem.total,),
                               ColumnSeries(borderRadius: BorderRadius.all(Radius.circular(10)),color:Colors.deepOrange,name: 'Vaccination',dataSource: vaclist, xValueMapper: (Health_Chart_Item collItem, _) => collItem.date, yValueMapper: (Health_Chart_Item collItem, _)=> collItem.total,),

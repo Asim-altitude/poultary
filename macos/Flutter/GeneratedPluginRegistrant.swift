@@ -11,7 +11,7 @@ import flutter_local_notifications
 import in_app_purchase_storekit
 import path_provider_foundation
 import printing
-import share_plus_macos
+import share_plus
 import shared_preferences_foundation
 import sqflite
 import url_launcher_macos
