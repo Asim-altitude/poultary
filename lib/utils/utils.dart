@@ -221,7 +221,7 @@ class Utils {
       return "assets/font/Roboto-Regular.ttf";
     }
     else if(language =="zh"){
-      return "assets/font/NotoSansSC.ttf";
+      return "assets/font/Roboto-Regular.ttf";
     }
     else if(language =="uk"){
       return "assets/font/Roboto-Regular.ttf";
@@ -290,7 +290,7 @@ class Utils {
       return "assets/font/Roboto-Bold.ttf";
     }
     else if(language =="zh"){
-      return "assets/font/NotoSansSC.ttf";
+      return "assets/font/Roboto-Regular.ttf";
     }
     else if(language =="uk"){
       return "assets/font/Roboto-Bold.ttf";
@@ -345,8 +345,6 @@ class Utils {
       Utils.isShowAdd = true;
       inititalize();
     }
-    Utils.isShowAdd = false;
-    hideBanner();
   }
   static Future<void> inititalize() async {
     // CAS.setDebugMode(true);

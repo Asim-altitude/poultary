@@ -51,9 +51,11 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
     getList();
     getAllEvents();
     checkPermissions();
+    Utils.setupAds();
   }
 
   void checkPermissions() async {
+    Utils.initNotification();
     bool isGranted = await Utils.isAndroidPermissionGranted();
     if(!isGranted){
       Utils.requestPermissions();
@@ -215,7 +217,7 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
                               width: 1.0,
                             ),
                           ),
-                          child: Text('Active'.tr(), style: TextStyle(
+                          child: Text('ACTIVE'.tr(), style: TextStyle(
                               color: selected==2 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                         ),
                       ),
@@ -242,7 +244,7 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
                               width: 1.0,
                             ),
                           ),
-                          child: Text('Expired'.tr(), style: TextStyle(
+                          child: Text('EXPIRED'.tr(), style: TextStyle(
                               color: selected==3 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                         ),
                       ),

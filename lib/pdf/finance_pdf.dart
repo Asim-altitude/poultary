@@ -84,7 +84,7 @@ class Invoice {
     // _logo = (imageLogo).buffer.asUint8List();
     ByteData? image = null;
 
-    if(Utils.INVOICE_LOGO_STR =="assets/farm_icon.png"){
+    if(Utils.INVOICE_LOGO_STR =="assets/farm_icon.png" || Utils.INVOICE_LOGO_STR =="assets/farm.jpg"){
       image = await rootBundle.load('assets/farm_icon.png');
       imageData = (image).buffer.asUint8List();
     }
