@@ -392,7 +392,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
                          // Enable tooltip
                          tooltipBehavior: TooltipBehavior(enable: true),
-                         series: <ChartSeries<Finance_Chart_Item, String>>[
+                         series: <CartesianSeries<Finance_Chart_Item, String>>[
 
                            ColumnSeries(borderRadius: BorderRadius.all(Radius.circular(10)),color:Colors.green,name: 'Income',dataSource: incomeChartData, xValueMapper: (Finance_Chart_Item incomeItem, _) => incomeItem.date, yValueMapper: (Finance_Chart_Item incomeItem, _)=> incomeItem.amount,),
                            ColumnSeries(borderRadius: BorderRadius.all(Radius.circular(10)),color: Colors.red,name:'Expense',dataSource: expenseChartData, xValueMapper: (Finance_Chart_Item expenseItem, _) => expenseItem.date, yValueMapper: (Finance_Chart_Item expenseItem, _) => expenseItem.amount,)

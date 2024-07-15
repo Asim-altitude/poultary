@@ -279,7 +279,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
                             // Enable tooltip
                             tooltipBehavior: TooltipBehavior(enable: true),
-                            series: <ChartSeries<Feeding, String>>[
+                            series: <CartesianSeries<Feeding, String>>[
 
                               ColumnSeries(borderRadius: BorderRadius.all(Radius.circular(10)),color:Colors.deepOrange,name: 'Feed',dataSource: list, xValueMapper: (Feeding feedItem, _) => feedItem.feed_name, yValueMapper: (Feeding feedItem, _)=> double.parse(feedItem.quantity!),),
 

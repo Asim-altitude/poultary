@@ -83,7 +83,7 @@ class _PDFScreen extends State<PDFScreen> {
     print('Save as file ${file.path} ...');
     await file.writeAsBytes(bytes);
     // await OpenFile.open(file.path);
-     Share.shareFiles(['${file.path}'], text: 'Poultary Pdf');
+     Share.shareXFiles([XFile(file.path)], text: 'Poultry Pdf');
     // await Printing.layoutPdf(onLayout: (_) => bytes);
 
   }

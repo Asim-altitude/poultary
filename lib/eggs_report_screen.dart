@@ -310,7 +310,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
 
                             // Enable tooltip
                             tooltipBehavior: TooltipBehavior(enable: true),
-                            series: <ChartSeries<Eggs_Chart_Item, String>>[
+                            series: <CartesianSeries<Eggs_Chart_Item, String>>[
 
                               ColumnSeries(borderRadius: BorderRadius.all(Radius.circular(10)),color:Colors.green,name: 'Collections',dataSource: collectionList, xValueMapper: (Eggs_Chart_Item collItem, _) => collItem.date, yValueMapper: (Eggs_Chart_Item collItem, _)=> collItem.total,),
                               ColumnSeries(borderRadius: BorderRadius.all(Radius.circular(10)),color:Colors.red,name: 'Reductions',dataSource: reductionList, xValueMapper: (Eggs_Chart_Item collItem, _) => collItem.date, yValueMapper: (Eggs_Chart_Item collItem, _)=> collItem.total,),
