@@ -389,6 +389,17 @@ class _NewIncome extends State<NewIncome>
                                                 expands: true,
                                                 controller: howmanyController,
                                                 keyboardType: TextInputType.number,
+                                                inputFormatters: [
+                                                  FilteringTextInputFormatter.allow(RegExp(r"[0-9]")),
+                                                  TextInputFormatter.withFunction((oldValue, newValue) {
+                                                    final text = newValue.text;
+                                                    return text.isEmpty
+                                                        ? newValue
+                                                        : double.tryParse(text) == null
+                                                        ? oldValue
+                                                        : newValue;
+                                                  }),
+                                                ],
                                                 textInputAction: TextInputAction.next,
                                                 decoration:  InputDecoration(
                                                   border: OutlineInputBorder(
@@ -431,6 +442,17 @@ class _NewIncome extends State<NewIncome>
                                                   expands: true,
                                                   controller: amountController,
                                                   keyboardType: TextInputType.number,
+                                                  inputFormatters: [
+                                                    FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+                                                    TextInputFormatter.withFunction((oldValue, newValue) {
+                                                      final text = newValue.text;
+                                                      return text.isEmpty
+                                                          ? newValue
+                                                          : double.tryParse(text) == null
+                                                          ? oldValue
+                                                          : newValue;
+                                                    }),
+                                                  ],
                                                   textInputAction: TextInputAction.next,
                                                   decoration:  InputDecoration(
                                                     border: OutlineInputBorder(

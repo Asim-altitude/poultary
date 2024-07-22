@@ -7,7 +7,7 @@ class Finance_Chart_Item{
 
   String date = "";
   String type = "";
-  int? amount = 0;
+  double? amount = 0;
 
   Finance_Chart_Item(
       {

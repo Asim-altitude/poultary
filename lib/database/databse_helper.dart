@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -718,6 +716,7 @@ class DatabaseHelper  {
             Map<String, dynamic> json = result[i];
 
             feed = Feeding.fromJson(json);
+            feed.quantity = feed.quantity!.replaceAll(",", ".");
             _feedList.add(feed);
             print(_feedList);
           }
@@ -763,6 +762,7 @@ class DatabaseHelper  {
             Map<String, dynamic> json = result[i];
 
             feed = Feeding.fromJson(json);
+            feed.quantity = feed.quantity!.replaceAll(",", ".");
             _feedList.add(feed);
             print(_feedList);
           }
@@ -776,7 +776,7 @@ class DatabaseHelper  {
 
   }
 
-  static Future<int> getTotalFeedConsumption(int f_id,String str_date, String end_date) async {
+  static Future<num> getTotalFeedConsumption(int f_id,String str_date, String end_date) async {
 
     var result;
 
@@ -805,13 +805,13 @@ class DatabaseHelper  {
     if(map.values.first.toString().toLowerCase() == 'null')
       return 0;
     else
-      return int.parse(map.values.first.toString());
+      return num.parse(map.values.first.toString().replaceAll(",", "."));
 
   }
 
   // INCOME/EXPENSE
 
-  static Future<int> getTransactionsTotal(int f_id, String type, String str_date, String end_date) async {
+  static Future<double> getTransactionsTotal(int f_id, String type, String str_date, String end_date) async {
 
     var result;
 
@@ -822,10 +822,10 @@ class DatabaseHelper  {
     }
     if(f_id == -1) {
       result = await _database?.rawQuery(
-          "SELECT sum(amount) FROM Transactions where $type and date BETWEEN '$str_date'and '$end_date'");
+          "SELECT sum(CAST(REPLACE(amount,',','.') as REAL)) FROM Transactions where $type and date BETWEEN '$str_date'and '$end_date'");
     }else if(f_id != -1) {
       result = await _database?.rawQuery(
-          "SELECT sum(amount) FROM Transactions where $type and f_id = $f_id and date BETWEEN '$str_date'and '$end_date' ");
+          "SELECT sum(CAST(REPLACE(amount,',','.') as REAL)) FROM Transactions where $type and f_id = $f_id and date BETWEEN '$str_date'and '$end_date' ");
     }
 
     Map<String,dynamic> map = result![0];
@@ -834,7 +834,7 @@ class DatabaseHelper  {
     if(map.values.first.toString().toLowerCase() == 'null')
       return 0;
     else
-      return int.parse(map.values.first.toString());
+      return double.parse(map.values.first.toString().replaceAll(",", "."));
 
   }
 
@@ -864,7 +864,7 @@ class DatabaseHelper  {
     if(map.values.first.toString().toLowerCase() == 'null')
       return 0;
     else
-      return int.parse(map.values.first.toString());
+      return int.parse(map.values.first.toString().replaceAll(",", "."));
 
   }
 
@@ -1213,16 +1213,26 @@ class DatabaseHelper  {
 
   //FFUNC
   static Future<List<Finance_Chart_Item>>  getFinanceChartData(String strDate,String endDate, String itype) async {
-    var result = await _database?.rawQuery("SELECT type,date,sum(amount) FROM Transactions WHERE date >= '$strDate' and date <= '$endDate' and type = '$itype'  GROUP BY date");
+    var result = await _database?.rawQuery("SELECT type,date,sum(CAST(REPLACE(amount,',','.') as REAL)) FROM Transactions WHERE date >= '$strDate' and date <= '$endDate' and type = '$itype'  GROUP BY date");
     List<Finance_Chart_Item> _feedList = [];
     Finance_Chart_Item feed;
     if(result!=null){
       if(result.isNotEmpty){
         if(result.isNotEmpty){
+          String date ="", type="", amount="";
           for(int i = 0 ; i < result.length ; i ++){
             Map<String, dynamic> json = result[i];
-
-            feed = Finance_Chart_Item.fromJson(json);
+            print(json);
+            result[i].forEach((index, value) {
+              print("$index - $value");
+              if(index.toString()=="date")
+                date = value.toString();
+              else if(index.toString()=="type")
+                type = value.toString();
+              else
+                amount = value.toString();
+            });
+            feed = Finance_Chart_Item(date: date, type: type, amount: double.parse(amount));
             _feedList.add(feed);
             print(_feedList);
           }
@@ -1475,7 +1485,7 @@ class DatabaseHelper  {
     return flock;
   }
 
-  static Future<List<Flock_Image>> getFlockImage(int f_id) async{
+  static Future<List<Flock_Image>> getFlockImage(int f_id) async {
     var result = await _database?.rawQuery("SELECT * FROM Flock_Image where f_id = $f_id");
     List<Flock_Image> _birdList = [];
     Flock_Image flock;

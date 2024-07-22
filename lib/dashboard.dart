@@ -340,6 +340,11 @@ class _DashboardScreen extends State<DashboardScreen> {
 
     net_income = gross_income - total_expense;
 
+
+    gross_income = num.parse(gross_income.toStringAsFixed(2));
+    total_expense = num.parse(total_expense.toStringAsFixed(2));
+    net_income = num.parse(net_income.toStringAsFixed(2));
+
     dataMap = { "Income".tr(): gross_income.toDouble(),
       "Expense".tr(): total_expense.toDouble(),};
 
@@ -376,11 +381,11 @@ class _DashboardScreen extends State<DashboardScreen> {
   int flock_total = 0;
 
 
-  int gross_income = 0;
-  int total_expense = 0;
-  int net_income = 0;
+  num gross_income = 0;
+  num total_expense = 0;
+  num net_income = 0;
   int total_eggs_collected = 0;
-  int total_feed_consumption = 0;
+  num total_feed_consumption = 0;
   int treatmentCount =0;
 
   @override

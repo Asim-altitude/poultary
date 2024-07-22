@@ -295,6 +295,17 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                                         expands: true,
                                         controller: totalBirdsController,
                                         keyboardType: TextInputType.number,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.allow(RegExp(r"[0-9]")),
+                                          TextInputFormatter.withFunction((oldValue, newValue) {
+                                            final text = newValue.text;
+                                            return text.isEmpty
+                                                ? newValue
+                                                : double.tryParse(text) == null
+                                                ? oldValue
+                                                : newValue;
+                                          }),
+                                        ],
                                         textInputAction: TextInputAction.next,
                                         decoration:  InputDecoration(
                                           fillColor: Colors.grey,

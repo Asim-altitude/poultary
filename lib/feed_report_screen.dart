@@ -79,7 +79,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
   List<String> flock_name = [];
 
 
-  int total_feed_consumption = 0;
+  num total_feed_consumption = 0;
 
   void clearValues(){
 

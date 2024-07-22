@@ -87,9 +87,9 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
   List<Finance_Chart_Item> expenseChartData = [];
   List<String> flock_name = [];
 
-  int gross_income = 0;
-  int total_expense = 0;
-  int net_income = 0;
+  num gross_income = 0;
+  num total_expense = 0;
+  num net_income = 0;
 
   void clearValues(){
 
@@ -109,11 +109,16 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
     gross_income = await DatabaseHelper.getTransactionsTotal(f_id, "Income", str_date, end_date);
     total_expense = await DatabaseHelper.getTransactionsTotal(f_id, "Expense", str_date, end_date);
 
+
     print(gross_income);
     print(total_expense);
     print(net_income);
 
     net_income = gross_income - total_expense;
+
+    gross_income = num.parse(gross_income.toStringAsFixed(2));
+    total_expense = num.parse(total_expense.toStringAsFixed(2));
+    net_income = num.parse(net_income.toStringAsFixed(2));
 
     getFilteredEggsCollections(str_date, end_date);
 

@@ -1001,12 +1001,11 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
           ),
         ),
 
-
       ],
       elevation: 8.0,
     ).then((value) async {
       if (value != null) {
-        if(value == 2){
+        if(value == 2) {
           if(transactionList.elementAt(selected_index!).type == "Income") {
             var txt = await Navigator.push(
               context,
