@@ -6,7 +6,7 @@ import 'dart:core';
 class FeedFlock_Report_Item{
 
   String f_name = "";
-  int? consumption = 0;
+  num? consumption = 0;
 
 
   FeedFlock_Report_Item(

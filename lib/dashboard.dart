@@ -317,6 +317,8 @@ class _DashboardScreen extends State<DashboardScreen> {
     int vac_count = await DatabaseHelper.getHealthTotal(-1, "Vaccination", str_date, end_date);
     int med_count = await DatabaseHelper.getHealthTotal(-1, "Medication", str_date, end_date);
     treatmentCount = vac_count + med_count;
+    total_feed_consumption = num.parse(total_feed_consumption.toStringAsFixed(2));
+
     setState(() {
 
     });

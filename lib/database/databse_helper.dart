@@ -1144,6 +1144,8 @@ class DatabaseHelper  {
             Map<String, dynamic> json = result[i];
 
             feed = Feed_Report_Item.fromJson(json);
+            feed.consumption = num.parse(feed.consumption!.toStringAsFixed(2));
+
             _feedList.add(feed);
             print(_feedList);
           }
@@ -1258,6 +1260,7 @@ class DatabaseHelper  {
           for(int i = 0 ; i < result.length ; i ++){
             Map<String, dynamic> json = result[i];
             feed = FeedFlock_Report_Item.fromJson(json);
+            feed.consumption = num.parse(feed.consumption!.toStringAsFixed(2));
             _feedList.add(feed);
             print(_feedList);
           }

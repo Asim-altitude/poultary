@@ -96,6 +96,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
     list = await DatabaseHelper.getAllMostUsedFeeds(f_id, str_date, end_date);
 
     total_feed_consumption = await DatabaseHelper.getTotalFeedConsumption(f_id, str_date, end_date);
+    total_feed_consumption = num.parse(total_feed_consumption.toStringAsFixed(2));
 
     setState(() {
 
@@ -358,8 +359,8 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                     ),
 
                     list.length > 0 ? Container(
-                      margin: EdgeInsets.only(top: 0,bottom: 200),
-                      height: heightScreen - 300,
+                      margin: EdgeInsets.only(top: 0,bottom: 20),
+                      height: list.length * 110,
                       width: widthScreen,
                       color: Utils.getScreenBackground(),
                       child: ListView.builder(
@@ -382,7 +383,6 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                                 ],
 
                               ),
-
                               child: Container(
                                 child: Row( children: [
                                   Expanded(
@@ -709,7 +709,6 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
     Utils.feed_flock_report_list = await DatabaseHelper.getAllFeedingsReportByFlock(str_date,end_date);
 
   }
-
 
 
 }

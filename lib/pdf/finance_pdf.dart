@@ -3,17 +3,12 @@ import 'dart:typed_data';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:google_fonts/google_fonts.dart';
 import 'package:poultary/utils/utils.dart';
-
 import '../../data.dart';
 import '../model/finance_report_item.dart';
-import '../model/flock.dart';
-import '../model/flock_report_item.dart';
 
 Future<Uint8List> generateFinancialReport(
     PdfPageFormat pageFormat, CustomData data) async {
@@ -289,9 +284,9 @@ class Invoice {
                       margin: pw.EdgeInsets.only(left: 10),
                       alignment: pw.Alignment.topLeft,
                       child: pw.Text(
-                        Utils.TOTAL_INCOME,
+                        Utils.currency+Utils.TOTAL_INCOME,
                         style: pw.TextStyle(
-                          color: PdfColors.black,
+                          color: PdfColors.green,
                           fontWeight: pw.FontWeight.bold,
                           fontSize: 16,
                         ),
@@ -317,9 +312,9 @@ class Invoice {
                         alignment: pw.Alignment.topLeft,
                         margin: pw.EdgeInsets.only(left: 10),
                         child: pw.Text(
-                          Utils.TOTAL_EXPENSE,
+                          Utils.currency+Utils.TOTAL_EXPENSE,
                           style: pw.TextStyle(
-                            color: PdfColors.black,
+                            color: PdfColors.red,
                             fontWeight: pw.FontWeight.bold,
                             fontSize: 16,
                           ),
@@ -345,11 +340,11 @@ class Invoice {
                         margin: pw.EdgeInsets.only(left: 10),
                         alignment: pw.Alignment.topLeft,
                         child: pw.Text(
-                          Utils.NET_INCOME,
+                          Utils.currency+Utils.NET_INCOME,
                           style: pw.TextStyle(
-                            color: int.parse(Utils.NET_INCOME) < 0 ? PdfColors.red : PdfColors.green,
+                            color: double.parse(Utils.NET_INCOME) < 0 ? PdfColors.red : PdfColors.black,
                             fontWeight: pw.FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: 18,
                           ),
                         ),
                       ),

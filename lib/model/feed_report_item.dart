@@ -7,7 +7,7 @@ class Feed_Report_Item{
 
   String feed_name = "";
   String f_name = "";
-  int? consumption = 0;
+  num? consumption = 0;
 
 
   Feed_Report_Item(

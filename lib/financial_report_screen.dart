@@ -474,10 +474,9 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                           child: Text('transactions'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
                     ),
                     list.length > 0 ? Container(
-                      margin: EdgeInsets.only(top: 0,bottom: 100),
-                      height: heightScreen,
+                      margin: EdgeInsets.only(top: 0,bottom: 20),
                       width: widthScreen,
-
+                      height: list.length * 90,
                       child: ListView.builder(
                           itemCount: list.length,
                           scrollDirection: Axis.vertical,
@@ -569,6 +568,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                         ),
                       ),
                     ),
+                    SizedBox(height: 100,),
                   ],
                 ),
               )

@@ -76,21 +76,23 @@ class Invoice {
 
   double get _grandTotal => _total * (1 + tax);
 
-  int getFLockTotal() {
-    int total = 0;
+  num getFLockTotal() {
+    num total = 0;
     for (int i=0;i<flockFeedList.length;i++){
       total = total + flockFeedList.elementAt(i).consumption!;
     }
 
+    total = num.parse(total.toStringAsFixed(2));
     return total;
   }
 
-  int getFeedTotal() {
-    int total = 0;
+  num getFeedTotal() {
+    num total = 0;
     for (int i=0;i<products.length;i++){
       total = total + products.elementAt(i).consumption!;
     }
 
+    total = num.parse(total.toStringAsFixed(2));
     return total;
   }
 
@@ -169,7 +171,7 @@ class Invoice {
                         fontSize: 10,
                       ),
                     ),), pw.Text(
-                    getFeedTotal().toString(),
+                    getFeedTotal().toString()+" "+"Kg".tr(),
                     style: pw.TextStyle(
                       color: PdfColors.black,
                       fontWeight: pw.FontWeight.bold,
@@ -211,7 +213,7 @@ class Invoice {
                         ),
                       ),),
                   pw.Text(
-                      getFLockTotal().toString(),
+                      getFLockTotal().toString()+" "+"Kg".tr(),
                       style: pw.TextStyle(
                         color: PdfColors.black,
                         fontWeight: pw.FontWeight.bold,

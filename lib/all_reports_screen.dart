@@ -144,6 +144,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
     gross_income = num.parse(gross_income.toStringAsFixed(2));
     total_expense = num.parse(total_expense.toStringAsFixed(2));
     net_income = num.parse(net_income.toStringAsFixed(2));
+    total_feed_consumption = num.parse(total_feed_consumption.toStringAsFixed(2));
 
     setState(() {
 
