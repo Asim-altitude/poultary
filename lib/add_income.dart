@@ -119,8 +119,8 @@ class _NewIncome extends State<NewIncome>
     }
 
     if(!isEdit) {
-      _purposeselectedValue = _purposeList[0];
-      howmanyController.text = total_birds.toString();
+      _purposeselectedValue = Utils.SELECTED_FLOCK;
+      howmanyController.text = "";
       DateTime dateTime = DateTime.now();
       date = DateFormat('yyyy-MM-dd').format(dateTime);
 

@@ -92,10 +92,9 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
     if(!isEdit) {
       DateTime dateTime = DateTime.now();
       date = DateFormat('yyyy-MM-dd').format(dateTime);
-      _purposeselectedValue = _purposeList[0];
+      _purposeselectedValue = Utils.selected_flock!.f_name;
       bird_countController.text = total_birds.toString();
     }
-
 
     setState(() {
 

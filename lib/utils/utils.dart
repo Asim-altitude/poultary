@@ -90,6 +90,9 @@ class Utils {
   static String TOTAL_VACCINATIONS = "0";
   static String applied_filter = "";
 
+  static String SELECTED_FLOCK = "";
+  static int SELECTED_FLOCK_ID = -1;
+
   static List<Flock_Report_Item> flock_report_list = [];
   static List<Egg_Report_Item> egg_report_list = [];
   static List<Feed_Report_Item> feed_report_list = [];

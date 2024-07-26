@@ -387,7 +387,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
 
                   eggs.length > 0 ? Container(
                     width: widthScreen,
-                    height: heightScreen,
+                    height: eggs.length * 115,
                     child: ListView.builder(
                         itemCount: eggs.length,
                         scrollDirection: Axis.vertical,

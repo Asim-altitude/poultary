@@ -42,6 +42,19 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
   int _other_filter = 2;
   void getFilters() async {
 
+    await DatabaseHelper.instance.database;
+
+    flocks = await DatabaseHelper.getFlocks();
+
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+
+    for(int i=0;i<flocks.length;i++){
+      _purposeList.add(flocks.elementAt(i).f_name);
+    }
+
+    _purposeselectedValue = Utils.selected_flock!.f_name;
+    f_id = getFlockID();
+
     _other_filter = (await SessionManager.getOtherFilter())!;
     date_filter_name = filterList.elementAt(_other_filter);
     getData(date_filter_name);
@@ -51,7 +64,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
   void initState() {
     super.initState();
     getFilters();
-    getList();
+
     Utils.setupAds();
 
   }
@@ -665,25 +678,6 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
   List<Flock> flocks = [];
   String _purposeselectedValue = "";
   List<String> _purposeList = [];
-  void getList() async {
-
-    await DatabaseHelper.instance.database;
-
-    flocks = await DatabaseHelper.getFlocks();
-
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
-
-    for(int i=0;i<flocks.length;i++){
-      _purposeList.add(flocks.elementAt(i).f_name);
-    }
-
-    _purposeselectedValue = _purposeList[0];
-
-    setState(() {
-
-    });
-
-  }
 
   int isCollection = 1;
   int selected = 1;

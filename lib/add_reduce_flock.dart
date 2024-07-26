@@ -7,17 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/add_birds.dart';
-import 'package:poultary/add_eggs.dart';
-import 'package:poultary/inventory.dart';
-import 'package:poultary/pdf/pdf_screen.dart';
-import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
-
-import 'add_flocks.dart';
 import 'database/databse_helper.dart';
-import 'model/egg_item.dart';
 import 'model/flock.dart';
 import 'model/flock_detail.dart';
 
@@ -45,6 +38,18 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
   int _other_filter = 2;
   void getFilters() async {
 
+    await DatabaseHelper.instance.database;
+
+    flocks = await DatabaseHelper.getFlocks();
+
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+
+    for(int i=0;i<flocks.length;i++){
+      _purposeList.add(flocks.elementAt(i).f_name);
+    }
+
+    _purposeselectedValue = Utils.selected_flock!.f_name;
+    f_id = getFlockID();
     _other_filter = (await SessionManager.getOtherFilter())!;
     date_filter_name = filterList.elementAt(_other_filter);
 
@@ -56,7 +61,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
     super.initState();
 
     getFilters();
-    getList();
+
     Utils.setupAds();
 
   }
@@ -64,25 +69,6 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
   List<Flock> flocks = [];
   String _purposeselectedValue = "";
   List<String> _purposeList = [];
-  void getList() async {
-
-    await DatabaseHelper.instance.database;
-
-    flocks = await DatabaseHelper.getFlocks();
-
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
-
-    for(int i=0;i<flocks.length;i++){
-      _purposeList.add(flocks.elementAt(i).f_name);
-    }
-
-    _purposeselectedValue = _purposeList[0];
-
-    setState(() {
-
-    });
-
-  }
 
   int selected = 1;
   int f_id = -1;
@@ -96,8 +82,6 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
     await DatabaseHelper.instance.database;
 
     list = await DatabaseHelper.getFlockDetails();
-
-
     egg_total = list.length;
 
     setState(() {
@@ -770,7 +754,9 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
         onChanged: (String? newValue) {
           setState(() {
             _purposeselectedValue = newValue!;
-            getFlockID();
+
+            Utils.SELECTED_FLOCK = _purposeselectedValue;
+            Utils.SELECTED_FLOCK_ID = getFlockID();
             getFilteredTransactions(str_date, end_date);
 
           });
@@ -974,7 +960,6 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
   }
 
   int getFlockID() {
-
 
     for(int i=0;i<flocks.length;i++){
       if(_purposeselectedValue == flocks.elementAt(i).f_name){

@@ -14,11 +14,7 @@ import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-
-import 'model/egg_item.dart';
-import 'model/feed_item.dart';
 import 'model/flock.dart';
-import 'model/flock_detail.dart';
 import 'model/health_chart_data.dart';
 import 'model/health_report_item.dart';
 
@@ -379,7 +375,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                   ),
 
                   list.length > 0 ? Container(
-                    height: heightScreen - 120,
+                    height: list.length * 200,
                     width: widthScreen,
                     child: ListView.builder(
                         itemCount: list.length,
@@ -422,7 +418,6 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                                           Row(
                                             children: [
                                               Image.asset("assets/birds.png", width: 40, height: 40,),
-
                                               // Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).type == 'Medication'? 'Medicated birds: '.tr():'Vaccinated birds: '.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
                                               Container(margin: EdgeInsets.only(left: 5), child: Text(list.elementAt(index).bird_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black),)),
 
@@ -444,7 +439,6 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                                         children: [
                                          // Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).type == 'Medication'?'Medicated by: '.tr():'Vaccinated by: '.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
                                           Image.asset("assets/doctor.png", width: 25, height: 25,),
-
                                           Container(margin: EdgeInsets.only(left: 10), child: Text(list.elementAt(index).doctor_name, style: TextStyle( fontWeight: FontWeight.normal, fontSize: 16, color: Colors.black),)),
 
                                         ],
@@ -453,7 +447,6 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                                         children: [
                                          // Container(margin: EdgeInsets.all(0), child: Text('Disease: '.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
                                           Image.asset("assets/disease.png", width: 25, height: 25,),
-
                                           Container(margin: EdgeInsets.only(left: 10), child: Text(list.elementAt(index).disease.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 16, color: Colors.black),)),
 
                                         ],

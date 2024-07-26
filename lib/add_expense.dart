@@ -113,7 +113,7 @@ class _NewExpense extends State<NewExpense>
     }
 
     if(!isEdit) {
-      _purposeselectedValue = _purposeList[0];
+      _purposeselectedValue = Utils.SELECTED_FLOCK;
       DateTime dateTime = DateTime.now();
       date = DateFormat('yyyy-MM-dd').format(dateTime);
 

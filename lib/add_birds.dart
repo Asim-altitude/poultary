@@ -1,25 +1,15 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:ffi';
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/model/flock_detail.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
-
 import 'database/databse_helper.dart';
-import 'model/bird_item.dart';
-import 'model/egg_item.dart';
 import 'model/flock.dart';
-import 'model/flock_image.dart';
 
 class NewBirdsCollection extends StatefulWidget {
 
@@ -105,12 +95,15 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
     await DatabaseHelper.instance.database;
 
     flocks = await DatabaseHelper.getFlocks();
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
     }
 
-    _purposeselectedValue = _purposeList[0];
+    if(!isEdit)
+    _purposeselectedValue = Utils.selected_flock!.f_name;//Utils.SELECTED_FLOCK;
+
     setState(()
     { });
 

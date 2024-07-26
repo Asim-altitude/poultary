@@ -97,7 +97,7 @@ class _NewFeeding extends State<NewFeeding>
     }
 
     if(!isEdit)
-     _purposeselectedValue = _purposeList[0];
+      _purposeselectedValue = Utils.selected_flock!.f_name;
 
 
     setState(() {
@@ -260,7 +260,6 @@ class _NewFeeding extends State<NewFeeding>
                               Column(
                                 children: [
                                   Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('CHOOSE_FLOCK_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-
                                   Container(
                                     width: widthScreen,
                                     height: 70,

@@ -357,13 +357,13 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                       child: Container(
                         child: SizedBox(
                     width: widthScreen,
-                    height: 60,
+                    height: 70,
                     child: TextFormField(
                       maxLines: null,
                       controller: nameController,
                       textInputAction: TextInputAction.next,
                       decoration:  InputDecoration(
-                        fillColor: Colors.grey.withAlpha(70),
+                        fillColor: Colors.white.withAlpha(70),
                         border: OutlineInputBorder(
                             borderRadius:
                             BorderRadius.all(Radius.circular(20))),
@@ -449,7 +449,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                           padding: EdgeInsets.all(10),
                           margin: EdgeInsets.only(left: 20, right: 20),
                           decoration: BoxDecoration(
-                            color: Colors.grey.withAlpha(70),
+                            color: Colors.white.withAlpha(70),
                             borderRadius: const BorderRadius.all(
                                 Radius.circular(20.0)),
                             border: Border.all(
@@ -470,7 +470,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                           padding: EdgeInsets.all(10),
                           margin: EdgeInsets.only(left: 20, right: 20),
                           decoration: BoxDecoration(
-                            color: Colors.grey.withAlpha(70),
+                            color: Colors.white.withAlpha(70),
                             borderRadius: const BorderRadius.all(
                                 Radius.circular(20.0)),
                             border: Border.all(
@@ -489,7 +489,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                           height: 70,
                           margin: EdgeInsets.only(left: 20, right: 20),
                           decoration: BoxDecoration(
-                            color: Colors.grey.withAlpha(70),
+                            color: Colors.white.withAlpha(70),
                             borderRadius: const BorderRadius.all(
                                 Radius.circular(20.0)),
                             border: Border.all(
@@ -528,47 +528,59 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                     ),
                     Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25, top: 20),child: Text('FLOCK_IMAGES'.tr(), style: TextStyle(fontSize: 14,  color: Colors.black, fontWeight: FontWeight.bold),)),
 
-                    Column(children: [
-                      SizedBox(height: 40,width: widthScreen),
-
-                      imagesAdded? Container(
-                        height: 80,
-                        width: widthScreen - 40,
-                        margin: EdgeInsets.only(left: 10),
-                        child: ListView.builder(
-                            itemCount: imageFileList!.length,
-                            scrollDirection: Axis.horizontal,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Container(
-                                  margin: EdgeInsets.all(10),
-                                  height: 80, width: 80,
-                                  child: Image.file(File(imageFileList![index].path,), fit: BoxFit.cover,
-                                  ));
-                            }),
-                      ) : Container( height: 80,
-                          width: widthScreen - 135,margin: EdgeInsets.only(left: 15), alignment: Alignment.center, child: Text('No images added')),
-                      InkWell(
-                        onTap: () {
-                          selectImages();
-                        },
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Container(
-                            width: widthScreen - 40,
-                            height: 50,
-                            decoration: BoxDecoration(
-                                color: Utils.getThemeColorBlue(),
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
-                              Icon(Icons.add, color: Colors.white,),
-                              Text('IMAGES'.tr(), style: TextStyle(
-                                  color: Colors.white, fontSize: 14),)
-                            ],),
-                          ),
+                    Container(
+                      margin: EdgeInsets.only(left: 20, right: 20),
+                      padding: EdgeInsets.only(bottom: 10, left: 5, right: 5),
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.all(
+                            Radius.circular(10.0)),
+                        border: Border.all(
+                          color:  Colors.grey,
+                          width: 1.0,
                         ),
                       ),
-                    ],),
+                      child: Column(children: [
+                        SizedBox(height: 40,width: widthScreen),
+
+                        imagesAdded? Container(
+                          height: 80,
+                          width: widthScreen - 40,
+                          margin: EdgeInsets.only(left: 10),
+                          child: ListView.builder(
+                              itemCount: imageFileList!.length,
+                              scrollDirection: Axis.horizontal,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Container(
+                                    margin: EdgeInsets.all(10),
+                                    height: 80, width: 80,
+                                    child: Image.file(File(imageFileList![index].path,), fit: BoxFit.cover,
+                                    ));
+                              }),
+                        ) : Container( height: 80,
+                            width: widthScreen - 135,margin: EdgeInsets.only(left: 15), alignment: Alignment.center, child: Text('No images added')),
+                        InkWell(
+                          onTap: () {
+                            selectImages();
+                          },
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Container(
+                              width: widthScreen - 40,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                  color: Utils.getThemeColorBlue(),
+                                  borderRadius:
+                                  BorderRadius.all(Radius.circular(10))),
+                              child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
+                                Icon(Icons.add, color: Colors.white,),
+                                Text('IMAGES'.tr(), style: TextStyle(
+                                    color: Colors.white, fontSize: 14),)
+                              ],),
+                            ),
+                          ),
+                        ),
+                      ],),
+                    ),
                     SizedBox(height: 30,width: widthScreen),
                     Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25, bottom: 5),child: Text('FLOCK_DESC'.tr(), style: TextStyle(fontSize: 14,  color: Colors.black, fontWeight: FontWeight.bold),)),
 

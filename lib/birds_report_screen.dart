@@ -1,7 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,8 +9,6 @@ import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
-
-import 'model/feed_item.dart';
 import 'model/flock.dart';
 import 'model/flock_detail.dart';
 import 'model/flock_report_item.dart';
@@ -307,7 +302,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
               ),
 
               Container(
-                 height: heightScreen,
+
                   padding: EdgeInsets.only(top: 10),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
@@ -330,7 +325,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                   ),
 
                   list.length > 0 ? Container(
-                    height: heightScreen - 220,
+                    height: list.length * 130,
                     width: widthScreen,
                     child: ListView.builder(
                         itemCount: list.length,
@@ -356,7 +351,6 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                               ),
 
                               child: Container(
-                                height: 130,
                                 color: Colors.white,
                                 child: Row( children: [
                                   Expanded(

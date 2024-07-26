@@ -95,7 +95,8 @@ class _NewEggCollection extends State<NewEggCollection>
       _purposeList.add(flocks.elementAt(i).f_name);
     }
 
-    _purposeselectedValue = _purposeList[0];
+    if(!isEdit)
+    _purposeselectedValue = Utils.selected_flock!.f_name;
 
     setState(() {
 
