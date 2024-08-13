@@ -122,6 +122,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                     ],
                   ),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
                         alignment: Alignment.center,
@@ -135,23 +136,16 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                           },
                         ),
                       ),
-                      Container(
-                          margin: EdgeInsets.only(left: 10),
-                          child: Text(
-                            "",
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          )),
+                      InkWell(onTap: (){
+                        showAlertDialog(context,Utils.selected_flock!.f_name);
+                      },child:Align(alignment:Alignment.topRight,child: Container(margin:EdgeInsets.only(right: 10),child: Image.asset("assets/edit.png", width: 30, height: 30,color: Colors.white,),)),),
 
                     ],
                   ),
                 ),
               ),
 
-              Container( child: Text(Utils.selected_flock!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white,),)),
+               Container(child: Text(Utils.selected_flock!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white,),)),
               Container(
                 margin: EdgeInsets.only(left: 15, top: 5),
                 child: Row(children: [
@@ -799,6 +793,68 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
     });
   }
+
+  final nameController = TextEditingController();
+  showAlertDialog(BuildContext context,String name) {
+
+    nameController.text = name;
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: Text("CANCEL".tr()),
+      onPressed:  () {
+        Navigator.pop(context);
+      },
+    );
+    Widget continueButton = TextButton(
+      child: Text("DONE".tr()),
+      onPressed:  () async {
+        Utils.selected_flock!.f_name = nameController.text;
+        await DatabaseHelper.updateFlockName(nameController.text, Utils.selected_flock!.f_id);
+        Utils.showToast("DONE".tr());
+        Navigator.pop(context);
+        setState(() {
+
+        });
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("EDIT".tr()),
+      content: Container(
+        padding: EdgeInsets.all(10),
+        child: TextFormField(
+          maxLines: null,
+          controller: nameController,
+          textInputAction: TextInputAction.next,
+          decoration:  InputDecoration(
+            fillColor: Colors.white.withAlpha(70),
+            border: OutlineInputBorder(
+                borderRadius:
+                BorderRadius.all(Radius.circular(20))),
+            hintText: 'FLOCK_NAME'.tr(),
+            hintStyle: TextStyle(
+                color: Colors.grey, fontSize: 16),
+            labelStyle: TextStyle(
+                color: Colors.black, fontSize: 16),
+          ),
+        ),
+      ),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
 
 }
 

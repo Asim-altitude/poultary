@@ -1053,7 +1053,24 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
     );
     Widget continueButton = TextButton(
       child: Text("DELETE".tr()),
-      onPressed:  () {
+      onPressed:  () async {
+        if(list.elementAt(selected_index!).f_id != -1) {
+          int birds_to_delete = list
+              .elementAt(selected_index!)
+              .item_count;
+          int current_birds = await DatabaseHelper.getAllFlockBirdsCount(list
+              .elementAt(selected_index!)
+              .f_id, str_date, end_date);
+
+          if(list.elementAt(selected_index!).item_type == "Addition")
+             current_birds = current_birds - birds_to_delete;
+          else
+            current_birds = current_birds + birds_to_delete;
+
+          await DatabaseHelper.updateFlockBirds(
+              current_birds, list.elementAt(selected_index!).f_id);
+
+        }
         DatabaseHelper.deleteItem("Flock_Detail", selected_id!);
         list.removeAt(selected_index!);
         Utils.showToast("RECORD_DELETED".tr());

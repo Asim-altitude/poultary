@@ -42,7 +42,6 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
      try
      {
        getFilters();
-
        getList();
      }
      catch(ex){
@@ -64,6 +63,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
     getData(_reports_filter);
   }
 
+  int total_initial_flock_birds = 0;
   int total_flock_birds = 0;
   int total_birds_added = 0;
   int total_birds_reduced = 0;
@@ -111,14 +111,22 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
     clearValues();
 
+
     total_flock_birds = await DatabaseHelper.getAllFlockBirdsCount(f_id, str_date, end_date);
 
     total_birds_added = await DatabaseHelper.getBirdsCalculations(f_id, "Addition", str_date, end_date);
 
     total_birds_reduced = await DatabaseHelper.getBirdsCalculations(f_id, "Reduction", str_date, end_date);
+    total_initial_flock_birds = await DatabaseHelper.getAllFlockInitialBirdsCount(f_id, str_date, end_date);
 
-    total_birds_added = total_birds_added + total_flock_birds;
-    current_birds = total_birds_added - total_birds_reduced;
+    print("Flock Initial Birds $total_initial_flock_birds");
+    print("Flock Added Birds $total_birds_added");
+    /*total_initial_flock_birds = await DatabaseHelper.getAllFlockInitialBirdsCount(f_id, str_date, end_date);
+    total_flock_birds = total_flock_birds + total_birds_added;*/
+    //total_birds_added = total_birds_added + total_flock_birds;
+    //current_birds = total_birds_added - total_birds_reduced;
+    current_birds = total_flock_birds;
+    total_birds_added = total_birds_added + total_initial_flock_birds;
 
     total_eggs_collected = await DatabaseHelper.getEggCalculations(f_id, 1, str_date, end_date);
 
@@ -1024,7 +1032,6 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
       getAllData();
     }
 
-    getAllData();
 
   }
 

@@ -907,14 +907,44 @@ class DatabaseHelper  {
 
     if(f_id == -1 && !str_date.isEmpty) {
       result = await _database?.rawQuery(
-          "SELECT sum(bird_count) FROM Flock where acqusition_date BETWEEN '$str_date'and '$end_date'");
+          "SELECT sum(active_bird_count) FROM Flock where acqusition_date BETWEEN '$str_date'and '$end_date'");
     }else if(f_id != -1 && str_date.isEmpty) {
       result = await _database?.rawQuery(
-          "SELECT sum(bird_count) FROM Flock where f_id = $f_id ");
+          "SELECT active_bird_count FROM Flock where f_id = $f_id ");
 
     }else if(f_id != -1 && !str_date.isEmpty) {
       result = await _database?.rawQuery(
-          "SELECT sum(bird_count) FROM Flock where f_id = $f_id and acqusition_date BETWEEN '$str_date'and '$end_date' ");
+          "SELECT active_bird_count FROM Flock where f_id = $f_id and acqusition_date BETWEEN '$str_date'and '$end_date' ");
+
+    }else if (f_id == -1 && str_date.isEmpty){
+      result = await _database?.rawQuery(
+          "SELECT sum(active_bird_count) FROM Flock");
+    }
+
+    Map<String,dynamic> map = result![0];
+    print(map.values.first);
+
+    if(map.values.first.toString().toLowerCase() == 'null')
+      return 0;
+    else
+      return int.parse(map.values.first.toString());
+
+  }
+
+  static Future<int> getAllFlockInitialBirdsCount(int f_id,String str_date, String end_date) async {
+
+    var result;
+
+    if(f_id == -1 && !str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT sum(bird_count) FROM Flock where acqusition_date BETWEEN '$str_date'and '$end_date'");
+    }else if(f_id != -1 && str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT bird_count FROM Flock where f_id = $f_id ");
+
+    }else if(f_id != -1 && !str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT bird_count FROM Flock where f_id = $f_id and acqusition_date BETWEEN '$str_date'and '$end_date' ");
 
     }else if (f_id == -1 && str_date.isEmpty){
       result = await _database?.rawQuery(
@@ -1452,6 +1482,11 @@ class DatabaseHelper  {
 
   static Future<int>  updateFlockStatus (int active, int id) async {
     var result = await _database?.rawUpdate("UPDATE Flock SET active = '${active}' WHERE f_id = ${id}");
+    return 1;
+  }
+
+  static Future<int>  updateFlockName (String name, int id) async {
+    var result = await _database?.rawUpdate("UPDATE Flock SET f_name = '$name' WHERE f_id = ${id}");
     return 1;
   }
 
