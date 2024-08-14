@@ -37,6 +37,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
   }
 
+  String date = "Choose date";
   void getUsage() async{
     birdUsageList = await DatabaseHelper.getBirdUSage(Utils.selected_flock!.f_id);
 
@@ -55,6 +56,8 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
    await DatabaseHelper.instance.database;
 
    images = await DatabaseHelper.getFlockImage(Utils.selected_flock!.f_id);
+
+   date = Utils.selected_flock!.acqusition_date;
 
    print(images);
 
@@ -136,16 +139,25 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                           },
                         ),
                       ),
-                      InkWell(onTap: (){
-                        showAlertDialog(context,Utils.selected_flock!.f_name);
-                      },child:Align(alignment:Alignment.topRight,child: Container(margin:EdgeInsets.only(right: 10),child: Image.asset("assets/edit.png", width: 30, height: 30,color: Colors.white,),)),),
-
+                      Align(
+                        alignment: Alignment.topRight,
+                        child:  GestureDetector(
+                          onTapDown: (TapDownDetails details) {
+                            showMemberMenu(details.globalPosition);
+                          },
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            padding: EdgeInsets.all(5),
+                            child: Image.asset('assets/menu_dots.png', color: Colors.white,),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
-
-               Container(child: Text(Utils.selected_flock!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white,),)),
+              Container(child: Text(Utils.selected_flock!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white,),)),
               Container(
                 margin: EdgeInsets.only(left: 15, top: 5),
                 child: Row(children: [
@@ -794,6 +806,55 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     });
   }
 
+
+  void showMemberMenu(Offset offset) async {
+    double left = offset.dx;
+    double top = offset.dy;
+    await showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(left, top, 0, 0),
+
+      items: [
+        PopupMenuItem(
+          value: 2,
+          child: Text(
+            "EDIT".tr(),
+            style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Colors.black),
+          ),
+        ), PopupMenuItem(
+          value: 1,
+          child: Text(
+            "DELETE".tr(),
+            style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Colors.black),
+          ),
+        ),
+
+      ],
+      elevation: 8.0,
+    ).then((value) async {
+      if (value != null) {
+        if(value == 1){
+         showDeleteConfirmation(context);
+        }
+        else if(value == 2)
+        {
+          showAlertDialog(context, Utils.selected_flock!.f_name);
+
+        }else
+        {
+          print(value);
+        }
+      }
+    });
+  }
+
+
   final nameController = TextEditingController();
   showAlertDialog(BuildContext context,String name) {
 
@@ -839,6 +900,174 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                 color: Colors.black, fontSize: 16),
           ),
         ),
+      ), /*Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(10),
+            child: TextFormField(
+              maxLines: null,
+              controller: nameController,
+              textInputAction: TextInputAction.next,
+              decoration:  InputDecoration(
+                fillColor: Colors.white.withAlpha(70),
+                border: OutlineInputBorder(
+                    borderRadius:
+                    BorderRadius.all(Radius.circular(20))),
+                hintText: 'FLOCK_NAME'.tr(),
+                hintStyle: TextStyle(
+                    color: Colors.grey, fontSize: 16),
+                labelStyle: TextStyle(
+                    color: Colors.black, fontSize: 16),
+              ),
+            ),
+          ),
+         *//* Container(
+            width: widthScreen,
+            height: 60,
+            padding: EdgeInsets.all(10),
+            margin: EdgeInsets.only(left: 10, right: 10),
+            decoration: BoxDecoration(
+              color: Colors.white.withAlpha(70),
+              borderRadius: const BorderRadius.all(
+                  Radius.circular(20.0)),
+              border: Border.all(
+                color:  Colors.grey,
+                width: 1.0,
+              ),
+            ),
+            child: getAcqusitionDropDownList(),
+          ),
+          Container(
+            width: widthScreen,
+            height: 60,
+            margin: EdgeInsets.only(left: 10, right: 10,top: 10),
+            decoration: BoxDecoration(
+              color: Colors.white.withAlpha(70),
+              borderRadius: const BorderRadius.all(
+                  Radius.circular(20.0)),
+              border: Border.all(
+                color:  Colors.grey,
+                width: 1.0,
+              ),
+            ),
+            child: InkWell(
+              onTap: () {
+                pickDate();
+              },
+              child: Container(
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.only(left: 10),
+
+                child: Text(Utils.getFormattedDate(date), style: TextStyle(
+                    color: Colors.black, fontSize: 16),),
+              ),
+            ),
+          ),*//*
+        ],
+      ),*/
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  void pickDate() async{
+
+    DateTime? pickedDate = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(1950),
+        //DateTime.now() - not to allow to choose before today.
+        lastDate: DateTime.now());
+
+    if (pickedDate != null)
+    {
+      String formattedDate =
+      DateFormat('yyyy-MM-dd').format(pickedDate);
+      setState(() {
+        date = formattedDate;
+      });
+    } else {}
+
+  }
+
+
+  List<String> acqusitionList = [
+    'PURCHASED'.tr(),
+    'HATCHED'.tr(),
+    'GIFT'.tr(),
+    'OTHER'.tr(),
+  ];
+  String _acqusitionselectedValue = 'PURCHASED'.tr();
+  Widget getAcqusitionDropDownList() {
+    return Container(
+      width: widthScreen,
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration.collapsed(hintText: ''),
+        isDense: true,
+        value: _acqusitionselectedValue,
+        elevation: 16,
+        isExpanded: true,
+        onChanged: (String? newValue) {
+          setState(() {
+            _acqusitionselectedValue = newValue!;
+
+          });
+        },
+        items: acqusitionList.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  showDeleteConfirmation(BuildContext context) {
+
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: Text("CANCEL".tr()),
+      onPressed:  () {
+        Navigator.pop(context);
+      },
+    );
+    Widget continueButton = TextButton(
+      child: Text("DONE".tr()),
+      onPressed:  () async {
+
+        await DatabaseHelper.deleteFlock(Utils.selected_flock!);
+
+        Utils.showToast("RECORD_DELETED".tr());
+        Navigator.pop(context);
+        Navigator.pop(context);
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("CONFIRMATION".tr()),
+      content: Container(
+        padding: EdgeInsets.all(10),
+        child: Text('RU_SURE'.tr())
       ),
       actions: [
         cancelButton,

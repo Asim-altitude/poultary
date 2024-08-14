@@ -826,8 +826,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
         lastDate: DateTime.now());
 
     if (pickedDate != null) {
-      print(
-          pickedDate); //pickedDate output format => 2021-03-10 00:00:00.000
+      print(pickedDate); //pickedDate output format => 2021-03-10 00:00:00.000
       String formattedDate =
       DateFormat('yyyy-MM-dd').format(pickedDate);
       print(formattedDate);
