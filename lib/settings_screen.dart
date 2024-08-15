@@ -396,7 +396,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                           ],),),
                     ),
                   ),
-                  InkWell(
+                 /* InkWell(
                     onTap: () {
                       Navigator.push(
                         context,
@@ -449,7 +449,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
 
                           ],),),
                     ),
-                  ),
+                  ),*/
                   // SizedBox(height: 4,),
                   // InkWell(
                   //   onTap: () {
