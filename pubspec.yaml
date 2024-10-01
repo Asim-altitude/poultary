@@ -66,6 +66,7 @@ dependencies:
   introduction_screen: ^3.0.0
   flutter_image_compress: ^2.3.0
   carousel_slider: ^4.2.1
+  modal_bottom_sheet: ^3.0.0
 
 
 

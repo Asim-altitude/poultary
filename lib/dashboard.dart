@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:language_picker/language_picker_dropdown.dart';
 import 'package:language_picker/languages.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:poultary/category_screen.dart';
 import 'package:poultary/daily_feed.dart';
@@ -375,6 +376,10 @@ class _DashboardScreen extends State<DashboardScreen> {
     setState(() {
 
     });
+
+    bool isShow = await SessionManager.isShowWhatsNewDialog();
+    if(isShow)
+      showWhatsNewDialog();
 
   }
 
@@ -1249,6 +1254,115 @@ class _DashboardScreen extends State<DashboardScreen> {
       ),
     );
   }
+
+
+  void showWhatsNewDialog() {
+
+    showMaterialModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return SingleChildScrollView(
+              controller: ModalScrollController.of(context),
+              child: Container(
+                padding: EdgeInsets.only(left: 20, right: 10, top: 10, bottom: 20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "What's New".tr(),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                        color: Utils.getThemeColorBlue(),
+                      ),
+                    ),
+                    SizedBox(height: 5,),
+
+                    Text(
+                      'Some key changes made in this update'.tr(),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Utils.getThemeColorBlue(),
+                        fontWeight: FontWeight.w200,
+                      ),
+                    ),
+                    SizedBox(height: 20,),
+                    Text(
+                      'Birds'.tr()+' '+'ADITION_RDCTIN'.tr(),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Utils.getThemeColorBlue(),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 5,),
+                    Text(
+                      'graph1'.tr(),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.black,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                    SizedBox(height: 10,),
+                    Text(
+                      'Income'.tr()+'/'+'Expense'.tr(),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Utils.getThemeColorBlue(),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      'graph2'.tr(),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.black,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                    InkWell(
+                      onTap: (){
+                        SessionManager.setWhatsNewDialog(false);
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        width: widthScreen,
+                        height: 60,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Utils.getThemeColorBlue(),
+                          borderRadius: const BorderRadius.all(
+                              Radius.circular(10.0)),
+                          border: Border.all(
+                            color:  Utils.getThemeColorBlue(),
+                            width: 2.0,
+                          ),
+                        ),
+                        margin: EdgeInsets.all( 20),
+                        child: Text(
+                          "DONE".tr(),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
 
 
 }

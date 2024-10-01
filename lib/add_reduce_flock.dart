@@ -10,6 +10,7 @@ import 'package:poultary/add_birds.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
+import 'package:poultary/view_transaction.dart';
 import 'database/databse_helper.dart';
 import 'model/flock.dart';
 import 'model/flock_detail.dart';
@@ -47,14 +48,42 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
     }
-
     _purposeselectedValue = Utils.selected_flock!.f_name;
     f_id = getFlockID();
     _other_filter = (await SessionManager.getOtherFilter())!;
     date_filter_name = filterList.elementAt(_other_filter);
 
+    addNewColumn();
+
     getData(date_filter_name);
-  }
+
+   }
+
+   void addNewColumn() async{
+    try{
+      int c = await DatabaseHelper.addColumnInFlockDetail();
+      print("Column Info $c");
+    }catch(ex){
+      print(ex);
+    }
+
+    try{
+      int c = await DatabaseHelper.addColumnInFTransactions();
+      print("Column Info $c");
+    }catch(ex){
+      print(ex);
+    }
+
+    try{
+      int? c = await DatabaseHelper.updateLinkedFlocketailNullValue();
+      print("Flock Details Update Info $c");
+
+      int? t = await DatabaseHelper.updateLinkedTransactionNullValue();
+      print("Transactions Update Info $t");
+    }catch(ex){
+      print(ex);
+    }
+   }
 
   @override
   void initState() {
@@ -396,28 +425,78 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                           color: Colors.white,
                           child:Column(
                             children: [
-                              Align(
+                              list.elementAt(index).transaction_id!= "-1"?Align(
                                 alignment: Alignment.topRight,
                                 child:
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     GestureDetector(
-                                      onTapDown: (TapDownDetails details) {
+                                      onTapDown: (TapDownDetails details) async {
                                         selected_id = list.elementAt(index).f_detail_id;
                                         selected_index = index;
-                                        showMemberMenu(details.globalPosition);
+                                        if(list.elementAt(selected_index!).transaction_id != "-1") {
+                                          final result = await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>  ViewCompleteTransaction(transaction_id: list.elementAt(selected_index!).transaction_id, isTransaction: false,)),
+                                          );
+
+                                          getData(date_filter_name);
+                                        }else {
+                                          showMemberMenu(
+                                              details.globalPosition);
+                                        }
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.all(5),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              margin: EdgeInsets.all(5),
+                                              child: Text('View Details'.tr(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w200, color: Utils.getThemeColorBlue()),)),
+
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+
+                                  ],
+                                ),)  : Align(
+                                alignment: Alignment.topRight,
+                                child:
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    GestureDetector(
+                                      onTapDown: (TapDownDetails details) async {
+                                        selected_id = list.elementAt(index).f_detail_id;
+                                        selected_index = index;
+                                        if(list.elementAt(selected_index!).transaction_id != "-1") {
+                                          final result = await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>  ViewCompleteTransaction(transaction_id: list.elementAt(selected_index!).transaction_id, isTransaction: false,)),
+                                          );
+
+                                          getData(date_filter_name);
+                                        }else {
+                                          showMemberMenu(
+                                              details.globalPosition);
+                                        }
                                       },
                                       child: Container(
                                         width: 30,
                                         height: 30,
                                         padding: EdgeInsets.all(5),
-                                        child: Image.asset('assets/options.png'),
+                                        child: Image.asset(list.elementAt(index).transaction_id!= "-1"?'assets/view_icon.png':'assets/options.png'),
                                       ),
                                     ),
 
                                   ],
-                                ),),
+                                ),) ,
                               Row( children: [
                                 Expanded(
                                   child: Container(
@@ -475,7 +554,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                                     ),
                                   ],
                                 ),
-                              )
+                              ),
                             ],
                           )
                         ),
@@ -719,6 +798,8 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                   ]
       ),),),),),);
   }
+
+
 
   Future<void> addNewCollection() async{
     final result = await Navigator.push(
@@ -996,7 +1077,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
         ), PopupMenuItem(
           value: 1,
           child: Text(
-            "DELETE_RECORD".tr(),
+            list.elementAt(selected_index!).transaction_id!= "-1" ? "VIEW_RECORD".tr() : "DELETE_RECORD".tr(),
             style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
@@ -1005,6 +1086,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
         ),
 
       ],
+
       elevation: 8.0,
     ).then((value) async {
       if (value != null) {
@@ -1034,13 +1116,59 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
           }
         }
         else if(value == 1){
-          showAlertDialog(context);
+          if(list.elementAt(selected_index!).transaction_id != "-1")
+          {
+            // View Complete Record
+
+            print(selected_index);
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>  ViewCompleteTransaction(transaction_id: list.elementAt(selected_index!).transaction_id, isTransaction: false,)),
+            );
+
+            getData(date_filter_name);
+          }
+          else
+          {
+            showAlertDialog(context);
+          }
         }else {
           print(value);
         }
       }
     });
   }
+
+  showCautionDialog(BuildContext context) {
+
+    // set up the buttons
+
+    Widget continueButton = TextButton(
+      child: Text("VIEW_INFO".tr()),
+      onPressed:  () async {
+
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("INFO".tr()),
+      content: Text("MULTIPLE_OPERATIONS".tr()),
+      actions: [
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
 
   showAlertDialog(BuildContext context) {
 
@@ -1055,20 +1183,62 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       child: Text("DELETE".tr()),
       onPressed:  () async {
         if(list.elementAt(selected_index!).f_id != -1) {
-          int birds_to_delete = list
-              .elementAt(selected_index!)
-              .item_count;
-          int current_birds = await DatabaseHelper.getAllFlockBirdsCount(list
-              .elementAt(selected_index!)
-              .f_id, str_date, end_date);
 
-          if(list.elementAt(selected_index!).item_type == "Addition")
-             current_birds = current_birds - birds_to_delete;
-          else
-            current_birds = current_birds + birds_to_delete;
+          if(list.elementAt(selected_index!).transaction_id != "-1"){
+            if(list.elementAt(selected_index!).transaction_id.contains(","))
+            {
+              /*Flock flock = await DatabaseHelper
+                    .getSingleFlock(list.elementAt(selected_index!).f_id);
+                int active_birds = */
 
-          await DatabaseHelper.updateFlockBirds(
-              current_birds, list.elementAt(selected_index!).f_id);
+            }else{
+
+              await DatabaseHelper.deleteItem("Transaction",int.parse(list
+                  .elementAt(selected_index!).transaction_id));
+
+              int birds_to_delete = list
+                  .elementAt(selected_index!)
+                  .item_count;
+              Flock flock = await DatabaseHelper
+                  .getSingleFlock(list
+                  .elementAt(selected_index!)
+                  .f_id);
+              int current_birds = flock.active_bird_count!;
+
+              if (list
+                  .elementAt(selected_index!)
+                  .item_type == "Addition")
+                current_birds = current_birds - birds_to_delete;
+              else
+                current_birds = current_birds + birds_to_delete;
+
+              await DatabaseHelper.updateFlockBirds(
+                  current_birds, list
+                  .elementAt(selected_index!)
+                  .f_id);
+            }
+          }else {
+            int birds_to_delete = list
+                .elementAt(selected_index!)
+                .item_count;
+            Flock flock = await DatabaseHelper
+                .getSingleFlock(list
+                .elementAt(selected_index!)
+                .f_id);
+            int current_birds = flock.active_bird_count!;
+
+            if (list
+                .elementAt(selected_index!)
+                .item_type == "Addition")
+              current_birds = current_birds - birds_to_delete;
+            else
+              current_birds = current_birds + birds_to_delete;
+
+            await DatabaseHelper.updateFlockBirds(
+                current_birds, list
+                .elementAt(selected_index!)
+                .f_id);
+          }
 
         }
         DatabaseHelper.deleteItem("Flock_Detail", selected_id!);
@@ -1078,7 +1248,6 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
         setState(() {
 
         });
-
 
       },
     );

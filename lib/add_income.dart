@@ -1,8 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:ffi';
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:poultary/model/feed_item.dart';
 import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/sticky.dart';
@@ -19,7 +16,9 @@ import 'package:poultary/utils/utils.dart';
 import 'database/databse_helper.dart';
 import 'model/bird_item.dart';
 import 'model/egg_item.dart';
+import 'model/finance_flock_item.dart';
 import 'model/flock.dart';
+import 'model/flock_detail.dart';
 import 'model/flock_image.dart';
 import 'model/transaction_item.dart';
 
@@ -45,12 +44,15 @@ class _NewIncome extends State<NewIncome>
 
   String _purposeselectedValue = "";
   String _saleselectedValue = "Sale Item".tr();
+  String _mysaleselectedValue = "-Choose Option-".tr();
 
   List<String> _purposeList = [];
   List<String> _saleItemList = [];
   List<SubItem> _paymentMethodList = [];
   List<String>  _visiblePaymentMethodList = [];
   List<SubItem> _subItemList = [];
+  List<SubItem> _mysubItemList = [];
+  List<String> _mysaleItemList = [];
 
   int chosen_index = 0;
 
@@ -85,9 +87,7 @@ class _NewIncome extends State<NewIncome>
       _purposeselectedValue = widget.transactionItem!.f_name;
       date = widget.transactionItem!.date;
       _saleselectedValue = widget.transactionItem!.sale_item;
-   /*   payment_status = widget.transactionItem!.payment_status;
-      payment_method = widget.transactionItem!.payment_method;
-   */   notesController.text = widget.transactionItem!.short_note;
+      notesController.text = widget.transactionItem!.short_note;
       howmanyController.text = widget.transactionItem!.how_many;
       soldtoController.text = widget.transactionItem!.sold_purchased_from;
       amountController.text = widget.transactionItem!.amount;
@@ -104,27 +104,71 @@ class _NewIncome extends State<NewIncome>
 
   }
 
-  List<Flock> flocks = [];
-  void getList() async {
+   List<Flock> flocks = [];
+   void getList() async {
 
-    await DatabaseHelper.instance.database;
+     if(!isEdit) {
+       await DatabaseHelper.instance.database;
+       flocks = await DatabaseHelper.getFlocks();
+       is_specific_flock = true;
+       if(flocks.length > 1){
+         flocks.insert(0, Flock(f_id: -1,
+             f_name: 'Farm Wide'.tr(),
+             bird_count: 0,
+             purpose: '',
+             acqusition_date: '',
+             acqusition_type: '',
+             notes: '',
+             icon: '',
+             active_bird_count: 0,
+             active: 1));
+         is_specific_flock = false;
+       }
 
-    flocks = await DatabaseHelper.getFlocks();
+       for (int i = 0; i < flocks.length; i++) {
+         _purposeList.add(flocks.elementAt(i).f_name);
+         total_birds += flocks
+             .elementAt(i)
+             .active_bird_count!;
+       }
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+       _purposeselectedValue = _purposeList[0];
+       howmanyController.text = "";
+       DateTime dateTime = DateTime.now();
+       date = DateFormat('yyyy-MM-dd').format(dateTime);
 
-    for(int i=0;i<flocks.length;i++){
-      _purposeList.add(flocks.elementAt(i).f_name);
-      total_birds += flocks.elementAt(i).active_bird_count!;
-    }
 
-    if(!isEdit) {
-      _purposeselectedValue = Utils.SELECTED_FLOCK;
-      howmanyController.text = "";
-      DateTime dateTime = DateTime.now();
-      date = DateFormat('yyyy-MM-dd').format(dateTime);
+     }else{
 
-    }
+       _purposeselectedValue = widget.transactionItem!.f_name;
+       _purposeList.add(_purposeselectedValue);
+       howmanyController.text = widget.transactionItem!.how_many;
+       date = widget.transactionItem!.date;
+
+       if(widget.transactionItem!.f_id! != -1) {
+         Flock flock = await DatabaseHelper.getSingleFlock(
+             widget.transactionItem!.f_id!);
+         flocks.add(flock);
+         is_specific_flock = true;
+       }else{
+         flocks.add(Flock(f_id: -1,
+             f_name: 'Farm Wide'.tr(),
+             bird_count: 0,
+             purpose: '',
+             acqusition_date: '',
+             acqusition_type: '',
+             notes: '',
+             icon: '',
+             active_bird_count: 0,
+             active: 1));
+         is_specific_flock = false;
+       }
+
+
+
+     }
+
+
 
     setState(() {
 
@@ -143,7 +187,6 @@ class _NewIncome extends State<NewIncome>
 
     if(!isEdit)
     payment_method = _visiblePaymentMethodList[0];
-
     print(payment_method);
 
     setState(() {
@@ -152,20 +195,81 @@ class _NewIncome extends State<NewIncome>
 
   }
 
+  void updateIncomeCategories() async {
+    _mysaleItemList = [];
+    _mysubItemList = await DatabaseHelper.getSubCategoryList(1);
+
+    _mysaleItemList.add("-Choose Option-".tr());
+    for(int i=0;i<_mysubItemList.length;i++){
+
+      if(_mysubItemList.elementAt(i).name! != "Egg Sale")
+        _mysaleItemList.add(_mysubItemList.elementAt(i).name!.tr());
+
+    }
+    setState(() {
+
+    });
+  }
+
   void getIncomeCategoryList() async {
     await DatabaseHelper.instance.database;
+    if(isEdit){
+      _saleselectedValue = widget.transactionItem!.sale_item;
+      _saleItemList.add(_saleselectedValue.tr());
 
-    _subItemList = await DatabaseHelper.getSubCategoryList(1);
+      print(_saleselectedValue);
+      print("ID ${widget.transactionItem!.flock_update_id}");
+      choose_option = false;
+      purpose_option_invalid = false;
+      if(widget.transactionItem!.flock_update_id != "-1"){
+        is_bird_sale = true;
 
+        if(widget.transactionItem!.flock_update_id.contains(",") ||
+            widget.transactionItem!.f_id == -1)
+        {
+            is_specific_flock = false;
+            List<String> item_ids = widget.transactionItem!.flock_update_id.split(",");
+            print(item_ids);
+            for(int i=0;i<item_ids.length;i++){
+              print("F DETAIL ID ${item_ids[i]}");
+              Flock_Detail flock_detail = await DatabaseHelper.getSingleFlockDetails(int.parse(item_ids[i]));
+              Flock flock = await DatabaseHelper.getSingleFlock(flock_detail.f_id);
+              FinanceFlockItem financeFlockItem = new FinanceFlockItem(id: flock_detail.f_id, name: flock_detail.f_name, active_birds: flock.active_bird_count!, selected_birds: flock_detail.item_count, isActive: true);
+              financeList.add(financeFlockItem);
+            }
 
-    for(int i=0;i<_subItemList.length;i++){
-      _saleItemList.add(_subItemList.elementAt(i).name!);
+        }
+        else
+        {
+            is_specific_flock = true;
+        }
+
+      }else{
+        is_bird_sale = false;
+      }
+
+    } else{
+      _mysubItemList = await DatabaseHelper.getSubCategoryList(1);
+      _mysaleItemList = [];
+      _mysaleItemList.add("-Choose Option-".tr());
+      for(int i=0;i<_mysubItemList.length;i++){
+
+        if(_mysubItemList.elementAt(i).name! != "Egg Sale")
+          _mysaleItemList.add(_mysubItemList.elementAt(i).name!.tr());
+
+      }
+
+      _saleItemList = [];
+      _saleItemList.add("-Choose Purpose-".tr());
+      _saleItemList.add("Flock Sale".tr());
+      _saleItemList.add("Egg Sale".tr());
+      _saleItemList.add("Other Income".tr());
+
+      _saleselectedValue = _saleItemList[0];
+      is_bird_sale = false;
+
+      print(_saleItemList);
     }
-
-    if(!isEdit)
-    _saleselectedValue = _saleItemList[0];
-
-    print(_saleItemList);
 
 
     setState(() {
@@ -173,6 +277,62 @@ class _NewIncome extends State<NewIncome>
     });
 
   }
+
+  bool is_bird_sale = false, is_specific_flock = false,
+      isOther = false, choose_option = false,
+      income_option_invalid = true, purpose_option_invalid = true;
+
+  void checkSelectedOption(){
+
+    for(int i=0;i<_saleItemList.length;i++){
+      if(_saleselectedValue == _saleItemList[i]){
+        if(i == 0){
+          choose_option = false;
+          is_bird_sale = false;
+          purpose_option_invalid = true;
+        }
+        else if(i == 1){
+          choose_option = false;
+          is_bird_sale = true;
+         // _purposeselectedValue = Utils.selected_flock!.f_name;
+          purpose_option_invalid = false;
+          if(getFlockID() == -1)
+            showBottomDialog();
+
+        }else if(i == _saleItemList.length-1){
+          choose_option = true;
+          is_bird_sale = false;
+          purpose_option_invalid = false;
+        }else{
+          choose_option = false;
+          is_bird_sale = false;
+          purpose_option_invalid = false;
+        }
+      }
+    }
+    setState(() {
+
+    });
+
+  }
+
+  void checkIncomeOption(){
+
+    for(int i=0;i<_mysaleItemList.length;i++){
+      if(_mysaleselectedValue == _mysaleItemList[i]){
+        if(i == 0){
+          income_option_invalid = true;
+        }else{
+          income_option_invalid = false;
+        }
+      }
+    }
+    setState(() {
+
+    });
+
+  }
+
 
   int activeStep = 0;
 
@@ -338,7 +498,6 @@ class _NewIncome extends State<NewIncome>
                             Column(
                               children: [
                                 Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('PURPOSE1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-
                                 Container(
                                   width: widthScreen,
                                   height: 70,
@@ -350,7 +509,7 @@ class _NewIncome extends State<NewIncome>
                                     borderRadius: const BorderRadius.all(
                                         Radius.circular(20.0)),
                                     border: Border.all(
-                                      color:  Colors.grey,
+                                      color:  purpose_option_invalid? Colors.red:Colors.grey,
                                       width: 1.0,
                                     ),
                                   ),
@@ -358,8 +517,60 @@ class _NewIncome extends State<NewIncome>
                                 ),
                               ],
                             ),
+                          (is_bird_sale && is_specific_flock)? Container(alignment: Alignment.center,child: Text('Auto_reduction'.tr(), style: TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.w200),)):SizedBox(width: 1,),
 
-                            SizedBox(height: 10,width: widthScreen),
+                          choose_option ? Column(
+                            children: [
+                              SizedBox(height: 10,width: widthScreen),
+                              Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Income Categories'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                              Row(
+                                children: [Expanded(
+                                  child: Container(
+                                    height: 70,
+                                    alignment: Alignment.centerRight,
+                                    padding: EdgeInsets.all(10),
+                                    margin: EdgeInsets.only(left: 20, right: 10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withAlpha(70),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(20.0)),
+                                      border: Border.all(
+                                        color: income_option_invalid? Colors.red:Colors.grey,
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                    child: getMySaleOptionsList(),
+                                  ),
+                                ),InkWell(
+                                  onTap: (){
+                                    addNewIncomOption();
+                                  },
+                                  child: Container(
+                                    width: 70,
+                                    height: 70,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue,
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(20.0)),
+
+                                    ),
+                                    margin: EdgeInsets.only(right: 20),
+                                    child: Text(
+                                      "+",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),],
+                              )
+                            ],
+                          ):SizedBox(width: 1,),
+
+                          SizedBox(height: 10,width: widthScreen),
                             Container(
 
                               child: Row(
@@ -387,6 +598,12 @@ class _NewIncome extends State<NewIncome>
                                               child: TextFormField(
                                                 maxLines: null,
                                                 expands: true,
+                                                readOnly: (!is_specific_flock && is_bird_sale),
+                                                onTap: () {
+                                                  if(!is_specific_flock && is_bird_sale){
+                                                    showBottomDialog();
+                                                  }
+                                                },
                                                 controller: howmanyController,
                                                 keyboardType: TextInputType.number,
                                                 inputFormatters: [
@@ -673,20 +890,19 @@ class _NewIncome extends State<NewIncome>
 
                               activeStep++;
                               if(activeStep==1){
-                                if(howmanyController.text.trim().length>0
-                                    && amountController.text.trim().length>0)
+                                if(invalidInput())
                                 {
-                                  setState(() {
-
-                                  });
-                                }else{
                                   activeStep--;
                                   Utils.showToast("PROVIDE_ALL".tr());
+                                }else{
+                                 setState(() {
+
+                                 });
                                 }
                               }
 
                               if(activeStep==2){
-                                if(soldtoController.text.trim().length>0)
+                                if(!invalidInput() && soldtoController.text.trim().length>0)
                                 {
                                   setState(() {
 
@@ -698,12 +914,13 @@ class _NewIncome extends State<NewIncome>
                               }
 
                               if(activeStep==3){
+
                                 if(isEdit){
                                   await DatabaseHelper.instance.database;
                                   TransactionItem transaction_item = TransactionItem(
                                       f_id: getFlockID(),
                                       date: date,
-                                      sale_item: _saleselectedValue,
+                                      sale_item: choose_option?_mysaleselectedValue : _saleselectedValue,
                                       expense_item: "",
                                       type: "Income",
                                       amount: amountController.text,
@@ -715,12 +932,14 @@ class _NewIncome extends State<NewIncome>
                                       how_many: howmanyController.text,
                                       extra_cost: "",
                                       extra_cost_details: "",
-                                      f_name: _purposeselectedValue);
+                                      f_name: _purposeselectedValue, flock_update_id: '-1');
 
                                   transaction_item.id = widget.transactionItem!.id;
 
                                   int? id = await DatabaseHelper
                                       .updateTransaction(transaction_item);
+
+                                  reduceBirds(widget.transactionItem!.id!);
                                   Utils.showToast("SUCCESSFUL".tr());
                                   Navigator.pop(context);
                                 }else {
@@ -729,7 +948,7 @@ class _NewIncome extends State<NewIncome>
                                   TransactionItem transaction_item = TransactionItem(
                                       f_id: getFlockID(),
                                       date: date,
-                                      sale_item: _saleselectedValue,
+                                      sale_item: choose_option?_mysaleselectedValue : _saleselectedValue,
                                       expense_item: "",
                                       type: "Income",
                                       amount: amountController.text,
@@ -741,9 +960,10 @@ class _NewIncome extends State<NewIncome>
                                       how_many: howmanyController.text,
                                       extra_cost: "",
                                       extra_cost_details: "",
-                                      f_name: _purposeselectedValue);
+                                      f_name: _purposeselectedValue, flock_update_id: '-1');
                                   int? id = await DatabaseHelper
                                       .insertNewTransaction(transaction_item);
+                                  reduceBirds(id!);
                                   Utils.showToast("SUCCESSFUL".tr());
                                   Navigator.pop(context);
                                 }
@@ -786,6 +1006,248 @@ class _NewIncome extends State<NewIncome>
     );
   }
 
+  int getActiveBirds(int f_id) {
+    int active_birds = 0;
+    for(int i=0;i<flocks.length;i++){
+      if(f_id == flocks.elementAt(i).f_id){
+        active_birds = flocks.elementAt(i).active_bird_count!;
+        break;
+      }
+    }
+
+    return active_birds;
+  }
+
+  Future<void> reduceBirds(int transactionn_id) async {
+    print("Reduce Birds Function");
+    print("TransactionID $transactionn_id");
+
+    if(is_specific_flock && is_bird_sale && !isEdit){
+      print("SPECIFIC FLOCK+BIRDSALE+NEW");
+      int active_birds = getActiveBirds(getFlockID());
+      if (int.parse(howmanyController.text) <
+          active_birds) {
+        active_birds = active_birds -
+            int.parse(
+                howmanyController.text);
+        print(active_birds);
+
+        DatabaseHelper.updateFlockBirds(
+            active_birds, getFlockID());
+
+        int? flock_detail_id = await DatabaseHelper
+            .insertFlockDetail(Flock_Detail(
+            f_id: getFlockID(),
+            item_type: 'Reduction',
+            item_count: int.parse(
+                howmanyController.text),
+            acqusition_type: "",
+            acqusition_date: date,
+            reason: "Bird Sale".tr(),
+            short_note: notesController.text,
+            f_name: _purposeselectedValue,
+            transaction_id: transactionn_id.toString()
+
+        ));
+
+        await DatabaseHelper.updateLinkedTransaction(transactionn_id.toString(), flock_detail_id.toString());
+
+      }
+    }else if(is_specific_flock && is_bird_sale && isEdit){
+      try {
+        print("SPECIFIC FLOCK+BIRDSALE+EDIT");
+
+        int f_detail_id = int.parse(widget.transactionItem!.flock_update_id);
+        if (f_detail_id != -1) {
+          Flock_Detail flock_detail = await DatabaseHelper.getSingleFlockDetails(f_detail_id);
+          if(flock_detail!= null){
+            int first_reduction = flock_detail.item_count;
+            int second_reduction = int.parse(howmanyController.text);
+            if(first_reduction > second_reduction){
+              int diff = first_reduction - second_reduction;
+              int current_active = getActiveBirds(getFlockID());
+              current_active = current_active + diff;
+              await DatabaseHelper.updateFlockBirds(current_active, getFlockID());
+              Flock_Detail flock_detail_1 = Flock_Detail(f_id: getFlockID(), f_name: _purposeselectedValue, item_type: flock_detail.item_type, item_count: second_reduction, acqusition_type: flock_detail.acqusition_type, acqusition_date: flock_detail.acqusition_date, reason: flock_detail.reason, short_note: notesController.text, transaction_id: transactionn_id.toString());
+              flock_detail_1.f_detail_id = f_detail_id;
+              await DatabaseHelper.updateFlock(flock_detail_1);
+
+
+            }else{
+              int diff = second_reduction - first_reduction;
+              int current_active = getActiveBirds(getFlockID());
+              current_active = current_active - diff;
+              await DatabaseHelper.updateFlockBirds(current_active, getFlockID());
+              Flock_Detail flock_detail_1 = Flock_Detail(f_id: getFlockID(), f_name: _purposeselectedValue, item_type: flock_detail.item_type, item_count: second_reduction, acqusition_type: flock_detail.acqusition_type, acqusition_date: flock_detail.acqusition_date, reason: flock_detail.reason, short_note:  notesController.text, transaction_id: transactionn_id.toString());
+              flock_detail_1.f_detail_id = f_detail_id;
+              await DatabaseHelper.updateFlock(flock_detail_1);
+
+
+            }
+
+          }
+
+          await DatabaseHelper.updateLinkedTransaction(transactionn_id.toString(), f_detail_id.toString());
+
+        }
+      }catch(ex){
+        print(ex);
+      }
+    }else if(!is_specific_flock && is_bird_sale && !isEdit){
+      print("FARMWIDE+BIRDSALE+NEW");
+
+      for(int i = 0;i<financeList.length;i++){
+        if(financeList.elementAt(i).isActive) {
+          await reduceBirdsFarmWide(i, transactionn_id);
+        }
+      }
+      await DatabaseHelper.updateLinkedTransaction(transactionn_id.toString(), farm_wide_f_detail_id);
+
+    }else if(!is_specific_flock && is_bird_sale && isEdit){
+      print("FARMWIDE+BIRDSALE+EDIT");
+      for(int i = 0;i<financeList.length;i++){
+        await reduceBirdsFarmWideEdit(i);
+      }
+      await DatabaseHelper.updateLinkedTransaction(transactionn_id.toString(), farm_wide_f_detail_id);
+
+    }
+
+  }
+
+  String farm_wide_f_detail_id = "";
+  Future<int> reduceBirdsFarmWide(int index, int transactionn_id) async{
+
+    try {
+      print("reduceBirdsFarmWide $index $transactionn_id");
+      FinanceFlockItem financeFlockItem = financeList.elementAt(index);
+
+      int active_birds = getActiveBirds(financeFlockItem.id!);
+      if (financeFlockItem.selected_birds <
+          active_birds) {
+        active_birds = active_birds - financeFlockItem.selected_birds;
+
+        print(active_birds);
+        DatabaseHelper.updateFlockBirds(active_birds, financeFlockItem.id!);
+        print("reduceBirdsFarmWide BIRDS UPDATED $active_birds ${financeFlockItem.name}");
+
+        int? flock_detail_id = await DatabaseHelper
+            .insertFlockDetail(Flock_Detail(
+            f_id: financeFlockItem.id!,
+            item_type: 'Reduction',
+            item_count: financeFlockItem.selected_birds,
+            acqusition_type: "",
+            acqusition_date: date,
+            reason: "Bird Sale".tr(),
+            short_note: notesController.text,
+            f_name: financeFlockItem.name,
+            transaction_id: transactionn_id.toString()));
+
+        if (index == 0)
+          farm_wide_f_detail_id = flock_detail_id.toString();
+        else
+          farm_wide_f_detail_id =
+              farm_wide_f_detail_id + "," + flock_detail_id.toString();
+
+        print("ID $farm_wide_f_detail_id");
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+
+    return 0;
+  }
+  Future<int> reduceBirdsFarmWideEdit(int index) async{
+    FinanceFlockItem financeFlockItem = financeList.elementAt(index);
+
+    int f_detail_id = int.parse(widget.transactionItem!.flock_update_id.split(",")[index]);
+    Flock_Detail flock_detail = await DatabaseHelper.getSingleFlockDetails(f_detail_id);
+    Flock flock = await DatabaseHelper.getSingleFlock(financeFlockItem.id!);
+
+    int first_reduction = flock_detail.item_count;
+    int active_birds = flock.active_bird_count!;
+    if (financeFlockItem.selected_birds < first_reduction) {
+      int diff = first_reduction - financeFlockItem.selected_birds;
+
+      active_birds = active_birds + diff;
+      print(active_birds);
+
+      DatabaseHelper.updateFlockBirds(
+          active_birds, financeFlockItem.id!);
+
+
+    }else{
+      int diff =  financeFlockItem.selected_birds - first_reduction;
+
+      active_birds = active_birds - diff;
+      print(active_birds);
+
+      DatabaseHelper.updateFlockBirds(
+          active_birds, financeFlockItem.id!);
+    }
+
+
+    Flock_Detail object = new Flock_Detail(
+        f_id: financeFlockItem.id!,
+        item_type: 'Reduction',
+        item_count: financeFlockItem.selected_birds,
+        acqusition_type: "",
+        acqusition_date: date,
+        reason: "Bird Sale".tr(),
+        short_note: notesController.text,
+        f_name: financeFlockItem.name,
+        transaction_id: widget.transactionItem!.id.toString());
+    object.f_detail_id = f_detail_id;
+
+    await DatabaseHelper.updateFlock(object);
+
+
+    if (index == 0)
+      farm_wide_f_detail_id = f_detail_id.toString();
+    else
+      farm_wide_f_detail_id =
+          farm_wide_f_detail_id + "," + f_detail_id.toString();
+
+    print("ID $farm_wide_f_detail_id");
+
+    return 0;
+  }
+
+  bool invalidInput() {
+
+    bool invalid = false;
+    if(howmanyController.text.isEmpty){
+      invalid = true;
+    }else if(num.parse(howmanyController.text) == 0){
+      invalid = true;
+    }
+
+    if(amountController.text.isEmpty){
+      invalid = true;
+    }
+    else if(num.parse(amountController.text) == 0){
+      invalid = true;
+    }
+
+    if(num.parse(howmanyController.text) >= getActiveBirds(getFlockID()) && is_specific_flock){
+      invalid = true;
+      int count = getActiveBirds(getFlockID()) - 1;
+      Utils.showToast("You cannot reduce more than".tr() +" "+ count.toString() + " " + "Birds".tr());
+    }
+
+    if(purpose_option_invalid){
+      invalid = true;
+    }
+
+    if(choose_option){
+      if(income_option_invalid){
+        invalid = true;
+      }
+    }
+
+    return invalid;
+  }
+
   Widget getDropDownList() {
     return Container(
       width: widthScreen,
@@ -800,9 +1262,20 @@ class _NewIncome extends State<NewIncome>
             _purposeselectedValue = newValue!;
             int f_id = getFlockID();
             if (f_id == -1){
-              howmanyController.text = total_birds.toString();
+              if(!isEdit) {
+                howmanyController.text = total_birds.toString();
+                // _saleselectedValue = _saleItemList[0];
+                is_specific_flock = false;
+                // purpose_option_invalid = true;
+                if (is_bird_sale)
+                  showBottomDialog();
+              }
+
             }else {
-              howmanyController.text = getActiveBirds().toString();
+              if(!isEdit) {
+                howmanyController.text = getActiveBirdsbyName().toString();
+                is_specific_flock = true;
+              }
             }
           });
         },
@@ -824,6 +1297,36 @@ class _NewIncome extends State<NewIncome>
     );
   }
 
+  showErrorMessage(BuildContext context) {
+
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: Text("Ok".tr()),
+      onPressed:  () {
+        Navigator.pop(context);
+      },
+    );
+
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Unsupported Operation".tr()),
+      content: Text("Unsupported Operation Message".tr()),
+      actions: [
+        cancelButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+
   Widget getSaleTypeList() {
     return Container(
       width: widthScreen,
@@ -836,6 +1339,8 @@ class _NewIncome extends State<NewIncome>
         onChanged: (String? newValue) {
           setState(() {
             _saleselectedValue = newValue!;
+            if(!isEdit)
+              checkSelectedOption();
 
             print("Selected Sale Item $_saleselectedValue");
 
@@ -859,6 +1364,42 @@ class _NewIncome extends State<NewIncome>
     );
   }
 
+  Widget getMySaleOptionsList() {
+    return Container(
+      width: widthScreen,
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration.collapsed(hintText: ''),
+        isDense: true,
+        value: _mysaleselectedValue,
+        elevation: 16,
+        isExpanded: true,
+        onChanged: (String? newValue) {
+          setState(() {
+            _mysaleselectedValue = newValue!;
+            checkIncomeOption();
+            print("Selected Sale Item $_mysaleselectedValue");
+
+          });
+        },
+        items: _mysaleItemList.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(
+              value.tr(),
+              textAlign: TextAlign.right,
+              style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+
   Widget getPaymentMethodList() {
     return Container(
       width: widthScreen,
@@ -871,6 +1412,7 @@ class _NewIncome extends State<NewIncome>
         onChanged: (String? newValue) {
           setState(() {
             payment_method = newValue!;
+            print(payment_method);
 
           });
         },
@@ -928,7 +1470,7 @@ class _NewIncome extends State<NewIncome>
   }
 
 
-  void pickDate() async{
+  void pickDate() async {
 
      DateTime? pickedDate = await showDatePicker(
         context: context,
@@ -973,7 +1515,7 @@ class _NewIncome extends State<NewIncome>
       valid = false;
       print("Add amount");
     }
-    
+
     if (_saleselectedValue.toLowerCase().contains("Sale Item".tr())){
       valid = false;
       print("No sale item slected");
@@ -1008,7 +1550,7 @@ class _NewIncome extends State<NewIncome>
     return selected_id;
   }
 
-  int getActiveBirds() {
+  int getActiveBirdsbyName() {
 
     int selected_id = -1;
     for(int i=0;i<flocks.length;i++){
@@ -1035,5 +1577,457 @@ class _NewIncome extends State<NewIncome>
 
     return selected_id;
   }
+
+  List<FinanceFlockItem> financeList = [];
+
+
+  /*void showAllFlocksForReduction(){
+
+    financeList = [];
+    for(int i=1;i<flocks.length;i++){
+      FinanceFlockItem financeFlockItem = new FinanceFlockItem(id: flocks.elementAt(i).f_id, name: flocks.elementAt(i).f_name, active_birds: flocks.elementAt(i).active_bird_count!, selected_birds: 0);
+      financeList.add(financeFlockItem);
+      print("FinanceList ${financeList.length}");
+    }
+
+    showMaterialModalBottomSheet(
+      context: context,
+      builder: (context) => SingleChildScrollView(
+        controller: ModalScrollController.of(context),
+        child: Container(
+          padding: EdgeInsets.only(left: 10,right: 10,top: 10,bottom: 20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text("Reduce birds from specific flocks".tr(), style: TextStyle(fontWeight: FontWeight.bold,fontSize: 14,color: Utils.getThemeColorBlue()),),
+              Text('Auto_reduction'.tr(), style: TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.w200),),
+              Align(
+                alignment: Alignment.topRight,
+                child: Container(
+                  width: 80,
+                  height: 40,
+                  margin: EdgeInsets.all(10),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(3)),
+                    color: Utils.getThemeColorBlue(),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 2,
+                        offset: Offset(0, 1), // changes position of shadow
+                      ),
+                    ],
+                  ),
+                  child:  Text('Done'.tr(), style: TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.bold),),),
+              ),
+              Container(
+                height: flocks.length * 60,
+                width: widthScreen,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: financeList.length,
+                  itemBuilder: (BuildContext context, int index)
+                  {
+                   return Container(
+                      height: 50,
+                       margin: EdgeInsets.only(left: 10,right: 10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(3)),
+                        color: Colors.white12,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2),
+                            spreadRadius: 2,
+                            blurRadius: 2,
+                            offset: Offset(0, 1), // changes position of shadow
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(child: Container(margin: EdgeInsets.only(left: 20,),child: Text(financeList.elementAt(index).name,
+                            style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Utils.getThemeColorBlue()),))),
+                          Expanded(child: Container(child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              InkWell(
+                                  onTap: (){
+                                    int count = financeList.elementAt(index).selected_birds;
+
+                                    print("Count $count");
+                                    if(count > 0)
+                                    {
+                                      setState(() {
+                                        count--;
+                                        financeList.elementAt(index).selected_birds = count;
+                                      });
+                                    }
+
+                                  },
+                                  child: Icon(Icons.remove_circle,size: 30,color: Utils.getThemeColorBlue(),)),
+                              Container(
+                                  margin: EdgeInsets.only(left: 10, right: 10),
+                                  child: Text("${financeList.elementAt(index).selected_birds}", style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.black),)),
+                              InkWell(
+                                  onTap: (){
+
+                                    int count = financeList.elementAt(index).selected_birds;
+                                    print("Count $count");
+
+                                    if(count < financeList.elementAt(index).active_birds)
+                                    {
+                                      count++;
+                                      financeList.elementAt(index).selected_birds = count;
+                                    }
+
+                                    setState(() {
+                                    });
+
+                                  },
+                                  child: Icon(Icons.add_circle,size: 30,color: Utils.getThemeColorBlue(),))
+
+                            ],
+                          ),))
+                        ],
+                      ),
+                    );
+
+                  },
+                ),
+              ),
+            ],
+          )
+        ),
+      ),
+    );
+  }
+*/
+
+  int birds_total = 0;
+  void updateTotalBirds(){
+    birds_total = 0;
+    for(int i=0;i<financeList.length;i++){
+      if(financeList.elementAt(i).isActive)
+      birds_total = birds_total + financeList.elementAt(i).selected_birds;
+    }
+    if(is_bird_sale && !is_specific_flock)
+       howmanyController.text = birds_total.toString();
+
+    setState(() {
+
+    });
+
+  }
+
+  void showBottomDialog(){
+    updateTotalBirds();
+    if(financeList.isEmpty) {
+      for (int i = 1; i < flocks.length; i++) {
+        FinanceFlockItem financeFlockItem = FinanceFlockItem(
+          id: flocks
+              .elementAt(i)
+              .f_id,
+          name: flocks
+              .elementAt(i)
+              .f_name,
+          active_birds: flocks
+              .elementAt(i)
+              .active_bird_count!,
+          selected_birds: 1, isActive: false,
+        );
+        financeList.add(financeFlockItem);
+        print("FinanceList ${financeList.length}");
+      }
+    }
+
+    showAllFlocksForReduction();
+
+  }
+
+  void showAllFlocksForReduction() {
+
+    showMaterialModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return SingleChildScrollView(
+              controller: ModalScrollController.of(context),
+              child: Container(
+                padding: EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Reduce birds from specific flocks".tr(),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Utils.getThemeColorBlue(),
+                      ),
+                    ),
+                    Text(
+                      'Auto_reduction'.tr(),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.red,
+                        fontWeight: FontWeight.w200,
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: InkWell(
+                        onTap: (){
+                          updateTotalBirds();
+                          Navigator.pop(context);
+                        },
+                        child: Container(
+                          width: 80,
+                          height: 40,
+                          margin: EdgeInsets.all(10),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(3)),
+                            color: Utils.getThemeColorBlue(),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 2,
+                                offset: Offset(0, 1), // changes position of shadow
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            'Done'.tr(),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      height: financeList.length * 100,
+                      width: widthScreen,
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: financeList.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Container(
+                            height: 50,
+                            margin: EdgeInsets.only(left: 5, right: 5, top:10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.all(Radius.circular(3)),
+                              color: Colors.white12,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.2),
+                                  spreadRadius: 2,
+                                  blurRadius: 2,
+                                  offset: Offset(0, 1), // changes position of shadow
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                               !isEdit ? Align(
+                                  alignment: Alignment.center,
+                                  child: Container(
+                                    width: 40,
+                                    height: 40,
+                                    alignment: Alignment.centerLeft,
+                                    child: CheckboxListTile(
+                                      title: Text(""),
+                                      activeColor: Utils.getThemeColorBlue(),
+                                       value: financeList.elementAt(index).isActive,
+                                      onChanged: (newValue) {
+                                        setState(() {
+                                          if(financeList.elementAt(index).isActive)
+                                            financeList.elementAt(index).isActive = false;
+                                          else
+                                            financeList.elementAt(index).isActive = true;
+
+                                          updateTotalBirds();
+                                        });
+                                      },
+                                      controlAffinity: ListTileControlAffinity.trailing,  //  <-- leading Checkbox
+                                    ),
+                                  ),
+                                ) : SizedBox(width: 1,),
+                                Expanded(
+                                  child: Container(
+                                    margin: EdgeInsets.only(left: 20),
+                                    child: Text(
+                                      financeList.elementAt(index).name,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        color: Utils.getThemeColorBlue(),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Container(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        InkWell(
+                                          onTap: () {
+                                            if(financeList.elementAt(index).isActive) {
+                                              setState(() {
+                                                int count = financeList
+                                                    .elementAt(index)
+                                                    .selected_birds;
+                                                if (count > 1) {
+                                                  financeList
+                                                      .elementAt(index)
+                                                      .selected_birds = --count;
+                                                }
+
+                                                updateTotalBirds();
+                                              });
+                                            }
+                                          },
+                                          child: Icon(
+                                            Icons.remove_circle,
+                                            size: 30,
+                                            color: financeList.elementAt(index).isActive? Utils.getThemeColorBlue() : Colors.grey,
+                                          ),
+                                        ),
+                                        Container(
+                                          margin: EdgeInsets.only(left: 10, right: 10),
+                                          child: Text(
+                                            "${financeList.elementAt(index).selected_birds}",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                              color: financeList.elementAt(index).isActive? Colors.black : Colors.grey,
+                                            ),
+                                          ),
+                                        ),
+                                        InkWell(
+                                          onTap: () {
+                                            if(financeList.elementAt(index).isActive) {
+                                              setState(() {
+                                                int count = financeList
+                                                    .elementAt(index)
+                                                    .selected_birds;
+                                                if (count < financeList
+                                                    .elementAt(index)
+                                                    .active_birds) {
+                                                  financeList
+                                                      .elementAt(index)
+                                                      .selected_birds = ++count;
+                                                }
+
+                                                updateTotalBirds();
+                                              });
+                                            }
+                                          },
+                                          child: Icon(
+                                            Icons.add_circle,
+                                            size: 30,
+                                            color: financeList.elementAt(index).isActive? Utils.getThemeColorBlue() : Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void addNewIncomOption() {
+
+    final nameController = TextEditingController();
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            scrollable: true,
+            title: Text("New Income".tr(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),),
+            content: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Form(
+                child: Column(
+                  children: <Widget>[
+                    TextFormField(
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        labelText: 'Enter Name'.tr(),
+                      ),
+                    ),
+
+                    InkWell(
+                      onTap: () async {
+                        print(nameController.text);
+
+                        if(!nameController.text.isEmpty){
+                          await DatabaseHelper.insertNewSubItem(SubItem(c_id: 1, name: nameController.text));
+                          updateIncomeCategories();
+                          Navigator.pop(context);
+                        }
+
+                      },
+                      child: Container(
+                        width: widthScreen,
+                        height: 50,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Utils.getThemeColorBlue(),
+                          borderRadius: const BorderRadius.all(
+                              Radius.circular(50.0)),
+                          border: Border.all(
+                            color:  Utils.getThemeColorBlue(),
+                            width: 2.0,
+                          ),
+                        ),
+                        margin: EdgeInsets.all( 20),
+                        child: Text(
+                          "CONFIRM".tr(),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+
+                  ],
+                ),
+              ),
+            ),
+          );
+        });
+  }
+
+
 
 }

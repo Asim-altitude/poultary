@@ -10,6 +10,7 @@ import 'package:poultary/add_eggs.dart';
 import 'package:poultary/add_expense.dart';
 import 'package:poultary/add_feeding.dart';
 import 'package:poultary/add_income.dart';
+import 'package:poultary/add_reduce_flock.dart';
 import 'package:poultary/inventory.dart';
 import 'package:poultary/model/feed_item.dart';
 import 'package:poultary/model/transaction_item.dart';
@@ -17,6 +18,7 @@ import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
+import 'package:poultary/view_transaction.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 import 'add_flocks.dart';
@@ -55,14 +57,43 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
       _purposeList.add(flocks.elementAt(i).f_name);
     }
 
+    addNewColumn();
+
     _purposeselectedValue = Utils.selected_flock!.f_name;
     f_id = getFlockID();
     Utils.SELECTED_FLOCK = _purposeselectedValue;
     Utils.SELECTED_FLOCK_ID = f_id;
     _other_filter = (await SessionManager.getOtherFilter())!;
     date_filter_name = filterList.elementAt(_other_filter);
+
     getData(date_filter_name);
 
+  }
+
+  void addNewColumn() async{
+    try{
+      int c = await DatabaseHelper.addColumnInFlockDetail();
+      print("Column Info $c");
+    }catch(ex){
+      print(ex);
+    }
+
+    try{
+      int c = await DatabaseHelper.addColumnInFTransactions();
+      print("Column Info $c");
+    }catch(ex){
+      print(ex);
+    }
+
+    try{
+      int? c = await DatabaseHelper.updateLinkedFlocketailNullValue();
+      print("Flock Details Update Info $c");
+
+      int? t = await DatabaseHelper.updateLinkedTransactionNullValue();
+      print("Transactions Update Info $t");
+    }catch(ex){
+      print(ex);
+    }
   }
 
   @override
@@ -405,27 +436,45 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                           child: Column(
                             children: [
                               Align(
-                                  alignment: Alignment.topRight,
-                                  child:
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                       GestureDetector(
-                                         onTapDown: (TapDownDetails details) {
-                                           selected_id = transactionList.elementAt(index).id;
-                                           selected_index = index;
-                                           showMemberMenu(details.globalPosition);
-                                         },
-                                         child: Container(
-                                          width: 30,
-                                          height: 30,
-                                          padding: EdgeInsets.all(5),
-                                          child: Image.asset('assets/options.png'),
+                                alignment: Alignment.topRight,
+                                child:
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    GestureDetector(
+                                      onTapDown: (TapDownDetails details) {
+                                        selected_id = transactionList.elementAt(index).id;
+                                        selected_index = index;
+                                        showMemberMenu(details.globalPosition);
+                                      },
+                                      child: Container(
+                                        width: 30,
+                                        height: 30,
+                                        padding: EdgeInsets.all(5),
+                                        child: Image.asset('assets/options.png'),
                                       ),
-                                       ),
+                                    ),
 
-                                    ],
-                                  ),),
+                                  ],
+                                ),),
+                              /*(transactionList.elementAt(index).flock_update_id.isEmpty || transactionList.elementAt(index).flock_update_id != "-1")? Align(
+                                alignment: Alignment.topRight,
+                                child:
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    GestureDetector(
+                                      onTapDown: (TapDownDetails details) {
+                                         showInfoMessage(context);
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.all(5),
+                                        child: Text('Auto Generated'.tr(), style: TextStyle(fontWeight: FontWeight.w300, color: Colors.red),),
+                                      ),
+                                    ),
+
+                                  ],
+                                ),) : SizedBox(width: 1,),*/
                               Align(
                                 alignment: Alignment.centerLeft,
                               child:Container(child: Text( textAlign:TextAlign.left,style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()), transactionList.elementAt(index).type == 'Income'? transactionList.elementAt(index).sale_item.tr() : transactionList.elementAt(index).expense_item.tr()),),),
@@ -990,7 +1039,8 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
         PopupMenuItem(
           value: 1,
           child: Text(
-            "DELETE_RECORD".tr(),
+            transactionList.elementAt(selected_index!).flock_update_id!= "-1" ? "VIEW_RECORD".tr() : "DELETE_RECORD".tr(),
+
             style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
@@ -1003,6 +1053,8 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
     ).then((value) async {
       if (value != null) {
         if(value == 2) {
+
+
           if(transactionList.elementAt(selected_index!).type == "Income") {
             var txt = await Navigator.push(
               context,
@@ -1022,12 +1074,68 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
           }
         }
         else if(value == 1){
-          showAlertDialog(context);
+          if(transactionList.elementAt(selected_index!).flock_update_id!= "-1"){
+            print(selected_index);
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>  ViewCompleteTransaction(transaction_id: transactionList.elementAt(selected_index!).id.toString(), isTransaction: true,)),
+            );
+
+            getData(date_filter_name);
+          }else {
+            showAlertDialog(context);
+          }
         }else {
           print(value);
         }
       }
     });
+  }
+
+  showInfoMessage(BuildContext context) {
+
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: Text("CANCEL".tr()),
+      onPressed:  () {
+        Navigator.pop(context);
+      },
+    );
+    Widget continueButton = TextButton(
+      child: Text("Take Action".tr()),
+      onPressed:  () async {
+
+       // Utils.selected_flock = await DatabaseHelper.getSingleFlock(transactionList.elementAt(selected_index!).f_id!);
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>  AddReduceFlockScreen()),
+        );
+
+        getData(date_filter_name);
+        Navigator.pop(context);
+
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Auto Generated".tr()),
+      content: Text("AUTO_GENERATED_TRANS".tr()),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   showAlertDialog(BuildContext context) {

@@ -14,11 +14,13 @@ class Flock_Detail{
   String acqusition_date = "";
   String short_note = "";
   String reason = "";
+  String transaction_id = "";
 
   Flock_Detail(
       {
         required this.f_id, required this.f_name, required this.item_type,required this.item_count
-        ,required this.acqusition_type,required this.acqusition_date,required this.reason,required this.short_note
+        ,required this.acqusition_type,required this.acqusition_date,required this.reason,required this.short_note,
+        required this.transaction_id
       });
 
   Flock_Detail.fromJson(Map<String, dynamic> json) {
@@ -30,11 +32,10 @@ class Flock_Detail{
     acqusition_date = json['acqusition_date'].toString();
     short_note = json['short_note'].toString();
     reason = json['reason'].toString();
+    transaction_id = json['transaction_id'] ?? "-1";
     acqusition_type = json['acqusition_type'].toString();
 
-
   }
-
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
@@ -47,6 +48,7 @@ class Flock_Detail{
     data['acqusition_type'] = this.acqusition_type;
     data['short_note'] = this.short_note;
     data['item_count'] = this.item_count;
+    data['transaction_id'] = this.transaction_id;
 
     return data;
   }

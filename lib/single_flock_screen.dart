@@ -548,12 +548,15 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                             ),
                           ),
                         ),
-                        onTap: () {
-                          Navigator.push(
+                        onTap: () async{
+                         await Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => const TransactionsScreen()),
                           );
+
+                          Utils.selected_flock = await DatabaseHelper.findFlock(Utils.selected_flock!.f_id);
+
                         }),
                   ],
                 ),

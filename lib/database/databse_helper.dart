@@ -173,6 +173,20 @@ class DatabaseHelper  {
 
   }
 
+  static Future<dynamic> addColumnInFTransactions() async {
+    var count = await _database?.execute("ALTER TABLE Transactions ADD "
+        "COLUMN flock_update_id TEXT;");
+    // print(await _database?.query(TableName));
+    return count;
+  }
+
+  static Future<dynamic> addColumnInFlockDetail() async {
+     var count = await _database?.execute("ALTER TABLE Flock_Detail ADD "
+        "COLUMN transaction_id TEXT;");
+   // print(await _database?.query(TableName));
+    return count;
+  }
+
   static Future<List<CategoryItem>>  getCategoryItem() async {
     var result = await _database?.rawQuery("SELECT * FROM Category");
     List<CategoryItem> _categoryList = [];
@@ -292,15 +306,60 @@ class DatabaseHelper  {
 
   }
 
+  static Future<Flock_Detail> getSingleFlockDetails(int f_detail_id) async {
+    final db = await instance.database;
+
+    final map = await _database?.rawQuery(
+        "SELECT * FROM Flock_Detail WHERE f_detail_id = ?",[f_detail_id]
+    );
+
+    if (map!.isNotEmpty) {
+      return Flock_Detail.fromJson(map.first);
+    } else {
+      throw Exception("User: Flock Detail not found");
+    }
+  }
+
+  static Future<Flock> getSingleFlock(int f_id) async {
+    final db = await instance.database;
+
+    final map = await _database?.rawQuery(
+        "SELECT * FROM Flock WHERE f_id = ?",[f_id]
+    );
+
+    if (map!.isNotEmpty) {
+      return Flock.fromJson(map.first);
+    } else {
+      throw Exception("User: Flock not found");
+    }
+  }
+
+  static Future<int?> updateLinkedFlocketailNullValue() async {
+
+    return await _database?.rawUpdate(
+        "UPDATE Flock_Detail SET transaction_id = '-1' WHERE transaction_id = 'NULL';");
+  }
+
+  static Future<int?> updateLinkedTransactionNullValue() async {
+
+    return await _database?.rawUpdate(
+        "UPDATE Transactions SET flock_update_id = '-1' WHERE flock_update_id = 'NULL';");
+  }
+
+  static Future<int?> updateLinkedFlockDetail(String f_detail_id, String transaction_id,) async {
+
+    return await _database?.rawUpdate(
+        "UPDATE Flock_Detail SET transaction_id = '$transaction_id' WHERE f_detail_id = $f_detail_id;");
+  }
+
+  static Future<int?> updateLinkedTransaction(String id, String f_detail_id,) async {
+
+    return await _database?.rawUpdate(
+        "UPDATE Transactions SET flock_update_id = '$f_detail_id' WHERE id = $id;");
+  }
+
   static Future<int?> updateFlock(Flock_Detail? flock_detail) async {
 
-    // get a reference to the database
-    // because this is an expensive operation we use async and await
-
-    // row to update
-
-
-    // We'll update the first row just as an example
     int id = 1;
 
     // do the update and get the number of affected rows
@@ -1027,6 +1086,34 @@ class DatabaseHelper  {
 
   }
 
+  static Future<List<TransactionItem>> getSingleTransaction(String id) async{
+    var result = null;
+    result = await _database?.rawQuery(
+        "SELECT * FROM Transactions where id = '$id'");
+
+    print(result);
+    List<TransactionItem> _transactionList = [];
+    TransactionItem _transaction;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            _transaction = TransactionItem.fromJson(json);
+            _transactionList.add(_transaction);
+            print(_transactionList);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        _transaction = TransactionItem.fromJson(json);
+      }
+    }
+    return _transactionList;
+
+  }
+
   static Future<List<TransactionItem>>  getReportFilteredTransactions(int f_id,String type,String str_date,String end_date) async {
 
     var result = null;
@@ -1131,7 +1218,6 @@ class DatabaseHelper  {
             print(_transactionList);
           }
         }
-
         Map<String, dynamic> json = result[0];
         _transaction = TransactionItem.fromJson(json);
       }
@@ -1383,7 +1469,7 @@ class DatabaseHelper  {
 
     return result![0].toString();
 
-  }
+   }
 
   static Future<int> getFlockActiveBirds(int id) async {
 
@@ -1417,6 +1503,7 @@ class DatabaseHelper  {
     }
     return _birdList;
   }
+
   static Future<int>  getFlocksNamesCount(String name) async {
     int index = 0;
     var result = await _database?.rawQuery("SELECT * FROM Flock where active = 1 AND f_name = '${name}'");

@@ -1,6 +1,4 @@
-import 'dart:async';
 import 'dart:core';
-
 
 
 class TransactionItem{
@@ -20,6 +18,7 @@ class TransactionItem{
   String how_many = "";
   String extra_cost = "";
   String extra_cost_details = "";
+  String flock_update_id = "";
 
   TransactionItem(
       {
@@ -27,7 +26,7 @@ class TransactionItem{
         required this.expense_item, required this.type, required this.amount
      , required this.payment_method, required this.payment_status, required this.sold_purchased_from
         , required this.short_note, required this.how_many, required this.extra_cost,
-        required this.extra_cost_details
+        required this.extra_cost_details,required this.flock_update_id
       });
 
   TransactionItem.fromJson(Map<String, dynamic> json) {
@@ -43,8 +42,10 @@ class TransactionItem{
     short_note = json['short_note'];
     how_many = json['how_many'];
     extra_cost = json['extra_cost'];
+    flock_update_id = json['flock_update_id'] ?? "-1";
     extra_cost_details = json['extra_cost_details'].toString();
     payment_status = json['payment_status'].toString();
+    payment_method = json['payment_method'].toString();
   }
 
   Map<String, dynamic> toJson() {
@@ -60,9 +61,11 @@ class TransactionItem{
     data['sold_purchased_from'] = this.sold_purchased_from;
     data['short_note'] = this.short_note;
     data['how_many'] = this.how_many;
+    data['flock_update_id'] = this.flock_update_id;
     data['extra_cost'] = this.extra_cost;
     data['extra_cost_details'] = this.extra_cost_details;
     data['payment_status'] = this.payment_status;
+    data['payment_method'] = this.payment_method;
 
 
     return data;
