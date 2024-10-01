@@ -398,7 +398,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
               ),
 
               list.length > 0 ? Container(
-                height: heightScreen - 290,
+                height: heightScreen - 350,
                 width: widthScreen,
                 child: ListView.builder(
                     itemCount: list.length,

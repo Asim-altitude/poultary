@@ -349,6 +349,9 @@ class Utils {
       inititalize();
     }
 
+    Utils.isShowAdd = false;
+
+
   }
   static Future<void> inititalize() async {
     // CAS.setDebugMode(true);

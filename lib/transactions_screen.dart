@@ -408,7 +408,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
               
               transactionList.length > 0 ? Container(
                 margin: EdgeInsets.only(top: 0,bottom: 200),
-                height: heightScreen -300,
+                height: heightScreen -340,
                 width: widthScreen,
                 child: ListView.builder(
                     itemCount: transactionList.length,
