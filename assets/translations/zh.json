@@ -378,5 +378,16 @@
   "Some key changes made in this update": "本次更新中的一些关键更改",
   "Birds_Addition": "鸟类添加",
   "graph1": "现在，可以轻松记录鸟类的购买和销售，因为鸟类的添加/减少会自动链接到财务记录。",
-  "graph2": "同样，相反，如果您记录的收入或费用涉及单个鸡群的鸟类销售或购买，甚至涉及多个鸡群，或者说整个农场，那么您在记录收入或费用时有一个新的选择来处理该案件，并且"
+  "graph2": "同样，相反，如果您记录的收入或费用涉及单个鸡群的鸟类销售或购买，甚至涉及多个鸡群，或者说整个农场，那么您在记录收入或费用时有一个新的选择来处理该案件，并且",
+  "Products": "产品",
+  "Disclosure": "披露",
+  "Disclosure_Detail": "我们是 Amazon Services LLC 联营计划的参与者，该计划是一项联属广告计划，旨在为我们提供一种通过链接到 Amazon.com 和联营网站来赚取费用的方式。",
+  "Products not available.": "产品不可用。",
+  "Please try again later.": "请稍后重试。",
+  "View on Amazon": "在亚马逊上查看",
+  "NEXT": "下一个",
+  "REDUCTION": "减少",
+  "-Choose Purpose-": "-选择目的-",
+  "Reduce birds from specific flocks": "减少特定鸡群的鸟类",
+  "Done": "完毕"
 }

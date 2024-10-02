@@ -376,6 +376,17 @@
  "Some key changes made in this update": "Einige wichtige Änderungen, die in diesem Update vorgenommen wurden",
  "Birds_Addition": "Vögel-Zusatz",
  "graph1": "Jetzt ist es einfach, den Kauf und Verkauf von Vögeln aufzuzeichnen, da die Hinzufügung/Reduzierung von Vögeln automatisch mit den Finanzunterlagen verknüpft wird. ",
- "graph2": "Ähnlich verhält es sich umgekehrt: Wenn Sie Einnahmen oder Ausgaben erfassen, die den Verkauf oder Kauf von Vögeln für eine einzelne Herde oder sogar mehrere Herden oder, sagen wir, den gesamten Betrieb betreffen, erfassen, haben Sie eine neue Möglichkeit, den Fall zu bearbeiten, während Sie Einnahmen oder Ausgaben erfassen "
+ "graph2": "Ähnlich verhält es sich umgekehrt: Wenn Sie Einnahmen oder Ausgaben erfassen, die den Verkauf oder Kauf von Vögeln für eine einzelne Herde oder sogar mehrere Herden oder, sagen wir, den gesamten Betrieb betreffen, erfassen, haben Sie eine neue Möglichkeit, den Fall zu bearbeiten, während Sie Einnahmen oder Ausgaben erfassen ",
+ "Products": "Produkte",
+ "Disclosure": "Offenlegung",
+ "Disclosure_Detail": "Wir nehmen am Amazon Services LLC Associates-Programm teil, einem Affiliate-Werbeprogramm, das uns die Möglichkeit bietet, durch die Verlinkung zu Amazon.com und verbundenen Websites Gebühren zu verdienen.",
+ "Products not available.": "Produkte nicht verfügbar.",
+ "Please try again later.": "Bitte versuchen Sie es später noch einmal.",
+ "View on Amazon": "Auf Amazon ansehen",
+ "NEXT": "NÄCHSTE",
+ "REDUCTION": "REDUKTION",
+ "-Choose Purpose-": "-Wählen Sie den Zweck-",
+ "Reduce birds from specific flocks": "Reduzieren Sie Vögel aus bestimmten Herden",
+ "Done": "Erledigt"
 
 }

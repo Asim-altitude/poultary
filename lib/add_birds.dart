@@ -308,7 +308,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
 
                   Container(
                     alignment: Alignment.center,
-                    height: !is_transaction ? heightScreen-250 : heightScreen - 200,
+                    height: !is_transaction ? heightScreen-250 : heightScreen - 134,
 
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,

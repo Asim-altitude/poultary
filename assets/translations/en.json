@@ -386,6 +386,16 @@
   "Some key changes made in this update": "Some key changes made in this update",
   "Birds_Addition": "Birds Addition",
   "graph1": "Now it’s easy to record birds purchase and sale as birds addition/reduction is auto linked to financial records. So, you just need to add or remove birds from a specific flock and app will allow you to specify financial information on the same page rather than recording it separately in finance module.",
-  "graph2": "Similarly, On the other way around if you record an Income or Expense involving birds sale or purchase for a single flock or even involving multiple flocks or lets say farm wide then you have a new option to handle the case while recording an income or expense and it will auto generate a record for birds addition or reduction."
-
+  "graph2": "Similarly, On the other way around if you record an Income or Expense involving birds sale or purchase for a single flock or even involving multiple flocks or lets say farm wide then you have a new option to handle the case while recording an income or expense and it will auto generate a record for birds addition or reduction.",
+  "Products": "Products",
+  "Disclosure": "Disclosure",
+  "Disclosure_Detail": "We are a participant in the Amazon Services LLC Associates Program, an affiliate advertising program designed to provide a means for us to earn fees by linking to Amazon.com and affiliated sites.",
+  "Products not available.": "Products not available.",
+  "Please try again later.": "Please try again later.",
+  "View on Amazon": "View on Amazon",
+  "NEXT": "NEXT",
+  "REDUCTION": "REDUCTION",
+  "-Choose Purpose-": "-Choose Purpose-",
+  "Reduce birds from specific flocks": "Reduce birds from specific flocks",
+  "Done": "Done"
 }

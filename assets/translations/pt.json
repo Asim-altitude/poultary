@@ -375,5 +375,16 @@
  "Some key changes made in this update": "Algumas mudanças importantes feitas nesta atualização",
  "Birds_Addition": "Adição de pássaros",
  "graph1": "Agora é fácil registrar a compra e venda de aves, pois a adição/redução de aves é automaticamente vinculada aos registros financeiros. ",
- "graph2": "Da mesma forma, por outro lado, se você registrar uma receita ou despesa envolvendo a venda ou compra de aves para um único rebanho ou mesmo envolvendo vários rebanhos ou, digamos, em toda a fazenda, você terá uma nova opção para lidar com o caso enquanto registra uma receita ou despesa e "
+ "graph2": "Da mesma forma, por outro lado, se você registrar uma receita ou despesa envolvendo a venda ou compra de aves para um único rebanho ou mesmo envolvendo vários rebanhos ou, digamos, em toda a fazenda, você terá uma nova opção para lidar com o caso enquanto registra uma receita ou despesa e ",
+ "Products": "Produtos",
+ "Disclosure": "Divulgação",
+ "Disclosure_Detail": "Somos participantes do Programa de Associados da Amazon Services LLC, um programa de publicidade de afiliados projetado para fornecer um meio para ganharmos taxas vinculando-nos à Amazon.com e sites afiliados.",
+ "Products not available.": "Produtos não disponíveis.",
+ "Please try again later.": "Por favor, tente novamente mais tarde.",
+ "View on Amazon": "Ver na Amazon",
+ "NEXT": "PRÓXIMO",
+ "REDUCTION": "REDUÇÃO",
+ "-Choose Purpose-": "-Escolha o objetivo-",
+ "Reduce birds from specific flocks": "Reduzir aves de bandos específicos",
+ "Done": "Feito"
 }

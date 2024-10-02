@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:poultary/category_screen.dart';
 import 'package:poultary/dashboard.dart';
 import 'package:poultary/inventory.dart';
+import 'package:poultary/product_screen.dart';
 import 'package:poultary/settings_screen.dart';
 import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/transactions_screen.dart';
@@ -100,6 +101,9 @@ class _HomeScreen extends State<HomeScreen> {
     Center(
       child: AllEventsScreen(),
     ),
+    Center(
+      child: ProductScreen(),
+    ),
 
   ];
 
@@ -135,6 +139,8 @@ class _HomeScreen extends State<HomeScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: "REPORTS".tr()),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "SETTINGS".tr()),
           BottomNavigationBarItem(icon: Icon(Icons.notifications_active), label: "Reminders".tr()),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: "Products".tr()),
+
         ],
 
       ),),

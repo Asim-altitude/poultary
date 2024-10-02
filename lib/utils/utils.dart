@@ -18,6 +18,8 @@ import 'package:poultary/utils/session_manager.dart';
 import '../CAS_Ads.dart';
 import 'package:uuid/uuid.dart';
 import '../database/databse_helper.dart';
+import '../model/bird_item.dart';
+import '../model/bird_product.dart';
 import '../model/egg_item.dart';
 import '../model/egg_report_item.dart';
 import '../model/farm_item.dart';
@@ -104,6 +106,8 @@ class Utils {
   static BannerAd? _bannerAd ;
   static bool _isBannerAdReady = false;
   static InterstitialAd? _interstitialAd;
+  static List<BirdProduct> products = [];
+  static bool isShowProducts = false;
 
   // static MediationManager? manager;
   // static CASBannerView? view;
@@ -348,9 +352,6 @@ class Utils {
       Utils.isShowAdd = true;
       inititalize();
     }
-
-    Utils.isShowAdd = false;
-
 
   }
   static Future<void> inititalize() async {
