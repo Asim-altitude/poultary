@@ -375,5 +375,16 @@
  "Some key changes made in this update": "Bu güncellemede yapılan bazı önemli değişiklikler",
  "Birds_Addition": "Kuşların İlavesi",
  "graph1": "Kanatlıların eklenmesi/azaltılması mali kayıtlara otomatik olarak bağlandığından, artık kuş alım ve satımını kaydetmek kolaydır. ",
- "graph2": "Benzer şekilde, diğer taraftan, tek bir sürü için kanatlı satışını veya satın alımını içeren veya hatta birden fazla sürüyü kapsayan veya diyelim ki çiftlik çapında bir Gelir veya Gider kaydederseniz, o zaman bir gelir veya gideri kaydederken durumu ele almak için yeni bir seçeneğiniz olur ve "
+ "graph2": "Benzer şekilde, diğer taraftan, tek bir sürü için kanatlı satışını veya satın alımını içeren veya hatta birden fazla sürüyü kapsayan veya diyelim ki çiftlik çapında bir Gelir veya Gider kaydederseniz, o zaman bir gelir veya gideri kaydederken durumu ele almak için yeni bir seçeneğiniz olur ve ",
+ "Products": "Ürünler",
+ "Disclosure": "Açıklama",
+ "Disclosure_Detail": "Amazon.com'a ve bağlı sitelere bağlanarak ücret kazanmamızı sağlayacak bir araç sağlamak üzere tasarlanmış bir bağlı kuruluş reklam programı olan Amazon Services LLC Associates Programının bir katılımcısıyız.",
+ "Products not available.": "Ürünler mevcut değil.",
+ "Please try again later.": "Lütfen daha sonra tekrar deneyin.",
+ "View on Amazon": "Amazon'da görüntüle",
+ "NEXT": "SONRAKİ",
+ "REDUCTION": "KESİNTİ",
+ "-Choose Purpose-": "-Amaç Seçin-",
+ "Reduce birds from specific flocks": "Belirli sürülerdeki kuşları azaltın",
+ "Done": "Tamamlamak"
 }

@@ -375,5 +375,16 @@
  "Some key changes made in this update": "이번 업데이트에서 일부 주요 변경 사항이 적용되었습니다.",
  "Birds_Addition": "새 추가",
  "graph1": "이제 새 추가/감소가 재무 기록과 자동으로 연결되므로 새 구매 및 판매를 쉽게 기록할 수 있습니다. ",
- "graph2": "마찬가지로, 반대로 단일 무리를 위한 새 판매 또는 구매와 관련된 수입 또는 비용을 기록하거나 여러 무리를 포함하거나 농장 전체에 걸쳐 있다고 가정하면 수입 또는 비용을 기록하는 동안 해당 사건을 처리할 수 있는 새로운 옵션이 있습니다. "
+ "graph2": "마찬가지로, 반대로 단일 무리를 위한 새 판매 또는 구매와 관련된 수입 또는 비용을 기록하거나 여러 무리를 포함하거나 농장 전체에 걸쳐 있다고 가정하면 수입 또는 비용을 기록하는 동안 해당 사건을 처리할 수 있는 새로운 옵션이 있습니다. ",
+ "Products": "제품",
+ "Disclosure": "폭로",
+ "Disclosure_Detail": "우리는 Amazon.com 및 제휴 사이트에 연결하여 수수료를 받을 수 있는 수단을 제공하도록 설계된 제휴 광고 프로그램인 Amazon Services LLC Associates Program의 참가자입니다.",
+ "Products not available.": "제품을 사용할 수 없습니다.",
+ "Please try again later.": "나중에 다시 시도해 주세요.",
+ "View on Amazon": "아마존에서 보기",
+ "NEXT": "다음",
+ "REDUCTION": "절감",
+ "-Choose Purpose-": "-목적을 선택하세요-",
+ "Reduce birds from specific flocks": "특정 무리에서 새를 줄입니다",
+ "Done": "완료"
 }

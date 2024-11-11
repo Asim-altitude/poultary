@@ -375,6 +375,17 @@
   "Some key changes made in this update": "Quelques changements clés apportés dans cette mise à jour",
   "Birds_Addition": "Ajout d'oiseaux",
   "graph1": "Il est désormais facile d’enregistrer l’achat et la vente d’oiseaux, car l’ajout/la réduction d’oiseaux est automatiquement lié aux dossiers financiers. ",
-  "graph2": "De même, à l'inverse, si vous enregistrez un revenu ou une dépense impliquant la vente ou l'achat d'oiseaux pour un seul troupeau ou même impliquant plusieurs troupeaux ou, disons, à l'échelle de la ferme, vous disposez d'une nouvelle option pour gérer le cas tout en enregistrant un revenu ou une dépense et "
+  "graph2": "De même, à l'inverse, si vous enregistrez un revenu ou une dépense impliquant la vente ou l'achat d'oiseaux pour un seul troupeau ou même impliquant plusieurs troupeaux ou, disons, à l'échelle de la ferme, vous disposez d'une nouvelle option pour gérer le cas tout en enregistrant un revenu ou une dépense et ",
+  "Products": "Produits",
+  "Disclosure": "Divulgation",
+  "Disclosure_Detail": "Nous participons au programme d'associés d'Amazon Services LLC, un programme de publicité d'affiliation conçu pour nous permettre de gagner des frais en créant des liens vers Amazon.com et des sites affiliés.",
+  "Products not available.": "Produits non disponibles.",
+  "Please try again later.": "Veuillez réessayer plus tard.",
+  "View on Amazon": "Voir sur Amazon",
+  "NEXT": "SUIVANT",
+  "REDUCTION": "RÉDUCTION",
+  "-Choose Purpose-": "-Choisissez un objectif-",
+  "Reduce birds from specific flocks": "Réduire les oiseaux de troupeaux spécifiques",
+  "Done": "Fait"
 
 }
