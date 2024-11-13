@@ -6,7 +6,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:poultary/app_intro/image_slider.dart';
+import 'package:poultary/model/feed_item.dart';
+import 'package:poultary/model/flock_detail.dart';
 import 'package:poultary/model/flock_image.dart';
+import 'package:poultary/model/med_vac_item.dart';
+import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/transactions_screen.dart';
 import 'package:poultary/utils/utils.dart';
@@ -1057,7 +1061,28 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
       child: Text("DONE".tr()),
       onPressed:  () async {
 
+        List<Flock_Detail> flock_details = await DatabaseHelper.getFlockDetailsByFlock(Utils.selected_flock!.f_id);
+        List<TransactionItem> transactionItem = await DatabaseHelper.getTransactionByFlock(Utils.selected_flock!.f_id);
+        List<Feeding> feedings = await DatabaseHelper.getFeedingsByFlock(Utils.selected_flock!.f_id);
+        List<Vaccination_Medication> vac_med_list = await DatabaseHelper.getMedVacByFlock(Utils.selected_flock!.f_id);
+
         await DatabaseHelper.deleteFlock(Utils.selected_flock!);
+
+        for(int i=0;i<flock_details.length;i++){
+          await DatabaseHelper.deleteFlockDetails(flock_details.elementAt(i).f_id);
+        }
+
+        for(int i=0;i<transactionItem.length;i++){
+          await DatabaseHelper.deleteItem("Transactions",transactionItem.elementAt(i).f_id!);
+        }
+
+        for(int i=0;i<feedings.length;i++){
+          await DatabaseHelper.deleteItem("Feeding",feedings.elementAt(i).f_id!);
+        }
+
+        for(int i=0;i<vac_med_list.length;i++){
+          await DatabaseHelper.deleteItem("Vaccination_Medication",vac_med_list.elementAt(i).f_id!);
+        }
 
         Utils.showToast("RECORD_DELETED".tr());
         Navigator.pop(context);
@@ -1085,7 +1110,12 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
         return alert;
       },
     );
+
+  void deleteRecords(List feedings) {
+
   }
+
+ }
 
 
 }

@@ -1,9 +1,7 @@
-import 'dart:async';
 import 'dart:core';
 
 
-
-class Vaccination_Medication{
+class Vaccination_Medication {
 
   int? id;
   int? f_id;

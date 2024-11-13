@@ -141,12 +141,11 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
 
       if(widget.flock_detail != null){
         if(widget.flock_detail!.transaction_id != "-1") {
-          List<TransactionItem> items = await DatabaseHelper.
+          transactionItem = await DatabaseHelper.
           getSingleTransaction(widget.flock_detail!.transaction_id);
 
-          if (!items.isEmpty) {
+          if (transactionItem != null) {
             is_transaction = true;
-            transactionItem = items.elementAt(0);
             amountController.text = transactionItem!.amount;
             personController.text = transactionItem!.sold_purchased_from;
             payment_method = transactionItem!.payment_method;
@@ -154,15 +153,16 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
 
           }
 
-        }else{
+        }
+        else{
 
         }
 
         print("loading single flock");
-        Flock singleflock = await DatabaseHelper.getSingleFlock(widget.flock_detail!.f_id);
+        Flock? singleflock = await DatabaseHelper.getSingleFlock(widget.flock_detail!.f_id);
         print(singleflock);
         print("adding flock");
-        flocks.add(Flock(f_id: widget.flock_detail!.f_id,f_name: widget.flock_detail!.f_name, bird_count: singleflock.bird_count,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: singleflock.active_bird_count, active: 1));
+        flocks.add(Flock(f_id: widget.flock_detail!.f_id,f_name: widget.flock_detail!.f_name, bird_count: singleflock!.bird_count,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: singleflock!.active_bird_count, active: 1));
         print(flocks);
         _purposeList.add(flocks.elementAt(0).f_name);
 

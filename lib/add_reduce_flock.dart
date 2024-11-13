@@ -1199,11 +1199,11 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
               int birds_to_delete = list
                   .elementAt(selected_index!)
                   .item_count;
-              Flock flock = await DatabaseHelper
+              Flock? flock = await DatabaseHelper
                   .getSingleFlock(list
                   .elementAt(selected_index!)
                   .f_id);
-              int current_birds = flock.active_bird_count!;
+              int current_birds = flock!.active_bird_count!;
 
               if (list
                   .elementAt(selected_index!)
@@ -1221,11 +1221,11 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
             int birds_to_delete = list
                 .elementAt(selected_index!)
                 .item_count;
-            Flock flock = await DatabaseHelper
+            Flock? flock = await DatabaseHelper
                 .getSingleFlock(list
                 .elementAt(selected_index!)
                 .f_id);
-            int current_birds = flock.active_bird_count!;
+            int current_birds = flock!.active_bird_count!;
 
             if (list
                 .elementAt(selected_index!)

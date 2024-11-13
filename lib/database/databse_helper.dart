@@ -306,8 +306,7 @@ class DatabaseHelper  {
 
   }
 
-  static Future<Flock_Detail> getSingleFlockDetails(int f_detail_id) async {
-    final db = await instance.database;
+  static Future<Flock_Detail?> getSingleFlockDetails(int f_detail_id) async {
 
     final map = await _database?.rawQuery(
         "SELECT * FROM Flock_Detail WHERE f_detail_id = ?",[f_detail_id]
@@ -316,21 +315,18 @@ class DatabaseHelper  {
     if (map!.isNotEmpty) {
       return Flock_Detail.fromJson(map.first);
     } else {
-      throw Exception("User: Flock Detail not found");
+      return null;
     }
   }
 
-  static Future<Flock> getSingleFlock(int f_id) async {
-    final db = await instance.database;
+  static Future<Flock?> getSingleFlock(int f_id) async {
 
-    final map = await _database?.rawQuery(
-        "SELECT * FROM Flock WHERE f_id = ?",[f_id]
-    );
+    final map = await _database?.rawQuery("SELECT * FROM Flock WHERE f_id = $f_id");
 
     if (map!.isNotEmpty) {
       return Flock.fromJson(map.first);
     } else {
-      throw Exception("User: Flock not found");
+      return null;
     }
   }
 
@@ -480,6 +476,96 @@ class DatabaseHelper  {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
 
+  }
+
+  static Future<List<Vaccination_Medication>>  getMedVacByFlock(int id) async {
+    var result = await _database?.rawQuery("SELECT * FROM Vaccination_Medication where f_id = $id");
+    List<Vaccination_Medication> _List = [];
+    Vaccination_Medication flock_detail;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            flock_detail = Vaccination_Medication.fromJson(json);
+            _List.add(flock_detail);
+            print(_List);
+          }
+        }
+        Map<String, dynamic> json = result[0];
+        flock_detail = Vaccination_Medication.fromJson(json);
+      }
+    }
+    return _List;
+  }
+
+  static Future<List<Feeding>>  getFeedingsByFlock(int id) async {
+    var result = await _database?.rawQuery("SELECT * FROM Feeding where f_id = $id");
+    List<Feeding> _List = [];
+    Feeding flock_detail;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            flock_detail = Feeding.fromJson(json);
+            _List.add(flock_detail);
+            print(_List);
+          }
+        }
+        Map<String, dynamic> json = result[0];
+        flock_detail = Feeding.fromJson(json);
+      }
+    }
+    return _List;
+  }
+
+  static Future<List<TransactionItem>>  getTransactionByFlock(int id) async {
+    var result = await _database?.rawQuery("SELECT * FROM Transactions where f_id = $id");
+    List<TransactionItem> _List = [];
+    TransactionItem flock_detail;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            flock_detail = TransactionItem.fromJson(json);
+            _List.add(flock_detail);
+            print(_List);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        flock_detail = TransactionItem.fromJson(json);
+      }
+    }
+    return _List;
+  }
+
+  static Future<List<Flock_Detail>>  getFlockDetailsByFlock(int id) async {
+    var result = await _database?.rawQuery("SELECT * FROM Flock_Detail where f_id = $id");
+    List<Flock_Detail> _List = [];
+    Flock_Detail flock_detail;
+    if(result!=null){
+      if(result.isNotEmpty){
+        if(result.isNotEmpty){
+          for(int i = 0 ; i < result.length ; i ++){
+            Map<String, dynamic> json = result[i];
+
+            flock_detail = Flock_Detail.fromJson(json);
+            _List.add(flock_detail);
+            print(_List);
+          }
+        }
+
+        Map<String, dynamic> json = result[0];
+        flock_detail = Flock_Detail.fromJson(json);
+      }
+    }
+    return _List;
   }
 
   static Future<List<Flock_Detail>>  getFlockDetails() async {
@@ -1086,7 +1172,20 @@ class DatabaseHelper  {
 
   }
 
-  static Future<List<TransactionItem>> getSingleTransaction(String id) async{
+  static Future<TransactionItem?> getSingleTransaction(String id) async {
+
+    final map = await _database?.rawQuery(
+        "SELECT * FROM Transactions where id = ?",[id]
+    );
+
+    if (map!.isNotEmpty) {
+      return TransactionItem.fromJson(map.first);
+    } else {
+      return null;
+    }
+  }
+
+  /*static Future<List<TransactionItem>> getSingleTransaction(String id) async{
     var result = null;
     result = await _database?.rawQuery(
         "SELECT * FROM Transactions where id = '$id'");
@@ -1113,7 +1212,7 @@ class DatabaseHelper  {
     return _transactionList;
 
   }
-
+*/
   static Future<List<TransactionItem>>  getReportFilteredTransactions(int f_id,String type,String str_date,String end_date) async {
 
     var result = null;
@@ -1578,9 +1677,15 @@ class DatabaseHelper  {
   }
 
   static Future<int>  deleteFlock (Flock flock) async {
-    var result = await _database?.rawQuery("DELETE FROM Flock WHERE f_id = '${flock.f_id}\'");
+    var result = await _database?.rawQuery("DELETE FROM Flock WHERE f_id = '${flock.f_id}'");
     return 1;
   }
+
+  static Future<int>  deleteFlockDetails (int id) async {
+    var result = await _database?.rawQuery("DELETE FROM Flock_Detail WHERE f_id = $id");
+    return 1;
+  }
+
   static Future<int>  updateFlockBirds (int count, int id) async {
     var result = await _database?.rawUpdate("UPDATE Flock SET active_bird_count = '${count}' WHERE f_id = ${id}");
     return 1;

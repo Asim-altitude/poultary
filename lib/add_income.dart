@@ -146,9 +146,9 @@ class _NewIncome extends State<NewIncome>
        date = widget.transactionItem!.date;
 
        if(widget.transactionItem!.f_id! != -1) {
-         Flock flock = await DatabaseHelper.getSingleFlock(
+         Flock? flock = await DatabaseHelper.getSingleFlock(
              widget.transactionItem!.f_id!);
-         flocks.add(flock);
+         flocks.add(flock!);
          is_specific_flock = true;
        }else{
          flocks.add(Flock(f_id: -1,
@@ -232,9 +232,9 @@ class _NewIncome extends State<NewIncome>
             print(item_ids);
             for(int i=0;i<item_ids.length;i++){
               print("F DETAIL ID ${item_ids[i]}");
-              Flock_Detail flock_detail = await DatabaseHelper.getSingleFlockDetails(int.parse(item_ids[i]));
-              Flock flock = await DatabaseHelper.getSingleFlock(flock_detail.f_id);
-              FinanceFlockItem financeFlockItem = new FinanceFlockItem(id: flock_detail.f_id, name: flock_detail.f_name, active_birds: flock.active_bird_count!, selected_birds: flock_detail.item_count, isActive: true);
+              Flock_Detail? flock_detail = await DatabaseHelper.getSingleFlockDetails(int.parse(item_ids[i]));
+              Flock? flock = await DatabaseHelper.getSingleFlock(flock_detail!.f_id);
+              FinanceFlockItem financeFlockItem = new FinanceFlockItem(id: flock_detail!.f_id, name: flock_detail.f_name, active_birds: flock!.active_bird_count!, selected_birds: flock_detail.item_count, isActive: true);
               financeList.add(financeFlockItem);
             }
 
@@ -1059,7 +1059,7 @@ class _NewIncome extends State<NewIncome>
 
         int f_detail_id = int.parse(widget.transactionItem!.flock_update_id);
         if (f_detail_id != -1) {
-          Flock_Detail flock_detail = await DatabaseHelper.getSingleFlockDetails(f_detail_id);
+          Flock_Detail? flock_detail = await DatabaseHelper.getSingleFlockDetails(f_detail_id);
           if(flock_detail!= null){
             int first_reduction = flock_detail.item_count;
             int second_reduction = int.parse(howmanyController.text);
@@ -1161,11 +1161,11 @@ class _NewIncome extends State<NewIncome>
     FinanceFlockItem financeFlockItem = financeList.elementAt(index);
 
     int f_detail_id = int.parse(widget.transactionItem!.flock_update_id.split(",")[index]);
-    Flock_Detail flock_detail = await DatabaseHelper.getSingleFlockDetails(f_detail_id);
-    Flock flock = await DatabaseHelper.getSingleFlock(financeFlockItem.id!);
+    Flock_Detail? flock_detail = await DatabaseHelper.getSingleFlockDetails(f_detail_id);
+    Flock? flock = await DatabaseHelper.getSingleFlock(financeFlockItem.id!);
 
-    int first_reduction = flock_detail.item_count;
-    int active_birds = flock.active_bird_count!;
+    int first_reduction = flock_detail!.item_count;
+    int active_birds = flock!.active_bird_count!;
     if (financeFlockItem.selected_birds < first_reduction) {
       int diff = first_reduction - financeFlockItem.selected_birds;
 

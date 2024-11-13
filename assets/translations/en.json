@@ -397,5 +397,7 @@
   "REDUCTION": "REDUCTION",
   "-Choose Purpose-": "-Choose Purpose-",
   "Reduce birds from specific flocks": "Reduce birds from specific flocks",
-  "Done": "Done"
+  "Done": "Done",
+
+  "No Transaction found" : "No Transaction found"
 }
