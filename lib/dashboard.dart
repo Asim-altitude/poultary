@@ -377,9 +377,9 @@ class _DashboardScreen extends State<DashboardScreen> {
 
     });
 
-    bool isShow = await SessionManager.isShowWhatsNewDialog();
-    if(isShow)
-      showWhatsNewDialog();
+    // bool isShow = await SessionManager.isShowWhatsNewDialog();
+    // if(isShow)
+    //   showWhatsNewDialog();
 
   }
 
@@ -485,7 +485,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                 onTap: (){
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
+                    CupertinoPageRoute(
                         builder: (context) => const FinanceReportsScreen()),
                   );
                 },
@@ -649,7 +649,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                           onTap: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(
+                              CupertinoPageRoute(
                                   builder: (context) => const FinanceReportsScreen()),
                             );
                           },
@@ -665,7 +665,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                           onTap: (){
                             Navigator.push(
                               context,
-                              MaterialPageRoute(
+                              CupertinoPageRoute(
                                   builder: (context) => const FinanceReportsScreen()),
                             );
                           },
@@ -685,7 +685,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                            Expanded(child: InkWell(onTap : () async{
                              await Navigator.push(
                                context,
-                               MaterialPageRoute(
+                               CupertinoPageRoute(
                                    builder: (context) => const EggCollectionScreen()),
                              );
                              getFilteredData(date_filter_name);
@@ -693,7 +693,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                            Expanded(child: InkWell(onTap : () async{
                              await Navigator.push(
                                context,
-                               MaterialPageRoute(
+                               CupertinoPageRoute(
                                    builder: (context) => const DailyFeedScreen()),
                              );
                              getFilteredData(date_filter_name);
@@ -701,7 +701,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                            Expanded(child: InkWell(onTap: () async{
                             await Navigator.push(
                               context,
-                              MaterialPageRoute(
+                              CupertinoPageRoute(
                                   builder: (context) => const MedicationVaccinationScreen()),
                             );
 
@@ -750,7 +750,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                                 onTap: () async {
                                   await Navigator.push(
                                     context,
-                                    MaterialPageRoute(
+                                    CupertinoPageRoute(
                                         builder: (context) => const ADDFlockScreen()),
                                   );
 
@@ -803,7 +803,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                                       Utils.selected_flock = flocks.elementAt(index);
                                       await Navigator.push(
                                         context,
-                                        MaterialPageRoute(
+                                        CupertinoPageRoute(
                                             builder: (context) => const SingleFlockScreen()),
                                       );
                                       getList();
@@ -886,7 +886,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                               onTap: () async {
                                 await Navigator.push(
                                   context,
-                                  MaterialPageRoute(
+                                  CupertinoPageRoute(
                                       builder: (context) => const ADDFlockScreen()),
                                 );
 
