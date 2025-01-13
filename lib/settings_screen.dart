@@ -173,7 +173,8 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
           child:Container(
           width: widthScreen,
           height: heightScreen,
-            color: Utils.getScreenBackground(),
+            color: Colors.white,
+            // color: Utils.getScreenBackground(),
             child:SingleChildScrollViewWithStickyFirstWidget(
             child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -181,114 +182,109 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
             children:  [
 
               Utils.getDistanceBar(),
-              ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
-                child: Container(
-                  decoration: BoxDecoration(
-                     boxShadow: [
-                      BoxShadow(
-                        color: Utils.getThemeColorBlue(), //(x,y)
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        alignment: Alignment.center,
-                        width: 52,
-                        height: 52,
-                        child: Icon(Icons.settings,
-                            color: Colors.white),
-                      ),
-                      Container(
+              // ClipRRect(
+              //   borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
+              //   child: Container(
+              //     decoration: BoxDecoration(
+              //        boxShadow: [
+              //         BoxShadow(
+              //           color: Utils.getThemeColorBlue(), //(x,y)
+              //         ),
+              //       ],
+              //     ),
+              //     child: Row(
+              //       children: [
+              //         Container(
+              //           alignment: Alignment.center,
+              //           width: 52,
+              //           height: 52,
+              //           child: Icon(Icons.settings,
+              //               color: Colors.white),
+              //         ),
+              //         Container(
+              //
+              //             child: Text(
+              //               'SETTINGS'.tr(),
+              //               textAlign: TextAlign.start,
+              //               style: TextStyle(
+              //                   color: Colors.white,
+              //                   fontSize: 18,
+              //                   fontWeight: FontWeight.bold),
+              //             )),
+              //
+              //       ],
+              //     ),
+              //   ),
+              // ),
+              // if(isGetLanguage)
+              //   Visibility(
+              //     visible: false,
+              //     child: Container(
+              //       decoration: BoxDecoration(
+              //           borderRadius: BorderRadius.all(Radius.circular(3)),
+              //           color: Colors.white,
+              //           border: Border.all(color: Colors.blueAccent,width: 1.0)
+              //       ),
+              //       height: 60,
+              //       margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+              //
+              //       child:
+              //
+              //       Column(
+              //         mainAxisAlignment: MainAxisAlignment.center,
+              //         children: [
+              //           Container(height: 20,
+              //
+              //             color: Colors.white,
+              //             child: Align(
+              //               alignment: Alignment.center,
+              //               child:Text("Language".tr(),
+              //                 textAlign: TextAlign.center,
+              //                 style: new TextStyle(
+              //                   fontSize: 13.0,
+              //                   fontWeight: FontWeight.normal,
+              //                   color: Colors.black54,
+              //
+              //                 ),
+              //               ),),
+              //           ),
+              //
+              //           Container(
+              //             width: Utils.getWidthResized(200),height:24,color: Colors.white,
+              //             child: LanguagePickerDropdown(
+              //               initialValue: _selectedCupertinoLanguage,
+              //               itemBuilder: _buildDropdownItem,
+              //               languages: supportedLanguages,
+              //               onValuePicked: (Language language) {
+              //                 _selectedCupertinoLanguage = language;
+              //                 // Utils.showToast(language.isoCode);
+              //                 Utils.setSelectedLanguage(_selectedCupertinoLanguage,context);
+              //               },
+              //             ),
+              //           ),
+              //
+              //         ],)
+              //
+              //       ,),
+              //   ),
 
-                          child: Text(
-                            'SETTINGS'.tr(),
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          )),
-
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 8,),
-              if(isGetLanguage)
-                Visibility(
-                  visible: false,
-                  child: Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(3)),
-                        color: Colors.white,
-                        border: Border.all(color: Colors.blueAccent,width: 1.0)
-                    ),
-                    height: 60,
-                    margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
-
-                    child:
-
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(height: 20,
-
-                          color: Colors.white,
-                          child: Align(
-                            alignment: Alignment.center,
-                            child:Text("Language".tr(),
-                              textAlign: TextAlign.center,
-                              style: new TextStyle(
-                                fontSize: 13.0,
-                                fontWeight: FontWeight.normal,
-                                color: Colors.black54,
-
-                              ),
-                            ),),
-                        ),
-
-                        Container(
-                          width: Utils.getWidthResized(200),height:24,color: Colors.white,
-                          child: LanguagePickerDropdown(
-                            initialValue: _selectedCupertinoLanguage,
-                            itemBuilder: _buildDropdownItem,
-                            languages: supportedLanguages,
-                            onValuePicked: (Language language) {
-                              _selectedCupertinoLanguage = language;
-                              // Utils.showToast(language.isoCode);
-                              Utils.setSelectedLanguage(_selectedCupertinoLanguage,context);
-                            },
-                          ),
-                        ),
-
-                      ],)
-
-                    ,),
-                ),
-
+              SizedBox(height: 12,),
               Container(
-                  padding: EdgeInsets.all(10),
-                  margin: EdgeInsets.all(10),
+                  padding: EdgeInsets.all(0),
+                  margin: EdgeInsets.all(0),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(3)),
+                    borderRadius: BorderRadius.all(Radius.circular(0)),
                     color: Colors.white,
                     boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 1,
-                        blurRadius: 1,
-                        offset: Offset(0, 1), // changes position of shadow
-                      ),
+
                     ],
                   ), child: Column(
                 children: [
-                  Align(
-                    alignment: Alignment.center,
-                    child:
-                    Text('Basic Settings'.tr(),style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
-                  ),
+                  // Align(
+                  //   alignment: Alignment.center,
+                  //   child:
+                  //   Text('Basic Settings'.tr(),style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                  // ),
                   InkWell(
                     onTap: () {
                       Navigator.push(
@@ -299,27 +295,20 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                     },
                     child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(3)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 2,
-                            offset: Offset(0, 1), // changes position of shadow
-                          ),
-                        ],
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
+
                         color: Colors.white,
-                        //  border: Border.all(color: Colors.blueAccent,width: 1.0)
+                         border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
                       ),
                       margin: EdgeInsets.only(left: 12,right: 12,top: 5,bottom: 8),
                       child: Container(
-                        height: 52,
+                        height: 48,
                         padding: EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.all(Radius.circular(5)),
+                          color: Colors.white,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.white, //(x,y)
                             ),
                           ],
                         ),
@@ -332,8 +321,9 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                                 child: Row(
                                   children: [
 
-                                    Icon(Icons.account_balance_rounded,color: Utils.getThemeColorBlue(),),
-                                    SizedBox(width: 4,),
+                                    SizedBox(width: 2,),
+                                    Icon(Icons.account_balance_rounded,color: Utils.getThemeColorBlue(),size: 20,),
+                                    SizedBox(width: 8,),
                                     Text('FARM_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                                   ],
                                 )),
@@ -353,21 +343,14 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                     },
                     child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(3)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 2,
-                            offset: Offset(0, 1), // changes position of shadow
-                          ),
-                        ],
-                        color: Colors.white,
-                        // border: Border.all(color: Colors.blueAccent,width: 1.0)
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+
+                          color: Colors.white,
+                          border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
                       ),
                       margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
                       child: Container(
-                        height: 52,
+                        height: 48,
                         padding: EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -387,8 +370,10 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                                 child: Row(
                                   children: [
 
-                                    Icon(Icons.account_tree,color: Utils.getThemeColorBlue(),),
-                                    SizedBox(width: 4,),
+                                    SizedBox(width: 2,),
+
+                                    Icon(Icons.account_tree,color: Utils.getThemeColorBlue(),size: 20,),
+                                    SizedBox(width: 8,),
                                     Text('CATEGORY_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                                   ],
                                 )),
@@ -518,19 +503,12 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                     },
                     child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(3)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 2,
-                            offset: Offset(0, 1), // changes position of shadow
-                          ),
-                        ],
-                        color: Colors.white,
-                        //  border: Border.all(color: Colors.blueAccent,width: 1.0)
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+
+                          color: Colors.white,
+                          border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
                       ),
-                      margin: EdgeInsets.only(left: 12,right: 12,top: 5,bottom: 8),
+                      margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
                       child: Container(
                         height: 52,
                         padding: EdgeInsets.all(10),
@@ -550,8 +528,9 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                                 alignment: Alignment.topLeft,
                                 child: Row(
                                   children: [
-                                    Icon(Icons.filter_list,color: Utils.getThemeColorBlue(),),
-                                    SizedBox(width: 4,),
+                                    SizedBox(width: 2,),
+                                    Icon(Icons.filter_list,color: Utils.getThemeColorBlue(),size: 20,),
+                                    SizedBox(width: 8,),
                                     Text('All Data Filters'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                                   ],
                                 )),
@@ -565,133 +544,121 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
 
               Container(
                 padding: EdgeInsets.all(10),
-                margin: EdgeInsets.all(10),
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(3)),
                     color: Colors.white,
                   boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 1,
-                      blurRadius: 1,
-                      offset: Offset(0, 1), // changes position of shadow
-                    ),
-                  ],
+                    ]
                 ),
                 child: Column(children: [
                 Align(
                   alignment: Alignment.center,
                   child:
-                  Text('BACK_UP_RESTORE_MESSAGE'.tr(),style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                  Text('BACK_UP_RESTORE_MESSAGE'.tr(),style: TextStyle(fontSize: 20,fontFamily: 'Roboto', fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                 ),
                 SizedBox(height: 4,),
 
-                InkWell(
-                  onTap: () {
-                    shareFiles();
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(3)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 2,
-                          offset: Offset(0, 1), // changes position of shadow
-                        ),
-                      ],
-                      color: Colors.white,
-                      // border: Border.all(color: Colors.blueAccent,width: 1.0)
-                    ),
-                    margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+
+
+                  InkWell(
+                    onTap: () {
+                      shareFiles();
+                    },
                     child: Container(
-                      height: 52,
-                      padding: EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                        borderRadius: BorderRadius.all(Radius.circular(3)),
                         boxShadow: [
-                          BoxShadow(
-                            color: Colors.white, //(x,y)
-                          ),
+
                         ],
+                        color: Colors.white,
+                        border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-
-                        children: [
-                          Align(
-                              alignment: Alignment.topLeft,
-                              child: Row(
-                                children: [
-
-                                  Icon(Icons.backup,color: Utils.getThemeColorBlue(),),
-                                  SizedBox(width: 4,),
-                                  Text("BACKUP".tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
-                                ],
-                              )),
-
-                        ],),),
-                  ),
-                ),
-                InkWell(
-                  onTap: () async {
-                    await DatabaseHelper.importDataBaseFile(context);
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(3)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 2,
-                          offset: Offset(0, 1), // changes position of shadow
+                      margin: EdgeInsets.all(10),
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white, //(x,y)
+                            ),
+                          ],
                         ),
-                      ],
-                      color: Colors.white,
-                      //border: Border.all(color: Colors.blueAccent,width: 1.0)
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+
+                          children: [
+                            Align(
+                                alignment: Alignment.topLeft,
+                                child: Column(
+                                  children: [
+
+                                    Icon(Icons.backup,color: Utils.getThemeColorBlue(),size: 25,),
+                                    Text("BACKUP".tr(),style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Utils.getThemeColorBlue()),),
+                                  ],
+                                )),
+
+                          ],),),
                     ),
-                    margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
-                    child: Container(
-                      height: 52,
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(5)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.white, //(x,y)
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-
-                        children: [
-                          Align(
-                              alignment: Alignment.topLeft,
-                              child: Row(
-                                children: [
-
-                                  Icon(Icons.restore,color: Utils.getThemeColorBlue(),),
-                                  SizedBox(width: 4,),
-                                  Text("RESTORE".tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
-                                ],
-                              )),
-
-                        ],),),
                   ),
-                ),
+                  InkWell(
+                    onTap: () async {
+                      await DatabaseHelper.importDataBaseFile(context);
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(3)),
+                          boxShadow: [
+
+                          ],
+                          color: Colors.white,
+                          border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
+                      ),
+                      margin: EdgeInsets.all(10),
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white, //(x,y)
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+
+                          children: [
+                            Align(
+                                alignment: Alignment.topLeft,
+                                child: Column(
+                                  children: [
+
+                                    Icon(Icons.restore,color: Utils.getThemeColorBlue(),size: 25,),
+                                    Text("RESTORE".tr(),style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Utils.getThemeColorBlue()),),
+                                  ],
+                                )),
+
+                          ],),),
+                    ),
+                  ),
+
+                ],),
+
+
               ],),),
 
               if(Utils.isShowAdd)
               Container(width: Utils.WIDTH_SCREEN,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(3)),
+                    borderRadius: BorderRadius.all(Radius.circular(6)),
 
-                    color: Colors.white,
+                    color: Utils.getThemeColorBlue(),
                     border: Border.all(color: Colors.blueAccent,width: 1.0)
                 ),
                 margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
@@ -699,7 +666,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
 
                 child: Column(
                 children: [
-                  Text('ADS_REMOVAL'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                  Text('ADS_REMOVAL'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Colors.white),),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -710,7 +677,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                         style: new TextStyle(
                             fontSize: 13.0,
                             fontWeight: FontWeight.normal,
-                            color: Utils.getThemeColorBlue(),
+                            color: Colors.white70,
                             fontFamily: 'PTSANS'
                         ),
                       ),),
@@ -722,7 +689,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                           style: new TextStyle(
                               fontSize: 13.0,
                               fontWeight: FontWeight.normal,
-                              color: Utils.getThemeColorBlue(),
+                              color: Colors.white70,
                               fontFamily: 'PTSANS'
                           ),
                         ),),
@@ -738,8 +705,8 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.all(Radius.circular(3)),
 
-                          color: Utils.getThemeColorBlue(),
-                          border: Border.all(color: Colors.transparent,width: 4.0)
+                          color: Colors.white,
+                          border: Border.all(color: Colors.transparent,width: 3.0)
                       ),
                       margin: EdgeInsets.only(left: 12,right: 12,top: 0,bottom: 0),
                       child: Container(
@@ -766,8 +733,9 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                                 child: Row(
                                   children: [
 
-                                    Icon(Icons.check_circle_outline,color: Colors.white,size: 30,),
                                     SizedBox(width: 4,),
+                                    Icon(Icons.ads_click,color: Colors.white,size: 24,),
+                                    SizedBox(width: 6,),
                                     Text('REMOVE_ADS'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white),),
                                   ],
                                 )),
@@ -775,7 +743,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                           ],),),
                     ),
                   ),
-                  SizedBox(height: 6,),
+                  SizedBox(height: 10,),
                   InkWell(
                     onTap: () {
                       _inAppPurchase.restorePurchases();
@@ -786,7 +754,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                           borderRadius: BorderRadius.all(Radius.circular(4)),
 
                           color: Utils.getThemeColorBlue(),
-                          border: Border.all(color: Colors.transparent,width: 2.0)
+                          border: Border.all(color: Colors.white,width: 3.0)
                       ),
                       margin: EdgeInsets.only(left: 12,right: 12,top: 0,bottom: 0),
                       child: Container(
@@ -813,8 +781,9 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                                 child: Row(
                                   children: [
 
-                                    Icon(Icons.cloud_upload_outlined,color: Colors.white,size: 30,),
                                     SizedBox(width: 4,),
+                                    Icon(Icons.cloud_upload_outlined,color: Colors.white,size: 24,),
+                                    SizedBox(width: 8,),
                                     Text('RESTORE_PREMIUM'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white),),
                                   ],
                                 )),

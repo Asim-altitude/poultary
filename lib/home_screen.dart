@@ -95,15 +95,16 @@ class _HomeScreen extends State<HomeScreen> {
     Center(
       child: ReportsScreen(),
     ),
-    Center(
-      child: SettingsScreen(),
-    ),
+
     Center(
       child: AllEventsScreen(),
     ),
     Center(
-      child: ProductScreen(),
+      child: SettingsScreen(),
     ),
+    // Center(
+    //   child: ProductScreen(),
+    // ),
 
   ];
 
@@ -137,9 +138,10 @@ class _HomeScreen extends State<HomeScreen> {
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "DASHBOARD".tr()),
           BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: "REPORTS".tr()),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "SETTINGS".tr()),
           BottomNavigationBarItem(icon: Icon(Icons.notifications_active), label: "Reminders".tr()),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: "Products".tr()),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "SETTINGS".tr()),
+
+          // BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: "Products".tr()),
 
         ],
 
