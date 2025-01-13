@@ -16,8 +16,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
-  runApp(
-      EasyLocalization(
+  runApp(EasyLocalization(
           supportedLocales: [Locale('en'), Locale('ar'),Locale('de'),Locale('ru'),Locale('fa'),Locale('ja'),Locale('ko'),Locale('pt'),Locale('tr'),Locale('fr'),Locale('id'),Locale('hi'),Locale('es'),Locale('zh'),Locale('uk'),Locale('pl'),Locale('bn'),Locale('te'),Locale('ta')],
           path: 'assets/translations', // <-- change the path of the translation files
           fallbackLocale: Locale('en'),
@@ -73,6 +72,8 @@ void loadForm() {
     },
   );
 }
+
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 

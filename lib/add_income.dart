@@ -365,7 +365,6 @@ class _NewIncome extends State<NewIncome>
               child: Column(
                 children: [
                   Utils.getDistanceBar(),
-
                   ClipRRect(
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                     child: Container(
@@ -395,7 +394,6 @@ class _NewIncome extends State<NewIncome>
                       ),
                     ),
                   ),
-
 
                   SizedBox(height: 20,),
                   EasyStepper(

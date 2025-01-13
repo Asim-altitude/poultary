@@ -522,6 +522,8 @@ class DatabaseHelper  {
     return _List;
   }
 
+
+
   static Future<List<TransactionItem>>  getTransactionByFlock(int id) async {
     var result = await _database?.rawQuery("SELECT * FROM Transactions where f_id = $id");
     List<TransactionItem> _List = [];
@@ -1656,13 +1658,8 @@ class DatabaseHelper  {
   }
 
   static Future<int>  deleteItem(String table, int id) async {
-    if(table == 'Flock_Detail'){
+    var result = await _database?.rawQuery("DELETE FROM $table WHERE f_id = $id");
 
-      var result = await _database?.rawQuery("DELETE FROM $table WHERE f_detail_id = $id");
-    }else{
-
-      var result = await _database?.rawQuery("DELETE FROM $table WHERE id = $id");
-    }
     return 1;
   }
 
