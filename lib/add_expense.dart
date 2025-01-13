@@ -465,10 +465,9 @@ class _NewExpense extends State<NewExpense>
                         setState(() => activeStep = index),
                   ),
 
-
+                  SizedBox(height: 30,),
                   Container(
                     alignment: Alignment.center,
-                    height: heightScreen - 250,
 
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -490,7 +489,7 @@ class _NewExpense extends State<NewExpense>
                                         fontWeight: FontWeight.bold),
                                   )),
 
-                              SizedBox(height: 20,width: widthScreen),
+                              SizedBox(height: 40,width: widthScreen),
                               Column(
                                 children: [
                                   Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('CHOOSE_FLOCK_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
@@ -729,7 +728,7 @@ class _NewExpense extends State<NewExpense>
                                         fontWeight: FontWeight.bold),
                                   )),
 
-                              SizedBox(height: 20,width: widthScreen),
+                              SizedBox(height: 40,width: widthScreen),
                               Column(
                                 children: [
                                   Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Payment Method'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),

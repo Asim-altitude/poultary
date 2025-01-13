@@ -448,9 +448,9 @@ class _NewIncome extends State<NewIncome>
                         setState(() => activeStep = index),
                   ),
 
+                  SizedBox(height: 30,),
                   Container(
                     alignment: Alignment.center,
-                    height: heightScreen - 250,
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -467,8 +467,8 @@ class _NewIncome extends State<NewIncome>
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold),
                               )),
-                          SizedBox(height: 20,width: widthScreen),
-                            SizedBox(height: 10,width: widthScreen),
+                             SizedBox(height: 40,width: widthScreen),
+
                             Column(
                               children: [
                                 Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('CHOOSE_FLOCK_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
