@@ -1,13 +1,11 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:language_picker/language_picker.dart';
 import 'package:language_picker/languages.dart';
 import 'package:poultary/add_feeding.dart';
 import 'package:poultary/category_screen.dart';
@@ -15,11 +13,11 @@ import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
-import 'all_events.dart';
+import 'auto_egg_collection.dart';
+import 'auto_feed_management.dart';
 import 'database/databse_helper.dart';
 import 'farm_setup_screen.dart';
 import 'filter_setup_screen.dart';
-import 'manage_flock_screen.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
@@ -135,6 +133,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
     Utils.setupAds();
     getLanguage();
   }
+  
   setUpInitial() async {
     bool isInApp = await SessionManager.getInApp();
     if(isInApp){
@@ -375,6 +374,99 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                                     Icon(Icons.account_tree,color: Utils.getThemeColorBlue(),size: 20,),
                                     SizedBox(width: 8,),
                                     Text('CATEGORY_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                  ],
+                                )),
+
+                          ],),),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>  AutomaticFeedManagementScreen()),
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+
+                          color: Colors.white,
+                          border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
+                      ),
+                      margin: EdgeInsets.only(left: 12,right: 12,top: 5,bottom: 8),
+                      child: Container(
+                        height: 48,
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Align(
+                                alignment: Alignment.topLeft,
+                                child: Row(
+                                  children: [
+
+                                    SizedBox(width: 2,),
+                                    Image.asset("assets/feed.png", color: Utils.getThemeColorBlue(), width: 20, height: 20,),
+                                    SizedBox(width: 8,),
+                                    Text('AUTO_FEED_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                  ],
+                                )),
+
+                          ],),),
+                    ),
+                  ),
+
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>  AutomaticEggCollectionScreen()),
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+
+                          color: Colors.white,
+                          border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
+                      ),
+                      margin: EdgeInsets.only(left: 12,right: 12,top: 5,bottom: 8),
+                      child: Container(
+                        height: 48,
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Align(
+                                alignment: Alignment.topLeft,
+                                child: Row(
+                                  children: [
+
+                                    SizedBox(width: 2,),
+                                    Image.asset("assets/eggs_tray.png", color: Utils.getThemeColorBlue(), width: 20, height: 20,),
+                                    SizedBox(width: 8,),
+                                    Text('AUTO_EGG_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                                   ],
                                 )),
 

@@ -398,6 +398,8 @@
   "-Choose Purpose-": "-Choose Purpose-",
   "Reduce birds from specific flocks": "Reduce birds from specific flocks",
   "Done": "Done",
+  "No Transaction found" : "No Transaction found",
 
-  "No Transaction found" : "No Transaction found"
+  "AUTO_FEED_MANAGMENT": "Auto Feed Management",
+  "AUTO_EGG_MANAGMENT": "Auto Egg Collection"
 }
