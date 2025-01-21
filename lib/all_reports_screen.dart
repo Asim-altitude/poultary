@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
+import 'package:poultary/model/feed_summary.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
@@ -102,7 +103,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
   }
 
   List<Feeding> feedings = [];
-
+  List<FeedSummary> feedingSummary = [];
   void getAllData() async {
 
     print(date_filter_name);
@@ -134,7 +135,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
     total_eggs = total_eggs_collected - total_eggs_reduced;
 
-    feedings = await DatabaseHelper.getTopMostUsedFeeds(f_id, str_date, end_date);
+    feedingSummary = await DatabaseHelper.getMyTopMostUsedFeeds(f_id, str_date, end_date);
 
     total_feed_consumption = await DatabaseHelper.getTotalFeedConsumption(f_id, str_date, end_date);
 
@@ -502,10 +503,10 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                             Text("TOTAL_CONSUMPTION".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white70),),
                             SizedBox(height: 5,),
                             Container(
-                              height: feedings.length==0?10:feedings.length*45,
+                              height: feedingSummary.length==0?10:feedingSummary.length*45,
                               width: widthScreen,
                               child: ListView.builder(
-                                  itemCount: feedings.length,
+                                  itemCount: feedingSummary.length,
                                   scrollDirection: Axis.vertical,
                                   physics: NeverScrollableScrollPhysics(),
                                   itemBuilder: (BuildContext context, int index) {
@@ -520,8 +521,8 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text(feedings.elementAt(index).feed_name!.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.white),),
-                                          Text(feedings.elementAt(index).quantity! +" kg",style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.white),),
+                                          Text(feedingSummary.elementAt(index).feedName.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.white),),
+                                          Text(feedingSummary.elementAt(index).totalQuantity.toString() +" kg",style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.white),),
 
                                         ],),
                                     );

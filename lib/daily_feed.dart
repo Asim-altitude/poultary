@@ -70,15 +70,14 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
   }
 
   bool no_colection = true;
-  List<Feeding> feedings = [];
+  List<Feeding> feedings = [], tempFeed = [];
   List<String> flock_name = [];
   void getEggCollectionList() async {
 
     await DatabaseHelper.instance.database;
 
-    feedings = await DatabaseHelper.getAllFeedings();
-
-
+    tempFeed = await DatabaseHelper.getAllFeedings();
+    feedings = tempFeed.reversed.toList();
     feed_total = feedings.length;
 
     setState(() {
@@ -325,14 +324,16 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                 ],),
               )*/
               feedings.length > 0 ? Container(
-                height: heightScreen - 290,
+                height: heightScreen,
                 width: widthScreen,
+
                 child: ListView.builder(
                     itemCount: feedings.length,
                     scrollDirection: Axis.vertical,
+                    padding: EdgeInsets.only(bottom: 250),
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
-                        margin: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(left: 10, right: 10, top:  10),
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(3)),
                             color: Colors.white,
@@ -764,9 +765,8 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
 
     await DatabaseHelper.instance.database;
 
-
-    feedings = await DatabaseHelper.getFilteredFeeding(f_id,filter_name,st,end);
-
+    tempFeed = await DatabaseHelper.getFilteredFeeding(f_id,filter_name,st,end);
+    feedings = tempFeed.reversed.toList();
     setState(() {
 
     });

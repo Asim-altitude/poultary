@@ -66,16 +66,15 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
   }
 
   bool no_colection = true;
-  List<Eggs> eggs = [];
+  List<Eggs> eggs = [], tempList = [];
   List<String> flock_name = [];
 
   void getEggCollectionList() async {
 
     await DatabaseHelper.instance.database;
 
-    eggs = await DatabaseHelper.getEggsCollections();
-
-
+    tempList = await DatabaseHelper.getEggsCollections();
+    eggs = tempList.reversed.toList();
     egg_total = eggs.length;
 
     setState(() {
@@ -805,9 +804,8 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
     await DatabaseHelper.instance.database;
 
-
-    eggs = await DatabaseHelper.getFilteredEggs(f_id,filter_name,st,end);
-
+    tempList = await DatabaseHelper.getFilteredEggs(f_id,filter_name,st,end);
+    eggs = tempList.reversed.toList();
 
     setState(() {
 

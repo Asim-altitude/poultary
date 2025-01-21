@@ -1,16 +1,24 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'database/databse_helper.dart';
 import 'model/flock.dart';
 import 'model/sub_category_item.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class AutomaticFeedManagementScreen extends StatefulWidget {
   @override
   _AutomaticFeedManagementScreenState createState() => _AutomaticFeedManagementScreenState();
 }
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
+
 
 class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementScreen> {
   bool isAutoFeedEnabled = false;
@@ -24,11 +32,33 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
     _initializeData();
   }
 
+  Future<void> initNotificationsSettings() async {
+
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+
+      const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings(
+          '@mipmap/ic_launcher'); // Replace with your app icon
+      const InitializationSettings initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid,
+      );
+      await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+      tz.initializeTimeZones();
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
+
   Future<void> _initializeData() async {
     await DatabaseHelper.instance.database;
     _feedList = await _fetchFeedList();
     flocks = await DatabaseHelper.getFlocks();
-    _loadFlockSettings();
+    print("FLOCKS ${flocks.length}");
+    await _loadFlockSettings();
+    await initNotificationsSettings();
   }
 
   Future<List<String>> _fetchFeedList() async {
@@ -66,21 +96,29 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
           );
         }).toList();
       });
+    } else {
+      // Initialize feed settings for each flock if no saved settings found
+      setState(() {
+        automaticFeedFlocks = flocks.map((flock) => AutomaticFeedSetting(
+          id: flock.f_id,
+          name: flock.f_name,
+          feedSettings: _generateDefaultFeedSettings(), // Define your default feed settings function
+        )).toList();
+      });
     }
 
     // Load the isAutoFeedEnabled state
     setState(() {
       isAutoFeedEnabled = prefs.getBool('isAutoFeedEnabled') ?? false;
+      String? savedDate = prefs.getString("lastSyncDate");
+      print('SAVED_DATE $savedDate');
+
+      if (savedDate != null) {
+        _startingDate = DateTime.parse(savedDate); // Parse the string to DateTime
+      }
+
     });
   }
-
-
-  List<FeedSetting> _generateDefaultFeedSettings() {
-    List<String> days = ["Mon", "Tues", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    return days.map((day) => FeedSetting(day: day, feedName: "Not Specified", dailyRequirement: "1")).toList();
-  }
-
-
 
   Future<void> _saveFlockSettings() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -95,18 +133,23 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
 
   }
 
+  List<FeedSetting> _generateDefaultFeedSettings() {
+    List<String> days = ["Mon", "Tues", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    return days.map((day) => FeedSetting(day: day, feedName: "Not Specified", dailyRequirement: "1")).toList();
+  }
 
+  DateTime? _startingDate; // Track the selected starting date
 
 
   String _getDayName(int index) {
     List<String> days = [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-      "Sunday",
+      "Mon",
+      "Tues",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun",
     ];
     return days[index];
   }
@@ -132,12 +175,81 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
             ),
             value: isAutoFeedEnabled,
             activeColor: Utils.getThemeColorBlue(),
-            onChanged: (value) {
+            onChanged: (value) async {
               setState(() {
                 isAutoFeedEnabled = value;
               });
+              _saveFlockSettings();
+
+              if (isAutoFeedEnabled) {
+                await requestNotificationPermissions();
+                await scheduleDailyNotification();
+              } else {
+                await flutterLocalNotificationsPlugin.cancel(1);
+                // Cancels auto-feed notification with ID 1
+
+              }
             },
           ),
+
+          // Show Starting Date Picker if isAutoFeedEnabled is true
+          if (isAutoFeedEnabled)
+            Column(
+              children: [
+                Text(
+                  "Automatic Daily Feed Records will be generated.",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16.0, right: 16.0,top: 8),
+                  child: Row(
+                    children: [
+                      Text(
+                        "Last Sync:",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () async {
+                            DateTime? pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: _startingDate ?? DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (pickedDate != null) {
+                              setState(() {
+                                _startingDate = pickedDate;
+                              });
+                              SharedPreferences prefs = await SharedPreferences.getInstance();
+                              await prefs.setString('lastSyncDate', pickedDate.toIso8601String());
+
+                            }
+                          },
+                          child: Container(
+                            height: 48,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            alignment: Alignment.centerLeft,
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            child: Text(
+                              _startingDate != null
+                                  ? "${_startingDate!.day}-${_startingDate!.month}-${_startingDate!.year}"
+                                  : "Select Date",
+                              style: TextStyle(fontSize: 16, color: Colors.black87),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
           // Flock List
           Expanded(
             child: ListView.builder(
@@ -151,6 +263,10 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                     title: Text(
                       flock.name,
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
+                    ),
+                    subtitle: Text(
+                      "Expand to customize feed",
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.grey),
                     ),
                     children: [
                       // Labels Row
@@ -288,7 +404,11 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
-          onPressed: isAutoFeedEnabled ? _saveFlockSettings : null,
+          onPressed: () {
+            if(isAutoFeedEnabled){
+              _saveFlockSettings();
+            }
+          },
           style: ElevatedButton.styleFrom(
             elevation: 5,
             backgroundColor: isAutoFeedEnabled ? Utils.getThemeColorBlue() : Colors.grey.shade300,
@@ -320,6 +440,62 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
       ),
     );
   }
+
+
+
+  /// Schedules daily notifications
+  Future<void> scheduleDailyNotification() async {
+    const AndroidNotificationDetails androidNotificationDetails =
+    AndroidNotificationDetails(
+      'auto_feed_channel',
+      'Auto Feed Notifications',
+      channelDescription: 'Notifications for automatic feed management',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+
+    const NotificationDetails notificationDetails =
+    NotificationDetails(android: androidNotificationDetails);
+
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      1,
+      'New Feed Records Ready',
+      'New feed records are Ready. Check them now!',
+      _nextInstanceOfTime(8, 0),
+      notificationDetails,
+      androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation:
+      UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+  }
+
+  tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {
+    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    tz.TZDateTime scheduledDate =
+    tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    return scheduledDate;
+  }
+
+  Future<void> requestNotificationPermissions() async {
+    if (await Permission.notification.isGranted) {
+      print('Notification permissions already granted');
+      return;
+    }
+
+    final PermissionStatus status = await Permission.notification.request();
+    if (status.isGranted) {
+      print('Notification permissions granted');
+    } else {
+      print('Notification permissions denied');
+    }
+  }
+
 }
 
 class AutomaticFeedSetting {
@@ -369,4 +545,5 @@ class FeedSetting {
     feedName: json['feedName'],
     dailyRequirement: json['dailyRequirement'],
   );
+
 }

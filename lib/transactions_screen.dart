@@ -106,14 +106,14 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
   }
 
   bool no_colection = true;
-  List<TransactionItem> transactionList = [];
+  List<TransactionItem> transactionList = [], tempList = [];
   List<String> flock_name = [];
   void getAllTransactions() async {
 
     await DatabaseHelper.instance.database;
 
-    transactionList = await DatabaseHelper.getAllTransactions();
-
+    tempList = await DatabaseHelper.getAllTransactions();
+    transactionList = tempList.reversed.toList();
 
     feed_total = transactionList.length;
 
@@ -127,9 +127,8 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
 
     await DatabaseHelper.instance.database;
 
-
-    transactionList = await DatabaseHelper.getFilteredTransactions(f_id,filter_name,st,end);
-
+    tempList = await DatabaseHelper.getFilteredTransactions(f_id,filter_name,st,end);
+    transactionList = tempList.reversed.toList();
     feed_total = transactionList.length;
 
     setState(() {

@@ -1,24 +1,14 @@
 import 'dart:async';
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:poultary/add_eggs.dart';
-import 'package:poultary/add_feeding.dart';
 import 'package:poultary/add_vac_med.dart';
-import 'package:poultary/inventory.dart';
-import 'package:poultary/model/feed_item.dart';
-import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
-
-import 'add_flocks.dart';
 import 'database/databse_helper.dart';
-import 'model/egg_item.dart';
 import 'model/flock.dart';
 import 'model/med_vac_item.dart';
 
@@ -78,14 +68,14 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
   }
 
   bool no_colection = true;
-  List<Vaccination_Medication> vac_med_list = [];
+  List<Vaccination_Medication> vac_med_list = [], tempList = [];
   List<String> flock_name = [];
   void getvaccMedList() async {
 
     await DatabaseHelper.instance.database;
 
-    vac_med_list = await DatabaseHelper.getAllVaccinationMedications();
-
+    tempList = await DatabaseHelper.getAllVaccinationMedications();
+    vac_med_list = tempList.reversed.toList();
     feed_total = vac_med_list.length;
 
     setState(() {
@@ -820,9 +810,8 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
 
     await DatabaseHelper.instance.database;
 
-
-    vac_med_list = await DatabaseHelper.getFilteredMedication(f_id,filter_name,st,end);
-
+    tempList = await DatabaseHelper.getFilteredMedication(f_id,filter_name,st,end);
+    vac_med_list = tempList.reversed.toList();
     setState(() {
 
     });

@@ -17,6 +17,7 @@ import '../model/eggs_chart_data.dart';
 import '../model/farm_item.dart';
 import '../model/feed_item.dart';
 import '../model/feed_report_item.dart';
+import '../model/feed_summary.dart';
 import '../model/feedflock_report_item.dart';
 import '../model/finance_chart_data.dart';
 import '../model/flock_detail.dart';
@@ -275,6 +276,25 @@ class DatabaseHelper  {
     );
 
   }
+
+  // Function to get the latest feeding record date
+  static Future<Map<String, dynamic>?> queryLatestFeedingRecord() async {
+    List<Map<String, dynamic>>? result = await _database?.query(
+      'Feeding',
+      columns: ['feeding_date'],
+      orderBy: 'feeding_date DESC',
+      limit: 1,
+    );
+
+    print('FEEDING_DATE $result');
+    // Check if the result is not null and contains data
+    if (result != null && result.isNotEmpty) {
+      return result.first;
+    }
+
+    return null;
+  }
+
 
   static Future<int?> insertEggCollection(Eggs eggs) async {
 
@@ -875,6 +895,117 @@ class DatabaseHelper  {
     }
     return _feedList;
 
+  }
+
+  static Future<List<FeedSummary>> getMyMostUsedFeeds(int f_id, String str_date, String end_date) async {
+    var result;
+
+    // Case 1: No flock ID and date range provided
+    if (f_id == -1 && !str_date.isEmpty && !end_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding "
+              "WHERE feeding_date BETWEEN '$str_date' AND '$end_date' "
+              "GROUP BY feed_name "
+              "ORDER BY total_quantity DESC"
+      );
+     // print("SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding WHERE feeding_date BETWEEN '$str_date' AND '$end_date' GROUP BY feed_name ORDER BY total_quantity");
+
+      // Case 2: Flock ID provided but no date range
+    } else if (f_id != -1 && str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding "
+              "WHERE f_id = '$f_id' "
+              "GROUP BY feed_name "
+              "ORDER BY total_quantity DESC"
+      );
+     // print("SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding WHERE f_id = '$f_id' GROUP BY feed_name ORDER BY total_quantity");
+
+      // Case 3: Both flock ID and date range provided
+    } else if (f_id != -1 && !str_date.isEmpty && !end_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding "
+              "WHERE f_id = '$f_id' AND feeding_date BETWEEN '$str_date' AND '$end_date' "
+              "GROUP BY feed_name "
+              "ORDER BY total_quantity DESC"
+      );
+     // print("SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding WHERE f_id = '$f_id' AND feeding_date BETWEEN '$str_date' AND '$end_date' GROUP BY feed_name ORDER BY total_quantity DESC LIMIT 3");
+
+      // Case 4: No flock ID and no date range (global query)
+    } else if (f_id == -1 && str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding "
+              "GROUP BY feed_name "
+              "ORDER BY total_quantity DESC"
+      );
+     // print("SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding GROUP BY feed_name ORDER BY total_quantity DESC LIMIT 3");
+    }
+
+    List<FeedSummary> _feedList = [];
+    if (result != null && result.isNotEmpty) {
+      for (int i = 0; i < result.length; i++) {
+        Map<String, dynamic> json = result[i];
+        FeedSummary feedSummary = FeedSummary.fromMap(json);
+        _feedList.add(feedSummary);
+      }
+    }
+
+    return _feedList;
+  }
+
+
+  static Future<List<FeedSummary>> getMyTopMostUsedFeeds(int f_id, String str_date, String end_date) async {
+    var result;
+
+    // Case 1: No flock ID and date range provided
+    if (f_id == -1 && !str_date.isEmpty && !end_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding "
+              "WHERE feeding_date BETWEEN '$str_date' AND '$end_date' "
+              "GROUP BY feed_name "
+              "ORDER BY total_quantity DESC LIMIT 3"
+      );
+      print("SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding WHERE feeding_date BETWEEN '$str_date' AND '$end_date' GROUP BY feed_name ORDER BY total_quantity DESC LIMIT 3");
+
+      // Case 2: Flock ID provided but no date range
+    } else if (f_id != -1 && str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding "
+              "WHERE f_id = '$f_id' "
+              "GROUP BY feed_name "
+              "ORDER BY total_quantity DESC LIMIT 3"
+      );
+      print("SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding WHERE f_id = '$f_id' GROUP BY feed_name ORDER BY total_quantity DESC LIMIT 3");
+
+      // Case 3: Both flock ID and date range provided
+    } else if (f_id != -1 && !str_date.isEmpty && !end_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding "
+              "WHERE f_id = '$f_id' AND feeding_date BETWEEN '$str_date' AND '$end_date' "
+              "GROUP BY feed_name "
+              "ORDER BY total_quantity DESC LIMIT 3"
+      );
+      print("SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding WHERE f_id = '$f_id' AND feeding_date BETWEEN '$str_date' AND '$end_date' GROUP BY feed_name ORDER BY total_quantity DESC LIMIT 3");
+
+      // Case 4: No flock ID and no date range (global query)
+    } else if (f_id == -1 && str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding "
+              "GROUP BY feed_name "
+              "ORDER BY total_quantity DESC LIMIT 3"
+      );
+      print("SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding GROUP BY feed_name ORDER BY total_quantity DESC LIMIT 3");
+    }
+
+    List<FeedSummary> _feedList = [];
+    if (result != null && result.isNotEmpty) {
+      for (int i = 0; i < result.length; i++) {
+        Map<String, dynamic> json = result[i];
+        FeedSummary feedSummary = FeedSummary.fromMap(json);
+        _feedList.add(feedSummary);
+      }
+    }
+
+    return _feedList;
   }
 
 

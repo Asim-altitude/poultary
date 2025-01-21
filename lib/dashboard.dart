@@ -14,6 +14,7 @@ import 'package:poultary/category_screen.dart';
 import 'package:poultary/daily_feed.dart';
 import 'package:poultary/inventory.dart';
 import 'package:poultary/medication_vaccination.dart';
+import 'package:poultary/settings_screen.dart';
 import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/transactions_screen.dart';
@@ -25,6 +26,7 @@ import 'CAS_Ads.dart';
 import 'add_flocks.dart';
 import 'all_events.dart';
 import 'all_reports_screen.dart';
+import 'auto_add_feed_screen.dart';
 import 'database/databse_helper.dart';
 import 'egg_collection.dart';
 import 'financial_report_screen.dart';
@@ -377,9 +379,9 @@ class _DashboardScreen extends State<DashboardScreen> {
 
     });
 
-    // bool isShow = await SessionManager.isShowWhatsNewDialog();
-    // if(isShow)
-    //   showWhatsNewDialog();
+     bool isShow = await SessionManager.isShowWhatsNewDialog();
+     if(isShow)
+       _showFeatureDialog();
 
   }
 
@@ -753,6 +755,12 @@ class _DashboardScreen extends State<DashboardScreen> {
                                     CupertinoPageRoute(
                                         builder: (context) => const ADDFlockScreen()),
                                   );
+
+                                /* await Navigator.push(
+                                    context,
+                                    CupertinoPageRoute(
+                                        builder: (context) =>  AutoFeedSyncScreen()),
+                                  );*/
 
                                   getList();
                                   getFilteredData(date_filter_name);
@@ -1363,6 +1371,71 @@ class _DashboardScreen extends State<DashboardScreen> {
     );
   }
 
+  void _showFeatureDialog() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'New Feature: Automatic Feed Management!',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'We’ve introduced a new feature that automates feed management for your flocks. '
+                    'Set it up once and let the app handle the rest! You can activate automatic feed management in app settings.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Utils.getThemeColorBlue(), // Button color for "Activate Now"
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10), // Padding for a better look
+                    ),
+                    onPressed: () {
+                      // Navigate to the settings screen or activate the feature
+                      SessionManager.setWhatsNewDialog(false);
+                      Navigator.pop(context); // Close the dialog
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const SettingsScreen()),
+                      ); // Example route
+                    },
+                    child: const Text('Activate Now', style: TextStyle(color: Colors.white),),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey, // Button color for "Not Now"
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10), // Padding for a better look
+                    ),
+                    onPressed: () {
+                      // Close the dialog and save the preference
+                      SessionManager.setWhatsNewDialog(false);
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Not Now', style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
 
 }

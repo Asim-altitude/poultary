@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SessionManager {
   static const String user_id = "user_id";
   static const String app_launch = "app_launch";
-  static const String whats_new = "whats_new";
+  static const String whats_new = "new_feature";
   static const String phone_id = "phone_id";
   static const String is_premium = "is_premium";
   static final String countryCode = "countryCode";

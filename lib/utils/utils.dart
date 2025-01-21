@@ -565,16 +565,22 @@ class Utils {
 
   static String getFormattedDate(String date){
 
-    if (date.toLowerCase().contains("date")){
-      return "Choose date".tr();
-    }
+   try {
+     if (date.toLowerCase().contains("date")) {
+       return "Choose date".tr();
+     }
 
-    var inputFormat = DateFormat('yyyy-MM-dd');
-    var inputDate = inputFormat.parse(date); // <-- dd/MM 24H format
+     var inputFormat = DateFormat('yyyy-MM-dd');
+     var inputDate = inputFormat.parse(date); // <-- dd/MM 24H format
 
-    var outputFormat = DateFormat('dd MMM yyyy');
-    var outputDate = outputFormat.format(inputDate);
-    return outputDate;
+     var outputFormat = DateFormat('dd MMM yyyy');
+     var outputDate = outputFormat.format(inputDate);
+     return outputDate;
+   }
+   catch(ex){
+     print(ex);
+     return date;
+   }
   }
 
   static String getReminderFormattedDate(String date){

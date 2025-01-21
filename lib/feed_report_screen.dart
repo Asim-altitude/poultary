@@ -18,6 +18,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'model/egg_item.dart';
 import 'model/feed_item.dart';
 import 'model/feed_report_item.dart';
+import 'model/feed_summary.dart';
 import 'model/flock.dart';
 import 'model/flock_detail.dart';
 
@@ -76,6 +77,8 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
   }
 
   List<Feeding> list = [];
+
+  List<FeedSummary> feedingSummary = [];
   List<String> flock_name = [];
 
 
@@ -93,7 +96,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
     clearValues();
 
-    list = await DatabaseHelper.getAllMostUsedFeeds(f_id, str_date, end_date);
+    feedingSummary = await DatabaseHelper.getMyMostUsedFeeds(f_id, str_date, end_date);
 
     total_feed_consumption = await DatabaseHelper.getTotalFeedConsumption(f_id, str_date, end_date);
     total_feed_consumption = num.parse(total_feed_consumption.toStringAsFixed(2));
@@ -280,9 +283,9 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
                             // Enable tooltip
                             tooltipBehavior: TooltipBehavior(enable: true),
-                            series: <CartesianSeries<Feeding, String>>[
+                            series: <CartesianSeries<FeedSummary, String>>[
 
-                              ColumnSeries(borderRadius: BorderRadius.all(Radius.circular(10)),color:Colors.deepOrange,name: 'Feed',dataSource: list, xValueMapper: (Feeding feedItem, _) => feedItem.feed_name, yValueMapper: (Feeding feedItem, _)=> double.parse(feedItem.quantity!),),
+                              ColumnSeries(borderRadius: BorderRadius.all(Radius.circular(10)),color:Colors.deepOrange,name: 'Feed',dataSource: feedingSummary, xValueMapper: (FeedSummary feedItem, _) => feedItem.feedName, yValueMapper: (FeedSummary feedItem, _)=> feedItem.totalQuantity,),
 
                             ]),
                         /*Expanded(
@@ -308,18 +311,18 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
                     SizedBox(height: 20,width: widthScreen,),
                     Container(
-                      height: list.length * 30,
+                      height: feedingSummary.length * 30,
                       width: widthScreen,
                       child: ListView.builder(
-                          itemCount: list.length,
+                          itemCount: feedingSummary.length,
                           scrollDirection: Axis.vertical,
                           physics: NeverScrollableScrollPhysics(),
                           itemBuilder: (BuildContext context, int index) {
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(list.elementAt(index).feed_name!.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                                Text(list.elementAt(index).quantity! + "KG".tr(),style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
+                                Text(feedingSummary.elementAt(index).feedName.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
+                                Text(feedingSummary.elementAt(index).totalQuantity.toString() + "KG".tr(),style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
 
                               ],);
 
@@ -335,119 +338,122 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                   ],),),
               ),
 
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-                  color: Utils.getScreenBackground(),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 2,
-                      blurRadius: 2,
-                      offset: Offset(0, 1), // changes position of shadow
-                    ),
-                  ],
+              Visibility(
+                visible: false,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+                    color: Utils.getScreenBackground(),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 2,
+                        offset: Offset(0, 1), // changes position of shadow
+                      ),
+                    ],
 
-                ),
-                child: Column(
-                  children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                          margin: EdgeInsets.all(10),
-                          child: Text('All Feedings'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
-                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.center,
+                        child: Container(
+                            margin: EdgeInsets.all(10),
+                            child: Text('All Feedings'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
+                      ),
 
-                    list.length > 0 ? Container(
-                      margin: EdgeInsets.only(top: 0,bottom: 20),
-                      height: list.length * 110,
-                      width: widthScreen,
-                      color: Utils.getScreenBackground(),
-                      child: ListView.builder(
-                          itemCount: list.length,
-                          scrollDirection: Axis.vertical,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemBuilder: (BuildContext context, int index) {
-                            return Container(
-                              margin: EdgeInsets.only(left: 8,right: 8,top: 8,bottom: 0),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.all(Radius.circular(3)),
-                                  color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
-                                    spreadRadius: 2,
-                                    blurRadius: 2,
-                                    offset: Offset(0, 1), // changes position of shadow
-                                  ),
-                                ],
+                      list.length > 0 ? Container(
+                        margin: EdgeInsets.only(top: 0,bottom: 20),
+                        height: list.length * 110,
+                        width: widthScreen,
+                        color: Utils.getScreenBackground(),
+                        child: ListView.builder(
+                            itemCount: list.length,
+                            scrollDirection: Axis.vertical,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemBuilder: (BuildContext context, int index) {
+                              return Container(
+                                margin: EdgeInsets.only(left: 8,right: 8,top: 8,bottom: 0),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.all(Radius.circular(3)),
+                                    color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.5),
+                                      spreadRadius: 2,
+                                      blurRadius: 2,
+                                      offset: Offset(0, 1), // changes position of shadow
+                                    ),
+                                  ],
 
-                              ),
-                              child: Container(
-                                child: Row( children: [
-                                  Expanded(
-                                    child: Container(
-                                      color: Colors.white,
-                                      alignment: Alignment.topLeft,
-                                      margin: EdgeInsets.all(10),
-                                      child: Column(children: [
-                                        Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).feed_name!.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),)),
-                                                Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index).f_name.tr()+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-                                              ],
-                                            ),
-                                            Container(
-                                              margin: EdgeInsets.only(right: 5),
-                                              child: Row(
+                                ),
+                                child: Container(
+                                  child: Row( children: [
+                                    Expanded(
+                                      child: Container(
+                                        color: Colors.white,
+                                        alignment: Alignment.topLeft,
+                                        margin: EdgeInsets.all(10),
+                                        child: Column(children: [
+                                          Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
                                                 children: [
-                                                  Image.asset("assets/p_feed.png", width: 40, height: 40,),
-                                                  Container( child: Text(list.elementAt(index).quantity.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color: Utils.getThemeColorBlue()),)),
-                                                  Text("KG".tr(), style: TextStyle(color: Colors.black, fontSize: 16),)
+                                                  Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).feed_name!.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),)),
+                                                  Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index).f_name.tr()+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
                                                 ],
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                        Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: Row(
-                                              children: [
-                                                //Container(margin: EdgeInsets.only(top:5), child: Text('Feeding on'.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
-                                                Icon(Icons.calendar_month, size: 25,),
-                                                Container(margin: EdgeInsets.only(top: 5, left: 5), child: Text(Utils.getFormattedDate(list.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-                                              ],
-                                            )),
+                                              Container(
+                                                margin: EdgeInsets.only(right: 5),
+                                                child: Row(
+                                                  children: [
+                                                    Image.asset("assets/p_feed.png", width: 40, height: 40,),
+                                                    Container( child: Text(list.elementAt(index).quantity.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color: Utils.getThemeColorBlue()),)),
+                                                    Text("KG".tr(), style: TextStyle(color: Colors.black, fontSize: 16),)
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Align(
+                                              alignment: Alignment.centerLeft,
+                                              child: Row(
+                                                children: [
+                                                  //Container(margin: EdgeInsets.only(top:5), child: Text('Feeding on'.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
+                                                  Icon(Icons.calendar_month, size: 25,),
+                                                  Container(margin: EdgeInsets.only(top: 5, left: 5), child: Text(Utils.getFormattedDate(list.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+                                                ],
+                                              )),
 
-                                        // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                      ],),
+                                          // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+                                        ],),
+                                      ),
                                     ),
-                                  ),
 
 
-                                ]),
-                              ),
-                            );
+                                  ]),
+                                ),
+                              );
 
-                          }),
-                    ) : Center(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 20),
+                            }),
+                      ) : Center(
                         child: Container(
-                          height: heightScreen - 200,
-                          width: widthScreen,
-                          child: Column(
-                            children: [
-                              Text('No Feeding added in current period'.tr(), style: TextStyle(fontSize: 18, color: Colors.black),),
-                            ],
+                          margin: EdgeInsets.only(top: 20),
+                          child: Container(
+                            height: heightScreen - 200,
+                            width: widthScreen,
+                            child: Column(
+                              children: [
+                                Text('No Feeding added in current period'.tr(), style: TextStyle(fontSize: 18, color: Colors.black),),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 
@@ -473,8 +479,6 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
     }
 
     _purposeselectedValue = _purposeList[0];
-
-
 
 
     setState(() {

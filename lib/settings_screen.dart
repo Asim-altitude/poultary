@@ -403,8 +403,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                           borderRadius: BorderRadius.all(Radius.circular(5)),
                           color: Colors.white,
                           boxShadow: [
-                            BoxShadow(
-                            ),
+                            BoxShadow(),
                           ],
                         ),
                         child: Column(
@@ -415,19 +414,17 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                                 alignment: Alignment.topLeft,
                                 child: Row(
                                   children: [
-
                                     SizedBox(width: 2,),
                                     Image.asset("assets/feed.png", color: Utils.getThemeColorBlue(), width: 20, height: 20,),
                                     SizedBox(width: 8,),
                                     Text('AUTO_FEED_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                                   ],
                                 )),
-
                           ],),),
                     ),
                   ),
 
-                  InkWell(
+                  /*InkWell(
                     onTap: () {
                       Navigator.push(
                         context,
@@ -472,7 +469,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
 
                           ],),),
                     ),
-                  ),
+                  ),*/
                  /* InkWell(
                     onTap: () {
                       Navigator.push(
