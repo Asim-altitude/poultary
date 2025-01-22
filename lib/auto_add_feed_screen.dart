@@ -326,10 +326,7 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const HomeScreen()),
-                      );
+                     _showSkipWarningDialog();
                     },
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14.0),
@@ -376,6 +373,72 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
       ),
     );
   }
+  void _showSkipWarningDialog() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Warning: Manual Entry Required',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'If you skip, you will need to manually add these feed records later.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close the dialog
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey, // Optional: Warning color
+                    ),
+                    child: const Text('Cancel', style: TextStyle(color: Colors.white),),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close the dialog
+                      _skipAction(); // Call the skip function
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Utils.getThemeColorBlue(), // Optional: Success color
+                    ),
+                    child: const Text('Skip Anyway', style: TextStyle(color: Colors.white),),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _skipAction() {
+    // Add the logic for skipping here
+    print("User chose to skip. Proceed with skipping...");
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
+    );
+  }
+
 
   void _deleteFeedRecord(int index) {
     setState(() {

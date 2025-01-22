@@ -29,6 +29,21 @@ class _NewEggCollection extends State<NewEggCollection>
   double widthScreen = 0;
   double heightScreen = 0;
 
+  // List of possible bird egg colors
+  final List<String> eggColors = [
+    'white',
+    'brown',
+    'blue',
+    'green',
+    'speckled',
+    'pink',
+    'cream',
+    'olive',
+  ];
+
+  // Selected color
+  String? selectedColor = "";
+
    bool isCollection;
   _NewEggCollection(this.isCollection);
 
@@ -63,6 +78,7 @@ class _NewEggCollection extends State<NewEggCollection>
       notesController.text = "${widget.eggs!.short_note!}";
       _reductionReasonValue = "${widget.eggs!.reduction_reason}";
       _purposeselectedValue = widget.eggs!.f_name!;
+      selectedColor = widget.eggs!.egg_color;
 
     }else
     {
@@ -73,7 +89,7 @@ class _NewEggCollection extends State<NewEggCollection>
       totalEggsController.text = "10";
       goodEggsController.text ="5";
       badEggsController.text =  "5";
-
+      selectedColor = eggColors[0];
     }
 
     getList();
@@ -481,6 +497,54 @@ class _NewEggCollection extends State<NewEggCollection>
                                   ],
                                 ):SizedBox(height: 0,width: widthScreen),
 
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Egg Color'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+
+                                    const SizedBox(height: 5),
+                                    Container(
+                                      height: 70,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.withAlpha(70),
+                                        borderRadius: const BorderRadius.all(Radius.circular(20.0)),
+                                        border: Border.all(
+                                          color: Colors.black,
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      margin: const EdgeInsets.only(left: 20, right: 20),
+                                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                                      child: DropdownButtonFormField<String>(
+                                        decoration: const InputDecoration.collapsed(hintText: null), // Disable internal decoration
+                                        value: selectedColor,
+                                        hint: const Text('Select Egg Color'),
+                                        items: eggColors.map((color) {
+                                          return DropdownMenuItem(
+                                            value: color,
+                                            child: SizedBox(
+                                              height: 60.0, // Set custom height for each item
+                                              child: Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: Text(color),
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                        onChanged: (value) {
+                                          setState(() {
+                                            selectedColor = value;
+                                          });
+                                        },
+                                        icon: const Icon(Icons.arrow_drop_down),
+                                        dropdownColor: Colors.white,
+                                      ),
+                                    ),
+
+                                  ],
+                                ),
+
                                 SizedBox(height: 10,width: widthScreen),
                                 Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DATE'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
 
@@ -582,6 +646,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                     widget.eggs!.f_id = getFlockID();
                                     widget.eggs!.f_name = _purposeselectedValue;
                                     widget.eggs!.date = this.date;
+                                    widget.eggs!.egg_color = selectedColor;
                                     widget.eggs!.good_eggs = int.parse(goodEggsController.text);
                                     widget.eggs!.bad_eggs =  int.parse(badEggsController.text);
                                     widget.eggs!.total_eggs = int.parse(
@@ -604,7 +669,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                         short_note: notesController.text,
                                         date: date,
                                         reduction_reason: '',
-                                        isCollection: 1));
+                                        isCollection: 1, egg_color: selectedColor));
                                     Utils.showToast("SUCCESSFUL".tr());
                                     Navigator.pop(context, "Egg ADDED");
                                   }
@@ -613,6 +678,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                     widget.eggs!.f_id = getFlockID();
                                     widget.eggs!.f_name = _purposeselectedValue;
                                     widget.eggs!.date = this.date;
+                                    widget.eggs!.egg_color = selectedColor;
                                     widget.eggs!.good_eggs =  int.parse(goodEggsController.text);
                                     widget.eggs!.bad_eggs = int.parse(badEggsController.text);
                                     widget.eggs!.reduction_reason = _reductionReasonValue;
@@ -635,7 +701,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                         short_note: notesController.text,
                                         date: date,
                                         reduction_reason: _reductionReasonValue,
-                                        isCollection: 0));
+                                        isCollection: 0, egg_color: selectedColor));
                                     Utils.showToast("SUCCESSFUL".tr());
                                     Navigator.pop(context, "Egg Reduced");
                                   }

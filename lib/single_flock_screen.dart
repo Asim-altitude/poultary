@@ -87,8 +87,15 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     super.initState();
     getImages();
     getUsage();
+    addEggColorColumn();
     Utils.setupAds();
 
+  }
+
+  void addEggColorColumn() async{
+    DatabaseHelper.instance.database;
+    await DatabaseHelper.addEggColorColumn();
+    print("DONE");
   }
 
 

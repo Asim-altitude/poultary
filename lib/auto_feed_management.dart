@@ -181,14 +181,13 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
               });
               _saveFlockSettings();
 
-              if (isAutoFeedEnabled) {
+              /*if (isAutoFeedEnabled) {
                 await requestNotificationPermissions();
                 await scheduleDailyNotification();
               } else {
                 await flutterLocalNotificationsPlugin.cancel(1);
                 // Cancels auto-feed notification with ID 1
-
-              }
+              }*/
             },
           ),
 

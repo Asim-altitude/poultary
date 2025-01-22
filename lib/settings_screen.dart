@@ -13,6 +13,7 @@ import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'auto_egg_collection.dart';
 import 'auto_feed_management.dart';
 import 'database/databse_helper.dart';
@@ -169,7 +170,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
     return SafeArea(child: Scaffold(
       body:SafeArea(
         top: false,
-          child:Container(
+        child:Container(
           width: widthScreen,
           height: heightScreen,
             color: Colors.white,
@@ -415,7 +416,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                                 child: Row(
                                   children: [
                                     SizedBox(width: 2,),
-                                    Image.asset("assets/feed.png", color: Utils.getThemeColorBlue(), width: 20, height: 20,),
+                                    Image.asset("assets/auto_feed_icon.png", color: Utils.getThemeColorBlue(), width: 20, height: 20,),
                                     SizedBox(width: 8,),
                                     Text('AUTO_FEED_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                                   ],
@@ -627,6 +628,34 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                           ],),),
                     ),
                   ),
+                  /*Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Contact Us',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 20),
+                        ListTile(
+                          leading: Icon(Icons.chat, color: Colors.green),
+                          title: Text('Contact via WhatsApp'),
+                          subtitle: Text('Chat with us directly on WhatsApp'),
+                          trailing: Icon(Icons.arrow_forward, color: Colors.green),
+                          onTap: () => _openWhatsApp(whatsappNumber),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          leading: Icon(Icons.group, color: Colors.blue),
+                          title: Text('Join Our WhatsApp Channel'),
+                          subtitle: Text('Stay updated with our latest news and updates'),
+                          trailing: Icon(Icons.arrow_forward, color: Colors.blue),
+                          onTap: () => _openWhatsAppChannel(whatsappChannelLink),
+                        ),
+                      ],
+                    ),
+                  ),*/
                 ],
               ),),
 
@@ -889,8 +918,6 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
       ),),),),),);
   }
 
-
-
   void addNewCollection(){
     Navigator.push(
       context,
@@ -1094,6 +1121,27 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
           await _inAppPurchase.completePurchase(purchaseDetails);
         }
       }
+    }
+  }
+
+
+  final String whatsappNumber = '+1234567890';
+  final String whatsappChannelLink = 'https://chat.whatsapp.com/exampleChannelLink';
+
+  void _openWhatsApp(String number) async {
+    final whatsappUrl = 'https://wa.me/$number';
+    if (await canLaunch(whatsappUrl)) {
+      await launch(whatsappUrl);
+    } else {
+      throw 'Could not launch $whatsappUrl';
+    }
+  }
+
+  void _openWhatsAppChannel(String channelLink) async {
+    if (await canLaunch(channelLink)) {
+      await launch(channelLink);
+    } else {
+      throw 'Could not launch $channelLink';
     }
   }
 

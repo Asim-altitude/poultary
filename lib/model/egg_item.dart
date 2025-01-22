@@ -1,7 +1,4 @@
-import 'dart:async';
 import 'dart:core';
-
-
 
 class Eggs{
 
@@ -12,6 +9,7 @@ class Eggs{
   int good_eggs = 0;
   int bad_eggs = 0;
   int total_eggs = 0;
+  String? egg_color;
   String? date;
   int? isCollection;
   String? reduction_reason;
@@ -20,8 +18,10 @@ class Eggs{
 
   Eggs(
       {
-        required this.f_id,required this.f_name, this.id, required this.image, required this.good_eggs,required this.bad_eggs
-        , required this.total_eggs, required this.date,required this.short_note, required this.isCollection,required this.reduction_reason
+        required this.f_id,required this.f_name, this.id, required this.image,
+        required this.good_eggs,required this.bad_eggs, required this.egg_color,
+        required this.total_eggs, required this.date,required this.short_note,
+        required this.isCollection,required this.reduction_reason
       });
 
   Eggs.fromJson(Map<String, dynamic> json) {
@@ -33,6 +33,7 @@ class Eggs{
     bad_eggs = json['spoilt_eggs'];
     total_eggs = json['total_eggs'];
     isCollection = json['isCollection'];
+    egg_color = json['egg_color'];
     reduction_reason = json['reduction_reason'];
     date = json['collection_date'].toString();
     short_note = json['short_note'].toString();
@@ -52,6 +53,7 @@ class Eggs{
     data['collection_date'] = this.date;
     data['reduction_reason'] = this.reduction_reason;
     data['isCollection'] = this.isCollection;
+    data['egg_color'] = this.egg_color;
 
     return data;
   }

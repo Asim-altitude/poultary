@@ -234,7 +234,7 @@ class _NewIncome extends State<NewIncome>
               print("F DETAIL ID ${item_ids[i]}");
               Flock_Detail? flock_detail = await DatabaseHelper.getSingleFlockDetails(int.parse(item_ids[i]));
               Flock? flock = await DatabaseHelper.getSingleFlock(flock_detail!.f_id);
-              FinanceFlockItem financeFlockItem = new FinanceFlockItem(id: flock_detail!.f_id, name: flock_detail.f_name, active_birds: flock!.active_bird_count!, selected_birds: flock_detail.item_count, isActive: true);
+              FinanceFlockItem financeFlockItem = new FinanceFlockItem(id: flock_detail.f_id, name: flock_detail.f_name, active_birds: flock!.active_bird_count!, selected_birds: flock_detail.item_count, isActive: true);
               financeList.add(financeFlockItem);
             }
 

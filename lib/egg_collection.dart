@@ -57,6 +57,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
   }
 
+
   @override
   void initState() {
     super.initState();
@@ -423,6 +424,16 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                                             Text("Eggs", style: TextStyle(color: Colors.black, fontSize: 12),),
                                             Text(" On", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14),),
                                             Container(margin: EdgeInsets.all(5), child: Text(Utils.getFormattedDate(eggs.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        margin: EdgeInsets.only(right: 10),
+                                        child: Row(
+                                          children: [
+                                            Text("Color"+": ", style: TextStyle(color: Colors.black, fontSize: 12),),
+                                            Text(eggs.elementAt(index).egg_color!, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14),),
 
                                           ],
                                         ),
