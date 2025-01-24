@@ -103,7 +103,7 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
       // Ensure lastSyncDate is not null; default to 30 days ago if missing
       DateTime currentDate = DateTime.now();
       currentDate = DateTime(currentDate.year, currentDate.month, currentDate.day); // Truncate to midnight
-      DateTime startSyncDate = lastSyncDate ?? currentDate.subtract(const Duration(days: 30));
+      DateTime startSyncDate = lastSyncDate ?? currentDate.subtract(const Duration(days: 5));
       startSyncDate = DateTime(startSyncDate.year, startSyncDate.month, startSyncDate.day); // Truncate to midnight
 
       print("LAST_SYNC: $startSyncDate");
@@ -115,30 +115,72 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
         for (DateTime date = startSyncDate.add(const Duration(days: 1));
         !date.isAfter(currentDate); // Inclusive condition
         date = date.add(const Duration(days: 1))) {
+
           // Get the day of the week (Monday = 1, Sunday = 7)
           int weekday = date.weekday - 1; // Adjust to 0-based index
 
-          // Find the feed setting for the specific day
-          FeedSetting? feedSetting = setting.feedSettings.firstWhereOrNull(
-                (fs) => fs.day == _getDayName(weekday),
-          );
-
-          if (feedSetting != null) {
-            // Proceed with adding the feeding record
-            String formattedDate = DateFormat('yyyy-MM-dd').format(date);
-            Feeding newFeeding = Feeding(
-              f_id: setting.id,
-              f_name: setting.name,
-              feed_name: feedSetting.feedName,
-              quantity: feedSetting.dailyRequirement,
-              date: formattedDate,
-              short_note: 'Automatically added feed for $formattedDate',
+          if (setting.isTwiceADay) {
+            // Generate two feeding records if Twice a Day is enabled
+            FeedSetting? morningFeedSetting = setting.morningFeedSettings.firstWhereOrNull(
+                  (fs) => fs.day == _getDayName(weekday),
             );
-            print("F_ID ${newFeeding.f_id} date ${newFeeding.date} qty ${newFeeding.quantity} f_name ${newFeeding.f_name}");
-            // Add the new feeding record
-            setState(() {
-              pendingFeedRecords.add(newFeeding);
-            });
+
+            FeedSetting? eveningFeedSetting = setting.eveningFeedSettings.firstWhereOrNull(
+                  (fs) => fs.day == _getDayName(weekday),
+            );
+
+            if (morningFeedSetting != null) {
+              String formattedDate = DateFormat('yyyy-MM-dd').format(date);
+              Feeding morningFeeding = Feeding(
+                f_id: setting.id,
+                f_name: setting.name,
+                feed_name: morningFeedSetting.feedName,
+                quantity: morningFeedSetting.dailyRequirement,
+                date: formattedDate,
+                short_note: 'Automatically added morning feed for $formattedDate',
+              );
+              print("Morning Feeding: F_ID ${morningFeeding.f_id}, date ${morningFeeding.date}, qty ${morningFeeding.quantity}, f_name ${morningFeeding.f_name}");
+              setState(() {
+                pendingFeedRecords.add(morningFeeding);
+              });
+            }
+
+            if (eveningFeedSetting != null) {
+              String formattedDate = DateFormat('yyyy-MM-dd').format(date);
+              Feeding eveningFeeding = Feeding(
+                f_id: setting.id,
+                f_name: setting.name,
+                feed_name: eveningFeedSetting.feedName,
+                quantity: eveningFeedSetting.dailyRequirement,
+                date: formattedDate,
+                short_note: 'Automatically added evening feed for $formattedDate',
+              );
+              print("Evening Feeding: F_ID ${eveningFeeding.f_id}, date ${eveningFeeding.date}, qty ${eveningFeeding.quantity}, f_name ${eveningFeeding.f_name}");
+              setState(() {
+                pendingFeedRecords.add(eveningFeeding);
+              });
+            }
+          } else {
+            // Generate a single feeding record if Twice a Day is off (Once a Day)
+            FeedSetting? feedSetting = setting.feedSettings.firstWhereOrNull(
+                  (fs) => fs.day == _getDayName(weekday),
+            );
+
+            if (feedSetting != null) {
+              String formattedDate = DateFormat('yyyy-MM-dd').format(date);
+              Feeding newFeeding = Feeding(
+                f_id: setting.id,
+                f_name: setting.name,
+                feed_name: feedSetting.feedName,
+                quantity: feedSetting.dailyRequirement,
+                date: formattedDate,
+                short_note: 'Automatically added feed for $formattedDate',
+              );
+              print("Once a Day Feeding: F_ID ${newFeeding.f_id}, date ${newFeeding.date}, qty ${newFeeding.quantity}, f_name ${newFeeding.f_name}");
+              setState(() {
+                pendingFeedRecords.add(newFeeding);
+              });
+            }
           }
         }
       }

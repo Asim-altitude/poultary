@@ -77,7 +77,6 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
           .map((e) => AutomaticFeedSetting.fromJson(e))
           .toList();
 
-      // Sync saved settings with current flocks
       setState(() {
         automaticFeedFlocks = flocks.map((flock) {
           AutomaticFeedSetting? savedSetting = savedSettings.firstWhere(
@@ -86,23 +85,33 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
               id: flock.f_id,
               name: flock.f_name,
               feedSettings: _generateDefaultFeedSettings(),
+              morningFeedSettings: [], // Initialize for backward compatibility
+              eveningFeedSettings: [], // Initialize for backward compatibility
             ),
           );
 
           return AutomaticFeedSetting(
             id: flock.f_id,
             name: flock.f_name,
+            isTwiceADay: savedSetting.isTwiceADay,
             feedSettings: savedSetting.feedSettings,
+            morningFeedSettings: savedSetting.morningFeedSettings.isEmpty
+                ? _generateDefaultFeedSettings()
+                : savedSetting.morningFeedSettings, // Populate default if empty
+            eveningFeedSettings: savedSetting.eveningFeedSettings.isEmpty
+                ? _generateDefaultFeedSettings()
+                : savedSetting.eveningFeedSettings, // Populate default if empty
           );
         }).toList();
       });
     } else {
-      // Initialize feed settings for each flock if no saved settings found
       setState(() {
         automaticFeedFlocks = flocks.map((flock) => AutomaticFeedSetting(
           id: flock.f_id,
           name: flock.f_name,
-          feedSettings: _generateDefaultFeedSettings(), // Define your default feed settings function
+          feedSettings: _generateDefaultFeedSettings(),
+          morningFeedSettings: [], // Initialize as empty list
+          eveningFeedSettings: [], // Initialize as empty list
         )).toList();
       });
     }
@@ -114,15 +123,16 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
       print('SAVED_DATE $savedDate');
 
       if (savedDate != null) {
-        _startingDate = DateTime.parse(savedDate); // Parse the string to DateTime
+        _startingDate = DateTime.parse(savedDate);
       }
-
     });
   }
+
 
   Future<void> _saveFlockSettings() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String flocksJson = json.encode(automaticFeedFlocks.map((e) => e.toJson()).toList());
+
     // Save the isAutoFeedEnabled state
     await prefs.setBool('isAutoFeedEnabled', isAutoFeedEnabled);
     await prefs.setString('flockSettings', flocksJson);
@@ -130,8 +140,8 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Settings saved successfully!')),
     );
-
   }
+
 
   List<FeedSetting> _generateDefaultFeedSettings() {
     List<String> days = ["Mon", "Tues", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -268,136 +278,136 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.grey),
                     ),
                     children: [
-                      // Labels Row
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 1,
-                              child: Text(
-                                'Day',
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 3,
-                              child: Text(
-                                'Feed',
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                'Qty (kg)',
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      // Toggle Between Once and Twice a Day
+                      SwitchListTile(
+                        title: Text("Enable Twice a Day Feed"),
+                        value: flock.isTwiceADay,
+                        onChanged: isAutoFeedEnabled
+                            ? (value) {
+                          setState(() {
+                            flock.isTwiceADay = value;
 
-                      // Dynamic Feed Settings List
-                      ...flock.feedSettings.map((setting) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          child: Row(
+                            // Initialize morning and evening feed settings if switching to Twice a Day
+                            if (value) {
+                              flock.morningFeedSettings ??= List.from(flock.feedSettings);
+                              flock.eveningFeedSettings ??= _generateDefaultFeedSettings();
+                            }
+                          });
+                        }
+                            : null,
+                      ),
+                      // Show Tab View for Morning and Evening Feed Settings if Twice a Day is Enabled
+                      if (flock.isTwiceADay)
+                        DefaultTabController(
+                          length: 2,
+                          child: Column(
                             children: [
-                              // Day Column
-                              Expanded(
-                                flex: 1,
-                                child: Text(
-                                  setting.day,
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                                ),
+                              TabBar(
+                                labelColor: Utils.getThemeColorBlue(),
+                                unselectedLabelColor: Colors.grey,
+                                indicatorColor: Utils.getThemeColorBlue(),
+                                tabs: [
+                                  Tab(text: "Morning Feed"),
+                                  Tab(text: "Evening Feed"),
+                                ],
                               ),
-                              // Feed Dropdown
-                              Expanded(
-                                flex: 3,
-                                child: Container(
-                                  height: 48,
-                                  padding: EdgeInsets.symmetric(horizontal: 12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: Colors.grey.shade300),
-                                  ),
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton<String>(
-                                      value: setting.feedName,
-                                      isExpanded: true,
-                                      icon: Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue()),
-                                      items: _feedList.map((feed) {
-                                        return DropdownMenuItem(
-                                          value: feed,
-                                          child: Text(
-                                            feed,
-                                            style: TextStyle(fontSize: 16),
-                                            overflow: TextOverflow.ellipsis, // Handle long text
+                              Container(
+                                height: 420, // Adjust the height as needed
+                                child: TabBarView(
+                                  children: [
+                                    // Morning Feed Settings
+                                    Column(
+                                      children: [
+                                        _buildGlobalFeedControl(
+                                          context,
+                                          "Morning",
+                                          flock.morningFeedSettings,
+                                              (feedName, qty) {
+                                            setState(() {
+                                              flock.morningFeedSettings?.forEach((setting) {
+                                                setting.feedName = feedName;
+                                                setting.dailyRequirement = qty;
+                                              });
+                                            });
+                                          },
+                                        ),
+                                        Expanded(
+                                          child: ListView.builder(
+                                            itemCount: flock.morningFeedSettings?.length ?? 0,
+                                            itemBuilder: (context, index) {
+                                              final setting = flock.morningFeedSettings![index];
+                                              return _buildFeedSettingRow(setting);
+                                            },
                                           ),
-                                        );
-                                      }).toList(),
-                                      onChanged: isAutoFeedEnabled
-                                          ? (value) {
-                                        setState(() {
-                                          setting.feedName = value!;
-                                        });
-                                      }
-                                          : null,
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                ),
-                              ),
-                              // Qty Text Field
-                              Expanded(
-                                flex: 2,
-                                child: Container(
-                                  height: 48,
-                                  padding: EdgeInsets.symmetric(horizontal: 12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: Colors.grey.shade300),
-                                  ),
-                                  child: TextField(
-                                    decoration: InputDecoration(
-                                      hintText: 'Qty',
-                                      border: InputBorder.none,
+                                    // Evening Feed Settings
+                                    Column(
+                                      children: [
+                                        _buildGlobalFeedControl(
+                                          context,
+                                          "Evening",
+                                          flock.eveningFeedSettings,
+                                              (feedName, qty) {
+                                            setState(() {
+                                              flock.eveningFeedSettings?.forEach((setting) {
+                                                setting.feedName = feedName;
+                                                setting.dailyRequirement = qty;
+                                              });
+                                            });
+                                          },
+                                        ),
+                                        Expanded(
+                                          child: ListView.builder(
+                                            itemCount: flock.eveningFeedSettings?.length ?? 0,
+                                            itemBuilder: (context, index) {
+                                              final setting = flock.eveningFeedSettings![index];
+                                              return _buildFeedSettingRow(setting);
+                                            },
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    controller: TextEditingController.fromValue(
-                                      TextEditingValue(
-                                        text: setting.dailyRequirement,
-                                        selection: TextSelection.collapsed(offset: setting.dailyRequirement.length),
-                                      ),
-                                    ),
-                                    onChanged: isAutoFeedEnabled
-                                        ? (value) {
-                                      setState(() {
-                                        setting.dailyRequirement = value;
-                                      });
-                                    }
-                                        : null,
-                                    enabled: isAutoFeedEnabled,
-                                    style: TextStyle(fontSize: 16),
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      LengthLimitingTextInputFormatter(3),
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                  ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
-                        );
-                      }).toList(),
+                        )
+                      else
+                      // Single Feed Setting for Once a Day
+                        Column(
+                          children: [
+                            _buildGlobalFeedControlForOnceADay(context, "Daily", automaticFeedFlocks.single.feedSettings,
+                                  (feedName, qty) {
+                              setState(() {
+                                automaticFeedFlocks.single.feedSettings.forEach((setting) {
+                                  setting.feedName = feedName;
+                                  setting.dailyRequirement = qty;
+                                });
+                              });
+                            },),
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: flock.feedSettings.length,
+                              itemBuilder: (context, index) {
+                                final setting = flock.feedSettings[index];
+                                return _buildFeedSettingRow(setting);
+                              },
+                            ),
+                          ],
+                        ),
                     ],
                   ),
                 );
+
+
               },
             ),
           ),
+
         ],
       ),
       bottomNavigationBar: Padding(
@@ -440,6 +450,350 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
     );
   }
 
+  Widget _buildGlobalFeedControl(
+      BuildContext context,
+      String title,
+      List<FeedSetting> feedSettings,
+      Function(String feedName, String qty) onApply,
+      ) {
+    TextEditingController feedNameController = TextEditingController();
+    TextEditingController qtyController = TextEditingController();
+
+    return Card(
+      margin: EdgeInsets.all(8),
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title
+            Text(
+              "Set $title Feed for All Days",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Utils.getThemeColorBlue(),
+              ),
+            ),
+            SizedBox(height: 12),
+            // Feed Name & Quantity Fields in Row
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Feed Name Dropdown
+                Expanded(
+                  child: Container(
+                    height: 48,
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: feedSettings.isNotEmpty ? feedSettings[0].feedName : null,
+                        isExpanded: true,
+                        icon: Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue()),
+                        items: _feedList
+                            .map((feed) => DropdownMenuItem(
+                          value: feed,
+                          child: Text(
+                            feed,
+                            style: TextStyle(fontSize: 16),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ))
+                            .toList(),
+                        onChanged: (value) {
+                          feedNameController.text = value ?? "";
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 12),
+                // Quantity Input
+                Container(
+                  height: 48,
+                  width: 80, // Narrow width for quantity
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: TextField(
+                    controller: qtyController,
+                    decoration: InputDecoration(
+                      hintText: 'Qty',
+                      border: InputBorder.none,
+                    ),
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16),
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(3),
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                  ),
+                ),
+                SizedBox(width: 12),
+                // Apply Button
+                ElevatedButton(
+                  onPressed: () {
+                    if (feedNameController.text.isEmpty || qtyController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Please enter both Feed and Quantity")),
+                      );
+                    } else {
+                      // Apply the settings
+                      onApply(feedNameController.text, qtyController.text);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Applied to all days successfully!")),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    "Apply",
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGlobalFeedControlForOnceADay(
+      BuildContext context,
+      String title,
+      List<FeedSetting> feedSettings,
+      Function(String feedName, String qty) onApply,
+      ) {
+    TextEditingController feedNameController = TextEditingController();
+    TextEditingController qtyController = TextEditingController();
+
+    return Card(
+      margin: EdgeInsets.all(8),
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title
+            Text(
+              "Set $title Feed for All Days",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Utils.getThemeColorBlue(),
+              ),
+            ),
+            SizedBox(height: 12),
+            // Feed Name & Quantity Fields in Row
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Feed Name Dropdown
+                Expanded(
+                  child: Container(
+                    height: 48,
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: feedSettings.isNotEmpty ? feedSettings[0].feedName : null,
+                        isExpanded: true,
+                        icon: Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue()),
+                        items: _feedList
+                            .map((feed) => DropdownMenuItem(
+                          value: feed,
+                          child: Text(
+                            feed,
+                            style: TextStyle(fontSize: 16),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ))
+                            .toList(),
+                        onChanged: (value) {
+                          feedNameController.text = value ?? "";
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 12),
+                // Quantity Input
+                Container(
+                  height: 48,
+                  width: 80, // Narrow width for quantity
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: TextField(
+                    controller: qtyController,
+                    decoration: InputDecoration(
+                      hintText: 'Qty',
+                      border: InputBorder.none,
+                    ),
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16),
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(3),
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                  ),
+                ),
+                SizedBox(width: 12),
+                // Apply Button
+                ElevatedButton(
+                  onPressed: () {
+                    if (feedNameController.text.isEmpty || qtyController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Please enter both Feed and Quantity")),
+                      );
+                    } else {
+                      // Apply the settings
+                      onApply(feedNameController.text, qtyController.text);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Applied to all days successfully!")),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    "Apply",
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+
+
+  Widget _buildFeedSettingRow(FeedSetting setting) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Row(
+        children: [
+          // Day Column
+          Expanded(
+            flex: 1,
+            child: Text(
+              setting.day,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+          ),
+          // Feed Dropdown
+          Expanded(
+            flex: 3,
+            child: Container(
+              height: 48,
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: setting.feedName,
+                  isExpanded: true,
+                  icon: Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue()),
+                  items: _feedList.map((feed) {
+                    return DropdownMenuItem(
+                      value: feed,
+                      child: Text(
+                        feed,
+                        style: TextStyle(fontSize: 16),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: isAutoFeedEnabled
+                      ? (value) {
+                    setState(() {
+                      setting.feedName = value!;
+                    });
+                  }
+                      : null,
+                ),
+              ),
+            ),
+          ),
+          // Qty Text Field
+          Expanded(
+            flex: 2,
+            child: Container(
+              height: 48,
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Qty',
+                  border: InputBorder.none,
+                ),
+                controller: TextEditingController.fromValue(
+                  TextEditingValue(
+                    text: setting.dailyRequirement,
+                    selection: TextSelection.collapsed(offset: setting.dailyRequirement.length),
+                  ),
+                ),
+                onChanged: isAutoFeedEnabled
+                    ? (value) {
+                  setState(() {
+                    setting.dailyRequirement = value;
+                  });
+                }
+                    : null,
+                enabled: isAutoFeedEnabled,
+                style: TextStyle(fontSize: 16),
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(3),
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
 
   /// Schedules daily notifications
@@ -496,31 +850,52 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
   }
 
 }
-
 class AutomaticFeedSetting {
-  final int id; // Add flock ID
-  final String name;
-  final List<FeedSetting> feedSettings;
+  int id;
+  String name;
+  bool isTwiceADay; // New property
+  List<FeedSetting> feedSettings;
+  List<FeedSetting> morningFeedSettings; // Morning feeds for Twice a Day
+  List<FeedSetting> eveningFeedSettings; // Evening feeds for Twice a Day
 
-  AutomaticFeedSetting({required this.id, required this.name, required this.feedSettings});
+  AutomaticFeedSetting({
+    required this.id,
+    required this.name,
+    this.isTwiceADay = false,
+    this.feedSettings = const [],
+    this.morningFeedSettings = const [],
+    this.eveningFeedSettings = const [],
+  });
 
-  // Convert to JSON
   Map<String, dynamic> toJson() => {
     'id': id,
     'name': name,
+    'isTwiceADay': isTwiceADay,
     'feedSettings': feedSettings.map((e) => e.toJson()).toList(),
+    'morningFeedSettings': morningFeedSettings.map((e) => e.toJson()).toList(),
+    'eveningFeedSettings': eveningFeedSettings.map((e) => e.toJson()).toList(),
   };
 
-  // Create from JSON
-  factory AutomaticFeedSetting.fromJson(Map<String, dynamic> json) => AutomaticFeedSetting(
-    id: json['id'] ?? 0, // Handle null ID gracefully
-    name: json['name'],
-    feedSettings: (json['feedSettings'] as List)
-        .map((e) => FeedSetting.fromJson(e))
-        .toList(),
-  );
-}
+  factory AutomaticFeedSetting.fromJson(Map<String, dynamic> json) {
+    return AutomaticFeedSetting(
+      id: json['id'],
+      name: json['name'],
+      isTwiceADay: json['isTwiceADay'] ?? false,
+      feedSettings: (json['feedSettings'] as List)
+          .map((e) => FeedSetting.fromJson(e))
+          .toList(),
+      morningFeedSettings: (json['morningFeedSettings'] as List?)
+          ?.map((e) => FeedSetting.fromJson(e))
+          .toList() ??
+          [], // Initialize as empty list if not present
+      eveningFeedSettings: (json['eveningFeedSettings'] as List?)
+          ?.map((e) => FeedSetting.fromJson(e))
+          .toList() ??
+          [], // Initialize as empty list if not present
+    );
+  }
 
+}
 
 class FeedSetting {
   final String day;

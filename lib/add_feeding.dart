@@ -15,6 +15,7 @@ import 'package:poultary/model/feed_item.dart';
 import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'database/databse_helper.dart';
 import 'model/bird_item.dart';
@@ -52,8 +53,6 @@ class _NewFeeding extends State<NewFeeding>
 
   int chosen_index = 0;
   bool isEdit = false;
-
-
   @override
   void initState() {
     super.initState();
@@ -77,6 +76,8 @@ class _NewFeeding extends State<NewFeeding>
     Utils.setupAds();
 
   }
+
+
 
   List<Flock> flocks = [];
   void getList() async {

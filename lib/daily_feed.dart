@@ -1,23 +1,16 @@
 import 'dart:async';
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:poultary/add_eggs.dart';
 import 'package:poultary/add_feeding.dart';
-import 'package:poultary/inventory.dart';
 import 'package:poultary/model/feed_item.dart';
-import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
-
-import 'add_flocks.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'database/databse_helper.dart';
-import 'model/egg_item.dart';
 import 'model/flock.dart';
 
 class DailyFeedScreen extends StatefulWidget {
@@ -32,6 +25,8 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
 
   double widthScreen = 0;
   double heightScreen = 0;
+
+  bool isAutoFeedEnabled = false;
 
   @override
   void dispose() {
@@ -57,8 +52,71 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
 
     _other_filter = (await SessionManager.getOtherFilter())!;
     date_filter_name = filterList.elementAt(_other_filter);
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    isAutoFeedEnabled = prefs.getBool('isAutoFeedEnabled') ?? false;
+
+
     getData(date_filter_name);
   }
+
+  Future<void> _addManualFeedingRecord() async {
+    // Check if automatic feed management is turned on
+    if (isAutoFeedEnabled) {
+      // Show bottom dialog asking for confirmation
+      bool? shouldProceed = await showModalBottomSheet<bool>(
+        context: context,
+        isDismissible: false,
+        builder: (BuildContext context) {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Automatic Feed Enabled", style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Utils.getThemeColorBlue()),),
+                SizedBox(height: 20,),
+                Text(
+                  'The automatic feed management is also turned on and adding manual records may result in inconsistent feeding records. Are you sure you still want to add manual feeding record?',
+                  style: TextStyle(fontSize: 16),
+                ),
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context, false); // User cancels
+                      },
+                      child: Text("Cancel", style: TextStyle(color: Colors.grey),),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        addNewCollection();// User proceeds
+                      },
+                      child: Text("Still Proceed"),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      // If user cancels, return early
+      if (shouldProceed == false) {
+        return;
+      }
+    }
+
+    // Proceed with adding the manual feeding record
+    // Your logic for adding manual feeding record here
+    print("Adding manual feeding record...");
+
+  }
+
 
   @override
   void initState() {
@@ -106,7 +164,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            addNewCollection();
+            _addManualFeedingRecord();
           },
           child: Container(
             height: 50,
