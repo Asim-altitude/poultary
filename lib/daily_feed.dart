@@ -10,6 +10,7 @@ import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'auto_feed_management.dart';
 import 'database/databse_helper.dart';
 import 'model/flock.dart';
 
@@ -40,7 +41,6 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
     await DatabaseHelper.instance.database;
 
     flocks = await DatabaseHelper.getFlocks();
-
     flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
 
     for(int i=0;i<flocks.length;i++){
@@ -54,11 +54,10 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
     date_filter_name = filterList.elementAt(_other_filter);
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     isAutoFeedEnabled = prefs.getBool('isAutoFeedEnabled') ?? false;
 
-
     getData(date_filter_name);
+
   }
 
   Future<void> _addManualFeedingRecord() async {
@@ -75,10 +74,10 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Automatic Feed Enabled", style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Utils.getThemeColorBlue()),),
+                Text("Automatic Feed Enabled".tr(), style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Utils.getThemeColorBlue()),),
                 SizedBox(height: 20,),
                 Text(
-                  'The automatic feed management is also turned on and adding manual records may result in inconsistent feeding records. Are you sure you still want to add manual feeding record?',
+                  'auto_feed_msg'.tr(),
                   style: TextStyle(fontSize: 16),
                 ),
                 SizedBox(height: 16),
@@ -89,13 +88,13 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                       onPressed: () {
                         Navigator.pop(context, false); // User cancels
                       },
-                      child: Text("Cancel", style: TextStyle(color: Colors.grey),),
+                      child: Text("CANCEL".tr(), style: TextStyle(color: Colors.grey),),
                     ),
                     ElevatedButton(
                       onPressed: () {
                         addNewCollection();// User proceeds
                       },
-                      child: Text("Still Proceed"),
+                      child: Text("Still Proceed".tr()),
                     ),
                   ],
                 ),
@@ -109,6 +108,12 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
       if (shouldProceed == false) {
         return;
       }
+    }else{
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>  NewFeeding()),
+      );
     }
 
     // Proceed with adding the manual feeding record
@@ -381,6 +386,49 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                   ),
                 ],),
               )*/
+              Visibility(
+                visible: !isAutoFeedEnabled,
+                child: InkWell(
+                  onTap: () async {
+                   await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>  AutomaticFeedManagementScreen()),
+                    );
+
+                   SharedPreferences prefs = await SharedPreferences.getInstance();
+                   isAutoFeedEnabled = prefs.getBool('isAutoFeedEnabled') ?? false;
+
+                   setState(() {
+
+                   });
+
+                  },
+                  child: Container(height: 60,
+                    width: widthScreen,
+                    margin: EdgeInsets.all(10.0),
+                    padding: EdgeInsets.all(10.0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 2,
+                          offset: Offset(0, 1), // changes position of shadow
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(child: Text('Automatic Feed Management'.tr(), style: TextStyle(color: Utils.getThemeColorBlue(), fontSize: 15, fontWeight: FontWeight.w600),)),
+                        Icon(Icons.arrow_forward_ios_rounded, color: Utils.getThemeColorBlue(), size: 30,)
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               feedings.length > 0 ? Container(
                 height: heightScreen,
                 width: widthScreen,

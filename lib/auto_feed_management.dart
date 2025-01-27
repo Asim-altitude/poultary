@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -63,7 +64,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
 
   Future<List<String>> _fetchFeedList() async {
     List<SubItem> subItemList = await DatabaseHelper.getSubCategoryList(3);
-    List<String> feedList = ["Not Specified"];
+    List<String> feedList = ["Not Specified".tr()];
     feedList.addAll(subItemList.map((item) => item.name ?? "Unknown"));
     return feedList;
   }
@@ -138,7 +139,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
     await prefs.setString('flockSettings', flocksJson);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Settings saved successfully!')),
+      SnackBar(content: Text('Settings saved successfully!'.tr())),
     );
   }
 
@@ -171,7 +172,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
         iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: Utils.getThemeColorBlue(),
         title: Text(
-          'Automatic Feed Management',
+          'Automatic Feed Management'.tr(),
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
         ),
       ),
@@ -180,7 +181,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
           // Toggle Switch
           SwitchListTile(
             title: Text(
-              'Turn On/Off',
+              'Turn On/Off'.tr(),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
             ),
             value: isAutoFeedEnabled,
@@ -206,7 +207,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
             Column(
               children: [
                 Text(
-                  "Automatic Daily Feed Records will be generated.",
+                  "Automatic Daily Feed Records will be generated.".tr(),
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey),
                 ),
                 Padding(
@@ -214,7 +215,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                   child: Row(
                     children: [
                       Text(
-                        "Last Sync:",
+                        "Last Sync:".tr(),
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                       ),
                       SizedBox(width: 16),
@@ -247,7 +248,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                             child: Text(
                               _startingDate != null
                                   ? "${_startingDate!.day}-${_startingDate!.month}-${_startingDate!.year}"
-                                  : "Select Date",
+                                  : "Select Date".tr(),
                               style: TextStyle(fontSize: 16, color: Colors.black87),
                             ),
                           ),
@@ -274,13 +275,13 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
                     ),
                     subtitle: Text(
-                      "Expand to customize feed",
+                      "Expand to customize feed".tr(),
                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.grey),
                     ),
                     children: [
                       // Toggle Between Once and Twice a Day
                       SwitchListTile(
-                        title: Text("Enable Twice a Day Feed"),
+                        title: Text("Enable Twice a Day Feed".tr()),
                         value: flock.isTwiceADay,
                         onChanged: isAutoFeedEnabled
                             ? (value) {
@@ -307,8 +308,8 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                                 unselectedLabelColor: Colors.grey,
                                 indicatorColor: Utils.getThemeColorBlue(),
                                 tabs: [
-                                  Tab(text: "Morning Feed"),
-                                  Tab(text: "Evening Feed"),
+                                  Tab(text: "Morning Feed".tr()),
+                                  Tab(text: "Evening Feed".tr()),
                                 ],
                               ),
                               Container(
@@ -320,12 +321,12 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                                       children: [
                                         _buildGlobalFeedControl(
                                           context,
-                                          "Morning",
+                                          "Morning".tr(),
                                           flock.morningFeedSettings,
                                               (feedName, qty) {
                                             setState(() {
-                                              flock.morningFeedSettings?.forEach((setting) {
-                                                setting.feedName = feedName;
+                                              flock.morningFeedSettings.forEach((setting) {
+                                                setting.feedName = feedName.tr();
                                                 setting.dailyRequirement = qty;
                                               });
                                             });
@@ -333,9 +334,9 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                                         ),
                                         Expanded(
                                           child: ListView.builder(
-                                            itemCount: flock.morningFeedSettings?.length ?? 0,
+                                            itemCount: flock.morningFeedSettings.length ?? 0,
                                             itemBuilder: (context, index) {
-                                              final setting = flock.morningFeedSettings![index];
+                                              final setting = flock.morningFeedSettings[index];
                                               return _buildFeedSettingRow(setting);
                                             },
                                           ),
@@ -347,12 +348,12 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                                       children: [
                                         _buildGlobalFeedControl(
                                           context,
-                                          "Evening",
+                                          "Evening".tr(),
                                           flock.eveningFeedSettings,
                                               (feedName, qty) {
                                             setState(() {
-                                              flock.eveningFeedSettings?.forEach((setting) {
-                                                setting.feedName = feedName;
+                                              flock.eveningFeedSettings.forEach((setting) {
+                                                setting.feedName = feedName.tr();
                                                 setting.dailyRequirement = qty;
                                               });
                                             });
@@ -360,9 +361,9 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                                         ),
                                         Expanded(
                                           child: ListView.builder(
-                                            itemCount: flock.eveningFeedSettings?.length ?? 0,
+                                            itemCount: flock.eveningFeedSettings.length ?? 0,
                                             itemBuilder: (context, index) {
-                                              final setting = flock.eveningFeedSettings![index];
+                                              final setting = flock.eveningFeedSettings[index];
                                               return _buildFeedSettingRow(setting);
                                             },
                                           ),
@@ -436,7 +437,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
               ),
               SizedBox(width: 8),
               Text(
-                'Save Settings',
+                'Save Settings'.tr(),
                 style: TextStyle(
                   color: isAutoFeedEnabled ? Colors.white : Colors.grey.shade600,
                   fontWeight: FontWeight.w600,
@@ -469,7 +470,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
           children: [
             // Title
             Text(
-              "Set $title Feed for All Days",
+              "Set".tr()+" $title"+ "Feed for All Days".tr(),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -527,7 +528,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                   child: TextField(
                     controller: qtyController,
                     decoration: InputDecoration(
-                      hintText: 'Qty',
+                      hintText: 'Qty'.tr(),
                       border: InputBorder.none,
                     ),
                     keyboardType: TextInputType.number,
@@ -545,13 +546,13 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                   onPressed: () {
                     if (feedNameController.text.isEmpty || qtyController.text.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Please enter both Feed and Quantity")),
+                        SnackBar(content: Text("Please enter both Feed and Quantity".tr())),
                       );
                     } else {
                       // Apply the settings
                       onApply(feedNameController.text, qtyController.text);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Applied to all days successfully!")),
+                        SnackBar(content: Text("Applied to all days successfully!".tr())),
                       );
                     }
                   },
@@ -562,7 +563,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                     ),
                   ),
                   child: Text(
-                    "Apply",
+                    "Apply".tr(),
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -593,7 +594,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
           children: [
             // Title
             Text(
-              "Set $title Feed for All Days",
+              "Set".tr()+ " $title"+"Feed for All Days".tr(),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -651,7 +652,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                   child: TextField(
                     controller: qtyController,
                     decoration: InputDecoration(
-                      hintText: 'Qty',
+                      hintText: 'Qty'.tr(),
                       border: InputBorder.none,
                     ),
                     keyboardType: TextInputType.number,
@@ -669,13 +670,13 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                   onPressed: () {
                     if (feedNameController.text.isEmpty || qtyController.text.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Please enter both Feed and Quantity")),
+                        SnackBar(content: Text("Please enter both Feed and Quantity".tr())),
                       );
                     } else {
                       // Apply the settings
                       onApply(feedNameController.text, qtyController.text);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Applied to all days successfully!")),
+                        SnackBar(content: Text("Applied to all days successfully!".tr())),
                       );
                     }
                   },
@@ -686,7 +687,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                     ),
                   ),
                   child: Text(
-                    "Apply",
+                    "Apply".tr(),
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -764,7 +765,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
               ),
               child: TextField(
                 decoration: InputDecoration(
-                  hintText: 'Qty',
+                  hintText: 'Qty'.tr(),
                   border: InputBorder.none,
                 ),
                 controller: TextEditingController.fromValue(

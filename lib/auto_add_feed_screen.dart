@@ -222,7 +222,7 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
 
     // Show a confirmation message
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Pending feed records saved successfully!')),
+      SnackBar(content: Text('Pending feed records saved successfully!'.tr())),
     );
     Navigator.pushReplacement(
       context,
@@ -242,16 +242,16 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Edit Feed Record'),
+          title: Text('Edit Feed Record'.tr()),
           content: Column(
             children: [
               TextField(
                 controller: feedNameController,
-                decoration: InputDecoration(labelText: 'Feed Name'),
+                decoration: InputDecoration(labelText: 'Feed Name'.tr()),
               ),
               TextField(
                 controller: quantityController,
-                decoration: InputDecoration(labelText: 'Quantity'),
+                decoration: InputDecoration(labelText: 'Quantity'.tr()),
                 keyboardType: TextInputType.number,
               ),
             ],
@@ -267,13 +267,13 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                 });
                 Navigator.of(context).pop();
               },
-              child: Text('Save'),
+              child: Text('SAVE'.tr()),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: Text('CANCEL'.tr()),
             ),
           ],
         );
@@ -285,7 +285,7 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Auto Feed Sync'),
+        title: Text('Auto Feed Sync'.tr()),
       ),
       body: Column(
         children: [
@@ -293,7 +293,7 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: pendingFeedRecords.isEmpty
-                  ? const Center(child: Text('No Records'))
+                  ?  Center(child: Text('No Records'.tr()))
                   : ListView.builder(
                 itemCount: pendingFeedRecords.length,
                 itemBuilder: (context, index) {
@@ -309,7 +309,7 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                '${record.feed_name}',
+                                '${record.feed_name?.tr()}',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
@@ -335,16 +335,16 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                             ],
                           ),
                           Text(
-                            '${record.f_name}',
+                            '${record.f_name.tr()}',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Text('Quantity: ${record.quantity} kg'),
+                          Text("Quantity".tr()+": ${record.quantity}"+"kg".tr()),
                           const SizedBox(height: 8),
-                          Text('Date: ${Utils.getFormattedDate(record.date!)}'),
+                          Text("DATE".tr()+": ${Utils.getFormattedDate(record.date!)}"),
                           const SizedBox(height: 8),
                           Text(
                             '${record.short_note}',
@@ -377,8 +377,8 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
-                    child: const Text(
-                      'Skip',
+                    child:  Text(
+                      'Skip'.tr(),
                       style: TextStyle(fontSize: 16.0),
                     ),
                   ),
@@ -398,8 +398,8 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                       backgroundColor: Theme.of(context).primaryColor,
                       elevation: 4.0,
                     ),
-                    child: const Text(
-                      'Save',
+                    child:  Text(
+                      'SAVE'.tr(),
                       style: TextStyle(
                         fontSize: 16.0,
                         fontWeight: FontWeight.bold,
@@ -427,8 +427,8 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Warning: Manual Entry Required',
+               Text(
+                'Warning: Manual Entry Required'.tr(),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -436,8 +436,8 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
-                'If you skip, you will need to manually add these feed records later.',
+               Text(
+                'manual_feed_msg'.tr(),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -451,7 +451,7 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey, // Optional: Warning color
                     ),
-                    child: const Text('Cancel', style: TextStyle(color: Colors.white),),
+                    child:  Text('CANCEL'.tr(), style: TextStyle(color: Colors.white),),
                   ),
                   ElevatedButton(
                     onPressed: () {
@@ -461,7 +461,7 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Utils.getThemeColorBlue(), // Optional: Success color
                     ),
-                    child: const Text('Skip Anyway', style: TextStyle(color: Colors.white),),
+                    child:  Text('Skip Anyway'.tr(), style: TextStyle(color: Colors.white),),
                   ),
                 ],
               ),

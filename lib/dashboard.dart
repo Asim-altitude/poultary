@@ -1383,14 +1383,13 @@ class _DashboardScreen extends State<DashboardScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'New Feature: Automatic Feed Management!',
+               Text(
+                'New Feature: Automatic Feed Management!'.tr(),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
-              const Text(
-                'We’ve introduced a new feature that automates feed management for your flocks. '
-                    'Set it up once and let the app handle the rest! You can activate automatic feed management in app settings.',
+               Text(
+                'feature_msg'.tr(),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -1413,7 +1412,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                             builder: (context) => const SettingsScreen()),
                       ); // Example route
                     },
-                    child: const Text('Activate Now', style: TextStyle(color: Colors.white),),
+                    child:  Text('Activate Now'.tr(), style: TextStyle(color: Colors.white),),
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -1426,7 +1425,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                       SessionManager.setWhatsNewDialog(false);
                       Navigator.pop(context);
                     },
-                    child: const Text('Not Now', style: TextStyle(color: Colors.white)),
+                    child:  Text('Not Now'.tr(), style: TextStyle(color: Colors.white)),
                   ),
                 ],
               ),
