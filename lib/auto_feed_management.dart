@@ -381,10 +381,10 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
 
                         Column(
                           children: [
-                            _buildGlobalFeedControlForOnceADay(context, "Daily", automaticFeedFlocks[index].feedSettings,
+                            _buildGlobalFeedControlForOnceADay(context, "Daily", automaticFeedFlocks.single.feedSettings,
                                   (feedName, qty) {
                               setState(() {
-                                automaticFeedFlocks[index].feedSettings.forEach((setting) {
+                                automaticFeedFlocks.single.feedSettings.forEach((setting) {
                                   setting.feedName = feedName;
                                   setting.dailyRequirement = qty;
                                 });
