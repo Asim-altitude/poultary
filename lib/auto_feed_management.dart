@@ -378,6 +378,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                         )
                       else
                       // Single Feed Setting for Once a Day
+
                         Column(
                           children: [
                             _buildGlobalFeedControlForOnceADay(context, "Daily", automaticFeedFlocks.single.feedSettings,
