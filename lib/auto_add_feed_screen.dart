@@ -309,7 +309,7 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                '${record.feed_name?.tr()}',
+                                '${record.f_name.tr()}',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
@@ -335,7 +335,7 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                             ],
                           ),
                           Text(
-                            '${record.f_name.tr()}',
+                            '${record.feed_name?.tr()}',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
@@ -372,14 +372,14 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                     },
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14.0),
-                      side: BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
+                      side: BorderSide(color: Utils.getThemeColorBlue(), width: 2.0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
                     child:  Text(
                       'Skip'.tr(),
-                      style: TextStyle(fontSize: 16.0),
+                      style: TextStyle(fontSize: 16.0, color: Utils.getThemeColorBlue()),
                     ),
                   ),
                 ),
@@ -395,10 +395,10 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
-                      backgroundColor: Theme.of(context).primaryColor,
+                      backgroundColor: Utils.getThemeColorBlue(),
                       elevation: 4.0,
                     ),
-                    child:  Text(
+                    child: Text(
                       'SAVE'.tr(),
                       style: TextStyle(
                         fontSize: 16.0,

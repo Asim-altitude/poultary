@@ -321,20 +321,26 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                                       children: [
                                         _buildGlobalFeedControl(
                                           context,
-                                          "Morning".tr(),
+                                          "Global",
                                           flock.morningFeedSettings,
-                                              (feedName, qty) {
+                                              (index,feedName, qty) {
                                             setState(() {
-                                              flock.morningFeedSettings.forEach((setting) {
-                                                setting.feedName = feedName.tr();
-                                                setting.dailyRequirement = qty;
-                                              });
+
+
+                                              flock.morningFeedSettings =
+                                                  flock.morningFeedSettings.map((setting) {
+                                                    return setting.copyWith(
+                                                      feedName: feedName,
+                                                      dailyRequirement: qty,
+                                                    );
+                                                  }).toList();
                                             });
-                                          },
+                                          }, // Pass function
+                                          index, // Pass index
                                         ),
                                         Expanded(
                                           child: ListView.builder(
-                                            itemCount: flock.morningFeedSettings.length ?? 0,
+                                            itemCount: flock.morningFeedSettings.length,
                                             itemBuilder: (context, index) {
                                               final setting = flock.morningFeedSettings[index];
                                               return _buildFeedSettingRow(setting);
@@ -348,20 +354,26 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                                       children: [
                                         _buildGlobalFeedControl(
                                           context,
-                                          "Evening".tr(),
+                                          "Global",
                                           flock.eveningFeedSettings,
-                                              (feedName, qty) {
+                                              (index,feedName, qty) {
                                             setState(() {
-                                              flock.eveningFeedSettings.forEach((setting) {
-                                                setting.feedName = feedName.tr();
-                                                setting.dailyRequirement = qty;
-                                              });
+                                              // Update both evening and morning settings
+                                              flock.eveningFeedSettings =
+                                                  flock.eveningFeedSettings.map((setting) {
+                                                    return setting.copyWith(
+                                                      feedName: feedName,
+                                                      dailyRequirement: qty,
+                                                    );
+                                                  }).toList();
+
                                             });
-                                          },
+                                          }, // Pass function
+                                          index, // Pass index
                                         ),
                                         Expanded(
                                           child: ListView.builder(
-                                            itemCount: flock.eveningFeedSettings.length ?? 0,
+                                            itemCount: flock.eveningFeedSettings.length,
                                             itemBuilder: (context, index) {
                                               final setting = flock.eveningFeedSettings[index];
                                               return _buildFeedSettingRow(setting);
@@ -378,18 +390,27 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                         )
                       else
                       // Single Feed Setting for Once a Day
-
                         Column(
                           children: [
-                            _buildGlobalFeedControlForOnceADay(context, "Daily", automaticFeedFlocks.single.feedSettings,
-                                  (feedName, qty) {
-                              setState(() {
-                                automaticFeedFlocks.single.feedSettings.forEach((setting) {
-                                  setting.feedName = feedName;
-                                  setting.dailyRequirement = qty;
+                            _buildGlobalFeedControlForOnceADay(
+                              context,
+                              "Once a Day",
+                              flock.feedSettings,
+                                  (index,feedName, qty) {
+                                setState(() {
+                                  // Update both evening and morning settings
+                                  flock.feedSettings =
+                                      flock.feedSettings.map((setting) {
+                                        return setting.copyWith(
+                                          feedName: feedName,
+                                          dailyRequirement: qty,
+                                        );
+                                      }).toList();
+
                                 });
-                              });
-                            },),
+                              }, // Pass function
+                              index, // Pass index
+                            ),
                             ListView.builder(
                               shrinkWrap: true,
                               physics: NeverScrollableScrollPhysics(),
@@ -401,6 +422,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                             ),
                           ],
                         ),
+
                     ],
                   ),
                 );
@@ -456,11 +478,9 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
       BuildContext context,
       String title,
       List<FeedSetting> feedSettings,
-      Function(String feedName, String qty) onApply,
+      Function(int index, String feedName, String qty) onApply,
+      int index, // New parameter
       ) {
-    TextEditingController feedNameController = TextEditingController();
-    TextEditingController qtyController = TextEditingController();
-
     return Card(
       margin: EdgeInsets.all(8),
       elevation: 2,
@@ -469,9 +489,8 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title
             Text(
-              "Set".tr()+" $title"+ "Feed for All Days".tr(),
+              "Set".tr() + " $title" + "Feed for All Days".tr(),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -479,9 +498,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
               ),
             ),
             SizedBox(height: 12),
-            // Feed Name & Quantity Fields in Row
             Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Feed Name Dropdown
                 Expanded(
@@ -495,7 +512,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
-                        value: feedSettings.isNotEmpty ? feedSettings[0].feedName : null,
+                        value: feedSettings[index].feedName,
                         isExpanded: true,
                         icon: Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue()),
                         items: _feedList
@@ -509,7 +526,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                         ))
                             .toList(),
                         onChanged: (value) {
-                          feedNameController.text = value ?? "";
+                          onApply(index, value ?? "", feedSettings[index].dailyRequirement);
                         },
                       ),
                     ),
@@ -519,7 +536,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                 // Quantity Input
                 Container(
                   height: 48,
-                  width: 80, // Narrow width for quantity
+                  width: 80,
                   padding: EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -527,7 +544,6 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                     border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: TextField(
-                    controller: qtyController,
                     decoration: InputDecoration(
                       hintText: 'Qty'.tr(),
                       border: InputBorder.none,
@@ -539,33 +555,9 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                       LengthLimitingTextInputFormatter(3),
                       FilteringTextInputFormatter.digitsOnly,
                     ],
-                  ),
-                ),
-                SizedBox(width: 12),
-                // Apply Button
-                ElevatedButton(
-                  onPressed: () {
-                    if (feedNameController.text.isEmpty || qtyController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Please enter both Feed and Quantity".tr())),
-                      );
-                    } else {
-                      // Apply the settings
-                      onApply(feedNameController.text, qtyController.text);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Applied to all days successfully!".tr())),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    "Apply".tr(),
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    onChanged: (value) {
+                      onApply(index, feedSettings[index].feedName, value);
+                    },
                   ),
                 ),
               ],
@@ -575,16 +567,15 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
       ),
     );
   }
+
 
   Widget _buildGlobalFeedControlForOnceADay(
       BuildContext context,
       String title,
       List<FeedSetting> feedSettings,
-      Function(String feedName, String qty) onApply,
+      Function(int index, String feedName, String qty) onApply,
+      int index, // New parameter
       ) {
-    TextEditingController feedNameController = TextEditingController();
-    TextEditingController qtyController = TextEditingController();
-
     return Card(
       margin: EdgeInsets.all(8),
       elevation: 2,
@@ -593,9 +584,8 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title
             Text(
-              "Set".tr()+ " $title"+"Feed for All Days".tr(),
+              "Set".tr() + " $title" + "Feed for All Days".tr(),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -603,9 +593,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
               ),
             ),
             SizedBox(height: 12),
-            // Feed Name & Quantity Fields in Row
             Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Feed Name Dropdown
                 Expanded(
@@ -619,7 +607,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
-                        value: feedSettings.isNotEmpty ? feedSettings[0].feedName : null,
+                        value: feedSettings[index].feedName,
                         isExpanded: true,
                         icon: Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue()),
                         items: _feedList
@@ -633,7 +621,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                         ))
                             .toList(),
                         onChanged: (value) {
-                          feedNameController.text = value ?? "";
+                          onApply(index, value ?? "", feedSettings[index].dailyRequirement);
                         },
                       ),
                     ),
@@ -643,7 +631,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                 // Quantity Input
                 Container(
                   height: 48,
-                  width: 80, // Narrow width for quantity
+                  width: 80,
                   padding: EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -651,7 +639,6 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                     border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: TextField(
-                    controller: qtyController,
                     decoration: InputDecoration(
                       hintText: 'Qty'.tr(),
                       border: InputBorder.none,
@@ -663,33 +650,9 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                       LengthLimitingTextInputFormatter(3),
                       FilteringTextInputFormatter.digitsOnly,
                     ],
-                  ),
-                ),
-                SizedBox(width: 12),
-                // Apply Button
-                ElevatedButton(
-                  onPressed: () {
-                    if (feedNameController.text.isEmpty || qtyController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Please enter both Feed and Quantity".tr())),
-                      );
-                    } else {
-                      // Apply the settings
-                      onApply(feedNameController.text, qtyController.text);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Applied to all days successfully!".tr())),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    "Apply".tr(),
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    onChanged: (value) {
+                      onApply(index, feedSettings[index].feedName, value);
+                    },
                   ),
                 ),
               ],
@@ -699,6 +662,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
       ),
     );
   }
+
 
 
 
@@ -915,6 +879,18 @@ class FeedSetting {
     'feedName': feedName,
     'dailyRequirement': dailyRequirement,
   };
+
+  FeedSetting copyWith({
+    String? day,
+    String? feedName,
+    String? dailyRequirement,
+  }) {
+    return FeedSetting(
+      day: day ?? this.day,
+      feedName: feedName ?? this.feedName,
+      dailyRequirement: dailyRequirement ?? this.dailyRequirement,
+    );
+  }
 
   factory FeedSetting.fromJson(Map<String, dynamic> json) => FeedSetting(
     day: json['day'],
