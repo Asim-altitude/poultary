@@ -1193,7 +1193,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
             }else{
 
-              await DatabaseHelper.deleteItem("Transaction",int.parse(list
+              await DatabaseHelper.deleteItem("Transactions",int.parse(list
                   .elementAt(selected_index!).transaction_id));
 
               int birds_to_delete = list
@@ -1241,7 +1241,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
           }
 
         }
-        DatabaseHelper.deleteItem("Flock_Detail", selected_id!);
+        DatabaseHelper.deleteItemWithFlockID("Flock_Detail", selected_id!);
         list.removeAt(selected_index!);
         Utils.showToast("RECORD_DELETED".tr());
         Navigator.pop(context);

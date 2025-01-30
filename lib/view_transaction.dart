@@ -525,7 +525,7 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
                 .elementAt(i)
                 .f_id);
             if(flock == null){
-              await DatabaseHelper.deleteItem("Flock_Detail", flock_details
+              await DatabaseHelper.deleteItemWithFlockID("Flock_Detail", flock_details
                   .elementAt(i)
                   .f_detail_id!);
             }else {
@@ -537,7 +537,7 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
                   .elementAt(i)
                   .f_id);
 
-              await DatabaseHelper.deleteItem("Flock_Detail", flock_details
+              await DatabaseHelper.deleteItemWithFlockID("Flock_Detail", flock_details
                   .elementAt(i)
                   .f_detail_id!);
             }
@@ -557,7 +557,7 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
                 .f_id);
 
             if(flock == null){
-              await DatabaseHelper.deleteItem("Flock_Detail", flock_details
+              await DatabaseHelper.deleteItemWithFlockID("Flock_Detail", flock_details
                   .elementAt(i)
                   .f_detail_id!);
             }else {
@@ -568,7 +568,7 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
                   current_birds, flock_details
                   .elementAt(i)
                   .f_id);
-              await DatabaseHelper.deleteItem("Flock_Detail", flock_details
+              await DatabaseHelper.deleteItemWithFlockID("Flock_Detail", flock_details
                   .elementAt(i)
                   .f_detail_id!);
             }

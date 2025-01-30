@@ -1809,6 +1809,12 @@ class DatabaseHelper  {
   }
 
   static Future<int>  deleteItem(String table, int id) async {
+    var result = await _database?.rawQuery("DELETE FROM $table WHERE id = $id");
+
+    return 1;
+  }
+
+  static Future<int>  deleteItemWithFlockID(String table, int id) async {
     var result = await _database?.rawQuery("DELETE FROM $table WHERE f_id = $id");
 
     return 1;

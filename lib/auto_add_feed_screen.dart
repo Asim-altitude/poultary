@@ -481,7 +481,6 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
     );
   }
 
-
   void _deleteFeedRecord(int index) {
     setState(() {
       pendingFeedRecords.removeAt(index);
