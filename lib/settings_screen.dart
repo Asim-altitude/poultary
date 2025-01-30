@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:language_picker/languages.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:poultary/add_feeding.dart';
 import 'package:poultary/category_screen.dart';
 import 'package:poultary/sticky.dart';
@@ -77,6 +78,9 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
   ];
   late Language _selectedCupertinoLanguage;
   bool isGetLanguage = false;
+  final Uri _url = Uri.parse('https://chat.whatsapp.com/DT7MfbSM53G8MYoe4ufmsU');
+  final Uri _url2 = Uri.parse('https://whatsapp.com/channel/0029Vb358El3gvWaZBGYBU28');
+
   getLanguage() async {
     _selectedCupertinoLanguage = await Utils.getSelectedLanguage();
     setState(() {
@@ -821,25 +825,21 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                     },
                     child: Container(
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(3)),
+                          borderRadius: BorderRadius.all(Radius.circular(6)),
 
-                          color: Colors.white,
-                          border: Border.all(color: Colors.transparent,width: 3.0)
+                          color: Color.fromRGBO(255, 255, 255, 0.5),
+                          border: Border.all(color: Colors.transparent,width: 0.0)
                       ),
                       margin: EdgeInsets.only(left: 12,right: 12,top: 0,bottom: 0),
                       child: Container(
-                        height: 42,
+                        height: 50,
                         padding: EdgeInsets.all(5),
                         decoration: BoxDecoration(
-                          color: Utils.getThemeColorBlue(),
+                          color: Color.fromRGBO(255, 255, 255, 0.5),
 
                           borderRadius: BorderRadius.all(Radius.circular(5)),
 
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.white, //(x,y)
-                            ),
-                          ],
+
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -852,9 +852,9 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                                   children: [
 
                                     SizedBox(width: 4,),
-                                    Icon(Icons.ads_click,color: Colors.white,size: 24,),
+                                    Icon(Icons.remove_circle_outline,color: Utils.getThemeColorBlue(),size: 24,),
                                     SizedBox(width: 6,),
-                                    Text('REMOVE_ADS'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white),),
+                                    Text('REMOVE_ADS'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                                   ],
                                 )),
 
@@ -871,23 +871,20 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.all(Radius.circular(4)),
 
-                          color: Utils.getThemeColorBlue(),
-                          border: Border.all(color: Colors.white,width: 3.0)
+                          color: Color.fromRGBO(255, 255, 255, 0.5),
+                          border: Border.all(color: Colors.transparent,width: 0.0)
                       ),
                       margin: EdgeInsets.only(left: 12,right: 12,top: 0,bottom: 0),
                       child: Container(
-                        height: 46,
+                        height: 50,
                         padding: EdgeInsets.all(5),
                         decoration: BoxDecoration(
-                          color: Utils.getThemeColorBlue(),
+                          color: Color.fromRGBO(255, 255, 255, 0.5),
 
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
 
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.white, //(x,y)
-                            ),
-                          ],
+                          borderRadius: BorderRadius.all(Radius.circular(6)),
+
+
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -900,20 +897,146 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                                   children: [
 
                                     SizedBox(width: 4,),
-                                    Icon(Icons.cloud_upload_outlined,color: Colors.white,size: 24,),
+                                    Icon(Icons.settings_backup_restore,color: Utils.getThemeColorBlue(),size: 25,),
                                     SizedBox(width: 8,),
-                                    Text('RESTORE_PREMIUM'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white),),
+                                    Text('RESTORE_PREMIUM'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                                   ],
                                 )),
 
                           ],),),
                     ),
                   ),
+
                 ],
               ),
               ),
 
+              Padding(padding: EdgeInsets.only(left: 16,right: 12,top: 0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child:Text("Contact Us".tr(),
+                    textAlign: TextAlign.left,
+                    style: new TextStyle(
+                      fontSize: 26.0,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black87,
+                    ),
+                  ),),),
+              Padding(padding: EdgeInsets.only(left: 16,right: 12),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child:Text("NOTE_DETAIL".tr(),
+                    textAlign: TextAlign.left,
+                    style: new TextStyle(
+                      fontSize: 11.0,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.black54,
+                    ),
+                  ),),),
+              SizedBox(
+                height: Utils.HEIGHT_SCREEN * 0.01,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
 
+                  InkWell(
+                    onTap: (){
+                      _launchUrl();
+                    },
+                    child:Container(width: Utils.WIDTH_SCREEN/2-20,height: 100,
+                        decoration: BoxDecoration(
+                          color: Color.fromRGBO(255, 255, 255, 1),
+                          boxShadow: [
+                            new BoxShadow(
+                              color: Color.fromRGBO(240, 240, 240, 1),
+                              blurRadius: 2.0,
+                            ),
+                          ],
+                          borderRadius: const BorderRadius.all(
+                              Radius.circular(8.0)),
+                          border: Border.all(
+                            color:  Color.fromRGBO(125, 125, 125, 0.5),
+                            width: 0.0,
+                          ),
+                        ),
+                        child:Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(MdiIcons.whatsapp,color: Colors.black54,size: 34,),
+                            Padding(padding: EdgeInsets.only(left: 8,right: 8,bottom: 0,top: 4),
+                              child: Align(
+                                alignment: Alignment.center,
+                                child:Text("Ask a question on Whatsapp".tr(),
+                                  textAlign: TextAlign.center,
+                                  style: new TextStyle(
+                                      fontSize: 13.0,
+                                      fontWeight: FontWeight.normal,
+                                      color: Colors.black54,
+                                      fontFamily: 'PTSans'
+                                  ),
+                                ),),),
+
+
+                          ],)
+
+                    ),),
+                  Container(width: 14,height: 120,),
+                  InkWell(
+                    onTap: (){
+                      _launchUrl2();
+                    },
+                    child:Container(width: Utils.WIDTH_SCREEN/2-20,height: 100,
+                        decoration: BoxDecoration(
+                          color: Color.fromRGBO(255, 255, 255, 1),
+                          boxShadow: [
+                            new BoxShadow(
+                              color: Color.fromRGBO(240, 240, 240, 1),
+                              blurRadius: 2.0,
+                            ),
+                          ],
+                          borderRadius: const BorderRadius.all(
+                              Radius.circular(8.0)),
+                          border: Border.all(
+                            color:  Color.fromRGBO(125, 125, 125, 0.5),
+                            width: 0.0,
+                          ),
+                        ),
+                        child:Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(MdiIcons.whatsapp,color: Colors.green,size: 40,),
+                            Padding(padding: EdgeInsets.only(left: 8,right: 8,bottom: 0,top: 4),
+                              child: Align(
+                                alignment: Alignment.center,
+                                child:Text("For daily updates, join".tr(),
+                                  textAlign: TextAlign.center,
+                                  style: new TextStyle(
+                                      fontSize: 10.0,
+                                      fontWeight: FontWeight.normal,
+                                      color: Colors.black54,
+                                      fontFamily: 'PTSans'
+                                  ),
+                                ),),),
+                            Padding(padding: EdgeInsets.only(left: 0,right: 0,bottom: 0),
+                              child: Align(
+                                alignment: Alignment.center,
+                                child:Text("Easy Farming Community".tr(),
+                                  textAlign: TextAlign.center,
+                                  style: new TextStyle(
+                                      fontSize: 12.0,
+                                      fontWeight: FontWeight.normal,
+                                      color: Colors.green,
+                                      fontFamily: 'PTSans'
+                                  ),
+                                ),),),
+
+
+                          ],)
+
+                    ),),
+
+                ],),
                   ]
       ),),),),),);
   }
@@ -1051,7 +1174,23 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
     });
   }
 
+  Future<void> _launchUrl() async {
 
+    if (!await launchUrl(
+      _url,
+      mode: LaunchMode.externalApplication, // Ensures opening in the app
+    )) {
+      throw 'Could not launch $_url2';
+    }
+  }
+  Future<void> _launchUrl2() async {
+    if (!await launchUrl(
+      _url2,
+      mode: LaunchMode.externalApplication, // Ensures opening in the app
+    )) {
+      throw 'Could not launch $_url2';
+    }
+  }
 
   Future<void> deliverProduct(PurchaseDetails purchaseDetails) async {
     print("Payment successfull");
