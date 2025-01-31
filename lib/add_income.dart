@@ -1214,20 +1214,25 @@ class _NewIncome extends State<NewIncome>
   bool invalidInput() {
 
     bool invalid = false;
-    if(howmanyController.text.isEmpty){
+    if(howmanyController.text.isEmpty)
+    {
       invalid = true;
-    }else if(num.parse(howmanyController.text) == 0){
+
+    }
+    else if(num.parse(howmanyController.text) == 0)
+    {
       invalid = true;
     }
 
     if(amountController.text.isEmpty){
       invalid = true;
     }
+
     else if(num.parse(amountController.text) == 0){
       invalid = true;
     }
 
-    if(num.parse(howmanyController.text) >= getActiveBirds(getFlockID()) && is_specific_flock){
+    if(num.parse(howmanyController.text) >= getActiveBirds(getFlockID()) && is_specific_flock && is_bird_sale){
       invalid = true;
       int count = getActiveBirds(getFlockID()) - 1;
       Utils.showToast("You cannot reduce more than".tr() +" "+ count.toString() + " " + "Birds".tr());
