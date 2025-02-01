@@ -47,7 +47,12 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
       _purposeList.add(flocks.elementAt(i).f_name);
     }
 
-    _purposeselectedValue = Utils.selected_flock!.f_name;
+    if(Utils.selected_flock != null)
+      _purposeselectedValue = Utils.selected_flock!.f_name;
+    else {
+      _purposeselectedValue = _purposeList[0];
+      Utils.selected_flock = flocks[0];
+    }
     f_id = getFlockID();
 
     _other_filter = (await SessionManager.getOtherFilter())!;
