@@ -133,12 +133,17 @@ class _DashboardScreen extends State<DashboardScreen> {
 
     // Utils.showInterstitial();
   }
-
+  void addEggColorColumn() async{
+    DatabaseHelper.instance.database;
+    await DatabaseHelper.addEggColorColumn();
+    print("DONE");
+  }
   int _dashboard_filter = 2;
   void getFilters() async {
 
     _dashboard_filter = (await SessionManager.getDashboardFilter())!;
     date_filter_name = filterList.elementAt(_dashboard_filter);
+    addEggColorColumn();
 
   }
 

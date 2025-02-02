@@ -168,15 +168,23 @@ class DatabaseHelper  {
   static Future<void> addEggColorColumn() async {
     try {
       // Check if the 'egg_color' column exists
-      final tableInfo = await _database?.rawQuery("PRAGMA table_info(eggs)");
-      final hasColumn = tableInfo?.any((column) => column['name'] == 'egg_color');
+      final tableInfo = await _database?.rawQuery("PRAGMA table_info(Eggs)");
+      bool? hasColumn = tableInfo?.any((column) => column['name'] == 'egg_color');
+      print("OKOKOKOK: ${hasColumn}");
+      if(hasColumn==null){
+        hasColumn = false;
+      }
 
-      if (!hasColumn!) {
+      if (!hasColumn) {
         // Add the column if it doesn't exist
-        await _database?.execute("ALTER TABLE eggs ADD COLUMN egg_color TEXT DEFAULT 'white'");
+        await _database?.execute("ALTER TABLE Eggs ADD COLUMN egg_color TEXT DEFAULT 'white'");
         // Update existing rows to have 'white' as default (optional since DEFAULT handles it)
-        await _database?.rawUpdate("UPDATE eggs SET egg_color = 'white' WHERE egg_color IS NULL");
+        await _database?.rawUpdate("UPDATE Eggs SET egg_color = 'white' WHERE egg_color IS NULL");
         print("COLOR COLUMN ADDED");
+      }
+      else{
+        print("COLOR COLUMN NULL");
+
       }
     } catch (e) {
       print("Error adding 'egg_color' column: $e");
