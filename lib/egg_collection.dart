@@ -1,19 +1,13 @@
 import 'dart:async';
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/add_eggs.dart';
-import 'package:poultary/inventory.dart';
-import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
-
-import 'add_flocks.dart';
 import 'database/databse_helper.dart';
 import 'model/egg_item.dart';
 import 'model/flock.dart';

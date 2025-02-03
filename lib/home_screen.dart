@@ -49,6 +49,13 @@ class _HomeScreen extends State<HomeScreen> {
     getDirection();
     getList();
     getCurrency();
+   // addEggColorColumn();
+  }
+
+  void addEggColorColumn() async {
+    DatabaseHelper.instance.database;
+
+    print("DONE");
   }
 
 
@@ -68,7 +75,7 @@ class _HomeScreen extends State<HomeScreen> {
     }
 
     flock_total = flocks.length;
-
+    await DatabaseHelper.addEggColorColumn();
     setState(() {
 
     });

@@ -641,70 +641,94 @@ class _NewEggCollection extends State<NewEggCollection>
 
                               if(activeStep==2) {
                                 await DatabaseHelper.instance.database;
-                                if (isCollection){
-                                  if(isEdit){
-                                    widget.eggs!.f_id = getFlockID();
-                                    widget.eggs!.f_name = _purposeselectedValue;
-                                    widget.eggs!.date = this.date;
-                                    widget.eggs!.egg_color = selectedColor;
-                                    widget.eggs!.good_eggs = int.parse(goodEggsController.text);
-                                    widget.eggs!.bad_eggs =  int.parse(badEggsController.text);
-                                    widget.eggs!.total_eggs = int.parse(
-                                        totalEggsController.text);
-                                    widget.eggs!.short_note = notesController.text;
-                                    await DatabaseHelper.updateEggCollection(widget.eggs!);
+                                try {
+                                  if (isCollection) {
+                                    if (isEdit) {
+                                      widget.eggs!.f_id = getFlockID();
+                                      widget.eggs!.f_name =
+                                          _purposeselectedValue;
+                                      widget.eggs!.date = this.date;
+                                      widget.eggs!.egg_color = selectedColor;
+                                      widget.eggs!.good_eggs =
+                                          int.parse(goodEggsController.text);
+                                      widget.eggs!.bad_eggs =
+                                          int.parse(badEggsController.text);
+                                      widget.eggs!.total_eggs = int.parse(
+                                          totalEggsController.text);
+                                      widget.eggs!.short_note =
+                                          notesController.text;
+                                      await DatabaseHelper.updateEggCollection(
+                                          widget.eggs!);
 
-                                    Utils.showToast("SUCCESSFUL".tr());
-                                    Navigator.pop(context, "Egg ADDED");
-                                  }else {
-                                    int? id = await DatabaseHelper
-                                        .insertEggCollection(Eggs(
-                                        f_id: getFlockID(),
-                                        f_name: _purposeselectedValue,
-                                        image: '',
-                                        good_eggs: this.good_eggs,
-                                        bad_eggs: bad_eggs,
-                                        total_eggs: int.parse(
-                                            totalEggsController.text),
-                                        short_note: notesController.text,
-                                        date: date,
-                                        reduction_reason: '',
-                                        isCollection: 1, egg_color: selectedColor));
-                                    Utils.showToast("SUCCESSFUL".tr());
-                                    Navigator.pop(context, "Egg ADDED");
-                                  }
-                                }else{
-                                  if(isEdit){
-                                    widget.eggs!.f_id = getFlockID();
-                                    widget.eggs!.f_name = _purposeselectedValue;
-                                    widget.eggs!.date = this.date;
-                                    widget.eggs!.egg_color = selectedColor;
-                                    widget.eggs!.good_eggs =  int.parse(goodEggsController.text);
-                                    widget.eggs!.bad_eggs = int.parse(badEggsController.text);
-                                    widget.eggs!.reduction_reason = _reductionReasonValue;
-                                    widget.eggs!.total_eggs = int.parse(
-                                        totalEggsController.text);
-                                    widget.eggs!.short_note = notesController.text;
-                                    await DatabaseHelper.updateEggCollection(widget.eggs!);
-
-                                    Utils.showToast("SUCCESSFUL".tr());
-                                    Navigator.pop(context, "Egg ADDED");
+                                      Utils.showToast("SUCCESSFUL".tr());
+                                      Navigator.pop(context, "Egg ADDED");
+                                    }
+                                    else {
+                                      int? id = await DatabaseHelper
+                                          .insertEggCollection(Eggs(
+                                          f_id: getFlockID(),
+                                          f_name: _purposeselectedValue,
+                                          image: '',
+                                          good_eggs: this.good_eggs,
+                                          bad_eggs: bad_eggs,
+                                          total_eggs: int.parse(
+                                              totalEggsController.text),
+                                          short_note: notesController.text,
+                                          date: date,
+                                          reduction_reason: '',
+                                          isCollection: 1,
+                                          egg_color: selectedColor));
+                                      Utils.showToast("SUCCESSFUL".tr());
+                                      Navigator.pop(context, "Egg ADDED");
+                                    }
                                   } else {
-                                    int? id = await DatabaseHelper
-                                        .insertEggCollection(Eggs(
-                                        f_id: getFlockID(),
-                                        f_name: _purposeselectedValue,
-                                        image: '',
-                                        good_eggs: int.parse(goodEggsController.text),
-                                        bad_eggs: int.parse(badEggsController.text),
-                                        total_eggs: int.parse(totalEggsController.text),
-                                        short_note: notesController.text,
-                                        date: date,
-                                        reduction_reason: _reductionReasonValue,
-                                        isCollection: 0, egg_color: selectedColor));
-                                    Utils.showToast("SUCCESSFUL".tr());
-                                    Navigator.pop(context, "Egg Reduced");
+                                    if (isEdit) {
+                                      widget.eggs!.f_id = getFlockID();
+                                      widget.eggs!.f_name =
+                                          _purposeselectedValue;
+                                      widget.eggs!.date = this.date;
+                                      widget.eggs!.egg_color = selectedColor;
+                                      widget.eggs!.good_eggs =
+                                          int.parse(goodEggsController.text);
+                                      widget.eggs!.bad_eggs =
+                                          int.parse(badEggsController.text);
+                                      widget.eggs!.reduction_reason =
+                                          _reductionReasonValue;
+                                      widget.eggs!.total_eggs = int.parse(
+                                          totalEggsController.text);
+                                      widget.eggs!.short_note =
+                                          notesController.text;
+                                      await DatabaseHelper.updateEggCollection(
+                                          widget.eggs!);
+
+                                      Utils.showToast("SUCCESSFUL".tr());
+                                      Navigator.pop(context, "Egg ADDED");
+                                    }
+                                    else {
+                                      int? id = await DatabaseHelper
+                                          .insertEggCollection(Eggs(
+                                          f_id: getFlockID(),
+                                          f_name: _purposeselectedValue,
+                                          image: '',
+                                          good_eggs: int.parse(
+                                              goodEggsController.text),
+                                          bad_eggs: int.parse(
+                                              badEggsController.text),
+                                          total_eggs: int.parse(
+                                              totalEggsController.text),
+                                          short_note: notesController.text,
+                                          date: date,
+                                          reduction_reason: _reductionReasonValue,
+                                          isCollection: 0,
+                                          egg_color: selectedColor));
+                                      Utils.showToast("SUCCESSFUL".tr());
+                                      Navigator.pop(context, "Egg Reduced");
+                                    }
                                   }
+                                }
+                                catch(ex){
+                                  activeStep = 2;
+                                  Utils.showToast(ex.toString());
                                 }
                               }
                             },
@@ -869,5 +893,7 @@ class _NewEggCollection extends State<NewEggCollection>
 
     return selected_id;
   }
+
+
 
 }

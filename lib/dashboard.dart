@@ -187,10 +187,6 @@ class _DashboardScreen extends State<DashboardScreen> {
 
   void getFilteredData(String filter){
 
-    if(flocks.length==0){
-      Utils.showToast("Please add new flock to continue.");
-      return;
-    }
 
     int index = 0;
 
@@ -369,6 +365,12 @@ class _DashboardScreen extends State<DashboardScreen> {
     {
       no_flock = true;
       print("NO_FLOCKS".tr());
+      Utils.showToast("Please add new flock to continue.".tr());
+
+    }else{
+      bool isShow = await SessionManager.isShowWhatsNewDialog();
+      if(isShow)
+        _showFeatureDialog();
     }
 
     flock_total = flocks.length;
@@ -379,9 +381,7 @@ class _DashboardScreen extends State<DashboardScreen> {
 
     });
 
-     bool isShow = await SessionManager.isShowWhatsNewDialog();
-     if(isShow)
-       _showFeatureDialog();
+
 
   }
 

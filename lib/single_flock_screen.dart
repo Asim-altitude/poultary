@@ -1091,6 +1091,8 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
           await DatabaseHelper.deleteItem("Vaccination_Medication",vac_med_list.elementAt(i).f_id!);
         }
 
+        Utils.selected_flock = null;
+
         Utils.showToast("RECORD_DELETED".tr());
         Navigator.pop(context);
         Navigator.pop(context);
