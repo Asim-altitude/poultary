@@ -1334,17 +1334,21 @@ class DatabaseHelper  {
   }
 
   static Future<TransactionItem?> getSingleTransaction(String id) async {
-
-    final map = await _database?.rawQuery(
-        "SELECT * FROM Transactions where id = ?",[id]
-    );
-
-    if (map!.isNotEmpty) {
-      return TransactionItem.fromJson(map.first);
-    } else {
+    if (_database == null) {
+      print("DB IS NULL");
       return null;
+    }// Handle null database case
+
+    final List<Map<String, dynamic>>? map = await _database!.rawQuery(
+        "SELECT * FROM Transactions WHERE id = ?", [id]);
+
+    if (map == null || map.isEmpty) {
+      return null;
+    } else {
+      return TransactionItem.fromJson(map.first);
     }
   }
+
 
   /*static Future<List<TransactionItem>> getSingleTransaction(String id) async{
     var result = null;
@@ -1823,7 +1827,7 @@ class DatabaseHelper  {
   }
 
   static Future<int>  deleteItemWithFlockID(String table, int id) async {
-    var result = await _database?.rawQuery("DELETE FROM $table WHERE f_id = $id");
+    var result = await _database?.rawQuery("DELETE FROM $table WHERE f_detail_id = $id");
 
     return 1;
   }

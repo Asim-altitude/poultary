@@ -1036,14 +1036,13 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
     Widget continueButton = TextButton(
       child: Text("DELETE".tr()),
       onPressed:  () {
-        DatabaseHelper.deleteItem("Eggs".tr(), selected_id!);
+        DatabaseHelper.deleteItem("Eggs", selected_id!);
         eggs.removeAt(selected_index!);
         Utils.showToast("DONE".tr());
         Navigator.pop(context);
         setState(() {
 
         });
-
 
       },
     );

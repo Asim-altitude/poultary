@@ -58,7 +58,7 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
 
     print("Transaction ID ${widget.transaction_id}");
     transactionItem = await DatabaseHelper.getSingleTransaction(widget.transaction_id);
-
+    print(transactionItem);
     if(transactionItem != null) {
 
       print("Transaction $transactionItem");
@@ -68,11 +68,13 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
         print(item_ids);
         for (int i = 0; i < item_ids.length; i++) {
           print("F DETAIL ID ${item_ids[i]}");
-          Flock_Detail? flock_detail = await DatabaseHelper
-              .getSingleFlockDetails(int.parse(item_ids[i]));
-          // Flock flock = await DatabaseHelper.getSingleFlock(flock_detail.f_id);
-          if (flock_detail != null) {
-            flock_details.add(flock_detail);
+          if(!item_ids[i].isEmpty) {
+            Flock_Detail? flock_detail = await DatabaseHelper
+                .getSingleFlockDetails(int.parse(item_ids[i]));
+            // Flock flock = await DatabaseHelper.getSingleFlock(flock_detail.f_id);
+            if (flock_detail != null) {
+              flock_details.add(flock_detail);
+            }
           }
         }
       }
@@ -83,6 +85,7 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
         // Flock flock = await DatabaseHelper.getSingleFlock(flock_detail.f_id);
         if (flock_detail != null) {
           flock_details.add(flock_detail);
+          print('F_DETAIL_LIST ${flock_details.length}');
         }
       }
 
@@ -277,8 +280,8 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
                                     Row(
                                       children: [
                                         Container(child: Image.asset('assets/payment_method_ico.png', width: 25, height: 25, color: Colors.white70,) ),
-                                        Text(" "+transactionItem!.payment_method, style: TextStyle(fontWeight: FontWeight.w300,color: Colors.white, fontSize: 14),),
-                                        Text(" ("+transactionItem!.payment_status+")", style: TextStyle(fontWeight: FontWeight.w300,color: Colors.white70, fontSize: 14),),
+                                        Text(" "+transactionItem!.payment_method.tr(), style: TextStyle(fontWeight: FontWeight.w300,color: Colors.white, fontSize: 14),),
+                                        Text(" ("+transactionItem!.payment_status.tr()+")", style: TextStyle(fontWeight: FontWeight.w300,color: Colors.white70, fontSize: 14),),
 
                                       ],
                                     ),
@@ -343,7 +346,7 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Text(transactionItem!.type == "Income"? "Reductions":"Additions",style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
+                                      Text(transactionItem!.type == "Income"? "Reductions".tr():"Additions".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
 
                                     ],
                                   ),
@@ -511,79 +514,97 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
       child: Text("DELETE".tr()),
       onPressed:  () async {
 
-        if(transactionItem!.type == "Income"){
-          for(int i=0;i<flock_details.length;i++){
-
-            int birds_to_delete = flock_details
-                .elementAt(i)
-                .item_count;
-            print("F_ID ${flock_details
-                .elementAt(i)
-                .f_id}");
-            Flock? flock = await DatabaseHelper
-                .getSingleFlock(flock_details
-                .elementAt(i)
-                .f_id);
-            if(flock == null){
-              await DatabaseHelper.deleteItemWithFlockID("Flock_Detail", flock_details
+        try {
+          if (transactionItem!.type == "Income") {
+            print("INCOME");
+            for (int i = 0; i < flock_details.length; i++) {
+              int birds_to_delete = flock_details
                   .elementAt(i)
-                  .f_detail_id!);
-            }else {
-              int current_birds = flock.active_bird_count!;
-              current_birds = current_birds + birds_to_delete;
+                  .item_count;
+              print("F_ID ${flock_details
+                  .elementAt(i)
+                  .f_id}");
+              Flock? flock = await DatabaseHelper
+                  .getSingleFlock(flock_details
+                  .elementAt(i)
+                  .f_id);
+              if (flock == null) {
+                print("FLOCK NULL");
+                await DatabaseHelper.deleteItemWithFlockID(
+                    "Flock_Detail", flock_details
+                    .elementAt(i)
+                    .f_detail_id!);
+              } else {
+                print("FLOCK FOUND");
+                int current_birds = flock.active_bird_count!;
+                current_birds = current_birds + birds_to_delete;
 
-              await DatabaseHelper.updateFlockBirds(
-                  current_birds, flock_details
+                await DatabaseHelper.updateFlockBirds(
+                    current_birds, flock_details
+                    .elementAt(i)
+                    .f_id);
+                print("BIRD UPDATED");
+
+                await DatabaseHelper.deleteItemWithFlockID(
+                    "Flock_Detail", flock_details
+                    .elementAt(i)
+                    .f_detail_id!);
+                print("DELETE FLOCK DETAIL");
+              }
+            }
+          } else {
+            print("EXPENSE ");
+            for (int i = 0; i < flock_details.length; i++) {
+              int birds_to_delete = flock_details
+                  .elementAt(i)
+                  .item_count;
+              print('BIRDS_TO_DELETE $birds_to_delete');
+              print("F_ID ${flock_details
+                  .elementAt(i)
+                  .f_id}");
+              Flock? flock = await DatabaseHelper
+                  .getSingleFlock(flock_details
                   .elementAt(i)
                   .f_id);
 
-              await DatabaseHelper.deleteItemWithFlockID("Flock_Detail", flock_details
-                  .elementAt(i)
-                  .f_detail_id!);
+              if (flock == null) {
+                print("FLOCK NULL");
+                await DatabaseHelper.deleteItemWithFlockID(
+                    "Flock_Detail", flock_details
+                    .elementAt(i)
+                    .f_detail_id!);
+              } else {
+                print("FLOCK FOUND");
+                int current_birds = flock.active_bird_count!;
+                current_birds = current_birds - birds_to_delete;
+
+                await DatabaseHelper.updateFlockBirds(
+                    current_birds, flock_details
+                    .elementAt(i)
+                    .f_id);
+                print("BIRD UPDATED");
+
+                await DatabaseHelper.deleteItemWithFlockID(
+                    "Flock_Detail", flock_details
+                    .elementAt(i)
+                    .f_detail_id!);
+                print("DELETE FLOCK DETAIL");
+              }
             }
           }
-        }else{
-          for(int i=0;i<flock_details.length;i++){
 
-            int birds_to_delete = flock_details
-                .elementAt(i)
-                .item_count;
-            print("F_ID ${flock_details
-                .elementAt(i)
-                .f_id}");
-            Flock? flock = await DatabaseHelper
-                .getSingleFlock(flock_details
-                .elementAt(i)
-                .f_id);
+          await DatabaseHelper.deleteItem("Transactions", transactionItem!.id!);
+          Utils.showToast("RECORD_DELETED".tr());
+          Navigator.pop(context);
+          Navigator.pop(context);
 
-            if(flock == null){
-              await DatabaseHelper.deleteItemWithFlockID("Flock_Detail", flock_details
-                  .elementAt(i)
-                  .f_detail_id!);
-            }else {
-              int current_birds = flock!.active_bird_count!;
-              current_birds = current_birds - birds_to_delete;
+          setState(() {
 
-              await DatabaseHelper.updateFlockBirds(
-                  current_birds, flock_details
-                  .elementAt(i)
-                  .f_id);
-              await DatabaseHelper.deleteItemWithFlockID("Flock_Detail", flock_details
-                  .elementAt(i)
-                  .f_detail_id!);
-            }
-          }
+          });
         }
-
-        await DatabaseHelper.deleteItem("Transactions", transactionItem!.id!);
-        Utils.showToast("RECORD_DELETED".tr());
-        Navigator.pop(context);
-        Navigator.pop(context);
-
-        setState(() {
-
-        });
-
+        catch(ex){
+          Utils.showToast(ex.toString());
+        }
       },
     );
 

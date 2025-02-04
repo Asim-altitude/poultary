@@ -5,21 +5,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:poultary/model/feed_item.dart';
 import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
-import 'model/bird_item.dart';
-import 'model/egg_item.dart';
 import 'model/finance_flock_item.dart';
 import 'model/flock.dart';
 import 'model/flock_detail.dart';
-import 'model/flock_image.dart';
 import 'model/transaction_item.dart';
 
 class NewIncome extends StatefulWidget {
@@ -86,7 +81,7 @@ class _NewIncome extends State<NewIncome>
 
       _purposeselectedValue = widget.transactionItem!.f_name;
       date = widget.transactionItem!.date;
-      _saleselectedValue = widget.transactionItem!.sale_item;
+      _saleselectedValue = widget.transactionItem!.sale_item.tr();
       notesController.text = widget.transactionItem!.short_note;
       howmanyController.text = widget.transactionItem!.how_many;
       soldtoController.text = widget.transactionItem!.sold_purchased_from;
@@ -164,11 +159,7 @@ class _NewIncome extends State<NewIncome>
          is_specific_flock = false;
        }
 
-
-
      }
-
-
 
     setState(() {
 
@@ -181,12 +172,18 @@ class _NewIncome extends State<NewIncome>
 
     _paymentMethodList = await DatabaseHelper.getSubCategoryList(5);
 
-    for(int i=0;i<_paymentMethodList.length;i++){
-      _visiblePaymentMethodList.add(_paymentMethodList.elementAt(i).name!);
+    if(_paymentMethodList.length > 0) {
+      for (int i = 0; i < _paymentMethodList.length; i++) {
+        _visiblePaymentMethodList.add(_paymentMethodList
+            .elementAt(i)
+            .name!.tr());
+      }
+    }else{
+      _visiblePaymentMethodList.add("Cash".tr());
     }
 
     if(!isEdit)
-    payment_method = _visiblePaymentMethodList[0];
+    payment_method = _visiblePaymentMethodList[0].tr();
     print(payment_method);
 
     setState(() {
@@ -214,7 +211,7 @@ class _NewIncome extends State<NewIncome>
   void getIncomeCategoryList() async {
     await DatabaseHelper.instance.database;
     if(isEdit){
-      _saleselectedValue = widget.transactionItem!.sale_item;
+      _saleselectedValue = widget.transactionItem!.sale_item.tr();
       _saleItemList.add(_saleselectedValue.tr());
 
       print(_saleselectedValue);
@@ -232,10 +229,19 @@ class _NewIncome extends State<NewIncome>
             print(item_ids);
             for(int i=0;i<item_ids.length;i++){
               print("F DETAIL ID ${item_ids[i]}");
-              Flock_Detail? flock_detail = await DatabaseHelper.getSingleFlockDetails(int.parse(item_ids[i]));
-              Flock? flock = await DatabaseHelper.getSingleFlock(flock_detail!.f_id);
-              FinanceFlockItem financeFlockItem = new FinanceFlockItem(id: flock_detail.f_id, name: flock_detail.f_name, active_birds: flock!.active_bird_count!, selected_birds: flock_detail.item_count, isActive: true);
-              financeList.add(financeFlockItem);
+              if(!item_ids[i].isEmpty) {
+                Flock_Detail? flock_detail = await DatabaseHelper
+                    .getSingleFlockDetails(int.parse(item_ids[i]));
+                Flock? flock = await DatabaseHelper.getSingleFlock(
+                    flock_detail!.f_id);
+                FinanceFlockItem financeFlockItem = new FinanceFlockItem(
+                    id: flock_detail.f_id,
+                    name: flock_detail.f_name,
+                    active_birds: flock!.active_bird_count!,
+                    selected_birds: flock_detail.item_count,
+                    isActive: true);
+                financeList.add(financeFlockItem);
+              }
             }
 
         }
