@@ -1,5 +1,4 @@
 {
-
   "BACKUP_SUCCESSFUL": "Backup Successful",
   "BACKUP_FAILED": "Restore Problem",
   "BACKUP_FAILED_DESC1": "Please select the poultary.db file.",

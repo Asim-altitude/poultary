@@ -715,6 +715,9 @@ class Utils {
     else if(language =="ur"){
       return Languages.urdu;
     }
+    else if(language =="el"){
+      return Languages.greek;
+    }
     return Languages.english;
   }
 
@@ -806,6 +809,9 @@ class Utils {
     }
     else if(language.isoCode =="ur"){
       languageName = "ur";
+    }
+    else if(language.isoCode =="el"){
+      languageName = "el";
     }
 
     print(language.isoCode);

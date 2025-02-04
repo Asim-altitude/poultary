@@ -12,7 +12,7 @@ Future<void> main() async {
   await EasyLocalization.ensureInitialized();
 
   runApp(EasyLocalization(
-          supportedLocales: [Locale('en'), Locale('ar'),Locale('de'),Locale('ru'),Locale('fa'),Locale('ja'),Locale('ko'),Locale('pt'),Locale('tr'),Locale('fr'),Locale('id'),Locale('hi'),Locale('es'),Locale('zh'),Locale('uk'),Locale('pl'),Locale('bn'),Locale('te'),Locale('ta')],
+          supportedLocales: [Locale('en'), Locale('ar'),Locale('de'),Locale('ru'),Locale('fa'),Locale('ja'),Locale('ko'),Locale('pt'),Locale('tr'),Locale('fr'),Locale('id'),Locale('hi'),Locale('es'),Locale('zh'),Locale('uk'),Locale('pl'),Locale('bn'),Locale('te'),Locale('ta'),Locale('el')],
           path: 'assets/translations', // <-- change the path of the translation files
           fallbackLocale: Locale('en'),
       child: MyApp()),);
@@ -24,8 +24,6 @@ Future<void> main() async {
   Utils.direction = await Utils.getDirection();
   // MobileAds.instance.updateRequestConfiguration(
   //     RequestConfiguration(testDeviceIds: ['C0B856BD630A2928BC9F472E0A5C870A']));
-
-
 
 }
 

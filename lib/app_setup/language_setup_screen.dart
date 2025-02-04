@@ -54,7 +54,7 @@ class _LanguageSetupScreen extends State<LanguageSetupScreen>
     Languages.bengali,
     Languages.telugu,
     Languages.tamil,
-    // Languages.urdu
+    Languages.greek
 
   ];
 
