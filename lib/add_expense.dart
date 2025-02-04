@@ -181,8 +181,14 @@ class _NewExpense extends State<NewExpense>
     _paymentMethodList = await DatabaseHelper.getSubCategoryList(5);
 
 
-    for(int i=0;i<_paymentMethodList.length;i++){
-      _visiblePaymentMethodList.add(_paymentMethodList.elementAt(i).name!);
+    if(_paymentMethodList.length > 0) {
+      for (int i = 0; i < _paymentMethodList.length; i++) {
+        _visiblePaymentMethodList.add(_paymentMethodList
+            .elementAt(i)
+            .name!);
+      }
+    }else{
+      _visiblePaymentMethodList.add("Cash".tr());
     }
 
     if(!isEdit)

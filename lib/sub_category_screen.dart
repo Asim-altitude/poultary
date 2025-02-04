@@ -6,20 +6,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:poultary/add_eggs.dart';
-import 'package:poultary/add_feeding.dart';
-import 'package:poultary/inventory.dart';
-import 'package:poultary/model/category_item.dart';
-import 'package:poultary/model/feed_item.dart';
 import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
-
-import 'add_flocks.dart';
 import 'database/databse_helper.dart';
-import 'model/egg_item.dart';
-import 'model/flock.dart';
 
 class SubCategoryScreen extends StatefulWidget {
   const SubCategoryScreen({Key? key}) : super(key: key);
@@ -179,40 +170,34 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
                     itemCount: categoryList.length,
                     scrollDirection: Axis.vertical,
                     itemBuilder: (BuildContext context, int index) {
-                      return InkWell(
-                        onTap: () {
-                          Utils.selected_category = categoryList.elementAt(index).id!;
-                          Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const SingleFlockScreen()),
-                        );},
-                        child: Container(
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(Radius.circular(3)),
+                      return Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(3)),
 
-                              color: Colors.white,
-                              border: Border.all(color: Colors.grey,width: 1.0)
-                          ),
-                          margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
-                          child: Row(
-                            children: [
-                              Row( children: [
-                                Column( children: [
-                                  Container(
+                            color: Colors.white,
+                            border: Border.all(color: Colors.grey,width: 1.0)
+                        ),
+                        margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                        child: Row(
+                          children: [
+                            Row( children: [
+                              Column( children: [
+                                Container(
 
-                                      width: (widthScreen - widthScreen/4)+6,
-                                      margin: EdgeInsets.all(4) , padding: EdgeInsets.all(10), child: Text(categoryList.elementAt(index).name!.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 18, color: Colors.black),)),
-   // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                ],),
+                                    width: (widthScreen - widthScreen/4)+6,
+                                    margin: EdgeInsets.all(4) , padding: EdgeInsets.all(10), child: Text(categoryList.elementAt(index).name!.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 18, color: Colors.black),)),
+                         // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+                              ],),
 
-                              ]),
-                              InkWell(
+                            ]),
+                            Visibility(
+                              visible: categoryList.length==1? false : true,
+                              child: InkWell(
                                 onTap: () {
                                   showAlertDialog(context,index);
-                                },child: Container(width: 40,height: 40,child: Icon(Icons.cancel, color: Colors.red,),))
-                            ],
-                          ),
+                                },child: Container(width: 40,height: 40,child: Icon(Icons.cancel, color: Colors.red,),)),
+                            )
+                          ],
                         ),
                       );
 
