@@ -10,6 +10,7 @@ class Flock{
   int? bird_count;
   int active = 1;
   int? active_bird_count;
+  int? flock_new;
   String purpose = "";
   String icon = "";
   String acqusition_type = "";
@@ -18,7 +19,7 @@ class Flock{
 
   Flock({
         required this.f_id, required this.f_name,required this.bird_count, required this.active_bird_count,required this.purpose
-        ,required this.acqusition_type,required this.acqusition_date,required this.notes,required this.icon, required this.active
+        ,required this.acqusition_type,required this.flock_new,required this.acqusition_date,required this.notes,required this.icon, required this.active
       });
 
   Flock.fromJson(Map<String, dynamic> json) {
@@ -31,6 +32,7 @@ class Flock{
     acqusition_date = json['acqusition_date'].toString();
     notes = json['notes'].toString();
     icon = json['icon'].toString();
+    flock_new = json['flock_new'];
     acqusition_type = json['acqusition_type'].toString();
 
 
@@ -46,6 +48,7 @@ class Flock{
     data['notes'] = this.notes;
     data['icon'] = this.icon;
     data['active'] = this.active;
+    data['flock_new'] = this.flock_new;
     data['active_bird_count'] = this.active_bird_count;
     data['bird_count'] = this.bird_count;
 

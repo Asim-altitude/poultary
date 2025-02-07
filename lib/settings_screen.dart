@@ -922,20 +922,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                       color: Colors.black87,
                     ),
                   ),),),
-              Padding(padding: EdgeInsets.only(left: 16,right: 12),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child:Text("NOTE_DETAIL".tr(),
-                    textAlign: TextAlign.left,
-                    style: new TextStyle(
-                      fontSize: 11.0,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.black54,
-                    ),
-                  ),),),
-              SizedBox(
-                height: Utils.HEIGHT_SCREEN * 0.01,
-              ),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -1037,7 +1024,19 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                     ),),
 
                 ],),
-                  ]
+              Padding(padding: EdgeInsets.only(left: 16,right: 12),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child:Text("NOTE_DETAIL".tr(),
+                    textAlign: TextAlign.left,
+                    style: new TextStyle(
+                      fontSize: 11.0,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.black54,
+                    ),
+                  ),),),
+
+            ]
       ),),),),),);
   }
 

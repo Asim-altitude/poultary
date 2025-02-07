@@ -23,7 +23,7 @@ Future<void> main() async {
   await MobileAds.instance.initialize();
   Utils.direction = await Utils.getDirection();
   MobileAds.instance.updateRequestConfiguration(
-      RequestConfiguration(testDeviceIds: ['C0B856BD630A2928BC9F472E0A5C870A']));
+      RequestConfiguration(testDeviceIds: ['C0B856BD630A2928BC9F472E0A5C870A','C1F82EF953946E2EACA6F014AFF27318']));
 
 
 

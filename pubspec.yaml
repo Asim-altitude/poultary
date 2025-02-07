@@ -40,7 +40,7 @@ dependencies:
   fluttertoast: ^8.2.6
   syncfusion_flutter_datepicker: ^24.1.41
   syncfusion_flutter_charts: ^24.1.41
-  currency_picker: ^2.0.15
+  currency_picker: ^2.0.21
   pdf: ^3.10.8
   google_fonts: ^5.1.0
   printing: ^5.13.1

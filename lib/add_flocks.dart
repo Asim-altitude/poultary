@@ -1,6 +1,4 @@
-import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -17,7 +15,10 @@ import 'package:poultary/utils/utils.dart';
 import 'database/databse_helper.dart';
 import 'model/bird_item.dart';
 import 'model/flock.dart';
+import 'model/flock_detail.dart';
 import 'model/flock_image.dart';
+import 'model/sub_category_item.dart';
+import 'model/transaction_item.dart';
 
 class ADDFlockScreen extends StatefulWidget {
   const ADDFlockScreen({Key? key}) : super(key: key);
@@ -60,6 +61,8 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
 
   int chosen_index = 0;
 
+  final amountController = TextEditingController();
+  final personController = TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -93,6 +96,19 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
       print("NO_FLOCKS".tr());
     }
 
+    _paymentMethodList = await DatabaseHelper.getSubCategoryList(5);
+
+    if(_paymentMethodList.length > 0) {
+      for (int i = 0; i < _paymentMethodList.length; i++) {
+        _visiblePaymentMethodList.add(_paymentMethodList
+            .elementAt(i)
+            .name!);
+      }
+    }else{
+      _visiblePaymentMethodList.add("Cash".tr());
+    }
+
+    payment_method = _visiblePaymentMethodList[0];
 
     setState(() {
 
@@ -100,6 +116,9 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
 
   }
 
+  bool isPurchase = false;
+  List<SubItem> _paymentMethodList = [];
+  List<String>  _visiblePaymentMethodList = [];
 
   void getBirds() async {
 
@@ -279,7 +298,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                         return  index == chosen_index? InkWell(
                           onTap: () {
                             chosen_index = index;
-                            nameController.text = birds.elementAt(chosen_index).name + " FLock ${flocks.length + 1}";
+                            nameController.text = birds.elementAt(chosen_index).name.tr() + "FLock".tr() + "${flocks.length + 1}";
 
                             setState(() {
 
@@ -305,13 +324,13 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                               Container(
                                 width: 100,
                                 height: 50,
-                                child:Text(birds.elementAt(index).name, textAlign: TextAlign.center,style: TextStyle( fontSize: 16, color: Colors.black),),),
+                                child:Text(birds.elementAt(index).name.tr(), textAlign: TextAlign.center,style: TextStyle( fontSize: 16, color: Colors.black),),),
                             ]),
                           ),
                         ): InkWell(
                           onTap: (){
                             chosen_index = index;
-                            nameController.text = birds.elementAt(chosen_index).name + " FLock ${flocks.length + 1}";
+                            nameController.text = birds.elementAt(chosen_index).name.tr() + "FLock".tr() + "${flocks.length + 1}";
                             setState(() {
 
                             });
@@ -336,7 +355,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                               Container(
                                 width: 100,
                                 height: 50,
-                                child:Text(birds.elementAt(index).name, textAlign: TextAlign.center,style: TextStyle( fontSize: 16, color: Colors.black),),),                              ]),
+                                child:Text(birds.elementAt(index).name.tr(), textAlign: TextAlign.center,style: TextStyle( fontSize: 16, color: Colors.black),),),                              ]),
                           ),
                         );
 
@@ -377,146 +396,307 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                         ),
                       ),
                     ),
-                    SizedBox(height: 10,width: widthScreen),
-                        Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('NUMBER_BIRDS'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                    SizedBox(height: 20,width: widthScreen),
 
-                        Container(
-                      width: widthScreen,
-                      height: 70,
-                      padding: EdgeInsets.all(0),
-                      margin: EdgeInsets.only(left: 20, right: 20),
-                      decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius:
-                    BorderRadius.all(Radius.circular(20))),
-                      child: Container(
-                        child: SizedBox(
-                    width: widthScreen,
-                    height: 60,
-                    child: TextFormField(
-                      maxLines: null,
-                      expands: true,
-                      controller: birdcountController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r"[0-9]")),
-                        TextInputFormatter.withFunction((oldValue, newValue) {
-                          final text = newValue.text;
-                          return text.isEmpty
-                              ? newValue
-                              : double.tryParse(text) == null
-                              ? oldValue
-                              : newValue;
-                        }),
-                      ],
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                            borderRadius:
-                            BorderRadius.all(Radius.circular(20))),
-                        hintText: 'NUMBER_BIRDS'.tr(),
-                        hintStyle: TextStyle(
-                            color: Colors.grey, fontSize: 16),
-                        labelStyle: TextStyle(
-                            color: Colors.black, fontSize: 16),
-                      ),
-                    ),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 2, // First item takes 1 flex
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    alignment: Alignment.topLeft,
+                                    margin: EdgeInsets.only(left: 25, bottom: 5),
+                                    child: Text(
+                                      'NUMBER_BIRDS'.tr(),
+                                      style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  Container(
+                                    height: 70,
+                                    padding: EdgeInsets.all(0),
+                                    margin: EdgeInsets.only(left: 20),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                                    ),
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      height: 60,
+                                      child: TextFormField(
+                                        maxLines: null,
+                                        expands: true,
+                                        controller: birdcountController,
+                                        keyboardType: TextInputType.number,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.allow(RegExp(r"[0-9]")),
+                                          TextInputFormatter.withFunction((oldValue, newValue) {
+                                            final text = newValue.text;
+                                            return text.isEmpty
+                                                ? newValue
+                                                : double.tryParse(text) == null
+                                                ? oldValue
+                                                : newValue;
+                                          }),
+                                        ],
+                                        textInputAction: TextInputAction.next,
+                                        decoration: InputDecoration(
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.all(Radius.circular(20)),
+                                          ),
+                                          hintText: 'NUMBER_BIRDS'.tr(),
+                                          hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
+                                          labelStyle: TextStyle(color: Colors.black, fontSize: 16),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2, // Second item takes 2 flex
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    alignment: Alignment.topLeft,
+                                    margin: EdgeInsets.only(left: 10, bottom: 5),
+                                    child: Text(
+                                      'PURPOSE1'.tr(),
+                                      style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  Container(
+                                    height: 70,
+                                    alignment: Alignment.centerRight,
+                                    padding: EdgeInsets.all(10),
+                                    margin: EdgeInsets.only(left: 10, right: 20),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withAlpha(70),
+                                      borderRadius: const BorderRadius.all(Radius.circular(20.0)),
+                                      border: Border.all(color: Colors.grey, width: 1.0),
+                                    ),
+                                    child: getDropDownList(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ),
-                ],),
+
+                      ],),
                   ):SizedBox(width: 1,),
 
                   activeStep==1?
-                      Column(children: [
-                        SizedBox(height: 50,),
-                        Text(
-                          "Purpose, Type and Date".tr(),
-                          textAlign: TextAlign.start,
-                          style: TextStyle(
-                              color: Utils.getThemeColorBlue(),
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold),
+                  Column(
+                    children: [
+                      SizedBox(height: 30),
+                      Text(
+                        "Financial Info".tr(),
+                        textAlign: TextAlign.start,
+                        style: TextStyle(
+                          color: Utils.getThemeColorBlue(),
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
-                        SizedBox(height: 50,width: widthScreen),
+                      ),
+                      SizedBox(height: 50, width: widthScreen),
 
-                        Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('PURPOSE1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-
-                        Container(
-                          width: widthScreen,
-                          height: 70,
-                          alignment: Alignment.centerRight,
-                          padding: EdgeInsets.all(10),
-                          margin: EdgeInsets.only(left: 20, right: 20),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withAlpha(70),
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(20.0)),
-                            border: Border.all(
-                              color:  Colors.grey,
-                              width: 1.0,
-                            ),
-                          ),
-                          child: getDropDownList(),
+                      // Acquisition Dropdown (Always Enabled)
+                      Container(
+                        alignment: Alignment.topLeft,
+                        margin: EdgeInsets.only(left: 25, bottom: 5),
+                        child: Text(
+                          'ACQUSITION'.tr(),
+                          style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(height: 15,width: widthScreen),
-
-                        Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('ACQUSITION'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-
-                        Container(
-                          width: widthScreen,
-                          height: 70,
-                          alignment: Alignment.centerRight,
-                          padding: EdgeInsets.all(10),
-                          margin: EdgeInsets.only(left: 20, right: 20),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withAlpha(70),
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(20.0)),
-                            border: Border.all(
-                              color:  Colors.grey,
-                              width: 1.0,
-                            ),
-                          ),
-                          child: getAcqusitionDropDownList(),
-                        ),
-                        SizedBox(height: 15,width: widthScreen),
-
-                        Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DATE'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-
-                        Container(
-                          width: widthScreen,
-                          height: 70,
-                          margin: EdgeInsets.only(left: 20, right: 20),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withAlpha(70),
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(20.0)),
-                            border: Border.all(
-                              color:  Colors.grey,
-                              width: 1.0,
-                            ),
-                          ),
-                          child: InkWell(
-                            onTap: () {
-                              pickDate();
-                            },
-                            child: Container(
-                              alignment: Alignment.centerLeft,
-                              padding: EdgeInsets.only(left: 10),
-
-                              child: Text(Utils.getFormattedDate(date), style: TextStyle(
-                                  color: Colors.black, fontSize: 16),),
-                            ),
+                      ),
+                      Container(
+                        width: widthScreen,
+                        height: 70,
+                        alignment: Alignment.centerRight,
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(left: 20, right: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(70),
+                          borderRadius: const BorderRadius.all(Radius.circular(20.0)),
+                          border: Border.all(
+                            color: Colors.grey,
+                            width: 1.0,
                           ),
                         ),
-                        SizedBox(height: 15,width: widthScreen),
+                        child: getAcqusitionDropDownList(),
+                      ),
+                      SizedBox(height: 15, width: widthScreen),
 
-                      ],):SizedBox(width: 1,),
+                      // Disable all other UI components when isPurchase is false
+                      AbsorbPointer(
+                        absorbing: !isPurchase, // Disables interaction when isPurchase is false
+                        child: Opacity(
+                          opacity: isPurchase ? 1.0 : 0.5, // Visually indicate the UI is disabled
+                          child: Column(
+                            children: [
+                              // Expense Amount
+                              Container(
+                                alignment: Alignment.topLeft,
+                                margin: EdgeInsets.only(left: 20, bottom: 5),
+                                child: Text(
+                                  'EXPENSE_AMOUNT'.tr(),
+                                  style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Container(
+                                height: 70,
+                                padding: EdgeInsets.all(0),
+                                margin: EdgeInsets.only(right: 20, left: 20),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withAlpha(70),
+                                  borderRadius: const BorderRadius.all(Radius.circular(20.0)),
+                                ),
+                                child: SizedBox(
+                                  width: widthScreen,
+                                  height: 60,
+                                  child: TextFormField(
+                                    maxLines: null,
+                                    expands: true,
+                                    controller: amountController,
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+                                      TextInputFormatter.withFunction((oldValue, newValue) {
+                                        final text = newValue.text;
+                                        return text.isEmpty ? newValue : double.tryParse(text) == null ? oldValue : newValue;
+                                      }),
+                                    ],
+                                    textInputAction: TextInputAction.next,
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                                      hintText: 'EXPENSE_AMOUNT'.tr(),
+                                      hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
+                                      labelStyle: TextStyle(color: Colors.black, fontSize: 16),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              // Payment Method & Payment Status (Row)
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(height: 20),
+                                        Container(
+                                          alignment: Alignment.topLeft,
+                                          margin: EdgeInsets.only(left: 25, bottom: 5),
+                                          child: Text(
+                                            'Payment Method'.tr(),
+                                            style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                        Container(
+                                          height: 70,
+                                          alignment: Alignment.centerRight,
+                                          padding: EdgeInsets.all(10),
+                                          margin: EdgeInsets.only(left: 20),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withAlpha(70),
+                                            borderRadius: const BorderRadius.all(Radius.circular(20.0)),
+                                            border: Border.all(
+                                              color: Colors.grey,
+                                              width: 1.0,
+                                            ),
+                                          ),
+                                          child: getPaymentMethodList(),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(height: 20),
+                                        Container(
+                                          alignment: Alignment.topLeft,
+                                          margin: EdgeInsets.only(left: 25, bottom: 5),
+                                          child: Text(
+                                            'Payment Status'.tr(),
+                                            style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                        Container(
+                                          height: 70,
+                                          alignment: Alignment.centerRight,
+                                          padding: EdgeInsets.all(10),
+                                          margin: EdgeInsets.only(left: 10, right: 20),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withAlpha(70),
+                                            borderRadius: const BorderRadius.all(Radius.circular(20.0)),
+                                            border: Border.all(
+                                              color: Colors.grey,
+                                              width: 1.0,
+                                            ),
+                                          ),
+                                          child: getPaymentStatusList(),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              SizedBox(height: 15, width: widthScreen),
+
+                              // Paid To
+                              Container(
+                                alignment: Alignment.topLeft,
+                                margin: EdgeInsets.only(left: 25, bottom: 5),
+                                child: Text(
+                                  'PAID_TO1'.tr(),
+                                  style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Container(
+                                width: widthScreen,
+                                height: 70,
+                                padding: EdgeInsets.all(0),
+                                margin: EdgeInsets.only(left: 20, right: 20),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withAlpha(70),
+                                  borderRadius: const BorderRadius.all(Radius.circular(20.0)),
+                                ),
+                                child: SizedBox(
+                                  width: widthScreen,
+                                  height: 60,
+                                  child: TextFormField(
+                                    maxLines: null,
+                                    expands: true,
+                                    controller: personController,
+                                    textInputAction: TextInputAction.next,
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                                      hintText: 'PAID_TO_HINT'.tr(),
+                                      hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
+                                      labelStyle: TextStyle(color: Colors.black, fontSize: 16),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ):SizedBox(width: 1,),
+
 
                   activeStep==2? Column(children: [
 
-                    SizedBox(height: 50,),
+                    SizedBox(height: 30,),
 
                     Text(
                       "Flock Images and Description".tr(),
@@ -526,7 +706,38 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                           fontSize: 20,
                           fontWeight: FontWeight.bold),
                     ),
-                    Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25, top: 20),child: Text('FLOCK_IMAGES'.tr(), style: TextStyle(fontSize: 14,  color: Colors.black, fontWeight: FontWeight.bold),)),
+                    SizedBox(height: 30,width: widthScreen),
+
+                    Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DATE'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+
+                    Container(
+                      width: widthScreen,
+                      height: 70,
+                      margin: EdgeInsets.only(left: 20, right: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(70),
+                        borderRadius: const BorderRadius.all(
+                            Radius.circular(20.0)),
+                        border: Border.all(
+                          color:  Colors.grey,
+                          width: 1.0,
+                        ),
+                      ),
+                      child: InkWell(
+                        onTap: () {
+                          pickDate();
+                        },
+                        child: Container(
+                          alignment: Alignment.centerLeft,
+                          padding: EdgeInsets.only(left: 10),
+
+                          child: Text(Utils.getFormattedDate(date), style: TextStyle(
+                              color: Colors.black, fontSize: 16),),
+                        ),
+                      ),
+                    ),
+
+                    Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25, top: 15),child: Text('FLOCK_IMAGES'.tr(), style: TextStyle(fontSize: 14,  color: Colors.black, fontWeight: FontWeight.bold),)),
 
                     Container(
                       margin: EdgeInsets.only(left: 20, right: 20),
@@ -650,8 +861,65 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                           print("Everything Okay");
                           await DatabaseHelper.instance.database;
                           int? id = await DatabaseHelper.insertFlock(Flock(f_id: 1, f_name: nameController.text, bird_count: int.parse(birdcountController.text)
-                            , purpose: _purposeselectedValue, acqusition_type: _acqusitionselectedValue, acqusition_date: date, notes: notesController.text, icon: birds.elementAt(chosen_index).image, active_bird_count: int.parse(birdcountController.text), active: 1,
+                            , purpose: _purposeselectedValue, acqusition_type: _acqusitionselectedValue, acqusition_date: date, notes: notesController.text, icon: birds.elementAt(chosen_index).image, active_bird_count: int.parse(birdcountController.text), active: 1, flock_new: 1,
                           ));
+
+                          if(isPurchase){
+
+                            await DatabaseHelper.instance.database;
+                            TransactionItem transaction_item = TransactionItem(
+                                flock_update_id: "-1",
+                                f_id: id!,
+                                date: date,
+                                sale_item: "",
+                                expense_item: "Flock Purchase".tr(),
+                                type: "Expense",
+                                amount: amountController.text,
+                                payment_method: payment_method,
+                                payment_status: payment_status,
+                                sold_purchased_from: personController
+                                    .text,
+                                short_note: notesController.text,
+                                how_many: birdcountController.text,
+                                extra_cost: "",
+                                extra_cost_details: "",
+                                f_name: nameController.text);
+                            int? tr_id = await DatabaseHelper
+                                .insertNewTransaction(transaction_item);
+
+                            Flock_Detail f_detail = Flock_Detail(
+                                f_id: id,
+                                item_type: 'Addition',
+                                item_count: int.parse(birdcountController.text),
+                                acqusition_type: _acqusitionselectedValue,
+                                acqusition_date: date,
+                                reason: "",
+                                short_note: notesController.text,
+                                f_name: nameController.text,
+                                transaction_id: tr_id!.toString());
+
+                            int? flock_detail_id = await DatabaseHelper
+                                .insertFlockDetail(f_detail);
+
+                            await DatabaseHelper.updateLinkedTransaction(tr_id.toString(), flock_detail_id.toString());
+
+
+                          }else{
+                            Flock_Detail f_detail = Flock_Detail(
+                                f_id: id!,
+                                item_type: 'Addition',
+                                item_count: int.parse(birdcountController.text),
+                                acqusition_type: _acqusitionselectedValue,
+                                acqusition_date: date,
+                                reason: "",
+                                short_note: notesController.text,
+                                f_name: nameController.text,
+                                transaction_id: "-1" );
+
+                            int? flock_detail_id = await DatabaseHelper
+                                .insertFlockDetail(f_detail);
+
+                          }
 
                           if (base64Images.length > 0){
                             insertFlockImages(id);
@@ -730,6 +998,93 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
     );
   }
 
+  void isFinanceInfo(){
+    for(int i=0;i<acqusitionList.length;i++){
+      if(_acqusitionselectedValue == acqusitionList[i]){
+        if(i == 0){
+          isPurchase = true;
+        }else{
+          isPurchase = false;
+        }
+      }
+    }
+    setState(() {
+
+    });
+  }
+
+  String payment_method = "Cash".tr();
+  String payment_status = "CLEARED".tr();
+  Widget getPaymentMethodList() {
+    return Container(
+      width: widthScreen,
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration.collapsed(hintText: ""),
+        isDense: true,
+        value: payment_method,
+        elevation: 16,
+        isExpanded: true,
+        onChanged: (String? newValue) {
+          setState(() {
+            payment_method = newValue!;
+
+          });
+        },
+        items: _visiblePaymentMethodList.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(
+              value.tr(),
+              textAlign: TextAlign.right,
+              style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  List<String> paymentStatusList = ['CLEARED'.tr(),'UNCLEAR'.tr(),'RECONCILED'.tr()];
+
+  Widget getPaymentStatusList() {
+    return Container(
+      width: widthScreen,
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration.collapsed(hintText: ''),
+        isDense: true,
+        value: payment_status,
+        elevation: 16,
+        isExpanded: true,
+        onChanged: (String? newValue) {
+          setState(() {
+            payment_status = newValue!;
+
+          });
+        },
+        items: paymentStatusList.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+
+
   Widget getAcqusitionDropDownList() {
     return Container(
       width: widthScreen,
@@ -742,7 +1097,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
         onChanged: (String? newValue) {
           setState(() {
             _acqusitionselectedValue = newValue!;
-
+            isFinanceInfo();
           });
         },
         items: acqusitionList.map<DropdownMenuItem<String>>((String value) {
@@ -764,7 +1119,6 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
   }
   Widget getDropDownList() {
     return Container(
-      width: widthScreen,
       child: DropdownButtonFormField<String>(
         decoration: InputDecoration.collapsed(hintText: ''),
         isDense: true,
@@ -849,11 +1203,15 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
       print("Select Acqusition Type");
     }
 
-    if(_purposeselectedValue.toLowerCase().contains("SELECT_PURPOSE".tr()))
-    {
-      valid = false;
-      print("Select Purpose");
+    if(isPurchase){
+      if(amountController.text.isEmpty)
+        valid = false;
+
+      if(personController.text.isEmpty)
+        valid = false;
+
     }
+
 
     return valid;
   }

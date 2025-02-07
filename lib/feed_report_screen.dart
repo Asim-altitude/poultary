@@ -322,7 +322,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(feedingSummary.elementAt(index).feedName.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                                Text(feedingSummary.elementAt(index).totalQuantity.toString() + "KG".tr(),style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
+                                Text(Utils.roundTo2Decimal(feedingSummary.elementAt(index).totalQuantity).toString() + "KG".tr(),style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
 
                               ],);
 
@@ -472,7 +472,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1));
+    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1, flock_new: 1));
 
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);

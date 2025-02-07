@@ -66,6 +66,9 @@ class _HomeScreen extends State<HomeScreen> {
 
     await DatabaseHelper.instance.database;
 
+    await DatabaseHelper.addEggColorColumn();
+    await DatabaseHelper.addFlockInfoColumn();
+
     flocks = await DatabaseHelper.getFlocks();
 
     if(flocks.length == 0)
@@ -75,7 +78,7 @@ class _HomeScreen extends State<HomeScreen> {
     }
 
     flock_total = flocks.length;
-    await DatabaseHelper.addEggColorColumn();
+
     setState(() {
 
     });

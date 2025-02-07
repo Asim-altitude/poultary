@@ -168,7 +168,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
         Flock? singleflock = await DatabaseHelper.getSingleFlock(widget.flock_detail!.f_id);
         print(singleflock);
         print("adding flock");
-        flocks.add(Flock(f_id: widget.flock_detail!.f_id,f_name: widget.flock_detail!.f_name, bird_count: singleflock!.bird_count,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: singleflock!.active_bird_count, active: 1));
+        flocks.add(Flock(f_id: widget.flock_detail!.f_id,f_name: widget.flock_detail!.f_name, bird_count: singleflock!.bird_count,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: singleflock!.active_bird_count, active: 1, flock_new: singleflock.flock_new));
         print(flocks);
         _purposeList.add(flocks.elementAt(0).f_name);
 
@@ -291,7 +291,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                             activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 1',
+                        title: 'Step 1'.tr(),
                       ),
                       EasyStep(
                         customStep: CircleAvatar(
@@ -303,7 +303,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                             activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 2',
+                        title: 'Step 2'.tr(),
 
                       ),
 
@@ -578,7 +578,6 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                                     Column(
                                       children: [
                                         Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Payment Method'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-
                                         Container(
                                           width: widthScreen,
                                           height: 70,

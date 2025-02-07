@@ -477,23 +477,54 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
     setState((){});
   }
 
-  void chooseCurrency()
-  {
+  void chooseCurrency() {
+    final allCurrencies = CurrencyService().getAll(); // Use the custom service
+
+    print("Final Currency List: ${allCurrencies.map((c) => c.code).toList()}"); // Debugging
+
     showCurrencyPicker(
       context: context,
       showFlag: true,
       showCurrencyName: true,
       showCurrencyCode: true,
       onSelect: (Currency currency) {
+        print("Selected: ${currency.name} (${currency.code})");
         selectedCurrency = currency.symbol;
         DatabaseHelper.updateCurrency(selectedCurrency);
         Utils.currency = selectedCurrency;
-        setState(()
-        {
-
-        });
+        setState(() {});
         Utils.showToast("SUCCESSFUL".tr());
-      },);
+      },
+      currencyFilter: allCurrencies.map((c) => c.code).toList(), // Make sure IRR is included
+    );
   }
 
+
 }
+
+class CustomCurrencyService extends CurrencyService {
+  @override
+  List<Currency> getAll() {
+    final allCurrencies = super.getAll();
+
+    // Ensure IRR is not duplicated
+    if (!allCurrencies.any((c) => c.code == "IRR")) {
+      allCurrencies.add(Currency(
+        code: "IRR",
+        name: "Iranian Rial",
+        symbol: "﷼",
+        flag: "IR",  // Ensure this matches the internal flag system
+        decimalDigits: 0,
+        number: 364,
+        namePlural: "Iranian Rials",
+        thousandsSeparator: ",",
+        decimalSeparator: ".",
+        spaceBetweenAmountAndSymbol: true,
+        symbolOnLeft: false,
+      ));
+    }
+
+    return allCurrencies;
+  }
+}
+

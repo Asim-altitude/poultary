@@ -192,6 +192,29 @@ class DatabaseHelper  {
   }
 
 
+  static Future<void> addFlockInfoColumn() async {
+    try {
+      // Check if the 'flock_new' column exists
+      final tableInfo = await _database?.rawQuery("PRAGMA table_info(Flock)");
+      bool hasColumn = tableInfo?.any((column) => column['name'] == 'flock_new') ?? false;
+
+      if (!hasColumn) {
+        // Add the new column with a default value of 0
+        await _database?.execute("ALTER TABLE Flock ADD COLUMN flock_new INTEGER DEFAULT 0");
+
+        // Ensure existing rows also get the default value
+        await _database?.rawUpdate("UPDATE Flock SET flock_new = 0 WHERE flock_new IS NULL");
+
+        print("COLUMN 'flock_new' ADDED");
+      } else {
+        print("COLUMN 'flock_new' ALREADY EXISTS");
+      }
+    } catch (e) {
+      print("Error adding 'flock_new' column: $e");
+    }
+  }
+
+
   static Future<int?>  insertFlockImages(Flock_Image image) async {
 
     return await _database?.insert(
@@ -1241,29 +1264,35 @@ class DatabaseHelper  {
 
     var result;
 
-    if(f_id == -1 && !str_date.isEmpty) {
-      result = await _database?.rawQuery(
-          "SELECT sum(bird_count) FROM Flock where acqusition_date BETWEEN '$str_date'and '$end_date'");
-    }else if(f_id != -1 && str_date.isEmpty) {
-      result = await _database?.rawQuery(
-          "SELECT bird_count FROM Flock where f_id = $f_id ");
+    try {
 
-    }else if(f_id != -1 && !str_date.isEmpty) {
-      result = await _database?.rawQuery(
-          "SELECT bird_count FROM Flock where f_id = $f_id and acqusition_date BETWEEN '$str_date'and '$end_date' ");
+      if (f_id == -1 && !str_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT sum(bird_count) FROM Flock where flock_new = 0 AND acqusition_date BETWEEN '$str_date'and '$end_date'");
+      } else if (f_id != -1 && str_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT bird_count FROM Flock where flock_new = 0 AND f_id = $f_id ");
+      } else if (f_id != -1 && !str_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT bird_count FROM Flock where flock_new = 0 AND f_id = $f_id and acqusition_date BETWEEN '$str_date'and '$end_date' ");
+      } else if (f_id == -1 && str_date.isEmpty) {
+        result = await _database?.rawQuery(
+            "SELECT sum(bird_count) FROM Flock where flock_new = 0");
+      }
 
-    }else if (f_id == -1 && str_date.isEmpty){
-      result = await _database?.rawQuery(
-          "SELECT sum(bird_count) FROM Flock");
+
+      Map<String, dynamic> map = result![0];
+      print(map.values.first);
+
+      if (map.values.first.toString().toLowerCase() == 'null')
+        return 0;
+      else
+        return int.parse(map.values.first.toString());
     }
-
-    Map<String,dynamic> map = result![0];
-    print(map.values.first);
-
-    if(map.values.first.toString().toLowerCase() == 'null')
+    catch(ex){
+      print(ex);
       return 0;
-    else
-      return int.parse(map.values.first.toString());
+    }
 
   }
 
@@ -1273,12 +1302,12 @@ class DatabaseHelper  {
 
     if(f_id==-1) {
       result = await _database?.rawQuery(
-          "SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and acqusition_date BETWEEN '$str_date'and '$end_date'");
-      print("SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and acqusition_date BETWEEN '$str_date'and '$end_date'");
+          "SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and acqusition_date BETWEEN '$str_date' and '$end_date'");
+      print("SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and acqusition_date BETWEEN '$str_date' and '$end_date'");
     }else if (f_id!=-1){
       result = await _database?.rawQuery(
-          "SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and f_id = $f_id and acqusition_date BETWEEN '$str_date'and '$end_date'");
-      print("SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and f_id = $f_id and acqusition_date BETWEEN '$str_date'and '$end_date'");
+          "SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and f_id = $f_id and acqusition_date BETWEEN '$str_date' and '$end_date'");
+      print("SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and f_id = $f_id and acqusition_date BETWEEN '$str_date' and '$end_date'");
     }
 
     Map<String,dynamic> map = result![0];

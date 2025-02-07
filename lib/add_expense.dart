@@ -124,7 +124,7 @@ class _NewExpense extends State<NewExpense>
             notes: '',
             icon: '',
             active_bird_count: 0,
-            active: 1));
+            active: 1, flock_new: 1));
         is_specific_flock = false;
       }
 
@@ -163,7 +163,7 @@ class _NewExpense extends State<NewExpense>
             notes: '',
             icon: '',
             active_bird_count: 0,
-            active: 1));
+            active: 1, flock_new: 1));
         is_specific_flock = false;
       }
 

@@ -2,6 +2,7 @@ import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:currency_picker/currency_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -323,6 +324,30 @@ class Utils {
 
   }
 
+  static List<Currency> getMissingCurrency() {
+    final List<Currency> customCurrencies = [
+      Currency(
+        code: "IRR",
+        name: "Iranian Rial",
+        symbol: "﷼",
+        flag: "IR",
+        decimalDigits: 0,
+        number: 364,
+        namePlural: "Iranian Rials",
+        thousandsSeparator: ",",
+        decimalSeparator: ".",
+        spaceBetweenAmountAndSymbol: true,
+        symbolOnLeft: false,
+      )
+    ];
+
+    return customCurrencies;
+  }
+
+  static double roundTo2Decimal(double value) {
+    return (value * 100).roundToDouble() / 100;
+  }
+
   static setupInvoiceInitials(String invoiceHeading, String date) async {
     await DatabaseHelper.instance.database;
     Utils.INVOICE_DATE = date;
@@ -352,8 +377,7 @@ class Utils {
       Utils.isShowAdd = true;
       inititalize();
     }
-       Utils.isShowAdd = false;
-
+    Utils.isShowAdd = false;
   }
   static Future<void> inititalize() async {
     // CAS.setDebugMode(true);
