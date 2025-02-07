@@ -73,7 +73,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
     Languages.bengali,
     Languages.telugu,
     Languages.tamil,
-    // Languages.urdu
+    Languages.greek
 
   ];
   late Language _selectedCupertinoLanguage;
