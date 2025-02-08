@@ -68,6 +68,7 @@ class _HomeScreen extends State<HomeScreen> {
 
     await DatabaseHelper.addEggColorColumn();
     await DatabaseHelper.addFlockInfoColumn();
+    await addNewColumn();
 
     flocks = await DatabaseHelper.getFlocks();
 
@@ -84,6 +85,34 @@ class _HomeScreen extends State<HomeScreen> {
     });
 
   }
+
+
+  Future<void> addNewColumn() async{
+    try{
+      int c = await DatabaseHelper.addColumnInFlockDetail();
+      print("Column Info $c");
+    }catch(ex){
+      print(ex);
+    }
+
+    try{
+      int c = await DatabaseHelper.addColumnInFTransactions();
+      print("Column Info $c");
+    }catch(ex){
+      print(ex);
+    }
+
+    try{
+      int? c = await DatabaseHelper.updateLinkedFlocketailNullValue();
+      print("Flock Details Update Info $c");
+
+      int? t = await DatabaseHelper.updateLinkedTransactionNullValue();
+      print("Transactions Update Info $t");
+    }catch(ex){
+      print(ex);
+    }
+  }
+
 
   bool direction = true;
 
