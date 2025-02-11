@@ -44,7 +44,7 @@ class _NewEventReminder extends State<NewEventReminder>
 
   List<String> _purposeList = [];
 
-  List<String> _reminderList = ["Vaccination".tr(),"Medication".tr(),"Birds Sale".tr(), "Birds Purchase".tr(),"Egg Collection".tr(),"Cleanliness".tr(),"Inventory Purchase".tr(),"Financial Settlements".tr(),"Repairing".tr(),"Other".tr()];
+  List<String> _reminderList = ["Vaccination","Medication","Birds Sale", "Birds Purchase","Egg Collection","Cleanliness","Inventory Purchase","Financial Settlements","Repairing","Other"];
 
   int chosen_index = 0;
 
@@ -190,7 +190,7 @@ class _NewEventReminder extends State<NewEventReminder>
                             activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 1',
+                        title: 'Step 1'.tr(),
                       ),
                       EasyStep(
                         customStep: CircleAvatar(
@@ -202,7 +202,7 @@ class _NewEventReminder extends State<NewEventReminder>
                             activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 2',
+                        title: 'Step 2'.tr(),
 
                       ),
 
@@ -536,7 +536,7 @@ class _NewEventReminder extends State<NewEventReminder>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                   fontSize: 16.0,
@@ -569,7 +569,7 @@ class _NewEventReminder extends State<NewEventReminder>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                 fontSize: 16.0,

@@ -217,7 +217,7 @@ class _NewFeeding extends State<NewFeeding>
                             activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 1',
+                        title: 'Step 1'.tr(),
                       ),
                       EasyStep(
                         customStep: CircleAvatar(
@@ -229,7 +229,7 @@ class _NewFeeding extends State<NewFeeding>
                             activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 2',
+                        title: 'Step 2'.tr(),
 
                       ),
 
@@ -509,7 +509,7 @@ class _NewFeeding extends State<NewFeeding>
                               ),
                               margin: EdgeInsets.all( 20),
                               child: Text(
-                               activeStep==0?"NEXT":"CONFIRM".tr(),
+                               activeStep==0?"NEXT".tr():"CONFIRM".tr(),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -549,7 +549,7 @@ class _NewFeeding extends State<NewFeeding>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                   fontSize: 16.0,
@@ -583,7 +583,7 @@ class _NewFeeding extends State<NewFeeding>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                 fontSize: 16.0,

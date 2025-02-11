@@ -64,7 +64,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
 
   Future<List<String>> _fetchFeedList() async {
     List<SubItem> subItemList = await DatabaseHelper.getSubCategoryList(3);
-    List<String> feedList = ["Not Specified".tr()];
+    List<String> feedList = ["Not Specified"];
     feedList.addAll(subItemList.map((item) => item.name ?? "Unknown"));
     return feedList;
   }
@@ -125,6 +125,8 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
 
       if (savedDate != null) {
         _startingDate = DateTime.parse(savedDate);
+      }else{
+        _startingDate = DateTime.now();
       }
     });
   }
@@ -519,7 +521,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                             .map((feed) => DropdownMenuItem(
                           value: feed,
                           child: Text(
-                            feed,
+                            feed.tr(),
                             style: TextStyle(fontSize: 16),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -552,8 +554,15 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16),
                     inputFormatters: [
-                      LengthLimitingTextInputFormatter(3),
-                      FilteringTextInputFormatter.digitsOnly,
+                      FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+                      TextInputFormatter.withFunction((oldValue, newValue) {
+                        final text = newValue.text;
+                        return text.isEmpty
+                            ? newValue
+                            : double.tryParse(text) == null
+                            ? oldValue
+                            : newValue;
+                      }),
                     ],
                     onChanged: (value) {
                       onApply(index, feedSettings[index].feedName, value);
@@ -614,7 +623,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                             .map((feed) => DropdownMenuItem(
                           value: feed,
                           child: Text(
-                            feed,
+                            feed.tr(),
                             style: TextStyle(fontSize: 16),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -643,12 +652,19 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                       hintText: 'Qty'.tr(),
                       border: InputBorder.none,
                     ),
-                    keyboardType: TextInputType.number,
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16),
+                    keyboardType: TextInputType.number,
                     inputFormatters: [
-                      LengthLimitingTextInputFormatter(3),
-                      FilteringTextInputFormatter.digitsOnly,
+                      FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+                      TextInputFormatter.withFunction((oldValue, newValue) {
+                        final text = newValue.text;
+                        return text.isEmpty
+                            ? newValue
+                            : double.tryParse(text) == null
+                            ? oldValue
+                            : newValue;
+                      }),
                     ],
                     onChanged: (value) {
                       onApply(index, feedSettings[index].feedName, value);
@@ -676,7 +692,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
           Expanded(
             flex: 1,
             child: Text(
-              setting.day,
+              setting.day.tr(),
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
           ),
@@ -700,7 +716,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                     return DropdownMenuItem(
                       value: feed,
                       child: Text(
-                        feed,
+                        feed.tr(),
                         style: TextStyle(fontSize: 16),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -750,8 +766,15 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                 style: TextStyle(fontSize: 16),
                 keyboardType: TextInputType.number,
                 inputFormatters: [
-                  LengthLimitingTextInputFormatter(3),
-                  FilteringTextInputFormatter.digitsOnly,
+                  FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+                  TextInputFormatter.withFunction((oldValue, newValue) {
+                    final text = newValue.text;
+                    return text.isEmpty
+                        ? newValue
+                        : double.tryParse(text) == null
+                        ? oldValue
+                        : newValue;
+                  }),
                 ],
               ),
             ),

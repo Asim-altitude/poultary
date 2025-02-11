@@ -44,13 +44,13 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
 
   List<String> _purposeList = [];
   List<String> _reductionReasons = [
-    'SOLD'.tr(),'PERSONAL_USE'.tr(),'MORTALITY'.tr(),'LOST'.tr(),'OTHER'.tr()];
+    'SOLD','PERSONAL_USE','MORTALITY','LOST','OTHER'];
 
   List<String> acqusitionList = [
-    'PURCHASED'.tr(),
-    'HATCHED'.tr(),
-    'GIFT'.tr(),
-    'OTHER'.tr(),
+    'PURCHASED',
+    'HATCHED',
+    'GIFT',
+    'OTHER',
   ];
   int chosen_index = 0;
 
@@ -105,8 +105,8 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
       _reductionReasonValue = widget.flock_detail!.reason;
       _purposeselectedValue = widget.flock_detail!.f_name;
 
-      _reductionReasons = [_reductionReasonValue.tr()];
-      acqusitionList = [_acqusitionselectedValue.tr()];
+      _reductionReasons = [_reductionReasonValue];
+      acqusitionList = [_acqusitionselectedValue];
 
 
 
@@ -138,7 +138,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
             .name!);
       }
     }else{
-      _visiblePaymentMethodList.add("Cash".tr());
+      _visiblePaymentMethodList.add("Cash");
     }
 
     payment_method = _visiblePaymentMethodList[0];
@@ -168,7 +168,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
         Flock? singleflock = await DatabaseHelper.getSingleFlock(widget.flock_detail!.f_id);
         print(singleflock);
         print("adding flock");
-        flocks.add(Flock(f_id: widget.flock_detail!.f_id,f_name: widget.flock_detail!.f_name, bird_count: singleflock!.bird_count,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: singleflock!.active_bird_count, active: 1, flock_new: singleflock.flock_new));
+        flocks.add(Flock(f_id: widget.flock_detail!.f_id,f_name: widget.flock_detail!.f_name, bird_count: singleflock!.bird_count,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: singleflock.active_bird_count, active: 1, flock_new: singleflock.flock_new));
         print(flocks);
         _purposeList.add(flocks.elementAt(0).f_name);
 
@@ -959,7 +959,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                   fontSize: 16.0,
@@ -993,7 +993,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                 fontSize: 16.0,
@@ -1027,7 +1027,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                 fontSize: 16.0,
@@ -1067,21 +1067,24 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
   bool checkValidation() {
     bool valid = true;
 
-    if(date.toLowerCase().contains("Choose date".tr())){
+    if(date.toLowerCase().contains("Choose date".tr()) ||
+        date.toLowerCase().contains("Choose date")){
       valid = false;
       print("Select Date");
     }
 
 
     if(isCollection) {
-      if (_acqusitionselectedValue.contains("ACQUSITION_TYPE".tr())) {
+      if (_acqusitionselectedValue.contains("ACQUSITION_TYPE".tr()) ||
+          _acqusitionselectedValue.contains("ACQUSITION_TYPE")) {
         valid = false;
         print("Select Acqusition Type");
       }
     }
 
     if(!isCollection) {
-      if (_reductionReasonValue.contains("REDUCTION_REASON".tr())) {
+      if (_reductionReasonValue.contains("REDUCTION_REASON".tr()) ||
+          _reductionReasonValue.contains("REDUCTION_REASON")) {
         valid = false;
         print("Select Reduction reason");
       }
@@ -1096,8 +1099,8 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
     return valid;
 
   }
-  String payment_method = "Cash".tr();
-  String payment_status = "CLEARED".tr();
+  String payment_method = "Cash";
+  String payment_status = "CLEARED";
   Widget getPaymentMethodList() {
     return Container(
       width: widthScreen,
@@ -1131,7 +1134,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
     );
   }
 
-  List<String> paymentStatusList = ['CLEARED'.tr(),'UNCLEAR'.tr(),'RECONCILED'.tr()];
+  List<String> paymentStatusList = ['CLEARED','UNCLEAR','RECONCILED'];
 
   Widget getPaymentStatusList() {
     return Container(
@@ -1152,7 +1155,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                 fontSize: 16.0,
@@ -1205,7 +1208,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
               f_id: getFlockID(),
               date: date,
               sale_item: "",
-              expense_item: "Bird Purchase".tr(),
+              expense_item: "Bird Purchase",
               type: "Expense",
               amount: amountController.text,
               payment_method: payment_method,
@@ -1229,7 +1232,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
               f_id: getFlockID(),
               date: date,
               sale_item: "",
-              expense_item: "Bird Purchase".tr(),
+              expense_item: "Bird Purchase",
               type: "Expense",
               amount: amountController.text,
               payment_method: payment_method,
@@ -1252,7 +1255,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
               flock_update_id: widget.flock_detail!.f_detail_id.toString(),
               f_id: getFlockID(),
               date: date,
-              sale_item: "Bird Sale".tr(),
+              sale_item: "Bird Sale",
               expense_item: "",
               type: "Income",
               amount: amountController.text,
@@ -1278,7 +1281,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
               flock_update_id: "-1",
               f_id: getFlockID(),
               date: date,
-              sale_item: "Bird Sale".tr(),
+              sale_item: "Bird Sale",
               expense_item: "",
               type: "Income",
               amount: amountController.text,

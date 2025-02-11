@@ -59,7 +59,7 @@ class _NewEggCollection extends State<NewEggCollection>
 
   List<String> _purposeList = [];
   List<String> _reductionReasons = [
-    'SOLD'.tr(),'PERSONAL_USE'.tr(),'MORTALITY'.tr(),'LOST'.tr(),'OTHER'.tr()];
+    'SOLD','PERSONAL_USE','LOST','OTHER'];
 
   int chosen_index = 0;
 
@@ -220,7 +220,7 @@ class _NewEggCollection extends State<NewEggCollection>
                             activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 1',
+                        title: 'Step 1'.tr(),
                       ),
                       EasyStep(
                         customStep: CircleAvatar(
@@ -232,7 +232,7 @@ class _NewEggCollection extends State<NewEggCollection>
                             activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 2',
+                        title: 'Step 2'.tr(),
 
                       ),
 
@@ -519,7 +519,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                       child: DropdownButtonFormField<String>(
                                         decoration: const InputDecoration.collapsed(hintText: null), // Disable internal decoration
                                         value: selectedColor,
-                                        hint: const Text('Select Egg Color'),
+                                        hint:  Text('Select Egg Color'.tr()),
                                         items: eggColors.map((color) {
                                           return DropdownMenuItem(
                                             value: color,
@@ -527,7 +527,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                               height: 60.0, // Set custom height for each item
                                               child: Align(
                                                 alignment: Alignment.centerLeft,
-                                                child: Text(color),
+                                                child: Text(color.tr()),
                                               ),
                                             ),
                                           );
@@ -788,7 +788,7 @@ class _NewEggCollection extends State<NewEggCollection>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                   fontSize: 16.0,
@@ -821,7 +821,7 @@ class _NewEggCollection extends State<NewEggCollection>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                 fontSize: 16.0,

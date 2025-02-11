@@ -291,7 +291,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Text(date_filter_name, style: TextStyle(fontSize: 14),),
+                              Text(date_filter_name.tr(), style: TextStyle(fontSize: 14),),
                               Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
                             ],
                           ),
@@ -499,7 +499,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                             ),
 
                             SizedBox(height: 5,),
-                            Text('$total_feed_consumption' + 'kg',style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),),
+                            Text('$total_feed_consumption' + 'KG'.tr(),style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),),
                             Text("TOTAL_CONSUMPTION".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white70),),
                             SizedBox(height: 5,),
                             Container(
@@ -522,7 +522,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(feedingSummary.elementAt(index).feedName.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.white),),
-                                          Text(Utils.roundTo2Decimal(feedingSummary.elementAt(index).totalQuantity).toString() +" kg",style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.white),),
+                                          Text(Utils.roundTo2Decimal(feedingSummary.elementAt(index).totalQuantity).toString() +"KG".tr(),style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.white),),
 
                                         ],),
                                     );
@@ -903,7 +903,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
               Navigator.pop(bcontext);
             },
             child: ListTile(
-              title: Text(filterList.elementAt(index)),
+              title: Text(filterList.elementAt(index).tr()),
             ),
           );
         },
@@ -913,10 +913,10 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
 
 
 
-  List<String> filterList = ['TODAY'.tr(),'YESTERDAY'.tr(),'THIS_MONTH'.tr(), 'LAST_MONTH'.tr(),'LAST3_MONTHS'.tr(), 'LAST6_MONTHS'.tr(),'THIS_YEAR'.tr(),
-    'LAST_YEAR'.tr(),'ALL_TIME'.tr()];
+  List<String> filterList = ['TODAY','YESTERDAY','THIS_MONTH', 'LAST_MONTH','LAST3_MONTHS', 'LAST6_MONTHS','THIS_YEAR',
+    'LAST_YEAR','ALL_TIME'];
 
-  String date_filter_name = 'THIS_MONTH'.tr();
+  String date_filter_name = 'THIS_MONTH';
   String str_date = '',end_date = '';
   void getData(int filter) {
     int index = 0;

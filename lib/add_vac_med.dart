@@ -208,7 +208,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                             activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 1',
+                        title: 'Step 1'.tr(),
                       ),
                       EasyStep(
                         customStep: CircleAvatar(
@@ -220,7 +220,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                             activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 2',
+                        title: 'Step 2'.tr(),
 
                       ),
 
@@ -656,7 +656,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                   fontSize: 16.0,
@@ -691,7 +691,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                 fontSize: 16.0,

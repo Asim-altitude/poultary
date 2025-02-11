@@ -26,7 +26,6 @@
   "BIRDS_SUMMARY": "Birds Summary",
   "EGGS_SUMMARY": "Eggs Summary",
   "FEED_CONSUMPTION": "Feed Consumption",
-  "INCOME_EXPENSE": "Income/Expense",
   "HEALTH_SUMMARY": "Health Summary",
   "TOTAL": "Total",
   "Health": "Health",
@@ -87,7 +86,7 @@
   "ACQUSITION": "Acqusition",
   "NO_NOTES": "No Notes Taken",
   "NO_BIRDS_ADD_REDUCE": "No Birds Added/Reduced",
-  "All Additions/Reductions": "All Additions/Reductions",
+
   "NOTES_HINT": "Write short note",
   "CONFIRM": "Confirm",
   "EGG": "Egg",
@@ -444,10 +443,10 @@
   "feature_msg": "We’ve introduced a new feature that automates feed management for your flocks. '\n                    'Set it up once and let the app handle the rest! You can activate automatic feed management in app settings.",
   "Activate Now": "Activate Now",
   "Not Now": "Not Now",
+
   "Ask a question on Whatsapp": "Ask a question on Whatsapp",
   "Easy Farming Community": "Easy Farming Community",
   "For daily updates, join": "For daily updates, join",
-
   "Please add new flock to continue.": "Please add new flock to continue.",
   "Financial Info": "Financial Info",
   "Chicken": "Chicken",
@@ -467,5 +466,17 @@
   "Coturnix": "Coturnix",
   "Step 1": "Step 1",
   "Step 2": "Step 2",
-  "Step 3": "Step 3"
+  "Step 3": "Step 3",
+  "white": "white",
+  "brown": "brown",
+  "blue": "blue",
+  "green": "green",
+  "speckled": "speckled",
+  "cream": "cream",
+  "pink": "pink",
+  "olive": "olive",
+  "All Additions/Reductions": "Modify Birds",
+  "INCOME_EXPENSE": "Finance",
+
+  "Not Specified": "Not Specified"
 }

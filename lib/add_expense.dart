@@ -64,8 +64,8 @@ class _NewExpense extends State<NewExpense>
   bool includeExtras = false;
 
   String date = "Choose date";
-  String payment_method = "Cash".tr();
-  String payment_status = "CLEARED".tr();
+  String payment_method = "Cash";
+  String payment_status = "CLEARED";
 
   final quantityController = TextEditingController();
   final notesController = TextEditingController();
@@ -188,7 +188,7 @@ class _NewExpense extends State<NewExpense>
             .name!);
       }
     }else{
-      _visiblePaymentMethodList.add("Cash".tr());
+      _visiblePaymentMethodList.add("Cash");
     }
 
     if(!isEdit)
@@ -269,11 +269,11 @@ class _NewExpense extends State<NewExpense>
     _mysaleItemList = [];
     _mysubItemList = await DatabaseHelper.getSubCategoryList(2);
 
-    _mysaleItemList.add("-Choose Option-".tr());
+    _mysaleItemList.add("-Choose Option-");
     for(int i=0;i<_mysubItemList.length;i++){
 
       if(_mysubItemList.elementAt(i).name! != "Egg Sale")
-        _mysaleItemList.add(_mysubItemList.elementAt(i).name!.tr());
+        _mysaleItemList.add(_mysubItemList.elementAt(i).name!);
 
     }
     setState(() {
@@ -285,7 +285,7 @@ class _NewExpense extends State<NewExpense>
     await DatabaseHelper.instance.database;
     if(isEdit){
       _saleselectedValue = widget.transactionItem!.expense_item;
-      _saleItemList.add(_saleselectedValue.tr());
+      _saleItemList.add(_saleselectedValue);
 
       print(widget.transactionItem!.expense_item);
       print("SALE EDIT $_saleselectedValue");
@@ -324,12 +324,12 @@ class _NewExpense extends State<NewExpense>
     }else {
       _mysubItemList = await DatabaseHelper.getSubCategoryList(2);
 
-      _saleItemList.add("-Choose Purpose-".tr());
-      _saleItemList.add("Flock Purchase".tr());
-      _saleItemList.add("Feed Purchase".tr());
-      _saleItemList.add("Other Expense".tr());
+      _saleItemList.add("-Choose Purpose-");
+      _saleItemList.add("Flock Purchase");
+      _saleItemList.add("Feed Purchase");
+      _saleItemList.add("Other Expense");
 
-      _mysaleItemList.add("-Choose Option-".tr());
+      _mysaleItemList.add("-Choose Option-");
       for (int i = 0; i < _mysubItemList.length; i++) {
         if (_mysubItemList
             .elementAt(i)
@@ -438,7 +438,7 @@ class _NewExpense extends State<NewExpense>
                             activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 1',
+                        title: 'Step 1'.tr(),
                       ),
                       EasyStep(
                         customStep: CircleAvatar(
@@ -450,7 +450,7 @@ class _NewExpense extends State<NewExpense>
                             activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 2',
+                        title: 'Step 2'.tr(),
 
                       ),  EasyStep(
                         customStep: CircleAvatar(
@@ -462,7 +462,7 @@ class _NewExpense extends State<NewExpense>
                             activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 3',
+                        title: 'Step 3'.tr(),
 
                       ),
 
@@ -1219,7 +1219,7 @@ class _NewExpense extends State<NewExpense>
   }
 
 
-  List<String> paymentStatusList = ['CLEARED'.tr(),'UNCLEAR'.tr(),'RECONCILED'.tr()];
+  List<String> paymentStatusList = ['CLEARED','UNCLEAR','RECONCILED'];
   Widget getPaymentStatusList() {
     return Container(
       width: widthScreen,
@@ -1301,12 +1301,14 @@ class _NewExpense extends State<NewExpense>
       print("Add amount");
     }
     
-    if (_saleselectedValue.toLowerCase().contains("ITEM".tr())){
+    if (_saleselectedValue.toLowerCase().contains("ITEM".tr())
+        || _saleselectedValue.toLowerCase().contains("ITEM")){
       valid = false;
       print("No sale item slected");
     }
 
-    if (payment_method.contains("Payment Method".tr())){
+    if (payment_method.contains("Payment Method".tr()) ||
+        payment_method.contains("Payment Method")){
       valid = false;
       print("No payment method slected");
     }

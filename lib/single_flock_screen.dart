@@ -205,7 +205,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                         Row(
                           children: [
                             Container( child: Text('PURPOSE1'.tr()+": ", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.white70),)),
-                            Container( child: Text(Utils.selected_flock!.purpose, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white),)),
+                            Container( child: Text(Utils.selected_flock!.purpose.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white),)),
                           ],
                         ),
                         Row(

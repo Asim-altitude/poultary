@@ -147,10 +147,10 @@ class _DashboardScreen extends State<DashboardScreen> {
 
   }
 
-  List<String> filterList = ['TODAY'.tr(),'YESTERDAY'.tr(),'THIS_MONTH'.tr(), 'LAST_MONTH'.tr(),'LAST3_MONTHS'.tr(), 'LAST6_MONTHS'.tr(),'THIS_YEAR'.tr(),
-    'LAST_YEAR'.tr(),'ALL_TIME'.tr()];
+  List<String> filterList = ['TODAY','YESTERDAY','THIS_MONTH', 'LAST_MONTH','LAST3_MONTHS', 'LAST6_MONTHS','THIS_YEAR',
+    'LAST_YEAR','ALL_TIME'];
 
-  String date_filter_name = 'THIS_MONTH'.tr();
+  String date_filter_name = 'THIS_MONTH';
   String filter_name = "All";
   void openDatePicker() {
     showDialog(
@@ -182,7 +182,7 @@ class _DashboardScreen extends State<DashboardScreen> {
               Navigator.pop(bcontext);
             },
             child: ListTile(
-              title: Text(filterList.elementAt(index)),
+              title: Text(filterList.elementAt(index).tr()),
             ),
           );
         },
@@ -195,7 +195,7 @@ class _DashboardScreen extends State<DashboardScreen> {
 
     int index = 0;
 
-    if (filter == 'TODAY'.tr()){
+    if (filter == 'TODAY'){
       index = 0;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
@@ -207,7 +207,7 @@ class _DashboardScreen extends State<DashboardScreen> {
       getFilteredTransactions(str_date, end_date);
 
     }
-    else if (filter == 'YESTERDAY'.tr()){
+    else if (filter == 'YESTERDAY'){
       index = 1;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day -1);
 
@@ -219,7 +219,7 @@ class _DashboardScreen extends State<DashboardScreen> {
       getFilteredTransactions(str_date, end_date);
 
     }
-    else if (filter == 'THIS_MONTH'.tr()){
+    else if (filter == 'THIS_MONTH'){
       index = 2;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
 
@@ -232,7 +232,7 @@ class _DashboardScreen extends State<DashboardScreen> {
 
 
       getFilteredTransactions(str_date, end_date);
-    }else if (filter == 'LAST_MONTH'.tr()){
+    }else if (filter == 'LAST_MONTH'){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
 
@@ -247,7 +247,7 @@ class _DashboardScreen extends State<DashboardScreen> {
 
       getFilteredTransactions(str_date, end_date);
 
-    }else if (filter == 'LAST3_MONTHS'.tr()){
+    }else if (filter == 'LAST3_MONTHS'){
       index = 4;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -2, 1);
 
@@ -260,7 +260,7 @@ class _DashboardScreen extends State<DashboardScreen> {
 
 
       getFilteredTransactions(str_date, end_date);
-    }else if (filter == 'LAST6_MONTHS'.tr()){
+    }else if (filter == 'LAST6_MONTHS'){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
 
@@ -273,7 +273,7 @@ class _DashboardScreen extends State<DashboardScreen> {
 
 
       getFilteredTransactions(str_date, end_date);
-    }else if (filter == 'THIS_YEAR'.tr()){
+    }else if (filter == 'THIS_YEAR'){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
@@ -284,7 +284,7 @@ class _DashboardScreen extends State<DashboardScreen> {
       print(str_date+" "+end_date);
 
       getFilteredTransactions(str_date, end_date);
-    }else if (filter == 'LAST_YEAR'.tr()){
+    }else if (filter == 'LAST_YEAR'){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year-1, 12,31);
@@ -297,7 +297,7 @@ class _DashboardScreen extends State<DashboardScreen> {
 
       getFilteredTransactions(str_date, end_date);
 
-    }else if (filter == 'ALL_TIME'.tr()){
+    }else if (filter == 'ALL_TIME'){
       index = 8;
       var inputFormat = DateFormat('yyyy-MM-dd');
       str_date ="1950-01-01";
@@ -647,7 +647,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                               Icon(Icons.keyboard_arrow_left, color: Colors.white70,),
                               Container(
                                   margin: EdgeInsets.only(left: 5, right: 5),
-                                  child:Text(date_filter_name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white),)),
+                                  child:Text(date_filter_name.tr(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white),)),
                               Icon(Icons.keyboard_arrow_right, color: Colors.white70,),
                             ],),
                           ),
@@ -704,7 +704,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                                    builder: (context) => const DailyFeedScreen()),
                              );
                              getFilteredData(date_filter_name);
-                           },child: getCustomDataBox(Colors.white12, "FEEDING".tr(), '$total_feed_consumption', '',' kg'))),
+                           },child: getCustomDataBox(Colors.white12, "FEEDING".tr(), '$total_feed_consumption', '',' '+'KG'.tr()))),
                            Expanded(child: InkWell(onTap: () async{
                             await Navigator.push(
                               context,
@@ -856,9 +856,9 @@ class _DashboardScreen extends State<DashboardScreen> {
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
                                                   Container( child: Text(flocks.elementAt(index).f_name, style: TextStyle( fontWeight: FontWeight.w600, fontSize: 17, color: Utils.getThemeColorBlue()),)),
-                                                  Container( child: Text(flocks.elementAt(index).acqusition_type, style: TextStyle( fontWeight: FontWeight.w500, fontSize: 14, color: Colors.black,    decoration: TextDecoration.underline,
+                                                  Container( child: Text(flocks.elementAt(index).acqusition_type.tr(), style: TextStyle( fontWeight: FontWeight.w500, fontSize: 14, color: Colors.black,    decoration: TextDecoration.underline,
                                                   ),)),
-                                                  Container( child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black54),)),
+                                                  Container( child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date).tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black54),)),
 
                                                 ],),
                                             ),

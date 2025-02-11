@@ -236,7 +236,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Text(date_filter_name, style: TextStyle(fontSize: 14),),
+                              Text(date_filter_name.tr(), style: TextStyle(fontSize: 14),),
                               Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
                             ],
                           ),
@@ -285,7 +285,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                             tooltipBehavior: TooltipBehavior(enable: true),
                             series: <CartesianSeries<FeedSummary, String>>[
 
-                              ColumnSeries(borderRadius: BorderRadius.all(Radius.circular(10)),color:Colors.deepOrange,name: 'Feed',dataSource: feedingSummary, xValueMapper: (FeedSummary feedItem, _) => feedItem.feedName, yValueMapper: (FeedSummary feedItem, _)=> feedItem.totalQuantity,),
+                              ColumnSeries(borderRadius: BorderRadius.all(Radius.circular(10)),color:Colors.deepOrange,name: 'Feed'.tr(),dataSource: feedingSummary, xValueMapper: (FeedSummary feedItem, _) => feedItem.feedName.tr(), yValueMapper: (FeedSummary feedItem, _)=> feedItem.totalQuantity,),
 
                             ]),
                         /*Expanded(
@@ -513,7 +513,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                 fontSize: 14.0,
@@ -560,7 +560,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
               Navigator.pop(bcontext);
             },
             child: ListTile(
-              title: Text(filterList.elementAt(index)),
+              title: Text(filterList.elementAt(index).tr()),
             ),
           );
         },
@@ -570,16 +570,16 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
 
 
-  List<String> filterList = ['TODAY'.tr(),'YESTERDAY'.tr(),'THIS_MONTH'.tr(), 'LAST_MONTH'.tr(),'LAST3_MONTHS'.tr(), 'LAST6_MONTHS'.tr(),'THIS_YEAR'.tr(),
-    'LAST_YEAR'.tr(),'ALL_TIME'.tr()];
+  List<String> filterList = ['TODAY','YESTERDAY','THIS_MONTH', 'LAST_MONTH','LAST3_MONTHS', 'LAST6_MONTHS','THIS_YEAR',
+    'LAST_YEAR','ALL_TIME'];
 
-  String date_filter_name = 'THIS_MONTH'.tr();
-  String pdf_formatted_date_filter = 'THIS_MONTH'.tr();
+  String date_filter_name = 'THIS_MONTH';
+  String pdf_formatted_date_filter = 'THIS_MONTH';
   String str_date = '',end_date = '';
   void getData(String filter){
     int index = 0;
 
-    if (filter == 'TODAY'.tr()){
+    if (filter == 'TODAY'){
       index = 0;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
@@ -591,7 +591,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
       pdf_formatted_date_filter = 'TODAY'.tr()+" ("+Utils.getFormattedDate(str_date)+")";
 
     }
-    else if (filter == 'YESTERDAY'.tr()){
+    else if (filter == 'YESTERDAY'){
       index = 1;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day -1);
 
@@ -603,7 +603,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
       pdf_formatted_date_filter = "YESTERDAY".tr() + " ("+Utils.getFormattedDate(str_date)+")";
 
     }
-    else if (filter == 'THIS_MONTH'.tr()){
+    else if (filter == 'THIS_MONTH'){
       index = 2;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
 
@@ -616,7 +616,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
 
       pdf_formatted_date_filter = 'THIS_MONTH'.tr()+" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
-    }else if (filter == 'LAST_MONTH'.tr()){
+    }else if (filter == 'LAST_MONTH'){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
 
@@ -631,7 +631,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
       pdf_formatted_date_filter = 'LAST_MONTH'.tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
 
-    }else if (filter == 'LAST3_MONTHS'.tr()){
+    }else if (filter == 'LAST3_MONTHS'){
       index = 4;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -2, 1);
 
@@ -644,7 +644,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
 
       pdf_formatted_date_filter = "LAST3_MONTHS".tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
-    }else if (filter == 'LAST6_MONTHS'.tr()){
+    }else if (filter == 'LAST6_MONTHS'){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
 
@@ -657,7 +657,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
 
       pdf_formatted_date_filter = "LAST6_MONTHS".tr()+" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
-    }else if (filter == 'THIS_YEAR'.tr()){
+    }else if (filter == 'THIS_YEAR'){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
@@ -668,7 +668,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
       print(str_date+" "+end_date);
 
       pdf_formatted_date_filter = 'THIS_YEAR'.tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
-    }else if (filter == 'LAST_YEAR'.tr()){
+    }else if (filter == 'LAST_YEAR'){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year-1, 12,31);
@@ -681,7 +681,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
       pdf_formatted_date_filter = 'LAST_YEAR'.tr() +" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
 
-    }else if (filter == 'ALL_TIME'.tr()){
+    }else if (filter == 'ALL_TIME'){
       index = 8;
       var inputFormat = DateFormat('yyyy-MM-dd');
       str_date ="1950-01-01";

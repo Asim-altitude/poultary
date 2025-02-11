@@ -249,16 +249,49 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                           },
                         ),
                       ),
-                      Container(
-                          margin: EdgeInsets.only(left: 10),
-                          child: Text(
-                            applied_filter_name.tr(),
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          )),
+                      Expanded(
+                        child: Container(
+                            margin: EdgeInsets.only(left: 10),
+                            child: Text(
+                              applied_filter_name.tr(),
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
+                            )),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          openSortDialog(context, (selectedSort) {
+                            setState(() {
+                              sortOption = selectedSort == "date_desc"
+                                  ? "Date (New)"
+                                  : "Date (Old)";
+                              sortSelected = selectedSort == "date_desc"
+                                  ? "DESC" : "ASC";
+                            });
+
+                            getFilteredTransactions(str_date, end_date);
+
+                          });
+                        },
+                        child: Container(
+                          height: 50,
+                          width: 130,
+                          color: Colors.white.withAlpha(40),
+                          alignment: Alignment.center,
+                          padding: EdgeInsets.symmetric(horizontal: 5),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(child: Text(sortOption, style: TextStyle(fontSize: 12, color: Colors.white))),
+                              Icon(Icons.sort, color: Colors.white),
+
+                            ],
+                          ),
+                        ),
+                      ),
 
                     ],
                   ),
@@ -398,7 +431,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
               ),
 
               list.length > 0 ? Container(
-                height: heightScreen - 350,
+                height: heightScreen - 290,
                 width: widthScreen,
                 child: ListView.builder(
                     itemCount: list.length,
@@ -531,9 +564,9 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
                                       list.elementAt(index).item_type == 'Reduction'? Align(
                                           alignment: Alignment.topLeft,
-                                          child: Container( child: Text(list.elementAt(index).reason.toString().toUpperCase(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Utils.getThemeColorBlue()),))) : Align(
+                                          child: Container( child: Text(list.elementAt(index).reason.toString().tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Utils.getThemeColorBlue()),))) : Align(
                                           alignment: Alignment.topLeft,
-                                          child: Container( child: Text(list.elementAt(index).acqusition_type.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Utils.getThemeColorBlue()),))),
+                                          child: Container( child: Text(list.elementAt(index).acqusition_type.toString().tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Utils.getThemeColorBlue()),))),
                                       // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
                                     ],),
                                   ),
@@ -906,7 +939,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
     await DatabaseHelper.instance.database;
 
 
-    list = await DatabaseHelper.getFilteredFlockDetails(f_id,filter_name,st,end);
+    list = await DatabaseHelper.getFilteredFlockDetailsWithSort(f_id,filter_name,st,end,sortSelected);
 
 
     setState(() {
@@ -1270,6 +1303,44 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       },
     );
   }
+
+  String sortSelected = "DESC"; // Default label
+  String sortOption = "Date (Newest)";
+  void openSortDialog(BuildContext context, Function(String) onSortSelected) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Sort By", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Divider(),
+              ListTile(
+                title: Text("Date (Newest)"),
+                onTap: () {
+                  onSortSelected("date_desc");
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: Text("Date (Oldest)"),
+                onTap: () {
+                  onSortSelected("date_asc");
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
 
 }
 

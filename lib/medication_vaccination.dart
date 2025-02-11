@@ -207,16 +207,50 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                           },
                         ),
                       ),
-                      Container(
-                          margin: EdgeInsets.only(left: 10),
-                          child: Text(
-                            applied_filter_name.tr(),
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          )),
+                      Expanded(
+                        child: Container(
+                            margin: EdgeInsets.only(left: 10),
+                            child: Text(
+                              applied_filter_name.tr(),
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold),
+                            )),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          openSortDialog(context, (selectedSort) {
+                            setState(() {
+                              sortOption = selectedSort == "date_desc"
+                                  ? "Date (New)"
+                                  : "Date (Old)";
+                              sortSelected = selectedSort == "date_desc"
+                                  ? "DESC" : "ASC";
+                            });
+
+                            getFilteredTransactions(str_date, end_date);
+
+                          });
+                        },
+                        child: Container(
+                          height: 50,
+                          width: 130,
+                          color: Colors.white.withAlpha(40),
+                          alignment: Alignment.center,
+                          padding: EdgeInsets.symmetric(horizontal: 5),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(child: Text(sortOption, style: TextStyle(fontSize: 12, color: Colors.white))),
+                              Icon(Icons.sort, color: Colors.white),
+
+                            ],
+                          ),
+                        ),
+                      ),
+
 
                     ],
                   ),
@@ -816,7 +850,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
 
     await DatabaseHelper.instance.database;
 
-    tempList = await DatabaseHelper.getFilteredMedication(f_id,filter_name,st,end);
+    tempList = await DatabaseHelper.getFilteredMedicationWithSort(f_id,filter_name,st,end,sortSelected);
     vac_med_list = tempList.reversed.toList();
     setState(() {
 
@@ -1078,6 +1112,45 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
       },
     );
   }
+
+
+  String sortSelected = "DESC"; // Default label
+  String sortOption = "Date (Newest)";
+  void openSortDialog(BuildContext context, Function(String) onSortSelected) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Sort By", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Divider(),
+              ListTile(
+                title: Text("Date (Newest)"),
+                onTap: () {
+                  onSortSelected("date_desc");
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: Text("Date (Oldest)"),
+                onTap: () {
+                  onSortSelected("date_asc");
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
 
 }
 

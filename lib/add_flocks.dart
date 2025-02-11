@@ -44,17 +44,17 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
   String _acqusitionselectedValue = "";
 
   List<String> _purposeList = [
-    'EGG'.tr(),
-    'MEAT'.tr(),
-    'EGG_MEAT'.tr(),
-    'OTHER'.tr(),
+    'EGG',
+    'MEAT',
+    'EGG_MEAT',
+    'OTHER',
   ];
 
   List<String> acqusitionList = [
-    'PURCHASED'.tr(),
-    'HATCHED'.tr(),
-    'GIFT'.tr(),
-    'OTHER'.tr(),
+    'PURCHASED',
+    'HATCHED',
+    'GIFT',
+    'OTHER',
   ];
 
   List<Bird> birds = [];
@@ -105,7 +105,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
             .name!);
       }
     }else{
-      _visiblePaymentMethodList.add("Cash".tr());
+      _visiblePaymentMethodList.add("Cash");
     }
 
     payment_method = _visiblePaymentMethodList[0];
@@ -237,7 +237,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                             activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 1',
+                        title: 'Step 1'.tr(),
                       ),
                       EasyStep(
                         customStep: CircleAvatar(
@@ -249,7 +249,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                             activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 2',
+                        title: 'Step 2'.tr(),
 
                       ),
                       EasyStep(
@@ -262,7 +262,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                             activeStep >= 2 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 3',
+                        title: 'Step 3'.tr(),
                       ),
 
                     ],
@@ -768,7 +768,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                                     ));
                               }),
                         ) : Container( height: 80,
-                            width: widthScreen - 135,margin: EdgeInsets.only(left: 15), alignment: Alignment.center, child: Text('No images added')),
+                            width: widthScreen - 135,margin: EdgeInsets.only(left: 15), alignment: Alignment.center, child: Text('NO_IMAGES'.tr())),
                         InkWell(
                           onTap: () {
                             selectImages();
@@ -1013,8 +1013,8 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
     });
   }
 
-  String payment_method = "Cash".tr();
-  String payment_status = "CLEARED".tr();
+  String payment_method = "Cash";
+  String payment_status = "CLEARED";
   Widget getPaymentMethodList() {
     return Container(
       width: widthScreen,
@@ -1048,7 +1048,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
     );
   }
 
-  List<String> paymentStatusList = ['CLEARED'.tr(),'UNCLEAR'.tr(),'RECONCILED'.tr()];
+  List<String> paymentStatusList = ['CLEARED','UNCLEAR','RECONCILED'];
 
   Widget getPaymentStatusList() {
     return Container(
@@ -1069,7 +1069,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                 fontSize: 16.0,
@@ -1104,7 +1104,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                 fontSize: 16.0,
@@ -1135,7 +1135,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                   fontSize: 16.0,
@@ -1197,7 +1197,8 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
 
     bool valid = true;
 
-    if(_acqusitionselectedValue.toLowerCase().contains("ACQUSITION_TYPE".tr()))
+    if(_acqusitionselectedValue.toLowerCase().contains("ACQUSITION_TYPE".tr()) ||
+        _acqusitionselectedValue.toLowerCase().contains("ACQUSITION_TYPE"))
     {
       valid = false;
       print("Select Acqusition Type");

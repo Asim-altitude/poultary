@@ -477,12 +477,39 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
     setState((){});
   }
 
-  void chooseCurrency() {
-    final allCurrencies = CurrencyService().getAll(); // Use the custom service
+  Future<void> chooseCurrency() async {
+    final allCurrencies = CurrencyService().getAll(); // Get built-in currencies
+    final extraCurrencies = Utils.getMissingCurrency(); // Get missing currencies
 
-    print("Final Currency List: ${allCurrencies.map((c) => c.code).toList()}"); // Debugging
+    // Merge lists while ensuring no duplicate codes
+    final Map<String, Currency> mergedMap = {
+      for (var currency in allCurrencies) currency.code: currency, // Add existing currencies
+      for (var currency in extraCurrencies) currency.code: currency, // Override with missing currencies
+    };
 
-    showCurrencyPicker(
+    final List<Currency> mergedList = mergedMap.values.toList(); // Convert map back to list
+
+    // 📌 Print all merged currencies
+    print("✅ Merged Currency List:");
+    for (var currency in mergedList) {
+      print("${currency.code} - ${currency.name} (${currency.symbol})");
+    }
+
+    Currency? selected = await showCurrencyListDialog(context, mergedList);
+
+    // Show dialog and wait for result
+  //  Currency? selected = await showCurrencyListDialog(context, mergedList);
+
+    if (selected != null) {
+      print("Selected: ${selected.name} (${selected.code})");
+      selectedCurrency = selected.symbol;
+      DatabaseHelper.updateCurrency(selectedCurrency);
+      Utils.currency = selectedCurrency;
+      setState(() {}); // UI update happens after selection
+      Utils.showToast("SUCCESSFUL".tr());
+    }
+
+   /* showCurrencyPicker(
       context: context,
       showFlag: true,
       showCurrencyName: true,
@@ -495,12 +522,16 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
         setState(() {});
         Utils.showToast("SUCCESSFUL".tr());
       },
-      currencyFilter: allCurrencies.map((c) => c.code).toList(), // Make sure IRR is included
-    );
+      currencyFilter: mergedList.map((c) => c.code).toList(), // Ensure IRR & others are included
+    );*/
   }
 
 
+
 }
+
+
+
 
 class CustomCurrencyService extends CurrencyService {
   @override
@@ -525,6 +556,98 @@ class CustomCurrencyService extends CurrencyService {
     }
 
     return allCurrencies;
+  }
+}
+
+
+Future<Currency?> showCurrencyListDialog(BuildContext context, List<Currency> currencies) async {
+  return await showDialog<Currency>(
+    context: context,
+    builder: (BuildContext context) {
+      return _CurrencyPickerDialog(currencies: currencies);
+    },
+  );
+}
+
+class _CurrencyPickerDialog extends StatefulWidget {
+  final List<Currency> currencies;
+  const _CurrencyPickerDialog({Key? key, required this.currencies}) : super(key: key);
+
+  @override
+  State<_CurrencyPickerDialog> createState() => _CurrencyPickerDialogState();
+}
+
+class _CurrencyPickerDialogState extends State<_CurrencyPickerDialog> {
+  late TextEditingController _searchController;
+  late List<Currency> _filteredCurrencies;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+    _filteredCurrencies = widget.currencies;
+  }
+
+  void _filterCurrencies(String query) {
+    setState(() {
+      _filteredCurrencies = widget.currencies
+          .where((currency) =>
+      currency.name.toLowerCase().contains(query.toLowerCase()) ||
+          currency.code.toLowerCase().contains(query.toLowerCase()) ||
+          currency.symbol.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Column(
+        children: [
+          const Text("Select Currency"),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: "Search currency...",
+              prefixIcon: const Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onChanged: _filterCurrencies,
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: double.maxFinite,
+        height: 400,
+        child: ListView.builder(
+          itemCount: _filteredCurrencies.length,
+          itemBuilder: (context, index) {
+            final currency = _filteredCurrencies[index];
+            return ListTile(
+              leading: CircleAvatar(child: Text(currency.code.substring(0, 2))),
+              title: Text("${currency.name} (${currency.code})"),
+              subtitle: Text(currency.symbol),
+              onTap: () => Navigator.pop(context, currency),
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, null),
+          child: const Text("Close"),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 }
 

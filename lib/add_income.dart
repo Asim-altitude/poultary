@@ -38,8 +38,8 @@ class _NewIncome extends State<NewIncome>
   }
 
   String _purposeselectedValue = "";
-  String _saleselectedValue = "Sale Item".tr();
-  String _mysaleselectedValue = "-Choose Option-".tr();
+  String _saleselectedValue = "Sale Item";
+  String _mysaleselectedValue = "-Choose Option-";
 
   List<String> _purposeList = [];
   List<String> _saleItemList = [];
@@ -62,8 +62,8 @@ class _NewIncome extends State<NewIncome>
 
   String date = "Choose date";
   String displayDate = "";
-  String payment_method = "Cash".tr();
-  String payment_status = "CLEARED".tr();
+  String payment_method = "Cash";
+  String payment_status = "CLEARED";
 
   final quantityController = TextEditingController();
   final notesController = TextEditingController();
@@ -81,7 +81,7 @@ class _NewIncome extends State<NewIncome>
 
       _purposeselectedValue = widget.transactionItem!.f_name;
       date = widget.transactionItem!.date;
-      _saleselectedValue = widget.transactionItem!.sale_item.tr();
+      _saleselectedValue = widget.transactionItem!.sale_item;
       notesController.text = widget.transactionItem!.short_note;
       howmanyController.text = widget.transactionItem!.how_many;
       soldtoController.text = widget.transactionItem!.sold_purchased_from;
@@ -176,14 +176,14 @@ class _NewIncome extends State<NewIncome>
       for (int i = 0; i < _paymentMethodList.length; i++) {
         _visiblePaymentMethodList.add(_paymentMethodList
             .elementAt(i)
-            .name!.tr());
+            .name!);
       }
     }else{
-      _visiblePaymentMethodList.add("Cash".tr());
+      _visiblePaymentMethodList.add("Cash");
     }
 
     if(!isEdit)
-    payment_method = _visiblePaymentMethodList[0].tr();
+    payment_method = _visiblePaymentMethodList[0];
     print(payment_method);
 
     setState(() {
@@ -196,11 +196,11 @@ class _NewIncome extends State<NewIncome>
     _mysaleItemList = [];
     _mysubItemList = await DatabaseHelper.getSubCategoryList(1);
 
-    _mysaleItemList.add("-Choose Option-".tr());
+    _mysaleItemList.add("-Choose Option-");
     for(int i=0;i<_mysubItemList.length;i++){
 
       if(_mysubItemList.elementAt(i).name! != "Egg Sale")
-        _mysaleItemList.add(_mysubItemList.elementAt(i).name!.tr());
+        _mysaleItemList.add(_mysubItemList.elementAt(i).name!);
 
     }
     setState(() {
@@ -211,8 +211,8 @@ class _NewIncome extends State<NewIncome>
   void getIncomeCategoryList() async {
     await DatabaseHelper.instance.database;
     if(isEdit){
-      _saleselectedValue = widget.transactionItem!.sale_item.tr();
-      _saleItemList.add(_saleselectedValue.tr());
+      _saleselectedValue = widget.transactionItem!.sale_item;
+      _saleItemList.add(_saleselectedValue);
 
       print(_saleselectedValue);
       print("ID ${widget.transactionItem!.flock_update_id}");
@@ -257,19 +257,19 @@ class _NewIncome extends State<NewIncome>
     } else{
       _mysubItemList = await DatabaseHelper.getSubCategoryList(1);
       _mysaleItemList = [];
-      _mysaleItemList.add("-Choose Option-".tr());
+      _mysaleItemList.add("-Choose Option-");
       for(int i=0;i<_mysubItemList.length;i++){
 
         if(_mysubItemList.elementAt(i).name! != "Egg Sale")
-          _mysaleItemList.add(_mysubItemList.elementAt(i).name!.tr());
+          _mysaleItemList.add(_mysubItemList.elementAt(i).name!);
 
       }
 
       _saleItemList = [];
-      _saleItemList.add("-Choose Purpose-".tr());
-      _saleItemList.add("Flock Sale".tr());
-      _saleItemList.add("Egg Sale".tr());
-      _saleItemList.add("Other Income".tr());
+      _saleItemList.add("-Choose Purpose-");
+      _saleItemList.add("Flock Sale");
+      _saleItemList.add("Egg Sale");
+      _saleItemList.add("Other Income");
 
       _saleselectedValue = _saleItemList[0];
       is_bird_sale = false;
@@ -421,7 +421,7 @@ class _NewIncome extends State<NewIncome>
                             activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 1',
+                        title: 'Step 1'.tr(),
                       ),
                       EasyStep(
                         customStep: CircleAvatar(
@@ -433,7 +433,7 @@ class _NewIncome extends State<NewIncome>
                             activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 2',
+                        title: 'Step 2'.tr(),
 
                       ),  EasyStep(
                         customStep: CircleAvatar(
@@ -445,7 +445,7 @@ class _NewIncome extends State<NewIncome>
                             activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
                           ),
                         ),
-                        title: 'Step 3',
+                        title: 'Step 3'.tr(),
 
                       ),
 

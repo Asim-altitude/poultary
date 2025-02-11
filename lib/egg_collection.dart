@@ -176,7 +176,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
               Utils.getDistanceBar(),
 
               ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
                     boxShadow: [
@@ -199,17 +199,49 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                           },
                         ),
                       ),
-                      Container(
-                          margin: EdgeInsets.only(left: 10),
-                          child: Text(
-                            applied_filter_name.tr(),
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          )),
+                      Expanded(
+                        child: Container(
+                            margin: EdgeInsets.only(left: 10),
+                            child: Text(
+                              applied_filter_name.tr(),
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold),
+                            )),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          openSortDialog(context, (selectedSort) {
+                            setState(() {
+                              sortOption = selectedSort == "date_desc"
+                                  ? "Date (New)"
+                                  : "Date (Old)";
+                              sortSelected = selectedSort == "date_desc"
+                                  ? "DESC" : "ASC";
+                            });
 
+                            getFilteredTransactions(str_date, end_date);
+
+                          });
+                        },
+                        child: Container(
+                          height: 50,
+                          width: 130,
+                          color: Colors.white.withAlpha(40),
+                          alignment: Alignment.center,
+                          padding: EdgeInsets.symmetric(horizontal: 5),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(child: Text(sortOption, style: TextStyle(fontSize: 12, color: Colors.white))),
+                              Icon(Icons.sort, color: Colors.white),
+
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -222,7 +254,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                       height: 45,
                       alignment: Alignment.centerRight,
                       padding: EdgeInsets.only(left: 10),
-                      margin: EdgeInsets.only(top: 10,left: 10,right: 5),
+                      margin: EdgeInsets.only(top: 5,left: 10,right: 5),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: const BorderRadius.all(
@@ -252,7 +284,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                               width: 1.0,
                             ),
                           ),
-                          margin: EdgeInsets.only(right: 10,top: 15,bottom: 5),
+                          margin: EdgeInsets.only(right: 10,top: 10,bottom: 5),
                           padding: EdgeInsets.only(left: 5,right: 5),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
@@ -351,7 +383,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
               ),
 
               eggs.length > 0 ? Container(
-                height: heightScreen - 290,
+                height: heightScreen - 280,
                 width: widthScreen,
                 child: ListView.builder(
                     itemCount: eggs.length,
@@ -363,7 +395,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
                         },
                         child: Container(
-                          margin: EdgeInsets.only(left: 8,right: 8,top: 8,bottom: 0),
+                          margin: EdgeInsets.only(left: 8,right: 8,top: 5,bottom: 0),
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.all(Radius.circular(3)),
 
@@ -815,16 +847,16 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
     await DatabaseHelper.instance.database;
 
-    tempList = await DatabaseHelper.getFilteredEggs(f_id,filter_name,st,end);
-    eggs = tempList.reversed.toList();
+    eggs = await DatabaseHelper.getFilteredEggsWithSort(f_id,filter_name,st,end,sortSelected);
+    //eggs = tempList.reversed.toList();
 
     setState(() {
 
     });
 
   }
-
-
+  String sortSelected = "DESC"; // Default label
+  String sortOption = "Date (Newest)"; // Default label
   List<String> filterList = ['TODAY'.tr(),'YESTERDAY'.tr(),'THIS_MONTH'.tr(), 'LAST_MONTH'.tr(),'LAST3_MONTHS'.tr(), 'LAST6_MONTHS'.tr(),'THIS_YEAR'.tr(),
     'LAST_YEAR'.tr(),'ALL_TIME'.tr()];
 
@@ -1062,6 +1094,41 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
       context: context,
       builder: (BuildContext context) {
         return alert;
+      },
+    );
+  }
+
+  void openSortDialog(BuildContext context, Function(String) onSortSelected) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Sort By", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Divider(),
+              ListTile(
+                title: Text("Date (Newest)"),
+                onTap: () {
+                  onSortSelected("date_desc");
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: Text("Date (Oldest)"),
+                onTap: () {
+                  onSortSelected("date_asc");
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
       },
     );
   }
