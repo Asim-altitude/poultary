@@ -22,6 +22,7 @@ import 'database/databse_helper.dart';
 import 'egg_collection.dart';
 import 'model/farm_item.dart';
 import 'model/flock.dart';
+import 'new_reporting_Screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -132,7 +133,7 @@ class _HomeScreen extends State<HomeScreen> {
       child: DashboardScreen(),
     ),
     Center(
-      child: ReportsScreen(),
+      child: ReportListScreen(),
     ),
 
     Center(

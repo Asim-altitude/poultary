@@ -20,6 +20,7 @@ import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 import 'model/egg_item.dart';
 import 'model/feed_item.dart';
 import 'model/finance_chart_data.dart';
+import 'model/finance_summary_flock.dart';
 import 'model/flock.dart';
 import 'model/flock_detail.dart';
 
@@ -100,6 +101,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
   }
 
+  List<FlockIncomeExpense> flockFinanceList = [];
   void getAllData() async{
 
     await DatabaseHelper.instance.database;
@@ -108,7 +110,6 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
     gross_income = await DatabaseHelper.getTransactionsTotal(f_id, "Income", str_date, end_date);
     total_expense = await DatabaseHelper.getTransactionsTotal(f_id, "Expense", str_date, end_date);
-
 
     print(gross_income);
     print(total_expense);
@@ -137,9 +138,17 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
     double tamount = 0;
     int added = -1;
 
+    flockFinanceList = (await DatabaseHelper.getFlockWiseIncomeExpense(st,end))!;
+    Utils.flockfinanceList = flockFinanceList;
     list = await DatabaseHelper.getReportFilteredTransactions(f_id,"All",st,end);
     incomeChartData = await DatabaseHelper.getFinanceChartData(st, end,"Income");
     expenseChartData = await DatabaseHelper.getFinanceChartData(st, end,"Expense");
+
+    topIncomeItems = (await DatabaseHelper.getTopIncomeItems(st,end))!;
+    topExpenseItems = (await DatabaseHelper.getTopExpenseItems(st,end))!;
+
+    Utils.incomeItems = topIncomeItems;
+    Utils.expenseItems = topExpenseItems;
 
     for(int j=0;j<expenseChartData.length;j++){
       expenseChartData.elementAt(j).date = Utils.getFormattedDate(expenseChartData.elementAt(j).date).substring(0,Utils.getFormattedDate(expenseChartData.elementAt(j).date).length-4);
@@ -311,271 +320,299 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
               Row(
                 children: [
-                  Expanded(
+
+                  InkWell(
+                    onTap: () {
+                      openDatePicker();
+                    },
+                    borderRadius: BorderRadius.circular(8), // Adds ripple effect with rounded edges
                     child: Container(
                       height: 45,
-                      alignment: Alignment.centerRight,
-                      padding: EdgeInsets.only(left: 10),
-                      margin: EdgeInsets.only(top: 10,left: 10,right: 5),
+                      width: widthScreen - 20,
+                      margin: EdgeInsets.only(right: 10,left: 10, top: 15, bottom: 10),
+                      padding: EdgeInsets.symmetric(horizontal: 10),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: const BorderRadius.all(
-                            Radius.circular(5.0)),
+                        gradient: LinearGradient(
+                          colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color:  Utils.getThemeColorBlue(),
-                          width: 1.0,
+                          color: Utils.getThemeColorBlue(),
+                          width: 1.2,
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
                       ),
-                      child: getDropDownList(),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.calendar_today, color: Utils.getThemeColorBlue(), size: 18),
+                          SizedBox(width: 8),
+                          Text(
+                            date_filter_name.tr(),
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+                          ),
+                          SizedBox(width: 8),
+                          Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(), size: 20),
+                        ],
+                      ),
                     ),
-                  ),
-                  InkWell(
-                      onTap: () {
-                        openDatePicker();
-                      },
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Container(
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(5.0)),
-                            border: Border.all(
-                              color:  Utils.getThemeColorBlue(),
-                              width: 1.0,
-                            ),
-                          ),
-                          margin: EdgeInsets.only(right: 10,top: 15,bottom: 5),
-                          padding: EdgeInsets.only(left: 5,right: 5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text(date_filter_name.tr(), style: TextStyle(fontSize: 14),),
-                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
-                            ],
-                          ),
-                        ),
-                      )),
+                  )
                 ],
               ),
 
               Container(
                 color: Colors.white,
-                child: Container(
-                  padding: EdgeInsets.all(10),
-                  /*decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                   *//* boxShadow: [
-                      BoxShadow(
-                        color: Colors.white, //(x,y)
-                      ),
-                    ],*//*
-                  ),*/
-                  child: Column(children: [
-                    Align(
-                        alignment: Alignment.topLeft,
-                        child: Row(
-                          children: [
-
-                            Text('INCOME_EXPENSE'.tr(),style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
-                          ],
-                        )),
-
-                    Container(
-                      width: widthScreen,
-                      child: Column(children: [
-                     //Initialize the chart widget
-                     SfCartesianChart(
-                         primaryXAxis: CategoryAxis(),
-
-                         zoomPanBehavior: _zoomPanBehavior,
-                         // Chart title
-                         title: ChartTitle(text: date_filter_name),
-                         // Enable legend
-                         legend: Legend(isVisible: true, position: LegendPosition.bottom),
-
-                         // Enable tooltip
-                         tooltipBehavior: TooltipBehavior(enable: true),
-                         series: <CartesianSeries<Finance_Chart_Item, String>>[
-
-                           ColumnSeries(borderRadius: BorderRadius.all(Radius.circular(10)),color:Colors.green,name: 'Income'.tr(),dataSource: incomeChartData, xValueMapper: (Finance_Chart_Item incomeItem, _) => incomeItem.date, yValueMapper: (Finance_Chart_Item incomeItem, _)=> incomeItem.amount,),
-                           ColumnSeries(borderRadius: BorderRadius.all(Radius.circular(10)),color: Colors.red,name:'Expense'.tr(),dataSource: expenseChartData, xValueMapper: (Finance_Chart_Item expenseItem, _) => expenseItem.date, yValueMapper: (Finance_Chart_Item expenseItem, _) => expenseItem.amount,)
-
-                         ]),
-                     /*Expanded(
-                       child: Padding(
-                         padding: const EdgeInsets.all(8.0),
-                         //Initialize the spark charts widget
-                         child: SfSparkLineChart.custom(
-                           //Enable the trackball
-                           trackball: SparkChartTrackball(
-                               activationMode: SparkChartActivationMode.tap),
-                           //Enable marker
-                           marker: SparkChartMarker(
-                               displayMode: SparkChartMarkerDisplayMode.all),
-                           //Enable data label
-                           labelDisplayMode: SparkChartLabelDisplayMode.all,
-                           xValueMapper: (int index) => data[index].year,
-                           yValueMapper: (int index) => data[index].sales,
-                           dataCount: data.length,
-                         ),
-                       ),
-                     )*/
-                   ]),) ,
-
-                    SizedBox(height: 20,width: widthScreen,),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('GROSS_INCOME'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                        Text(Utils.currency+'$gross_income',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
-
-                      ],),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('TOTAL_EXPENSE'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                        Text("-"+Utils.currency+"$total_expense",style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.red),),
-
-                      ],),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('NET_INCOME'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
-                        Text(Utils.currency+'$net_income',style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
-
-                      ],)
-                  ],),),
-              ),
-
-              Container(
-                padding: EdgeInsets.only(top: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-                  color: Utils.getScreenBackground(),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 2,
-                      blurRadius: 2,
-                      offset: Offset(0, 1), // changes position of shadow
-                    ),
-                  ],
-
-                ),
+                padding: EdgeInsets.all(15),
                 child: Column(
                   children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                          margin: EdgeInsets.all(10),
-                          child: Text('transactions'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
+
+                    SizedBox(height: 10),
+                    // Income vs Expense chart
+                    SfCartesianChart(
+                      primaryXAxis: CategoryAxis(),
+                      zoomPanBehavior: _zoomPanBehavior,
+                      title: ChartTitle(text: date_filter_name.tr()),
+                      legend: Legend(isVisible: true, position: LegendPosition.bottom),
+                      tooltipBehavior: TooltipBehavior(enable: true),
+                      series: <CartesianSeries<Finance_Chart_Item, String>>[
+                        ColumnSeries(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                          color: Colors.green,
+                          name: 'Income'.tr(),
+                          dataSource: incomeChartData,
+                          xValueMapper: (Finance_Chart_Item incomeItem, _) => incomeItem.date,
+                          yValueMapper: (Finance_Chart_Item incomeItem, _) => incomeItem.amount,
+                        ),
+                        ColumnSeries(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                          color: Colors.red,
+                          name: 'Expense'.tr(),
+                          dataSource: expenseChartData,
+                          xValueMapper: (Finance_Chart_Item expenseItem, _) => expenseItem.date,
+                          yValueMapper: (Finance_Chart_Item expenseItem, _) => expenseItem.amount,
+                        ),
+                      ],
                     ),
-                    list.length > 0 ? Container(
-                      margin: EdgeInsets.only(top: 0,bottom: 20),
-                      width: widthScreen,
-                      height: list.length * 90,
-                      child: ListView.builder(
-                          itemCount: list.length,
-                          scrollDirection: Axis.vertical,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemBuilder: (BuildContext context, int index) {
-                            return InkWell(
-                              onTap: ()
-                              {
+                    SizedBox(height: 20),
+                    // Financial Summary
+                    Card(
+                      elevation: 6,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      margin: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                      child: Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 🔹 Overall Summary
+                            Text(
+                              "Summary & Analytics".tr(),
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+                            ),
+                            SizedBox(height: 12),
 
-                              },
-                              child: Container(
-                                margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.all(Radius.circular(3)),
-                                    color: Colors.white,
-                                ),
+                            _buildSummaryRow(Icons.arrow_upward, 'GROSS_INCOME'.tr(), gross_income, Colors.green),
+                            Divider(thickness: 1.2),
+                            _buildSummaryRow(Icons.arrow_downward, 'TOTAL_EXPENSE'.tr(), -total_expense, Colors.red),
+                            Divider(thickness: 1.2),
+                            _buildSummaryRow(Icons.account_balance_wallet, 'NET_INCOME'.tr(), net_income, Utils.getThemeColorBlue(), fontSize: 20),
 
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.all(Radius.circular(3)),
-                                    color: Colors.white,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.5),
-                                        spreadRadius: 2,
-                                        blurRadius: 2,
-                                        offset: Offset(0, 1), // changes position of shadow
-                                      ),
-                                    ],
-                                  ),
-                                  padding: EdgeInsets.all(10),
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Container(child: Text(style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black), list.elementAt(index).type == 'Income'? list.elementAt(index).sale_item.tr() : list.elementAt(index).expense_item.tr()),),
-                                          Container(child: Text(style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black), " ("+list.elementAt(index).f_name.tr()+")"),),
-                                          Icon(list.elementAt(index).type == 'Income'? Icons.arrow_upward:Icons.arrow_downward, color: list.elementAt(index).type == 'Income'? Colors.green:Colors.red,)
-                                        ],
-                                      ),
-                                      Row( children: [
-                                        Expanded(
-                                          child: Container(
-                                            margin: EdgeInsets.only(top: 10),
-                                            child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.start,
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
+                            SizedBox(height: 10),
 
-                                                Row(
-                                                  children: [
-                                                    Icon(Icons.calendar_month, size: 25,),
-                                                    Container(margin: EdgeInsets.only(left: 5),child: Text(Utils.getFormattedDate(list.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-                                                  ],
-                                                ),
-                                                // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                              ],),
-                                          ),
-                                        ),
+                            Column(
+                              children: flockFinanceList.map((flock) => _buildFlockRow(flock)).toList(),
+                            ),
+                            SizedBox(height: 10),
 
-                                        Container(
-                                          margin: EdgeInsets.only(right: 5),
-                                          child: Row(
-                                            children: [
-                                              Text(Utils.currency, style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold, fontSize: 14),),
-                                              Container(  child: Text(list.elementAt(index).amount.toString(), style: TextStyle( fontWeight: FontWeight.w700, fontSize: 16, color: list.elementAt(index).type == 'Income'? Utils.getThemeColorBlue():Colors.red),)),
-                                            ],
-                                          ),
-                                        ),
-                                      ]),
-                                    ],
-                                  ) ,
-                                ),
-                              ),
-                            );
+                            // 📊 Top Income Items
+                            Text(
+                              'Top Income Sources'.tr(),
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
+                            ),
+                            SizedBox(height: 8),
+                            Column(
+                              children: topIncomeItems.map((item) => _buildItemRow(item, Colors.green)).toList(),
+                            ),
 
-                          }),
-                    ) : Center(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 20),
-                        child: Container(
-                          height: heightScreen - 200,
-                          width: widthScreen,
-                          child: Column(
-                            children: [
-                              Text('No Income/Expense added in current period'.tr(), style: TextStyle(fontSize: 15, color: Colors.black54),),
-                            ],
-                          ),
+                            SizedBox(height: 15),
+
+                            // 📉 Top Expense Items
+                            Text(
+                              'Top Expenses'.tr(),
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
+                            ),
+                            SizedBox(height: 8),
+                            Column(
+                              children: topExpenseItems.map((item) => _buildItemRow(item, Colors.red)).toList(),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                    SizedBox(height: 100,),
+                    )
                   ],
                 ),
-              )
-
-
+              ),
             ]
       ),),),),),);
+  }
+
+  // 🔹 Item Row UI (for Income & Expense)
+  Widget _buildItemRow(FinancialItem item, Color color) {
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      margin: EdgeInsets.symmetric(vertical: 6),
+      color: Colors.grey[100],
+      child: Padding(
+        padding: EdgeInsets.all(10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(item.icon, color: color, size: 22),
+                SizedBox(width: 8),
+                Text(
+                  item.name.tr(),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                ),
+              ],
+            ),
+            Text(
+              Utils.currency + item.amount.toStringAsFixed(2),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 🔸 Summary Row UI
+  Widget _buildSummaryRow(IconData icon, String label, num amount, Color color, {double fontSize = 16}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: color, size: 22),
+            SizedBox(width: 8),
+            Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black)),
+          ],
+        ),
+        Text(
+          Utils.currency + amount.toStringAsFixed(2),
+          style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold, color: color),
+        ),
+      ],
+    );
+  }
+
+  // 🔸 Flock-wise Row UI
+  Widget _buildFlockRow(FlockIncomeExpense flock) {
+    double netProfit = flock.totalIncome - flock.totalExpense;
+    double profitMargin = flock.totalIncome == 0 ? 0 : (netProfit / flock.totalIncome) * 100;
+    bool isProfitable = netProfit >= 0;
+
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blueGrey[50]!, Colors.white],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 🐔 Flock Name & Growth Icon
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  flock.fName,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                ),
+                Row(
+                  children: [
+                    Icon(
+                      isProfitable ? Icons.trending_up : Icons.trending_down,
+                      color: isProfitable ? Colors.green : Colors.red,
+                      size: 22,
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      '${profitMargin.toStringAsFixed(1)}%',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isProfitable ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
+
+            // 🔹 Income & Expense Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildFlockDetail(Icons.arrow_upward, 'Income', flock.totalIncome, Colors.green),
+                _buildFlockDetail(Icons.arrow_downward, 'Expense', flock.totalExpense, Colors.red),
+                _buildFlockDetail(Icons.account_balance_wallet, 'NET_INCOME', netProfit, isProfitable ? Colors.blue : Colors.red),
+              ],
+            ),
+
+            SizedBox(height: 10),
+
+            // 📊 Profitability Progress Bar
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: LinearProgressIndicator(
+                value: (profitMargin.clamp(0, 100)) / 100,
+                backgroundColor: Colors.grey[300],
+                valueColor: AlwaysStoppedAnimation<Color>(isProfitable ? Colors.green : Colors.red),
+                minHeight: 6,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 🔹 Flock Detail (Income, Expense, Net Profit)
+  Widget _buildFlockDetail(IconData icon, String label, double amount, Color color) {
+    return Column(
+      children: [
+
+        SizedBox(height: 4),
+        Text(
+          label.tr(),
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.black54),
+        ),
+        SizedBox(height: 4),
+        Text(
+          '\$${amount.toStringAsFixed(2)}',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color),
+        ),
+      ],
+    );
   }
 
 
@@ -676,7 +713,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
               Navigator.pop(bcontext);
             },
             child: ListTile(
-              title: Text(filterList.elementAt(index)),
+              title: Text(filterList.elementAt(index).tr()),
             ),
           );
         },
@@ -684,6 +721,12 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
     );
   }
 
+  // 📝 Example Data
+  List<FinancialItem> topIncomeItems = [
+  ];
+
+  List<FinancialItem> topExpenseItems = [
+  ];
 
 
   List<String> filterList = ['TODAY','YESTERDAY','THIS_MONTH', 'LAST_MONTH','LAST3_MONTHS', 'LAST6_MONTHS','THIS_YEAR',
@@ -830,8 +873,12 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
     Utils.NET_INCOME = net_income.toString();
 
     Utils.finance_report_list.clear();
+
+    print("LIST ${list.length}");
+
     for(int i=0;i<list.length;i++){
 
+      print("$i ${list.elementAt(i).f_name}");
       TransactionItem transactionItem = list.elementAt(i);
       Utils.finance_report_list.add(Finance_Report_Item(f_name: transactionItem.f_name, date: Utils.getFormattedDate(transactionItem.date), salePurchaseItem: transactionItem.type == 'Income'? transactionItem.sale_item : transactionItem.expense_item, income:  transactionItem.type == 'Income'? transactionItem.amount : '0', expense:  transactionItem.type == 'Income'? '0' : transactionItem.amount));
 
@@ -847,4 +894,15 @@ class _SalesData {
    String year;
    double sales;
 }
+
+// 🔹 Model Class for Financial Item
+class FinancialItem {
+  final String name;
+  final double amount;
+  final IconData icon;
+
+  FinancialItem({required this.name, required this.amount, required this.icon});
+}
+
+
 

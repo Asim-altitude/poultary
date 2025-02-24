@@ -171,7 +171,7 @@ class Invoice {
                         fontSize: 10,
                       ),
                     ),), pw.Text(
-                    getFeedTotal().toString()+" "+"Kg".tr(),
+                    getFeedTotal().toString()+" "+"KG".tr(),
                     style: pw.TextStyle(
                       color: PdfColors.black,
                       fontWeight: pw.FontWeight.bold,
@@ -188,7 +188,7 @@ class Invoice {
             child: pw.Directionality(
               textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
               child: pw.Text(
-                'By FLock Name'.tr(),
+                'By FLock'.tr(),
                 style: pw.TextStyle(
                   color: PdfColors.black,
                   fontSize: 10,
@@ -213,7 +213,7 @@ class Invoice {
                         ),
                       ),),
                   pw.Text(
-                      getFLockTotal().toString()+" "+"Kg".tr(),
+                      getFLockTotal().toString()+" "+"KG".tr(),
                       style: pw.TextStyle(
                         color: PdfColors.black,
                         fontWeight: pw.FontWeight.bold,
@@ -268,88 +268,73 @@ class Invoice {
 
   pw.Widget _buildHeader(pw.Context context) {
     return pw.Directionality(
-        textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-        child:pw.Container(
-      height: 175,
-      child: pw.Column( 
-        children: [
-          pw.Expanded(
-            child: pw.Column(
-              mainAxisSize: pw.MainAxisSize.min,
-              children: [
-                pw.Container(
-                  alignment: pw.Alignment.center,
-                  padding: const pw.EdgeInsets.only(bottom: 8, left: 30),
-                  height: 70,
-                  child:
-                  imageData != null ? pw.Image(pw.MemoryImage(imageData!), ) : pw.PdfLogo(),
-                ),
-                // pw.Container(
-                //   color: baseColor,
-                //   padding: pw.EdgeInsets.only(top: 3),
-                // ),
-              ],
-            ),
+      textDirection: direction ? pw.TextDirection.ltr : pw.TextDirection.rtl,
+      child: pw.Container(
+        padding: const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: pw.BoxDecoration(
+          border: pw.Border(
+            bottom: pw.BorderSide(color: PdfColors.grey400, width: 1),
           ),
-          pw.Expanded(
-            child: pw.Column(
-              children: [
-                pw.Container(
-                  height: 30,
-                  padding: const pw.EdgeInsets.only(left: 20),
-                  alignment: pw.Alignment.center,
-                  child:pw.Directionality(
-                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                    child: pw.Text(
-                      Utils.INVOICE_HEADING.tr(),
-                      style: pw.TextStyle(
-                        color: PdfColors.blue,
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    ),),
-                ),
+        ),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
+          children: [
+            // LOGO
+            pw.Container(
+              height: 70,
+              alignment: pw.Alignment.center,
+              child: imageData != null
+                  ? pw.Image(pw.MemoryImage(imageData!))
+                  : pw.PdfLogo(),
+            ),
+            pw.SizedBox(height: 10),
 
-                pw.Container(
-                  height: 30,
-                  padding: const pw.EdgeInsets.only(left: 20),
-                  alignment: pw.Alignment.center,
-                  child: pw.Directionality(
-                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                    child: pw.Text(
-                      'Feed Consumption Report'.tr(),
-                      style: pw.TextStyle(
-                        color: PdfColors.black,
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),),
+            // HEADER TITLE
+            pw.Text(
+              Utils.INVOICE_HEADING.tr(),
+              style: pw.TextStyle(
+                color: PdfColors.blue700,
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 22,
+              ),
+            ),
+            pw.SizedBox(height: 4),
 
-                ),
+            // REPORT TITLE
+            pw.Text(
+              'Feed Consumption Report'.tr(),
+              style: pw.TextStyle(
+                color: PdfColors.black,
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            pw.SizedBox(height: 6),
 
-                pw.Container(
-                  height: 20,
-                  padding: const pw.EdgeInsets.only(left: 20),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    Utils.INVOICE_DATE,
-                    style: pw.TextStyle(
-                      color: PdfColors.black,
-                      fontWeight: pw.FontWeight.normal,
-                      fontSize: 16,
-                    ),
+            // DATE
+            pw.Container(
+              padding: const pw.EdgeInsets.symmetric(vertical: 2),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.grey200,
+                borderRadius: pw.BorderRadius.circular(5),
+              ),
+              child: pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                child: pw.Text(
+                  Utils.INVOICE_DATE,
+                  style: pw.TextStyle(
+                    color: PdfColors.black,
+                    fontSize: 14,
                   ),
                 ),
-
-              ],
+              ),
             ),
-          ),
-          if (context.pageNumber > 1) pw.SizedBox(height: 20)
-        ],
+            if (context.pageNumber > 1) pw.SizedBox(height: 15),
+          ],
+        ),
       ),
-    ),);
+    );
   }
-
   pw.Widget _buildSummary(pw.Context context) {
     return pw.Directionality(
       textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
@@ -711,33 +696,34 @@ class Invoice {
   pw.Widget _contentTable(pw.Context context) {
     const tableHeaders = [
       'Feed Name',
-      'Consumption quantity (Kg)',
+      'Quantity',
     ];
 
     return pw.TableHelper.fromTextArray(
-      border: null,
+      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
       cellAlignment: pw.Alignment.centerLeft,
       headerDecoration: pw.BoxDecoration(
-        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
         color: PdfColors.blue,
+        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
       ),
-      headerHeight: 25,
-      cellHeight: 40,
-      cellAlignments: {
-        0: pw.Alignment.centerLeft,
-        1: pw.Alignment.centerLeft,
-        2: pw.Alignment.centerRight,
-        3: pw.Alignment.center,
-        4: pw.Alignment.centerRight,
+      headerHeight: 30,
+      cellHeight: 35,
+      columnWidths: {
+        0: const pw.FlexColumnWidth(2),
+        1: const pw.FlexColumnWidth(1),
       },
-      headerDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-      tableDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+      cellAlignments: {
+        0: pw.Alignment.centerLeft,  // Feed Name
+        1: pw.Alignment.centerRight, // Quantity
+      },
+      headerDirection: direction ? pw.TextDirection.ltr : pw.TextDirection.rtl,
+      tableDirection: direction ? pw.TextDirection.ltr : pw.TextDirection.rtl,
       headerStyle: pw.TextStyle(
         color: _baseTextColor,
-        fontSize: 10,
+        fontSize: 11,
         fontWeight: pw.FontWeight.bold,
       ),
-      cellStyle: const pw.TextStyle(
+      cellStyle: pw.TextStyle(
         color: _darkColor,
         fontSize: 10,
       ),
@@ -745,53 +731,49 @@ class Invoice {
         border: pw.Border(
           bottom: pw.BorderSide(
             color: accentColor,
-            width: .5,
+            width: 0.5,
           ),
         ),
       ),
-      headers: List<String>.generate(
-        tableHeaders.length,
-            (col) => tableHeaders[col].tr(),
-      ),
-      data: List<List<String>>.generate(
-        products.length,
-            (row) => List<String>.generate(
-          tableHeaders.length,
-              (col) => products[row].getIndex(col).tr(),
-        ),
-      ),
+      headers: tableHeaders.map((header) => header.tr()).toList(),
+      data: products.map((feed) => [
+        feed.feed_name.tr(),
+        "${feed.consumption.toString()}".tr(), // Formatting quantity
+      ]).toList(),
     );
   }
+
   pw.Widget _contentTable1(pw.Context context) {
     const tableHeaders = [
       'Flock Name',
-      'Consumption quantity (Kg)',
+      'Quantity',
     ];
 
     return pw.TableHelper.fromTextArray(
-      border: null,
+      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
       cellAlignment: pw.Alignment.centerLeft,
       headerDecoration: pw.BoxDecoration(
-        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
         color: PdfColors.blue,
+        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
       ),
-      headerHeight: 25,
-      cellHeight: 40,
-      cellAlignments: {
-        0: pw.Alignment.centerLeft,
-        1: pw.Alignment.centerLeft,
-        2: pw.Alignment.centerRight,
-        3: pw.Alignment.center,
-        4: pw.Alignment.centerRight,
+      headerHeight: 30,
+      cellHeight: 35,
+      columnWidths: {
+        0: const pw.FlexColumnWidth(2),
+        1: const pw.FlexColumnWidth(1),
       },
-      headerDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-      tableDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+      cellAlignments: {
+        0: pw.Alignment.centerLeft,  // Flock Name
+        1: pw.Alignment.centerRight, // Quantity
+      },
+      headerDirection: direction ? pw.TextDirection.ltr : pw.TextDirection.rtl,
+      tableDirection: direction ? pw.TextDirection.ltr : pw.TextDirection.rtl,
       headerStyle: pw.TextStyle(
         color: _baseTextColor,
-        fontSize: 10,
+        fontSize: 11,
         fontWeight: pw.FontWeight.bold,
       ),
-      cellStyle: const pw.TextStyle(
+      cellStyle: pw.TextStyle(
         color: _darkColor,
         fontSize: 10,
       ),
@@ -799,23 +781,18 @@ class Invoice {
         border: pw.Border(
           bottom: pw.BorderSide(
             color: accentColor,
-            width: .5,
+            width: 0.5,
           ),
         ),
       ),
-      headers: List<String>.generate(
-        tableHeaders.length,
-            (col) => tableHeaders[col].tr(),
-      ),
-      data: List<List<String>>.generate(
-        flockFeedList.length,
-            (row) => List<String>.generate(
-          tableHeaders.length,
-              (col) => flockFeedList[row].getIndex(col).tr(),
-        ),
-      ),
+      headers: tableHeaders.map((header) => header.tr()).toList(),
+      data: flockFeedList.map((flock) => [
+        flock.f_name.tr(),
+        "${flock.consumption}".tr(), // Formatting quantity
+      ]).toList(),
     );
   }
+
 }
 
 String _formatCurrency(double amount) {

@@ -748,7 +748,6 @@ class _DashboardScreen extends State<DashboardScreen> {
                                     children: [
                                       Text("ALL_FLOCKS".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
                                       Text("(" + flocks.length.toString() + ")",style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-
                                     ],
                                   ),
                                 ),
@@ -823,7 +822,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                                       getFilteredData(date_filter_name);();
 
                                     },
-                                    child:Container(
+                                    child: Container(
                                       margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.all(Radius.circular(3)),
@@ -839,7 +838,7 @@ class _DashboardScreen extends State<DashboardScreen> {
 
                                       ),
                                       child: Container(
-                                        height: 120,
+                                        height: 130,
                                         width: widthScreen,
                                         decoration: BoxDecoration(
                                           color: Colors.white,

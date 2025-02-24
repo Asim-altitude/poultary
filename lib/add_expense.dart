@@ -1218,7 +1218,6 @@ class _NewExpense extends State<NewExpense>
     );
   }
 
-
   List<String> paymentStatusList = ['CLEARED','UNCLEAR','RECONCILED'];
   Widget getPaymentStatusList() {
     return Container(
@@ -1232,7 +1231,6 @@ class _NewExpense extends State<NewExpense>
         onChanged: (String? newValue) {
           setState(() {
             payment_status = newValue!;
-
 
           });
         },

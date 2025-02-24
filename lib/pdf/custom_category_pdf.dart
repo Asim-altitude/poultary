@@ -11,18 +11,22 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:poultary/utils/utils.dart';
 
 import '../../data.dart';
-import '../eggs_report_screen.dart';
+import '../model/custom_category_data.dart';
 import '../model/egg_report_item.dart';
+import '../model/feed_report_item.dart';
+import '../model/feedflock_report_item.dart';
 
-Future<Uint8List> generateEggReport(
+Future<Uint8List> generateCustomReport(
     PdfPageFormat pageFormat, CustomData data) async {
   final lorem = pw.LoremText();
 
-  final products = Utils.egg_report_list;
+  final products = Utils.feed_report_list;
+  final feedbyflock = Utils.feed_flock_report_list;
 
   final invoice = Invoice(
     invoiceNumber: '982347',
     products: products,
+    flockFeedList: feedbyflock,
     customerName: 'Abraham Swearegin',
     customerAddress: '54 rue de Rivoli\n75001 Paris, France',
     paymentInfo:
@@ -38,6 +42,7 @@ Future<Uint8List> generateEggReport(
 class Invoice {
   Invoice({
     required this.products,
+    required this.flockFeedList,
     required this.customerName,
     required this.customerAddress,
     required this.invoiceNumber,
@@ -47,7 +52,8 @@ class Invoice {
     required this.accentColor,
   });
 
-  final List<Egg_Report_Item> products;
+  final List<Feed_Report_Item> products;
+  final List<FeedFlock_Report_Item> flockFeedList;
   final String customerName;
   final String customerAddress;
   final String invoiceNumber;
@@ -66,7 +72,30 @@ class Invoice {
   double get _total =>
       products.map<double>((p) => 0).reduce((a, b) => a + b);
 
+  int get _feedTotal => products.map<int>((e) => 0).reduce((a, b) => a + b);
+  int get _flockTotal => flockFeedList.map<int>((e) => 0).reduce((a, b) => a + b);
+
   double get _grandTotal => _total * (1 + tax);
+
+  num getFLockTotal() {
+    num total = 0;
+    for (int i=0;i<flockFeedList.length;i++){
+      total = total + flockFeedList.elementAt(i).consumption!;
+    }
+
+    total = num.parse(total.toStringAsFixed(2));
+    return total;
+  }
+
+  num getFeedTotal() {
+    num total = 0;
+    for (int i=0;i<products.length;i++){
+      total = total + products.elementAt(i).consumption!;
+    }
+
+    total = num.parse(total.toStringAsFixed(2));
+    return total;
+  }
 
   Uint8List? _logo;
   Uint8List? imageData;
@@ -92,7 +121,6 @@ class Invoice {
 
     }
 
-
     direction = await Utils.getDirection();
     String regular = await Utils.getPdfregularFont();
     String bold = await Utils.getPdfBoldFont();
@@ -102,7 +130,6 @@ class Invoice {
     final font1 = await rootBundle.load(bold);
     final ttfFBold = pw.Font.ttf(font1);
 
-
     // Add page to the PDF
     doc.addPage(
       pw.MultiPage(
@@ -111,30 +138,72 @@ class Invoice {
           direction? ttfFLight:ttfFBold,
           ttfFBold,ttfFLight,
         ),
-
         header: _buildHeader,
         build: (context) => [
-         // _contentHeader(context),
-          _buildSummary(context),
-          pw.SizedBox(height: 5),
-          pw.Text(
-            "By Flock".tr(),
-            style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.black),
-          ),
-          _contentTable(context),
-          pw.SizedBox(height: 5),
-          pw.Text(
-            "Reductions".tr(),
-            style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.black),
-          ),
+          pw.Container(
+            height: 30,
+            alignment: pw.Alignment.topLeft,
+            child: pw.Directionality(
+              textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+              child: pw.Text(
+                'By FLock'.tr(),
+                style: pw.TextStyle(
+                  color: PdfColors.black,
+                  fontSize: 12,
+                ),
+              ),),
 
-          _contentTableForReduction(context, Utils.eggReductionSummary!),
+          ),
+          _contentTable1(context),
+          pw.SizedBox(height: 10),
+          pw.Container(
+            height: 30,
+            alignment: pw.Alignment.topLeft,
+            child: pw.Directionality(
+              textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+              child: pw.Text(
+                'By Date'.tr(),
+                style: pw.TextStyle(
+                  color: PdfColors.black,
+                  fontSize: 12,
+                ),
+              ),),
+
+          ),
+          _contentTable2(context, Utils.categoryDataList!),
+
+          pw.Container(
+              height: 40,
+              alignment: pw.Alignment.topRight,
+              margin: pw.EdgeInsets.only(top: 10),
+              child: pw.Row(
+                  children: [
+                    pw.Directionality(
+                      textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                      child: pw.Text(
+                        'Total Consumption: '.tr(),
+                        style: pw.TextStyle(
+                          color: PdfColors.black,
+                          fontSize: 10,
+                        ),
+                      ),),
+                    pw.Text(
+                      Utils.TOTAL_CONSUMPTION.toString()+" "+"KG".tr(),
+                      style: pw.TextStyle(
+                        color: PdfColors.black,
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ]
+              )
+          ),
           pw.Container(
               margin: pw.EdgeInsets.only(top: 10),
               child: pw.Row(
                   children: [
                     pw.Container(
-                      alignment: pw.Alignment.center,
+                      alignment: pw.Alignment.topLeft,
                       child: pw.Directionality(
                         textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
                         child: pw.Text(
@@ -144,6 +213,7 @@ class Invoice {
                             fontSize: 10,
                           ),
                         ),),
+
                     ),pw.Container(
                       margin: pw.EdgeInsets.only(left: 10),
                       alignment: pw.Alignment.topLeft,
@@ -159,7 +229,6 @@ class Invoice {
                   ]
               )
           ),
-          pw.SizedBox(height: 20),
           //_contentFooter(context),
           // pw.SizedBox(height: 20),
           // _termsAndConditions(context),
@@ -177,9 +246,7 @@ class Invoice {
       child: pw.Container(
         padding: const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: pw.BoxDecoration(
-          border: pw.Border(
-            bottom: pw.BorderSide(color: PdfColors.grey400, width: 1),
-          ),
+          border: pw.Border(),
         ),
         child: pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.center,
@@ -207,7 +274,7 @@ class Invoice {
 
             // REPORT TITLE
             pw.Text(
-              'Eggs Inventory Report'.tr(),
+              Utils.INVOICE_SUB_HEADING.tr(),
               style: pw.TextStyle(
                 color: PdfColors.black,
                 fontWeight: pw.FontWeight.bold,
@@ -240,94 +307,126 @@ class Invoice {
       ),
     );
   }
-
   pw.Widget _buildSummary(pw.Context context) {
     return pw.Directionality(
-      textDirection: direction ? pw.TextDirection.ltr : pw.TextDirection.rtl,
-      child: pw.Container(
-        margin: pw.EdgeInsets.only(top: 10),
-        padding: pw.EdgeInsets.all(10),
-        decoration: pw.BoxDecoration(
-          border: pw.Border.all(color: PdfColors.grey, width: 1),
-          borderRadius: pw.BorderRadius.circular(5),
-        ),
-        child: pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.center,
-          children: [
-            // Title
-            pw.Container(
-              padding: pw.EdgeInsets.symmetric(vertical: 8),
-              decoration: pw.BoxDecoration(
-                color: PdfColors.blue100,
-                borderRadius: pw.BorderRadius.circular(5),
-              ),
-              child: pw.Center(
-                child: pw.Text(
-                  "SUMMARY".tr(),
-                  style: pw.TextStyle(
-                    color: PdfColors.blue900,
-                    fontWeight: pw.FontWeight.bold,
-                    fontSize: 22,
-                  ),
-                ),
-              ),
-            ),
+      textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+      child:pw.Container(
+      height: 120,
+      margin: pw.EdgeInsets.only(top: 10),
+      child: pw.Column(
+        children: [
 
-            pw.SizedBox(height: 10),
-
-            // Summary Table
-            pw.Table(
-              border: pw.TableBorder.all(color: PdfColors.grey, width: 0.5),
-              columnWidths: {
-                0: pw.FlexColumnWidth(3),
-                1: pw.FlexColumnWidth(2),
-              },
+          pw.Expanded(
+            child: pw.Column(
               children: [
-                _buildSummaryRow("Collected Eggs", Utils.TOTAL_EGG_COLLECTED),
-                _buildSummaryRow("Reduced Eggs", Utils.TOTAL_EGG_REDUCED),
-                _buildSummaryRow("Good Eggs", Utils.GOOD_EGGS),
-                _buildSummaryRow("Bad Eggs", Utils.BAD_EGGS),
-                _buildSummaryRow("Reserve Eggs", Utils.EGG_RESERVE),
+                pw.Container(
+                  height: 30,
+                  alignment: pw.Alignment.topLeft,
+                  child: pw.Directionality(
+                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                    child: pw.Text(
+                      'SUMMARY'.tr(),
+                      style: pw.TextStyle(
+                        color: PdfColors.black,
+                        fontSize: 10,
+                      ),
+                    ),),
+
+                ),
+
+                pw.Row(
+                  children: [
+                    pw.Container(
+                      alignment: pw.Alignment.topLeft,
+                      child: pw.Directionality(
+                        textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                        child: pw.Text(
+                          'Collcted Eggs'.tr(),
+                          style: pw.TextStyle(
+                            color: PdfColors.black,
+                            fontSize: 10,
+                          ),
+                        ),),
+
+                    ),pw.Container(
+                      alignment: pw.Alignment.topLeft,
+                      child: pw.Text(
+                        Utils.TOTAL_EGG_COLLECTED,
+                        style: pw.TextStyle(
+                          color: PdfColors.black,
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ]
+                ),
+
+                pw.Row(
+                    children: [
+                      pw.Container(
+                        alignment: pw.Alignment.topLeft,
+                        child: pw.Directionality(
+                          textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                          child: pw.Text(
+                            'Reduced Eggs'.tr(),
+                            style: pw.TextStyle(
+                              color: PdfColors.black,
+                              fontSize: 10,
+                            ),
+                          ),),
+                      ),pw.Container(
+                        alignment: pw.Alignment.topLeft,
+
+                        child: pw.Text(
+                          Utils.TOTAL_EGG_REDUCED,
+                          style: pw.TextStyle(
+                            color: PdfColors.black,
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ]
+                ),
+
+                pw.Row(
+                    children: [
+                      pw.Container(
+                        alignment: pw.Alignment.topLeft,
+                        child: pw.Directionality(
+                          textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+                          child: pw.Text(
+                            'Reserve Eggs'.tr(),
+                            style: pw.TextStyle(
+                              color: PdfColors.black,
+                              fontSize: 10,
+                            ),
+                          ),),
+
+                      ),pw.Container(
+                        alignment: pw.Alignment.topLeft,
+                         child: pw.Text(
+                          Utils.EGG_RESERVE,
+                          style: pw.TextStyle(
+                            color: PdfColors.black,
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ]
+                )
+
               ],
             ),
-          ],
-        ),
+          ),
+
+        ],
       ),
-    );
+    ),);
   }
 
-// Helper function to build each row of the summary table
-  pw.TableRow _buildSummaryRow(String title, String value) {
-    return pw.TableRow(
-      decoration: pw.BoxDecoration(
-        color: PdfColors.white,
-      ),
-      children: [
-        pw.Container(
-          padding: pw.EdgeInsets.all(5),
-          child: pw.Text(
-            title.tr(),
-            style: pw.TextStyle(
-              fontSize: 14,
-              fontWeight: pw.FontWeight.bold,
-              color: PdfColors.black,
-            ),
-          ),
-        ),
-        pw.Container(
-          padding: pw.EdgeInsets.all(8),
-          child: pw.Text(
-            value,
-            style: pw.TextStyle(
-              fontSize: 14,
-              color: PdfColors.black,
-              fontWeight: pw.FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
   pw.Widget _buildFooter(pw.Context context) {
     return pw.Row(
@@ -380,7 +479,7 @@ class Invoice {
             height: 70,
             child: pw.FittedBox(
               child: pw.Text(
-                'Total: ${_formatCurrency(_grandTotal)}',
+                'TOTAL'.tr()+': ${_formatCurrency(_grandTotal)}',
                 style: pw.TextStyle(
                   color: baseColor,
                   fontStyle: pw.FontStyle.italic,
@@ -436,6 +535,80 @@ class Invoice {
           ),
         ),
       ],
+    );
+  }
+
+  pw.Widget _contentTable2(pw.Context context, List<CustomCategoryData> categoryDataList) {
+    const tableHeaders = [
+      'Category Name',
+      'Quantity',
+      'Unit',
+      'Date',
+      'Item Type',
+    ];
+
+    return pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.6),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(2), // Category Name
+        1: const pw.FlexColumnWidth(1), // Quantity
+        2: const pw.FlexColumnWidth(1), // Unit
+        3: const pw.FlexColumnWidth(2), // Date
+        4: const pw.FlexColumnWidth(2), // Item Type
+      },
+      children: [
+        // Table Header Row
+        pw.TableRow(
+          decoration: pw.BoxDecoration(
+            color: PdfColors.blue600,
+            borderRadius: pw.BorderRadius.circular(4),
+          ),
+          children: tableHeaders.map((header) {
+            return pw.Padding(
+              padding: const pw.EdgeInsets.all(8),
+              child: pw.Text(
+                header.tr(),
+                style: pw.TextStyle(
+                  color: PdfColors.white,
+                  fontSize: 12,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+                textAlign: pw.TextAlign.center,
+              ),
+            );
+          }).toList(),
+        ),
+
+        // Data Rows with alternating colors
+        for (int i = 0; i < categoryDataList.length; i++)
+          pw.TableRow(
+            decoration: pw.BoxDecoration(
+              color: i.isEven ? PdfColors.white : PdfColors.grey100, // Alternate row colors
+            ),
+            children: [
+              _tableCell(categoryDataList[i].cName.tr(), align: pw.TextAlign.left),
+              _tableCell(categoryDataList[i].quantity.toStringAsFixed(2).tr(), align: pw.TextAlign.right),
+              _tableCell(categoryDataList[i].unit.tr(), align: pw.TextAlign.center),
+              _tableCell(Utils.getFormattedDate(categoryDataList[i].date).tr(), align: pw.TextAlign.center),
+              _tableCell(categoryDataList[i].itemType.tr(), align: pw.TextAlign.center),
+            ],
+          ),
+      ],
+    );
+  }
+
+// Helper function to format table cells
+  pw.Widget _tableCell(String text, {pw.TextAlign align = pw.TextAlign.left}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.all(6),
+      child: pw.Text(
+        text,
+        style: pw.TextStyle(
+          color: PdfColors.black,
+          fontSize: 11,
+        ),
+        textAlign: align,
+      ),
     );
   }
 
@@ -512,7 +685,7 @@ class Invoice {
                   child: pw.Row(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
-                      pw.Text('TOTAL'.tr()+":"),
+                      pw.Text('Total:'),
                       pw.Text(_formatCurrency(_grandTotal)),
                     ],
                   ),
@@ -568,179 +741,121 @@ class Invoice {
 
   pw.Widget _contentTable(pw.Context context) {
     const tableHeaders = [
-      'Flock Name',
-      'Collected Eggs',
-      'Reduced Eggs',
-      'Reserve Eggs'
+      'Feed Name',
+      'Consumption Quantity (Kg)',
     ];
 
-    return pw.Container(
-      margin: const pw.EdgeInsets.only(top: 10),
-      child: pw.Table(
-        border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5), // Light border
-        columnWidths: {
-          0: pw.FlexColumnWidth(2), // Flock Name (wider column)
-          1: pw.FlexColumnWidth(1.5),
-          2: pw.FlexColumnWidth(1.5),
-          3: pw.FlexColumnWidth(1.5),
-        },
-        children: [
-          // Table Header
-          pw.TableRow(
-            decoration: pw.BoxDecoration(
-              color: PdfColors.blue700, // Darker blue header
-              borderRadius: const pw.BorderRadius.vertical(top: pw.Radius.circular(3)), // Rounded corners
-            ),
-            children: tableHeaders.map((header) {
-              return pw.Padding(
-                padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 5),
-                child: pw.Text(
-                  header.tr(),
-                  style: pw.TextStyle(
-                    color: PdfColors.white,
-                    fontSize: 12,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                  textAlign: pw.TextAlign.center,
-                ),
-              );
-            }).toList(),
-          ),
-
-          // Table Rows
-          ...List.generate(products.length, (rowIndex) {
-            final rowColor = rowIndex.isEven ? PdfColors.white : PdfColors.grey200; // Alternating row colors
-            return pw.TableRow(
-              decoration: pw.BoxDecoration(color: rowColor),
-              children: List.generate(tableHeaders.length, (colIndex) {
-                return pw.Padding(
-                  padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 5),
-                  child: pw.Text(
-                    products[rowIndex].getIndex(colIndex).tr(),
-                    style: pw.TextStyle(
-                      fontSize: 11,
-                      color: _darkColor,
-                    ),
-                    textAlign: colIndex == 0 ? pw.TextAlign.left : pw.TextAlign.right, // Align numbers to the right
-                  ),
-                );
-              }),
-            );
-          }),
-        ],
+    return pw.TableHelper.fromTextArray(
+      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+      cellAlignment: pw.Alignment.centerLeft,
+      headerDecoration: pw.BoxDecoration(
+        color: PdfColors.blue,
+        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
       ),
+      headerHeight: 30,
+      cellHeight: 35,
+      columnWidths: {
+        0: const pw.FlexColumnWidth(2),
+        1: const pw.FlexColumnWidth(1),
+      },
+      cellAlignments: {
+        0: pw.Alignment.centerLeft,  // Feed Name
+        1: pw.Alignment.centerRight, // Quantity
+      },
+      headerDirection: direction ? pw.TextDirection.ltr : pw.TextDirection.rtl,
+      tableDirection: direction ? pw.TextDirection.ltr : pw.TextDirection.rtl,
+      headerStyle: pw.TextStyle(
+        color: _baseTextColor,
+        fontSize: 11,
+        fontWeight: pw.FontWeight.bold,
+      ),
+      cellStyle: pw.TextStyle(
+        color: _darkColor,
+        fontSize: 10,
+      ),
+      rowDecoration: pw.BoxDecoration(
+        border: pw.Border(
+          bottom: pw.BorderSide(
+            color: accentColor,
+            width: 0.5,
+          ),
+        ),
+      ),
+      headers: tableHeaders.map((header) => header.tr()).toList(),
+      data: products.map((feed) => [
+        feed.feed_name.tr(),
+        "${feed.consumption.toString()}".tr(), // Formatting quantity
+      ]).toList(),
     );
   }
 
-  pw.Widget _contentTableForReduction(pw.Context context, List<EggReductionSummary> reductionList) {
+  pw.Widget _contentTable1(pw.Context context) {
     const tableHeaders = [
-      'Reduction Reason',
-      'TOTAL',
+      'Flock Name',
+      'Consumption Quantity (Kg)',
     ];
 
-    return pw.Container(
-      margin: const pw.EdgeInsets.only(top: 10),
-      child: pw.Table(
-        border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5), // Light border
-        columnWidths: {
-          0: pw.FlexColumnWidth(2), // Reason (wider column)
-          1: pw.FlexColumnWidth(1.5), // Total Reduced Eggs
-        },
-        children: [
-          // Table Header
+    return pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.6),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(2), // Flock Name
+        1: const pw.FlexColumnWidth(1), // Quantity
+      },
+      children: [
+        // Table Header Row
+        pw.TableRow(
+          decoration: pw.BoxDecoration(
+            color: PdfColors.blue600,
+            borderRadius: pw.BorderRadius.circular(4),
+          ),
+          children: tableHeaders.map((header) {
+            return pw.Padding(
+              padding: const pw.EdgeInsets.all(8),
+              child: pw.Text(
+                header.tr(),
+                style: pw.TextStyle(
+                  color: PdfColors.white,
+                  fontSize: 12,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+                textAlign: pw.TextAlign.center,
+              ),
+            );
+          }).toList(),
+        ),
+
+        // Data Rows with alternating colors
+        for (int i = 0; i < Utils.flockQuantity!.length; i++)
           pw.TableRow(
             decoration: pw.BoxDecoration(
-              color: PdfColors.blue700, // Darker blue header
+              color: i.isEven ? PdfColors.white : PdfColors.grey100, // Alternate row colors
             ),
-            children: tableHeaders.map((header) {
-              return pw.Padding(
-                padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 5),
-                child: pw.Text(
-                  header.tr(),
-                  style: pw.TextStyle(
-                    color: PdfColors.white,
-                    fontSize: 12,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                  textAlign: pw.TextAlign.center,
-                ),
-              );
-            }).toList(),
+            children: [
+              _tableCell2(Utils.flockQuantity![i].flockName.tr(), align: pw.TextAlign.left),
+              _tableCell2(Utils.flockQuantity![i].totalQuantity.toString(), align: pw.TextAlign.right),
+            ],
           ),
-
-          // Table Rows
-          ...List.generate(reductionList.length, (rowIndex) {
-            final rowColor = rowIndex.isEven ? PdfColors.white : PdfColors.grey200; // Alternating row colors
-            final item = reductionList[rowIndex];
-
-            return pw.TableRow(
-              decoration: pw.BoxDecoration(color: rowColor),
-              children: [
-                // Reduction Reason (Aligned Left)
-                pw.Padding(
-                  padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 5),
-                  child: pw.Text(
-                    item.reason.tr(),
-                    style: pw.TextStyle(fontSize: 11, color: PdfColors.black),
-                    textAlign: pw.TextAlign.left,
-                  ),
-                ),
-                // Total Reduced Eggs (Aligned Right)
-                pw.Padding(
-                  padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 5),
-                  child: pw.Text(
-                    "-${item.totalReduced}",
-                    style: pw.TextStyle(fontSize: 11, color: PdfColors.red, fontWeight: pw.FontWeight.bold),
-                    textAlign: pw.TextAlign.right,
-                  ),
-                ),
-              ],
-            );
-          }),
-        ],
-      ),
+      ],
     );
   }
 
+// Helper function to format table cells
+  pw.Widget _tableCell2(String text, {pw.TextAlign align = pw.TextAlign.left}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.all(6),
+      child: pw.Text(
+        text,
+        style: pw.TextStyle(
+          color: PdfColors.black,
+          fontSize: 11,
+        ),
+        textAlign: align,
+      ),
+    );
+  }
 
 }
 
 String _formatCurrency(double amount) {
   return '\$${amount.toStringAsFixed(2)}';
-}
-
-String _formatDate(DateTime date) {
-  final format = DateFormat.yMMMd('en_US');
-  return format.format(date);
-}
-
-class Product {
-  const Product(
-      this.sku,
-      this.productName,
-      this.price,
-      this.quantity,
-      );
-
-  final String sku;
-  final String productName;
-  final double price;
-  final int quantity;
-  double get total => price * quantity;
-
-  String getIndex(int index) {
-    switch (index) {
-      case 0:
-        return sku;
-      case 1:
-        return productName;
-      case 2:
-        return _formatCurrency(price);
-      case 3:
-        return quantity.toString();
-      case 4:
-        return _formatCurrency(total);
-    }
-    return '';
-  }
 }

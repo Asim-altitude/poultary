@@ -9,6 +9,8 @@ class Egg_Report_Item{
   int? collected = 0;
   int? reduced = 0;
   int? reserve = 0;
+  int? good_eggs = 0;
+  int bad_eggs = 0;
 
   Egg_Report_Item(
       {

@@ -178,30 +178,44 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
           },
           child: Container(
             height: 50,
-            margin: EdgeInsets.all(5),
+            margin: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
             decoration: BoxDecoration(
-              color: Utils.getThemeColorBlue(),
+              gradient: LinearGradient(
+                colors: [
+                  Utils.getThemeColorBlue().withOpacity(0.9),
+                  Utils.getThemeColorBlue(),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 2,
-                  blurRadius: 2,
-                  offset: Offset(0, 1), // changes position of shadow
+                  color: Colors.blue.shade200.withOpacity(0.6),
+                  blurRadius: 6,
+                  spreadRadius: 1,
+                  offset: Offset(0, 3), // Slight elevation
                 ),
               ],
-              borderRadius: const BorderRadius.all(
-                  Radius.circular(5.0)),
-              border: Border.all(
-                color:  Utils.getThemeColorBlue(),
-                width: 2.0,
-              ),
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
-              Icon(Icons.add, color: Colors.white, size: 30,),
-              Text('NEW_FEEDING'.tr(), style: TextStyle(
-                  color: Colors.white, fontSize: 18),)
-            ],),
-          ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.add, color: Colors.white, size: 26),
+                SizedBox(width: 8),
+                Text(
+                  'NEW_FEEDING'.tr(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          )
+
         ),
       ),
       body:SafeArea(
@@ -219,77 +233,100 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
               Utils.getDistanceBar(),
 
               ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(10),
+                  bottomRight: Radius.circular(10),
+                ),
                 child: Container(
                   decoration: BoxDecoration(
-                     boxShadow: [
+                    gradient: LinearGradient(
+                      colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [
                       BoxShadow(
-                        color: Utils.getThemeColorBlue(), //(x,y)
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 6,
+                        offset: Offset(0, 3),
                       ),
                     ],
                   ),
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   child: Row(
                     children: [
-                      Container(
-                        alignment: Alignment.center,
-                        width: 50,
-                        height: 50,
-                        child: InkWell(
-                          child: Icon(Icons.arrow_back,
-                              color: Colors.white, size: 30),
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
+                      /// Back Button
+                      InkWell(
+                        borderRadius: BorderRadius.circular(30),
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 45,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.15),
+                          ),
+                          child: Icon(Icons.arrow_back, color: Colors.white, size: 28),
                         ),
                       ),
+
+                      /// Title
                       Expanded(
                         child: Container(
-                            margin: EdgeInsets.only(left: 10),
-                            child: Text(
-                              applied_filter_name.tr(),
-                              textAlign: TextAlign.start,
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold),
-                            )),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          openSortDialog(context, (selectedSort) {
-                            setState(() {
-                              sortOption = selectedSort == "date_desc"
-                                  ? "Date (New)"
-                                  : "Date (Old)";
-                              sortSelected = selectedSort == "date_desc"
-                                  ? "DESC" : "ASC";
-                            });
-
-                            getFilteredTransactions(str_date, end_date);
-
-                          });
-                        },
-                        child: Container(
-                          height: 50,
-                          width: 130,
-                          color: Colors.white.withAlpha(40),
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(horizontal: 5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(child: Text(sortOption, style: TextStyle(fontSize: 12, color: Colors.white))),
-                              Icon(Icons.sort, color: Colors.white),
-
-                            ],
+                          margin: EdgeInsets.only(left: 12),
+                          child: Text(
+                            applied_filter_name.tr(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
 
+                      /// Sort Button
+                      InkWell(
+                        borderRadius: BorderRadius.circular(10),
+                        onTap: () {
+                          openSortDialog(context, (selectedSort) {
+                            setState(() {
+                              sortOption = selectedSort == "date_desc" ? "Date (New)" : "Date (Old)";
+                              sortSelected = selectedSort == "date_desc" ? "DESC" : "ASC";
+                            });
+
+                            getFilteredTransactions(str_date, end_date);
+                          });
+                        },
+                        child: Container(
+                          height: 45,
+                          width: 130,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          alignment: Alignment.center,
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  sortOption.tr(),
+                                  style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Icon(Icons.sort, color: Colors.white, size: 22),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
+
               Row(
                 children: [
                   Expanded(
@@ -477,96 +514,132 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                     padding: EdgeInsets.only(bottom: 250),
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
-                        margin: EdgeInsets.only(left: 10, right: 10, top:  10),
+                        margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(3)),
-                            color: Colors.white,
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
+                              color: Colors.grey.withOpacity(0.1),
+                              blurRadius: 6,
                               spreadRadius: 2,
-                              blurRadius: 2,
-                              offset: Offset(0, 1), // changes position of shadow
+                              offset: Offset(0, 3),
                             ),
                           ],
                         ),
-                        child: Container(
-                          color: Colors.white,
-                          child: Row( children: [
-                            Expanded(
-                              child: Container(
-                                color: Colors.white,
-                                alignment: Alignment.topLeft,
-                                margin: EdgeInsets.all(10),
-                                child: Column(children: [
-                                  Align(
-                                    alignment: Alignment.topRight,
-                                    child:
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 🏷️ Top Row: Feed Name + More Options Button
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: RichText(
+                                    text: TextSpan(
+                                      text: feedings[index].feed_name!.tr(),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                        color: Utils.getThemeColorBlue(),
+                                      ),
                                       children: [
-                                        GestureDetector(
-                                          onTapDown: (TapDownDetails details) {
-                                            selected_id = feedings.elementAt(index).id;
-                                            showMemberMenu(details.globalPosition);
-                                          },
-                                          child: Container(
-                                            width: 30,
-                                            height: 30,
-                                            padding: EdgeInsets.all(5),
-                                            child: Image.asset('assets/options.png'),
+                                        TextSpan(
+                                          text: " (${feedings[index].f_name!.tr()})",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.normal,
+                                            fontSize: 16,
+                                            color: Colors.black87,
                                           ),
                                         ),
-
-                                      ],
-                                    ),),
-                                  Row(
-                                    children: [
-                                      Container(margin: EdgeInsets.all(0), child: Text(feedings.elementAt(index).feed_name!.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),)),
-                                      Container(margin: EdgeInsets.all(0), child: Text(" ("+feedings.elementAt(index).f_name!.tr()+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-                                    ],
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.only(right: 10),
-                                    child: Row(
-                                      children: [
-                                        Container(margin: EdgeInsets.all(0), child: Text('Consumption'.tr()+': ', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-                                        Container(  child: Text(feedings.elementAt(index).quantity.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
-                                        Text("KG".tr(), style: TextStyle(color: Colors.black, fontSize: 16),)
                                       ],
                                     ),
                                   ),
-                                  Align(
-                                      alignment: Alignment.topLeft,
-                                      child: Row(
-                                        children: [
-                                          Container(margin: EdgeInsets.all(0), child: Text('DATE'.tr()+': ', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-
-                                          Container(margin: EdgeInsets.only(left: 5), child: Text(Utils.getFormattedDate(feedings.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
-                                        ],
-                                      )),
-
-                                  Container(
-                                    margin: EdgeInsets.all(5),
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.format_quote,size: 15,),
-                                        SizedBox(width: 3,),
-                                        Container(
-                                          width: widthScreen-70,
-                                          child: Text(
-                                            feedings.elementAt(index).short_note!.isEmpty ? 'NO_NOTES'.tr() : feedings.elementAt(index).short_note!
-                                            ,maxLines: 3, style: TextStyle(fontSize: 14, color: Colors.black),),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                  // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                ],),
-                              ),
+                                ),
+                                GestureDetector(
+                                  onTapDown: (TapDownDetails details) {
+                                    selected_id = feedings[index].id;
+                                    showMemberMenu(details.globalPosition);
+                                  },
+                                  child: Icon(Icons.more_vert, color: Colors.grey.shade600),
+                                ),
+                              ],
                             ),
 
-                          ]),
+                            // 🔹 Divider Line (Under Feed Name & Flock Name)
+                            Divider(color: Colors.grey.shade300, thickness: 1, height: 12),
+
+                            // 📊 Consumption Info
+                            Row(
+                              children: [
+                                Icon(Icons.restaurant, size: 16, color: Colors.grey.shade700),
+                                SizedBox(width: 6),
+                                Text(
+                                  'Consumption'.tr() + ': ',
+                                  style: TextStyle(fontSize: 14, color: Colors.black87),
+                                ),
+                                Text(
+                                  "${feedings[index].quantity} KG".tr(),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(height: 6),
+
+                            // 📅 Date Info
+                            Row(
+                              children: [
+                                Icon(Icons.calendar_today, size: 16, color: Colors.grey.shade700),
+                                SizedBox(width: 6),
+                                Text(
+                                  Utils.getFormattedDate(feedings[index].date.toString()),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(height: 8),
+
+                            // 📝 Notes Section
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.notes,
+                                  size: 16,
+                                  color: feedings[index].short_note!.isNotEmpty
+                                      ? Colors.grey.shade700
+                                      : Colors.grey.shade500,
+                                ),
+                                SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    feedings[index].short_note!.isNotEmpty
+                                        ? feedings[index].short_note!
+                                        : 'NO_NOTES'.tr(),
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: feedings[index].short_note!.isNotEmpty
+                                          ? Colors.black87
+                                          : Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       );
 
@@ -1153,7 +1226,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
   }
 
   String sortSelected = "DESC"; // Default label
-  String sortOption = "Date (Newest)";
+  String sortOption = "Date (New)";
   void openSortDialog(BuildContext context, Function(String) onSortSelected) {
     showModalBottomSheet(
       context: context,
@@ -1166,17 +1239,17 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Sort By", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("Sort By".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               Divider(),
               ListTile(
-                title: Text("Date (Newest)"),
+                title: Text("Date (New)".tr()),
                 onTap: () {
                   onSortSelected("date_desc");
                   Navigator.pop(context);
                 },
               ),
               ListTile(
-                title: Text("Date (Oldest)"),
+                title: Text("Date (Old)".tr()),
                 onTap: () {
                   onSortSelected("date_asc");
                   Navigator.pop(context);

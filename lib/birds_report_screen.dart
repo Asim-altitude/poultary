@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 import 'model/flock.dart';
 import 'model/flock_detail.dart';
 import 'model/flock_report_item.dart';
@@ -63,9 +65,11 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
   List<String> flock_name = [];
 
   int egg_total = 0;
-
+  List<FlockSummary> additionsSummary = [];
+  List<ReductionByReason> reductionByReason = [];
   void getEggCollectionList() async {
 
+    //ONCE CALLED
     await DatabaseHelper.instance.database;
 
     list = await DatabaseHelper.getFlockDetails();
@@ -76,6 +80,18 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
 
     });
 
+  }
+
+
+  // Function to process reductions and return a list of ReductionByReason
+  List<ReductionByReason> getReductionsByReason(List<Flock_Detail> flockDetails) {
+    Map<String, int> reductionsByReason = {};
+
+    for (var detail in flockDetails.where((f) => f.item_type == "Reduction")) {
+      reductionsByReason[detail.reason] = (reductionsByReason[detail.reason] ?? 0) + detail.item_count;
+    }
+
+    return reductionsByReason.entries.map((e) => ReductionByReason(reason: e.key, totalCount: e.value)).toList();
   }
 
   int total_initial_flock_birds = 0;
@@ -192,6 +208,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                       InkWell(
                         onTap: (){
                           Utils.setupInvoiceInitials("FLOCK_REPORT".tr(),pdf_formatted_date_filter);
+                          Utils.flock_details = list;
                           prepareListData();
 
                           Utils.TOTAL_BIRDS_ADDED = total_birds_added.toString();
@@ -216,7 +233,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
 
               Row(
                 children: [
-                  Expanded(
+                  /*Expanded(
                     child: Container(
                       height: 45,
                       alignment: Alignment.centerRight,
@@ -233,207 +250,287 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                       ),
                       child: getDropDownList(),
                     ),
-                  ),
+                  ),*/
                   InkWell(
-                      onTap: () {
-                        openDatePicker();
-                      },
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Container(
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(5.0)),
-                            border: Border.all(
-                              color:  Utils.getThemeColorBlue(),
-                              width: 1.0,
-                            ),
-                          ),
-                          margin: EdgeInsets.only(right: 10,top: 15,bottom: 5),
-                          padding: EdgeInsets.only(left: 5,right: 5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text(date_filter_name.tr(), style: TextStyle(fontSize: 14),),
-                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
-                            ],
-                          ),
+                    onTap: () {
+                      openDatePicker();
+                    },
+                    borderRadius: BorderRadius.circular(8), // Adds ripple effect with rounded edges
+                    child: Container(
+                      height: 45,
+                      width: widthScreen - 20,
+                      margin: EdgeInsets.only(right: 10,left: 10, top: 15, bottom: 10),
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                      )),
-                ],
-              ),
-
-              Container(
-                color: Colors.white,
-                child: Container(
-                  width: widthScreen,
-                   padding: EdgeInsets.all(10),
-                   decoration: BoxDecoration(
-                     color: Colors.white,
-                     borderRadius: BorderRadius.all(Radius.circular(5)),
-
-                   ),
-                 child: Column(children: [
-                 Align(
-                     alignment: Alignment.topLeft,
-                     child: Row(
-                       children: [
-
-                         Text('SUMMARY'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
-                       ],
-                     )),
-
-                 Row(
-                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                   children: [
-                   Text('TOTAL_ADDED'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                   Text('$total_birds_added',style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, color: Colors.black),),
-
-                 ],),
-                   Row(
-                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                     children: [
-                       Text('TOTAL_REDUCED'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                       Text('-$total_birds_reduced',style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, color: Colors.red),),
-
-                     ],),
-                   Row(
-                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                     children: [
-                       Text('CURRENT_BIRDS'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
-                       Text('$current_birds',style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
-
-                     ],)
-             ],),),
-              ),
-
-              Container(
-
-                  padding: EdgeInsets.only(top: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-                    color: Utils.getScreenBackground(),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 2,
-                        offset: Offset(0, 1), // changes position of shadow
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Utils.getThemeColorBlue(),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),child: Column(
-                children: [
-                  Align(
-                    alignment: Alignment.center,
-                    child: Container(
-                        margin: EdgeInsets.all(10),
-                        child: Text('ADITION_RDCTIN'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
-                  ),
-
-                  list.length > 0 ? Container(
-                    height: list.length * 130,
-                    width: widthScreen,
-                    child: ListView.builder(
-                        itemCount: list.length,
-                        scrollDirection: Axis.vertical,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemBuilder: (BuildContext context, int index) {
-                          return InkWell(
-                            onTap: () {
-                            },
-                            child: Container(
-                              margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.all(Radius.circular(3)),
-                                  color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
-                                    spreadRadius: 2,
-                                    blurRadius: 2,
-                                    offset: Offset(0, 1), // changes position of shadow
-                                  ),
-                                ],
-                              ),
-
-                              child: Container(
-                                color: Colors.white,
-                                child: Row( children: [
-                                  Expanded(
-                                    child: Container(
-                                      color: Colors.white,
-                                      padding: EdgeInsets.all(10),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.start,children: [
-                                        Row(
-                                          children: [
-                                            Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).f_name.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
-                                            Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index).item_type.tr()+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: list.elementAt(index).item_type=='Reduction'? Colors.red:Colors.black),)),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Icon(Icons.calendar_month, size: 25,),
-
-                                            Align(
-                                                alignment: Alignment.topLeft,
-                                                child: Container(margin: EdgeInsets.all(5), child: Text(Utils.getFormattedDate(list.elementAt(index).acqusition_date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),))),
-                                          ],
-                                        ),
-                                        list.elementAt(index).item_type == 'Reduction'? Row(
-                                          children: [
-                                            Align(
-                                                alignment: Alignment.topLeft,
-                                                child: Container(margin: EdgeInsets.only(top:5), child: Text(list.elementAt(index).reason.toString().tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),))),
-                                          ],
-                                        ) : Align(
-                                            alignment: Alignment.topLeft,
-                                            child: Container(margin: EdgeInsets.only(top:5), child: Text(list.elementAt(index).acqusition_type.toString().tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),))),
-                                        // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                      ],),
-                                    ),
-                                  ),
-                                  Column(
-                                    children: [
-                                      Container(
-                                        margin: EdgeInsets.all(10),
-                                        color: Colors.white,
-                                        child: Row(
-                                          children: [
-                                            Image.asset("assets/bird_icon.png", width: 40, height: 40,),
-                                            Container( margin: EdgeInsets.only(right: 5, left: 5), child: Text(list.elementAt(index).item_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color:list.elementAt(index).item_type == 'Addition'?Colors.black:Colors.black),)),
-                                           // Text("BIRDS".tr(), style: TextStyle(color: Colors.black, fontSize: 12),)
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
-                                ]),
-                              ),
-                            ),
-                          );
-
-                        }),
-                  ) : Center(
-                    child: Container(
-                      margin: EdgeInsets.only(top: 50),
-                      child: Column(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('NO_BIRD_ADDED'.tr(), style: TextStyle(fontSize: 15, color: Colors.black54),),
+                          Icon(Icons.calendar_today, color: Utils.getThemeColorBlue(), size: 18),
+                          SizedBox(width: 8),
+                          Text(
+                            date_filter_name.tr(),
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+                          ),
+                          SizedBox(width: 8),
+                          Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(), size: 20),
                         ],
                       ),
                     ),
-                  ),
+                  )
                 ],
-              ),),
+              ),
 
+
+              SizedBox(height: 10),
+
+              _flockDateChart(),
+              SizedBox(height: 10),
+
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.white, Colors.blue.shade50], // Subtle gradient
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      spreadRadius: 2,
+                      offset: Offset(0, 4), // Softer drop shadow
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 🔷 Title
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'SUMMARY'.tr(),
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Utils.getThemeColorBlue(),
+                            ),
+                          ),
+                          Icon(Icons.bar_chart, color: Utils.getThemeColorBlue()), // Chart icon
+                        ],
+                      ),
+                      SizedBox(height: 12),
+
+                      // 🐥 Total Added
+                      _buildSummaryRow(
+                        icon: Icons.add_circle,
+                        label: 'TOTAL_ADDED'.tr(),
+                        value: '$total_birds_added',
+                        valueColor: Colors.green.shade700,
+                      ),
+
+                      Divider(color: Colors.grey[300], thickness: 0.8),
+
+                      // ❌ Total Reduced
+                      _buildSummaryRow(
+                        icon: Icons.remove_circle,
+                        label: 'TOTAL_REDUCED'.tr(),
+                        value: '-$total_birds_reduced',
+                        valueColor: Colors.red.shade700,
+                      ),
+
+                      Divider(color: Colors.grey[300], thickness: 0.8),
+
+                      // 🏠 Current Birds (Highlighted)
+                      _buildSummaryRow(
+                        icon: Icons.pets,
+                        label: 'CURRENT_BIRDS'.tr(),
+                        value: '$current_birds',
+                        valueColor: Colors.black,
+                        isBold: true,
+                        fontSize: 18,
+                      ),
+
+                      SizedBox(height: 15),
+
+                      // 📊 Birds Added Per Flock Title
+                      Text(
+                        'By Flock'.tr(),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Utils.getThemeColorBlue(),
+                        ),
+                      ),
+                      SizedBox(height: 8),
+
+                      // 🐥 Birds Added Per Flock List
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: additionsSummary.length,
+                        separatorBuilder: (context, index) => Divider(color: Colors.grey[300], thickness: 0.8),
+                        itemBuilder: (context, index) {
+                          FlockSummary summary = additionsSummary[index];
+
+                          // Calculate percentage change
+                          int netChange = summary.totalAdded - summary.totalReduced;
+                          double percentageChange = summary.totalAdded > 0
+                              ? (netChange / summary.totalAdded) * 100
+                              : 0;
+
+                          // Determine color based on net change
+                          Color changeColor = netChange >= 0 ? Colors.green.shade700 : Colors.red.shade700;
+                          String changeSymbol = netChange >= 0 ? '+' : ''; // Add "+" only for positive values
+
+                          return ListTile(
+                            leading: Icon(
+                              netChange >= 0 ? Icons.trending_up : Icons.trending_down,
+                              color: changeColor,
+                              size: 28,
+                            ),
+                            title: Text(
+                              summary.flockName,
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                            ),
+                            subtitle: Row(
+                              children: [
+                                Text(
+                                  'Added'.tr()+': ${summary.totalAdded}  ',
+                                  style: TextStyle(fontSize: 14, color: Colors.green.shade700),
+                                ),
+                                Text(
+                                  'Reduced'.tr()+': ${summary.totalReduced}',
+                                  style: TextStyle(fontSize: 14, color: Colors.red.shade700),
+                                ),
+                              ],
+                            ),
+                            trailing: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  '$changeSymbol${netChange}',
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: changeColor),
+                                ),
+                                Text(
+                                  '(${percentageChange.toStringAsFixed(1)}%)',
+                                  style: TextStyle(fontSize: 12, color: changeColor),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Title
+                          Text(
+                            'Reduction By Reason'.tr(),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Utils.getThemeColorBlue(),
+                            ),
+                          ),
+                          SizedBox(height: 8),
+
+                          // Using `map()` inside Column with SingleChildScrollView
+                          SingleChildScrollView(
+                            child: Column(
+                              children: reductionByReason.map((reduction) {
+                                return Card(
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  elevation: 4,
+                                  margin: EdgeInsets.symmetric(vertical: 5, horizontal: 8),
+                                  child: ListTile(
+                                    leading: CircleAvatar(
+                                      backgroundColor: Colors.redAccent,
+                                      child: Icon(Icons.trending_down, color: Colors.white),
+                                    ),
+                                    title: Text(
+                                      reduction.reason.tr(),
+                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                    ),
+                                    subtitle: Text(
+                                      "TOTAL".tr()+" ${reduction.totalCount}",
+                                      style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ],
+                      )
+
+
+                    ],
+                  ),
+                ),
+              ),
 
 
             ]
       ),),),),),);
+  }
+
+  /// 📌 **Reusable Summary Row**
+  Widget _buildSummaryRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color valueColor,
+    bool isBold = false,
+    double fontSize = 16,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: valueColor, size: 22), // Icon for visual clarity
+            SizedBox(width: 10),
+            Text(
+              label,
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+            ),
+          ],
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            color: valueColor,
+          ),
+        ),
+      ],
+    );
   }
 
   void getFilteredBirds(String st,String end) async {
@@ -441,6 +538,34 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
     await DatabaseHelper.instance.database;
 
     list = await DatabaseHelper.getFilteredFlockDetails(f_id,"All",st,end);
+    try {
+      List<Flock_Detail> additions = list.where((e) => e.item_type == "Addition").toList();
+      List<Flock_Detail> reductions = list.where((e) => e.item_type == "Reduction").toList();
+
+      // Group birds added by flock name
+      Map<String, List<Flock_Detail>> additionsByFlock = groupBy(additions, (e) => e.f_name);
+      Map<String, List<Flock_Detail>> reductionsByFlock = groupBy(reductions, (e) => e.f_name);
+
+      // Merge additions and reductions into a single summary list
+      Set<String> allFlockNames = {...additionsByFlock.keys, ...reductionsByFlock.keys};
+
+      additionsSummary = allFlockNames.map((flockName) {
+        int totalAdded = additionsByFlock[flockName]?.fold(0, (sum, e) => sum! + e.item_count) ?? 0;
+        int totalReduced = reductionsByFlock[flockName]?.fold(0, (sum, e) => sum! + e.item_count) ?? 0;
+
+        return FlockSummary(
+          flockName: flockName,
+          totalAdded: totalAdded,
+          totalReduced: totalReduced, // Add this to FlockSummary model
+        );
+      }).toList();
+
+      reductionByReason = getReductionsByReason(list);
+      print("REDUCTION_LIST ${reductionByReason.length}");
+      Utils.reductionByReason = reductionByReason;
+    } catch (ex) {
+      print(ex);
+    }
 
     setState(() {
 
@@ -696,8 +821,10 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
 
   void prepareListData() async{
 
+
     List<Flock_Report_Item> list = [];
     int? added = 0,reduced = 0,init_flock_birds = 0,active_birds = 0,total_added =0,total_reduced=0;
+
 
     if(f_id == -1) {
       for (int i = 0; i < flocks.length; i++) {
@@ -782,5 +909,200 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
 
   }
 
+  /// 📊 **Chart 1: Grouped by Flock Name**
+  Widget _flockNameChart() {
+    final Map<String, int> flockSummary = {};
+    for (var flock in list) {
+      flockSummary.update(flock.f_name, (value) => value + flock.item_count, ifAbsent: () => flock.item_count);
+    }
+
+    final List<_ChartData> chartData = flockSummary.entries
+        .map((entry) => _ChartData(entry.key, entry.value))
+        .toList();
+
+    return _buildChart(
+      title: 'Flock Distribution',
+      xAxisLabel: 'Flock Name',
+      data: chartData,
+      colorGradient: [Colors.blue.shade400, Colors.blue.shade700],
+    );
+  }
+
+  /// 📊 **Chart 2: Grouped by Acquisition Date**
+  Widget _flockDateChart() {
+    final Map<String, num> additionSummary = {};
+    final Map<String, num> reductionSummary = {};
+
+// 🟢 Process Additions
+    for (var flock in list) {
+      if (flock.item_type == "Addition") {
+        additionSummary.update(
+          Utils.getFormattedDate(flock.acqusition_date),
+              (value) => value + (flock.item_count ?? 0),
+          ifAbsent: () => (flock.item_count ?? 0),
+        );
+      }
+    }
+
+// 🔴 Process Reductions
+    for (var flock in list) {
+      if (flock.item_type == "Reduction") {
+        reductionSummary.update(
+          Utils.getFormattedDate(flock.acqusition_date),
+              (value) => value + (flock.item_count ?? 0),
+          ifAbsent: () => (flock.item_count ?? 0),
+        );
+      }
+    }
+
+    // 🔄 Merge Data
+    final List<_ChartData> additionData = additionSummary.entries
+        .map((entry) => _ChartData(entry.key, entry.value))
+        .toList();
+
+    final List<_ChartData> reductionData = reductionSummary.entries
+        .map((entry) => _ChartData(entry.key, entry.value))
+        .toList();
+
+    return _buildGroupedChart(
+      title: 'Acqusition & Reduction Trends'.tr(),
+      xAxisLabel: 'DATE'.tr(),
+      additionData: additionData,
+      reductionData: reductionData,
+      additionColor: [Colors.green.shade400, Colors.green.shade700],
+      reductionColor: [Colors.red.shade400, Colors.red.shade700],
+    );
+  }
+
+  Widget _buildGroupedChart({
+    required String title,
+    required String xAxisLabel,
+    required List<_ChartData> additionData,
+    required List<_ChartData> reductionData,
+    required List<Color> additionColor,
+    required List<Color> reductionColor,
+  }) {
+    return SfCartesianChart(
+      title: ChartTitle(text: title),
+      legend: Legend(isVisible: true),
+      primaryXAxis: CategoryAxis(
+        title: AxisTitle(text: xAxisLabel),
+        labelRotation: -45, // Rotate labels if they overlap
+      ),
+      primaryYAxis: NumericAxis(title: AxisTitle(text: 'Count')),
+
+      // 🟢 Enable Chart Interaction
+      tooltipBehavior: TooltipBehavior(enable: true, header: '', canShowMarker: false),
+      selectionType: SelectionType.point,  // Allow selection
+      selectionGesture: ActivationMode.singleTap, // Tap to select
+
+      series: <CartesianSeries<_ChartData, String>>[
+        // 🟢 Additions Series with Tap & Tooltip
+        ColumnSeries<_ChartData, String>(
+          name: 'Addition'.tr(),
+          dataSource: additionData,
+          xValueMapper: (data, _) => data.label,
+          yValueMapper: (data, _) => data.value,
+          color: additionColor.first,
+          enableTooltip: true,
+
+          // 🖱️ Enable selection
+          isVisibleInLegend: true,
+          onPointTap: (ChartPointDetails details) {
+            print("🟢 Addition Clicked: ${additionData[details.pointIndex!].label}, Value: ${additionData[details.pointIndex!].value}");
+          },
+        ),
+
+        // 🔴 Reductions Series with Tap & Tooltip
+        ColumnSeries<_ChartData, String>(
+          name: 'REDUCTION'.tr(),
+          dataSource: reductionData,
+          xValueMapper: (data, _) => data.label,
+          yValueMapper: (data, _) => data.value,
+          color: reductionColor.first,
+          enableTooltip: true,
+
+          // 🖱️ Enable selection
+          isVisibleInLegend: true,
+          onPointTap: (ChartPointDetails details) {
+            print("🔴 Reduction Clicked: ${reductionData[details.pointIndex!].label}, Value: ${reductionData[details.pointIndex!].value}");
+          },
+        ),
+      ],
+    );
+  }
+
+
+
+  /// 📊 **Reusable Chart Builder**
+  Widget _buildChart({
+    required String title,
+    required String xAxisLabel,
+    required List<_ChartData> data,
+    required List<Color> colorGradient,
+  }) {
+    return Padding(
+      padding: EdgeInsets.only(left: 10,right: 10,top: 5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          SizedBox(height: 10),
+          SfCartesianChart(
+            plotAreaBorderWidth: 0,
+            legend: Legend(isVisible: true, position: LegendPosition.bottom),
+            tooltipBehavior: TooltipBehavior(enable: true),
+            primaryXAxis: CategoryAxis(
+              title: AxisTitle(text: xAxisLabel),
+              labelRotation: 45, // Rotate labels for better readability
+            ),
+            primaryYAxis: NumericAxis(
+              title: AxisTitle(text: 'Total Count'),
+              minimum: 0,
+            ),
+            series: <CartesianSeries>[
+              ColumnSeries<_ChartData, String>(
+                name: 'Birds Addition',
+                dataSource: data,
+                xValueMapper: (_ChartData data, _) => data.label,
+                yValueMapper: (_ChartData data, _) => data.value,
+                dataLabelSettings: DataLabelSettings(isVisible: true),
+                borderRadius: BorderRadius.circular(8), // Rounded corners
+                gradient: LinearGradient(
+                  colors: colorGradient,
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
+
+/// 📌 Helper Model for Chart Data
+class _ChartData {
+  final String label;
+  final num value;
+
+  _ChartData(this.label, this.value);
+}
+
+class FlockSummary {
+  String flockName;
+  int totalAdded;
+  int totalReduced;
+
+  FlockSummary({required this.flockName, required this.totalAdded, required this.totalReduced});
+}
+
+class ReductionByReason {
+  String reason;
+  int totalCount;
+
+  ReductionByReason({required this.reason, required this.totalCount});
+}
+
 

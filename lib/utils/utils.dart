@@ -15,12 +15,19 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:language_picker/languages.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:poultary/model/custom_category_data.dart';
 import 'package:poultary/utils/session_manager.dart';
 import '../CAS_Ads.dart';
 import 'package:uuid/uuid.dart';
+import '../birds_report_screen.dart';
+import '../custom_category_report.dart';
 import '../database/databse_helper.dart';
+import '../eggs_report_screen.dart';
+import '../financial_report_screen.dart';
+import '../health_report_screen.dart';
 import '../model/bird_item.dart';
 import '../model/bird_product.dart';
+import '../model/custom_category.dart';
 import '../model/egg_item.dart';
 import '../model/egg_report_item.dart';
 import '../model/farm_item.dart';
@@ -28,6 +35,7 @@ import '../model/feed_item.dart';
 import '../model/feed_report_item.dart';
 import '../model/feedflock_report_item.dart';
 import '../model/finance_report_item.dart';
+import '../model/finance_summary_flock.dart';
 import '../model/flock.dart';
 import '../model/flock_detail.dart';
 import '../model/flock_report_item.dart';
@@ -67,6 +75,16 @@ class Utils {
   static Flock? selected_flock;
   static Eggs? selected_egg_collection;
   static Flock_Detail? selected_flock_collection;
+  static List<Flock_Detail>? flock_details;
+  static List<EggReductionSummary>? eggReductionSummary;
+  static List<FlockIncomeExpense>? flockfinanceList;
+  static List<VaccinationGrouped>? groupedList;
+  static List<FinancialItem>? incomeItems;
+  static List<FinancialItem>? expenseItems;
+  static List<FlockQuantity>? flockQuantity;
+  static List<ReductionByReason>? reductionByReason;
+  static List<CustomCategoryData>? categoryDataList;
+
   static Feeding? selected_feeding;
   static int selected_category = -1;
   static String selected_category_name = "";
@@ -75,6 +93,7 @@ class Utils {
   static String vaccine_medicine = "All Medications/Vaccinations";
   static String INVOICE_LOGO_STR = "";
   static String INVOICE_HEADING = "";
+  static String INVOICE_SUB_HEADING = "";
   static String INVOICE_DATE = "";
 
   static String TOTAL_BIRDS_ADDED = "0";
@@ -84,6 +103,8 @@ class Utils {
   static String TOTAL_EGG_COLLECTED = "100";
   static String TOTAL_EGG_REDUCED = "20";
   static String EGG_RESERVE = "80";
+  static String GOOD_EGGS = "80";
+  static String BAD_EGGS = "80";
 
   static String TOTAL_INCOME = "0";
   static String TOTAL_EXPENSE = "0";
@@ -92,6 +113,7 @@ class Utils {
   static String TOTAL_MEDICATIONS = "0";
   static String TOTAL_VACCINATIONS = "0";
   static String applied_filter = "";
+  static String TOTAL_CONSUMPTION = "0";
 
   static String SELECTED_FLOCK = "";
   static int SELECTED_FLOCK_ID = -1;
@@ -472,6 +494,33 @@ class Utils {
     print(invoiceHeading);
   }
 
+  static List<CustomCategory> getDefaultFlockCatgories() {
+   List<CustomCategory> defaultCategories = [];
+   CustomCategory modifyBirds = CustomCategory(name:"Modify Birds", itemtype: "Default", cat_type: "Birds FLock", unit: "num", enabled: 1, icon: Icons.add);
+   modifyBirds.cIcon = "assets/birds.png";
+
+   CustomCategory eggCollection = CustomCategory(name:"EGG_COLLECTION", itemtype: "Default", cat_type: "EGG_COLLECTION".tr(), unit: "num", enabled: 1, icon: Icons.add);
+   eggCollection.cIcon = "assets/egg.png";
+
+   CustomCategory feeding = CustomCategory(name:"DAILY_FEEDING", itemtype: "Default", cat_type: "Feed Consumption".tr(), unit: "kg", enabled: 1, icon: Icons.add);
+   feeding.cIcon = "assets/feed.png";
+
+   CustomCategory health = CustomCategory(name:"BIRDS_HEALTH", itemtype: "Default", cat_type: "Medical".tr(), unit: "num", enabled: 1, icon: Icons.add);
+   health.cIcon = "assets/health.png";
+
+   CustomCategory finance = CustomCategory(name:"INCOME_EXPENSE", itemtype: "Default", cat_type: "Finance".tr(), unit: "currency", enabled: 1, icon: Icons.add);
+   finance.cIcon = "assets/income.png";
+
+   defaultCategories.add(modifyBirds);
+   defaultCategories.add(eggCollection);
+   defaultCategories.add(feeding);
+   defaultCategories.add(health);
+   defaultCategories.add(finance);
+
+   return defaultCategories;
+
+  }
+
   static Future<void> setupAds() async {
     bool isInApp = await SessionManager.getInApp();
     if(isInApp){
@@ -482,6 +531,7 @@ class Utils {
       Utils.isShowAdd = true;
       inititalize();
     }
+    Utils.isShowAdd = false;
 
   }
   static Future<void> inititalize() async {
@@ -564,6 +614,19 @@ class Utils {
   }
   static Future<void> hideBanner() async {
     // view?.hideBanner();
+  }
+
+  static bool checkIfContains(List<String> list ,String unit) {
+    bool contains = false;
+    for(int i=0;i<list.length;i++){
+      if(unit == list[i])
+      {
+        contains = true;
+        break;
+      }
+    }
+
+    return contains;
   }
 
   static double getWidthResized(double input) {

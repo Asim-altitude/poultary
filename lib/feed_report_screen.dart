@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,19 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
-import 'package:poultary/model/transaction_item.dart';
+import 'package:poultary/model/feed_summary_flock.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-
-import 'model/egg_item.dart';
 import 'model/feed_item.dart';
-import 'model/feed_report_item.dart';
 import 'model/feed_summary.dart';
 import 'model/flock.dart';
-import 'model/flock_detail.dart';
 
 class FeedReportsScreen extends StatefulWidget {
   const FeedReportsScreen({Key? key}) : super(key: key);
@@ -79,6 +72,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
   List<Feeding> list = [];
 
   List<FeedSummary> feedingSummary = [];
+  List<FlockFeedSummary> flockFeedSummary = [];
   List<String> flock_name = [];
 
 
@@ -97,6 +91,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
     clearValues();
 
     feedingSummary = await DatabaseHelper.getMyMostUsedFeeds(f_id, str_date, end_date);
+    flockFeedSummary = await DatabaseHelper.getMyMostUsedFeedsByFlock(f_id, str_date, end_date);
 
     total_feed_consumption = await DatabaseHelper.getTotalFeedConsumption(f_id, str_date, end_date);
     total_feed_consumption = num.parse(total_feed_consumption.toStringAsFixed(2));
@@ -124,7 +119,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
       body:SafeArea(
         top: false,
 
-         child:Container(
+         child: Container(
           width: widthScreen,
           height: heightScreen,
              color: Colors.white,
@@ -196,7 +191,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
               Row(
                 children: [
-                  Expanded(
+              /*    Expanded(
                     child: Container(
                       height: 45,
                       alignment: Alignment.centerRight,
@@ -213,37 +208,55 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                       ),
                       child: getDropDownList(),
                     ),
-                  ),
+                  ),*/
                   InkWell(
-                      onTap: () {
-                        openDatePicker();
-                      },
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Container(
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(5.0)),
-                            border: Border.all(
-                              color:  Utils.getThemeColorBlue(),
-                              width: 1.0,
-                            ),
-                          ),
-                          margin: EdgeInsets.only(right: 10,top: 15,bottom: 5),
-                          padding: EdgeInsets.only(left: 5,right: 5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text(date_filter_name.tr(), style: TextStyle(fontSize: 14),),
-                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
-                            ],
-                          ),
+                    onTap: () {
+                      openDatePicker();
+                    },
+                    borderRadius: BorderRadius.circular(8), // Adds ripple effect with rounded edges
+                    child: Container(
+                      height: 45,
+                      width: widthScreen - 20,
+                      margin: EdgeInsets.only(right: 10,left: 10, top: 15, bottom: 10),
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                      )),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Utils.getThemeColorBlue(),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.calendar_today, color: Utils.getThemeColorBlue(), size: 18),
+                          SizedBox(width: 8),
+                          Text(
+                            date_filter_name.tr(),
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+                          ),
+                          SizedBox(width: 8),
+                          Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(), size: 20),
+                        ],
+                      ),
+                    ),
+                  )
                 ],
               ),
+
+
               Container(
                 color: Colors.white,
                 child: Container(
@@ -257,208 +270,195 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                     ],
                   ),
                   child: Column(children: [
-                    Align(
-                        alignment: Alignment.topLeft,
-                        child: Row(
-                          children: [
 
-                            Text('FEED_CONSUMPTION'.tr(),style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
-                          ],
-                        )),
+                    Padding(
+                      padding: EdgeInsets.all(5),
+                      child: Column(
+                        children: [
+                          // Chart Title
+                          Text(date_filter_name.tr(),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                          ),
+                          SizedBox(height: 8),
 
-
-                    Container(
-                      width: widthScreen,
-                      child: Column(children: [
-                        //Initialize the chart widget
-                        SfCartesianChart(
-                            primaryXAxis: CategoryAxis(),
-
+                          // Chart Widget
+                          SfCartesianChart(
+                            primaryXAxis: CategoryAxis(
+                              labelRotation: -45,  // Slanted labels for better readability
+                              majorGridLines: MajorGridLines(width: 0.5),
+                            ),
+                            primaryYAxis: NumericAxis(
+                              labelFormat: '{value}'+' '+ 'KG'.tr(),
+                              majorGridLines: MajorGridLines(width: 0.3),
+                            ),
                             zoomPanBehavior: _zoomPanBehavior,
-                            // Chart title
-                            title: ChartTitle(text: date_filter_name),
 
-                            // Enable legend
-                           // legend: Legend(isVisible: true, position: LegendPosition.bottom),
+                            // Enable Legend
+                            legend: Legend(
+                              isVisible: true,
+                              position: LegendPosition.bottom,
+                              textStyle: TextStyle(fontSize: 14),
+                            ),
 
-                            // Enable tooltip
+                            // Enable Tooltip
                             tooltipBehavior: TooltipBehavior(enable: true),
+
+                            // Series
                             series: <CartesianSeries<FeedSummary, String>>[
-
-                              ColumnSeries(borderRadius: BorderRadius.all(Radius.circular(10)),color:Colors.deepOrange,name: 'Feed'.tr(),dataSource: feedingSummary, xValueMapper: (FeedSummary feedItem, _) => feedItem.feedName.tr(), yValueMapper: (FeedSummary feedItem, _)=> feedItem.totalQuantity,),
-
-                            ]),
-                        /*Expanded(
-                       child: Padding(
-                         padding: const EdgeInsets.all(8.0),
-                         //Initialize the spark charts widget
-                         child: SfSparkLineChart.custom(
-                           //Enable the trackball
-                           trackball: SparkChartTrackball(
-                               activationMode: SparkChartActivationMode.tap),
-                           //Enable marker
-                           marker: SparkChartMarker(
-                               displayMode: SparkChartMarkerDisplayMode.all),
-                           //Enable data label
-                           labelDisplayMode: SparkChartLabelDisplayMode.all,
-                           xValueMapper: (int index) => data[index].year,
-                           yValueMapper: (int index) => data[index].sales,
-                           dataCount: data.length,
-                         ),
-                       ),
-                     )*/
-                      ]),) ,
-
-                    SizedBox(height: 20,width: widthScreen,),
-                    Container(
-                      height: feedingSummary.length * 30,
-                      width: widthScreen,
-                      child: ListView.builder(
-                          itemCount: feedingSummary.length,
-                          scrollDirection: Axis.vertical,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemBuilder: (BuildContext context, int index) {
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(feedingSummary.elementAt(index).feedName.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                                Text(Utils.roundTo2Decimal(feedingSummary.elementAt(index).totalQuantity).toString() + "KG".tr(),style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
-
-                              ],);
-
-                          }),
+                              ColumnSeries<FeedSummary, String>(
+                                name: 'Feed'.tr(),
+                                dataSource: feedingSummary,
+                                xValueMapper: (FeedSummary feedItem, _) => feedItem.feedName.tr(),
+                                yValueMapper: (FeedSummary feedItem, _) => feedItem.totalQuantity,
+                                borderRadius: BorderRadius.all(Radius.circular(10)), // Smooth Rounded Bars
+                                color: Colors.deepOrange,
+                                dataLabelSettings: DataLabelSettings(
+                                  isVisible: true,
+                                  textStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('TOTAL_CONSUMPTION'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
-                        Text(total_feed_consumption.toString() +"KG".tr(),style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),),
 
-                      ],)
+
+                    Card(
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      margin: EdgeInsets.all(8),
+                      child: Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Summary Title
+                            Text(
+                              "SUMMARY".tr(),
+                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
+                            ),
+                            SizedBox(height: 8),
+
+                            // Section 1: By Feed Name
+                            Text(
+                              "By Feed Name".tr(),
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                            ),
+                            Divider(thickness: 1, color: Colors.black26),
+                            Column(
+                              children: feedingSummary.map((feed) {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 3),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        feed.feedName.tr(),
+                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black),
+                                      ),
+                                      Text(
+                                        "${Utils.roundTo2Decimal(feed.totalQuantity)}"+" "+"KG".tr(),
+                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+
+                            SizedBox(height: 10),
+
+                            // Section 2: By Flock Name
+                            Text(
+                              "By Flock Name".tr(),
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                            ),
+                            Divider(thickness: 1, color: Colors.black26),
+                            Column(
+                              children: flockFeedSummary.map((flock) {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 3),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        flock.f_name.tr(),
+                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black),
+                                      ),
+                                      Text(
+                                        "${Utils.roundTo2Decimal(flock.totalQuantity)}" + " "+"KG".tr(),
+                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+
+                            // Divider for Separation
+                            Divider(thickness: 1, color: Colors.black26),
+                            SizedBox(height: 6),
+
+                            // Total Consumption Row
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'TOTAL_CONSUMPTION'.tr(),
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
+                                  ),
+                                  Text(
+                                    "${total_feed_consumption}"+" "+"KG".tr(),
+                                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+
+
                   ],),),
               ),
 
-              Visibility(
-                visible: false,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-                    color: Utils.getScreenBackground(),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 2,
-                        offset: Offset(0, 1), // changes position of shadow
-                      ),
-                    ],
-
-                  ),
-                  child: Column(
-                    children: [
-                      Align(
-                        alignment: Alignment.center,
-                        child: Container(
-                            margin: EdgeInsets.all(10),
-                            child: Text('All Feedings'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
-                      ),
-
-                      list.length > 0 ? Container(
-                        margin: EdgeInsets.only(top: 0,bottom: 20),
-                        height: list.length * 110,
-                        width: widthScreen,
-                        color: Utils.getScreenBackground(),
-                        child: ListView.builder(
-                            itemCount: list.length,
-                            scrollDirection: Axis.vertical,
-                            physics: NeverScrollableScrollPhysics(),
-                            itemBuilder: (BuildContext context, int index) {
-                              return Container(
-                                margin: EdgeInsets.only(left: 8,right: 8,top: 8,bottom: 0),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.all(Radius.circular(3)),
-                                    color: Colors.white,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5),
-                                      spreadRadius: 2,
-                                      blurRadius: 2,
-                                      offset: Offset(0, 1), // changes position of shadow
-                                    ),
-                                  ],
-
-                                ),
-                                child: Container(
-                                  child: Row( children: [
-                                    Expanded(
-                                      child: Container(
-                                        color: Colors.white,
-                                        alignment: Alignment.topLeft,
-                                        margin: EdgeInsets.all(10),
-                                        child: Column(children: [
-                                          Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).feed_name!.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),)),
-                                                  Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index).f_name.tr()+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-                                                ],
-                                              ),
-                                              Container(
-                                                margin: EdgeInsets.only(right: 5),
-                                                child: Row(
-                                                  children: [
-                                                    Image.asset("assets/p_feed.png", width: 40, height: 40,),
-                                                    Container( child: Text(list.elementAt(index).quantity.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color: Utils.getThemeColorBlue()),)),
-                                                    Text("KG".tr(), style: TextStyle(color: Colors.black, fontSize: 16),)
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Align(
-                                              alignment: Alignment.centerLeft,
-                                              child: Row(
-                                                children: [
-                                                  //Container(margin: EdgeInsets.only(top:5), child: Text('Feeding on'.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
-                                                  Icon(Icons.calendar_month, size: 25,),
-                                                  Container(margin: EdgeInsets.only(top: 5, left: 5), child: Text(Utils.getFormattedDate(list.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-                                                ],
-                                              )),
-
-                                          // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                        ],),
-                                      ),
-                                    ),
-
-
-                                  ]),
-                                ),
-                              );
-
-                            }),
-                      ) : Center(
-                        child: Container(
-                          margin: EdgeInsets.only(top: 20),
-                          child: Container(
-                            height: heightScreen - 200,
-                            width: widthScreen,
-                            child: Column(
-                              children: [
-                                Text('No Feeding added in current period'.tr(), style: TextStyle(fontSize: 18, color: Colors.black),),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
 
             ]
       ),),),),),);
+  }
+
+  Widget _buildChart() {
+    return Container(
+      height: 200,
+      color: Colors.grey[300], // Placeholder for the chart
+      alignment: Alignment.center,
+      child: Text("Chart Placeholder"),
+    );
+  }
+
+  Widget _buildDataList() {
+    return Expanded(
+      child: ListView.separated(
+        itemCount: 10,
+        separatorBuilder: (context, index) => Divider(),
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text("Feed Type ${index + 1}"),
+            subtitle: Text("Quantity: 5kg"),
+            trailing: Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {},
+          );
+        },
+      ),
+    );
   }
 
 

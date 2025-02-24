@@ -15,10 +15,14 @@ import 'package:poultary/sticky.dart';
 import 'package:poultary/transactions_screen.dart';
 import 'package:poultary/utils/utils.dart';
 import 'add_reduce_flock.dart';
+import 'custom/all_custom_data_screen.dart';
+import 'custom/all_customcategories_screen.dart';
+import 'custom/custom_flock_category.dart';
 import 'daily_feed.dart';
 import 'database/databse_helper.dart';
 import 'egg_collection.dart';
 import 'medication_vaccination.dart';
+import 'model/custom_category.dart';
 import 'model/used_item.dart';
 
 class SingleFlockScreen extends StatefulWidget {
@@ -88,8 +92,23 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     getImages();
     getUsage();
     addEggColorColumn();
+    getAllCategories();
     Utils.setupAds();
 
+  }
+
+  List<CustomCategory> categories = [];
+  List<CustomCategory> defaultcategories = [];
+  Future<void> getAllCategories() async {
+
+    defaultcategories = Utils.getDefaultFlockCatgories();
+
+    categories = (await DatabaseHelper.getCustomCategories())!;
+    await DatabaseHelper.createCategoriesDataTable();
+
+    defaultcategories.addAll(categories);
+
+    setState(() {});
   }
 
   void addEggColorColumn() async{
@@ -168,118 +187,202 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                   ),
                 ),
               ),
-              Container(child: Text(Utils.selected_flock!.f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white,),)),
               Container(
-                margin: EdgeInsets.only(left: 15, top: 5),
-                child: Row(children: [
-                  Image.asset(Utils.selected_flock!.icon.replaceAll("jpeg", "png"), width: 125, height: 125,),
-                  /*AvatarView(
-                    radius: 65,
-                    borderColor: Utils.getThemeColorBlue(),
-                    avatarType: AvatarType.RECTANGLE,
-                    backgroundColor: Colors.grey.withAlpha(50),
-                    imagePath:
-                    Utils.selected_flock!.icon,
-                    placeHolder: Container(
-                      child: Icon(Icons.ac_unit, size: 50,),
+                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+
+                    /// **Flock Name (Title)**
+                    Center(
+                      child: Text(
+                        Utils.selected_flock!.f_name,
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
                     ),
-                    errorWidget: Container(
-                      child: Icon(Icons.error, size: 50,),
-                    ),
-                  ),*/
-                  Container(
-                    margin: EdgeInsets.all(10),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+
+                    SizedBox(height: 8),
+
+                    /// **Flock Details Row**
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+
+                        /// **Flock Icon**
                         Container(
-                          margin: EdgeInsets.only(right: 15),
-                          child: Row(
+                          decoration: BoxDecoration(
+                            color: Colors.white10, // Subtle background
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: EdgeInsets.all(10),
+                          child: Image.asset(
+                            Utils.selected_flock!.icon.replaceAll("jpeg", "png"),
+                            width: 90, height: 90,
+                          ),
+                        ),
+
+                        SizedBox(width: 10),
+
+                        /// **Bird Count & Additional Details**
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container( margin: EdgeInsets.only(right: 3), child: Text(Utils.selected_flock!.active_bird_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 24, color: Colors.white),)),
-                              Text("BIRDS".tr(), style: TextStyle(color: Colors.white70, fontSize: 16),)
+
+                              /// **Bird Count**
+                              Row(
+                                children: [
+                                   Text(
+                                    Utils.selected_flock!.active_bird_count.toString(),
+                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                                  ),
+                                  SizedBox(width: 5),
+                                  Text("BIRDS".tr(), style: TextStyle(color: Colors.white70, fontSize: 16)),
+                                ],
+                              ),
+
+                              SizedBox(height: 8),
+
+                              /// **Purpose**
+                              Row(
+                                children: [
+                                  Icon(Icons.assignment, color: Colors.white70, size: 18),
+                                  SizedBox(width: 5),
+                                  Text('PURPOSE1'.tr() + ": ", style: TextStyle(fontSize: 12, color: Colors.white70)),
+                                  Expanded(
+                                    child: Text(
+                                      Utils.selected_flock!.purpose.tr(),
+                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                                      overflow: TextOverflow.ellipsis, // Prevents overflow issues
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              SizedBox(height: 5),
+
+                              /// **Acquisition Type**
+                              Row(
+                                children: [
+                                  Icon(Icons.card_travel, color: Colors.white70, size: 18),
+                                  SizedBox(width: 5),
+                                  Text('ACQUSITION'.tr() + ": ", style: TextStyle(fontSize: 12, color: Colors.white70)),
+                                  Expanded(
+                                    child: Text(
+                                      Utils.selected_flock!.acqusition_type.tr(),
+                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white, decoration: TextDecoration.underline),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              SizedBox(height: 5),
+
+                              /// **Acquisition Date**
+                              Row(
+                                children: [
+                                  Icon(Icons.calendar_today, color: Colors.white70, size: 18),
+                                  SizedBox(width: 5),
+                                  Text('DATE'.tr() + ": ", style: TextStyle(fontSize: 12, color: Colors.white70)),
+                                  Text(
+                                    Utils.getFormattedDate(Utils.selected_flock!.acqusition_date),
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),
-                        Row(
-                          children: [
-                            Container( child: Text('PURPOSE1'.tr()+": ", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.white70),)),
-                            Container( child: Text(Utils.selected_flock!.purpose.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white),)),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Container( child: Text('ACQUSITION'.tr()+": ", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.white70),)),
-                            Container( child: Text(Utils.selected_flock!.acqusition_type.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white,decoration: TextDecoration.underline,),)),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            //Icon(Icons.calendar_month, size: 25, color: Colors.white70,),
-                            Container( child: Text('DATE'.tr()+": ", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.white70),)),
-                            Container( child: Text(Utils.getFormattedDate(Utils.selected_flock!.acqusition_date), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white),)),
-                          ],
-                        ),
-
-                    ],),
-                  ),
-
-                ]),
-              ),
-              birdUsageList.length > 0? Container(height: 40, width: widthScreen,
-              margin: EdgeInsets.only(left: 10, right: 10),
-              child: ListView.builder(
-                  itemCount: birdUsageList.length,
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Container(
-                      height: 55,
-                      padding: EdgeInsets.all(5),
-                      margin: EdgeInsets.all(5),
-                      decoration:  BoxDecoration(
-                        color: Colors.white12,
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(10))),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Text(birdUsageList.elementAt(index).reason, style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold,color: Colors.white),),
-                        SizedBox(width: 10,),
-                        Text(birdUsageList.elementAt(index).sum, style: TextStyle(fontSize: 14,color: Colors.white),),
-
                       ],
-                    ),);
-                  }),) : SizedBox(width: 0, height: 0,),
+                    ),
 
-              !Utils.selected_flock!.notes.isEmpty? Container(
-                  margin: EdgeInsets.only(left: 20,right: 10),
-                  child: Text(Utils.selected_flock!.notes, style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.white),)): SizedBox(width: 0,height: 0,),
-              imagesAdded? Container(
-                height: 80,
-                width: widthScreen ,
-                margin: EdgeInsets.only(left: 10,right: 10),
-                child: ListView.builder(
-                    itemCount: byteimages.length,
-                    scrollDirection: Axis.horizontal,
-                    itemBuilder: (BuildContext context, int index) {
-                      return InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => CarouselDemo()),
-                          );
-                        },
-                        child: Container(
-                          margin: EdgeInsets.all(10),
-                          height: 80, width: 80,
-                          child:  Image.memory(byteimages.elementAt(index), fit: BoxFit.fill,),
+
+                    /// **Bird Usage List**
+                    if (birdUsageList.isNotEmpty)
+                      Container(
+                        height: 45,
+                        width: double.infinity,
+                        margin: EdgeInsets.symmetric(vertical: 10),
+                        child: ListView.builder(
+                          itemCount: birdUsageList.length,
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Container(
+                              height: 45,
+                              padding: EdgeInsets.symmetric(horizontal: 10),
+                              margin: EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.white12,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    birdUsageList[index].reason.tr(),
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    birdUsageList[index].sum,
+                                    style: TextStyle(fontSize: 14, color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    }),
-              ): SizedBox(height: 0,width: 0,),
+                      ),
 
+                    /// **Notes Section**
+                    if (Utils.selected_flock!.notes.isNotEmpty)
+                      Container(
+
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white12,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          Utils.selected_flock!.notes,
+                          style: TextStyle(fontSize: 14, color: Colors.white70),
+                        ),
+                      ),
+
+                    /// **Images List**
+                    if (imagesAdded)
+                      Container(
+                        height: 80,
+                        width: double.infinity,
+                        margin: EdgeInsets.only(top: 10),
+                        child: ListView.builder(
+                          itemCount: byteimages.length,
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (BuildContext context, int index) {
+                            return InkWell(
+                              onTap: () {
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => CarouselDemo()));
+                              },
+                              child: Container(
+                                margin: EdgeInsets.all(8),
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  image: DecorationImage(
+                                    image: MemoryImage(byteimages[index]),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
               Container(
                 height: heightScreen,
                 margin: EdgeInsets.only(top: 30),
@@ -291,22 +394,67 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                 ),
                 child: Column(
                   children: [
-                    Text(
-                      "Manage_Flock_1".tr(),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          color: Utils.getThemeColorBlue(),
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
+                    Stack(
+                      children: [
+                        Container(
+                          margin: EdgeInsets.only(top: 5),
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Manage_Flock_1".tr(),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Utils.getThemeColorBlue(),
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                  builder: (context) =>  CustomCategoryScreen(customCategory: null,)),
+                            );
+
+                            getAllCategories();
+
+                          },
+                          child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Container(
+                                  width: 50,
+                                  alignment: Alignment.center,
+                                  padding: EdgeInsets.all(7),
+                                  margin: EdgeInsets.only(right: 10),
+                                  decoration: BoxDecoration(
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 2,
+                                        blurRadius: 2,
+                                        offset: Offset(0, 1), // changes position of shadow
+                                      ),
+                                    ],
+                                    color: Utils.getThemeColorBlue(),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(10.0)),
+                                    border: Border.all(
+                                      color:  Utils.getThemeColorBlue(),
+                                      width: 2.0,
+                                    ),
+                                  ),child: Text("+", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 20, color: Colors.white),))),
+                        ),
+                      ],
                     ),
-                    SizedBox(width: widthScreen, height: 10,),
-                    Row(
+
+                    SizedBox(width: widthScreen, height: 20,),
+                  /*  Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                       Expanded(
                         child: InkWell(
                             child: Container(
-                              margin: EdgeInsets.all(10),
+                              margin: EdgeInsets.only(left: 10),
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -354,7 +502,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                       Expanded(
                         child: InkWell(
                           child: Container(
-                            margin: EdgeInsets.all(10),
+                            margin: EdgeInsets.only(right: 10, left: 5),
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -409,7 +557,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                         Expanded(
                           child: InkWell(
                               child: Container(
-                                margin:   EdgeInsets.all(10),
+                                margin:  EdgeInsets.only(left: 10),
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -461,7 +609,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                         Expanded(
                           child: InkWell(
                               child: Container(
-                                margin:  EdgeInsets.all(10),
+                                margin:  EdgeInsets.only(left: 5,right: 10),
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -477,7 +625,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
                                 ),
                                 child: Container(
-                                   margin: EdgeInsets.only(left: 10),
+                                   margin: EdgeInsets.only(left: 5),
                                   child: Column(
                                     children: [
                                       Container(
@@ -510,65 +658,221 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                 );
                               }),),
                       ],),
-                    SizedBox(width: widthScreen, height: 10,),
-                    InkWell(
-                        child: Container(
-                          width: widthScreen ,
-                          height: 60,
-                          margin: EdgeInsets.all(10),
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                            color: Utils.getThemeColorBlue(),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 2,
-                                blurRadius: 2,
-                                offset: Offset(0, 1), // changes position of shadow
-                              ),
-                            ],
-
-                          ),
-                          child: Container(
-                            width: 40,height: 40,
-                            margin: EdgeInsets.only(left: 10),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 36,
-                                height: 36,
-                                child:Image(image: AssetImage(
-                                    'assets/income.png'),
-                                  fit: BoxFit.fill,
-                                  color: Colors.white,
-                                ),),
-                                Expanded(
-                                  child: Text(
-                                    "INCOME_EXPENSE".tr(),
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.bold
+                    SizedBox(width: widthScreen, height: 5,),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                              child: Container(
+                                height: 60,
+                                margin: EdgeInsets.only(top: 10, left: 10),
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                  color: Utils.getThemeColorBlue(),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.5),
+                                      spreadRadius: 2,
+                                      blurRadius: 2,
+                                      offset: Offset(0, 1), // changes position of shadow
                                     ),
+                                  ],
+
+                                ),
+                                child: Container(
+                                  width: 40,height: 40,
+                                  margin: EdgeInsets.only(left: 10),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 36,
+                                      height: 36,
+                                      child:Image(image: AssetImage(
+                                          'assets/income.png'),
+                                        fit: BoxFit.fill,
+                                        color: Colors.white,
+                                      ),),
+                                      Expanded(
+                                        child: Text(
+                                          "INCOME_EXPENSE".tr(),
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.white,
+                                              fontFamily: 'Roboto',
+                                              fontWeight: FontWeight.bold
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
+                              ),
+                              onTap: () async{
+                               await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const TransactionsScreen()),
+                                );
+
+                                Utils.selected_flock = await DatabaseHelper.findFlock(Utils.selected_flock!.f_id);
+
+                              }),
                         ),
-                        onTap: () async{
-                         await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const TransactionsScreen()),
+
+                        Expanded(
+                          child: InkWell(
+                              child: Container(
+                                height: 60,
+                                margin: EdgeInsets.only(top: 10,right: 10, left: 5),
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                  color: Utils.getThemeColorBlue(),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.5),
+                                      spreadRadius: 2,
+                                      blurRadius: 2,
+                                      offset: Offset(0, 1), // changes position of shadow
+                                    ),
+                                  ],
+
+                                ),
+                                child: Container(
+                                  width: 40,height: 40,
+                                  margin: EdgeInsets.only(left: 5),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 36,
+                                        height: 36,
+                                        child:Image(image: AssetImage(
+                                            'assets/more.png'),
+                                          fit: BoxFit.fill,
+                                          color: Colors.white,
+                                        ),),
+                                      Expanded(
+                                        child: Text(
+                                          "More Items".tr(),
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.white,
+                                              fontFamily: 'Roboto',
+                                              fontWeight: FontWeight.bold
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              onTap: () async{
+
+                                await DatabaseHelper.createCustomCategoriesTableIfNotExists();
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => AllCategoryScreen()),);
+
+                              }),
+                        ),
+                      ],
+                    ),*/
+                    Container(
+                      height: widthScreen,
+                      child: GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 5.0,
+                          mainAxisSpacing: 5.0,
+                          childAspectRatio: 1.0,
+                        ),
+                        itemCount: defaultcategories.length,
+                        itemBuilder: (context, index) {
+                          final category = defaultcategories[index];
+                          return InkWell(
+                            onTap: () {
+                              if (index == 0) {
+                                print("Birds Modification");
+                                moveToAddReduceFlock();
+                              } else if (index == 1) {
+                                print("Egg Collection");
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const EggCollectionScreen()),
+                                );
+                              } else if (index == 2) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const DailyFeedScreen()),
+                                );
+                              } else if (index == 3) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const MedicationVaccinationScreen()),
+                                );
+                              } else if (index == 4) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const TransactionsScreen()),
+                                );
+                              } else {
+                                _showOptions(index);
+                              }
+                            },
+                            child: Card(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              elevation: 4,
+                              color: category.enabled == 1 ? Colors.white : Colors.grey[300],
+                              child: Padding(
+                                padding: const EdgeInsets.all(5.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    index <= 4
+                                        ? Container(
+                                      width: 35,
+                                      height: 35,
+                                      child: Image(
+                                        image: AssetImage(category.cIcon),
+                                        fit: BoxFit.fill,
+                                        color: Utils.getThemeColorBlue(),
+                                      ),
+                                    )
+                                        : Icon(category.icon, size: 35, color: Utils.getThemeColorBlue()),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      category.name.tr(),
+                                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    /*Text(
+                                      '${category.cat_type}',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                                    ),*/
+                                    Text('${category.itemtype.tr()}',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(fontSize: 10, color: category.itemtype == "Collection" ? Colors.green : category.itemtype == "Default"?Colors.grey:Colors.red),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           );
+                        },
+                      ),
+                    )
 
-                          Utils.selected_flock = await DatabaseHelper.findFlock(Utils.selected_flock!.f_id);
 
-                        }),
+
                   ],
                 ),
               ),
@@ -1126,6 +1430,121 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
  }
 
+
+  void _showOptions(int index) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Wrap(
+          children: [
+            ListTile(
+              leading: Icon(Icons.remove_red_eye_outlined, size: 30,),
+              title: Text('View Category Data'.tr(), style: TextStyle(fontWeight: FontWeight.bold, color: defaultcategories.elementAt(index).enabled==0? Colors.grey:Colors.black),),
+              onTap: () async {
+                if(defaultcategories.elementAt(index).enabled==1) {
+                  Navigator.pop(context);
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) =>
+                        CategoryDataListScreen(
+                          customCategory: defaultcategories.elementAt(index),)),
+                  );
+                }
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.edit),
+              title: Text('EDIT'.tr(), style: TextStyle(color: defaultcategories.elementAt(index).enabled==0? Colors.grey:Colors.black),),
+              onTap: () {
+                if(defaultcategories.elementAt(index).enabled==1) {
+                  Navigator.pop(context);
+                  _editCategory(index);
+                }
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.delete),
+              title: Text('DELETE'.tr(), style: TextStyle(color: defaultcategories.elementAt(index).enabled==0? Colors.grey:Colors.black),),
+              onTap: () {
+                if(defaultcategories.elementAt(index).enabled==1) {
+                  Navigator.pop(context);
+                  _showDeleteConfirmationDialog(context, index);
+                }
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.block),
+              title: Text(defaultcategories[index].enabled == 1 ? 'Disable'.tr() : 'Enable'.tr()),
+              onTap: () {
+                Navigator.pop(context);
+                _toggleCategoryStatus(index);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _editCategory(int index) {
+    // Implement edit functionality
+    _createCategory(defaultcategories[index]);
+  }
+
+  Future<void> _showDeleteConfirmationDialog(BuildContext context,int index) async {
+    bool? confirmDelete = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("CONFIRMATION".tr()),
+          content: Text(
+            "RU_SURE".tr(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false), // Cancel
+              child: Text("CANCEL".tr()),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true), // Confirm
+              child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmDelete == true) {
+      _deleteCategory(index);
+    }
+  }
+
+
+  Future<void> _deleteCategory(int index) async {
+    await DatabaseHelper.deleteCategoryData(defaultcategories.elementAt(index).id!);
+    await DatabaseHelper.deleteCategory(defaultcategories.elementAt(index).id!);
+
+    setState(() {
+      defaultcategories.removeAt(index);
+    });
+  }
+
+  Future<void> _toggleCategoryStatus(int index) async {
+    defaultcategories[index].enabled = defaultcategories[index].enabled == 1? 0:1;
+    await DatabaseHelper.updateCategory(defaultcategories[index]);
+    setState(() {
+
+    });
+
+  }
+
+  Future<void> _createCategory(CustomCategory? item) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CustomCategoryScreen(customCategory: item,)),
+    );
+    getAllCategories();
+  }
 
 }
 

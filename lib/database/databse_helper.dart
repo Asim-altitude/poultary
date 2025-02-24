@@ -11,15 +11,20 @@ import 'package:sqflite/sqflite.dart';
 import 'dart:io';
 import 'package:path/path.dart';
 
+import '../financial_report_screen.dart';
 import '../model/bird_item.dart';
 import '../model/category_item.dart';
+import '../model/custom_category.dart';
+import '../model/custom_category_data.dart';
 import '../model/eggs_chart_data.dart';
 import '../model/farm_item.dart';
 import '../model/feed_item.dart';
 import '../model/feed_report_item.dart';
 import '../model/feed_summary.dart';
+import '../model/feed_summary_flock.dart';
 import '../model/feedflock_report_item.dart';
 import '../model/finance_chart_data.dart';
+import '../model/finance_summary_flock.dart';
 import '../model/flock_detail.dart';
 import '../model/flock_image.dart';
 import '../model/health_chart_data.dart';
@@ -164,6 +169,147 @@ class DatabaseHelper  {
 
   }
 
+  static Future<void> createCategoriesDataTable() async {
+    await _database?.execute('''
+      CREATE TABLE IF NOT EXISTS CustomCategoryData (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      f_id INTEGER NOT NULL,
+      c_id INTEGER NOT NULL,
+      f_name TEXT NOT NULL,
+      c_type TEXT NOT NULL,
+      c_name TEXT NOT NULL,
+      item_type TEXT NOT NULL,
+      quantity REAL NOT NULL,
+      unit TEXT NOT NULL,
+      date TEXT NOT NULL,
+      note TEXT
+    )
+    ''');
+  }
+
+  static Future<void> createCustomCategoriesTableIfNotExists() async {
+    await _database?.execute('''
+      CREATE TABLE IF NOT EXISTS CustomCategory(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        itemtype TEXT NOT NULL,
+        cat_type TEXT NOT NULL,
+        unit TEXT NOT NULL,
+        enabled INTEGER NOT NULL,
+        icon INTEGER NOT NULL
+      )
+    ''');
+  }
+  /// **Fetches a unique list of category types (cat_type)**
+  static Future<List<String>?> getUniqueCategoryTypes() async {
+
+    final List<Map<String, Object?>> result = await _database!.rawQuery('''
+    SELECT DISTINCT name FROM CustomCategory
+  ''');
+
+    return result.map((e) => e['name'] as String?)
+        .where((e) => e != null && e.isNotEmpty)
+        .cast<String>() // Ensures type safety
+        .toList();
+  }
+
+  static Future<List<CustomCategoryData>> getCustomCategoriesData(int? selectedFlock, String str_date, String end_date, String? selectedType, String sort) async {
+
+    String query = 'SELECT * FROM CustomCategoryData WHERE 1=1';
+    List<dynamic> args = [];
+
+    if (selectedFlock != null) {
+      if(selectedFlock==-1){
+
+      }else {
+        query += ' AND f_id = ?';
+        args.add(selectedFlock);
+      }
+    }
+
+    if (selectedType != null && selectedType.isNotEmpty) {
+      query += ' AND c_type = ?';
+      args.add(selectedType);
+    }
+
+    if (str_date != null && str_date.isNotEmpty) {
+      query += ' AND date >= ?';
+      args.add(str_date);
+    }
+
+    if (end_date != null && end_date.isNotEmpty) {
+      query += ' AND date <= ?';
+      args.add(end_date);
+    }
+
+    if (sort != null && sort.isNotEmpty) {
+      query += ' ORDER BY date $sort';
+    }
+
+    final List<Map<String, Object?>>? maps = await _database?.rawQuery(query, args);
+
+    return List.generate(maps!.length, (i) {
+      return CustomCategoryData.fromMap(maps[i]);
+    });
+  }
+
+  static Future<int?> updateCustomCategoryData(CustomCategoryData feeding) async {
+
+    // We'll update the first row just as an example
+    int id = 1;
+
+    // do the update and get the number of affected rows
+    int? updateCount = await _database?.update(
+        "CustomCategoryData",
+        feeding.toMap(),
+        where: 'id= ?',
+        whereArgs: [feeding.id]);
+
+    print("Updated...");
+
+    // show the results: print all rows in the db
+
+  }
+
+  static Future<int?> insertCategoryData(CustomCategoryData category) async {
+
+    return await _database?.insert('CustomCategoryData', category.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+
+  static Future<int?> insertCustomCategory(CustomCategory category) async {
+    return await _database?.insert('CustomCategory', category.toMap());
+  }
+
+  static Future<List<CustomCategory>?> getCustomCategories() async {
+    final result = await _database?.query('CustomCategory');
+    return result?.map((map) => CustomCategory.fromMap(map)).toList();
+  }
+
+  static Future<int?> updateCategory(CustomCategory category) async {
+    return await _database?.update(
+      'CustomCategory',
+      category.toMap(),
+      where: 'id = ?',
+      whereArgs: [category.id],
+    );
+  }
+
+  static Future<int?> deleteCategory(int id) async {
+    return await _database?.delete(
+      'CustomCategory',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  static Future<int?> deleteCategoryData(int id) async {
+    return await _database?.delete(
+      'CustomCategoryData',
+      where: 'c_id = ?',
+      whereArgs: [id],
+    );
+  }
 
   static Future<void> addEggColorColumn() async {
     try {
@@ -1166,6 +1312,81 @@ class DatabaseHelper  {
 
   }
 
+  static Future<List<FlockIncomeExpense>?> getFlockWiseIncomeExpense(String str,String end) async {
+    String query = '''
+    SELECT 
+        f_id,
+        f_name,
+        SUM(CASE WHEN type = 'Income' THEN amount ELSE 0 END) AS total_income,
+        SUM(CASE WHEN type = 'Expense' THEN amount ELSE 0 END) AS total_expense
+    FROM Transactions
+    WHERE date >= '$str' AND date <= '$end'
+    GROUP BY f_id, f_name
+    ORDER BY f_name;
+  ''';
+
+    List<Map<String, Object?>>? result = await _database?.rawQuery(query);
+    return result?.map((map) => FlockIncomeExpense.fromMap(map)).toList();
+  }
+
+
+
+  static Future<List<FlockFeedSummary>> getMyMostUsedFeedsByFlock(int f_id, String str_date, String end_date) async {
+    var result;
+
+    // Case 1: No flock ID and date range provided
+    if (f_id == -1 && !str_date.isEmpty && !end_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT f_name, SUM(quantity) AS total_quantity FROM Feeding "
+              "WHERE feeding_date BETWEEN '$str_date' AND '$end_date' "
+              "GROUP BY f_name "
+              "ORDER BY total_quantity DESC"
+      );
+      // print("SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding WHERE feeding_date BETWEEN '$str_date' AND '$end_date' GROUP BY feed_name ORDER BY total_quantity");
+
+      // Case 2: Flock ID provided but no date range
+    } else if (f_id != -1 && str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT f_name, SUM(quantity) AS total_quantity FROM Feeding "
+              "WHERE f_id = '$f_id' "
+              "GROUP BY f_name "
+              "ORDER BY total_quantity DESC"
+      );
+      // print("SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding WHERE f_id = '$f_id' GROUP BY feed_name ORDER BY total_quantity");
+
+      // Case 3: Both flock ID and date range provided
+    } else if (f_id != -1 && !str_date.isEmpty && !end_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT f_name, SUM(quantity) AS total_quantity FROM Feeding "
+              "WHERE f_id = '$f_id' AND feeding_date BETWEEN '$str_date' AND '$end_date' "
+              "GROUP BY f_name "
+              "ORDER BY total_quantity DESC"
+      );
+      // print("SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding WHERE f_id = '$f_id' AND feeding_date BETWEEN '$str_date' AND '$end_date' GROUP BY feed_name ORDER BY total_quantity DESC LIMIT 3");
+
+      // Case 4: No flock ID and no date range (global query)
+    } else if (f_id == -1 && str_date.isEmpty) {
+      result = await _database?.rawQuery(
+          "SELECT f_name, SUM(quantity) AS total_quantity FROM Feeding "
+              "GROUP BY f_name "
+              "ORDER BY total_quantity DESC"
+      );
+      // print("SELECT feed_name, SUM(quantity) AS total_quantity FROM Feeding GROUP BY feed_name ORDER BY total_quantity DESC LIMIT 3");
+    }
+
+    List<FlockFeedSummary> _feedList = [];
+    if (result != null && result.isNotEmpty) {
+      for (int i = 0; i < result.length; i++) {
+        Map<String, dynamic> json = result[i];
+        FlockFeedSummary feedSummary = FlockFeedSummary.fromMap(json);
+        _feedList.add(feedSummary);
+      }
+    }
+
+    return _feedList;
+  }
+
+
   static Future<List<FeedSummary>> getMyMostUsedFeeds(int f_id, String str_date, String end_date) async {
     var result;
 
@@ -1556,6 +1777,28 @@ class DatabaseHelper  {
 
   }
 
+  static Future<int> getUniqueEggCalculationsGoodBad(int f_id,int type,String str_date, String end_date) async {
+
+    var result;
+
+    String column = 'good_eggs';
+    if(type==0)
+      column = 'spoilt_eggs';
+
+    result = await _database?.rawQuery(
+        "SELECT sum("+column+") FROM Eggs where isCollection = 1 and f_id = $f_id and collection_date BETWEEN '$str_date'and '$end_date'");
+    print("SELECT sum("+column+") FROM Eggs where isCollection = 1 and f_id = $f_id and collection_date BETWEEN '$str_date'and '$end_date'");
+
+
+    Map<String,dynamic> map = result![0];
+    print(map.values.first);
+    if(map.values.first.toString().toLowerCase() == 'null')
+      return 0;
+    else
+      return int.parse(map.values.first.toString());
+
+  }
+
 
   static Future<int> getEggCalculations(int f_id,int type,String str_date, String end_date) async {
 
@@ -1658,6 +1901,41 @@ class DatabaseHelper  {
     }
     return _transactionList;
   }
+
+  static Future<List<FinancialItem>?> getTopIncomeItems(String str, String end) async {
+    final List<Map<String, Object?>>? results = await _database?.rawQuery('''
+    SELECT sale_item, SUM(amount) as total_amount
+    FROM transactions
+    WHERE type = 'Income' AND date >= '$str' AND date <= '$end'
+    GROUP BY sale_item
+    ORDER BY amount DESC
+    LIMIT 5
+  ''');
+
+    return results?.map((map) => FinancialItem(
+      name: map['sale_item'].toString(),
+      amount: (map['total_amount'] as num).toDouble(),
+      icon: Icons.trending_up, // Icon for Income items
+    )).toList();
+  }
+
+  static Future<List<FinancialItem>?> getTopExpenseItems(String str, String end) async {
+    final List<Map<String, Object?>>? results = await _database?.rawQuery('''
+    SELECT expense_item, SUM(amount) as total_amount
+    FROM transactions
+    WHERE type = 'Expense' AND date >= '$str' AND date <= '$end'
+    GROUP BY expense_item
+    ORDER BY amount DESC
+    LIMIT 5
+  ''');
+
+    return results?.map((map) => FinancialItem(
+      name: map['expense_item'].toString(),
+      amount: (map['total_amount'] as num).toDouble(),
+      icon: Icons.trending_down, // Icon for Expense items
+    )).toList();
+  }
+
 
   static Future<List<TransactionItem>>  getFilteredTransactionsWithSort(int f_id,String type,String str_date, String end_date,String sort) async {
 

@@ -162,61 +162,94 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
       bottomNavigationBar: BottomAppBar(
         color: Colors.transparent,
         child: Container(
-          height: 50,
+          height: 60, // Slightly increased height for better tap accessibility
           width: widthScreen,
-          child: Row(children: [
+          padding: EdgeInsets.symmetric(horizontal: 10), // Added padding for better spacing
+          child: Row(
+            children: [
+              /// 🟢 Income Button
+              Expanded(
+                child: InkWell(
+                  onTap: () {
+                    addNewIncome();
+                  },
+                  borderRadius: BorderRadius.circular(10), // Smooth rounded ripple effect
+                  child: Container(
+                    height: 55, // Increased for better touch area
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.green.shade700, Colors.green.shade400], // Gradient for modern effect
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(10), // Rounded corners
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.green.shade900.withOpacity(0.2),
+                          blurRadius: 6,
+                          spreadRadius: 1,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add, color: Colors.white, size: 26), // Slightly reduced size for better alignment
+                        SizedBox(width: 6), // Space between icon and text
+                        Text(
+                          'Income'.tr(),
+                          style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
 
-            Expanded(
-              child: InkWell(
-                onTap: () {
-                  addNewIncome();
-                },
-                child: Container(
-                  height: 50,
-                  margin: EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: const BorderRadius.all(
-                        Radius.circular(5.0)),
-                    border: Border.all(
-                      color:  Colors.green,
-                      width: 2.0,
+              SizedBox(width: 10), // Space between buttons
+
+              /// 🔴 Expense Button
+              Expanded(
+                child: InkWell(
+                  onTap: () {
+                    addNewExpense();
+                  },
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    height: 55,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.red.shade700, Colors.red.shade400], // Red gradient for expense
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.red.shade900.withOpacity(0.2),
+                          blurRadius: 6,
+                          spreadRadius: 1,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.remove, color: Colors.white, size: 26), // "Remove" icon for better visual cue
+                        SizedBox(width: 6),
+                        Text(
+                          'Expense'.tr(),
+                          style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
                   ),
-                  child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Icon(Icons.add, color: Colors.white, size: 30,),
-                    Text('Income'.tr(), style: TextStyle(
-                        color: Colors.white, fontSize: 18),)
-                  ],),
                 ),
               ),
-            ),
-            Expanded(
-              child: InkWell(
-                onTap: () {
-                  addNewExpense();
-                },
-                child: Container(
-                  height: 50,
-                  margin: EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: const BorderRadius.all(
-                        Radius.circular(5.0)),
-                    border: Border.all(
-                      color:  Colors.red,
-                      width: 2.0,
-                    ),
-                  ),
-                  child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Icon(Icons.add, color: Colors.white, size: 30,),
-                    Text('Expense'.tr(), style: TextStyle(
-                        color: Colors.white, fontSize: 18),)
-                  ],),
-                ),
-              ),
-            ),
-          ],),
+            ],
+          ),
         ),
         elevation: 0,
       ),
@@ -235,74 +268,95 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
               Utils.getDistanceBar(),
 
               ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(10),
+                  bottomRight: Radius.circular(10),
+                ),
                 child: Container(
                   decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Utils.getThemeColorBlue(), //(x,y)
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 6,
+                        offset: Offset(0, 3),
                       ),
                     ],
                   ),
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   child: Row(
                     children: [
-                      Container(
-                        alignment: Alignment.center,
-                        width: 50,
-                        height: 50,
-                        child: InkWell(
-                          child: Icon(Icons.arrow_back,
-                              color: Colors.white, size: 30),
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
+                      /// Back Button
+                      InkWell(
+                        borderRadius: BorderRadius.circular(30),
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 45,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.15),
+                          ),
+                          child: Icon(Icons.arrow_back, color: Colors.white, size: 28),
                         ),
                       ),
+
+                      /// Title
                       Expanded(
                         child: Container(
-                            margin: EdgeInsets.only(left: 10),
-                            child: Text(
-                              applied_filter_name.tr(),
-                              textAlign: TextAlign.start,
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold),
-                            )),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          openSortDialog(context, (selectedSort) {
-                            setState(() {
-                              sortOption = selectedSort == "date_desc"
-                                  ? "Date (New)"
-                                  : "Date (Old)";
-                              sortSelected = selectedSort == "date_desc"
-                                  ? "DESC" : "ASC";
-                            });
-
-                            getFilteredTransactions(str_date, end_date);
-
-                          });
-                        },
-                        child: Container(
-                          height: 50,
-                          width: 130,
-                          color: Colors.white.withAlpha(40),
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(horizontal: 5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(child: Text(sortOption, style: TextStyle(fontSize: 12, color: Colors.white))),
-                              Icon(Icons.sort, color: Colors.white),
-
-                            ],
+                          margin: EdgeInsets.only(left: 12),
+                          child: Text(
+                            applied_filter_name.tr(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
 
+                      /// Sort Button
+                      InkWell(
+                        borderRadius: BorderRadius.circular(10),
+                        onTap: () {
+                          openSortDialog(context, (selectedSort) {
+                            setState(() {
+                              sortOption = selectedSort == "date_desc" ? "Date (New)" : "Date (Old)";
+                              sortSelected = selectedSort == "date_desc" ? "DESC" : "ASC";
+                            });
 
+                            getFilteredTransactions(str_date, end_date);
+                          });
+                        },
+                        child: Container(
+                          height: 45,
+                          width: 130,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          alignment: Alignment.center,
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  sortOption.tr(),
+                                  style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Icon(Icons.sort, color: Colors.white, size: 22),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -448,134 +502,199 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                     scrollDirection: Axis.vertical,
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
-                        margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
+                        margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(3)),
-
+                          borderRadius: BorderRadius.circular(8),
                           color: Colors.white,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 2,
-                              blurRadius: 2,
-                              offset: Offset(0, 1), // changes position of shadow
+                              color: Colors.grey.withOpacity(0.15),
+                              spreadRadius: 1,
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
                             ),
                           ],
                         ),
-
-                        child: Container(
-                          color: Colors.white,
-                          padding: EdgeInsets.all(10),
+                        child: Padding(
+                          padding: EdgeInsets.all(12),
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Align(
-                                alignment: Alignment.topRight,
-                                child:
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    GestureDetector(
-                                      onTapDown: (TapDownDetails details) {
-                                        selected_id = transactionList.elementAt(index).id;
-                                        selected_index = index;
-                                        showMemberMenu(details.globalPosition);
-                                      },
-                                      child: Container(
-                                        width: 30,
-                                        height: 30,
-                                        padding: EdgeInsets.all(5),
-                                        child: Image.asset('assets/options.png'),
-                                      ),
-                                    ),
 
-                                  ],
-                                ),),
-                              /*(transactionList.elementAt(index).flock_update_id.isEmpty || transactionList.elementAt(index).flock_update_id != "-1")? Align(
-                                alignment: Alignment.topRight,
-                                child:
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    GestureDetector(
-                                      onTapDown: (TapDownDetails details) {
-                                         showInfoMessage(context);
-                                      },
-                                      child: Container(
-                                        padding: EdgeInsets.all(5),
-                                        child: Text('Auto Generated'.tr(), style: TextStyle(fontWeight: FontWeight.w300, color: Colors.red),),
-                                      ),
-                                    ),
-
-                                  ],
-                                ),) : SizedBox(width: 1,),*/
-                              Align(
-                                alignment: Alignment.centerLeft,
-                              child:Container(child: Text( textAlign:TextAlign.left,style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()), transactionList.elementAt(index).type == 'Income'? transactionList.elementAt(index).sale_item.tr() : transactionList.elementAt(index).expense_item.tr()),),),
+                              /// **Title & Menu (Aligned in Same Row)**
                               Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Container(child: Text(style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black), transactionList.elementAt(index).f_name.tr(),)),
-                                  Container(child: Text(style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black), "("+transactionList.elementAt(index).how_many+" Items)",)),
+                                  Expanded(
+                                    child: Text(
+                                      transactionList.elementAt(index).type == 'Income'
+                                          ? transactionList.elementAt(index).sale_item.tr()
+                                          : transactionList.elementAt(index).expense_item.tr(),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: Utils.getThemeColorBlue(),
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
 
+                                  /// **Options Menu**
+                                  GestureDetector(
+                                    onTapDown: (TapDownDetails details) {
+                                      selected_id = transactionList.elementAt(index).id;
+                                      selected_index = index;
+                                      showMemberMenu(details.globalPosition);
+                                    },
+                                    child: Container(
+                                      width: 32,
+                                      height: 32,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.grey.shade200,
+                                      ),
+                                      child: Icon(Icons.more_vert, size: 20, color: Colors.grey.shade700),
+                                    ),
+                                  ),
                                 ],
                               ),
 
-                              Row( children: [
-                                Expanded(
-                                  child: Container(
-                                    margin: EdgeInsets.only(top: 5),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Container(  child: Text(transactionList.elementAt(index).type!.toLowerCase() == 'income'? 'Sold To'.tr()+":":'Paid To'.tr()+":", style: TextStyle(fontSize: 14, color: Colors.black),)),
-                                            Text(transactionList.elementAt(index).sold_purchased_from, style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black, fontSize: 14),),
-                                            Text(" On ".tr(), style: TextStyle(color: Colors.black, fontSize: 14),),
-                                            Container(child: Text(Utils.getFormattedDate(transactionList.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
+                              /// **Divider (Title Section)**
+                              Container(
+                                margin: EdgeInsets.symmetric(vertical: 6),
+                                height: 1,
+                                color: Colors.grey.shade300,
+                              ),
 
-                                          ],
-                                        ),
-
-                                        Container(
-                                          margin: EdgeInsets.only(right: 10,top: 5),
-                                          child: Row(
-                                            children: [
-                                              Container(  child: Text(transactionList.elementAt(index).type!.tr()+": ", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: transactionList.elementAt(index).type!.toLowerCase() == 'income'? Colors.green: Colors.red),)),
-
-                                              Container( margin: EdgeInsets.only(left: 5),  child: Text(transactionList.elementAt(index).amount.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
-                                              Text(Utils.currency, style: TextStyle(color: Colors.black, fontSize: 14),),
-                                              Text(" ("+transactionList.elementAt(index).payment_status.toUpperCase().tr()+")", style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black, fontSize: 14),)
-
-                                            ],
-                                          ),
-                                        ),
-
-                                        Container(
-                                          margin: EdgeInsets.only(top: 5),
-                                          child: Row(
-                                            children: [
-                                              Icon(Icons.format_quote,size: 15,),
-                                              SizedBox(width: 3,),
-                                              Container(
-                                                width: widthScreen-70,
-                                                child: Text(
-                                                  transactionList.elementAt(index).short_note!.isEmpty ? 'NO_NOTES'.tr() : transactionList.elementAt(index).short_note!
-                                                  ,maxLines: 3, style: TextStyle(fontSize: 14, color: Colors.black),),
-                                              ),
-                                            ],
-                                          ),
-                                        )
-                                        // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                      ],),
+                              /// **Item & Quantity**
+                              Row(
+                                children: [
+                                  Icon(Icons.shopping_bag, size: 16, color: Colors.blueAccent),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    transactionList.elementAt(index).f_name.tr(),
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
                                   ),
-                                ),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    "(${transactionList.elementAt(index).how_many} Items)",
+                                    style: TextStyle(fontSize: 14, color: Colors.black54),
+                                  ),
+                                ],
+                              ),
 
-                              ]),
+                              SizedBox(height: 8),
+
+                              /// **Transaction Details**
+                              Row(
+                                children: [
+                                  Icon(
+                                    transactionList.elementAt(index).type!.toLowerCase() == 'income'
+                                        ? Icons.trending_up
+                                        : Icons.trending_down,
+                                    size: 16,
+                                    color: transactionList.elementAt(index).type!.toLowerCase() == 'income'
+                                        ? Colors.green
+                                        : Colors.red,
+                                  ),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    transactionList.elementAt(index).type!.toLowerCase() == 'income' ? 'Sold To'.tr() : 'Paid To'.tr(),
+                                    style: TextStyle(fontSize: 14, color: Colors.black),
+                                  ),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    transactionList.elementAt(index).sold_purchased_from,
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
+                                  ),
+                                  SizedBox(width: 6),
+                                  Text("On".tr(), style: TextStyle(color: Colors.black, fontSize: 14)),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    Utils.getFormattedDate(transactionList.elementAt(index).date.toString()),
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
+                                  ),
+                                ],
+                              ),
+
+                              SizedBox(height: 6),
+
+                              /// **Transaction Amount & Payment Status**
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  /// **Income/Expense Label**
+                                  Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                    decoration: BoxDecoration(
+                                      color: transactionList.elementAt(index).type!.toLowerCase() == 'income'
+                                          ? Colors.green.shade100
+                                          : Colors.red.shade100,
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: Text(
+                                      transactionList.elementAt(index).type!.tr(),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: transactionList.elementAt(index).type!.toLowerCase() == 'income'
+                                            ? Colors.green
+                                            : Colors.red,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+
+                                  /// **Amount**
+                                  Row(
+                                    children: [
+                                       Text(
+                                        transactionList.elementAt(index).amount.toString(),
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
+                                      ),
+                                      SizedBox(width: 4),
+                                      Text(Utils.currency, style: TextStyle(color: Colors.black, fontSize: 14)),
+                                    ],
+                                  ),
+
+                                  /// **Payment Status (Colored Tag)**
+                                  Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    child: Text(
+                                      transactionList.elementAt(index).payment_status.toUpperCase().tr(),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: transactionList.elementAt(index).payment_status.toLowerCase() == "cleared"
+                                            ? Colors.green
+                                            : Colors.orange,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              SizedBox(height: 6),
+
+                              /// **Notes Section**
+                              Row(
+                                children: [
+                                  Icon(Icons.notes, size: 15, color: Colors.grey.shade700),
+                                  SizedBox(width: 5),
+                                  Expanded(
+                                    child: Text(
+                                      transactionList.elementAt(index).short_note!.isEmpty ? 'NO_NOTES'.tr() : transactionList.elementAt(index).short_note!,
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(fontSize: 14, color: Colors.black),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
-                          ) ,
+                          ),
                         ),
                       );
+
 
                     }),
               ) : Utils.getCustomEmptyMessage("assets/pfinance.png", "No Income/Expense added")
@@ -1215,7 +1334,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
   }
 
   String sortSelected = "DESC"; // Default label
-  String sortOption = "Date (Newest)";
+  String sortOption = "Date (New)";
   void openSortDialog(BuildContext context, Function(String) onSortSelected) {
     showModalBottomSheet(
       context: context,
@@ -1228,17 +1347,17 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Sort By", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("Sort By".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               Divider(),
               ListTile(
-                title: Text("Date (Newest)"),
+                title: Text("Date (New)".tr()),
                 onTap: () {
                   onSortSelected("date_desc");
                   Navigator.pop(context);
                 },
               ),
               ListTile(
-                title: Text("Date (Oldest)"),
+                title: Text("Date (Old)".tr()),
                 onTap: () {
                   onSortSelected("date_asc");
                   Navigator.pop(context);

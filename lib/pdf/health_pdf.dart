@@ -3,17 +3,12 @@ import 'dart:typed_data';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:google_fonts/google_fonts.dart';
 import 'package:poultary/utils/utils.dart';
 
 import '../../data.dart';
-import '../model/egg_report_item.dart';
-import '../model/feed_report_item.dart';
-import '../model/feedflock_report_item.dart';
+import '../health_report_screen.dart';
 import '../model/health_report_item.dart';
 
 Future<Uint8List> generateHealthReport(
@@ -158,7 +153,8 @@ class Invoice {
             ),),
           ),
           _contentTable1(context),
-
+          /*_buildFlockDiseaseReport(context, Utils.groupedList!),
+*/
           pw.Container(
               margin: pw.EdgeInsets.only(top: 10),
               child: pw.Row(
@@ -202,176 +198,267 @@ class Invoice {
 
   pw.Widget _buildHeader(pw.Context context) {
     return pw.Directionality(
-        textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-        child:pw.Container(
-      height: 175,
-      child: pw.Column(
-        children: [
-          pw.Expanded(
-            child: pw.Column(
-              mainAxisSize: pw.MainAxisSize.min,
-              children: [
-                pw.Container(
-                  alignment: pw.Alignment.center,
-                  padding: const pw.EdgeInsets.only(bottom: 8, left: 30),
-                  height: 70,
-                  child:
-                  imageData != null ? pw.Image(pw.MemoryImage(imageData!), ) : pw.PdfLogo(),
-                ),
-                // pw.Container(
-                //   color: baseColor,
-                //   padding: pw.EdgeInsets.only(top: 3),
-                // ),
-              ],
-            ),
+      textDirection: direction ? pw.TextDirection.ltr : pw.TextDirection.rtl,
+      child: pw.Container(
+        padding: const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: pw.BoxDecoration(
+          border: pw.Border(
+            bottom: pw.BorderSide(color: PdfColors.grey400, width: 1),
           ),
-          pw.Expanded(
-            child: pw.Column(
-              children: [
-                pw.Container(
-                  height: 30,
-                  padding: const pw.EdgeInsets.only(left: 20),
-                  alignment: pw.Alignment.center,
-                  child:pw.Directionality(
-                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                  child: pw.Text(
-                    Utils.INVOICE_HEADING.tr(),
-                    style: pw.TextStyle(
-                      color: PdfColors.blue,
-                      fontWeight: pw.FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),),
-                ),
+        ),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
+          children: [
+            // LOGO
+            pw.Container(
+              height: 70,
+              alignment: pw.Alignment.center,
+              child: imageData != null
+                  ? pw.Image(pw.MemoryImage(imageData!))
+                  : pw.PdfLogo(),
+            ),
+            pw.SizedBox(height: 10),
 
-                pw.Container(
-                  height: 30,
-                  padding: const pw.EdgeInsets.only(left: 20),
-                  alignment: pw.Alignment.center,
-                  child: pw.Directionality(
-                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                  child: pw.Text(
-                    'Birds Medication Report'.tr(),
-                    style: pw.TextStyle(
-                      color: PdfColors.black,
-                      fontWeight: pw.FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),),
-                ),
+            // HEADER TITLE
+            pw.Text(
+              Utils.INVOICE_HEADING.tr(),
+              style: pw.TextStyle(
+                color: PdfColors.blue700,
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 22,
+              ),
+            ),
+            pw.SizedBox(height: 4),
 
-                pw.Container(
-                  height: 20,
-                  padding: const pw.EdgeInsets.only(left: 20),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    Utils.INVOICE_DATE,
-                    style: pw.TextStyle(
-                      color: PdfColors.black,
-                      fontWeight: pw.FontWeight.normal,
-                      fontSize: 16,
-                    ),
+            // REPORT TITLE
+            pw.Text(
+              'Birds Health Report'.tr(),
+              style: pw.TextStyle(
+                color: PdfColors.black,
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            pw.SizedBox(height: 6),
+
+            // DATE
+            pw.Container(
+              padding: const pw.EdgeInsets.symmetric(vertical: 2),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.grey200,
+                borderRadius: pw.BorderRadius.circular(5),
+              ),
+              child: pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                child: pw.Text(
+                  Utils.INVOICE_DATE,
+                  style: pw.TextStyle(
+                    color: PdfColors.black,
+                    fontSize: 14,
                   ),
                 ),
-
-              ],
+              ),
             ),
-          ),
-          if (context.pageNumber > 1) pw.SizedBox(height: 20)
-        ],
+            if (context.pageNumber > 1) pw.SizedBox(height: 15),
+          ],
+        ),
       ),
-    ),);
+    );
   }
-
   pw.Widget _buildSummary(pw.Context context) {
     return pw.Directionality(
-        textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-        child:pw.Container(
-      height: 120,
-      margin: pw.EdgeInsets.only(top: 10),
-      child: pw.Column(
+      textDirection: direction ? pw.TextDirection.ltr : pw.TextDirection.rtl,
+      child: pw.Container(
+        margin: pw.EdgeInsets.only(top: 10),
+        padding: pw.EdgeInsets.all(12),
+        decoration: pw.BoxDecoration(
+          border: pw.Border.all(color: PdfColors.blue, width: 2),
+          borderRadius: pw.BorderRadius.circular(8),
+        ),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
+          children: [
+            // Summary Title
+            pw.Container(
+              alignment: pw.Alignment.center,
+              padding: pw.EdgeInsets.symmetric(vertical: 8),
+              child: pw.Text(
+                "SUMMARY".tr(),
+                style: pw.TextStyle(
+                  color: PdfColors.blue,
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 22,
+                ),
+              ),
+            ),
+
+            pw.SizedBox(height: 8),
+
+            // Summary Details in Boxed Rows
+            _buildSummaryRow('Total Vaccinations'.tr(), Utils.vaccine_report_list.length.toString()),
+            pw.Divider(color: PdfColors.grey, thickness: 0.8),
+            _buildSummaryRow('Total Medications'.tr(), Utils.medication_report_list.length.toString()),
+          ],
+        ),
+      ),
+    );
+  }
+
+// Helper method for cleaner row UI
+  pw.Widget _buildSummaryRow(String label, String value) {
+    return pw.Container(
+      padding: pw.EdgeInsets.symmetric(vertical: 6),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-
-          pw.Expanded(
-            child: pw.Column(
-              children: [
-                pw.Container(
-                  height: 30,
-                  alignment: pw.Alignment.center,
-                  child:pw.Directionality(
-                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                  child: pw.Text(
-                    "SUMMARY".tr(),
-                    style: pw.TextStyle(
-                      color: PdfColors.blue,
-                      fontWeight: pw.FontWeight.bold,
-                      fontSize: 24,
-                    ),
-                  ),),
-                ),
-
-                pw.Row(
-                  children: [
-                    pw.Container(
-                      alignment: pw.Alignment.topLeft,
-                      child:pw.Directionality(
-                        textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                      child: pw.Text(
-                        'Total Vaccinations'.tr()+': ',
-                        style: pw.TextStyle(
-                          color: PdfColors.black,
-                          fontSize: 16,
-                        ),
-                      ),),
-                    ),pw.Container(
-                      alignment: pw.Alignment.topLeft,
-                      child: pw.Text(
-                        Utils.vaccine_report_list.length.toString(),
-                        style: pw.TextStyle(
-                          color: PdfColors.black,
-                          fontWeight: pw.FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ]
-                ),
-
-                pw.Row(
-                    children: [
-                      pw.Container(
-                        alignment: pw.Alignment.topLeft,
-                        child:pw.Directionality(
-                          textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                        child: pw.Text(
-                          'Total Medications'.tr()+': ',
-                          style: pw.TextStyle(
-                            color: PdfColors.black,
-                            fontSize: 16,
-                          ),
-                        ),),
-                      ),pw.Container(
-                        alignment: pw.Alignment.topLeft,
-
-                        child: pw.Text(
-                          Utils.medication_report_list.length.toString(),
-                          style: pw.TextStyle(
-                            color: PdfColors.black,
-                            fontWeight: pw.FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ]
-                ),
-
-              ],
+          pw.Text(
+            label + ': ',
+            style: pw.TextStyle(
+              color: PdfColors.black,
+              fontSize: 16,
+              fontWeight: pw.FontWeight.bold,
             ),
           ),
-
+          pw.Text(
+            value,
+            style: pw.TextStyle(
+              color: PdfColors.black,
+              fontSize: 16,
+            ),
+          ),
         ],
       ),
-    ),);
+    );
+  }
+
+  pw.Widget _buildFlockDiseaseReport(pw.Context context, List<VaccinationGrouped> groupedList) {
+    return pw.Column(
+      children: groupedList.map((group) {
+        int vaccinationCount = group.records.where((r) => r.type == "Vaccination").length;
+        int medicationCount = group.records.where((r) => r.type == "Medication").length;
+
+        // Group diseases with their respective medicines and types
+        Map<String, List<Map<String, String>>> diseaseDetails = {};
+        for (var record in group.records) {
+          if (record.disease.isNotEmpty) {
+            if (!diseaseDetails.containsKey(record.disease)) {
+              diseaseDetails[record.disease.tr()] = [];
+            }
+            diseaseDetails[record.disease]!.add({
+              "type": record.type, // Vaccination or Medication
+              "medicine": record.medicine.tr(),
+            });
+          }
+        }
+
+        return pw.Container(
+          margin: pw.EdgeInsets.symmetric(vertical: 6),
+          padding: pw.EdgeInsets.all(12),
+          decoration: pw.BoxDecoration(
+            border: pw.Border.all(color: PdfColors.blue, width: 1),
+            borderRadius: pw.BorderRadius.circular(8),
+          ),
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              // 🐔 Flock Name & Counts
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text(
+                    group.flockName,
+                    style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: PdfColors.black),
+                  ),
+                  pw.Row(
+                    children: [
+                      _buildLabel("Vaccinations".tr()+":", vaccinationCount.toString(), PdfColors.green),
+                      pw.SizedBox(width: 8),
+                      _buildLabel("Medications".tr()+":", medicationCount.toString(), PdfColors.red),
+                    ],
+                  ),
+                ],
+              ),
+
+              pw.SizedBox(height: 8),
+
+              // 🦠 Disease & Treatments
+              if (diseaseDetails.isNotEmpty) ...[
+                pw.Divider(),
+                pw.Text("Diseases & Treatments".tr(),
+                    style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.blue)),
+                pw.SizedBox(height: 6),
+
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: diseaseDetails.entries.map((entry) {
+                    return pw.Padding(
+                      padding: pw.EdgeInsets.only(bottom: 6),
+                      child: pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          // Disease Label
+                          pw.Text(
+                            "Disease".tr()+": ${entry.key}",
+                            style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.orange),
+                          ),
+                          pw.SizedBox(height: 2),
+
+                          // Treatments
+                          pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: entry.value.map((detail) {
+                              return pw.Padding(
+                                padding: pw.EdgeInsets.only(left: 16),
+                                child: pw.Row(
+                                  children: [
+                                    pw.Text(
+                                      "[${detail['type']}]",
+                                      style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: PdfColors.blue),
+                                    ),
+                                    pw.SizedBox(width: 6),
+                                    pw.Expanded(
+                                      child: pw.Text(
+                                        detail['medicine']!,
+                                        style: pw.TextStyle(fontSize: 12, color: PdfColors.black),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+// 🛠 Helper function for text labels
+  pw.Widget _buildLabel(String title, String count, PdfColor color) {
+    return pw.Row(
+      children: [
+        pw.Text("$title ", style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: color)),
+        pw.Text(count, style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: PdfColors.black)),
+      ],
+    );
+  }
+
+// 🛠 Helper function for icon and label
+  pw.Widget _buildIconLabel(String emoji, String count) {
+    return pw.Row(
+      children: [
+        pw.Text(emoji, style: pw.TextStyle(fontSize: 16)), // Emoji Icon
+        pw.SizedBox(width: 4),
+        pw.Text(count, style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.black)),
+      ],
+    );
   }
 
 
@@ -675,7 +762,7 @@ class Invoice {
       'Diseaese Name',
       'Flock Name',
       'Date',
-      'Birds'
+      'BIRDS'
     ];
 
     return pw.TableHelper.fromTextArray(

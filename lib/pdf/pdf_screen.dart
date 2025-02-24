@@ -21,6 +21,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:http/http.dart' as http;
 
 import '../data.dart';
+import 'custom_category_example.dart';
 import 'egg_example.dart';
 import 'example.dart';
 import 'finance_example.dart';
@@ -259,6 +260,9 @@ class _PDFScreen extends State<PDFScreen> {
         break;
       case 4:
         uint8list = await healthexamples[_tab].builder(format, _data);
+        break;
+      case 5:
+        uint8list = await customexamples[_tab].builder(format, _data);
         break;
 
     }

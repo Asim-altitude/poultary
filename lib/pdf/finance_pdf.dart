@@ -8,7 +8,9 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:poultary/utils/utils.dart';
 import '../../data.dart';
+import '../financial_report_screen.dart';
 import '../model/finance_report_item.dart';
+import '../model/finance_summary_flock.dart';
 
 Future<Uint8List> generateFinancialReport(
     PdfPageFormat pageFormat, CustomData data) async {
@@ -111,7 +113,19 @@ class Invoice {
         build: (context) => [
          // _contentHeader(context),
           _buildSummary(context),
-          _contentTable(context),
+          pw.SizedBox(height: 10),
+          pw.Text(
+            "By Flock".tr(),
+            style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.black),
+          ),
+
+          pw.SizedBox(height: 5),
+          _contentTable(context,Utils.flockfinanceList!),
+          pw.SizedBox(height: 20),
+
+          _financialItemTable(context, Utils.incomeItems!, "Top Income Sources".tr()),
+          pw.SizedBox(height: 10),
+          _financialItemTable(context, Utils.expenseItems!, "Top Expenses".tr()),
           pw.Container(
               margin: pw.EdgeInsets.only(top: 10),
               child: pw.Row(
@@ -158,207 +172,156 @@ class Invoice {
 
   pw.Widget _buildHeader(pw.Context context) {
     return pw.Directionality(
-        textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-        child:pw.Container(
-      height: 175,
-      child: pw.Column(
-        children: [
-          pw.Expanded(
-            child: pw.Column(
-              mainAxisSize: pw.MainAxisSize.min,
-              children: [
-                pw.Container(
-                  alignment: pw.Alignment.center,
-                  padding: const pw.EdgeInsets.only(bottom: 8, left: 30),
-                  height: 70,
-                  child:
-                  imageData != null ? pw.Image(pw.MemoryImage(imageData!), ) : pw.PdfLogo(),
-                ),
-                // pw.Container(
-                //   color: baseColor,
-                //   padding: pw.EdgeInsets.only(top: 3),
-                // ),
-              ],
-            ),
+      textDirection: direction ? pw.TextDirection.ltr : pw.TextDirection.rtl,
+      child: pw.Container(
+        padding: const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: pw.BoxDecoration(
+          border: pw.Border(
+            bottom: pw.BorderSide(color: PdfColors.grey400, width: 1),
           ),
-          pw.Expanded(
-            child: pw.Column(
-              children: [
-                pw.Container(
-                  height: 30,
-                  padding: const pw.EdgeInsets.only(left: 20),
-                  alignment: pw.Alignment.center,
-                  child:pw.Directionality(
-                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                  child: pw.Text(
-                    Utils.INVOICE_HEADING.tr(),
-                    style: pw.TextStyle(
-                      color: PdfColors.blue,
-                      fontWeight: pw.FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),),
-                ),
+        ),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
+          children: [
+            // LOGO
+            pw.Container(
+              height: 70,
+              alignment: pw.Alignment.center,
+              child: imageData != null
+                  ? pw.Image(pw.MemoryImage(imageData!))
+                  : pw.PdfLogo(),
+            ),
+            pw.SizedBox(height: 10),
 
-                pw.Container(
-                  height: 30,
-                  padding: const pw.EdgeInsets.only(left: 20),
-                  alignment: pw.Alignment.center,
-                  child:pw.Directionality(
-                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                  child: pw.Text(
-                    'Financial Report'.tr(),
-                    style: pw.TextStyle(
-                      color: PdfColors.black,
-                      fontWeight: pw.FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),),
-                ),
+            // HEADER TITLE
+            pw.Text(
+              Utils.INVOICE_HEADING.tr(),
+              style: pw.TextStyle(
+                color: PdfColors.blue700,
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 22,
+              ),
+            ),
+            pw.SizedBox(height: 4),
 
-                pw.Container(
-                  height: 20,
-                  padding: const pw.EdgeInsets.only(left: 20),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    Utils.INVOICE_DATE,
-                    style: pw.TextStyle(
-                      color: PdfColors.black,
-                      fontWeight: pw.FontWeight.normal,
-                      fontSize: 16,
-                    ),
+            // REPORT TITLE
+            pw.Text(
+              'Financial Report'.tr(),
+              style: pw.TextStyle(
+                color: PdfColors.black,
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            pw.SizedBox(height: 6),
+
+            // DATE
+            pw.Container(
+              padding: const pw.EdgeInsets.symmetric(vertical: 2),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.grey200,
+                borderRadius: pw.BorderRadius.circular(5),
+              ),
+              child: pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                child: pw.Text(
+                  Utils.INVOICE_DATE,
+                  style: pw.TextStyle(
+                    color: PdfColors.black,
+                    fontSize: 14,
                   ),
                 ),
-
-              ],
+              ),
             ),
-          ),
-          if (context.pageNumber > 1) pw.SizedBox(height: 20)
-        ],
+            if (context.pageNumber > 1) pw.SizedBox(height: 15),
+          ],
+        ),
       ),
-    ),);
+    );
   }
-
   pw.Widget _buildSummary(pw.Context context) {
     return pw.Directionality(
-        textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-        child:pw.Container(
-      height: 120,
-      margin: pw.EdgeInsets.only(top: 10),
-      child: pw.Column(
+      textDirection: direction ? pw.TextDirection.ltr : pw.TextDirection.rtl,
+      child: pw.Container(
+        margin: pw.EdgeInsets.only(top: 15),
+        padding: pw.EdgeInsets.all(10),
+        decoration: pw.BoxDecoration(
+          border: pw.Border.all(color: PdfColors.grey300, width: 1),
+          borderRadius: pw.BorderRadius.circular(5),
+        ),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
+          children: [
+            // Summary Title
+            pw.Container(
+              margin: pw.EdgeInsets.only(bottom: 10),
+              alignment: pw.Alignment.center,
+              child: pw.Text(
+                "SUMMARY".tr(),
+                style: pw.TextStyle(
+                  color: PdfColors.blue,
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 22,
+                ),
+              ),
+            ),
+
+            pw.SizedBox(height: 5),
+
+            // Financial Summary Box
+            pw.Container(
+              padding: pw.EdgeInsets.all(8),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.grey100,
+                borderRadius: pw.BorderRadius.circular(5),
+              ),
+              child: pw.Column(
+                children: [
+                  _buildSummaryRow("GROSS_INCOME".tr(), Utils.currency + Utils.TOTAL_INCOME, PdfColors.green),
+                  _buildSummaryRow("TOTAL_EXPENSE".tr(), Utils.currency + Utils.TOTAL_EXPENSE, PdfColors.red),
+                  pw.Divider(color: PdfColors.grey, thickness: 0.8), // Divider line
+                  _buildSummaryRow(
+                    "NET_INCOME".tr(),
+                    Utils.currency + Utils.NET_INCOME,
+                    double.parse(Utils.NET_INCOME) < 0 ? PdfColors.red : PdfColors.black,
+                    isBold: true,
+                    fontSize: 18,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+// Helper Function for Summary Rows
+  pw.Widget _buildSummaryRow(String title, String value, PdfColor color, {bool isBold = false, double fontSize = 16}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 3),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-
-          pw.Expanded(
-            child: pw.Column(
-              children: [
-                pw.Container(
-                  height: 30,
-                  margin: pw.EdgeInsets.only(bottom: 5,top: 10),
-                  alignment: pw.Alignment.center,
-                  child:pw.Directionality(
-                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                  child: pw.Text(
-                    "SUMMARY".tr(),
-                    style: pw.TextStyle(
-                      color: PdfColors.blue,
-                      fontWeight: pw.FontWeight.bold,
-                      fontSize: 24,
-                    ),
-                  ),),
-                ),
-
-                pw.Row(
-                  children: [
-                    pw.Container(
-                      alignment: pw.Alignment.topLeft,
-                      child: pw.Directionality(
-                        textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                      child: pw.Text(
-                        'GROSS_INCOME'.tr()+': ',
-                        style: pw.TextStyle(
-                          color: PdfColors.black,
-                          fontSize: 16,
-                        ),
-                      ),),
-                    ),pw.Container(
-                      margin: pw.EdgeInsets.only(left: 10),
-                      alignment: pw.Alignment.topLeft,
-                      child: pw.Text(
-                        Utils.currency+Utils.TOTAL_INCOME,
-                        style: pw.TextStyle(
-                          color: PdfColors.green,
-                          fontWeight: pw.FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ]
-                ),
-
-                pw.Row(
-                    children: [
-                      pw.Container(
-                        alignment: pw.Alignment.topLeft,
-                        child: pw.Directionality(
-                          textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                        child: pw.Text(
-                          'TOTAL_EXPENSE'.tr()+': ',
-                          style: pw.TextStyle(
-                            color: PdfColors.black,
-                            fontSize: 16,
-                          ),
-                        ),),
-                      ),pw.Container(
-                        alignment: pw.Alignment.topLeft,
-                        margin: pw.EdgeInsets.only(left: 10),
-                        child: pw.Text(
-                          Utils.currency+Utils.TOTAL_EXPENSE,
-                          style: pw.TextStyle(
-                            color: PdfColors.red,
-                            fontWeight: pw.FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ]
-                ),
-                pw.Row(
-                    children: [
-                      pw.Container(
-                        alignment: pw.Alignment.topLeft,
-                        child:pw.Directionality(
-                          textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                        child: pw.Text(
-                          'NET_INCOME'.tr()+":    ",
-                          style: pw.TextStyle(
-                            color: PdfColors.black,
-                            fontWeight: pw.FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),),
-                      ),pw.Container(
-                        margin: pw.EdgeInsets.only(left: 10),
-                        alignment: pw.Alignment.topLeft,
-                        child: pw.Text(
-                          Utils.currency+Utils.NET_INCOME,
-                          style: pw.TextStyle(
-                            color: double.parse(Utils.NET_INCOME) < 0 ? PdfColors.red : PdfColors.black,
-                            fontWeight: pw.FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
-                    ]
-                ),
-
-
-              ],
+          pw.Text(
+            title + ": ",
+            style: pw.TextStyle(
+              color: PdfColors.black,
+              fontSize: fontSize,
+              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
             ),
           ),
-
+          pw.Text(
+            value,
+            style: pw.TextStyle(
+              color: color,
+              fontSize: fontSize,
+              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+            ),
+          ),
         ],
       ),
-    ),);
+    );
   }
 
 
@@ -599,64 +562,157 @@ class Invoice {
     );
   }
 
-  pw.Widget _contentTable(pw.Context context) {
+  pw.Widget _contentTable(pw.Context context, List<FlockIncomeExpense> flockData) {
     const tableHeaders = [
-      'Sale/Purchase Item',
       'Flock Name',
-      'Date',
       'Income',
       'Expense',
-
+      'NET_INCOME',
     ];
 
-    return pw.TableHelper.fromTextArray(
-      border: null,
-      cellAlignment: pw.Alignment.centerLeft,
-      headerDecoration: pw.BoxDecoration(
-        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
-        color: PdfColors.blue,
-      ),
-      headerHeight: 25,
-      cellHeight: 40,
-      cellAlignments: {
-        0: pw.Alignment.centerLeft,
-        1: pw.Alignment.centerLeft,
-        2: pw.Alignment.centerLeft,
-        3: pw.Alignment.center,
-        4: pw.Alignment.centerRight,
+    return pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5), // Light border for all cells
+      columnWidths: {
+        0: pw.FlexColumnWidth(3), // Flock Name
+        1: pw.FlexColumnWidth(2), // Total Income
+        2: pw.FlexColumnWidth(2), // Total Expense
+        3: pw.FlexColumnWidth(2), // Net Profit
       },
-      headerDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-      tableDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-      headerStyle: pw.TextStyle(
-        color: _baseTextColor,
-        fontSize: 10,
-        fontWeight: pw.FontWeight.bold,
-      ),
-      cellStyle: pw.TextStyle(
-        color: _darkColor,
-        fontSize: 12,
-      ),
-      rowDecoration: pw.BoxDecoration(
-        border: pw.Border(
-          bottom: pw.BorderSide(
-            color: accentColor,
-            width: .5,
-          ),
+      children: [
+        // 🔹 Table Header
+        pw.TableRow(
+          decoration: pw.BoxDecoration(color: PdfColors.blue),
+          children: tableHeaders.map((header) {
+            return pw.Padding(
+              padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              child: pw.Text(
+                header.tr(),
+                style: pw.TextStyle(
+                  color: PdfColors.white,
+                  fontSize: 12,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+                textAlign: pw.TextAlign.center,
+              ),
+            );
+          }).toList(),
         ),
-      ),
-      headers: List<String>.generate(
-        tableHeaders.length,
-            (col) => tableHeaders[col].tr(),
-      ),
-      data: List<List<String>>.generate(
-        products.length,
-            (row) => List<String>.generate(
-          tableHeaders.length,
-              (col) => products[row].getIndex(col).tr(),
+
+        // 🔹 Table Data Rows
+        ...flockData.asMap().entries.map((entry) {
+          final rowIndex = entry.key;
+          final flock = entry.value;
+          final rowColor = rowIndex.isEven ? PdfColors.white : PdfColors.grey100; // Alternating row colors
+
+          return pw.TableRow(
+            decoration: pw.BoxDecoration(color: rowColor),
+            children: [
+              _tableCell(flock.fName, align: pw.TextAlign.left),
+              _tableCell('${flock.totalIncome.toStringAsFixed(2)}', align: pw.TextAlign.right),
+              _tableCell('${flock.totalExpense.toStringAsFixed(2)}', align: pw.TextAlign.right),
+              _tableCell('${(flock.totalIncome - flock.totalExpense).toStringAsFixed(2)}', align: pw.TextAlign.right, isBold: true),
+            ],
+          );
+        }),
+      ],
+    );
+  }
+
+// 📌 Helper function for table cell styling
+  pw.Widget _tableCell(String text, {pw.TextAlign align = pw.TextAlign.left, bool isBold = false}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+      child: pw.Text(
+        text.tr(),
+        style: pw.TextStyle(
+          color: PdfColors.black,
+          fontSize: 11,
+          fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
         ),
+        textAlign: align,
       ),
     );
   }
+
+  pw.Widget _financialItemTable(pw.Context context, List<FinancialItem> financialData, String title) {
+    const tableHeaders = [
+      'Item Name',
+      'TOTAL',
+    ];
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        // 🔹 Table Title
+        pw.Text(
+          title,
+          style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.black),
+        ),
+        pw.SizedBox(height: 6),
+
+        pw.Table(
+          border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5), // Light border for all cells
+          columnWidths: {
+            0: pw.FlexColumnWidth(3), // Item Name
+            1: pw.FlexColumnWidth(2), // Amount
+          },
+          children: [
+            // 🔹 Table Header
+            pw.TableRow(
+              decoration: pw.BoxDecoration(color: PdfColors.blue),
+              children: tableHeaders.map((header) {
+                return pw.Padding(
+                  padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                  child: pw.Text(
+                    header.tr(),
+                    style: pw.TextStyle(
+                      color: PdfColors.white,
+                      fontSize: 12,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                );
+              }).toList(),
+            ),
+
+            // 🔹 Table Data Rows
+            ...financialData.asMap().entries.map((entry) {
+              final rowIndex = entry.key;
+              final item = entry.value;
+              final rowColor = rowIndex.isEven ? PdfColors.white : PdfColors.grey100; // Alternating row colors
+
+              return pw.TableRow(
+                decoration: pw.BoxDecoration(color: rowColor),
+                children: [
+                  _ftableCell(item.name, align: pw.TextAlign.left),
+                  _ftableCell('${item.amount.toStringAsFixed(2)}', align: pw.TextAlign.right, isBold: true),
+                ],
+              );
+            }),
+          ],
+        ),
+        pw.SizedBox(height: 12),
+      ],
+    );
+  }
+
+// 📌 Helper function for table cell styling
+  pw.Widget _ftableCell(String text, {pw.TextAlign align = pw.TextAlign.left, bool isBold = false}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+      child: pw.Text(
+        text.tr(),
+        style: pw.TextStyle(
+          color: PdfColors.black,
+          fontSize: 11,
+          fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+        ),
+        textAlign: align,
+      ),
+    );
+  }
+
 }
 
 String _formatCurrency(double amount) {

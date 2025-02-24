@@ -29,7 +29,7 @@ class EggsReportsScreen extends StatefulWidget {
 }
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProviderStateMixin{
+class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProviderStateMixin {
 
   double widthScreen = 0;
   double heightScreen = 0;
@@ -37,44 +37,43 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
   @override
   void dispose() {
     super.dispose();
-
   }
 
   int _reports_filter = 2;
-  void getFilters() async {
 
+  void getFilters() async {
     _reports_filter = (await SessionManager.getReportFilter())!;
     date_filter_name = filterList.elementAt(_reports_filter);
     getData(date_filter_name);
   }
 
   late ZoomPanBehavior _zoomPanBehavior;
+
   @override
   void initState() {
     super.initState();
-     try
-     {
-       //date_filter_name = Utils.applied_filter;
-       _zoomPanBehavior = ZoomPanBehavior(
-           enableDoubleTapZooming: true,
-           enablePinching: true,
-           // Enables the selection zooming
-           enableSelectionZooming: true,
-           selectionRectBorderColor: Colors.red,
-           selectionRectBorderWidth: 1,
-           selectionRectColor: Colors.grey
-       );
-       getFilters();
-       getList();
-     }
-     catch(ex){
-       print(ex);
-     }
+    try {
+      //date_filter_name = Utils.applied_filter;
+      _zoomPanBehavior = ZoomPanBehavior(
+          enableDoubleTapZooming: true,
+          enablePinching: true,
+          // Enables the selection zooming
+          enableSelectionZooming: true,
+          selectionRectBorderColor: Colors.red,
+          selectionRectBorderWidth: 1,
+          selectionRectColor: Colors.grey
+      );
+      getFilters();
+      getList();
+    }
+    catch (ex) {
+      print(ex);
+    }
     Utils.setupAds();
-
   }
 
-  List<Eggs_Chart_Item> collectionList = [], reductionList = [];
+  List<Eggs_Chart_Item> collectionList = [],
+      reductionList = [];
   List<Eggs> eggs = [];
   List<String> flock_name = [];
 
@@ -85,39 +84,55 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
   int total_eggs_reduced = 0;
   int total_eggs = 0;
 
-  void clearValues(){
-
-     total_eggs_collected = 0;
-     total_eggs_reduced = 0;
-     total_eggs = 0;
-     eggs = [];
-
+  void clearValues() {
+    total_eggs_collected = 0;
+    total_eggs_reduced = 0;
+    total_eggs = 0;
+    eggs = [];
   }
 
-  void getAllData() async{
-
+  void getAllData() async {
     await DatabaseHelper.instance.database;
 
     clearValues();
 
-    total_eggs_collected = await DatabaseHelper.getEggCalculations(f_id, 1, str_date, end_date);
+    total_eggs_collected =
+    await DatabaseHelper.getEggCalculations(f_id, 1, str_date, end_date);
 
-    total_eggs_reduced = await DatabaseHelper.getEggCalculations(f_id, 0, str_date, end_date);
+    total_eggs_reduced =
+    await DatabaseHelper.getEggCalculations(f_id, 0, str_date, end_date);
 
     total_eggs = total_eggs_collected - total_eggs_reduced;
 
-    collectionList = await DatabaseHelper.getEggsReportData(str_date, end_date, 1);
+    collectionList =
+    await DatabaseHelper.getEggsReportData(str_date, end_date, 1);
 
-    reductionList = await DatabaseHelper.getEggsReportData(str_date, end_date, 0);
+    reductionList =
+    await DatabaseHelper.getEggsReportData(str_date, end_date, 0);
 
-    for(int i=0;i<reductionList.length;i++){
-      reductionList.elementAt(i).date = Utils.getFormattedDate(reductionList.elementAt(i).date).substring(0,Utils.getFormattedDate(reductionList.elementAt(i).date).length-4);
+    for (int i = 0; i < reductionList.length; i++) {
+      reductionList
+          .elementAt(i)
+          .date = Utils.getFormattedDate(reductionList
+          .elementAt(i)
+          .date).substring(0, Utils
+          .getFormattedDate(reductionList
+          .elementAt(i)
+          .date)
+          .length - 4);
     }
 
-    for(int j=0;j<collectionList.length;j++){
-      collectionList.elementAt(j).date = Utils.getFormattedDate(collectionList.elementAt(j).date).substring(0,Utils.getFormattedDate(collectionList.elementAt(j).date).length-4);
+    for (int j = 0; j < collectionList.length; j++) {
+      collectionList
+          .elementAt(j)
+          .date = Utils.getFormattedDate(collectionList
+          .elementAt(j)
+          .date).substring(0, Utils
+          .getFormattedDate(collectionList
+          .elementAt(j)
+          .date)
+          .length - 4);
     }
-
 
 
     getFilteredEggsCollections(str_date, end_date);
@@ -125,351 +140,463 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
     setState(() {
 
     });
-
   }
 
-  void getFilteredEggsCollections(String st,String end) async {
+  List<FlockEggSummary> flockEggSummary = [];
+  List<EggReductionSummary> eggReductionSummary = [];
 
+  int good_eggs = 0,
+      bad_eggs = 0;
+
+  void getFilteredEggsCollections(String st, String end) async {
     await DatabaseHelper.instance.database;
 
+    eggs = await DatabaseHelper.getFilteredEggs(f_id, "All", st, end);
 
-    eggs = await DatabaseHelper.getFilteredEggs(f_id,"All",st,end);
+    good_eggs = eggs
+        .where((item) => item.isCollection == 1)
+        .fold(0, (sum, item) => sum + item.good_eggs);
 
+    bad_eggs = eggs
+        .where((item) => item.isCollection == 1)
+        .fold(0, (sum, item) => sum + item.bad_eggs);
+
+    flockEggSummary = getFlockWiseEggSummary(eggs, str_date, end_date);
+    eggReductionSummary = getEggReductionSummary(eggs, str_date, end_date);
+
+    Utils.eggReductionSummary = eggReductionSummary;
 
     setState(() {
 
     });
-
   }
 
 
   @override
   Widget build(BuildContext context) {
-
-    double safeAreaHeight =  MediaQuery.of(context).padding.top;
-    double safeAreaHeightBottom =  MediaQuery.of(context).padding.bottom;
+    double safeAreaHeight = MediaQuery
+        .of(context)
+        .padding
+        .top;
+    double safeAreaHeightBottom = MediaQuery
+        .of(context)
+        .padding
+        .bottom;
     widthScreen =
-        MediaQuery.of(context).size.width; // because of default padding
-    heightScreen = MediaQuery.of(context).size.height;
+        MediaQuery
+            .of(context)
+            .size
+            .width; // because of default padding
+    heightScreen = MediaQuery
+        .of(context)
+        .size
+        .height;
     Utils.WIDTH_SCREEN = widthScreen;
-    Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
-      child:
+    Utils.HEIGHT_SCREEN = MediaQuery
+        .of(context)
+        .size
+        .height - (safeAreaHeight + safeAreaHeightBottom);
 
     return SafeArea(child: Scaffold(
-      body:SafeArea(
+      body: SafeArea(
         top: false,
 
-         child:Container(
+        child: Container(
           width: widthScreen,
           height: heightScreen,
-           color: Colors.white,
-            child: SingleChildScrollViewWithStickyFirstWidget(
+          color: Colors.white,
+          child: SingleChildScrollViewWithStickyFirstWidget(
             child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children:  [
-              Utils.getDistanceBar(),
-
-              ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
-                child: Container(
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Utils.getThemeColorBlue(), //(x,y)
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        alignment: Alignment.center,
-                        width: 50,
-                        height: 50,
-                        child: InkWell(
-                          child: Icon(Icons.arrow_back,
-                              color: Colors.white, size: 30),
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                            margin: EdgeInsets.only(left: 5),
-                            child: Text(
-                              "EGGS_REPORT".tr(),
-                              textAlign: TextAlign.start,
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold),
-                            )),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          Utils.setupInvoiceInitials("EGGS_REPORT".tr(),pdf_formatted_date_filter);
-                          prepareListData();
-
-                           Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>  PDFScreen(item: 1,)),
-                          );
-                        },
-                        child: Container(
-                          width: 30,
-                          height: 30,
-                          margin: EdgeInsets.only(right: 10),
-                          child: Image.asset('assets/pdf_icon.png'),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-
-              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Expanded(
+                  Utils.getDistanceBar(),
+
+                  ClipRRect(
+                    borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(0),
+                        bottomRight: Radius.circular(0)),
                     child: Container(
-                      height: 45,
-                      alignment: Alignment.centerRight,
-                      padding: EdgeInsets.only(left: 10),
-                      margin: EdgeInsets.only(top: 10,left: 10,right: 5),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: const BorderRadius.all(
-                            Radius.circular(5.0)),
-                        border: Border.all(
-                          color:  Utils.getThemeColorBlue(),
-                          width: 1.0,
-                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Utils.getThemeColorBlue(), //(x,y)
+                          ),
+                        ],
                       ),
-                      child: getDropDownList(),
+                      child: Row(
+                        children: [
+                          Container(
+                            alignment: Alignment.center,
+                            width: 50,
+                            height: 50,
+                            child: InkWell(
+                              child: Icon(Icons.arrow_back,
+                                  color: Colors.white, size: 30),
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                                margin: EdgeInsets.only(left: 5),
+                                child: Text(
+                                  "EGGS_REPORT".tr(),
+                                  textAlign: TextAlign.start,
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
+                                )),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              Utils.setupInvoiceInitials("EGGS_REPORT".tr(),
+                                  pdf_formatted_date_filter);
+                              prepareListData();
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => PDFScreen(item: 1,)),
+                              );
+                            },
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              margin: EdgeInsets.only(right: 10),
+                              child: Image.asset('assets/pdf_icon.png'),
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ),
-                  InkWell(
-                      onTap: () {
-                        openDatePicker();
-                      },
-                      child: Align(
-                        alignment: Alignment.centerRight,
+
+                  Row(
+                    children: [
+                      /*Expanded(
                         child: Container(
                           height: 45,
+                          alignment: Alignment.centerRight,
+                          padding: EdgeInsets.only(left: 10),
+                          margin: EdgeInsets.only(top: 10, left: 10, right: 5),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: const BorderRadius.all(
                                 Radius.circular(5.0)),
                             border: Border.all(
-                              color:  Utils.getThemeColorBlue(),
+                              color: Utils.getThemeColorBlue(),
                               width: 1.0,
                             ),
                           ),
-                          margin: EdgeInsets.only(right: 10,top: 15,bottom: 5),
-                          padding: EdgeInsets.only(left: 5,right: 5),
+                          child: getDropDownList(),
+                        ),
+                      ),*/
+                      InkWell(
+                        onTap: () {
+                          openDatePicker();
+                        },
+                        borderRadius: BorderRadius.circular(8), // Adds ripple effect with rounded edges
+                        child: Container(
+                          height: 45,
+                          width: widthScreen - 20,
+
+                          margin: EdgeInsets.only(right: 10,left: 10, top: 15, bottom: 10),
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Utils.getThemeColorBlue(),
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 4,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(date_filter_name, style: TextStyle(fontSize: 14),),
-                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
+                              Icon(Icons.calendar_today, color: Utils.getThemeColorBlue(), size: 18),
+                              SizedBox(width: 8),
+                              Text(
+                                date_filter_name.tr(),
+                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+                              ),
+                              SizedBox(width: 8),
+                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(), size: 20),
                             ],
                           ),
                         ),
-                      )),
-                ],
-              ),
-
-              Container(
-                color: Colors.white,
-                child: Container(
-                  padding: EdgeInsets.all(10),
-                  child: Column(children: [
-                    Align(
-                        alignment: Alignment.topLeft,
-                        child: Row(
-                          children: [
-
-                            Text('SUMMARY'.tr(),style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
-                          ],
-                        )),
-
-                    Container(
-                      width: widthScreen,
-                      child: Column(children: [
-                        //Initialize the chart widget
-                        SfCartesianChart(
-                            primaryXAxis: CategoryAxis(),
-
-                            zoomPanBehavior: _zoomPanBehavior,
-                            // Chart title
-                            title: ChartTitle(text: date_filter_name),
-
-                            // Enable legend
-                             legend: Legend(isVisible: true, position: LegendPosition.bottom),
-
-                            // Enable tooltip
-                            tooltipBehavior: TooltipBehavior(enable: true),
-                            series: <CartesianSeries<Eggs_Chart_Item, String>>[
-
-                              ColumnSeries(borderRadius: BorderRadius.all(Radius.circular(10)),color:Colors.green,name: 'Collections',dataSource: collectionList, xValueMapper: (Eggs_Chart_Item collItem, _) => collItem.date, yValueMapper: (Eggs_Chart_Item collItem, _)=> collItem.total,),
-                              ColumnSeries(borderRadius: BorderRadius.all(Radius.circular(10)),color:Colors.red,name: 'Reductions',dataSource: reductionList, xValueMapper: (Eggs_Chart_Item collItem, _) => collItem.date, yValueMapper: (Eggs_Chart_Item collItem, _)=> collItem.total,),
-
-                            ]),
-                        /*Expanded(
-                       child: Padding(
-                         padding: const EdgeInsets.all(8.0),
-                         //Initialize the spark charts widget
-                         child: SfSparkLineChart.custom(
-                           //Enable the trackball
-                           trackball: SparkChartTrackball(
-                               activationMode: SparkChartActivationMode.tap),
-                           //Enable marker
-                           marker: SparkChartMarker(
-                               displayMode: SparkChartMarkerDisplayMode.all),
-                           //Enable data label
-                           labelDisplayMode: SparkChartLabelDisplayMode.all,
-                           xValueMapper: (int index) => data[index].year,
-                           yValueMapper: (int index) => data[index].sales,
-                           dataCount: data.length,
-                         ),
-                       ),
-                     )*/
-                      ]),) ,
-
-                    SizedBox(height: 20,width: widthScreen,),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Total Collected'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                        Text('$total_eggs_collected',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black),),
-
-                      ],),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Total Used'.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),),
-                        Text('-$total_eggs_reduced',style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.red),),
-
-                      ],),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Remaining Eggs'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),),
-                        Text('$total_eggs',style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: total_eggs>=0 ? Colors.black : Colors.red),),
-
-                      ],)
-                  ],),),
-              ),
-
-              Container(
-                  padding: EdgeInsets.only(top: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-                    color: Utils.getScreenBackground(),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 2,
-                        offset: Offset(0, 1), // changes position of shadow
-                      ),
+                      )
                     ],
                   ),
-              child: Column(
-                children: [
-                  Align(
-                    alignment: Alignment.center,
-                    child: Container(
-                        margin: EdgeInsets.all(10),
-                        child: Text('Collections/Reductions'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),)),
-                  ),
 
-                  eggs.length > 0 ? Container(
-                    width: widthScreen,
-                    height: eggs.length * 115,
-                    child: ListView.builder(
-                        itemCount: eggs.length,
-                        scrollDirection: Axis.vertical,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemBuilder: (BuildContext context, int index) {
-                          return Container(
-                            margin: EdgeInsets.only(left: 12,right: 12,top: 8,bottom: 0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(Radius.circular(3)),
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  spreadRadius: 2,
-                                  blurRadius: 2,
-                                  offset: Offset(0, 1), // changes position of shadow
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+
+                        // Chart Section
+                        Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: EdgeInsets.all(10),
+                          child: SfCartesianChart(
+                            primaryXAxis: CategoryAxis(),
+                            zoomPanBehavior: _zoomPanBehavior,
+                            title: ChartTitle(text: date_filter_name),
+                            legend: Legend(isVisible: true,
+                                position: LegendPosition.bottom),
+                            tooltipBehavior: TooltipBehavior(enable: true),
+                            series: <CartesianSeries<Eggs_Chart_Item, String>>[
+                              ColumnSeries(
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(10)),
+                                color: Colors.green,
+                                name: 'Collections'.tr(),
+                                dataSource: collectionList,
+                                xValueMapper: (Eggs_Chart_Item item, _) =>
+                                item.date,
+                                yValueMapper: (Eggs_Chart_Item item, _) =>
+                                item.total,
+                              ),
+                              ColumnSeries(
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(10)),
+                                color: Colors.red,
+                                name: 'Reductions'.tr(),
+                                dataSource: reductionList,
+                                xValueMapper: (Eggs_Chart_Item item, _) =>
+                                item.date,
+                                yValueMapper: (Eggs_Chart_Item item, _) =>
+                                item.total,
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(height: 20),
+
+                        Card(
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // 📌 Summary Section
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Summary & Analytics".tr(),
+                                      style: TextStyle(fontSize: 18,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
                                 ),
+                                SizedBox(height: 12),
+                                Divider(),
+                                SizedBox(height: 8),
+
+                                // 🥚 Statistics Section
+                                Column(
+                                  children: [
+                                    SummaryRow(
+                                      title: 'Total Collected'.tr(),
+                                      value: '$total_eggs_collected',
+                                      icon: Icons.egg,
+                                      color: Colors.green,
+                                    ),
+                                    SummaryRow(
+                                      title: 'Good Eggs'.tr(),
+                                      value: '$good_eggs',
+                                      icon: Icons.check_circle,
+                                      color: Colors.blue,
+                                    ),
+                                    SummaryRow(
+                                      title: 'Bad Eggs'.tr(),
+                                      value: '$bad_eggs',
+                                      icon: Icons.warning_amber_rounded,
+                                      color: Colors.orange,
+                                    ),
+                                    Divider(),
+                                    SummaryRow(
+                                      title: 'Total Used'.tr(),
+                                      value: '-$total_eggs_reduced',
+                                      icon: Icons.remove_circle,
+                                      color: Colors.red,
+                                    ),
+                                    SummaryRow(
+                                      title: 'Remaining Eggs'.tr(),
+                                      value: '${total_eggs_collected -
+                                          total_eggs_reduced}',
+                                      icon: Icons.egg_alt,
+                                      color: (total_eggs_collected -
+                                          total_eggs_reduced) >= 0 ? Colors
+                                          .black : Colors.red,
+                                      isBold: true,
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 16),
+                                Divider(),
+
+                                // 🐔 Flock-wise Summary Section
+                                Text(
+                                  "By Flock".tr(),
+                                  style: TextStyle(fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 8),
+
+                                // 🏷️ Flock List
+                                Column(
+                                  children: flockEggSummary.map((flock) =>
+                                      _buildFlockRow(flock)).toList(),
+                                ),
+                                SizedBox(height: 8),
+                                buildEggReductionList(eggReductionSummary)
                               ],
                             ),
+                          ),
+                        )
 
-                            child: Container(
-                              color: Colors.white,
-                              height: 100,
-                              child: Row( children: [
-                                Expanded(
-                                  child: Container(
-                                    alignment: Alignment.topLeft,
-                                    margin: EdgeInsets.all(10),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).f_name!.tr() + " ", style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
-                                                Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).isCollection == 1? '(Collected)'.tr():'(Reduced)'.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: eggs.elementAt(index).isCollection == 1? Colors.green:Colors.red),)),
-                                              ],
-                                            ),
-                                            Row(
-                                              children: [
-                                                Image.asset("assets/eggs_count.png", width: 40, height: 40,),
-                                                Container( margin: EdgeInsets.only(right: 5, left: 5), child: Text(eggs.elementAt(index).total_eggs.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color:eggs.elementAt(index).isCollection == 0?Colors.black:Colors.black),)),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Icon(Icons.calendar_month, size: 25,),
-                                            Container(margin: EdgeInsets.all(5), child: Text(Utils.getFormattedDate(eggs.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-
-                                          ],
-                                        ),
-
-                                        // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                      ],),
-                                  ),
-                                ),
-
-
-                              ]),
-                            ),
-                          );
-
-                        }),
-                  ) : Center(
-                    child: Container(
-                      margin: EdgeInsets.only(top: 50),
-                      child: Column(
-                        children: [
-                          Text('No Eggs Collected/Reduced in given period'.tr(), style: TextStyle(fontSize: 15, color: Colors.black54),),
-                        ],
-                      ),
+                      ],
                     ),
+                  )
+
+
+                ]
+            ),),),),),);
+  }
+
+
+  Widget buildEggReductionList(List<EggReductionSummary> reductionList) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Egg Usage (Reductions)".tr(),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 8),
+        ...reductionList.map((reduction) => Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: ListTile(
+            leading: Icon(Icons.remove_circle, color: Colors.red),
+            title: Text(
+              reduction.reason.tr(),
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            trailing: Text(
+              "-${reduction.totalReduced}",
+              style: TextStyle(fontSize: 16, color: Colors.red, fontWeight: FontWeight.bold),
+            ),
+          ),
+        )),
+      ],
+    );
+  }
+
+
+  Widget _buildFlockRow(FlockEggSummary flock) {
+    return Card(
+      elevation: 3,
+      margin: EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Container(
+        padding: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade50, Colors.white],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Row(
+          children: [
+            // 🟡 Flock Icon
+            CircleAvatar(
+              radius: 24,
+              backgroundColor: Colors.blue.shade200,
+              child: Icon(Icons.egg, color: Colors.white, size: 28),
+            ),
+            SizedBox(width: 12),
+
+            // 📋 Flock Details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    flock.fName,
+                    style: TextStyle(fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87),
+                  ),
+                  SizedBox(height: 4),
+                  Row(
+                    children: [
+                      _buildEggInfo("Good", flock.goodEggs, Colors.green),
+                      SizedBox(width: 10),
+                      _buildEggInfo("Bad", flock.badEggs, Colors.orange),
+                      SizedBox(width: 10),
+                      _buildEggInfo("Total", flock.totalEggs, Colors.blue),
+                    ],
                   ),
                 ],
-              ),),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-            ]
-      ),),),),),);
+// 🎨 Helper for Colored Egg Info
+  Widget _buildEggInfo(String label, int count, Color color) {
+    return Row(
+      children: [
+        Icon(Icons.circle, color: color, size: 10),
+        SizedBox(width: 4),
+        Text(
+          "$label: $count",
+          style: TextStyle(
+              fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+        ),
+      ],
+    );
   }
 
 
@@ -477,16 +604,28 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
   List<Flock> flocks = [];
   String _purposeselectedValue = "";
   List<String> _purposeList = [];
-  void getList() async {
 
+  void getList() async {
     await DatabaseHelper.instance.database;
 
     flocks = await DatabaseHelper.getFlocks();
 
-    flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1, flock_new: 1));
+    flocks.insert(0, Flock(f_id: -1,
+        f_name: 'Farm Wide'.tr(),
+        bird_count: 0,
+        purpose: '',
+        acqusition_date: '',
+        acqusition_type: '',
+        notes: '',
+        icon: '',
+        active_bird_count: 0,
+        active: 1,
+        flock_new: 1));
 
-    for(int i=0;i<flocks.length;i++){
-      _purposeList.add(flocks.elementAt(i).f_name);
+    for (int i = 0; i < flocks.length; i++) {
+      _purposeList.add(flocks
+          .elementAt(i)
+          .f_name);
     }
 
     _purposeselectedValue = _purposeList[0];
@@ -494,7 +633,6 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
     setState(() {
 
     });
-
   }
 
   int isCollection = 1;
@@ -516,7 +654,6 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
             _purposeselectedValue = newValue!;
             getFlockID();
             getAllData();
-
           });
         },
         items: _purposeList.map<DropdownMenuItem<String>>((String value) {
@@ -544,14 +681,15 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
         builder: (BuildContext bcontext) {
           return AlertDialog(
             title: Text('DATE_FILTER'.tr()),
-            content: setupAlertDialoadContainer(bcontext,widthScreen - 40, widthScreen),
+            content: setupAlertDialoadContainer(
+                bcontext, widthScreen - 40, widthScreen),
           );
         });
   }
 
 
-  Widget setupAlertDialoadContainer(BuildContext bcontext,double width, double height) {
-
+  Widget setupAlertDialoadContainer(BuildContext bcontext, double width,
+      double height) {
     return Container(
       height: height, // Change as per your requirement
       width: width, // Change as per your requirement
@@ -561,7 +699,6 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
         itemBuilder: (BuildContext context, int index) {
           return InkWell(
             onTap: () {
-
               setState(() {
                 date_filter_name = filterList.elementAt(index);
               });
@@ -579,137 +716,219 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
   }
 
 
-
-  List<String> filterList = ['TODAY'.tr(),'YESTERDAY'.tr(),'THIS_MONTH'.tr(), 'LAST_MONTH'.tr(),'LAST3_MONTHS'.tr(), 'LAST6_MONTHS'.tr(),'THIS_YEAR'.tr(),
-    'LAST_YEAR'.tr(),'ALL_TIME'.tr()];
+  List<String> filterList = [
+    'TODAY'.tr(),
+    'YESTERDAY'.tr(),
+    'THIS_MONTH'.tr(),
+    'LAST_MONTH'.tr(),
+    'LAST3_MONTHS'.tr(),
+    'LAST6_MONTHS'.tr(),
+    'THIS_YEAR'.tr(),
+    'LAST_YEAR'.tr(),
+    'ALL_TIME'.tr()
+  ];
 
   String date_filter_name = 'THIS_MONTH'.tr();
   String pdf_formatted_date_filter = 'THIS_MONTH'.tr();
-  String str_date = '',end_date = '';
-  void getData(String filter){
+  String str_date = '',
+      end_date = '';
+
+  void getData(String filter) {
     int index = 0;
 
-    if (filter == 'TODAY'.tr()){
+    if (filter == 'TODAY'.tr()) {
       index = 0;
-      DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      DateTime today = DateTime.utc(DateTime
+          .now()
+          .year, DateTime
+          .now()
+          .month, DateTime
+          .now()
+          .day);
 
       var inputFormat = DateFormat('yyyy-MM-dd');
       str_date = inputFormat.format(today);
       end_date = inputFormat.format(today);
-      print(str_date+" "+end_date);
+      print(str_date + " " + end_date);
 
-      pdf_formatted_date_filter = 'TODAY'.tr()+" ("+Utils.getFormattedDate(str_date)+")";
-
+      pdf_formatted_date_filter =
+          'TODAY'.tr() + " (" + Utils.getFormattedDate(str_date) + ")";
     }
-    else if (filter == 'YESTERDAY'.tr()){
+    else if (filter == 'YESTERDAY'.tr()) {
       index = 1;
-      DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day -1);
+      DateTime today = DateTime.utc(DateTime
+          .now()
+          .year, DateTime
+          .now()
+          .month, DateTime
+          .now()
+          .day - 1);
 
       var inputFormat = DateFormat('yyyy-MM-dd');
       str_date = inputFormat.format(today);
       end_date = inputFormat.format(today);
-      print(str_date+" "+end_date);
+      print(str_date + " " + end_date);
 
-      pdf_formatted_date_filter = "YESTERDAY".tr() + " ("+Utils.getFormattedDate(str_date)+")";
-
+      pdf_formatted_date_filter =
+          "YESTERDAY".tr() + " (" + Utils.getFormattedDate(str_date) + ")";
     }
-    else if (filter == 'THIS_MONTH'.tr()){
+    else if (filter == 'THIS_MONTH'.tr()) {
       index = 2;
-      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
+      DateTime firstDayCurrentMonth = DateTime.utc(DateTime
+          .now()
+          .year, DateTime
+          .now()
+          .month, 1);
 
-      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month + 1).subtract(Duration(days: 1));
+      DateTime lastDayCurrentMonth = DateTime.utc(DateTime
+          .now()
+          .year, DateTime
+          .now()
+          .month + 1).subtract(Duration(days: 1));
 
       var inputFormat = DateFormat('yyyy-MM-dd');
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
-      print(str_date+" "+end_date);
+      print(str_date + " " + end_date);
 
 
-      pdf_formatted_date_filter = 'THIS_MONTH'.tr()+" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
-    }else if (filter == 'LAST_MONTH'.tr()){
+      pdf_formatted_date_filter =
+          'THIS_MONTH'.tr() + " (" + Utils.getFormattedDate(str_date) + "-" +
+              Utils.getFormattedDate(end_date) + ")";
+    } else if (filter == 'LAST_MONTH'.tr()) {
       index = 3;
-      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
+      DateTime firstDayCurrentMonth = DateTime.utc(DateTime
+          .now()
+          .year, DateTime
+          .now()
+          .month - 1, 1);
 
-      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month  -1,30);
+      DateTime lastDayCurrentMonth = DateTime.utc(DateTime
+          .now()
+          .year, DateTime
+          .now()
+          .month - 1, 30);
 
 
       var inputFormat = DateFormat('yyyy-MM-dd');
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
-      print(str_date+" "+end_date);
+      print(str_date + " " + end_date);
 
 
-      pdf_formatted_date_filter = 'LAST_MONTH'.tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
-
-    }else if (filter == 'LAST3_MONTHS'.tr()){
+      pdf_formatted_date_filter =
+          'LAST_MONTH'.tr() + " (" + Utils.getFormattedDate(str_date) + "-" +
+              Utils.getFormattedDate(end_date) + ")";
+    } else if (filter == 'LAST3_MONTHS'.tr()) {
       index = 4;
-      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -2, 1);
+      DateTime firstDayCurrentMonth = DateTime.utc(DateTime
+          .now()
+          .year, DateTime
+          .now()
+          .month - 2, 1);
 
-      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
+      DateTime lastDayCurrentMonth = DateTime.utc(DateTime
+          .now()
+          .year, DateTime
+          .now()
+          .month, DateTime
+          .now()
+          .day);
 
       var inputFormat = DateFormat('yyyy-MM-dd');
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
-      print(str_date+" "+end_date);
+      print(str_date + " " + end_date);
 
 
-      pdf_formatted_date_filter = "LAST3_MONTHS".tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
-    }else if (filter == 'LAST6_MONTHS'.tr()){
+      pdf_formatted_date_filter =
+          "LAST3_MONTHS".tr() + " (" + Utils.getFormattedDate(str_date) + "-" +
+              Utils.getFormattedDate(end_date) + ")";
+    } else if (filter == 'LAST6_MONTHS'.tr()) {
       index = 5;
-      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
+      DateTime firstDayCurrentMonth = DateTime.utc(DateTime
+          .now()
+          .year, DateTime
+          .now()
+          .month - 5, 1);
 
-      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
+      DateTime lastDayCurrentMonth = DateTime.utc(DateTime
+          .now()
+          .year, DateTime
+          .now()
+          .month, DateTime
+          .now()
+          .day);
 
       var inputFormat = DateFormat('yyyy-MM-dd');
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
-      print(str_date+" "+end_date);
+      print(str_date + " " + end_date);
 
 
-      pdf_formatted_date_filter = "LAST6_MONTHS".tr()+" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
-    }else if (filter == 'THIS_YEAR'.tr()){
+      pdf_formatted_date_filter =
+          "LAST6_MONTHS".tr() + " (" + Utils.getFormattedDate(str_date) + "-" +
+              Utils.getFormattedDate(end_date) + ")";
+    } else if (filter == 'THIS_YEAR'.tr()) {
       index = 6;
-      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
-      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
+      DateTime firstDayCurrentMonth = DateTime.utc(DateTime
+          .now()
+          .year, 1, 1);
+      DateTime lastDayCurrentMonth = DateTime.utc(DateTime
+          .now()
+          .year, DateTime
+          .now()
+          .month, DateTime
+          .now()
+          .day);
 
       var inputFormat = DateFormat('yyyy-MM-dd');
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
-      print(str_date+" "+end_date);
+      print(str_date + " " + end_date);
 
-      pdf_formatted_date_filter = 'THIS_YEAR'.tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
-    }else if (filter == 'LAST_YEAR'.tr()){
+      pdf_formatted_date_filter =
+          'THIS_YEAR'.tr() + " (" + Utils.getFormattedDate(str_date) + "-" +
+              Utils.getFormattedDate(end_date) + ")";
+    } else if (filter == 'LAST_YEAR'.tr()) {
       index = 7;
-      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
-      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year-1, 12,31);
+      DateTime firstDayCurrentMonth = DateTime.utc(DateTime
+          .now()
+          .year - 1, 1, 1);
+      DateTime lastDayCurrentMonth = DateTime.utc(DateTime
+          .now()
+          .year - 1, 12, 31);
 
       var inputFormat = DateFormat('yyyy-MM-dd');
       str_date = inputFormat.format(firstDayCurrentMonth);
       end_date = inputFormat.format(lastDayCurrentMonth);
-      print(str_date+" "+end_date);
+      print(str_date + " " + end_date);
 
 
-      pdf_formatted_date_filter = 'LAST_YEAR'.tr() +" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
-
-    }else if (filter == 'ALL_TIME'.tr()){
+      pdf_formatted_date_filter =
+          'LAST_YEAR'.tr() + " (" + Utils.getFormattedDate(str_date) + "-" +
+              Utils.getFormattedDate(end_date) + ")";
+    } else if (filter == 'ALL_TIME'.tr()) {
       index = 8;
       var inputFormat = DateFormat('yyyy-MM-dd');
-      str_date ="1950-01-01";
-      end_date = inputFormat.format(DateTime.now());;
-      print(str_date+" "+end_date);
+      str_date = "1950-01-01";
+      end_date = inputFormat.format(DateTime.now());
+      ;
+      print(str_date + " " + end_date);
 
       pdf_formatted_date_filter = 'ALL_TIME'.tr();
     }
     getAllData();
-
   }
 
   int getFlockID() {
-
-
-    for(int i=0;i<flocks.length;i++){
-      if(_purposeselectedValue == flocks.elementAt(i).f_name){
-        f_id = flocks.elementAt(i).f_id;
+    for (int i = 0; i < flocks.length; i++) {
+      if (_purposeselectedValue == flocks
+          .elementAt(i)
+          .f_name) {
+        f_id = flocks
+            .elementAt(i)
+            .f_id;
         break;
       }
     }
@@ -718,64 +937,198 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
   }
 
   void prepareListData() async {
-
-    int collected = 0, reduced = 0, reserve = 0;
+    int collected = 0,
+        reduced = 0,
+        reserve = 0,
+        t_good_eggs,
+        t_bad_eggs;
 
     Utils.egg_report_list.clear();
     Utils.TOTAL_EGG_COLLECTED = total_eggs_collected.toString();
     Utils.TOTAL_EGG_REDUCED = total_eggs_reduced.toString();
     Utils.EGG_RESERVE = total_eggs.toString();
+    Utils.GOOD_EGGS = good_eggs.toString();
+    Utils.BAD_EGGS = bad_eggs.toString();
 
 
-    if(f_id == -1)
-    {
-       for(int i=0; i<flocks.length; i++){
+    if (f_id == -1) {
+      for (int i = 0; i < flocks.length; i++) {
+        collected = await DatabaseHelper.getUniqueEggCalculations(flocks
+            .elementAt(i)
+            .f_id, 1, str_date, end_date);
+        reduced = await DatabaseHelper.getUniqueEggCalculations(flocks
+            .elementAt(i)
+            .f_id, 0, str_date, end_date);
 
+        t_good_eggs =
+        await DatabaseHelper.getUniqueEggCalculationsGoodBad(flocks
+            .elementAt(i)
+            .f_id, 1, str_date, end_date);
+        t_bad_eggs = await DatabaseHelper.getUniqueEggCalculationsGoodBad(flocks
+            .elementAt(i)
+            .f_id, 0, str_date, end_date);
 
-         collected = await DatabaseHelper.getUniqueEggCalculations(flocks
-             .elementAt(i)
-             .f_id, 1, str_date, end_date);
-         reduced = await DatabaseHelper.getUniqueEggCalculations(flocks
-             .elementAt(i)
-             .f_id, 0, str_date, end_date);
-         reserve = collected - reduced;
+        reserve = collected - reduced;
 
-         Utils.egg_report_list.add(Egg_Report_Item(f_name: flocks
-             .elementAt(i)
-             .f_name,
-             collected: collected,
-             reduced: reduced,
-             reserve: reserve));
-       }
-
-    } else
-    {
-      collected = await DatabaseHelper.getEggCalculations(f_id, 1, str_date, end_date);
-      reduced = await DatabaseHelper.getEggCalculations(f_id, 0, str_date, end_date);
+        Egg_Report_Item item = Egg_Report_Item(f_name: flocks
+            .elementAt(i)
+            .f_name,
+            collected: collected,
+            reduced: reduced,
+            reserve: reserve);
+        item.good_eggs = t_good_eggs;
+        item.bad_eggs = t_bad_eggs;
+        Utils.egg_report_list.add(item);
+      }
+    } else {
+      collected =
+      await DatabaseHelper.getEggCalculations(f_id, 1, str_date, end_date);
+      reduced =
+      await DatabaseHelper.getEggCalculations(f_id, 0, str_date, end_date);
+      t_good_eggs = await DatabaseHelper.getUniqueEggCalculationsGoodBad(
+          f_id, 1, str_date, end_date);
+      t_bad_eggs = await DatabaseHelper.getUniqueEggCalculationsGoodBad(
+          f_id, 0, str_date, end_date);
       reserve = collected - reduced;
 
       Flock? flock = await getSelectedFlock();
 
-      Utils.egg_report_list.add(Egg_Report_Item(f_name: flock!.f_name, collected: collected, reduced: reduced, reserve: reserve));
-
+      Egg_Report_Item item = Egg_Report_Item(f_name: flock!.f_name,
+          collected: collected,
+          reduced: reduced,
+          reserve: reserve);
+      item.good_eggs = t_good_eggs;
+      item.bad_eggs = t_bad_eggs;
+      Utils.egg_report_list.add(item);
     }
-
   }
 
-  Future<Flock?> getSelectedFlock() async{
-
+  Future<Flock?> getSelectedFlock() async {
     Flock? flock = null;
 
-    for(int i=0;i<flocks.length;i++){
-      if(f_id == flocks.elementAt(i).f_id){
+    for (int i = 0; i < flocks.length; i++) {
+      if (f_id == flocks
+          .elementAt(i)
+          .f_id) {
         flock = flocks.elementAt(i);
         break;
       }
     }
 
     return flock;
-
   }
 
+  List<FlockEggSummary> getFlockWiseEggSummary(List<Eggs> eggsList,
+      String startDate, String endDate) {
+    Map<String, FlockEggSummary> summaryMap = {};
+
+    for (var egg in eggsList) {
+      if (egg.date != null &&
+          egg.isCollection == 1) { // ✅ Filter by type "Addition"
+        DateTime eggDate = DateTime.parse(egg.date!);
+        DateTime start = DateTime.parse(startDate);
+        DateTime end = DateTime.parse(endDate);
+
+        if (eggDate.isAfter(start.subtract(Duration(days: 1))) &&
+            eggDate.isBefore(end.add(Duration(days: 1)))) {
+          if (!summaryMap.containsKey(egg.f_name)) {
+            summaryMap[egg.f_name!] = FlockEggSummary(
+                fName: egg.f_name!, goodEggs: 0, badEggs: 0, totalEggs: 0);
+          }
+          summaryMap[egg.f_name]!.goodEggs += egg.good_eggs;
+          summaryMap[egg.f_name]!.badEggs += egg.bad_eggs;
+          summaryMap[egg.f_name]!.totalEggs += egg.total_eggs;
+        }
+      }
+    }
+
+    return summaryMap.values.toList();
+  }
+
+  List<EggReductionSummary> getEggReductionSummary(List<Eggs> eggsList,
+      String str, String endDate) {
+    Map<String, int> reductionMap = {};
+
+    for (var egg in eggsList) {
+      if (egg.isCollection == 0) {
+        DateTime eggDate = DateTime.parse(egg.date!);
+        DateTime start = DateTime.parse(str);
+        DateTime end = DateTime.parse(endDate);
+
+        if (eggDate.isAfter(start.subtract(Duration(days: 1))) &&
+            eggDate.isBefore(end.add(Duration(days: 1)))) {
+          String reason = egg.reduction_reason ?? "Unknown";
+          reductionMap[reason] = (reductionMap[reason] ?? 0) + egg.total_eggs;
+        }
+      }
+    }
+
+      return reductionMap.entries
+          .map((entry) =>
+          EggReductionSummary(reason: entry.key, totalReduced: entry.value))
+          .toList();
+  }
+
+}
+
+// 📌 Model for Flock-wise summary
+class FlockEggSummary {
+   String fName;
+   int goodEggs;
+   int badEggs;
+   int totalEggs;
+
+  FlockEggSummary({required this.fName, required this.goodEggs, required this.badEggs, required this.totalEggs});
+}
+
+// 📌 Summary Row Widget
+class SummaryRow extends StatelessWidget {
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color color;
+  final bool isBold;
+
+  SummaryRow({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+    this.isBold = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 24),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class EggReductionSummary {
+  String reason;
+  int totalReduced;
+
+  EggReductionSummary({required this.reason, required this.totalReduced});
 }
 

@@ -1,39 +1,31 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:ffi';
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:poultary/model/feed_item.dart';
+import 'package:poultary/model/custom_category.dart';
+import 'package:poultary/model/custom_category_data.dart';
 import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import 'database/databse_helper.dart';
-import 'model/bird_item.dart';
-import 'model/egg_item.dart';
-import 'model/flock.dart';
-import 'model/flock_image.dart';
+import '../database/databse_helper.dart';
+import '../model/flock.dart';
 
-class NewFeeding extends StatefulWidget {
-   Feeding? feeding;
-   NewFeeding({Key? key, this.feeding}) : super(key: key);
+class NewCustomData extends StatefulWidget {
+  CustomCategoryData? customCategoryData;
+  CustomCategory customCategory;
+  NewCustomData({Key? key, this.customCategoryData,required this.customCategory}) : super(key: key);
 
   @override
-  _NewFeeding createState() => _NewFeeding();
+  _NewCustomData createState() => _NewCustomData();
 }
 
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _NewFeeding extends State<NewFeeding>
+class _NewCustomData extends State<NewCustomData>
     with SingleTickerProviderStateMixin {
   double widthScreen = 0;
   double heightScreen = 0;
@@ -57,21 +49,19 @@ class _NewFeeding extends State<NewFeeding>
   void initState() {
     super.initState();
 
-    if(widget.feeding != null)
+    if(widget.customCategoryData!= null)
     {
       isEdit = true;
-      date = widget.feeding!.date!;
-      _purposeselectedValue = widget.feeding!.f_name;
-      _feedselectedValue = widget.feeding!.feed_name!;
-      quantityController.text = widget.feeding!.quantity!;
-      notesController.text = widget.feeding!.short_note!;
+      date = widget.customCategoryData!.date;
+      _purposeselectedValue = widget.customCategoryData!.fName;
+      quantityController.text = widget.customCategoryData!.quantity.toString();
+      notesController.text = widget.customCategoryData!.note;
 
     }else{
       quantityController.text = "5";
     }
 
     getList();
-    getFeedList();
     Utils.showInterstitial();
     Utils.setupAds();
 
@@ -82,10 +72,9 @@ class _NewFeeding extends State<NewFeeding>
   List<Flock> flocks = [];
   void getList() async {
     if (!isEdit) {
-    DateTime dateTime = DateTime.now();
-    date = DateFormat('yyyy-MM-dd').format(dateTime);
-  }
-
+      DateTime dateTime = DateTime.now();
+      date = DateFormat('yyyy-MM-dd').format(dateTime);
+    }
 
     await DatabaseHelper.instance.database;
 
@@ -117,12 +106,9 @@ class _NewFeeding extends State<NewFeeding>
     }
 
     if(!isEdit)
-    _feedselectedValue = _feedList[0];
+      _feedselectedValue = _feedList[0];
 
     print(_feedselectedValue);
-
-    if(!Utils.checkIfContains(_feedList, _feedselectedValue))
-      _feedList.add(_feedselectedValue);
 
 
     setState(() {
@@ -164,7 +150,7 @@ class _NewFeeding extends State<NewFeeding>
           child: Container(
             width: widthScreen,
             height: heightScreen,
-              color: Utils.getScreenBackground(),
+            color: Utils.getScreenBackground(),
             child: SingleChildScrollViewWithStickyFirstWidget(
               child: Column(
                 children: [
@@ -250,15 +236,16 @@ class _NewFeeding extends State<NewFeeding>
                           Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
-                                isEdit?"EDIT".tr() +" "+"FEEDING".tr():"NEW_FEEDING".tr(),
+                                isEdit?"EDIT".tr() +" ${widget.customCategory.name.tr()}":"NEW".tr()+" ${widget.customCategory.name.tr()}",
                                 textAlign: TextAlign.start,
                                 style: TextStyle(
                                     color: Utils.getThemeColorBlue(),
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold),
                               )),
+                          SizedBox(height: 40,width: widthScreen),
 
-                         activeStep==0? Container(
+                          activeStep==0? Container(
                             child: Column(children: [
                               SizedBox(height: 20,width: widthScreen),
                               Column(
@@ -284,35 +271,10 @@ class _NewFeeding extends State<NewFeeding>
                                 ],
                               ),
 
-                              SizedBox(height: 10,width: widthScreen),
+                              SizedBox(height: 20,width: widthScreen),
                               Column(
                                 children: [
-                                  Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Choose Feed'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-
-                                  Container(
-                                    width: widthScreen,
-                                    height: 70,
-                                    alignment: Alignment.centerRight,
-                                    padding: EdgeInsets.all(10),
-                                    margin: EdgeInsets.only(left: 20, right: 20),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.withAlpha(70),
-                                      borderRadius: const BorderRadius.all(
-                                          Radius.circular(20.0)),
-                                      border: Border.all(
-                                        color:  Colors.grey,
-                                        width: 1.0,
-                                      ),
-                                    ),
-                                    child: getFeedTypeList(),
-                                  ),
-                                ],
-                              ),
-
-                              SizedBox(height: 10,width: widthScreen),
-                              Column(
-                                children: [
-                                  Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('FEED_QUANTITY_HINT'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                                  Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text(widget.customCategory.cat_type.tr()+' '+'Quantity'.tr()+"(${widget.customCategory.unit})", style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
                                   Container(
                                     width: widthScreen,
                                     height: 70,
@@ -362,7 +324,7 @@ class _NewFeeding extends State<NewFeeding>
                             ],),
                           ):SizedBox(width: 1,),
 
-                         activeStep==1? Container(child: Column(
+                          activeStep==1? Container(child: Column(
                             children: [
                               SizedBox(height: 10,width: widthScreen),
                               Column(
@@ -401,7 +363,7 @@ class _NewFeeding extends State<NewFeeding>
                                 ],
                               ),
 
-                              SizedBox(height: 10,width: widthScreen),
+                              SizedBox(height: 20,width: widthScreen),
                               Column(
                                 children: [
                                   Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DESCRIPTION_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
@@ -449,52 +411,44 @@ class _NewFeeding extends State<NewFeeding>
 
                               activeStep++;
 
-                            if(activeStep==1) {
-                              if (quantityController.text
-                                  .trim()
-                                  .length == 0) {
-                                activeStep--;
-                                Utils.showToast("PROVIDE_ALL".tr());
-                              }else{
-                                setState(() {
+                              if(activeStep==1) {
+                                if (quantityController.text
+                                    .trim()
+                                    .length == 0) {
+                                  activeStep--;
+                                  Utils.showToast("PROVIDE_ALL".tr());
+                                }else{
+                                  setState(() {
 
-                                });
-                              }
-                            }
-
-                            if(activeStep==2){
-
-                              if(isEdit){
-                                await DatabaseHelper.instance.database;
-
-                                Feeding feeding = Feeding(
-                                  f_id: getFlockID(),
-                                  short_note: notesController.text,
-                                  date: date,
-                                  feed_name: _feedselectedValue,
-                                  quantity: quantityController.text,
-                                  f_name: _purposeselectedValue,);
-                                feeding.id = widget.feeding!.id;
-                                int? id = await DatabaseHelper
-                                    .updateFeeding(feeding);
-
-                                Utils.showToast("SUCCESSFUL".tr());
-                                Navigator.pop(context);
-                              } else {
-                                await DatabaseHelper.instance.database;
-                                int? id = await DatabaseHelper
-                                    .insertNewFeeding(Feeding(
-                                  f_id: getFlockID(),
-                                  short_note: notesController.text,
-                                  date: date,
-                                  feed_name: _feedselectedValue,
-                                  quantity: quantityController.text,
-                                  f_name: _purposeselectedValue,));
-                                Utils.showToast("SUCCESSFUL".tr());
-                                Navigator.pop(context);
+                                  });
+                                }
                               }
 
-                            }
+                              if(activeStep==2){
+
+                                if(isEdit){
+                                  await DatabaseHelper.instance.database;
+
+                                  CustomCategoryData custom_data = CustomCategoryData(fId: getFlockID(), cId: widget.customCategory.id!, cType: widget.customCategory.cat_type, cName: widget.customCategory.name, itemType: widget.customCategory.itemtype, quantity: double.parse(quantityController.text), unit: widget.customCategory.unit, date: date, fName: _purposeselectedValue, note: notesController.text);
+
+                                  custom_data.id = widget.customCategoryData!.id;
+                                  int? id = await DatabaseHelper
+                                      .updateCustomCategoryData(custom_data);
+
+                                  Utils.showToast("SUCCESSFUL".tr());
+                                  Navigator.pop(context);
+                                } else {
+                                  await DatabaseHelper.instance.database;
+
+                                  CustomCategoryData custom_data = CustomCategoryData(fId: getFlockID(), cId: widget.customCategory.id!, cType: widget.customCategory.cat_type, cName: widget.customCategory.name, itemType: widget.customCategory.itemtype, quantity: double.parse(quantityController.text), unit: widget.customCategory.unit, date: date, fName: _purposeselectedValue, note: notesController.text);
+
+                                  int? id = await DatabaseHelper
+                                      .insertCategoryData(custom_data);
+                                  Utils.showToast("SUCCESSFUL".tr());
+                                  Navigator.pop(context);
+                                }
+
+                              }
 
                             },
                             child: Container(
@@ -512,7 +466,7 @@ class _NewFeeding extends State<NewFeeding>
                               ),
                               margin: EdgeInsets.all( 20),
                               child: Text(
-                               activeStep==0?"NEXT".tr():"CONFIRM".tr(),
+                                activeStep==0?"NEXT".tr():"CONFIRM".tr(),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Colors.white,
@@ -555,9 +509,9 @@ class _NewFeeding extends State<NewFeeding>
               value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.black,
+                fontSize: 16.0,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
               ),
             ),
           );
@@ -601,9 +555,9 @@ class _NewFeeding extends State<NewFeeding>
   }
 
 
-  void pickDate() async {
+  void pickDate() async{
 
-     DateTime? pickedDate = await showDatePicker(
+    DateTime? pickedDate = await showDatePicker(
         context: context,
         initialDate: DateTime.now(),
         firstDate: DateTime(1950),

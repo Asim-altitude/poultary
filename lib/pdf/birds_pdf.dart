@@ -12,6 +12,7 @@ import 'package:poultary/utils/utils.dart';
 
 import '../../data.dart';
 import '../model/flock.dart';
+import '../model/flock_detail.dart';
 import '../model/flock_report_item.dart';
 
 Future<Uint8List> generateInvoice(
@@ -117,7 +118,51 @@ class Invoice {
         build: (context) => [
          // _contentHeader(context),
           _buildSummary(context),
+          pw.Container(
+            alignment: pw.Alignment.topLeft,
+            margin: pw.EdgeInsets.only(top: 10,bottom: 10),
+            child: pw.Directionality(
+              textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+              child: pw.Text(
+                'By Flock'.tr(),
+                style: pw.TextStyle(
+                    color: PdfColors.black,
+                    fontSize: 10,
+                    fontWeight: pw.FontWeight.bold
+                ),
+              ),),
+          ),
           _contentTable(context),
+          pw.Container(
+            alignment: pw.Alignment.topLeft,
+            margin: pw.EdgeInsets.only(top: 10,bottom: 10),
+            child: pw.Directionality(
+              textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+              child: pw.Text(
+                'By Date'.tr(),
+                style: pw.TextStyle(
+                  color: PdfColors.black,
+                  fontSize: 10,
+                  fontWeight: pw.FontWeight.bold
+                ),
+              ),),
+          ),
+          _flockDetailTable(context, Utils.flock_details!),
+          pw.Container(
+            alignment: pw.Alignment.topLeft,
+            margin: pw.EdgeInsets.only(top: 10,bottom: 10),
+            child: pw.Directionality(
+              textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+              child: pw.Text(
+                'Reductions by reason'.tr(),
+                style: pw.TextStyle(
+                    color: PdfColors.black,
+                    fontSize: 10,
+                    fontWeight: pw.FontWeight.bold
+                ),
+              ),),
+          ),
+          _reductioncontentTable(context),
           pw.Container(
               margin: pw.EdgeInsets.only(top: 10),
               child: pw.Row(
@@ -160,217 +205,155 @@ class Invoice {
   }
 
   pw.Widget _buildHeader(pw.Context context) {
-    return pw.Container(
-      height: 175,
-      child: pw.Column(
-        children: [
-          pw.Expanded(
-            child: pw.Column(
-              mainAxisSize: pw.MainAxisSize.min,
-              children: [
-                pw.Container(
-                  alignment: pw.Alignment.center,
-                  padding: const pw.EdgeInsets.only(bottom: 8, left: 30),
-                  height: 70,
-                  child:
-                  imageData != null ? pw.Image(pw.MemoryImage(imageData!), ) : pw.PdfLogo(),
-                ),
-                // pw.Container(
-                //   color: baseColor,
-                //   padding: pw.EdgeInsets.only(top: 3),
-                // ),
-              ],
-            ),
+    return pw.Directionality(
+      textDirection: direction ? pw.TextDirection.ltr : pw.TextDirection.rtl,
+      child: pw.Container(
+        padding: const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: pw.BoxDecoration(
+          border: pw.Border(
+            bottom: pw.BorderSide(color: PdfColors.grey400, width: 1),
           ),
-          pw.Expanded(
-            child: pw.Column(
-              children: [
-                pw.Container(
-                  height: 30,
-                  padding: const pw.EdgeInsets.only(left: 20),
-                  alignment: pw.Alignment.center,
-                  child: pw.Directionality(
-                  textDirection: direction? pw.TextDirection.ltr : pw.TextDirection.rtl,
-                  child: pw.Text(
-                   Utils.INVOICE_HEADING.tr(),
-                    style: pw.TextStyle(
-                      color: PdfColors.blue,
-                      fontWeight: pw.FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),),
-                ),
+        ),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
+          children: [
+            // LOGO
+            pw.Container(
+              height: 70,
+              alignment: pw.Alignment.center,
+              child: imageData != null
+                  ? pw.Image(pw.MemoryImage(imageData!))
+                  : pw.PdfLogo(),
+            ),
+            pw.SizedBox(height: 10),
 
-                pw.Container(
-                  height: 30,
-                  padding: const pw.EdgeInsets.only(left: 20,top: 10),
-                  alignment: pw.Alignment.center,
+            // HEADER TITLE
+            pw.Text(
+              Utils.INVOICE_HEADING.tr(),
+              style: pw.TextStyle(
+                color: PdfColors.blue700,
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 22,
+              ),
+            ),
+            pw.SizedBox(height: 4),
 
-                  child: pw.Directionality(
-                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                    child: pw.Text(
-                      'Flock Inventory Report'.tr(),
-                      style: pw.TextStyle(
-                        color: PdfColors.black,
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),),
+            // REPORT TITLE
+            pw.Text(
+              'Flock Inventory Report'.tr(),
+              style: pw.TextStyle(
+                color: PdfColors.black,
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            pw.SizedBox(height: 6),
 
-                ),
-
-                pw.Container(
-                  height: 20,
-
-                  padding: const pw.EdgeInsets.only(left: 20, top: 5),
-                  alignment: pw.Alignment.center,
-                  child: pw.Text(
-                    Utils.INVOICE_DATE,
-                    style: pw.TextStyle(
-                      color: PdfColors.black,
-                      fontWeight: pw.FontWeight.normal,
-                      fontSize: 16,
-                    ),
+            // DATE
+            pw.Container(
+              padding: const pw.EdgeInsets.symmetric(vertical: 2),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.grey200,
+                borderRadius: pw.BorderRadius.circular(5),
+              ),
+              child: pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                child: pw.Text(
+                  Utils.INVOICE_DATE,
+                  style: pw.TextStyle(
+                    color: PdfColors.black,
+                    fontSize: 14,
                   ),
                 ),
-
-              ],
+              ),
             ),
-          ),
-          if (context.pageNumber > 1) pw.SizedBox(height: 20)
-        ],
+            if (context.pageNumber > 1) pw.SizedBox(height: 15),
+          ],
+        ),
+      ),
+    );
+  }
+  pw.Widget _buildSummary(pw.Context context) {
+    return pw.Directionality(
+      textDirection: direction ? pw.TextDirection.ltr : pw.TextDirection.rtl,
+      child: pw.Container(
+        padding: pw.EdgeInsets.all(10),
+        margin: pw.EdgeInsets.only(top: 10),
+        decoration: pw.BoxDecoration(
+          border: pw.Border.all(color: PdfColors.grey300, width: 1),
+          borderRadius: pw.BorderRadius.circular(8),
+          color: PdfColors.white,
+        ),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            // 🔷 Title
+            pw.Container(
+              alignment: pw.Alignment.center,
+              margin: pw.EdgeInsets.only(bottom: 10),
+              child: pw.Text(
+                "SUMMARY".tr(),
+                style: pw.TextStyle(
+                  color: PdfColors.blue,
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
+            ),
+
+            // 🟢 Birds Added
+            _buildSummaryRow('Birds Added'.tr(), Utils.TOTAL_BIRDS_ADDED, PdfColors.green.shade(700)),
+
+            // Divider
+            pw.Divider(color: PdfColors.grey300, thickness: 0.8),
+
+            // 🔴 Birds Reduced
+            _buildSummaryRow('Birds Reduced'.tr(), Utils.TOTAL_BIRDS_REDUCED, PdfColors.red.shade(700)),
+
+            // Divider
+            pw.Divider(color: PdfColors.grey300, thickness: 0.8),
+
+            // ⚫ Active Birds (Highlighted)
+            _buildSummaryRow(
+              'Active Birds'.tr(),
+              Utils.TOTAL_ACTIVE_BIRDS,
+              PdfColors.black,
+              isBold: true,
+              fontSize: 18,
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  pw.Widget _buildSummary(pw.Context context) {
-    return
-      pw.Directionality(
-        textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-      child:pw.Container(
-      height: 120,
-      margin: pw.EdgeInsets.only(top: 10),
-      child: pw.Column(
+  /// 📌 **Reusable Summary Row**
+  pw.Widget _buildSummaryRow(String label, String value, PdfColor color, {bool isBold = false, double fontSize = 16}) {
+    return pw.Padding(
+      padding: pw.EdgeInsets.symmetric(vertical: 4),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-
-          pw.Expanded(
-            child: pw.Column(
-
-              children: [
-                pw.Container(
-                  height: 30,
-
-
-                  child:  pw.Text(
-                      "SUMMARY".tr(),
-                      style: pw.TextStyle(
-                        color: PdfColors.blue,
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    ),
-
-                ),
-
-                pw.Row(
-
-                  children: [
-                    pw.Container(
-                      alignment: pw.Alignment.topLeft,
-
-
-                      child: pw.Text(
-                          'Birds Added'.tr()+": ",
-                          style: pw.TextStyle(
-                            color: PdfColors.black,
-                            fontSize: 16,
-
-
-                          ),
-                        ),
-
-                    ),pw.Container(
-                      margin: pw.EdgeInsets.only(left: 10),
-                      alignment: pw.Alignment.topLeft,
-                      child: pw.Text(
-                        Utils.TOTAL_BIRDS_ADDED,
-                        style: pw.TextStyle(
-                          color: PdfColors.black,
-                          fontWeight: pw.FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ]
-                ),
-
-                pw.Row(
-                    children: [
-                      pw.Container(
-                        alignment: pw.Alignment.topLeft,
-
-
-                        child:  pw.Text(
-                            'Birds Reduced'.tr()+": ",
-                            style: pw.TextStyle(
-                              color: PdfColors.black,
-                              fontSize: 16,
-                            ),
-                          ),
-
-                      ),pw.Container(
-                        alignment: pw.Alignment.topLeft,
-                        margin: pw.EdgeInsets.only(left: 10),
-                        child: pw.Text(
-                          Utils.TOTAL_BIRDS_REDUCED,
-                          style: pw.TextStyle(
-                            color: PdfColors.black,
-                            fontWeight: pw.FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ]
-                ),
-
-                pw.Row(
-                    children: [
-                      pw.Container(
-                        alignment: pw.Alignment.topLeft,
-
-
-                        child:  pw.Text(
-                            'Active Birds'.tr()+":",
-                            style: pw.TextStyle(
-                              color: PdfColors.black,
-                              fontSize: 16,
-                            ),
-                          ),
-
-                      ),pw.Container(
-                        alignment: pw.Alignment.topLeft,
-                        margin: pw.EdgeInsets.only(left: 10),
-                        child: pw.Text(
-                          Utils.TOTAL_ACTIVE_BIRDS,
-                          style: pw.TextStyle(
-                            color: PdfColors.black,
-                            fontWeight: pw.FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ]
-                )
-
-              ],
+          pw.Text(
+            label + ":",
+            style: pw.TextStyle(
+              fontSize: 16,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.black,
             ),
           ),
-
+          pw.Text(
+            value,
+            style: pw.TextStyle(
+              fontSize: fontSize,
+              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+              color: color,
+            ),
+          ),
         ],
-      ),),
+      ),
     );
   }
-
 
   pw.Widget _buildFooter(pw.Context context) {
     return pw.Row(
@@ -619,15 +602,14 @@ class Invoice {
     ];
 
     return pw.TableHelper.fromTextArray(
-      border: null,
+      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5), // Soft border
       cellAlignment: pw.Alignment.centerLeft,
       headerDecoration: pw.BoxDecoration(
-        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
-        color: PdfColors.blue,
+        color: PdfColors.blue, // Blue header background
       ),
-      headerHeight: 25,
-      cellHeight: 40,
-      headerDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
+      headerHeight: 30,
+      cellHeight: 35,
+      headerDirection: direction ? pw.TextDirection.ltr : pw.TextDirection.rtl,
       cellAlignments: {
         0: pw.Alignment.centerLeft,
         1: pw.Alignment.centerLeft,
@@ -635,28 +617,33 @@ class Invoice {
         3: pw.Alignment.center,
         4: pw.Alignment.centerRight,
       },
-      headerStyle: pw.TextStyle(
-        color: _baseTextColor,
-        fontSize: 10,
-        fontWeight: pw.FontWeight.bold,
 
+      // 🔷 Header Styling
+      headerStyle: pw.TextStyle(
+        color: PdfColors.white,
+        fontSize: 11,
+        fontWeight: pw.FontWeight.bold,
       ),
-      cellStyle: const pw.TextStyle(
-        color: _darkColor,
+
+      // 🔹 Cell Styling
+      cellStyle: pw.TextStyle(
+        color: PdfColors.black,
         fontSize: 10,
       ),
-       rowDecoration: pw.BoxDecoration(
+
+      // 🟡 Row Alternating Backgrounds
+      rowDecoration: pw.BoxDecoration(
+        color: PdfColors.grey100,
         border: pw.Border(
-          bottom: pw.BorderSide(
-            color: accentColor,
-            width: .5,
-          ),
+          bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
         ),
       ),
+
       headers: List<String>.generate(
         tableHeaders.length,
             (col) => tableHeaders[col].tr(),
       ),
+
       data: List<List<String>>.generate(
         products.length,
             (row) => List<String>.generate(
@@ -666,6 +653,108 @@ class Invoice {
       ),
     );
   }
+
+  pw.Widget _flockDetailTable(pw.Context context, List<Flock_Detail> flocks) {
+    final tableHeaders = [
+      'Flock Name'.tr(),
+      'ACQUSITION_TYPE'.tr(),
+      'ACQUSITION'.tr()+' '+'DATE'.tr(),
+      'Item Type'.tr(),
+      'Item Count'.tr(),
+    ];
+
+    return pw.TableHelper.fromTextArray(
+      border: pw.TableBorder.all(color: PdfColors.grey, width: 0.5),
+      headerDecoration: pw.BoxDecoration(
+        color: PdfColors.blue,
+        borderRadius: pw.BorderRadius.circular(4),
+      ),
+      headerHeight: 30,
+      cellHeight: 35,
+      headerStyle: pw.TextStyle(
+        color: PdfColors.white,
+        fontSize: 12,
+        fontWeight: pw.FontWeight.bold,
+      ),
+      cellStyle: pw.TextStyle(
+        color: PdfColors.black,
+        fontSize: 10,
+      ),
+      cellAlignments: {
+        0: pw.Alignment.centerLeft,
+        1: pw.Alignment.center,
+        2: pw.Alignment.center,
+        3: pw.Alignment.center,
+        4: pw.Alignment.centerRight,
+      },
+      headers: tableHeaders, // Now using dynamically translated headers
+      data: flocks.map((flock) => [
+        flock.f_name.tr(),
+        flock.acqusition_type.tr(),
+        flock.acqusition_date.tr(),
+        flock.item_type.tr(),
+        flock.item_count.toString(),
+      ]).toList(),
+    );
+  }
+
+  pw.Widget _reductioncontentTable(pw.Context context) {
+    const tableHeaders = [
+      'Reduction Reason',
+      'Total Reduced'
+    ];
+
+    return pw.TableHelper.fromTextArray(
+      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5), // Soft border
+      cellAlignment: pw.Alignment.centerLeft,
+      headerDecoration: pw.BoxDecoration(
+        color: PdfColors.blue, // Blue header background
+      ),
+      headerHeight: 30,
+      cellHeight: 35,
+      headerDirection: direction ? pw.TextDirection.ltr : pw.TextDirection.rtl,
+      cellAlignments: {
+        0: pw.Alignment.centerLeft,
+        1: pw.Alignment.centerRight,
+      },
+
+      // 🔷 Header Styling
+      headerStyle: pw.TextStyle(
+        color: PdfColors.white,
+        fontSize: 11,
+        fontWeight: pw.FontWeight.bold,
+      ),
+
+      // 🔹 Cell Styling
+      cellStyle: pw.TextStyle(
+        color: PdfColors.black,
+        fontSize: 10,
+      ),
+
+      // 🟡 Row Alternating Backgrounds
+      rowDecoration: pw.BoxDecoration(
+        color: PdfColors.grey100,
+        border: pw.Border(
+          bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
+        ),
+      ),
+
+      headers: List<String>.generate(
+        tableHeaders.length,
+            (col) => tableHeaders[col].tr(),
+      ),
+
+      data: List<List<String>>.generate(
+        Utils.reductionByReason!.length,
+            (row) => [
+              Utils.reductionByReason![row].reason.tr(), // Reduction reason
+              Utils.reductionByReason![row].totalCount.toString(), // Total reduced count
+        ],
+      ),
+    );
+  }
+
+
 }
 
 String _formatCurrency(double amount) {

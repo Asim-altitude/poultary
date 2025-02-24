@@ -109,63 +109,96 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
       bottomNavigationBar: BottomAppBar(
         color: Colors.transparent,
         child: Container(
-          height: 60,
+          height: 65, // Slightly increased height for better touch area
           width: widthScreen,
-          child: Row(children: [
+          padding: EdgeInsets.symmetric(horizontal: 10), // Added padding for better spacing
+          child: Row(
+            children: [
+              /// 🟢 Vaccination Button
+              Expanded(
+                child: InkWell(
+                  onTap: () {
+                    Utils.vaccine_medicine = "Vaccination";
+                    addNewVacMad();
+                  },
+                  borderRadius: BorderRadius.circular(10), // Rounded ripple effect
+                  child: Container(
+                    height: 55, // Increased height for a more premium feel
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.green.shade700, Colors.green.shade400], // Gradient effect
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(10), // Rounded corners
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.green.shade900.withOpacity(0.2),
+                          blurRadius: 6,
+                          spreadRadius: 1,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add, color: Colors.white, size: 28), // Slightly smaller icon
+                        SizedBox(width: 6), // Space between icon and text
+                        Text(
+                          'Vaccination'.tr(),
+                          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
 
-            Expanded(
-              child: InkWell(
-                onTap: () {
-                  Utils.vaccine_medicine ="Vaccination";
-                  addNewVacMad();
-                },
-                child: Container(
-                  height: 50,
-                  margin: EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: const BorderRadius.all(
-                        Radius.circular(5.0)),
-                    border: Border.all(
-                      color:  Colors.green,
-                      width: 2.0,
+              SizedBox(width: 10), // Space between buttons
+
+              /// 🔹 Medication Button
+              Expanded(
+                child: InkWell(
+                  onTap: () {
+                    Utils.vaccine_medicine = "Medication";
+                    addNewVacMad();
+                  },
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    height: 55,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.blue.shade700, Colors.blue.shade400], // Blue for differentiation
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.shade900.withOpacity(0.2),
+                          blurRadius: 6,
+                          spreadRadius: 1,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add, color: Colors.white, size: 28),
+                        SizedBox(width: 6),
+                        Text(
+                          'Medication'.tr(),
+                          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
                   ),
-                  child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Icon(Icons.add, color: Colors.white, size: 30,),
-                    Text('Vaccination'.tr(), style: TextStyle(
-                        color: Colors.white, fontSize: 18),)
-                  ],),
                 ),
               ),
-            ),
-            Expanded(
-              child: InkWell(
-                onTap: () {
-                  Utils.vaccine_medicine ="Medication";
-                  addNewVacMad();
-                },
-                child: Container(
-                  height: 50,
-                  margin: EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: const BorderRadius.all(
-                        Radius.circular(5.0)),
-                    border: Border.all(
-                      color:  Colors.green,
-                      width: 2.0,
-                    ),
-                  ),
-                  child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Icon(Icons.add, color: Colors.white, size: 30,),
-                    Text('Medication'.tr(), style: TextStyle(
-                        color: Colors.white, fontSize: 18),)
-                  ],),
-                ),
-              ),
-            ),
-          ],),
+            ],
+          ),
         ),
         elevation: 0,
       ),
@@ -184,74 +217,95 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
               Utils.getDistanceBar(),
 
               ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(10),
+                  bottomRight: Radius.circular(10),
+                ),
                 child: Container(
                   decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Utils.getThemeColorBlue(), //(x,y)
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 6,
+                        offset: Offset(0, 3),
                       ),
                     ],
                   ),
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   child: Row(
                     children: [
-                      Container(
-                        alignment: Alignment.center,
-                        width: 50,
-                        height: 50,
-                        child: InkWell(
-                          child: Icon(Icons.arrow_back,
-                              color: Colors.white, size: 30),
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
+                      /// Back Button
+                      InkWell(
+                        borderRadius: BorderRadius.circular(30),
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 45,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.15),
+                          ),
+                          child: Icon(Icons.arrow_back, color: Colors.white, size: 28),
                         ),
                       ),
+
+                      /// Title
                       Expanded(
                         child: Container(
-                            margin: EdgeInsets.only(left: 10),
-                            child: Text(
-                              applied_filter_name.tr(),
-                              textAlign: TextAlign.start,
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold),
-                            )),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          openSortDialog(context, (selectedSort) {
-                            setState(() {
-                              sortOption = selectedSort == "date_desc"
-                                  ? "Date (New)"
-                                  : "Date (Old)";
-                              sortSelected = selectedSort == "date_desc"
-                                  ? "DESC" : "ASC";
-                            });
-
-                            getFilteredTransactions(str_date, end_date);
-
-                          });
-                        },
-                        child: Container(
-                          height: 50,
-                          width: 130,
-                          color: Colors.white.withAlpha(40),
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(horizontal: 5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(child: Text(sortOption, style: TextStyle(fontSize: 12, color: Colors.white))),
-                              Icon(Icons.sort, color: Colors.white),
-
-                            ],
+                          margin: EdgeInsets.only(left: 12),
+                          child: Text(
+                            applied_filter_name.tr(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
 
+                      /// Sort Button
+                      InkWell(
+                        borderRadius: BorderRadius.circular(10),
+                        onTap: () {
+                          openSortDialog(context, (selectedSort) {
+                            setState(() {
+                              sortOption = selectedSort == "date_desc" ? "Date (New)" : "Date (Old)";
+                              sortSelected = selectedSort == "date_desc" ? "DESC" : "ASC";
+                            });
 
+                            getFilteredTransactions(str_date, end_date);
+                          });
+                        },
+                        child: Container(
+                          height: 45,
+                          width: 130,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          alignment: Alignment.center,
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  sortOption.tr(),
+                                  style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Icon(Icons.sort, color: Colors.white, size: 22),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -399,119 +453,158 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                     scrollDirection: Axis.vertical,
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
-                        margin: EdgeInsets.only(left: 8,right: 8,top: 8,bottom: 0),
+                        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(3)),
-
-                            color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 6,
                               spreadRadius: 2,
-                              blurRadius: 2,
-                              offset: Offset(0, 1), // changes position of shadow
+                              offset: Offset(0, 3),
                             ),
                           ],
                         ),
-
-                        child: Container(
-                          color: Colors.white,
-                          child: Row( children: [
-                            Expanded(
-                              child: Container(
-                                margin: EdgeInsets.all(10),
-                                child: Column( children: [
-
-                                  Align(
-                                    alignment: Alignment.topRight,
-                                    child:
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
+                        padding: EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            /// 🟢 Medicine Name & Options Menu
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: RichText(
+                                    text: TextSpan(
                                       children: [
-                                        GestureDetector(
-                                          onTapDown: (TapDownDetails details) {
-                                            selected_id = vac_med_list.elementAt(index).id;
-                                            selected_index = index;
-                                            showMemberMenu(details.globalPosition);
-                                          },
-                                          child: Container(
-                                            width: 30,
-                                            height: 30,
-                                            padding: EdgeInsets.all(5),
-                                            child: Image.asset('assets/options.png'),
+                                        TextSpan(
+                                          text: "${vac_med_list[index].medicine!.tr()} ",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                            color: Utils.getThemeColorBlue(),
                                           ),
                                         ),
-
-                                      ],
-                                    ),),
-
-                                  Row(
-                                    children: [
-                                      Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).medicine!.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Utils.getThemeColorBlue()),)),
-                                      Container(margin: EdgeInsets.all(0), child: Text(" ("+vac_med_list.elementAt(index).f_name!.tr()+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-
-                                    ],
-                                  ),
-                                  Align(
-                                    alignment: Alignment.bottomRight,
-                                    child: Row(
-                                      children: [
-                                        Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).type == 'Medication'? 'Birds: '.tr():'Birds: '.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-                                        Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).bird_count!.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
-
-                                      ],
-                                    ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      Container(margin: EdgeInsets.all(0), child: Text('Disease: '.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-                                      Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).disease!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
-
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).type == 'Medication'?'Med by: '.tr():'Vac by: ', style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-                                          Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).doctor_name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
-
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Container(margin: EdgeInsets.all(0), child: Text(vac_med_list.elementAt(index).type == 'Medication'?'  On: '.tr():'  On: '.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-                                          Container(margin: EdgeInsets.all(5), child: Text(Utils.getFormattedDate(vac_med_list.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),)),
-
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-
-
-                                  Container(
-                                    margin: EdgeInsets.all(5),
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.format_quote,size: 15,),
-                                        SizedBox(width: 3,),
-                                        Container(
-                                          width: widthScreen-70,
-                                          child: Text(
-                                            vac_med_list.elementAt(index).short_note!.isEmpty ? 'NO_NOTES'.tr() : vac_med_list.elementAt(index).short_note!
-                                            ,maxLines: 3, style: TextStyle(fontSize: 14, color: Colors.black),),
+                                        TextSpan(
+                                          text: "(${vac_med_list[index].f_name!.tr()})",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.normal,
+                                            fontSize: 16,
+                                            color: Colors.black54, // Less prominent
+                                          ),
                                         ),
                                       ],
                                     ),
-                                  )
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTapDown: (TapDownDetails details) {
+                                    selected_id = vac_med_list[index].id;
+                                    selected_index = index;
+                                    showMemberMenu(details.globalPosition);
+                                  },
+                                  child: Icon(Icons.more_vert, color: Colors.black54),
+                                ),
+                              ],
+                            ),
 
-                                  // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                ],),
+                            SizedBox(height: 6),
+                            Divider(thickness: 1, color: Colors.grey.withOpacity(0.3)),
+
+                            /// 📅 Date Section (Aligned Right)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.calendar_today, size: 14, color: Colors.black54),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    Utils.getFormattedDate(vac_med_list[index].date.toString()),
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
+                                  ),
+                                ],
                               ),
                             ),
-                          ]),
+
+                            SizedBox(height: 6),
+
+                            /// 🏥 Birds & Disease
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Image.asset("assets/bird_icon.png", width: 25, height: 25),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      'Birds: '.tr(),
+                                      style: TextStyle(fontSize: 14, color: Colors.black),
+                                    ),
+                                    Text(
+                                      vac_med_list[index].bird_count!.toString(),
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(height: 6),
+                            Row(
+                              children: [
+                                Icon(Icons.coronavirus, size: 16, color: Colors.red),
+                                SizedBox(width: 5),
+                                Text('Disease: '.tr(), style: TextStyle(fontSize: 14, color: Colors.black)),
+                                Text(
+                                  vac_med_list[index].disease!,
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 6),
+
+                            /// 👨‍⚕️ Doctor Name
+                            Row(
+                              children: [
+                                Icon(Icons.medical_services, size: 16, color: Colors.green),
+                                SizedBox(width: 5),
+                                Text(
+                                  vac_med_list[index].type == 'Medication' ? 'Med by: '.tr() : 'Vac by: '.tr(),
+                                  style: TextStyle(fontSize: 14, color: Colors.black),
+                                ),
+                                Text(
+                                  vac_med_list[index].doctor_name!,
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
+                                ),
+                              ],
+                            ),
+
+                            /// 📝 Notes Section
+                            if (vac_med_list[index].short_note != null && vac_med_list[index].short_note!.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(Icons.notes, size: 16, color: Colors.black54),
+                                    SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        vac_med_list[index].short_note!,
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(fontSize: 14, color: Colors.black),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
                         ),
                       );
+
 
                     }),
               ) :  Utils.getCustomEmptyMessage("assets/p_health.png", "No vaccination/medication added")
@@ -1021,7 +1114,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
         PopupMenuItem(
           value: 1,
           child: Text(
-            "DELETE RECORD".tr(),
+            "DELETE_RECORD".tr(),
             style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
@@ -1115,7 +1208,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
 
 
   String sortSelected = "DESC"; // Default label
-  String sortOption = "Date (Newest)";
+  String sortOption = "Date (new)";
   void openSortDialog(BuildContext context, Function(String) onSortSelected) {
     showModalBottomSheet(
       context: context,
@@ -1128,17 +1221,17 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Sort By", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("Sort By".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               Divider(),
               ListTile(
-                title: Text("Date (Newest)"),
+                title: Text("Date (New)".tr()),
                 onTap: () {
                   onSortSelected("date_desc");
                   Navigator.pop(context);
                 },
               ),
               ListTile(
-                title: Text("Date (Oldest)"),
+                title: Text("Date (Old)".tr()),
                 onTap: () {
                   onSortSelected("date_asc");
                   Navigator.pop(context);

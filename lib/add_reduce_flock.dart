@@ -138,78 +138,91 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       bottomNavigationBar: BottomAppBar(
         color: Colors.transparent,
         child: Container(
-          height: 60,
+          height: 65,
           width: widthScreen,
-          child: Row(children: [
+          child: Row(
+            children: [
+              /// Add Birds Button
+              Expanded(
+                child: InkWell(
+                  onTap: () => addNewCollection(),
+                  borderRadius: BorderRadius.circular(10),
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 300),
+                    height: 55,
+                    margin: EdgeInsets.symmetric(horizontal: 6),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.green.shade700, Colors.green.shade500],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.green.withOpacity(0.4),
+                          blurRadius: 6,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add_circle_outline_sharp, color: Colors.white, size: 28),
+                        SizedBox(width: 6),
+                        Text(
+                          'ADD_BIRDS'.tr(),
+                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
 
-            Expanded(
-              child: InkWell(
-                onTap: () {
-                  addNewCollection();
-                },
-                child: Container(
-                  height: 50,
-                  margin: EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: const BorderRadius.all(
-                        Radius.circular(5.0)),
-                    border: Border.all(
-                      color:  Colors.green,
-                      width: 2.0,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 2,
-                        offset: Offset(0, 1), // changes position of shadow
+              /// Reduce Birds Button
+              Expanded(
+                child: InkWell(
+                  onTap: () => reduceCollection(),
+                  borderRadius: BorderRadius.circular(10),
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 300),
+                    height: 55,
+                    margin: EdgeInsets.symmetric(horizontal: 6),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.red.shade700, Colors.red.shade500],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                    ],
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.red.withOpacity(0.4),
+                          blurRadius: 6,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.remove_circle_outline, color: Colors.white, size: 28),
+                        SizedBox(width: 6),
+                        Text(
+                          'REDUCE_BIRDS'.tr(),
+                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Icon(Icons.add_circle_outline_sharp, color: Colors.white, size: 25,),SizedBox(width: 4,),
-                    Text('ADD_BIRDS'.tr(), style: TextStyle(
-                        color: Colors.white, fontSize: 16),)
-                  ],),
                 ),
               ),
-            ),
-            Expanded(
-              child: InkWell(
-                onTap: () {
-                  reduceCollection();
-                },
-                child: Container(
-                  height: 50,
-                  margin: EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: const BorderRadius.all(
-                        Radius.circular(5.0)),
-                    border: Border.all(
-                      color:  Colors.red,
-                      width: 2.0,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 2,
-                        offset: Offset(0, 1), // changes position of shadow
-                      ),
-                    ],
-                  ),
-                  child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Icon(Icons.indeterminate_check_box_outlined, color: Colors.white, size: 25,),SizedBox(width: 4,),
-                    Text('REDUCE_BIRDS'.tr(), style: TextStyle(
-                        color: Colors.white, fontSize: 16),)
-                  ],),
-                ),
-              ),
-            ),
-          ],),
+            ],
+          ),
         ),
+
         elevation: 0,
       ),
       body:SafeArea(
@@ -226,73 +239,95 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
               Utils.getDistanceBar(),
 
               ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(10),
+                  bottomRight: Radius.circular(10),
+                ),
                 child: Container(
                   decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Utils.getThemeColorBlue(), //(x,y)
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 6,
+                        offset: Offset(0, 3),
                       ),
                     ],
                   ),
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   child: Row(
                     children: [
-                      Container(
-                        alignment: Alignment.center,
-                        width: 50,
-                        height: 50,
-                        child: InkWell(
-                          child: Icon(Icons.arrow_back,
-                              color: Colors.white, size: 30),
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
+                      /// Back Button
+                      InkWell(
+                        borderRadius: BorderRadius.circular(30),
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 45,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.15),
+                          ),
+                          child: Icon(Icons.arrow_back, color: Colors.white, size: 28),
                         ),
                       ),
+
+                      /// Title
                       Expanded(
                         child: Container(
-                            margin: EdgeInsets.only(left: 10),
-                            child: Text(
-                              applied_filter_name.tr(),
-                              textAlign: TextAlign.start,
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold),
-                            )),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          openSortDialog(context, (selectedSort) {
-                            setState(() {
-                              sortOption = selectedSort == "date_desc"
-                                  ? "Date (New)"
-                                  : "Date (Old)";
-                              sortSelected = selectedSort == "date_desc"
-                                  ? "DESC" : "ASC";
-                            });
-
-                            getFilteredTransactions(str_date, end_date);
-
-                          });
-                        },
-                        child: Container(
-                          height: 50,
-                          width: 130,
-                          color: Colors.white.withAlpha(40),
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(horizontal: 5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(child: Text(sortOption, style: TextStyle(fontSize: 12, color: Colors.white))),
-                              Icon(Icons.sort, color: Colors.white),
-
-                            ],
+                          margin: EdgeInsets.only(left: 12),
+                          child: Text(
+                            applied_filter_name.tr(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
 
+                      /// Sort Button
+                      InkWell(
+                        borderRadius: BorderRadius.circular(10),
+                        onTap: () {
+                          openSortDialog(context, (selectedSort) {
+                            setState(() {
+                              sortOption = selectedSort == "date_desc" ? "Date (New)" : "Date (Old)";
+                              sortSelected = selectedSort == "date_desc" ? "DESC" : "ASC";
+                            });
+
+                            getFilteredTransactions(str_date, end_date);
+                          });
+                        },
+                        child: Container(
+                          height: 45,
+                          width: 130,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          alignment: Alignment.center,
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  sortOption.tr(),
+                                  style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Icon(Icons.sort, color: Colors.white, size: 22),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -305,297 +340,258 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                       height: 45,
                       alignment: Alignment.centerRight,
                       padding: EdgeInsets.only(left: 10),
-                      margin: EdgeInsets.only(top: 10,left: 10,right: 5),
+                      margin: EdgeInsets.only(top: 10, left: 10, right: 5),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: const BorderRadius.all(
-                            Radius.circular(10.0)),
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color:  Utils.getThemeColorBlue(),
-                          width: 1.0,
+                          color: Utils.getThemeColorBlue(),
+                          width: 1.2,
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 4,
+                            offset: Offset(1, 2),
+                          ),
+                        ],
                       ),
                       child: getDropDownList(),
                     ),
                   ),
                   InkWell(
-                      onTap: () {
-                        openDatePicker();
-                      },
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Container(
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(10.0)),
-                            border: Border.all(
-                              color:  Utils.getThemeColorBlue(),
-                              width: 1.0,
-                            ),
-                          ),
-                          margin: EdgeInsets.only(right: 10,top: 15,bottom: 5),
-                          padding: EdgeInsets.only(left: 5,right: 5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text(date_filter_name, style: TextStyle(fontSize: 14),),
-                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
-                            ],
-                          ),
+                    onTap: () {
+                      openDatePicker();
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      height: 45,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Utils.getThemeColorBlue(),
+                          width: 1.2,
                         ),
-                      )),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 4,
+                            offset: Offset(1, 2),
+                          ),
+                        ],
+                      ),
+                      margin: EdgeInsets.only(right: 10, top: 15, bottom: 5),
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            date_filter_name,
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                          ),
+                          Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue()),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
+
+              /// Attractive Filter Buttons
               Container(
                 height: 50,
-                width: widthScreen ,
-                margin: EdgeInsets.only(left: 10,right: 10,bottom: 5),
-                child: Row(children: [
-
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        selected = 1;
-                        filter_name ='All';
-                        getFilteredTransactions(str_date, end_date);
-                      },
-                      child: Container(
-                        height: 40,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: selected == 1 ? Utils.getThemeColorBlue() : Colors.white,
-                          borderRadius: BorderRadius.only(topLeft: Radius.circular(10)
-                              ,bottomLeft: Radius.circular(10)),
-                          border: Border.all(
-                            color:  Utils.getThemeColorBlue(),
-                            width: 1.0,
-                          ),
-                        ),
-                        child: Text('All'.tr(), style: TextStyle(
-                            color: selected==1 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        selected = 2;
-                        filter_name ='Addition';
-                        getFilteredTransactions(str_date, end_date);
-
-                      },
-                      child: Container(
-                        height: 40,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: selected==2 ? Utils.getThemeColorBlue() : Colors.white,
-
-
-                          border: Border.all(
-                            color: Utils.getThemeColorBlue(),
-                            width: 1.0,
-                          ),
-                        ),
-                        child: Text('Addition'.tr(), style: TextStyle(
-                            color: selected==2 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        selected = 3;
-                        filter_name ='Reduction';
-                        getFilteredTransactions(str_date, end_date);
-                      },
-                      child: Container(
-                        height: 40,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: selected==3 ? Utils.getThemeColorBlue() : Colors.white,
-                          borderRadius: BorderRadius.only(topRight: Radius.circular(10)
-                              ,bottomRight: Radius.circular(10)),
-                          border: Border.all(
-                            color:  Utils.getThemeColorBlue(),
-                            width: 1.0,
-                          ),
-                        ),
-                        child: Text('Reduction'.tr(), style: TextStyle(
-                            color: selected==3 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
-                      ),
-                    ),
-                  ),
-                ],),
+                width: widthScreen,
+                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: Row(
+                  children: [
+                    buildFilterButton('All', 1),
+                    buildFilterButton('Addition', 2),
+                    buildFilterButton('Reduction', 3),
+                  ],
+                ),
               ),
 
               list.length > 0 ? Container(
                 height: heightScreen - 290,
                 width: widthScreen,
                 child: ListView.builder(
-                    itemCount: list.length,
-                    scrollDirection: Axis.vertical,
-                    itemBuilder: (BuildContext context, int index) {
-                      return InkWell(
-                        onTap: () {
-                          },
-                        child: Container(
-                          margin: EdgeInsets.only(left: 8,right: 8,top: 8,bottom: 0),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 2,
-                                blurRadius: 2,
-                                offset: Offset(0, 1), // changes position of shadow
-                              ),
-                            ],
-                              color: Colors.white,
-                          ),
-                        child: Container(
-                          color: Colors.white,
-                          child:Column(
-                            children: [
-                              list.elementAt(index).transaction_id!= "-1"?Align(
-                                alignment: Alignment.topRight,
-                                child:
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    GestureDetector(
-                                      onTapDown: (TapDownDetails details) async {
-                                        selected_id = list.elementAt(index).f_detail_id;
-                                        selected_index = index;
-                                        if(list.elementAt(selected_index!).transaction_id != "-1") {
-                                          final result = await Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>  ViewCompleteTransaction(transaction_id: list.elementAt(selected_index!).transaction_id, isTransaction: false,)),
-                                          );
+                  itemCount: list.length,
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  itemBuilder: (BuildContext context, int index) {
+                    var item = list[index];
+                    bool hasTransaction = item.transaction_id != "-1";
 
-                                          getData(date_filter_name);
-                                        }else {
-                                          showMemberMenu(
-                                              details.globalPosition);
-                                        }
-                                      },
-                                      child: Container(
-                                        padding: EdgeInsets.all(5),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.all(5),
-                                              child: Text('View Details'.tr(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w200, color: Utils.getThemeColorBlue()),)),
-
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-
-                                  ],
-                                ),)  : Align(
-                                alignment: Alignment.topRight,
-                                child:
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    GestureDetector(
-                                      onTapDown: (TapDownDetails details) async {
-                                        selected_id = list.elementAt(index).f_detail_id;
-                                        selected_index = index;
-                                        if(list.elementAt(selected_index!).transaction_id != "-1") {
-                                          final result = await Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>  ViewCompleteTransaction(transaction_id: list.elementAt(selected_index!).transaction_id, isTransaction: false,)),
-                                          );
-
-                                          getData(date_filter_name);
-                                        }else {
-                                          showMemberMenu(
-                                              details.globalPosition);
-                                        }
-                                      },
-                                      child: Container(
-                                        width: 30,
-                                        height: 30,
-                                        padding: EdgeInsets.all(5),
-                                        child: Image.asset(list.elementAt(index).transaction_id!= "-1"?'assets/view_icon.png':'assets/options.png'),
-                                      ),
-                                    ),
-
-                                  ],
-                                ),) ,
-                              Row( children: [
+                    return Card(
+                      elevation: 3,
+                      margin: EdgeInsets.only(bottom: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(14),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            /// **Header: Name + Menu Icon**
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
                                 Expanded(
-                                  child: Container(
-                                    color: Colors.white,
-                                    padding: EdgeInsets.only(left: 10,right: 10,bottom: 10),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.start,children: [
-                                      Row(
-                                        children: [
-                                          Container(margin: EdgeInsets.all(0), child: Text(list.elementAt(index).f_name, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 17, color: Colors.black),)),
-                                          Container(margin: EdgeInsets.all(0), child: Text(" ("+list.elementAt(index).item_type.tr()+")", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: list.elementAt(index)!.item_type=='Reduction'? Colors.red:Colors.green),)),
-                                        ],
-                                      ),
-                                      Container(
-                                        child: Column(
-                                          children: [
-                                            Container(
-                                              child: Row(
-                                                children: [
-                                                  Container( margin: EdgeInsets.only(right: 5), child: Text(list.elementAt(index).item_count.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 20, color:list.elementAt(index).item_type == 'Addition'?Colors.black:Colors.black),)),
-                                                  Text("BIRDS".tr(), style: TextStyle(color: Colors.black, fontSize: 12),),
-                                                  Text("  "+"ON".tr() , style: TextStyle(color: Utils.getThemeColorBlue(),fontWeight: FontWeight.bold, fontSize: 14),),
-                                                  Align(
-                                                      alignment: Alignment.topLeft,
-                                                      child: Container(margin: EdgeInsets.all(5), child: Text(Utils.getFormattedDate(list.elementAt(index).acqusition_date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),))),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-
-                                      list.elementAt(index).item_type == 'Reduction'? Align(
-                                          alignment: Alignment.topLeft,
-                                          child: Container( child: Text(list.elementAt(index).reason.toString().tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Utils.getThemeColorBlue()),))) : Align(
-                                          alignment: Alignment.topLeft,
-                                          child: Container( child: Text(list.elementAt(index).acqusition_type.toString().tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Utils.getThemeColorBlue()),))),
-                                      // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                    ],),
+                                  child: Text(
+                                    item.f_name,
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
                                   ),
                                 ),
 
-                              ]),
+                                /// **Menu Icon**
+                               !hasTransaction? GestureDetector(
+                                  onTapDown: (TapDownDetails details) {
+                                    selected_id = item.f_detail_id;
+                                    selected_index = index;
+                                    showMemberMenu(details.globalPosition);
+                                  },
+                                  child: Icon(Icons.more_vert, color: Colors.black54),
+                                ):SizedBox(height: 1,),
+                              ],
+                            ),
+                            SizedBox(height: 10),
+
+                            /// **Bird Count with Addition/Reduction Label**
+                            Row(
+                              children: [
+                                Image.asset("assets/bird_icon.png", width: 30, height: 30),
+                                SizedBox(width: 6),
+                                Text(
+                                  "${item.item_count} "+"BIRDS".tr(),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Container(
+                                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+                                  decoration: BoxDecoration(
+                                    color: item.item_type == 'Reduction'
+                                        ? Colors.red.withOpacity(0.15)
+                                        : Colors.green.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    item.item_type.tr(),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: item.item_type == 'Reduction' ? Colors.red : Colors.green,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10),
+
+                            /// **Date Positioned Properly Below Birds Count**
+                            Row(
+                              children: [
+                                Icon(Icons.calendar_today, size: 16, color: Colors.blueGrey),
+                                SizedBox(width: 6),
+                                Text(
+                                  Utils.getFormattedDate(item.acqusition_date.toString()),
+                                  style: TextStyle(fontSize: 14, color: Colors.black54),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10),
+
+                            /// **Reason / Acquisition Type**
+                            Text(
+                              item.item_type == 'Reduction' ? item.reason.toString().tr() : item.acqusition_type.toString().tr(),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.blueAccent,
+                              ),
+                            ),
+                            SizedBox(height: 12),
+
+                            /// **Notes Section**
+                            if (item.short_note.isNotEmpty)
                               Container(
-                                margin: EdgeInsets.only(left: 10,right: 10,bottom: 10),
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                                 child: Row(
                                   children: [
-                                    Icon(Icons.format_quote,size: 15,),
-                                    SizedBox(width: 3,),
-                                    Container(
-                                      width: widthScreen - 60,
+                                    Icon(Icons.notes, size: 18, color: Colors.black54),
+                                    SizedBox(width: 6),
+                                    Expanded(
                                       child: Text(
-                                        list.elementAt(index).short_note.isEmpty? 'NO_NOTES'.tr() : list.elementAt(index).short_note
-                                      ,maxLines: 3, style: TextStyle(fontSize: 14, color: Colors.black),),
+                                        item.short_note,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(fontSize: 14, color: Colors.black87),
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ],
-                          )
+                            SizedBox(height: 12),
+
+                            /// **Action Button (View Details)**
+                            if (hasTransaction)
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    selected_id = item.f_detail_id;
+                                    selected_index = index;
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ViewCompleteTransaction(
+                                          transaction_id: item.transaction_id,
+                                          isTransaction: false,
+                                        ),
+                                      ),
+                                    );
+                                    getData(date_filter_name);
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blueAccent,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.visibility, size: 18, color: Colors.white),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          "View Details".tr(),
+                                          style: TextStyle(fontSize: 14, color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
-                      );
-
-                    }),
-              ) : Utils.getCustomEmptyMessage("assets/add_reduce_.png", "NO_BIRDS_ADD_REDUCE")
+                    );
+                  },
+                ),
+              )
+                    : Utils.getCustomEmptyMessage("assets/add_reduce_.png", "NO_BIRDS_ADD_REDUCE")
 
 
                    /* Text(
@@ -832,6 +828,63 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       ),),),),),);
   }
 
+  /// **Filter Button Builder**
+  Widget buildFilterButton(String label, int id) {
+    bool isSelected = selected == id;
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          selected = id;
+          filter_name = label;
+          getFilteredTransactions(str_date, end_date);
+        },
+        borderRadius: BorderRadius.circular(10),
+        child: AnimatedContainer(
+          duration: Duration(milliseconds: 200),
+          height: 42,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            gradient: isSelected
+                ? LinearGradient(
+              colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            )
+                : null,
+            color: isSelected ? Utils.getThemeColorBlue() : Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: id == 1 ? Radius.circular(10) : Radius.zero,
+              bottomLeft: id == 1 ? Radius.circular(10) : Radius.zero,
+              topRight: id == 3 ? Radius.circular(10) : Radius.zero,
+              bottomRight: id == 3 ? Radius.circular(10) : Radius.zero,
+            ),
+            border: Border.all(
+              color: Utils.getThemeColorBlue(),
+              width: 1.2,
+            ),
+            boxShadow: isSelected
+                ? [
+              BoxShadow(
+                color: Utils.getThemeColorBlue().withOpacity(0.3),
+                blurRadius: 6,
+                offset: Offset(0, 3),
+              ),
+            ]
+                : [],
+          ),
+          child: Text(
+            label.tr(),
+            style: TextStyle(
+              color: isSelected ? Colors.white : Utils.getThemeColorBlue(),
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
 
 
   Future<void> addNewCollection() async{
@@ -904,8 +957,6 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
           );
         });
   }
-
-
   Widget setupAlertDialoadContainer(BuildContext bcontext,double width, double height) {
 
     return Container(
@@ -1305,7 +1356,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
   }
 
   String sortSelected = "DESC"; // Default label
-  String sortOption = "Date (Newest)";
+  String sortOption = "Date (New)";
   void openSortDialog(BuildContext context, Function(String) onSortSelected) {
     showModalBottomSheet(
       context: context,
@@ -1318,17 +1369,17 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Sort By", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("Sort By".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               Divider(),
               ListTile(
-                title: Text("Date (Newest)"),
+                title: Text("Date (New)".tr()),
                 onTap: () {
                   onSortSelected("date_desc");
                   Navigator.pop(context);
                 },
               ),
               ListTile(
-                title: Text("Date (Oldest)"),
+                title: Text("Date (Old)".tr()),
                 onTap: () {
                   onSortSelected("date_asc");
                   Navigator.pop(context);

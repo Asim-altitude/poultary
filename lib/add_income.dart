@@ -177,6 +177,11 @@ class _NewIncome extends State<NewIncome>
         _visiblePaymentMethodList.add(_paymentMethodList
             .elementAt(i)
             .name!);
+
+        print("ADD_PAY_METHOD $i ${_paymentMethodList
+            .elementAt(i)
+            .name!}");
+
       }
     }else{
       _visiblePaymentMethodList.add("Cash");
@@ -184,7 +189,10 @@ class _NewIncome extends State<NewIncome>
 
     if(!isEdit)
     payment_method = _visiblePaymentMethodList[0];
-    print(payment_method);
+    print("PAY_METHOD $payment_method");
+
+    if(!Utils.checkIfContains(_visiblePaymentMethodList, payment_method))
+      _visiblePaymentMethodList.add(payment_method);
 
     setState(() {
 
@@ -1443,7 +1451,7 @@ class _NewIncome extends State<NewIncome>
     );
   }
 
-  List<String> paymentStatusList = ['CLEARED'.tr(),'UNCLEAR'.tr(),'RECONCILED'.tr()];
+  List<String> paymentStatusList = ['CLEARED','UNCLEAR','RECONCILED'];
 
   Widget getPaymentStatusList() {
     return Container(
@@ -1464,7 +1472,7 @@ class _NewIncome extends State<NewIncome>
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr(),
               textAlign: TextAlign.right,
               style: new TextStyle(
                 fontSize: 16.0,

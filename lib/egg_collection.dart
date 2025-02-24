@@ -105,59 +105,87 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
         child: Container(
           height: 60,
           width: widthScreen,
-          child: Row(children: [
+          child: Row(
+            children: [
+              /// 🟢 Collect Button
+              Expanded(
+                child: InkWell(
+                  onTap: addNewCollection,
+                  borderRadius: BorderRadius.circular(10),
+                  splashColor: Colors.white.withOpacity(0.3),
+                  child: Container(
+                    height: 50,
+                    margin: EdgeInsets.symmetric(horizontal: 6),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.green.shade600, Colors.green.shade400],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.green.withOpacity(0.3),
+                          blurRadius: 5,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add_circle, color: Colors.white, size: 28),
+                        SizedBox(width: 6),
+                        Text(
+                          'COLLECT'.tr(),
+                          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
 
-            Expanded(
-              child: InkWell(
-                onTap: () {
-                  addNewCollection();
-                },
-                child: Container(
-                  height: 50,
-                  margin: EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: const BorderRadius.all(
-                        Radius.circular(5.0)),
-                    border: Border.all(
-                      color:  Colors.green,
-                      width: 2.0,
+              /// 🔴 Reduce Button
+              Expanded(
+                child: InkWell(
+                  onTap: reduceCollection,
+                  borderRadius: BorderRadius.circular(10),
+                  splashColor: Colors.white.withOpacity(0.3),
+                  child: Container(
+                    height: 50,
+                    margin: EdgeInsets.symmetric(horizontal: 6),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.red.shade600, Colors.red.shade400],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.red.withOpacity(0.3),
+                          blurRadius: 5,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.remove_circle, color: Colors.white, size: 28),
+                        SizedBox(width: 6),
+                        Text(
+                          'REDUCE'.tr(),
+                          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
                   ),
-                  child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Icon(Icons.add, color: Colors.white, size: 30,),
-                    Text('COLLECT'.tr(), style: TextStyle(
-                        color: Colors.white, fontSize: 18),)
-                  ],),
                 ),
               ),
-            ),
-            Expanded(
-              child: InkWell(
-                onTap: () {
-                  reduceCollection();
-                },
-                child: Container(
-                  height: 50,
-                  margin: EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: const BorderRadius.all(
-                        Radius.circular(5.0)),
-                    border: Border.all(
-                      color:  Colors.red,
-                      width: 2.0,
-                    ),
-                  ),
-                  child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Icon(Icons.add, color: Colors.white, size: 30,),
-                    Text('REDUCE'.tr(), style: TextStyle(
-                        color: Colors.white, fontSize: 18),)
-                  ],),
-                ),
-              ),
-            ),
-          ],),
+            ],
+          ),
         ),
         elevation: 0,
       ),
@@ -176,68 +204,91 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
               Utils.getDistanceBar(),
 
               ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(10),
+                  bottomRight: Radius.circular(10),
+                ),
                 child: Container(
                   decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Utils.getThemeColorBlue(), //(x,y)
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 6,
+                        offset: Offset(0, 3),
                       ),
                     ],
                   ),
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   child: Row(
                     children: [
-                      Container(
-                        alignment: Alignment.center,
-                        width: 50,
-                        height: 50,
-                        child: InkWell(
-                          child: Icon(Icons.arrow_back,
-                              color: Colors.white, size: 30),
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
+                      /// Back Button
+                      InkWell(
+                        borderRadius: BorderRadius.circular(30),
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 45,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.15),
+                          ),
+                          child: Icon(Icons.arrow_back, color: Colors.white, size: 28),
                         ),
                       ),
+
+                      /// Title
                       Expanded(
                         child: Container(
-                            margin: EdgeInsets.only(left: 10),
-                            child: Text(
-                              applied_filter_name.tr(),
-                              textAlign: TextAlign.start,
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold),
-                            )),
+                          margin: EdgeInsets.only(left: 12),
+                          child: Text(
+                            applied_filter_name.tr(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
                       ),
+
+                      /// Sort Button
                       InkWell(
+                        borderRadius: BorderRadius.circular(10),
                         onTap: () {
                           openSortDialog(context, (selectedSort) {
                             setState(() {
-                              sortOption = selectedSort == "date_desc"
-                                  ? "Date (New)"
-                                  : "Date (Old)";
-                              sortSelected = selectedSort == "date_desc"
-                                  ? "DESC" : "ASC";
+                              sortOption = selectedSort == "date_desc" ? "Date (New)" : "Date (Old)";
+                              sortSelected = selectedSort == "date_desc" ? "DESC" : "ASC";
                             });
 
                             getFilteredTransactions(str_date, end_date);
-
                           });
                         },
                         child: Container(
-                          height: 50,
+                          height: 45,
                           width: 130,
-                          color: Colors.white.withAlpha(40),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                           alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(horizontal: 5),
+                          padding: EdgeInsets.symmetric(horizontal: 10),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Expanded(child: Text(sortOption, style: TextStyle(fontSize: 12, color: Colors.white))),
-                              Icon(Icons.sort, color: Colors.white),
-
+                              Expanded(
+                                child: Text(
+                                  sortOption.tr(),
+                                  style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Icon(Icons.sort, color: Colors.white, size: 22),
                             ],
                           ),
                         ),
@@ -383,7 +434,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
               ),
 
               eggs.length > 0 ? Container(
-                height: heightScreen - 280,
+                height: heightScreen - 310,
                 width: widthScreen,
                 child: ListView.builder(
                     itemCount: eggs.length,
@@ -395,104 +446,161 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
                         },
                         child: Container(
-                          margin: EdgeInsets.only(left: 8,right: 8,top: 5,bottom: 0),
+                          margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(Radius.circular(3)),
-
-                           color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.white,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 6,
                                 spreadRadius: 2,
-                                blurRadius: 2,
-                                offset: Offset(0, 1), // changes position of shadow
+                                offset: Offset(0, 3),
                               ),
                             ],
                           ),
-                          child: Container(
-                            color: Colors.white,
-                            child: Row( children: [
-                              Expanded(
-                                child: Container(
-                                  alignment: Alignment.topLeft,
-                                  margin: EdgeInsets.only(left: 10,right: 10,top: 4,bottom: 10),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                          padding: EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              /// 🟢 Title Row (Icon + Name + Type + Menu)
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
                                     children: [
-                                      Align(
-                                        alignment: Alignment.topRight,
-                                        child:
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.end,
-                                          children: [
-                                            GestureDetector(
-                                              onTapDown: (TapDownDetails details) {
-                                                selected_id = eggs.elementAt(index).id;
-                                                selected_index = index;
-                                                showMemberMenu(details.globalPosition);
-                                              },
-                                              child: Container(
-                                                width: 30,
-                                                height: 30,
-                                                padding: EdgeInsets.all(5),
-                                                child: Image.asset('assets/options.png'),
-                                              ),
-                                            ),
-
-                                          ],
-                                        ),),
-                                      Row(
-                                        children: [
-                                          Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).f_name!.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
-                                          Container(margin: EdgeInsets.all(0), child: Text(eggs.elementAt(index).isCollection == 1? '(Collected)'.tr():'(Reduced)'.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: eggs.elementAt(index).isCollection == 1? Colors.green:Colors.red),)),
-
-                                        ],
+                                      Icon(
+                                        eggs[index].isCollection == 1 ? Icons.add_circle : Icons.remove_circle,
+                                        color: eggs[index].isCollection == 1 ? Colors.green : Colors.red,
+                                        size: 22,
                                       ),
+                                      SizedBox(width: 6),
+                                      Text(
+                                        eggs[index].f_name!.tr(),
+                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                                      ),
+                                      SizedBox(width: 6),
                                       Container(
-                                        margin: EdgeInsets.only(right: 10),
-                                        child: Row(
-                                          children: [
-                                            Container( margin: EdgeInsets.only(right: 5), child: Text(eggs.elementAt(index).total_eggs.toString(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
-                                            Text("Eggs", style: TextStyle(color: Colors.black, fontSize: 12),),
-                                            Text(" On", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14),),
-                                            Container(margin: EdgeInsets.all(5), child: Text(Utils.getFormattedDate(eggs.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-
-                                          ],
+                                        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: eggs[index].isCollection == 1 ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
+                                          borderRadius: BorderRadius.circular(5),
+                                        ),
+                                        child: Text(
+                                          eggs[index].isCollection == 1 ? "Collected".tr() : "Reduced".tr(),
+                                          style: TextStyle(fontSize: 12, color: eggs[index].isCollection == 1 ? Colors.green : Colors.red),
                                         ),
                                       ),
-                                      Container(
-                                        margin: EdgeInsets.only(right: 10),
-                                        child: Row(
-                                          children: [
-                                            Text("Color"+": ", style: TextStyle(color: Colors.black, fontSize: 12),),
-                                            Text(eggs.elementAt(index).egg_color!, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14),),
-
-                                          ],
-                                        ),
-                                      ),
-                                      Container(margin: EdgeInsets.all(5), child: Text(eggs.elementAt(index).isCollection==0? eggs.elementAt(index).reduction_reason!.toUpperCase() :'(Collected)'.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 14, color: Utils.getThemeColorBlue()),)),
-                                      Container(
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.format_quote,size: 15,),
-                                            SizedBox(width: 3,),
-                                            Container(
-                                              width: widthScreen-60,
-                                              child: Text(
-                                                eggs.elementAt(index).short_note!.isEmpty ? 'NO_NOTES'.tr() : eggs.elementAt(index).short_note!
-                                                ,maxLines: 3, style: TextStyle(fontSize: 14, color: Colors.black),),
-                                            ),
-                                          ],
-                                        ),
-                                      )
-                                      // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                    ],),
-                                ),
+                                    ],
+                                  ),
+                                  GestureDetector(
+                                    onTapDown: (TapDownDetails details) {
+                                      selected_id = eggs[index].id;
+                                      selected_index = index;
+                                      showMemberMenu(details.globalPosition);
+                                    },
+                                    child: Icon(Icons.more_vert, color: Colors.black54),
+                                  ),
+                                ],
                               ),
 
-                            ]),
+                              SizedBox(height: 6),
+                              Divider(thickness: 1, color: Colors.grey.withOpacity(0.3)),
+
+                              /// 🍳 Eggs Count & Date
+                              SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  Icon(Icons.egg, size: 16, color: Colors.black54),
+                                  SizedBox(width: 6),
+                                  Text("Eggs".tr() + ": ", style: TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.bold)),
+                                  Text(
+                                    "${eggs[index].total_eggs}",
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                                  ),
+                                  Spacer(),
+                                  Icon(Icons.calendar_today, size: 14, color: Colors.black54),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    Utils.getFormattedDate(eggs[index].date.toString()),
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
+                                  ),
+                                ],
+                              ),
+
+                              SizedBox(height: 6),
+
+                              /// 🥚 Good & Bad Eggs
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Icon(Icons.egg, size: 16, color: Colors.green),
+                                  SizedBox(width: 5),
+                                  Text("Good Eggs".tr() + ": ", style: TextStyle(color: Colors.black, fontSize: 14)),
+                                  Text(
+                                    "${eggs[index].good_eggs}",
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.green),
+                                  ),
+                                  SizedBox(width: 15),
+                                  Icon(Icons.egg, size: 16, color: Colors.orange),
+                                  SizedBox(width: 5),
+                                  Text("Bad Eggs".tr() + ": ", style: TextStyle(color: Colors.black, fontSize: 14)),
+                                  Text(
+                                    "${eggs[index].bad_eggs}",
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.orange),
+                                  ),
+                                ],
+                              ),
+
+                              SizedBox(height: 6),
+
+                              /// 🎨 Egg Color
+                              Row(
+                                children: [
+                                  Icon(Icons.color_lens, size: 16, color: Colors.black54),
+                                  SizedBox(width: 5),
+                                  Text("Color".tr() + ": ", style: TextStyle(color: Colors.black, fontSize: 14)),
+                                  Text(
+                                    eggs[index].egg_color!.tr(),
+                                    style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+
+                              /// ❌ Reduction Reason
+                              if (eggs[index].isCollection == 0)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: Text(
+                                    eggs[index].reduction_reason!.tr(),
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
+                                  ),
+                                ),
+
+                              /// 📝 Notes Section
+                              if (eggs[index].short_note!.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Icon(Icons.notes, size: 16, color: Colors.black54),
+                                      SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          eggs[index].short_note!,
+                                          maxLines: 3,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(fontSize: 14, color: Colors.black),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
+
                       );
 
                     }),
@@ -855,8 +963,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
     });
 
   }
-  String sortSelected = "DESC"; // Default label
-  String sortOption = "Date (Newest)"; // Default label
+
   List<String> filterList = ['TODAY'.tr(),'YESTERDAY'.tr(),'THIS_MONTH'.tr(), 'LAST_MONTH'.tr(),'LAST3_MONTHS'.tr(), 'LAST6_MONTHS'.tr(),'THIS_YEAR'.tr(),
     'LAST_YEAR'.tr(),'ALL_TIME'.tr()];
 
@@ -1098,6 +1205,8 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
     );
   }
 
+  String sortSelected = "DESC"; // Default label
+  String sortOption = "Date (New)";
   void openSortDialog(BuildContext context, Function(String) onSortSelected) {
     showModalBottomSheet(
       context: context,
@@ -1110,17 +1219,17 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Sort By", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("Sort By".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               Divider(),
               ListTile(
-                title: Text("Date (Newest)"),
+                title: Text("Date (New)".tr()),
                 onTap: () {
                   onSortSelected("date_desc");
                   Navigator.pop(context);
                 },
               ),
               ListTile(
-                title: Text("Date (Oldest)"),
+                title: Text("Date (Old)".tr()),
                 onTap: () {
                   onSortSelected("date_asc");
                   Navigator.pop(context);
