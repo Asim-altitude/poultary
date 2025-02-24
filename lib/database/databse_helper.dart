@@ -171,7 +171,7 @@ class DatabaseHelper  {
 
   static Future<void> createCategoriesDataTable() async {
     await _database?.execute('''
-      CREATE TABLE IF NOT EXISTS CustomCategoryData (
+      CREATE TABLE IF NOT EXISTS CustomCategoryData(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       f_id INTEGER NOT NULL,
       c_id INTEGER NOT NULL,

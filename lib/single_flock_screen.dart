@@ -410,6 +410,8 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                         ),
                         InkWell(
                           onTap: () async {
+                            await DatabaseHelper.createCustomCategoriesTableIfNotExists();
+
                             await Navigator.push(
                               context,
                               CupertinoPageRoute(
