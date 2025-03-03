@@ -781,6 +781,10 @@ class Utils {
       return "Choose date".tr();
     }
 
+    if (date.toLowerCase().contains("am") || date.toLowerCase().contains("pm")){
+      return date;
+    }
+
     var inputFormat = DateFormat('yyyy-MM-dd hh:mm');
     var inputDate = inputFormat.parse(date); // <-- dd/MM 24H format
 

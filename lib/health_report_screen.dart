@@ -237,25 +237,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
 
               Row(
                 children: [
-                 /* Expanded(
-                    child: Container(
-                      height: 45,
-                      alignment: Alignment.centerRight,
-                      padding: EdgeInsets.only(left: 10),
-                      margin: EdgeInsets.only(top: 10,left: 10,right: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: const BorderRadius.all(
-                            Radius.circular(5.0)),
-                        border: Border.all(
-                          color:  Utils.getThemeColorBlue(),
-                          width: 1.0,
-                        ),
-                      ),
-                      child: getDropDownList(),
-                    ),
-                  ),
-                 */ InkWell(
+                 InkWell(
                     onTap: () {
                       openDatePicker();
                     },
@@ -709,7 +691,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
   Widget setupAlertDialoadContainer(BuildContext bcontext,double width, double height) {
 
     return Container(
-      height: height, // Change as per your requirement
+      height: filterList.length * 55, // Change as per your requirement
       width: width, // Change as per your requirement
       child: ListView.builder(
         shrinkWrap: true,
@@ -717,11 +699,14 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
         itemBuilder: (BuildContext context, int index) {
           return InkWell(
             onTap: () {
+
               setState(() {
                 date_filter_name = filterList.elementAt(index);
               });
-              getData(date_filter_name);
+
               Navigator.pop(bcontext);
+              getData(date_filter_name);
+
             },
             child: ListTile(
               title: Text(filterList.elementAt(index).tr()),
@@ -732,14 +717,12 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
     );
   }
 
-
-
   List<String> filterList = ['TODAY','YESTERDAY','THIS_MONTH', 'LAST_MONTH','LAST3_MONTHS', 'LAST6_MONTHS','THIS_YEAR',
-    'LAST_YEAR','ALL_TIME'];
+    'LAST_YEAR','ALL_TIME','DATE_RANGE'];
 
   String date_filter_name = 'THIS_MONTH';
   String pdf_formatted_date_filter = 'THIS_MONTH';
-  String str_date = '',end_date = '';
+  String str_date='',end_date='';
   void getData(String filter){
     int index = 0;
 
@@ -754,6 +737,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
 
       pdf_formatted_date_filter = 'TODAY'.tr()+" ("+Utils.getFormattedDate(str_date)+")";
 
+      getAllData();
     }
     else if (filter == 'YESTERDAY'){
       index = 1;
@@ -765,7 +749,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
       print(str_date+" "+end_date);
 
       pdf_formatted_date_filter = "YESTERDAY".tr() + " ("+Utils.getFormattedDate(str_date)+")";
-
+      getAllData();
     }
     else if (filter == 'THIS_MONTH'){
       index = 2;
@@ -780,6 +764,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
 
 
       pdf_formatted_date_filter = 'THIS_MONTH'.tr()+" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
+      getAllData();
     }else if (filter == 'LAST_MONTH'){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
@@ -794,7 +779,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
 
 
       pdf_formatted_date_filter = 'LAST_MONTH'.tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
-
+      getAllData();
     }else if (filter == 'LAST3_MONTHS'){
       index = 4;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -2, 1);
@@ -808,6 +793,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
 
 
       pdf_formatted_date_filter = "LAST3_MONTHS".tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
+      getAllData();
     }else if (filter == 'LAST6_MONTHS'){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
@@ -821,6 +807,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
 
 
       pdf_formatted_date_filter = "LAST6_MONTHS".tr()+" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
+      getAllData();
     }else if (filter == 'THIS_YEAR'){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
@@ -832,6 +819,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
       print(str_date+" "+end_date);
 
       pdf_formatted_date_filter = 'THIS_YEAR'.tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
+      getAllData();
     }else if (filter == 'LAST_YEAR'){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
@@ -844,7 +832,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
 
 
       pdf_formatted_date_filter = 'LAST_YEAR'.tr() +" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
-
+      getAllData();
     }else if (filter == 'ALL_TIME'){
       index = 8;
       var inputFormat = DateFormat('yyyy-MM-dd');
@@ -853,11 +841,52 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
       print(str_date+" "+end_date);
 
 
-      pdf_formatted_date_filter = 'ALL_TIME'.tr();
+      pdf_formatted_date_filter = 'ALL_TIME';
+      getAllData();
+    }else if (filter == 'DATE_RANGE'){
+      _pickDateRange();
     }
-    getAllData();
+
 
   }
+
+  DateTimeRange? selectedDateRange;
+  Future<void> _pickDateRange() async {
+    DateTime now = DateTime.now();
+    DateTime firstDate = DateTime(now.year - 5); // Allows past 5 years
+    DateTime lastDate = DateTime(now.year + 5); // Allows future 5 years
+
+    DateTimeRange? pickedRange = await showDateRangePicker(
+      context: context,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      initialDateRange: selectedDateRange ?? DateTimeRange(start: now, end: now),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Colors.blue,
+            hintColor: Colors.blue,
+            colorScheme: ColorScheme.light(primary: Colors.blue),
+            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedRange != null) {
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      selectedDateRange = pickedRange;
+
+      str_date = inputFormat.format(pickedRange.start);
+      end_date = inputFormat.format(pickedRange.end);
+      date_filter_name = Utils.getFormattedDate(str_date) +" | "+Utils.getFormattedDate(end_date);
+      print(str_date+" "+end_date);
+      getAllData();
+
+    }
+  }
+
 
   int getFlockID() {
 

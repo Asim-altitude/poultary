@@ -141,8 +141,7 @@ class _NewIncome extends State<NewIncome>
        date = widget.transactionItem!.date;
 
        if(widget.transactionItem!.f_id! != -1) {
-         Flock? flock = await DatabaseHelper.getSingleFlock(
-             widget.transactionItem!.f_id!);
+         Flock? flock = await DatabaseHelper.getSingleFlock(widget.transactionItem!.f_id!);
          flocks.add(flock!);
          is_specific_flock = true;
        }else{
@@ -369,6 +368,189 @@ class _NewIncome extends State<NewIncome>
     child:
     return SafeArea(
       child: Scaffold(
+        bottomNavigationBar: Container(
+          margin: EdgeInsets.all(15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Show Previous Button only if activeStep > 0
+              if (activeStep > 0)
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        activeStep--;
+                      });
+                    },
+                    child: Container(
+                      height: 55,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade700,
+                        borderRadius: BorderRadius.circular(30), // More rounded
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.3),
+                            spreadRadius: 2,
+                            blurRadius: 6,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      margin: EdgeInsets.symmetric(horizontal: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
+                          SizedBox(width: 5),
+                          Text(
+                            "Previous".tr(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+              // Next or Finish Button
+              Expanded(
+                child: GestureDetector(
+                  onTap: () async {
+
+                    activeStep++;
+                    if(activeStep==1){
+                      if(invalidInput())
+                      {
+                        activeStep--;
+                        Utils.showToast("PROVIDE_ALL".tr());
+                      }else{
+                        setState(() {
+
+                        });
+                      }
+                    }
+
+                    if(activeStep==2){
+                      if(!invalidInput() && soldtoController.text.trim().length>0)
+                      {
+                        setState(() {
+
+                        });
+                      }else{
+                        activeStep--;
+                        Utils.showToast("PROVIDE_ALL".tr());
+                      }
+                    }
+
+                    if(activeStep==3){
+
+                      if(isEdit){
+                        await DatabaseHelper.instance.database;
+                        TransactionItem transaction_item = TransactionItem(
+                            f_id: getFlockID(),
+                            date: date,
+                            sale_item: choose_option?_mysaleselectedValue : _saleselectedValue,
+                            expense_item: "",
+                            type: "Income",
+                            amount: amountController.text,
+                            payment_method: payment_method,
+                            payment_status: payment_status,
+                            sold_purchased_from: soldtoController
+                                .text,
+                            short_note: notesController.text,
+                            how_many: howmanyController.text,
+                            extra_cost: "",
+                            extra_cost_details: "",
+                            f_name: _purposeselectedValue, flock_update_id: '-1');
+
+                        transaction_item.id = widget.transactionItem!.id;
+
+                        int? id = await DatabaseHelper
+                            .updateTransaction(transaction_item);
+
+                        reduceBirds(widget.transactionItem!.id!);
+                        Utils.showToast("SUCCESSFUL".tr());
+                        Navigator.pop(context);
+                      }else {
+                        print("Everything Okay");
+                        await DatabaseHelper.instance.database;
+                        TransactionItem transaction_item = TransactionItem(
+                            f_id: getFlockID(),
+                            date: date,
+                            sale_item: choose_option?_mysaleselectedValue : _saleselectedValue,
+                            expense_item: "",
+                            type: "Income",
+                            amount: amountController.text,
+                            payment_method: payment_method,
+                            payment_status: payment_status,
+                            sold_purchased_from: soldtoController
+                                .text,
+                            short_note: notesController.text,
+                            how_many: howmanyController.text,
+                            extra_cost: "",
+                            extra_cost_details: "",
+                            f_name: _purposeselectedValue, flock_update_id: '-1');
+                        int? id = await DatabaseHelper
+                            .insertNewTransaction(transaction_item);
+                        reduceBirds(id!);
+                        Utils.showToast("SUCCESSFUL".tr());
+                        Navigator.pop(context);
+                      }
+                    }
+
+                  },
+                  child: Container(
+                    height: 55,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: activeStep == 2
+                            ? [Utils.getThemeColorBlue(), Colors.greenAccent] // Finish Button
+                            : [Utils.getThemeColorBlue(), Colors.blueAccent], // Next Button
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(30), // More rounded
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 6,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    margin: EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          activeStep == 2 ? "SAVE".tr() : "Next".tr(),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(width: 5),
+                        Icon(
+                          activeStep == 1 ? Icons.check_circle : Icons.arrow_forward_ios,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         body: SafeArea(
           top: false,
           child: Container(
@@ -412,55 +594,40 @@ class _NewIncome extends State<NewIncome>
                   SizedBox(height: 20,),
                   EasyStepper(
                     activeStep: activeStep,
-                    activeStepTextColor: Utils.getThemeColorBlue(),
+                    activeStepTextColor: Colors.blue.shade900,
                     finishedStepTextColor: Utils.getThemeColorBlue(),
-                    internalPadding: 30,
+                    internalPadding: 20, // Reduce padding for better spacing
+                    stepShape: StepShape.circle,
+                    stepBorderRadius: 20,
+                    borderThickness: 3, // Balanced progress line thickness
                     showLoadingAnimation: false,
-                    stepRadius: 12,
-                    showStepBorder: true,
+                    stepRadius: 15, // Reduced step size to fit screen
+                    showStepBorder: false,
+                    lineStyle: LineStyle(
+                      lineLength: 50,
+                      lineType: LineType.normal,
+                      defaultLineColor: Colors.grey.shade300,
+                      activeLineColor: Colors.blueAccent,
+                      finishedLineColor: Utils.getThemeColorBlue(),
+                    ),
                     steps: [
                       EasyStep(
-                        customStep: CircleAvatar(
-                          radius: 8,
-                          backgroundColor: Colors.white,
-                          child: CircleAvatar(
-                            radius: 7,
-                            backgroundColor:
-                            activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey,
-                          ),
-                        ),
-                        title: 'Step 1'.tr(),
+                        customStep: _buildStepIcon(Icons.wallet_giftcard, 0),
+                        title: 'Income'.tr(),
                       ),
                       EasyStep(
-                        customStep: CircleAvatar(
-                          radius: 8,
-                          backgroundColor: Colors.white,
-                          child: CircleAvatar(
-                            radius: 7,
-                            backgroundColor:
-                            activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
-                          ),
-                        ),
-                        title: 'Step 2'.tr(),
-
-                      ),  EasyStep(
-                        customStep: CircleAvatar(
-                          radius: 8,
-                          backgroundColor: Colors.white,
-                          child: CircleAvatar(
-                            radius: 7,
-                            backgroundColor:
-                            activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
-                          ),
-                        ),
-                        title: 'Step 3'.tr(),
-
+                        customStep: _buildStepIcon(Icons.payments, 1),
+                        title: 'Payment Info'.tr(),
+                      ),
+                      EasyStep(
+                        customStep: _buildStepIcon(Icons.date_range, 1),
+                        title: 'DATE'.tr(),
                       ),
 
                     ],
-                    onStepReached: (index) =>
-                        setState(() => activeStep = index),
+                    onStepReached: (index) => setState(() => activeStep = index),
                   ),
+
 
                   SizedBox(height: 30,),
                   Container(
@@ -470,432 +637,253 @@ class _NewIncome extends State<NewIncome>
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
 
-                        activeStep==0? Column(children: [
-                          Container(
-                              margin: EdgeInsets.only(left: 10),
-                              child: Text(
-                                isEdit?'Edit'.tr() +" "+ "Income".tr() : "NEW_INCOME".tr(),
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                    color: Utils.getThemeColorBlue(),
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold),
-                              )),
-                             SizedBox(height: 40,width: widthScreen),
-
-                            Column(
-                              children: [
-                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('CHOOSE_FLOCK_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-                                Container(
-                                  width: widthScreen,
-                                  height: 70,
-                                  alignment: Alignment.centerRight,
-                                  padding: EdgeInsets.all(10),
-                                  margin: EdgeInsets.only(left: 20, right: 20),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.withAlpha(70),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(20.0)),
-                                    border: Border.all(
-                                      color:  Colors.grey,
-                                      width: 1.0,
-                                    ),
-                                  ),
-                                  child: getDropDownList(),
-                                ),
-                              ],
-                            ),
-
-                            SizedBox(height: 10,width: widthScreen),
-                            Column(
-                              children: [
-                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('PURPOSE1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-                                Container(
-                                  width: widthScreen,
-                                  height: 70,
-                                  alignment: Alignment.centerRight,
-                                  padding: EdgeInsets.all(10),
-                                  margin: EdgeInsets.only(left: 20, right: 20),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.withAlpha(70),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(20.0)),
-                                    border: Border.all(
-                                      color:  purpose_option_invalid? Colors.red:Colors.grey,
-                                      width: 1.0,
-                                    ),
-                                  ),
-                                  child: getSaleTypeList(),
-                                ),
-                              ],
-                            ),
-                          (is_bird_sale && is_specific_flock)? Container(alignment: Alignment.center,child: Text('Auto_reduction'.tr(), style: TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.w200),)):SizedBox(width: 1,),
-
-                          choose_option ? Column(
-                            children: [
-                              SizedBox(height: 10,width: widthScreen),
-                              Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Income Categories'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-                              Row(
-                                children: [Expanded(
-                                  child: Container(
-                                    height: 70,
-                                    alignment: Alignment.centerRight,
-                                    padding: EdgeInsets.all(10),
-                                    margin: EdgeInsets.only(left: 20, right: 10),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.withAlpha(70),
-                                      borderRadius: const BorderRadius.all(
-                                          Radius.circular(20.0)),
-                                      border: Border.all(
-                                        color: income_option_invalid? Colors.red:Colors.grey,
-                                        width: 1.0,
-                                      ),
-                                    ),
-                                    child: getMySaleOptionsList(),
-                                  ),
-                                ),InkWell(
-                                  onTap: (){
-                                    addNewIncomOption();
-                                  },
-                                  child: Container(
-                                    width: 70,
-                                    height: 70,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue,
-                                      borderRadius: const BorderRadius.all(
-                                          Radius.circular(20.0)),
-
-                                    ),
-                                    margin: EdgeInsets.only(right: 20),
-                                    child: Text(
-                                      "+",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                ),],
-                              )
+                        activeStep==0? Container(
+                          margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                          padding: EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.15),
+                                blurRadius: 10,
+                                spreadRadius: 2,
+                                offset: Offset(0, 5),
+                              ),
                             ],
-                          ):SizedBox(width: 1,),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Title
+                              Center(
+                                child: Text(
+                                  isEdit ? "Edit".tr() + " " + "Income".tr() : "NEW_INCOME".tr(),
+                                  style: TextStyle(
+                                    color: Utils.getThemeColorBlue(),
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 20),
 
-                          SizedBox(height: 10,width: widthScreen),
-                            Container(
+                              // Flock Selection
+                              _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
+                              SizedBox(height: 8),
+                              _buildDropdownField(getDropDownList()),
 
-                              child: Row(
+                              SizedBox(height: 20),
+
+                              // Purpose Selection
+                              _buildInputLabel("PURPOSE1".tr(), Icons.assignment),
+                              SizedBox(height: 8),
+                              _buildDropdownField(getSaleTypeList()),
+
+                              if (is_bird_sale && is_specific_flock)
+                                Padding(
+                                  padding: EdgeInsets.only(top: 10),
+                                  child: Center(
+                                    child: Text(
+                                      "Auto_reduction".tr(),
+                                      style: TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.w200),
+                                    ),
+                                  ),
+                                ),
+
+                              // Income Categories
+                              if (choose_option) ...[
+                                SizedBox(height: 20),
+                                _buildInputLabel("Income Categories".tr(), Icons.category),
+                                SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Expanded(child: _buildDropdownField(getMySaleOptionsList())),
+                                    SizedBox(width: 10),
+                                    _buildAddButton(addNewIncomOption),
+                                  ],
+                                ),
+                              ],
+
+                              SizedBox(height: 20),
+
+                              // How Many & Sale Amount
+                              Row(
                                 children: [
                                   Expanded(
                                     child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('HOW_MANY'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-
-                                        Container(
-                                          height: 70,
-                                          padding: EdgeInsets.all(0),
-                                          margin: EdgeInsets.only(left: 20,right: 5,),
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey.withAlpha(70),
-                                            borderRadius: const BorderRadius.all(
-                                                Radius.circular(20.0)),
-
-                                          ),
-                                          child: Container(
-
-                                            child: SizedBox(
-                                              width: widthScreen,
-                                              height: 60,
-                                              child: TextFormField(
-                                                maxLines: null,
-                                                expands: true,
-                                                readOnly: (!is_specific_flock && is_bird_sale),
-                                                onTap: () {
-                                                  if(!is_specific_flock && is_bird_sale){
-                                                    showBottomDialog();
-                                                  }
-                                                },
-                                                controller: howmanyController,
-                                                keyboardType: TextInputType.number,
-                                                inputFormatters: [
-                                                  FilteringTextInputFormatter.allow(RegExp(r"[0-9]")),
-                                                  TextInputFormatter.withFunction((oldValue, newValue) {
-                                                    final text = newValue.text;
-                                                    return text.isEmpty
-                                                        ? newValue
-                                                        : double.tryParse(text) == null
-                                                        ? oldValue
-                                                        : newValue;
-                                                  }),
-                                                ],
-                                                textInputAction: TextInputAction.next,
-                                                decoration:  InputDecoration(
-                                                  border: OutlineInputBorder(
-                                                      borderRadius:
-                                                      BorderRadius.all(Radius.circular(20))),
-                                                  hintText: 'HOW_MANY'.tr(),
-                                                  hintStyle: TextStyle(
-                                                      color: Colors.grey, fontSize: 16),
-                                                  labelStyle: TextStyle(
-                                                      color: Colors.black, fontSize: 16),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
+                                        _buildInputLabel("HOW_MANY".tr(), Icons.confirmation_num),
+                                        SizedBox(height: 8),
+                                        _buildNumberField(howmanyController, "HOW_MANY".tr(), readOnly: !is_specific_flock && is_bird_sale, onTap: () {
+                                          if (!is_specific_flock && is_bird_sale) showBottomDialog();
+                                        }),
                                       ],
                                     ),
                                   ),
+                                  SizedBox(width: 10),
                                   Expanded(
-                                      child: Column(
-                                        children: [
-                                          Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 5,bottom: 5),child: Text('SALE_AMOUNT'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-
-                                          Container(
-                                            height: 70,
-                                            padding: EdgeInsets.all(0),
-                                            margin: EdgeInsets.only( right: 20),
-                                            decoration: BoxDecoration(
-                                              color: Colors.grey.withAlpha(70),
-                                              borderRadius: const BorderRadius.all(
-                                                  Radius.circular(20.0)),
-
-                                            ),
-                                            child: Container(
-                                              child: SizedBox(
-                                                width: widthScreen,
-                                                height: 60,
-                                                child: TextFormField(
-                                                  maxLines: null,
-                                                  expands: true,
-                                                  controller: amountController,
-                                                  keyboardType: TextInputType.number,
-                                                  inputFormatters: [
-                                                    FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
-                                                    TextInputFormatter.withFunction((oldValue, newValue) {
-                                                      final text = newValue.text;
-                                                      return text.isEmpty
-                                                          ? newValue
-                                                          : double.tryParse(text) == null
-                                                          ? oldValue
-                                                          : newValue;
-                                                    }),
-                                                  ],
-                                                  textInputAction: TextInputAction.next,
-                                                  decoration:  InputDecoration(
-                                                    border: OutlineInputBorder(
-                                                        borderRadius:
-                                                        BorderRadius.all(Radius.circular(20))),
-                                                    hintText: 'SALE_AMOUNT'.tr(),
-                                                    hintStyle: TextStyle(
-                                                        color: Colors.grey, fontSize: 16),
-                                                    labelStyle: TextStyle(
-                                                        color: Colors.black, fontSize: 16),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      )) ,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        _buildInputLabel("SALE_AMOUNT".tr(), Icons.attach_money),
+                                        SizedBox(height: 8),
+                                        _buildNumberField(amountController, "SALE_AMOUNT".tr(), allowFloat: true),
+                                      ],
+                                    ),
+                                  ),
                                 ],
-                              ),),
-                          ],):SizedBox(width: 1,),
+                              ),
+                            ],
+                          ),
+                        )
+                            :SizedBox(width: 1,),
 
 
-                          activeStep==1?  Column(children: [
-                            Container(
-                                margin: EdgeInsets.only(left: 10),
-                                child: Text(
-                                  "Payment Info".tr(),
-                                  textAlign: TextAlign.start,
-                                  style: TextStyle(
+                          activeStep==1?  Container(
+                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Title
+                                Center(
+                                  child: Text(
+                                    "Payment Info".tr(),
+                                    style: TextStyle(
                                       color: Utils.getThemeColorBlue(),
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold),
-                                )),
-                            SizedBox(height: 20,width: widthScreen),
-                            Column(
-                              children: [
-                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Payment Method'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-
-                                Container(
-                                  width: widthScreen,
-                                  height: 70,
-                                  alignment: Alignment.centerRight,
-                                  padding: EdgeInsets.all(10),
-                                  margin: EdgeInsets.only(left: 20, right: 20),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.withAlpha(70),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(20.0)),
-                                    border: Border.all(
-                                      color:  Colors.grey,
-                                      width: 1.0,
-                                    ),
-                                  ),
-                                  child: getPaymentMethodList(),
-                                ),
-                              ],
-                            ),
-
-                            SizedBox(height: 10,width: widthScreen),
-                            Column(
-                              children: [
-                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Payment Status'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-
-                                Container(
-                                  width: widthScreen,
-                                  height: 70,
-                                  alignment: Alignment.centerRight,
-                                  padding: EdgeInsets.all(10),
-                                  margin: EdgeInsets.only(left: 20, right: 20),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.withAlpha(70),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(20.0)),
-                                    border: Border.all(
-                                      color:  Colors.grey,
-                                      width: 1.0,
-                                    ),
-                                  ),
-                                  child: getPaymentStatusList(),
-                                ),
-                              ],
-                            ),
-
-                            SizedBox(height: 10,width: widthScreen),
-                            Column(
-                              children: [
-                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('SOLD_TO'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-
-                                Container(
-                                  width: widthScreen,
-                                  height: 70,
-                                  padding: EdgeInsets.all(0),
-                                  margin: EdgeInsets.only(left: 20, right: 20),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.withAlpha(70),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(20.0)),
-
-                                  ),
-                                  child: Container(
-                                    child: SizedBox(
-                                      width: widthScreen,
-                                      height: 60,
-                                      child: TextFormField(
-                                        maxLines: null,
-                                        expands: true,
-                                        controller: soldtoController,
-                                        textInputAction: TextInputAction.next,
-                                        decoration:  InputDecoration(
-                                          border: OutlineInputBorder(
-                                              borderRadius:
-                                              BorderRadius.all(Radius.circular(20))),
-                                          hintText: 'SOLD_TO_HINT'.tr(),
-                                          hintStyle: TextStyle(
-                                              color: Colors.grey, fontSize: 16),
-                                          labelStyle: TextStyle(
-                                              color: Colors.black, fontSize: 16),
-                                        ),
-                                      ),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
+                                SizedBox(height: 20),
+
+                                // Payment Method
+                                _buildInputLabel("Payment Method".tr(), Icons.payment),
+                                SizedBox(height: 8),
+                                _buildDropdownField(getPaymentMethodList()),
+
+                                SizedBox(height: 20),
+
+                                // Payment Status
+                                _buildInputLabel("Payment Status".tr(), Icons.check_circle),
+                                SizedBox(height: 8),
+                                _buildDropdownField(getPaymentStatusList()),
+
+                                SizedBox(height: 20),
+
+                                // Sold To
+                                _buildInputLabel("SOLD_TO".tr(), Icons.person),
+                                SizedBox(height: 8),
+                                _buildInputField(soldtoController, "SOLD_TO_HINT".tr(), Icons.person),
                               ],
                             ),
-                          ],):SizedBox(width: 1,),
+                          )
+                              :SizedBox(width: 1,),
 
 
-                          activeStep==2?  Column(children: [
-                            Container(
-                                margin: EdgeInsets.only(left: 10),
-                                child: Text(
-                                  "Date_DESC".tr(),
-                                  textAlign: TextAlign.start,
-                                  style: TextStyle(
+                          activeStep==2?  Container(
+                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Title
+                                Center(
+                                  child: Text(
+                                    "Date_DESC".tr(),
+                                    style: TextStyle(
                                       color: Utils.getThemeColorBlue(),
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold),
-                                )),
-                            SizedBox(height: 20,width: widthScreen),
-                            Column(
-                              children: [
-                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DATE'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-
-                                Container(
-                                  width: widthScreen,
-                                  height: 70,
-                                  margin: EdgeInsets.only(left: 20, right: 20),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.withAlpha(70),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(20.0)),
-                                    border: Border.all(
-                                      color:  Colors.grey,
-                                      width: 1.0,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
                                     ),
+                                  ),
+                                ),
+                                SizedBox(height: 20),
+
+                                // Date Selection
+                                _buildInputLabel("DATE".tr(), Icons.calendar_today),
+                                SizedBox(height: 8),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withAlpha(70),
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(color: Colors.grey, width: 1),
                                   ),
                                   child: InkWell(
                                     onTap: () {
                                       pickDate();
                                     },
-                                    child: Container(
-                                      alignment: Alignment.centerLeft,
-                                      padding: EdgeInsets.only(left: 10),
-
-                                      child: Text(Utils.getFormattedDate(date), style: TextStyle(
-                                          color: Colors.black, fontSize: 16),),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            SizedBox(height: 10,width: widthScreen),
-                            Column(
-                              children: [
-                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('HOW_MUCH'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-                                Container(
-                                  width: widthScreen,
-                                  height: 100,
-                                  margin: EdgeInsets.only(left: 20, right: 20),
-                                  decoration: BoxDecoration(
-                                      color: Colors.grey.withAlpha(70),
-                                      borderRadius:
-                                      BorderRadius.all(Radius.circular(10))),
-                                  child: Container(
-                                    child: SizedBox(
-                                      width: widthScreen,
-                                      height: 100,
-                                      child: TextFormField(
-                                        maxLines: 2,
-                                        controller: notesController,
-                                        keyboardType: TextInputType.multiline,
-                                        textAlign: TextAlign.start,
-                                        textInputAction: TextInputAction.done,
-                                        decoration:  InputDecoration(
-                                          border: OutlineInputBorder(
-                                              borderRadius:
-                                              BorderRadius.all(Radius.circular(10))),
-                                          hintText: 'NOTES_HINT'.tr(),
-                                          hintStyle: TextStyle(
-                                              color: Colors.grey, fontSize: 16),
-                                          labelStyle: TextStyle(
-                                              color: Colors.black, fontSize: 16),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.calendar_today, color: Colors.black54),
+                                        SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text(
+                                            Utils.getFormattedDate(date),
+                                            style: TextStyle(color: Colors.black, fontSize: 16),
+                                          ),
                                         ),
-                                      ),
+                                      ],
                                     ),
+                                  ),
+                                ),
+
+                                SizedBox(height: 20),
+
+                                // Notes Input
+                                _buildInputLabel("DESCRIPTION_1".tr(), Icons.notes),
+                                SizedBox(height: 8),
+                                TextFormField(
+                                  maxLines: 2,
+                                  controller: notesController,
+                                  keyboardType: TextInputType.multiline,
+                                  textInputAction: TextInputAction.done,
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white.withAlpha(70),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                      borderSide: BorderSide(color: Colors.grey),
+                                    ),
+                                    hintText: "NOTES_HINT".tr(),
+                                    hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
                                   ),
                                 ),
                               ],
                             ),
-                          ],):SizedBox(width: 1,),
+                          )
+                              :SizedBox(width: 1,),
 
 
-                          SizedBox(height: 10,width: widthScreen),
+                          /*SizedBox(height: 10,width: widthScreen),
                           InkWell(
                             onTap: () async {
                               bool validate = checkValidation();
@@ -1005,7 +993,7 @@ class _NewIncome extends State<NewIncome>
                                     fontWeight: FontWeight.bold),
                               ),
                             ),
-                          )
+                          )*/
 
                         ]),
                   ),
@@ -1013,6 +1001,227 @@ class _NewIncome extends State<NewIncome>
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputField(
+      TextEditingController controller,
+      String hint, IconData icon, {
+        bool readOnly = false,
+        VoidCallback? onTap,
+        // Optional argument to allow float input
+      }) {
+    return Container(
+      height: 70, // Matches dropdown height
+      padding: EdgeInsets.symmetric(horizontal: 15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade300, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 2,
+            blurRadius: 3,
+            offset: Offset(0, 2), // Slight elevation
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(icon!, color: Utils.getThemeColorBlue(), size: 24), // Icon added for better UI
+          SizedBox(width: 10),
+          Expanded(
+            child: TextFormField(
+              controller: controller,
+              keyboardType: TextInputType.text,
+              readOnly: readOnly,
+              onTap: onTap,
+              style: TextStyle(fontSize: 16, color: Colors.black), // Match dropdown text
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: hint,
+                hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 16),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildStepIcon(IconData icon, int step) {
+    bool isActive = activeStep == step; // Current step
+    bool isFinished = activeStep > step; // Completed steps
+
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isFinished
+            ? Utils.getThemeColorBlue() // Completed step
+            : isActive
+            ? Utils.getThemeColorBlue() // Current step
+            : Colors.grey.shade400, // Upcoming step
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6,
+            spreadRadius: 1,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Icon(
+          isFinished ? Icons.check : icon, // ✅ Show tick if step is done
+          color: Colors.white,
+          size: 20,
+        ),
+      ),
+    );
+  }
+
+  // Reusable Form Field Container
+  Widget _buildFormFieldContainer({required String title, required Widget child}) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.only(bottom: 6),
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+          Container(
+            height: 70,
+            alignment: Alignment.center,
+            padding: EdgeInsets.symmetric(horizontal: 15),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.grey.shade300, width: 1.2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  spreadRadius: 2,
+                  blurRadius: 3,
+                  offset: Offset(0, 2), // Slight elevation
+                ),
+              ],
+            ),
+            child: child,
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  // Custom Input Label with Icon
+  Widget _buildInputLabel(String label, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, color: Utils.getThemeColorBlue(), size: 20),
+        SizedBox(width: 8),
+        Text(
+          label,
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black),
+        ),
+      ],
+    );
+  }
+
+// Custom Dropdown Field (Increased Height)
+  Widget _buildDropdownField(Widget dropdownWidget) {
+    return Container(
+      height: 65, // Increased height
+      padding: EdgeInsets.symmetric(horizontal: 15),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade300, width: 1.2),
+      ),
+      child: Center(child: dropdownWidget), // Ensuring it is vertically centered
+    );
+  }
+
+// Custom Number Input Field (Matches Dropdown Height & Supports Integer/Float)
+  Widget _buildNumberField(
+      TextEditingController controller,
+      String hint, {
+        bool readOnly = false,
+        VoidCallback? onTap,
+        bool allowFloat = false, // Optional argument to allow float input
+      }) {
+    return Container(
+      height: 70, // Matches dropdown height
+      padding: EdgeInsets.symmetric(horizontal: 15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade300, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 2,
+            blurRadius: 3,
+            offset: Offset(0, 2), // Slight elevation
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.numbers, color: Utils.getThemeColorBlue(), size: 24), // Icon added for better UI
+          SizedBox(width: 10),
+          Expanded(
+            child: TextFormField(
+              controller: controller,
+              keyboardType: TextInputType.numberWithOptions(decimal: allowFloat),
+              readOnly: readOnly,
+              onTap: onTap,
+              style: TextStyle(fontSize: 16, color: Colors.black), // Match dropdown text
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(
+                  allowFloat ? RegExp(r"^\d*\.?\d*$") : RegExp(r"^\d*$"),
+                ), // Allows only numbers or float based on flag
+              ],
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: hint,
+                hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 16),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+// Add New Income Option Button
+  Widget _buildAddButton(VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.blue,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Center(
+          child: Icon(Icons.add, color: Colors.white, size: 26),
         ),
       ),
     );
@@ -1227,42 +1436,47 @@ class _NewIncome extends State<NewIncome>
 
   bool invalidInput() {
 
-    bool invalid = false;
-    if(howmanyController.text.isEmpty)
-    {
-      invalid = true;
-
-    }
-    else if(num.parse(howmanyController.text) == 0)
-    {
-      invalid = true;
-    }
-
-    if(amountController.text.isEmpty){
-      invalid = true;
-    }
-
-    else if(num.parse(amountController.text) == 0){
-      invalid = true;
-    }
-
-    if(num.parse(howmanyController.text) >= getActiveBirds(getFlockID()) && is_specific_flock && is_bird_sale){
-      invalid = true;
-      int count = getActiveBirds(getFlockID()) - 1;
-      Utils.showToast("You cannot reduce more than".tr() +" "+ count.toString() + " " + "Birds".tr());
-    }
-
-    if(purpose_option_invalid){
-      invalid = true;
-    }
-
-    if(choose_option){
-      if(income_option_invalid){
+    try {
+      bool invalid = false;
+      if (howmanyController.text.isEmpty) {
         invalid = true;
       }
-    }
+      else if (num.parse(howmanyController.text) == 0) {
+        invalid = true;
+      }
 
-    return invalid;
+      if (amountController.text.isEmpty) {
+        invalid = true;
+      }
+
+      else if (num.parse(amountController.text) == 0) {
+        invalid = true;
+      }
+
+      if (num.parse(howmanyController.text) >= getActiveBirds(getFlockID()) &&
+          is_specific_flock && is_bird_sale) {
+        invalid = true;
+        int count = getActiveBirds(getFlockID()) - 1;
+        Utils.showToast(
+            "You cannot reduce more than".tr() + " " + count.toString() + " " +
+                "Birds".tr());
+      }
+
+      if (purpose_option_invalid) {
+        invalid = true;
+      }
+
+      if (choose_option) {
+        if (income_option_invalid) {
+          invalid = true;
+        }
+      }
+
+      return invalid;
+    }
+    catch(e){
+      return true;
+    }
   }
 
   Widget getDropDownList() {

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:poultary/database/databse_helper.dart';
@@ -23,7 +24,7 @@ class _CustomCategoryScreenState extends State<CustomCategoryScreen> {
   String? _selectedUnit;
   IconData? _selectedIcon = Icons.android;
 
-  List<String> categoryTypes = ['Water Usage', 'Vitamin Usage'];
+  List<String> categoryTypes = ['Water Usage', 'Vitamin Usage','Manure',"Supplements"];
   List<String> units = ['kg', 'lbs', 'litre', 'grams', 'ml', 'pieces'];
   List<IconData> availableIcons = [
     Icons.access_alarm,
@@ -258,7 +259,7 @@ class _CustomCategoryScreenState extends State<CustomCategoryScreen> {
     if (_nameController.text.isEmpty || _selectedCategoryType == null ||
         _selectedUnit == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill all fields')),
+        SnackBar(content: Text('PROVIDE_ALL'.tr())),
       );
       return;
     }
@@ -271,7 +272,7 @@ class _CustomCategoryScreenState extends State<CustomCategoryScreen> {
 
      await DatabaseHelper.updateCategory(widget.customCategory!);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Category Updated Successfully')),
+        SnackBar(content: Text('SUCCESSFUL'.tr())),
       );
       Navigator.pop(context);
 
@@ -287,7 +288,7 @@ class _CustomCategoryScreenState extends State<CustomCategoryScreen> {
 
       // Display success message and navigate back
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Category Created Successfully')),
+        SnackBar(content: Text('SUCCESSFUL'.tr())),
       );
 
       Navigator.pop(context);
@@ -370,7 +371,7 @@ class _CustomCategoryScreenState extends State<CustomCategoryScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Text(isEdit?'Edit Category':'Create Category', style: GoogleFonts.lato(fontWeight: FontWeight.bold, color: Colors.white)),
+        title: Text(isEdit?'Edit Category'.tr():'Create Category'.tr(), style: GoogleFonts.lato(fontWeight: FontWeight.bold, color: Colors.white)),
         backgroundColor: Utils.getThemeColorBlue(),
         automaticallyImplyLeading: false,
         leading: IconButton(
@@ -394,7 +395,7 @@ class _CustomCategoryScreenState extends State<CustomCategoryScreen> {
                         icon: Icon(_selectedIcon ?? Icons.category, size: 50, color: Utils.getThemeColorBlue()),
                         onPressed: _chooseIcon,
                       ),
-                      Text('Tap to change icon', style: GoogleFonts.lato(fontSize: 12, color: Colors.grey)),
+                      Text('Tap to change icon'.tr(), style: GoogleFonts.lato(fontSize: 12, color: Colors.grey)),
                     ],
                   ),
                 ),
@@ -402,14 +403,14 @@ class _CustomCategoryScreenState extends State<CustomCategoryScreen> {
                 TextField(
                   controller: _nameController,
                   decoration: InputDecoration(
-                    labelText: 'Category Name',
+                    labelText: 'Category Name'.tr(),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                     filled: true,
                     fillColor: Colors.grey[200],
                   ),
                 ),
                 SizedBox(height: 20),
-                Text('Category Type', style: GoogleFonts.lato(fontSize: 16, fontWeight: FontWeight.w600)),
+                Text('Category Type'.tr(), style: GoogleFonts.lato(fontSize: 16, fontWeight: FontWeight.w600)),
                 SizedBox(height: 10),
                 Row(
                   children: [
@@ -423,7 +424,7 @@ class _CustomCategoryScreenState extends State<CustomCategoryScreen> {
                             color: _selectedType == 'Consumption' ? Utils.getThemeColorBlue() : Colors.grey[300],
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: Text('Consumption',
+                          child: Text('Consumption'.tr(),
                               style: GoogleFonts.lato(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -443,7 +444,7 @@ class _CustomCategoryScreenState extends State<CustomCategoryScreen> {
                             color: _selectedType == 'Collection' ? Utils.getThemeColorBlue() : Colors.grey[300],
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: Text('Collection',
+                          child: Text('Collection'.tr(),
                               style: GoogleFonts.lato(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -460,7 +461,7 @@ class _CustomCategoryScreenState extends State<CustomCategoryScreen> {
                     Expanded(
                       child: DropdownButtonFormField<String>(
                         value: _selectedCategoryType,
-                        hint: Text('Select Type'),
+                        hint: Text('Select Type'.tr()),
                         onChanged: (value) => setState(() => _selectedCategoryType = value),
                         items: categoryTypes.map((type) => DropdownMenuItem(
                           value: type,
@@ -488,7 +489,7 @@ class _CustomCategoryScreenState extends State<CustomCategoryScreen> {
                     Expanded(
                       child: DropdownButtonFormField<String>(
                         value: _selectedUnit,
-                        hint: Text('Select Unit'),
+                        hint: Text('Select Unit'.tr()),
                         onChanged: (value) => setState(() => _selectedUnit = value),
                         items: units.map((unit) => DropdownMenuItem(
                           value: unit,
@@ -516,7 +517,7 @@ class _CustomCategoryScreenState extends State<CustomCategoryScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () => _createCategory(),
-                    child: Text(isEdit?'Update':'Create', style: GoogleFonts.lato(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    child: Text(isEdit?'Update'.tr():'Finish'.tr(), style: GoogleFonts.lato(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -554,6 +555,7 @@ class _CustomCategoryScreenState extends State<CustomCategoryScreen> {
               String newCategory = _newCategoryTypeController.text.trim();
               if (newCategory.isNotEmpty) {
                 if (!categoryTypes.contains(newCategory)) {
+                  _selectedCategoryType = newCategory;
                   setState(() => categoryTypes.add(newCategory));
                   _newCategoryTypeController.clear();
                   Navigator.pop(context);
@@ -592,6 +594,7 @@ class _CustomCategoryScreenState extends State<CustomCategoryScreen> {
               String newUnit = _newUnitController.text.trim();
               if (newUnit.isNotEmpty) {
                 if (!units.contains(newUnit)) {
+                  _selectedUnit = newUnit;
                   setState(() => units.add(newUnit));
                   _newUnitController.clear();
                   Navigator.pop(context);

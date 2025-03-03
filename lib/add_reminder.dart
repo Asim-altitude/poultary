@@ -121,6 +121,94 @@ class _NewEventReminder extends State<NewEventReminder>
     child:
     return SafeArea(
       child: Scaffold(
+        bottomNavigationBar: InkWell(
+          onTap: () async {
+            activeStep++;
+            if(activeStep==1){
+              if(isOther){
+                if(nameController.text.isEmpty)
+                {
+                  activeStep--;
+                  Utils.showToast("PROVIDE_ALL".tr());
+                }
+              }
+            }
+
+            if(activeStep==2)
+            {
+              if(notesController.text.isEmpty || !isDateChosen) {
+                activeStep--;
+                Utils.showToast("PROVIDE_ALL".tr());
+              }
+              else
+              {
+                DateTime datetime = DateFormat("dd MMM yyyy - hh:mm a").parse(Utils.getReminderFormattedDate(date)); // DateTime.parse();
+                int notification_time = ((datetime.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch) / 1000).round();
+                print("TIME $notification_time");
+
+                if(isEdit){
+                  MyEvent myevent = MyEvent(widget.myEvent!.id, getFlockID(),
+                      _purposeselectedValue,
+                      isOther
+                          ? nameController.text
+                          : _reminderValue,
+                      notesController.text ,1, date, 1);
+                  await EventsDatabaseHelper.instance
+                      .database;
+
+                  EventsDatabaseHelper.updateEvent(myevent);
+                  Utils.showToast("Reminder Added".tr());
+                  Navigator.pop(context);
+
+                } else {
+                  MyEvent myevent = MyEvent(-1, getFlockID(),
+                      _purposeselectedValue,
+                      isOther
+                          ? nameController.text
+                          : _reminderValue,
+                      notesController.text, 1, date, 1);
+                  await EventsDatabaseHelper.instance
+                      .database;
+
+                  EventsDatabaseHelper.insertNewEvent(myevent);
+                  Utils.showNotification(Utils.generateRandomNumber(), myevent.event_name!, myevent.event_detail!, notification_time);
+                  Utils.showToast("Reminder Added".tr());
+                  Navigator.pop(context);
+                }
+              }
+            }
+
+            setState(() {
+
+            });
+          },
+          child: Container(
+            width: widthScreen,
+            height: 60,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Utils.getThemeColorBlue(),
+              borderRadius: BorderRadius.circular(30), // More rounded
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.3),
+                  spreadRadius: 2,
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            margin: EdgeInsets.all(20),
+            child: Text(
+              activeStep==0? "Next".tr() : "CONFIRM".tr(),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
         body: SafeArea(
           top: false,
           child: Container(
@@ -216,8 +304,22 @@ class _NewEventReminder extends State<NewEventReminder>
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          SizedBox(height: 30,width: widthScreen),
+                          SizedBox(height: 50,width: widthScreen),
                           activeStep == 0? Container(
+                            margin: EdgeInsets.all(10),
+                            padding: EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
                             child: Column(
                               children: [
                                 Container(
@@ -232,7 +334,7 @@ class _NewEventReminder extends State<NewEventReminder>
                                     )),
 
                                 SizedBox(height: 40,width: widthScreen),
-                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('CHOOSE_FLOCK_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                                /*Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('CHOOSE_FLOCK_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
                                 Container(
                                   width: widthScreen,
                                   height: 70,
@@ -249,10 +351,13 @@ class _NewEventReminder extends State<NewEventReminder>
                                     ),
                                   ),
                                   child: getDropDownList(),
-                                ),
+                                ),*/
+
+                                _buildInputLabel("CHOOSE_FLOCK_1", Icons.pets),
+                                _buildDropdownField(getDropDownList()),
 
                                 SizedBox(height: 20,width: widthScreen),
-                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Reminder Title'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                                /*Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Reminder Title'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
                                 if(_reminderValue!='')
                                 Container(
                                   width: widthScreen,
@@ -270,11 +375,18 @@ class _NewEventReminder extends State<NewEventReminder>
                                     ),
                                   ),
                                   child: getRzeminderDropDownList(),
-                                ),
+                                ),*/
+
+                                _buildInputLabel("Reminder Title", Icons.title),
+                                if(_reminderValue!='')
+                                _buildDropdownField(getRzeminderDropDownList()),
 
                                 SizedBox(height: 20,width: widthScreen),
 
-                               isOther? Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Reminder Title'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)): SizedBox(width: 1,),
+                                isOther? _buildInputLabel("Reminder Title", Icons.title) : SizedBox(width: 1,),
+                                isOther? _buildTextAreaField(nameController, "Reminder Title",1): SizedBox(width: 1,),
+
+                           /*     isOther? Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Reminder Title'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)): SizedBox(width: 1,),
                                isOther? Container(
                                   width: widthScreen,
                                   height: 70,
@@ -307,12 +419,26 @@ class _NewEventReminder extends State<NewEventReminder>
                                     ),
                                   ),
                                 ) : SizedBox(width: 1,),
-
+*/
                               ],
                             ),
                           ):SizedBox(width: 1,),
 
                           activeStep==1? Container(
+                            margin: EdgeInsets.all(10),
+                            padding: EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
                             child: Column(
                               children: [
                                 Container(
@@ -327,8 +453,10 @@ class _NewEventReminder extends State<NewEventReminder>
                                     )),
                                 SizedBox(height: 20,width: widthScreen),
 
+                                _buildInputLabel("DATE", Icons.calendar_today),
+                                _buildDateField(date, pickDate),
 
-                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DATE'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                               /* Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DATE'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
 
                                 Container(
                                   width: widthScreen,
@@ -356,8 +484,13 @@ class _NewEventReminder extends State<NewEventReminder>
                                           color: Colors.black, fontSize: 16),),
                                     ),
                                   ),
-                                ),
+                                ),*/
                                 SizedBox(height: 20,width: widthScreen),
+
+                                _buildInputLabel("About Reminder", Icons.calendar_today),
+                                _buildTextAreaField(notesController, "About Reminder".tr(),3),
+
+/*
 
                                 Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('About Reminder'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
                                 Container(
@@ -393,6 +526,7 @@ class _NewEventReminder extends State<NewEventReminder>
                                   ),
                                 ),
 
+*/
 
                                 SizedBox(height: 10,width: widthScreen),
 
@@ -402,91 +536,7 @@ class _NewEventReminder extends State<NewEventReminder>
 
                           SizedBox(height: 25,width: widthScreen),
 
-                          InkWell(
-                            onTap: () async {
-                              activeStep++;
-                              if(activeStep==1){
-                                if(isOther){
-                                  if(nameController.text.isEmpty)
-                                  {
-                                    activeStep--;
-                                    Utils.showToast("PROVIDE_ALL".tr());
-                                  }
-                                }
-                              }
 
-                              if(activeStep==2)
-                              {
-                                if(notesController.text.isEmpty || !isDateChosen) {
-                                  activeStep--;
-                                  Utils.showToast("PROVIDE_ALL".tr());
-                                }
-                                else
-                                {
-                                  DateTime datetime = DateFormat("dd MMM yyyy - hh:mm a").parse(Utils.getReminderFormattedDate(date)); // DateTime.parse();
-                                  int notification_time = ((datetime.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch) / 1000).round();
-                                  print("TIME $notification_time");
-
-                                  if(isEdit){
-                                    MyEvent myevent = MyEvent(widget.myEvent!.id, getFlockID(),
-                                        _purposeselectedValue,
-                                        isOther
-                                            ? nameController.text
-                                            : _reminderValue,
-                                        notesController.text ,1, date, 1);
-                                    await EventsDatabaseHelper.instance
-                                        .database;
-
-                                    EventsDatabaseHelper.updateEvent(myevent);
-                                    Utils.showToast("Reminder Added".tr());
-                                    Navigator.pop(context);
-
-                                  } else {
-                                    MyEvent myevent = MyEvent(-1, getFlockID(),
-                                        _purposeselectedValue,
-                                        isOther
-                                            ? nameController.text
-                                            : _reminderValue,
-                                        notesController.text, 1, date, 1);
-                                    await EventsDatabaseHelper.instance
-                                        .database;
-
-                                    EventsDatabaseHelper.insertNewEvent(myevent);
-                                    Utils.showNotification(Utils.generateRandomNumber(), myevent.event_name!, myevent.event_detail!, notification_time);
-                                    Utils.showToast("Reminder Added".tr());
-                                    Navigator.pop(context);
-                                  }
-                                }
-                              }
-
-                              setState(() {
-
-                              });
-                            },
-                            child: Container(
-                              width: widthScreen,
-                              height: 60,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: Utils.getThemeColorBlue(),
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(10.0)),
-                                border: Border.all(
-                                  color:  Utils.getThemeColorBlue(),
-                                  width: 2.0,
-                                ),
-                              ),
-                              margin: EdgeInsets.all(20),
-                              child: Text(
-                                activeStep==0? "Next".tr() : "CONFIRM".tr(),
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          )
 
                         ]),
                   ),
@@ -496,6 +546,77 @@ class _NewEventReminder extends State<NewEventReminder>
           ),
         ),
       ),
+    );
+  }
+
+  // Custom Date Picker Field
+  Widget _buildDateField(String dateText, Function() onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.grey.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.grey.shade300, width: 1.2),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(dateText.tr(), style: TextStyle(fontSize: 16, color: Colors.black)),
+            Icon(Icons.calendar_today, color: Colors.blueGrey),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  // Custom Text Area for Description
+  Widget _buildTextAreaField(TextEditingController controller, String hint, int mx_lines) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade300, width: 1.2),
+      ),
+      child: TextFormField(
+        controller: controller,
+        maxLines: mx_lines,
+        keyboardType: TextInputType.multiline,
+        decoration: InputDecoration(
+          hintText: hint,
+          border: InputBorder.none,
+          hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 16),
+        ),
+      ),
+    );
+  }
+
+  // Custom Input Label with Icon
+  Widget _buildInputLabel(String label, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, color: Utils.getThemeColorBlue(), size: 20),
+        SizedBox(width: 8),
+        Text(
+          label.tr(),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black),
+        ),
+      ],
+    );
+  }
+// Custom Dropdown Field
+  Widget _buildDropdownField(Widget dropdownWidget) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade300, width: 1.2),
+      ),
+      child: dropdownWidget,
     );
   }
 
@@ -584,29 +705,37 @@ class _NewEventReminder extends State<NewEventReminder>
   }
 
 
-  void pickDate() async{
+  void pickDate() async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(), // Prevent selection before today
+      lastDate: DateTime(2050),
+    );
 
-     DateTime? pickedDate = await showDatePicker(
+    if (pickedDate != null) {
+      TimeOfDay? pickedTime = await showTimePicker(
         context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime.now(),
-        //DateTime.now() - not to allow to choose before today.
-        lastDate: DateTime(2050));
+        initialTime: TimeOfDay.now(),
+      );
 
-     TimeOfDay? pickedTime = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+      if (pickedTime != null) {
+        // Convert DateTime and TimeOfDay to a formatted string
+        String formattedDate = DateFormat('dd MMM yyyy').format(pickedDate);
 
-    if (pickedDate != null && pickedTime != null) {
-      print(pickedDate);
-      print(pickedTime);//pickedDate output format => 2021-03-10 00:00:00.000
-      String formattedDate = DateFormat('yyyy-MM-dd').format(pickedDate);
-      String formattedTime = "${pickedTime.hour}:${pickedTime.minute}";
-      print(formattedDate +" "+ formattedTime);
-      isDateChosen = true;//formatted date output using intl package =>  2021-03-16
-      setState(() {
-        date =
-            formattedDate +" "+ formattedTime; //set output date to TextField value.
-      });
-    } else {}
+        // Convert TimeOfDay to a 12-hour format with AM/PM
+        final now = DateTime.now();
+        final selectedDateTime = DateTime(now.year, now.month, now.day, pickedTime.hour, pickedTime.minute);
+        String formattedTime = DateFormat('hh:mm a').format(selectedDateTime);
+
+        print("$formattedDate - $formattedTime");
+
+        setState(() {
+          isDateChosen = true;
+          date = "$formattedDate - $formattedTime"; // Update the UI
+        });
+      }
+    }
   }
 
   int getFlockID() {

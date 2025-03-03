@@ -41,8 +41,6 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
   }
 
 
-
-
   @override
   void initState() {
     super.initState();
@@ -80,13 +78,21 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
     return SafeArea(child: Scaffold(
-      bottomNavigationBar: BottomAppBar(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+    print("FAB Clicked!");
+    addNewEvent();
+    },
+        backgroundColor: Utils.getThemeColorBlue(),  // Change background color
+        foregroundColor: Colors.white, // Change icon/text color
+      child: Icon(Icons.add),
+    ),
+      /*bottomNavigationBar: BottomAppBar(
         color: Colors.transparent,
         child: Container(
           height: 60,
           width: widthScreen,
           child: Row(children: [
-
             Expanded(
               child: InkWell(
                 onTap: () {
@@ -115,7 +121,7 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
           ],),
         ),
         elevation: 0,
-      ),
+      ),*/
       body:SafeArea(
         top: false,
           child:Container(

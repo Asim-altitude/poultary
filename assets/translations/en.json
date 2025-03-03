@@ -13,7 +13,7 @@
   "HEADING_DASHBOARD": "Financial Summary",
   "GROSS_INCOME": "Gross Income",
   "GROSS_EXPENSE": "Gross Expense",
-  "NET_INCOME": "Net Income",
+  "NET_INCOME": "Net Profit",
   "ALL_FLOCKS": "All Flocks",
   "NEW_FLOCK": "New Flock",
   "BIRDS": "Birds",
@@ -526,10 +526,32 @@
   "Top Medicine": "Top Medicine",
   "Top Diseases": "Top Diseases",
 
+
   "Date (New)": "Date (New)",
   "Date (Old)": "Date (Old)",
   "Sort By": "Sort By",
   "Color": "Color",
-  "View Details": "View Details"
+  "View Details": "View Details",
+  "Previous": "Previous",
+  "Expense Categories": "Expense Categories",
+  "Amount": "Amount",
+  "Update": "Update",
+  "Edit Category": "Edit Category",
+  "Manure": "Manure",
+  "Supplements": "Supplements",
+  "NET_PROFIT": "Profit",
+  "Tap to change": "Tap to change",
+  "Farm Setup Date": "Farm Setup Date",
+  "Farm Name": "Farm Name",
+  "Enter farm name": "Enter farm name",
+  "Currency": "Currency",
+  "hatch_msg": "You can track egg hatching progress and manage your egg incubator smoothly in our Hatching App.",
+  "✅ Multi-batch Egg Tracking": "✅ Multi-batch Egg Tracking",
+  "✅ Track Remaining Days": "✅ Track Remaining Days",
+  "✅ Customizable Notifications": "✅ Customizable Notifications",
+  "✅ Manage Egg Incubator": "✅ Manage Egg Incubator",
+  "✅ View Hatch History": "✅ View Hatch History",
+  "Continue to Hatching App": "Continue to Hatching App",
+  "Hatch These Eggs": "Hatch These Eggs"
 
 }

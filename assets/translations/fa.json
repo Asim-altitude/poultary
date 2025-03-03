@@ -514,7 +514,34 @@
  "Summary & Analytics": "خلاصه و تحلیل‌ها",
  "By Feed Name": "بر اساس نام خوراک",
  "Top Medicine": "برترین داروها",
- "Top Diseases": "برترین بیماری‌ها"
+ "Top Diseases": "برترین بیماری‌ها",
+
+ "Date (New)": "تاریخ (جدید)",
+ "Date (Old)": "تاریخ (قدیمی)",
+ "Sort By": "مرتب‌سازی بر اساس",
+ "Color": "رنگ",
+ "View Details": "مشاهده جزئیات",
+ "Previous": "قبلی",
+ "Expense Categories": "دسته‌بندی هزینه‌ها",
+ "Amount": "مقدار",
+ "Update": "به‌روزرسانی",
+ "Edit Category": "ویرایش دسته‌بندی",
+ "Manure": "کود",
+ "Supplements": "مکمل‌ها",
+ "NET_PROFIT": "سود",
+ "Tap to change": "برای تغییر ضربه بزنید",
+ "Farm Setup Date": "تاریخ تنظیم مزرعه",
+ "Farm Name": "نام مزرعه",
+ "Enter farm name": "نام مزرعه را وارد کنید",
+ "Currency": "واحد پول",
+ "hatch_msg": "می‌توانید پیشرفت جوجه‌کشی را دنبال کنید و دستگاه جوجه‌کشی خود را به‌راحتی مدیریت کنید.",
+ "✅ Multi-batch Egg Tracking": "✅ ردیابی تخم‌ها در چندین دسته",
+ "✅ Track Remaining Days": "✅ پیگیری روزهای باقی‌مانده",
+ "✅ Customizable Notifications": "✅ اعلان‌های قابل تنظیم",
+ "✅ Manage Egg Incubator": "✅ مدیریت دستگاه جوجه‌کشی",
+ "✅ View Hatch History": "✅ مشاهده تاریخچه جوجه‌کشی",
+ "Continue to Hatching App": "ادامه به برنامه جوجه‌کشی",
+ "Hatch These Eggs": "این تخم‌ها را جوجه‌کشی کنید"
 
 
 }

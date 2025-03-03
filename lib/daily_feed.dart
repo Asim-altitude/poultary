@@ -327,57 +327,54 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                 ),
               ),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 45,
-                      alignment: Alignment.centerRight,
-                      padding: EdgeInsets.only(left: 10),
-                      margin: EdgeInsets.only(top: 10,left: 10,right: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: const BorderRadius.all(
-                            Radius.circular(10.0)),
-                        border: Border.all(
-                          color:  Utils.getThemeColorBlue(),
-                          width: 1.0,
+              Center(
+                child: Container(
+                  padding: EdgeInsets.only(top: 10),
+                  margin: EdgeInsets.symmetric(horizontal: 10), // Margin of 10 on left & right
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 3, // 60% of available space
+                        child: SizedBox(
+                          height: 55,
+                          child: _buildDropdownField(
+                            "Select Item",
+                            _purposeList,
+                            _purposeselectedValue,
+                                (String? newValue) {
+                              setState(() {
+                                _purposeselectedValue = newValue!;
+                              });
+                            },
+                            width: double.infinity,
+                            height: 45,
+                          ),
                         ),
                       ),
-                      child: getDropDownList(),
-                    ),
-                  ),
-                  InkWell(
-                      onTap: () {
-                        openDatePicker();
-                      },
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Container(
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(10.0)),
-                            border: Border.all(
-                              color:  Utils.getThemeColorBlue(),
-                              width: 1.0,
-                            ),
-                          ),
-                          margin: EdgeInsets.only(right: 10,top: 15,bottom: 5),
-                          padding: EdgeInsets.only(left: 5,right: 5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text(date_filter_name, style: TextStyle(fontSize: 14),),
-                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
-                            ],
+                      SizedBox(width: 5), // Space between the dropdowns
+                      Expanded(
+                        flex: 2, // 40% of available space
+                        child: SizedBox(
+                          height: 55,
+                          child: _buildDropdownField(
+                            "Select Item",
+                            filterList,
+                            date_filter_name,
+                                (String? newValue) {
+                              setState(() {
+                                date_filter_name = newValue!;
+                                getData(date_filter_name);
+                              });
+                            },
+                            width: double.infinity,
+                            height: 45,
                           ),
                         ),
-                      )),
-                ],
-              ),
-              /*Container(
+                      ),
+                    ],
+                  ),
+                ),
+              ),    /*Container(
                 height: 50,
                 width: widthScreen ,
                 margin: EdgeInsets.only(left: 25,right: 25,bottom: 5),
@@ -560,6 +557,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                                 GestureDetector(
                                   onTapDown: (TapDownDetails details) {
                                     selected_id = feedings[index].id;
+                                    selected_index = index;
                                     showMemberMenu(details.globalPosition);
                                   },
                                   child: Icon(Icons.more_vert, color: Colors.grey.shade600),
@@ -880,6 +878,55 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
       ),),),),),);
   }
 
+  Widget _buildDropdownField(
+      String label,
+      List<String> items,
+      String selectedValue,
+      Function(String?) onChanged, {
+        double width = double.infinity,
+        double height = 70,
+      }) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Utils.getThemeColorBlue(), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: Offset(1, 2),
+          ),
+        ],
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: selectedValue,
+          icon: Padding(
+            padding: EdgeInsets.only(right: 5),
+            child: Icon(Icons.arrow_drop_down_circle, color: Colors.blue, size: 25),
+          ),
+          isExpanded: true,
+          style: TextStyle(fontSize: 16, color: Colors.black),
+          dropdownColor: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          items: items.map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Padding(
+                padding: EdgeInsets.all(10),
+                child: Text(value.tr(), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+              ),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
   Future<void> addNewCollection() async{
     await Navigator.push(
       context,
@@ -991,16 +1038,16 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
   }
 
 
-  List<String> filterList = ['TODAY'.tr(),'YESTERDAY'.tr(),'THIS_MONTH'.tr(), 'LAST_MONTH'.tr(),'LAST3_MONTHS'.tr(), 'LAST6_MONTHS'.tr(),'THIS_YEAR'.tr(),
-    'LAST_YEAR'.tr(),'ALL_TIME'.tr()];
+  List<String> filterList = ['TODAY','YESTERDAY','THIS_MONTH', 'LAST_MONTH','LAST3_MONTHS', 'LAST6_MONTHS','THIS_YEAR',
+    'LAST_YEAR','ALL_TIME','DATE_RANGE'];
 
-  String date_filter_name = 'THIS_MONTH'.tr();
+  String date_filter_name = 'THIS_MONTH';
 
   String str_date='',end_date='';
   void getData(String filter){
     int index = 0;
 
-    if (filter == 'TODAY'.tr()){
+    if (filter == 'TODAY'){
       index = 0;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
@@ -1012,7 +1059,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
       getFilteredTransactions(str_date, end_date);
 
     }
-    else if (filter == 'YESTERDAY'.tr()){
+    else if (filter == 'YESTERDAY'){
       index = 1;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day -1);
 
@@ -1024,7 +1071,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
       getFilteredTransactions(str_date, end_date);
 
     }
-    else if (filter == 'THIS_MONTH'.tr()){
+    else if (filter == 'THIS_MONTH'){
       index = 2;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
 
@@ -1037,7 +1084,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
 
 
       getFilteredTransactions(str_date, end_date);
-    }else if (filter == 'LAST_MONTH'.tr()){
+    }else if (filter == 'LAST_MONTH'){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
 
@@ -1051,7 +1098,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
 
 
       getFilteredTransactions(str_date, end_date);
-    }else if (filter == 'LAST3_MONTHS'.tr()){
+    }else if (filter == 'LAST3_MONTHS'){
       index = 4;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -2, 1);
 
@@ -1064,7 +1111,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
 
 
       getFilteredTransactions(str_date, end_date);
-    }else if (filter == 'LAST6_MONTHS'.tr()){
+    }else if (filter == 'LAST6_MONTHS'){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
 
@@ -1076,7 +1123,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
       print(str_date+" "+end_date);
 
       getFilteredTransactions(str_date, end_date);
-    }else if (filter == 'THIS_YEAR'.tr()){
+    }else if (filter == 'THIS_YEAR'){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
@@ -1088,7 +1135,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
 
       getFilteredTransactions(str_date, end_date);
 
-    }else if (filter == 'LAST_YEAR'.tr()){
+    }else if (filter == 'LAST_YEAR'){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year-1, 12,31);
@@ -1101,7 +1148,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
 
       getFilteredTransactions(str_date, end_date);
 
-    }else if (filter == 'ALL_TIME'.tr()){
+    }else if (filter == 'ALL_TIME'){
       index = 8;
       var inputFormat = DateFormat('yyyy-MM-dd');
       str_date ="1950-01-01";
@@ -1110,10 +1157,47 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
 
 
       getFilteredTransactions(str_date, end_date);
+    }else if (filter == 'DATE_RANGE'){
+     _pickDateRange();
     }
 
-    getFilteredTransactions(str_date, end_date);
   }
+
+  DateTimeRange? selectedDateRange;
+  Future<void> _pickDateRange() async {
+    DateTime now = DateTime.now();
+    DateTime firstDate = DateTime(now.year - 5); // Allows past 5 years
+    DateTime lastDate = DateTime(now.year + 5); // Allows future 5 years
+
+    DateTimeRange? pickedRange = await showDateRangePicker(
+      context: context,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      initialDateRange: selectedDateRange ?? DateTimeRange(start: now, end: now),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Colors.blue,
+            hintColor: Colors.blue,
+            colorScheme: ColorScheme.light(primary: Colors.blue),
+            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedRange != null) {
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      selectedDateRange = pickedRange;
+      str_date = inputFormat.format(pickedRange.start);
+      end_date = inputFormat.format(pickedRange.end);
+      print(str_date+" "+end_date);
+      getFilteredTransactions(str_date, end_date);
+
+    }
+  }
+
 
   int getFlockID() {
 

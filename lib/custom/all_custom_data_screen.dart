@@ -115,6 +115,54 @@ class _CustomCategoryListScreenState extends State<CategoryDataListScreen> {
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
 
     return Scaffold(
+      bottomNavigationBar: Container(
+        margin: EdgeInsets.all(15),
+        child: GestureDetector(
+          onTap: () async {
+            _addNewCategory(context);
+          },
+          child: Container(
+            height: 55,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Utils.getThemeColorBlue(), Colors.blueAccent],  // Next Button
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(30), // More rounded
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.blue.withOpacity(0.5),
+                  spreadRadius: 2,
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            margin: EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                 "ADD_NEW".tr(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(width: 5),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -212,57 +260,54 @@ class _CustomCategoryListScreenState extends State<CategoryDataListScreen> {
                 ),
               ),
             ),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 45,
-                    alignment: Alignment.centerRight,
-                    padding: EdgeInsets.only(left: 10),
-                    margin: EdgeInsets.only(top: 10,left: 10,right: 5),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: const BorderRadius.all(
-                          Radius.circular(10.0)),
-                      border: Border.all(
-                        color:  Utils.getThemeColorBlue(),
-                        width: 1.0,
+            Center(
+              child: Container(
+                padding: EdgeInsets.only(top: 10),
+                margin: EdgeInsets.symmetric(horizontal: 10), // Margin of 10 on left & right
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 3, // 60% of available space
+                      child: SizedBox(
+                        height: 55,
+                        child: _buildDropdownField(
+                          "Select Item",
+                          _purposeList,
+                          _purposeselectedValue,
+                              (String? newValue) {
+                            setState(() {
+                              _purposeselectedValue = newValue!;
+                            });
+                          },
+                          width: double.infinity,
+                          height: 45,
+                        ),
                       ),
                     ),
-                    child: getDropDownList(),
-                  ),
-                ),
-                InkWell(
-                    onTap: () {
-                      openDatePicker(context);
-                    },
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Container(
-                        height: 45,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: const BorderRadius.all(
-                              Radius.circular(10.0)),
-                          border: Border.all(
-                            color:  Utils.getThemeColorBlue(),
-                            width: 1.0,
-                          ),
-                        ),
-                        margin: EdgeInsets.only(right: 10,top: 15,bottom: 5),
-                        padding: EdgeInsets.only(left: 5,right: 5),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(date_filter_name, style: TextStyle(fontSize: 14),),
-                            Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
-                          ],
+                    SizedBox(width: 5), // Space between the dropdowns
+                    Expanded(
+                      flex: 2, // 40% of available space
+                      child: SizedBox(
+                        height: 55,
+                        child: _buildDropdownField(
+                          "Select Item",
+                          filterList,
+                          date_filter_name,
+                              (String? newValue) {
+                            setState(() {
+                              date_filter_name = newValue!;
+                              getData(date_filter_name,context);
+                            });
+                          },
+                          width: double.infinity,
+                          height: 45,
                         ),
                       ),
-                    )),
-              ],
+                    ),
+                  ],
+                ),
+              ),
             ),
-
             Expanded(
               child: FutureBuilder<List<CustomCategoryData>>(
                 future: _customCategories,
@@ -386,10 +431,6 @@ class _CustomCategoryListScreenState extends State<CategoryDataListScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _addNewCategory(context),
-        child: Icon(Icons.add),
-      ),
     );
   }
 
@@ -427,6 +468,55 @@ class _CustomCategoryListScreenState extends State<CategoryDataListScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildDropdownField(
+      String label,
+      List<String> items,
+      String selectedValue,
+      Function(String?) onChanged, {
+        double width = double.infinity,
+        double height = 70,
+      }) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Utils.getThemeColorBlue(), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: Offset(1, 2),
+          ),
+        ],
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: selectedValue,
+          icon: Padding(
+            padding: EdgeInsets.only(right: 5),
+            child: Icon(Icons.arrow_drop_down_circle, color: Colors.blue, size: 25),
+          ),
+          isExpanded: true,
+          style: TextStyle(fontSize: 16, color: Colors.black),
+          dropdownColor: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          items: items.map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Padding(
+                padding: EdgeInsets.all(10),
+                child: Text(value.tr(), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+              ),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
+      ),
     );
   }
 
@@ -568,16 +658,16 @@ class _CustomCategoryListScreenState extends State<CategoryDataListScreen> {
     }
   }
 
-  List<String> filterList = ['TODAY'.tr(),'YESTERDAY'.tr(),'THIS_MONTH'.tr(), 'LAST_MONTH'.tr(),'LAST3_MONTHS'.tr(), 'LAST6_MONTHS'.tr(),'THIS_YEAR'.tr(),
-    'LAST_YEAR'.tr(),'ALL_TIME'.tr()];
+  List<String> filterList = ['TODAY','YESTERDAY','THIS_MONTH', 'LAST_MONTH','LAST3_MONTHS', 'LAST6_MONTHS','THIS_YEAR',
+    'LAST_YEAR','ALL_TIME','DATE_RANGE'];
 
-  String date_filter_name = 'THIS_MONTH'.tr();
-  String pdf_formatted_date_filter = 'THIS_MONTH'.tr();
+  String date_filter_name = 'THIS_MONTH';
+  String pdf_formatted_date_filter = 'THIS_MONTH';
   String str_date='',end_date='';
   void getData(String filter, BuildContext context){
     int index = 0;
 
-    if (filter == 'TODAY'.tr()){
+    if (filter == 'TODAY'){
       index = 0;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
@@ -587,8 +677,10 @@ class _CustomCategoryListScreenState extends State<CategoryDataListScreen> {
       print(str_date+" "+end_date);
 
       pdf_formatted_date_filter = "Today ("+str_date+")";
+      getCategoryDataList();
+
     }
-    else if (filter == 'YESTERDAY'.tr()){
+    else if (filter == 'YESTERDAY'){
       index = 1;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day -1);
 
@@ -597,10 +689,10 @@ class _CustomCategoryListScreenState extends State<CategoryDataListScreen> {
       end_date = inputFormat.format(today);
       print(str_date+" "+end_date);
 
-      pdf_formatted_date_filter = "YESTERDAY".tr() + " ("+str_date+")";
-
+      pdf_formatted_date_filter = "YESTERDAY" + " ("+str_date+")";
+      getCategoryDataList();
     }
-    else if (filter == 'THIS_MONTH'.tr()){
+    else if (filter == 'THIS_MONTH'){
       index = 2;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
 
@@ -613,7 +705,9 @@ class _CustomCategoryListScreenState extends State<CategoryDataListScreen> {
 
 
       pdf_formatted_date_filter = "This Month ("+str_date+"-"+end_date+")";
-    }else if (filter == 'LAST_MONTH'.tr()){
+
+      getCategoryDataList();
+    }else if (filter == 'LAST_MONTH'){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
 
@@ -626,9 +720,9 @@ class _CustomCategoryListScreenState extends State<CategoryDataListScreen> {
       print(str_date+" "+end_date);
 
 
-      pdf_formatted_date_filter = 'LAST_MONTH'.tr()+ " ("+str_date+"-"+end_date+")";
-
-    }else if (filter == 'LAST3_MONTHS'.tr()){
+      pdf_formatted_date_filter = 'LAST_MONTH'+ " ("+str_date+"-"+end_date+")";
+      getCategoryDataList();
+    }else if (filter == 'LAST3_MONTHS'){
       index = 4;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -2, 1);
 
@@ -640,8 +734,10 @@ class _CustomCategoryListScreenState extends State<CategoryDataListScreen> {
       print(str_date+" "+end_date);
 
 
-      pdf_formatted_date_filter = "LAST3_MONTHS".tr()+ " ("+str_date+"-"+end_date+")";
-    }else if (filter == 'LAST6_MONTHS'.tr()){
+      pdf_formatted_date_filter = "LAST3_MONTHS"+ " ("+str_date+"-"+end_date+")";
+
+      getCategoryDataList();
+    }else if (filter == 'LAST6_MONTHS'){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
 
@@ -653,8 +749,10 @@ class _CustomCategoryListScreenState extends State<CategoryDataListScreen> {
       print(str_date+" "+end_date);
 
 
-      pdf_formatted_date_filter = "LAST6_MONTHS".tr()+" ("+str_date+"-"+end_date+")";
-    }else if (filter == 'THIS_YEAR'.tr()){
+      pdf_formatted_date_filter = "LAST6_MONTHS"+" ("+str_date+"-"+end_date+")";
+      getCategoryDataList();
+
+    }else if (filter == 'THIS_YEAR'){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
@@ -664,8 +762,9 @@ class _CustomCategoryListScreenState extends State<CategoryDataListScreen> {
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
 
-      pdf_formatted_date_filter = 'THIS_YEAR'.tr()+ " ("+str_date+"-"+end_date+")";
-    }else if (filter == 'LAST_YEAR'.tr()){
+      pdf_formatted_date_filter = 'THIS_YEAR'+ " ("+str_date+"-"+end_date+")";
+      getCategoryDataList();
+    }else if (filter == 'LAST_YEAR'){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year-1, 12,31);
@@ -675,23 +774,57 @@ class _CustomCategoryListScreenState extends State<CategoryDataListScreen> {
       end_date = inputFormat.format(lastDayCurrentMonth);
       print(str_date+" "+end_date);
 
-
-      pdf_formatted_date_filter = 'LAST_YEAR'.tr() +" ("+str_date+"-"+end_date+")";
-
-    }else if (filter == 'ALL_TIME'.tr()){
+      pdf_formatted_date_filter = 'LAST_YEAR' +" ("+str_date+"-"+end_date+")";
+      getCategoryDataList();
+    }else if (filter == 'ALL_TIME'){
       index = 8;
       var inputFormat = DateFormat('yyyy-MM-dd');
       str_date ="1950-01-01";
       end_date = inputFormat.format(DateTime.now());;
       print(str_date+" "+end_date);
 
-      pdf_formatted_date_filter = 'ALL_TIME'.tr();
-
+      pdf_formatted_date_filter = 'ALL_TIME';
+      getCategoryDataList();
+    }else if (filter == 'DATE_RANGE'){
+      _pickDateRange();
     }
 
+  }
+
+  Future<void> _pickDateRange() async {
+    DateTime now = DateTime.now();
+    DateTime firstDate = DateTime(now.year - 5); // Allows past 5 years
+    DateTime lastDate = DateTime(now.year + 5); // Allows future 5 years
+
+    DateTimeRange? pickedRange = await showDateRangePicker(
+      context: context,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      initialDateRange: selectedDateRange ?? DateTimeRange(start: now, end: now),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Colors.blue,
+            hintColor: Colors.blue,
+            colorScheme: ColorScheme.light(primary: Colors.blue),
+            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedRange != null) {
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      selectedDateRange = pickedRange;
+      str_date = inputFormat.format(pickedRange.start);
+      end_date = inputFormat.format(pickedRange.end);
+      print(str_date+" "+end_date);
       getCategoryDataList();
 
+    }
   }
+
 
 
   String filter_name = "All";

@@ -145,6 +145,149 @@ class _NewCustomData extends State<NewCustomData>
     child:
     return SafeArea(
       child: Scaffold(
+        bottomNavigationBar: Container(
+          margin: EdgeInsets.all(15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Show Previous Button only if activeStep > 0
+              if (activeStep > 0)
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        activeStep--;
+                      });
+                    },
+                    child: Container(
+                      height: 55,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade700,
+                        borderRadius: BorderRadius.circular(30), // More rounded
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.3),
+                            spreadRadius: 2,
+                            blurRadius: 6,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      margin: EdgeInsets.symmetric(horizontal: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
+                          SizedBox(width: 5),
+                          Text(
+                            "Previous".tr(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+              // Next or Finish Button
+              Expanded(
+                child: GestureDetector(
+                  onTap: () async {
+
+                    activeStep++;
+
+                    if(activeStep==1) {
+                      if (quantityController.text
+                          .trim()
+                          .length == 0) {
+                        activeStep--;
+                        Utils.showToast("PROVIDE_ALL".tr());
+                      }else{
+                        setState(() {
+
+                        });
+                      }
+                    }
+
+                    if(activeStep==2){
+
+                      if(isEdit){
+                        await DatabaseHelper.instance.database;
+
+                        CustomCategoryData custom_data = CustomCategoryData(fId: getFlockID(), cId: widget.customCategory.id!, cType: widget.customCategory.cat_type, cName: widget.customCategory.name, itemType: widget.customCategory.itemtype, quantity: double.parse(quantityController.text), unit: widget.customCategory.unit, date: date, fName: _purposeselectedValue, note: notesController.text);
+
+                        custom_data.id = widget.customCategoryData!.id;
+                        int? id = await DatabaseHelper
+                            .updateCustomCategoryData(custom_data);
+
+                        Utils.showToast("SUCCESSFUL".tr());
+                        Navigator.pop(context);
+                      } else {
+                        await DatabaseHelper.instance.database;
+
+                        CustomCategoryData custom_data = CustomCategoryData(fId: getFlockID(), cId: widget.customCategory.id!, cType: widget.customCategory.cat_type, cName: widget.customCategory.name, itemType: widget.customCategory.itemtype, quantity: double.parse(quantityController.text), unit: widget.customCategory.unit, date: date, fName: _purposeselectedValue, note: notesController.text);
+
+                        int? id = await DatabaseHelper
+                            .insertCategoryData(custom_data);
+                        Utils.showToast("SUCCESSFUL".tr());
+                        Navigator.pop(context);
+                      }
+
+                    }
+
+                  },
+                  child: Container(
+                    height: 55,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: activeStep == 1
+                            ? [Utils.getThemeColorBlue(), Colors.greenAccent] // Finish Button
+                            : [Utils.getThemeColorBlue(), Colors.blueAccent], // Next Button
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(30), // More rounded
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 6,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    margin: EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          activeStep == 1 ? "SAVE".tr() : "Next".tr(),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(width: 5),
+                        Icon(
+                          activeStep == 1 ? Icons.check_circle : Icons.arrow_forward_ios,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         body: SafeArea(
           top: false,
           child: Container(
@@ -189,223 +332,200 @@ class _NewCustomData extends State<NewCustomData>
                   SizedBox(height: 20,),
                   EasyStepper(
                     activeStep: activeStep,
-                    activeStepTextColor: Utils.getThemeColorBlue(),
+                    activeStepTextColor: Colors.blue.shade900,
                     finishedStepTextColor: Utils.getThemeColorBlue(),
-                    internalPadding: 30,
+                    internalPadding: 20, // Reduce padding for better spacing
+                    stepShape: StepShape.circle,
+                    stepBorderRadius: 20,
+                    borderThickness: 3, // Balanced progress line thickness
                     showLoadingAnimation: false,
-                    stepRadius: 12,
-                    showStepBorder: true,
+                    stepRadius: 15, // Reduced step size to fit screen
+                    showStepBorder: false,
+                    lineStyle: LineStyle(
+                      lineLength: 50,
+                      lineType: LineType.normal,
+                      defaultLineColor: Colors.grey.shade300,
+                      activeLineColor: Colors.blueAccent,
+                      finishedLineColor: Utils.getThemeColorBlue(),
+                    ),
                     steps: [
                       EasyStep(
-                        customStep: CircleAvatar(
-                          radius: 8,
-                          backgroundColor: Colors.white,
-                          child: CircleAvatar(
-                            radius: 7,
-                            backgroundColor:
-                            activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey,
-                          ),
-                        ),
-                        title: 'Step 1'.tr(),
+                        customStep: _buildStepIcon(Icons.backup_table_sharp, 0),
+                        title: 'Quantity'.tr(),
                       ),
                       EasyStep(
-                        customStep: CircleAvatar(
-                          radius: 8,
-                          backgroundColor: Colors.white,
-                          child: CircleAvatar(
-                            radius: 7,
-                            backgroundColor:
-                            activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
-                          ),
-                        ),
-                        title: 'Step 2'.tr(),
-
+                        customStep: _buildStepIcon(Icons.date_range, 1),
+                        title: 'DATE'.tr(),
                       ),
 
                     ],
-                    onStepReached: (index) =>
-                        setState(() => activeStep = index),
+                    onStepReached: (index) => setState(() => activeStep = index),
                   ),
                   Container(
                     alignment: Alignment.center,
-                    height: heightScreen - 250,
+
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Container(
-                              margin: EdgeInsets.only(left: 10),
-                              child: Text(
-                                isEdit?"EDIT".tr() +" ${widget.customCategory.name.tr()}":"NEW".tr()+" ${widget.customCategory.name.tr()}",
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                    color: Utils.getThemeColorBlue(),
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold),
-                              )),
                           SizedBox(height: 40,width: widthScreen),
 
-                          activeStep==0? Container(
-                            child: Column(children: [
-                              SizedBox(height: 20,width: widthScreen),
-                              Column(
-                                children: [
-                                  Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('CHOOSE_FLOCK_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-                                  Container(
-                                    width: widthScreen,
-                                    height: 70,
-                                    alignment: Alignment.centerRight,
-                                    padding: EdgeInsets.all(10),
-                                    margin: EdgeInsets.only(left: 20, right: 20),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.withAlpha(70),
-                                      borderRadius: const BorderRadius.all(
-                                          Radius.circular(20.0)),
-                                      border: Border.all(
-                                        color:  Colors.grey,
-                                        width: 1.0,
-                                      ),
-                                    ),
-                                    child: getDropDownList(),
-                                  ),
-                                ],
+                          Center(
+                            child: Text(
+                              isEdit?"EDIT".tr() +" ${widget.customCategory.name.tr()}":"NEW".tr()+" ${widget.customCategory.name.tr()}",
+                              style: TextStyle(
+                                color: Utils.getThemeColorBlue(),
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
+                            ),
+                          ),
+                          SizedBox(height: 30,width: widthScreen),
 
-                              SizedBox(height: 20,width: widthScreen),
-                              Column(
-                                children: [
-                                  Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text(widget.customCategory.cat_type.tr()+' '+'Quantity'.tr()+"(${widget.customCategory.unit})", style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-                                  Container(
-                                    width: widthScreen,
-                                    height: 70,
-                                    padding: EdgeInsets.all(0),
-                                    margin: EdgeInsets.only(left: 20, right: 20),
-                                    decoration: BoxDecoration(
-                                        color: Colors.grey.withAlpha(70),
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(20))),
-                                    child: Container(
-                                      child: SizedBox(
-                                        width: widthScreen,
-                                        height: 60,
-                                        child: TextFormField(
-                                          maxLines: null,
-                                          expands: true,
-                                          controller: quantityController,
-                                          keyboardType: TextInputType.number,
-                                          inputFormatters: [
-                                            FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
-                                            TextInputFormatter.withFunction((oldValue, newValue) {
-                                              final text = newValue.text;
-                                              return text.isEmpty
-                                                  ? newValue
-                                                  : double.tryParse(text) == null
-                                                  ? oldValue
-                                                  : newValue;
-                                            }),
-                                          ],
-                                          textInputAction: TextInputAction.next,
-                                          decoration: InputDecoration(
-                                            border: OutlineInputBorder(
-                                                borderRadius:
-                                                BorderRadius.all(Radius.circular(20))),
-                                            hintText: "FEED_QUANTITY_HINT".tr(),
-                                            hintStyle: TextStyle(
-                                                color: Colors.grey, fontSize: 16),
-                                            labelStyle: TextStyle(
-                                                color: Colors.black, fontSize: 16),
-                                          ),
-                                        ),
-                                      ),
+                          activeStep==0? Container(
+                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Form Title
+                                Center(
+                                  child: Text(
+                                  "Quantity".tr(),
+                                    style: TextStyle(
+                                      color: Utils.getThemeColorBlue(),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                ],
-                              ),
-                            ],),
+                                ),
+                                SizedBox(height: 20),
+
+                                // Choose Flock
+                                _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
+                                SizedBox(height: 8),
+                                _buildDropdownField(getDropDownList()),
+
+                                SizedBox(height: 20),
+
+                                // Feed Quantity Input
+                                _buildInputLabel('Quantity'.tr()+"(${widget.customCategory.unit.tr()})", Icons.scale),
+                                SizedBox(height: 8),
+                                _buildNumberInputField(quantityController,'Quantity'.tr()+"(${widget.customCategory.unit.tr()})"),
+
+                                SizedBox(height: 20),
+                              ],
+                            ),
+                          ):SizedBox(width: 1,),
+                          /*Container(
+                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Form Title
+                                Center(
+                                  child: Text(
+                                    isEdit?"EDIT".tr() +" ${widget.customCategory.name.tr()}":"NEW".tr()+" ${widget.customCategory.name.tr()}",
+                                    style: TextStyle(
+                                      color: Utils.getThemeColorBlue(),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 20),
+
+                                // Choose Flock
+                                _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
+                                SizedBox(height: 8),
+                                _buildDropdownField(getDropDownList()),
+
+                                SizedBox(height: 20),
+
+                                // Feed Quantity Input
+                                _buildInputLabel('Quantity'.tr()+"(${widget.customCategory.unit})", Icons.scale),
+                                SizedBox(height: 8),
+                                _buildNumberInputField(quantityController,'Quantity'.tr()+"(${widget.customCategory.unit})"),
+
+                                SizedBox(height: 20),
+                              ],
+                            ),
+                          )*/
+                          activeStep==1? Container(
+                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Title
+                                Center(
+                                  child: Text(
+                                    "DATE".tr()+" & "+ "DESCRIPTION_1".tr(),
+                                    style: TextStyle(
+                                      color: Utils.getThemeColorBlue(),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 20),
+
+                                // Date Picker
+                                _buildInputLabel("DATE".tr(), Icons.calendar_today),
+                                SizedBox(height: 8),
+                                _buildDateField(Utils.getFormattedDate(date), pickDate),
+
+                                SizedBox(height: 20),
+
+                                // Description Input
+                                _buildInputLabel("DESCRIPTION_1".tr(), Icons.description),
+                                SizedBox(height: 8),
+                                _buildTextAreaField(notesController, "NOTES_HINT".tr()),
+
+                                SizedBox(height: 20),
+                              ],
+                            ),
                           ):SizedBox(width: 1,),
 
-                          activeStep==1? Container(child: Column(
-                            children: [
-                              SizedBox(height: 10,width: widthScreen),
-                              Column(
-                                children: [
-                                  Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DATE'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
 
-                                  Container(
-                                    width: widthScreen,
-                                    height: 70,
-                                    margin: EdgeInsets.only(left: 20, right: 20),
-                                    decoration: BoxDecoration(
-
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    child: InkWell(
-                                      onTap: () {
-                                        pickDate();
-                                      },
-                                      child: Container(
-                                        alignment: Alignment.centerLeft,
-                                        padding: EdgeInsets.only(left: 10),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey.withAlpha(70),
-                                          borderRadius: const BorderRadius.all(
-                                              Radius.circular(20.0)),
-                                          border: Border.all(
-                                            color:  Colors.grey,
-                                            width: 1.0,
-                                          ),
-                                        ),
-                                        child: Text(Utils.getFormattedDate(date), style: TextStyle(
-                                            color: Colors.black, fontSize: 16),),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              SizedBox(height: 20,width: widthScreen),
-                              Column(
-                                children: [
-                                  Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DESCRIPTION_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-                                  Container(
-                                    width: widthScreen,
-                                    height: 100,
-                                    margin: EdgeInsets.only(left: 20, right: 20),
-                                    decoration: BoxDecoration(
-                                        color: Colors.grey.withAlpha(70),
-                                        borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                    child: Container(
-                                      child: SizedBox(
-                                        width: widthScreen,
-                                        height: 100,
-                                        child: TextFormField(
-                                          maxLines: 2,
-                                          controller: notesController,
-                                          keyboardType: TextInputType.multiline,
-                                          textAlign: TextAlign.start,
-                                          textInputAction: TextInputAction.done,
-                                          decoration:  InputDecoration(
-                                            border: OutlineInputBorder(
-                                                borderRadius:
-                                                BorderRadius.all(Radius.circular(10))),
-                                            hintText: 'NOTES_HINT'.tr(),
-                                            hintStyle: TextStyle(
-                                                color: Colors.black, fontSize: 16),
-                                            labelStyle: TextStyle(
-                                                color: Colors.black, fontSize: 16),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),):SizedBox(width: 1,),
-
-
-                          SizedBox(height: 10,width: widthScreen),
+                         /* SizedBox(height: 10,width: widthScreen),
                           InkWell(
                             onTap: () async {
 
@@ -474,7 +594,7 @@ class _NewCustomData extends State<NewCustomData>
                                     fontWeight: FontWeight.bold),
                               ),
                             ),
-                          )
+                          )*/
 
                         ]),
                   ),
@@ -482,6 +602,135 @@ class _NewCustomData extends State<NewCustomData>
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStepIcon(IconData icon, int step) {
+    bool isActive = activeStep == step; // Current step
+    bool isFinished = activeStep > step; // Completed steps
+
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isFinished
+            ? Utils.getThemeColorBlue() // Completed step
+            : isActive
+            ? Utils.getThemeColorBlue() // Current step
+            : Colors.grey.shade400, // Upcoming step
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6,
+            spreadRadius: 1,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Icon(
+          isFinished ? Icons.check : icon, // ✅ Show tick if step is done
+          color: Colors.white,
+          size: 20,
+        ),
+      ),
+    );
+  }
+
+  // Custom Date Picker Field
+  Widget _buildDateField(String dateText, Function() onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.grey.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.grey.shade300, width: 1.2),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(dateText, style: TextStyle(fontSize: 16, color: Colors.black)),
+            Icon(Icons.calendar_today, color: Colors.blueGrey),
+          ],
+        ),
+      ),
+    );
+  }
+
+// Custom Text Area for Description
+  Widget _buildTextAreaField(TextEditingController controller, String hint) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade300, width: 1.2),
+      ),
+      child: TextFormField(
+        controller: controller,
+        maxLines: 3,
+        keyboardType: TextInputType.multiline,
+        decoration: InputDecoration(
+          hintText: hint,
+          border: InputBorder.none,
+          hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 16),
+        ),
+      ),
+    );
+  }
+
+  // Custom Input Label with Icon
+  Widget _buildInputLabel(String label, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, color: Utils.getThemeColorBlue(), size: 20),
+        SizedBox(width: 8),
+        Text(
+          label,
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black),
+        ),
+      ],
+    );
+  }
+// Custom Dropdown Field
+  Widget _buildDropdownField(Widget dropdownWidget) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade300, width: 1.2),
+      ),
+      child: dropdownWidget,
+    );
+  }
+
+  // Custom Number Input Field
+  Widget _buildNumberInputField(TextEditingController controller, String hint) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade300, width: 1.2),
+      ),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: TextInputType.number,
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(
+            RegExp(r"^\d*\.?\d*$"),
+          ), // Allows only numbers or float based on flag
+        ],
+        decoration: InputDecoration(
+          hintText: hint,
+          border: InputBorder.none,
+          hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 16),
         ),
       ),
     );

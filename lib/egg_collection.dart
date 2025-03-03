@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,8 @@ import 'package:poultary/utils/utils.dart';
 import 'database/databse_helper.dart';
 import 'model/egg_item.dart';
 import 'model/flock.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 
 class EggCollectionScreen extends StatefulWidget {
   const EggCollectionScreen({Key? key}) : super(key: key);
@@ -298,139 +301,78 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                 ),
               ),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 45,
-                      alignment: Alignment.centerRight,
-                      padding: EdgeInsets.only(left: 10),
-                      margin: EdgeInsets.only(top: 5,left: 10,right: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: const BorderRadius.all(
-                            Radius.circular(10.0)),
-                        border: Border.all(
-                          color:  Utils.getThemeColorBlue(),
-                          width: 1.0,
+              Center(
+                child: Container(
+                  padding: EdgeInsets.only(top: 10),
+                  margin: EdgeInsets.symmetric(horizontal: 10), // Margin of 10 on left & right
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 3, // 60% of available space
+                        child: SizedBox(
+                          height: 55,
+                          child: _buildDropdownField(
+                            "Select Item",
+                            _purposeList,
+                            _purposeselectedValue,
+                                (String? newValue) {
+                              setState(() {
+                                _purposeselectedValue = newValue!;
+                              });
+                            },
+                            width: double.infinity,
+                            height: 45,
+                          ),
                         ),
                       ),
-                      child: getDropDownList(),
-                    ),
-                  ),
-                  InkWell(
-                      onTap: () {
-                        openDatePicker();
-                      },
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Container(
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(10.0)),
-                            border: Border.all(
-                              color:  Utils.getThemeColorBlue(),
-                              width: 1.0,
-                            ),
-                          ),
-                          margin: EdgeInsets.only(right: 10,top: 10,bottom: 5),
-                          padding: EdgeInsets.only(left: 5,right: 5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text(date_filter_name, style: TextStyle(fontSize: 14),),
-                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
-                            ],
+                      SizedBox(width: 5), // Space between the dropdowns
+                      Expanded(
+                        flex: 2, // 40% of available space
+                        child: SizedBox(
+                          height: 55,
+                          child: _buildDropdownField(
+                            "Select Item",
+                            filterList,
+                            date_filter_name,
+                                (String? newValue) {
+                              setState(() {
+                                date_filter_name = newValue!;
+                                getData(date_filter_name);
+                              });
+                            },
+                            width: double.infinity,
+                            height: 45,
                           ),
                         ),
-                      )),
-                ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
+
               Container(
-                height: 50,
-                width: widthScreen ,
-                margin: EdgeInsets.only(left: 10,right: 10,bottom: 5),
-                child: Row(children: [
-
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        selected = 1;
-                        filter_name ='All';
-                        getFilteredTransactions(str_date, end_date);
-                      },
-                      child: Container(
-                        height: 40,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: selected == 1 ? Utils.getThemeColorBlue() : Colors.white,
-                          borderRadius: BorderRadius.only(topLeft: Radius.circular(10)
-                              ,bottomLeft: Radius.circular(10)),
-                          border: Border.all(
-                            color:  Utils.getThemeColorBlue(),
-                            width: 1.0,
-                          ),
-                        ),
-                        child: Text('All'.tr(), style: TextStyle(
-                            color: selected==1 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
-                      ),
+                height: 55,
+                width: widthScreen,
+                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                  color: Colors.white.withOpacity(0.1), // Light transparent background
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 10,
+                      offset: Offset(0, 3),
                     ),
-                  ),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        selected = 2;
-                        isCollection = 1;
-                        filter_name ='1';
-                        getFilteredTransactions(str_date, end_date);
-
-                      },
-                      child: Container(
-                        height: 40,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: selected==2 ? Utils.getThemeColorBlue() : Colors.white,
-
-
-                          border: Border.all(
-                            color: Utils.getThemeColorBlue(),
-                            width: 1.0,
-                          ),
-                        ),
-                        child: Text('Collection'.tr(), style: TextStyle(
-                            color: selected==2 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        selected = 3;
-                        filter_name ='0';
-                        isCollection = 0;
-                        getFilteredTransactions(str_date, end_date);
-
-                      },
-                      child: Container(
-                        height: 40,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: selected==3 ? Utils.getThemeColorBlue() : Colors.white,
-                          borderRadius: BorderRadius.only(topRight: Radius.circular(10)
-                              ,bottomRight: Radius.circular(10)),
-                          border: Border.all(
-                            color:  Utils.getThemeColorBlue(),
-                            width: 1.0,
-                          ),
-                        ),
-                        child: Text('Reduction'.tr(), style: TextStyle(
-                            color: selected==3 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
-                      ),
-                    ),
-                  ),
-                ],),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    buildFilterButton('All', 1, Colors.blue),
+                    buildFilterButton('Collection', 2, Colors.green),
+                    buildFilterButton('Reduction', 3, Colors.red),
+                  ],
+                ),
               ),
 
               eggs.length > 0 ? Container(
@@ -597,6 +539,42 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                                     ],
                                   ),
                                 ),
+
+                              SizedBox(height: 6),
+
+                              if (eggs[index].isCollection == 1)
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: ElevatedButton(
+                                    onPressed: () => _showHatchBottomSheet(context), // Opens the hatch dialog
+                                    style: ElevatedButton.styleFrom(
+                                      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(30), // Rounded corners
+                                      ),
+                                      elevation: 5, // Adds shadow
+                                      backgroundColor: Colors.orange.shade600, // Warm egg-like color
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.egg, color: Colors.white, size: 22), // Egg icon
+                                        SizedBox(width: 8), // Space between icon and text
+                                        Text(
+                                          "Hatch These Eggs".tr(),
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.white, // Text color
+                                          ),
+                                        ),
+                                        Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 22), // Egg icon
+
+                                      ],
+                                    ),
+                                  ),
+                                )
+
                             ],
                           ),
                         ),
@@ -841,6 +819,256 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
       ),),),),),);
   }
 
+  Widget _buildDropdownField(
+      String label,
+      List<String> items,
+      String selectedValue,
+      Function(String?) onChanged, {
+        double width = double.infinity,
+        double height = 70,
+      }) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Utils.getThemeColorBlue(), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: Offset(1, 2),
+          ),
+        ],
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: selectedValue,
+          icon: Padding(
+            padding: EdgeInsets.only(right: 5),
+            child: Icon(Icons.arrow_drop_down_circle, color: Colors.blue, size: 25),
+          ),
+          isExpanded: true,
+          style: TextStyle(fontSize: 16, color: Colors.black),
+          dropdownColor: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          items: items.map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Padding(
+                padding: EdgeInsets.all(10),
+                child: Text(value.tr(), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+              ),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
+
+  void _showHatchBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start, // Align details to left
+            children: [
+              // Drag handle
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              SizedBox(height: 12),
+
+              // Centered App Icon & Title
+              Center(
+                child: Column(
+                  children: [
+                    Image.asset(
+                      'assets/hatching_icon.png', // Ensure the file is in assets folder
+                      height: 80,
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      "Egg Hatching".tr(),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 12),
+              // Left-aligned details
+              Text(
+                "hatch_msg".tr(),
+                style: TextStyle(fontSize: 14, color: Colors.black87),
+              ),
+              SizedBox(height: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("✅ Multi-batch Egg Tracking".tr(), style: TextStyle(fontWeight: FontWeight.w700),),
+                  Text("✅ Track Remaining Days".tr(),  style: TextStyle(fontWeight: FontWeight.w700)),
+                  Text("✅ Customizable Notifications".tr(),  style: TextStyle(fontWeight: FontWeight.w700)),
+                  Text("✅ Manage Egg Incubator".tr(),  style: TextStyle(fontWeight: FontWeight.w700)),
+                  Text("✅ View Hatch History".tr(),  style: TextStyle(fontWeight: FontWeight.w700)),
+                ],
+              ),
+              SizedBox(height: 20),
+
+              // Buttons (Right-aligned)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      "CANCEL".tr(),
+                      style: TextStyle(color: Colors.grey.shade700),
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _openHatchingApp();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                      backgroundColor: Colors.orange.shade600,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      elevation: 4,
+                    ),
+                    child: Text(
+                      "Continue to Hatching App".tr(),
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+
+  void _openHatchingApp() async {
+    Uri _urlAppLink = Uri.parse('');
+    if (Platform.isAndroid) {
+      _urlAppLink = Uri.parse('https://play.google.com/store/apps/details?id=com.zaheer.hatchingbird');
+      final Uri appUrl = Uri.parse("market://details?id=com.zaheer.hatchingbird");
+
+      if (await canLaunchUrl(appUrl)) {
+        await launchUrl(appUrl);
+      } else {
+        await launchUrl(_urlAppLink);
+      }
+    } else if (Platform.isIOS) {
+      _urlAppLink = Uri.parse('https://apps.apple.com/us/app/egg-hatching-manager/id1637798439');
+    }
+
+    if (await canLaunchUrl(_urlAppLink)) {
+      await launchUrl(_urlAppLink,mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Could not launch $_urlAppLink';
+    }
+  }
+
+  /// Function to Build Filter Buttons
+  Widget buildFilterButton(String label, int index, Color color) {
+    bool isSelected = selected == index;
+
+
+
+    return Flexible( // Use Flexible instead of Expanded
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            if(label=="Addition")
+              filter_name = "1";
+            else if(label=="Reduction")
+              filter_name ="0";
+            else
+              filter_name = label;
+
+            selected = index;
+            getFilteredTransactions(str_date, end_date);
+          });
+        },
+        borderRadius: BorderRadius.circular(30),
+        child: AnimatedContainer(
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          height: 45,
+          decoration: BoxDecoration(
+            gradient: isSelected
+                ? LinearGradient(
+              colors: [color.withOpacity(0.8), color.withOpacity(0.9)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            )
+                : LinearGradient(
+              colors: [Colors.white, Colors.white.withOpacity(0.7)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              color: isSelected ? color.withOpacity(0.8) : Colors.grey.shade300,
+              width: isSelected ? 2 : 1.5,
+            ),
+            boxShadow: [
+              if (isSelected)
+                BoxShadow(
+                  color: color.withOpacity(0.4),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (isSelected)
+                Icon(Icons.check, color: Colors.white, size: 18), // ✅ Checkmark only on selected
+              if (isSelected) SizedBox(width: 6),
+              Text(
+                label.tr(),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: isSelected ? Colors.white : Colors.black,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
   Future<void> addNewCollection() async {
 
     final result = await Navigator.push(
@@ -964,15 +1192,15 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
   }
 
-  List<String> filterList = ['TODAY'.tr(),'YESTERDAY'.tr(),'THIS_MONTH'.tr(), 'LAST_MONTH'.tr(),'LAST3_MONTHS'.tr(), 'LAST6_MONTHS'.tr(),'THIS_YEAR'.tr(),
-    'LAST_YEAR'.tr(),'ALL_TIME'.tr()];
+  List<String> filterList = ['TODAY','YESTERDAY','THIS_MONTH', 'LAST_MONTH','LAST3_MONTHS', 'LAST6_MONTHS','THIS_YEAR',
+    'LAST_YEAR','ALL_TIME','DATE_RANGE'];
 
-  String date_filter_name = 'THIS_MONTH'.tr();
+  String date_filter_name = 'THIS_MONTH';
   String str_date='',end_date='';
   void getData(String filter){
     int index = 0;
 
-    if (filter == 'TODAY'.tr()){
+    if (filter == 'TODAY'){
       index = 0;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
@@ -984,7 +1212,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
       getFilteredTransactions(str_date, end_date);
 
     }
-    else if (filter == 'YESTERDAY'.tr()){
+    else if (filter == 'YESTERDAY'){
       index = 1;
       DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day -1);
 
@@ -996,7 +1224,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
       getFilteredTransactions(str_date, end_date);
 
     }
-    else if (filter == 'THIS_MONTH'.tr()){
+    else if (filter == 'THIS_MONTH'){
       index = 2;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
 
@@ -1009,7 +1237,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
 
       getFilteredTransactions(str_date, end_date);
-    }else if (filter == 'LAST_MONTH'.tr()){
+    }else if (filter == 'LAST_MONTH'){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
 
@@ -1024,7 +1252,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
       getFilteredTransactions(str_date, end_date);
 
-    }else if (filter == 'LAST3_MONTHS'.tr()){
+    }else if (filter == 'LAST3_MONTHS'){
       index = 4;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -2, 1);
 
@@ -1037,7 +1265,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
 
       getFilteredTransactions(str_date, end_date);
-    }else if (filter == 'LAST6_MONTHS'.tr()){
+    }else if (filter == 'LAST6_MONTHS'){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
 
@@ -1050,7 +1278,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
 
       getFilteredTransactions(str_date, end_date);
-    }else if (filter == 'THIS_YEAR'.tr()){
+    }else if (filter == 'THIS_YEAR'){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
@@ -1061,7 +1289,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
       print(str_date+" "+end_date);
 
       getFilteredTransactions(str_date, end_date);
-    }else if (filter == 'LAST_YEAR'.tr()){
+    }else if (filter == 'LAST_YEAR'){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
       DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year-1, 12,31);
@@ -1074,7 +1302,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
       getFilteredTransactions(str_date, end_date);
 
-    }else if (filter == 'ALL_TIME'.tr()){
+    }else if (filter == 'ALL_TIME'){
       index = 8;
       var inputFormat = DateFormat('yyyy-MM-dd');
       str_date ="1950-01-01";
@@ -1082,10 +1310,48 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
       print(str_date+" "+end_date);
 
       getFilteredTransactions(str_date, end_date);
+    }else if (filter == 'DATE_RANGE'){
+      _pickDateRange();
     }
-    getFilteredTransactions(str_date, end_date);
+
 
   }
+
+  DateTimeRange? selectedDateRange;
+  Future<void> _pickDateRange() async {
+    DateTime now = DateTime.now();
+    DateTime firstDate = DateTime(now.year - 5); // Allows past 5 years
+    DateTime lastDate = DateTime(now.year + 5); // Allows future 5 years
+
+    DateTimeRange? pickedRange = await showDateRangePicker(
+      context: context,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      initialDateRange: selectedDateRange ?? DateTimeRange(start: now, end: now),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Colors.blue,
+            hintColor: Colors.blue,
+            colorScheme: ColorScheme.light(primary: Colors.blue),
+            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedRange != null) {
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      selectedDateRange = pickedRange;
+      str_date = inputFormat.format(pickedRange.start);
+      end_date = inputFormat.format(pickedRange.end);
+      print(str_date+" "+end_date);
+      getFilteredTransactions(str_date, end_date);
+
+    }
+  }
+
 
   int getFlockID() {
 

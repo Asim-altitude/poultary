@@ -515,6 +515,34 @@
   "Summary & Analytics": "Résumé et analyse",
   "By Feed Name": "Par nom d'aliment",
   "Top Medicine": "Meilleurs médicaments",
-  "Top Diseases": "Principales maladies"
+  "Top Diseases": "Principales maladies",
+
+  "Date (New)": "Date (Nouvelle)",
+  "Date (Old)": "Date (Ancienne)",
+  "Sort By": "Trier Par",
+  "Color": "Couleur",
+  "View Details": "Voir les détails",
+  "Previous": "Précédent",
+  "Expense Categories": "Catégories de Dépenses",
+  "Amount": "Montant",
+  "Update": "Mettre à jour",
+  "Edit Category": "Modifier la Catégorie",
+  "Manure": "Fumier",
+  "Supplements": "Suppléments",
+  "NET_PROFIT": "Profit",
+  "Tap to change": "Appuyez pour modifier",
+  "Farm Setup Date": "Date de Création de la Ferme",
+  "Farm Name": "Nom de la Ferme",
+  "Enter farm name": "Entrez le nom de la ferme",
+  "Currency": "Devise",
+  "hatch_msg": "Vous pouvez suivre la progression de l'éclosion des œufs et gérer votre incubateur dans notre application d'éclosion.",
+  "✅ Multi-batch Egg Tracking": "✅ Suivi Multi-Lots d'Œufs",
+  "✅ Track Remaining Days": "✅ Suivi des Jours Restants",
+  "✅ Customizable Notifications": "✅ Notifications Personnalisables",
+  "✅ Manage Egg Incubator": "✅ Gérer l'Incubateur d'Œufs",
+  "✅ View Hatch History": "✅ Voir l'Historique des Éclosions",
+  "Continue to Hatching App": "Continuer vers l'Application d'Éclosion",
+  "Hatch These Eggs": "Faire Éclore Ces Œufs"
+
 
 }

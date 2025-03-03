@@ -1,7 +1,3 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -15,14 +11,9 @@ import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:syncfusion_flutter_charts/sparkcharts.dart';
-
-import 'model/egg_item.dart';
-import 'model/feed_item.dart';
 import 'model/finance_chart_data.dart';
 import 'model/finance_summary_flock.dart';
 import 'model/flock.dart';
-import 'model/flock_detail.dart';
 
 class FinanceReportsScreen extends StatefulWidget {
   const FinanceReportsScreen({Key? key}) : super(key: key);
@@ -62,7 +53,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
     super.initState();
      try
      {
-       date_filter_name = "THIS_MONTH".tr();
+       date_filter_name = "THIS_MONTH";
        _zoomPanBehavior = ZoomPanBehavior(
            enableDoubleTapZooming: true,
            enablePinching: true,
@@ -320,17 +311,17 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
               Row(
                 children: [
-
+                  /// Single Date Picker
                   InkWell(
                     onTap: () {
                       openDatePicker();
                     },
-                    borderRadius: BorderRadius.circular(8), // Adds ripple effect with rounded edges
+                    borderRadius: BorderRadius.circular(8),
                     child: Container(
                       height: 45,
                       width: widthScreen - 20,
-                      margin: EdgeInsets.only(right: 10,left: 10, top: 15, bottom: 10),
-                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      margin: EdgeInsets.only(left: 10, top: 15, bottom: 10),
+                      padding: EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
@@ -364,8 +355,8 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                         ],
                       ),
                     ),
-                  )
-                ],
+                  ),
+                ]
               ),
 
               Container(
@@ -462,6 +453,43 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
               ),
             ]
       ),),),),),);
+  }
+
+  DateTimeRange? selectedDateRange;
+  Future<void> _pickDateRange() async {
+    DateTime now = DateTime.now();
+    DateTime firstDate = DateTime(now.year - 5); // Allows past 5 years
+    DateTime lastDate = DateTime(now.year + 5); // Allows future 5 years
+
+    DateTimeRange? pickedRange = await showDateRangePicker(
+      context: context,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      initialDateRange: selectedDateRange ?? DateTimeRange(start: now, end: now),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Colors.blue,
+            hintColor: Colors.blue,
+            colorScheme: ColorScheme.light(primary: Colors.blue),
+            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedRange != null) {
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      selectedDateRange = pickedRange;
+
+      str_date = inputFormat.format(pickedRange.start);
+      end_date = inputFormat.format(pickedRange.end);
+      date_filter_name = Utils.getFormattedDate(str_date) +" | "+Utils.getFormattedDate(end_date);
+      print(str_date+" "+end_date);
+      getAllData();
+
+    }
   }
 
   // 🔹 Item Row UI (for Income & Expense)
@@ -692,11 +720,10 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
         });
   }
 
-
   Widget setupAlertDialoadContainer(BuildContext bcontext,double width, double height) {
 
     return Container(
-      height: height, // Change as per your requirement
+      height: filterList.length * 55, // Change as per your requirement
       width: width, // Change as per your requirement
       child: ListView.builder(
         shrinkWrap: true,
@@ -708,9 +735,9 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
               setState(() {
                 date_filter_name = filterList.elementAt(index);
               });
-
-              getData(date_filter_name);
               Navigator.pop(bcontext);
+              getData(date_filter_name);
+
             },
             child: ListTile(
               title: Text(filterList.elementAt(index).tr()),
@@ -730,7 +757,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
 
   List<String> filterList = ['TODAY','YESTERDAY','THIS_MONTH', 'LAST_MONTH','LAST3_MONTHS', 'LAST6_MONTHS','THIS_YEAR',
-    'LAST_YEAR','ALL_TIME'];
+    'LAST_YEAR','ALL_TIME','DATE_RANGE'];
 
   String date_filter_name = 'THIS_MONTH';
   String pdf_formatted_date_filter = 'THIS_MONTH';
@@ -748,7 +775,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
       print(str_date+" "+end_date);
 
       pdf_formatted_date_filter = 'TODAY'.tr()+" ("+Utils.getFormattedDate(str_date)+")";
-
+      getAllData();
     }
     else if (filter == 'YESTERDAY'){
       index = 1;
@@ -760,7 +787,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
       print(str_date+" "+end_date);
 
       pdf_formatted_date_filter = "YESTERDAY".tr() + " ("+Utils.getFormattedDate(str_date)+")";
-
+      getAllData();
     }
     else if (filter == 'THIS_MONTH'){
       index = 2;
@@ -775,6 +802,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
 
       pdf_formatted_date_filter = 'THIS_MONTH'.tr()+" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
+      getAllData();
     }else if (filter == 'LAST_MONTH'){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
@@ -789,7 +817,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
 
       pdf_formatted_date_filter = 'LAST_MONTH'.tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
-
+      getAllData();
     }else if (filter == 'LAST3_MONTHS'){
       index = 4;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -2, 1);
@@ -803,6 +831,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
 
       pdf_formatted_date_filter = "LAST3_MONTHS".tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
+      getAllData();
     }else if (filter == 'LAST6_MONTHS'){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
@@ -816,6 +845,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
 
       pdf_formatted_date_filter = "LAST6_MONTHS".tr()+" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
+      getAllData();
     }else if (filter == 'THIS_YEAR'){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
@@ -827,6 +857,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
       print(str_date+" "+end_date);
 
       pdf_formatted_date_filter = 'THIS_YEAR'.tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
+      getAllData();
     }else if (filter == 'LAST_YEAR'){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
@@ -839,7 +870,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
 
       pdf_formatted_date_filter = 'LAST_YEAR'.tr() +" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
-
+      getAllData();
     }else if (filter == 'ALL_TIME'){
       index = 8;
       var inputFormat = DateFormat('yyyy-MM-dd');
@@ -848,8 +879,11 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
       print(str_date+" "+end_date);
 
       pdf_formatted_date_filter = 'ALL_TIME'.tr();
+      getAllData();
+    }else if (filter == 'DATE_RANGE'){
+      _pickDateRange();
     }
-    getAllData();
+
 
   }
 

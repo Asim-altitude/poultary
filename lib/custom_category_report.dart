@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
+import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
@@ -218,149 +219,151 @@ class _CategoryChartScreenState extends State<CategoryChartScreen> {
           ),*/
         ],
       ),
-      body: Column(
-        children: [
-          Row(
-            children: [
-              /*Expanded(
-                child: Container(
-                  height: 45,
-                  alignment: Alignment.centerRight,
-                  padding: EdgeInsets.only(left: 10),
-                  margin: EdgeInsets.only(top: 10,left: 10,right: 5),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: const BorderRadius.all(
-                        Radius.circular(5.0)),
-                    border: Border.all(
-                      color:  Utils.getThemeColorBlue(),
-                      width: 1.0,
-                    ),
-                  ),
-                  child: getDropDownList(),
-                ),
-              ),*/
-              InkWell(
-                onTap: () {
-                  openDatePicker();
-                },
-                borderRadius: BorderRadius.circular(8), // Adds ripple effect with rounded edges
-                child: Container(
-                  height: 45,
-                  width: widthScreen - 20,
-                  margin: EdgeInsets.only(right: 10,left: 10, top: 15, bottom: 10),
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Utils.getThemeColorBlue(),
-                      width: 1.2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
+      body: SingleChildScrollViewWithStickyFirstWidget(
+        child: Column(
+          children: [
+            Row(
+              children: [
+                /*Expanded(
+                  child: Container(
+                    height: 45,
+                    alignment: Alignment.centerRight,
+                    padding: EdgeInsets.only(left: 10),
+                    margin: EdgeInsets.only(top: 10,left: 10,right: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: const BorderRadius.all(
+                          Radius.circular(5.0)),
+                      border: Border.all(
+                        color:  Utils.getThemeColorBlue(),
+                        width: 1.0,
                       ),
-                    ],
+                    ),
+                    child: getDropDownList(),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.calendar_today, color: Utils.getThemeColorBlue(), size: 18),
-                      SizedBox(width: 8),
-                      Text(
-                        date_filter_name.tr(),
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+                ),*/
+                InkWell(
+                  onTap: () {
+                    openDatePicker();
+                  },
+                  borderRadius: BorderRadius.circular(8), // Adds ripple effect with rounded edges
+                  child: Container(
+                    height: 45,
+                    width: widthScreen - 20,
+                    margin: EdgeInsets.only(right: 10,left: 10, top: 15, bottom: 10),
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      SizedBox(width: 8),
-                      Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(), size: 20),
-                    ],
-                  ),
-                ),
-              )
-            ],
-          ),
-
-
-          records.isEmpty
-              ? Center(child: Text("No Data Available".tr(), style: TextStyle(fontSize: 18, color: Colors.grey)))
-              : Padding( padding: EdgeInsets.all(12),
-                            child: SfCartesianChart(
-                              primaryXAxis: CategoryAxis(),
-                              primaryYAxis: NumericAxis(),
-                              title: ChartTitle(text: widget.customCategory!.name.tr()+" "+"Quantity".tr(), textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue())),
-                              tooltipBehavior: TooltipBehavior(enable: true),
-                              series: <CartesianSeries<dynamic, dynamic>>[
-                                ColumnSeries<CustomCategoryData, String>(
-                                  dataSource: records,
-                                  xValueMapper: (CustomCategoryData data, _) => data.date.substring(5),
-                                  yValueMapper: (CustomCategoryData data, _) => data.quantity,
-                                  name: "Quantity".tr(),
-                                  dataLabelSettings: DataLabelSettings(isVisible: true, color: Colors.white),
-                                  color: Colors.blueAccent,
-                                )
-                              ],
-                            ),
-              ),
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Card(
-              elevation: 6,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-              color: Colors.white,
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 📌 Summary Section
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                         "Summary & Analytics".tr(),
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Utils.getThemeColorBlue(),
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
                         ),
-
                       ],
                     ),
-                    SizedBox(height: 8),
-                    Text(
-                      "TOTAL".tr()+" "+"Quantity".tr()+": ${totalQuantity.toStringAsFixed(2)} ${widget.customCategory!.unit.tr()}",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.calendar_today, color: Utils.getThemeColorBlue(), size: 18),
+                        SizedBox(width: 8),
+                        Text(
+                          date_filter_name.tr(),
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+                        ),
+                        SizedBox(width: 8),
+                        Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(), size: 20),
+                      ],
                     ),
-                    Divider(thickness: 1, height: 20),
-
-                    // 📌 Flock Quantity List
-                    Column(
-                      children: flockQuantityMap.map((entry) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(vertical: 5),
-                          child: ListTile(
-                            contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                            leading: CircleAvatar(
-                              backgroundColor: Colors.blue.shade100,
-                              child: Icon(Icons.home, color: Colors.blue),
-                            ),
-                            title: Text(entry.flockName, style: TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Text("Quantity".tr()+": ${entry.totalQuantity.toStringAsFixed(2)} ${widget.customCategory!.unit.toString()}"),
+                  ),
+                )
+              ],
+            ),
+        
+        
+            records.isEmpty
+                ? Center(child: Text("No Data Available".tr(), style: TextStyle(fontSize: 18, color: Colors.grey)))
+                : Padding( padding: EdgeInsets.all(12),
+                              child: SfCartesianChart(
+                                primaryXAxis: CategoryAxis(),
+                                primaryYAxis: NumericAxis(),
+                                title: ChartTitle(text: widget.customCategory!.name.tr()+" "+"Quantity".tr(), textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue())),
+                                tooltipBehavior: TooltipBehavior(enable: true),
+                                series: <CartesianSeries<dynamic, dynamic>>[
+                                  ColumnSeries<CustomCategoryData, String>(
+                                    dataSource: records,
+                                    xValueMapper: (CustomCategoryData data, _) => data.date.substring(5),
+                                    yValueMapper: (CustomCategoryData data, _) => data.quantity,
+                                    name: "Quantity".tr(),
+                                    dataLabelSettings: DataLabelSettings(isVisible: true, color: Colors.white),
+                                    color: Colors.blueAccent,
+                                  )
+                                ],
+                              ),
+                ),
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Card(
+                elevation: 6,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                color: Colors.white,
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 📌 Summary Section
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                           "Summary & Analytics".tr(),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
                           ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
+        
+                        ],
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        "TOTAL".tr()+" "+"Quantity".tr()+": ${totalQuantity.toStringAsFixed(2)} ${widget.customCategory!.unit.tr()}",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                      Divider(thickness: 1, height: 20),
+        
+                      // 📌 Flock Quantity List
+                      Column(
+                        children: flockQuantityMap.map((entry) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(vertical: 5),
+                            child: ListTile(
+                              contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                              leading: CircleAvatar(
+                                backgroundColor: Colors.blue.shade100,
+                                child: Icon(Icons.home, color: Colors.blue),
+                              ),
+                              title: Text(entry.flockName, style: TextStyle(fontWeight: FontWeight.bold)),
+                              subtitle: Text("Quantity".tr()+": ${entry.totalQuantity.toStringAsFixed(2)} ${widget.customCategory!.unit.toString()}"),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          )
-
-        ],
+            )
+        
+          ],
+        ),
       ),
     );
   }
@@ -436,33 +439,6 @@ class _CategoryChartScreenState extends State<CategoryChartScreen> {
   }
 
 
-  Widget setupAlertDialoadContainer(BuildContext bcontext,double width, double height) {
-
-    return Container(
-      height: height, // Change as per your requirement
-      width: width, // Change as per your requirement
-      child: ListView.builder(
-        shrinkWrap: true,
-        itemCount: filterList.length,
-        itemBuilder: (BuildContext context, int index) {
-          return InkWell(
-            onTap: () {
-
-              setState(() {
-                date_filter_name = filterList.elementAt(index);
-              });
-
-              getData(date_filter_name);
-              Navigator.pop(bcontext);
-            },
-            child: ListTile(
-              title: Text(filterList.elementAt(index).tr()),
-            ),
-          );
-        },
-      ),
-    );
-  }
 
 
   // Function to Convert List to FlockQuantity Class
@@ -486,12 +462,41 @@ class _CategoryChartScreenState extends State<CategoryChartScreen> {
 
 
 
+  Widget setupAlertDialoadContainer(BuildContext bcontext,double width, double height) {
+
+    return Container(
+      height: height, // Change as per your requirement
+      width: width, // Change as per your requirement
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: filterList.length,
+        itemBuilder: (BuildContext context, int index) {
+          return InkWell(
+            onTap: () {
+
+              setState(() {
+                date_filter_name = filterList.elementAt(index);
+              });
+
+              Navigator.pop(bcontext);
+              getData(date_filter_name);
+
+            },
+            child: ListTile(
+              title: Text(filterList.elementAt(index).tr()),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   List<String> filterList = ['TODAY','YESTERDAY','THIS_MONTH', 'LAST_MONTH','LAST3_MONTHS', 'LAST6_MONTHS','THIS_YEAR',
-    'LAST_YEAR','ALL_TIME'];
+    'LAST_YEAR','ALL_TIME','DATE_RANGE'];
 
   String date_filter_name = 'THIS_MONTH';
   String pdf_formatted_date_filter = 'THIS_MONTH';
-  String str_date = '',end_date = '';
+  String str_date='',end_date='';
   void getData(String filter){
     int index = 0;
 
@@ -506,6 +511,7 @@ class _CategoryChartScreenState extends State<CategoryChartScreen> {
 
       pdf_formatted_date_filter = 'TODAY'.tr()+" ("+Utils.getFormattedDate(str_date)+")";
 
+      getCategoryDataList();
     }
     else if (filter == 'YESTERDAY'){
       index = 1;
@@ -517,7 +523,7 @@ class _CategoryChartScreenState extends State<CategoryChartScreen> {
       print(str_date+" "+end_date);
 
       pdf_formatted_date_filter = "YESTERDAY".tr() + " ("+Utils.getFormattedDate(str_date)+")";
-
+      getCategoryDataList();
     }
     else if (filter == 'THIS_MONTH'){
       index = 2;
@@ -532,6 +538,7 @@ class _CategoryChartScreenState extends State<CategoryChartScreen> {
 
 
       pdf_formatted_date_filter = 'THIS_MONTH'.tr()+" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
+      getCategoryDataList();
     }else if (filter == 'LAST_MONTH'){
       index = 3;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
@@ -546,7 +553,7 @@ class _CategoryChartScreenState extends State<CategoryChartScreen> {
 
 
       pdf_formatted_date_filter = 'LAST_MONTH'.tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
-
+      getCategoryDataList();
     }else if (filter == 'LAST3_MONTHS'){
       index = 4;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -2, 1);
@@ -560,6 +567,7 @@ class _CategoryChartScreenState extends State<CategoryChartScreen> {
 
 
       pdf_formatted_date_filter = "LAST3_MONTHS".tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
+      getCategoryDataList();
     }else if (filter == 'LAST6_MONTHS'){
       index = 5;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
@@ -573,6 +581,7 @@ class _CategoryChartScreenState extends State<CategoryChartScreen> {
 
 
       pdf_formatted_date_filter = "LAST6_MONTHS".tr()+" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
+      getCategoryDataList();
     }else if (filter == 'THIS_YEAR'){
       index = 6;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
@@ -584,6 +593,7 @@ class _CategoryChartScreenState extends State<CategoryChartScreen> {
       print(str_date+" "+end_date);
 
       pdf_formatted_date_filter = 'THIS_YEAR'.tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
+      getCategoryDataList();
     }else if (filter == 'LAST_YEAR'){
       index = 7;
       DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
@@ -596,7 +606,7 @@ class _CategoryChartScreenState extends State<CategoryChartScreen> {
 
 
       pdf_formatted_date_filter = 'LAST_YEAR'.tr() +" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
-
+      getCategoryDataList();
     }else if (filter == 'ALL_TIME'){
       index = 8;
       var inputFormat = DateFormat('yyyy-MM-dd');
@@ -604,12 +614,52 @@ class _CategoryChartScreenState extends State<CategoryChartScreen> {
       end_date = inputFormat.format(DateTime.now());;
       print(str_date+" "+end_date);
 
-      pdf_formatted_date_filter = 'ALL_TIME'.tr();
+
+      pdf_formatted_date_filter = 'ALL_TIME';
+      getCategoryDataList();
+    }else if (filter == 'DATE_RANGE'){
+      _pickDateRange();
     }
-    getCategoryDataList();
+
 
   }
 
+  DateTimeRange? selectedDateRange;
+  Future<void> _pickDateRange() async {
+    DateTime now = DateTime.now();
+    DateTime firstDate = DateTime(now.year - 5); // Allows past 5 years
+    DateTime lastDate = DateTime(now.year + 5); // Allows future 5 years
+
+    DateTimeRange? pickedRange = await showDateRangePicker(
+      context: context,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      initialDateRange: selectedDateRange ?? DateTimeRange(start: now, end: now),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Colors.blue,
+            hintColor: Colors.blue,
+            colorScheme: ColorScheme.light(primary: Colors.blue),
+            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedRange != null) {
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      selectedDateRange = pickedRange;
+
+      str_date = inputFormat.format(pickedRange.start);
+      end_date = inputFormat.format(pickedRange.end);
+      date_filter_name = Utils.getFormattedDate(str_date) +" | "+Utils.getFormattedDate(end_date);
+      print(str_date+" "+end_date);
+      getCategoryDataList();
+
+    }
+  }
   int f_id = -1;
   int getFlockID() {
 

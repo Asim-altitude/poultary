@@ -160,32 +160,39 @@ class _HomeScreen extends State<HomeScreen> {
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
        return SafeArea(child: Scaffold(
-      bottomNavigationBar:
-    ClipRRect(
-    borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(10.0),
-    topRight: Radius.circular(10.0),
-    ),
-    child:
-    BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedTab,
-        onTap: (index) => _changeTab(index),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
-        backgroundColor: Utils.getThemeColorBlue(),
-
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "DASHBOARD".tr()),
-          BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: "REPORTS".tr()),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications_active), label: "Reminders".tr()),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "SETTINGS".tr()),
-
-          // BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: "Products".tr()),
-
-        ],
-
-      ),),
+         // Circular Floating Action Button
+          /* floatingActionButton: FloatingActionButton(
+             onPressed: () {
+               print("Plus Button Clicked");
+               // Add action here (e.g., open add item screen)
+             },
+             backgroundColor: Colors.blueAccent, // Change to match your theme
+             child: Icon(Icons.add, size: 32, color: Colors.white),
+             elevation: 6,
+             shape: CircleBorder(), // Ensures it's always circular
+           ),
+           floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+*/
+           bottomNavigationBar: ClipRRect(
+             borderRadius: BorderRadius.only(
+               topLeft: Radius.circular(12),
+               topRight: Radius.circular(12),
+             ),
+             child: BottomNavigationBar(
+               type: BottomNavigationBarType.fixed,
+               currentIndex: _selectedTab,
+               onTap: (index) => _changeTab(index),
+               selectedItemColor: Colors.white,
+               unselectedItemColor: Colors.white70,
+               backgroundColor: Utils.getThemeColorBlue(),
+               items: [
+                 BottomNavigationBarItem(icon: Icon(Icons.home), label: "DASHBOARD".tr()),
+                 BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: "REPORTS".tr()),
+                 BottomNavigationBarItem(icon: Icon(Icons.notifications_active), label: "Reminders".tr()),
+                 BottomNavigationBarItem(icon: Icon(Icons.settings), label: "SETTINGS".tr()),
+               ],
+             ),
+           ),
       body: _pages[_selectedTab])); /*SafeArea(
         top: false,
 
