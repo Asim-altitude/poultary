@@ -2393,6 +2393,24 @@ class DatabaseHelper  {
     return _birdList;
   }
 
+  static Future<void> deleteFlockAndRelatedInfo(int flockId) async {
+
+    // Begin a transaction to ensure atomicity
+    await _database?.transaction((txn) async {
+
+      await txn.delete('Eggs', where: 'f_id = ?', whereArgs: [flockId]);
+      await txn.delete('Transactions', where: 'f_id = ?', whereArgs: [flockId]);
+      await txn.delete('Feeding', where: 'f_id = ?', whereArgs: [flockId]);
+      await txn.delete('Vaccination_Medication', where: 'f_id = ?', whereArgs: [flockId]);
+      await txn.delete('Flock_Detail', where: 'f_id = ?', whereArgs: [flockId]);
+
+      // Delete flock
+      await txn.delete('Flock', where: 'f_id = ?', whereArgs: [flockId]);
+    });
+
+
+  }
+
   static Future<int>  deleteSubItem(SubItem subItem) async {
     var result = await _database?.rawQuery("DELETE FROM Category_Detail WHERE id = '${subItem.id}'");
     return 1;
