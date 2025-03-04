@@ -114,11 +114,13 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
         return;
       }
     }else{
-      Navigator.push(
+     await Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) =>  NewFeeding()),
       );
+
+      getFilteredTransactions(str_date, end_date);
     }
 
     // Proceed with adding the manual feeding record

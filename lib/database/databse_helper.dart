@@ -2408,7 +2408,6 @@ class DatabaseHelper  {
       await txn.delete('Flock', where: 'f_id = ?', whereArgs: [flockId]);
     });
 
-
   }
 
   static Future<int>  deleteSubItem(SubItem subItem) async {
