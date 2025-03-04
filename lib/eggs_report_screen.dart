@@ -369,7 +369,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                           child: SfCartesianChart(
                             primaryXAxis: CategoryAxis(),
                             zoomPanBehavior: _zoomPanBehavior,
-                            title: ChartTitle(text: date_filter_name),
+                            title: ChartTitle(text: date_filter_name.tr()),
                             legend: Legend(isVisible: true,
                                 position: LegendPosition.bottom),
                             tooltipBehavior: TooltipBehavior(enable: true),

@@ -897,11 +897,12 @@ class _DashboardScreen extends State<DashboardScreen> {
                           SizedBox(height: 10,),
                           // Egg Collection, Feed Consumption, Treatment Summary
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              getSummaryCard(Icons.egg, "Eggs", "$total_eggs_collected", Colors.white, EggsReportsScreen(), context),
-                              getSummaryCard(Icons.food_bank, "Feed", "$total_feed_consumption"+ "KG".tr(), Colors.white, FeedReportsScreen(), context),
-                              getSummaryCard(Icons.medical_information, "Health", "$treatmentCount", Colors.white, HealthReportScreen(), context),
+
+                              Expanded(child: getSummaryCard(Icons.egg, "Eggs", "$total_eggs_collected", Colors.white, EggsReportsScreen(), context)),
+                              Expanded(child: getSummaryCard(Icons.food_bank, "Feed", "$total_feed_consumption"+ "KG".tr(), Colors.white, FeedReportsScreen(), context)),
+                              Expanded(child: getSummaryCard(Icons.medical_information, "Health", "$treatmentCount", Colors.white, HealthReportScreen(), context)),
                             ],
                           ),
                         ],
@@ -1505,7 +1506,8 @@ class _DashboardScreen extends State<DashboardScreen> {
         );
       },
       child: Container(
-        width: 110, // Adjusted width for consistency
+
+        margin: EdgeInsets.only(left: 3,right: 3),
         padding: EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           gradient: LinearGradient(
