@@ -20,6 +20,8 @@ import '../model/eggs_chart_data.dart';
 import '../model/farm_item.dart';
 import '../model/feed_item.dart';
 import '../model/feed_report_item.dart';
+import '../model/feed_stock_history.dart';
+import '../model/feed_stock_summary.dart';
 import '../model/feed_summary.dart';
 import '../model/feed_summary_flock.dart';
 import '../model/feedflock_report_item.dart';
@@ -2392,6 +2394,107 @@ class DatabaseHelper  {
     }
     return _birdList;
   }
+
+  static Future<void> createFeedStockHistoryTable() async {
+    await _database?.execute('''
+    CREATE TABLE IF NOT EXISTS FeedStockHistory (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      feed_id INTEGER NOT NULL,
+      quantity REAL NOT NULL,
+      feed_name TEXT NOT NULL,
+      unit TEXT NOT NULL,
+      source TEXT NOT NULL,
+      date TEXT NOT NULL
+    )
+  ''');
+  }
+
+  static Future<int?> insertFeedStock(FeedStockHistory stock) async {
+
+    return await _database?.insert('FeedStockHistory', stock.toMap());
+  }
+
+  static Future<int?> updateFeedStock(FeedStockHistory stock) async {
+    return await _database?.update(
+      'FeedStockHistory',
+      stock.toMap(),
+      where: 'id = ?',
+      whereArgs: [stock.id],
+    );
+  }
+
+  static Future<int?> deleteFeedStock(int id) async {
+
+    return await _database?.delete(
+      'FeedStockHistory',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  static Future<List<FeedStockHistory>> getAllFeedStock() async {
+
+    final List<Map<String, Object?>>? maps = await _database?.query('FeedStockHistory');
+
+    return List.generate(maps!.length, (i) {
+      return FeedStockHistory.fromMap(maps[i]);
+    });
+  }
+
+  static Future<List<FeedStockSummary>?> getFeedStockSummary() async {
+    final List<Map<String, dynamic>>? maps = await _database?.rawQuery('''
+    WITH FirstStock AS (
+        SELECT feed_name, MIN(date) AS first_stock_date
+        FROM FeedStockHistory
+        GROUP BY feed_name
+    )
+    SELECT s.feed_name, 
+           COALESCE(SUM(s.quantity), 0) AS total_stock,
+           COALESCE((
+             SELECT SUM(CAST(f.quantity AS REAL)) 
+             FROM Feeding f
+             WHERE f.feed_name = s.feed_name 
+               AND f.feeding_date >= (SELECT first_stock_date FROM FirstStock WHERE feed_name = s.feed_name)
+           ), 0) AS used_stock,
+           (COALESCE(SUM(s.quantity), 0) - 
+            COALESCE((SELECT SUM(CAST(f.quantity AS REAL)) 
+                      FROM Feeding f
+                      WHERE f.feed_name = s.feed_name 
+                        AND f.feeding_date >= (SELECT first_stock_date FROM FirstStock WHERE feed_name = s.feed_name)
+                    ), 0)
+           ) AS available_stock
+    FROM FeedStockHistory s
+    GROUP BY s.feed_name;
+  ''');
+
+    if (maps == null || maps.isEmpty) return [];
+
+    return maps.map((map) {
+      String feedName = map['feed_name'] ?? "Unknown";
+
+      return FeedStockSummary(
+        feedName: feedName,
+        totalStock: (map['total_stock'] as num?)?.toDouble() ?? 0.0,
+        usedStock: (map['used_stock'] as num?)?.toDouble() ?? 0.0,
+        availableStock: (map['available_stock'] as num?)?.toDouble() ?? 0.0,
+
+      );
+    }).toList();
+  }
+
+  static Future<List<FeedStockHistory>> fetchStockHistory(String feed_name) async {
+    final db = await DatabaseHelper.instance.database;
+    final List<Map<String, dynamic>>? maps = await _database?.query(
+      'FeedStockHistory',
+      where: 'feed_name = ?',
+      whereArgs: [feed_name],
+      orderBy: 'date DESC',
+    );
+
+    return List.generate(maps!.length, (i) => FeedStockHistory.fromMap(maps[i]));
+  }
+
+
 
   static Future<void> deleteFlockAndRelatedInfo(int flockId) async {
 

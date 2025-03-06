@@ -1,25 +1,13 @@
 import 'dart:async';
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:poultary/category_screen.dart';
 import 'package:poultary/dashboard.dart';
-import 'package:poultary/inventory.dart';
-import 'package:poultary/product_screen.dart';
 import 'package:poultary/settings_screen.dart';
-import 'package:poultary/single_flock_screen.dart';
-import 'package:poultary/transactions_screen.dart';
+import 'package:poultary/stock_screen.dart';
 import 'package:poultary/utils/utils.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
-
-import 'add_flocks.dart';
 import 'all_events.dart';
-import 'all_reports_screen.dart';
 import 'database/databse_helper.dart';
-import 'egg_collection.dart';
 import 'model/farm_item.dart';
 import 'model/flock.dart';
 import 'new_reporting_Screen.dart';
@@ -88,7 +76,7 @@ class _HomeScreen extends State<HomeScreen> {
   }
 
 
-  Future<void> addNewColumn() async{
+  Future<void> addNewColumn() async {
     try{
       int c = await DatabaseHelper.addColumnInFlockDetail();
       print("Column Info $c");
@@ -131,6 +119,9 @@ class _HomeScreen extends State<HomeScreen> {
   List _pages = [
     Center(
       child: DashboardScreen(),
+    ),
+    Center(
+      child: FeedStockScreen(),
     ),
     Center(
       child: ReportListScreen(),
@@ -187,6 +178,7 @@ class _HomeScreen extends State<HomeScreen> {
                backgroundColor: Utils.getThemeColorBlue(),
                items: [
                  BottomNavigationBarItem(icon: Icon(Icons.home), label: "DASHBOARD".tr()),
+                 BottomNavigationBarItem(icon: Icon(Icons.inventory), label: "Inventory".tr()),
                  BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: "REPORTS".tr()),
                  BottomNavigationBarItem(icon: Icon(Icons.notifications_active), label: "Reminders".tr()),
                  BottomNavigationBarItem(icon: Icon(Icons.settings), label: "SETTINGS".tr()),

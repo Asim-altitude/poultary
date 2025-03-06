@@ -1,7 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -17,9 +14,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 
 import 'model/egg_item.dart';
 import 'model/eggs_chart_data.dart';
-import 'model/feed_item.dart';
 import 'model/flock.dart';
-import 'model/flock_detail.dart';
 
 class EggsReportsScreen extends StatefulWidget {
   const EggsReportsScreen({Key? key}) : super(key: key);
@@ -276,24 +271,6 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
 
                   Row(
                     children: [
-                      /*Expanded(
-                        child: Container(
-                          height: 45,
-                          alignment: Alignment.centerRight,
-                          padding: EdgeInsets.only(left: 10),
-                          margin: EdgeInsets.only(top: 10, left: 10, right: 5),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(5.0)),
-                            border: Border.all(
-                              color: Utils.getThemeColorBlue(),
-                              width: 1.0,
-                            ),
-                          ),
-                          child: getDropDownList(),
-                        ),
-                      ),*/
                       InkWell(
                         onTap: () {
                           openDatePicker();
@@ -369,7 +346,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                           child: SfCartesianChart(
                             primaryXAxis: CategoryAxis(),
                             zoomPanBehavior: _zoomPanBehavior,
-                            title: ChartTitle(text: date_filter_name),
+                            title: ChartTitle(text: date_filter_name.tr()),
                             legend: Legend(isVisible: true,
                                 position: LegendPosition.bottom),
                             tooltipBehavior: TooltipBehavior(enable: true),
