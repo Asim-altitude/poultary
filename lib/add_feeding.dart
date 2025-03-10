@@ -1,7 +1,3 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:ffi';
-import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:easy_stepper/easy_stepper.dart';
@@ -9,19 +5,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/model/feed_item.dart';
 import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/stock/stock_screen.dart';
 import 'package:poultary/utils/utils.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import 'database/databse_helper.dart';
-import 'model/bird_item.dart';
-import 'model/egg_item.dart';
+import 'model/feed_stock_summary.dart';
 import 'model/flock.dart';
-import 'model/flock_image.dart';
 
 class NewFeeding extends StatefulWidget {
    Feeding? feeding;
@@ -45,14 +37,23 @@ class _NewFeeding extends State<NewFeeding>
 
   String _purposeselectedValue = "";
   String _feedselectedValue = "";
+  String availableStock = "0.0";
   String _acqusitionselectedValue = "";
 
   List<String> _purposeList = [];
   List<String> _feedList = [];
   List<SubItem> _subItemList = [];
-
+  List<FeedStockSummary>? _stockSummary = [];
   int chosen_index = 0;
   bool isEdit = false;
+
+  Future<void> fetchStockSummary() async {
+    _stockSummary = await DatabaseHelper.getFeedStockSummary();
+    setState(() {
+
+    });
+    // Update UI after fetching data
+  }
   @override
   void initState() {
     super.initState();
@@ -100,11 +101,30 @@ class _NewFeeding extends State<NewFeeding>
     if(!isEdit)
       _purposeselectedValue = Utils.selected_flock!.f_name;
 
+    try {
+      fetchStockSummary();
+    }catch(e){
+      print(e);
+    }
 
     setState(() {
 
     });
 
+  }
+
+  String getAvailableStock() {
+
+    for(int i=0;i<_stockSummary!.length;i++){
+      if(_stockSummary?.elementAt(i).feedName.toLowerCase()==_feedselectedValue.toLowerCase()){
+        availableStock = _stockSummary!.elementAt(i).availableStock.toString();
+        break;
+      }else{
+        availableStock = "0.0";
+      }
+    }
+
+    return availableStock;
   }
 
   void getFeedList() async {
@@ -442,6 +462,45 @@ class _NewFeeding extends State<NewFeeding>
                                _buildInputLabel("Choose Feed".tr(), Icons.grass),
                                SizedBox(height: 8),
                                _buildDropdownField(getFeedTypeList()),
+                               if(!_feedselectedValue.isEmpty)
+                                 Row(
+                                   mainAxisAlignment: MainAxisAlignment.center,
+                                   children: [
+                                     Container(
+                                       margin: EdgeInsets.only(right: 10),
+                                         alignment: Alignment.centerRight,
+                                         child: Text('Stock: ${getAvailableStock()}Kg', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: getAvailableStock()=="0.0"? Colors.red :Colors.green),),),
+                                    getAvailableStock()=="0.0"? InkWell(
+                                      onTap: () async{
+                                         await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                FeedStockScreen(),
+                                          ),
+                                        );
+
+                                         fetchStockSummary();
+                                         setState(() {
+
+                                         });
+
+                                      },
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        width: 100,
+                                        padding: EdgeInsets.all(5),
+                                        margin: EdgeInsets.only(top: 5),
+                                        decoration: BoxDecoration(
+                                          color: Utils.getThemeColorBlue(),
+                                          borderRadius: BorderRadius.circular(10),
+                                          boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
+                                        ),
+                                         child: Text('Add Stock'.tr(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),),
+                                       ),
+                                    ): SizedBox(width: 1,)
+                                   ],
+                                 ),
 
                                SizedBox(height: 20),
 

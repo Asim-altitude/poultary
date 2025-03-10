@@ -1,12 +1,13 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:poultary/stock_details_screen.dart';
+import 'package:poultary/stock/stock_details_screen.dart';
 import 'package:poultary/utils/utils.dart';
-
-import 'database/databse_helper.dart';
-import 'model/feed_stock_history.dart';
-import 'model/feed_stock_summary.dart';
-import 'model/sub_category_item.dart';
+import '../database/databse_helper.dart';
+import '../model/feed_stock_history.dart';
+import '../model/feed_stock_summary.dart';
+import '../model/sub_category_item.dart';
+import '../model/transaction_item.dart';
 
 class FeedStockScreen extends StatefulWidget {
   @override
@@ -36,12 +37,18 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
   }
 
 
-  void _showAddStockDialog() {
-    showModalBottomSheet(
+  void _showAddStockDialog() async{
+    bool? stockAdded = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => AddStockBottomSheet(onStockAdded: fetchStockSummary),
+      builder: (context) => AddStockBottomSheet(onStockAdded: () {  },),
     );
+
+    if (stockAdded == true) {
+      // Explicitly refresh stock summary
+      _stockSummary = await DatabaseHelper.getFeedStockSummary();
+      setState(() {}); // Force UI update
+    }
   }
 
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
@@ -89,45 +96,70 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "Total Stock: ${stock.totalStock}",
-                        style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                      Row(
+                        children: [
+                          Text(
+                            "Total Stock: ",
+                            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                          ),
+                          Text(
+                            " ${stock.totalStock}",
+                            style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                           "KG".tr(),
+                            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                          ),
+                        ],
                       ),
                       SizedBox(height: 4),
-                      Text(
-                        "Used Stock: ${stock.usedStock}",
-                        style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                      Row(
+                        children: [
+                          Text(
+                            "Total Stock: ",
+                            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                          ),
+                          Text(
+                            " ${stock.usedStock}",
+                            style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            "KG".tr(),
+                            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                          ),
+                        ],
                       ),
                     ],
                   ),
 
                   // Available Stock Badge (Now Adjusts Dynamically)
-                  Flexible(
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: isLowStock ? Colors.red : Colors.green.shade700,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min, // Ensures dynamic width
-                        children: [
-                          Icon(Icons.inventory_2_rounded, color: Colors.white, size: 16),
-                          SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              "Available: ${stock.availableStock}",
-                              style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
-                              overflow: TextOverflow.ellipsis, // Prevents overflow
-                              softWrap: true, // Allows wrapping
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 ],
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isLowStock ? Colors.red : Colors.green.shade700,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min, // Ensures dynamic width
+                    children: [
+                      Icon(Icons.inventory_2_rounded, color: Colors.white, size: 16),
+                      SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          "Available: ${stock.availableStock}"+"KG".tr(),
+                          style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis, // Prevents overflow
+                          softWrap: true, // Allows wrapping
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
 
               SizedBox(height: 12),
@@ -260,7 +292,35 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Feed Stock Summary")),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(20.0), // Round bottom-left corner
+            bottomRight: Radius.circular(20.0), // Round bottom-right corner
+          ),
+          child: AppBar(
+            title: Text(
+              "Feed Stock Summary",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Colors.white,
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor: Utils.getThemeColorBlue(), // Customize the color
+            elevation: 8, // Gives it a more elevated appearance
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                Navigator.pop(context); // Navigates back
+              },
+            ),
+          ),
+        ),
+      ),
+
       body: _stockSummary!.isEmpty
           ? Center(
         child: Column(
@@ -281,21 +341,28 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
         key: _listKey,
         initialItemCount: _stockSummary!.length,
         itemBuilder: (context, index, animation) {
-          return InkWell(
-              onTap: () async {
-                List<FeedStockHistory> history = await DatabaseHelper.fetchStockHistory(_stockSummary!.elementAt(index).feedName);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => StockDetailScreen(
-                      stock: _stockSummary!.elementAt(index),
-                      stockHistory: history, // Fetch history
-                    ),
-                  ),
-                );
 
-              },
-              child: _buildStockItem(_stockSummary![index], index, animation));
+            return InkWell(
+                onTap: () async {
+                  List<FeedStockHistory> history = await DatabaseHelper
+                      .fetchStockHistory(
+                      _stockSummary!.elementAt(index).feedName);
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          StockDetailScreen(
+                            stock: _stockSummary!.elementAt(index),
+                            stockHistory: history, // Fetch history
+                          ),
+                    ),
+                  );
+
+                  fetchStockSummary();
+                },
+                child: _buildStockItem(
+                    _stockSummary![index], index, animation));
+
         },
       ),
       floatingActionButton: FloatingActionButton(
@@ -317,14 +384,14 @@ class AddStockBottomSheet extends StatefulWidget {
   @override
   _AddStockBottomSheetState createState() => _AddStockBottomSheetState();
 }
-
 class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _otherSourceController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   String? _selectedFeed;
-  String? _selectedUnit;
+  String? _selectedUnit = "KG";
   String? _selectedSource;
+  DateTime _selectedDate = DateTime.now(); // Default to today
   List<String> _feedList = [];
   List<String> _unitList = ["kg"];
   List<String> _sourceList = ["Purchased", "Gift", "Harvest", "Other"];
@@ -343,14 +410,28 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
     });
   }
 
+  /// Open date picker
+
+  Future<void> _pickDate() async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2022), // Set a reasonable range
+      lastDate: DateTime(2100),
+    );
+
+    if (pickedDate != null && pickedDate != _selectedDate) {
+      setState(() {
+        _selectedDate = pickedDate;
+      });
+    }
+  }
+
   void _saveStock() async {
-    if (_selectedFeed == null || _selectedUnit == null || _quantityController.text.isEmpty || _selectedSource == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("All fields are required"),
-          backgroundColor: Colors.red,
-        ),
-      );
+    if (_selectedFeed == null || _quantityController.text.isEmpty || _selectedSource == null) {
+      setState(() {
+        isRequired = true;
+      });
       return;
     }
 
@@ -362,20 +443,41 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
     FeedStockHistory stock = FeedStockHistory(
       feedId: getFeedIdbyName(),
       quantity: double.parse(_quantityController.text),
-      unit: _selectedUnit!,
+      unit: "KG",
       source: finalSource,
-      date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+      date: DateFormat('yyyy-MM-dd').format(_selectedDate), // Use selected date
       feed_name: _selectedFeed!,
     );
 
     await DatabaseHelper.insertFeedStock(stock);
-    widget.onStockAdded();
-    Navigator.pop(context);
+    if(!_amountController.text.isEmpty){
+      TransactionItem transaction_item = TransactionItem(
+          f_id: -1,
+          date: DateFormat('yyyy-MM-dd').format(_selectedDate),
+          sale_item: "",
+          expense_item: "Feed Purchase",
+          type: "Expense",
+          amount: _amountController.text,
+          payment_method: "Cash",
+          payment_status: "Cleared",
+          sold_purchased_from: "Market",
+          short_note: "$_selectedFeed Purchase made on ${DateFormat('yyyy-MM-dd').format(_selectedDate)}",
+          how_many: _quantityController.text,
+          extra_cost: "",
+          extra_cost_details: "",
+          f_name: "Farm Wide",
+          flock_update_id: '-1');
+      int? id = await DatabaseHelper
+          .insertNewTransaction(transaction_item);
+    }
+    Navigator.pop(context, true);
   }
 
   int getFeedIdbyName() {
     return feeds.firstWhere((feed) => feed.name == _selectedFeed).id!;
   }
+
+  bool isRequired = false;
 
   @override
   Widget build(BuildContext context) {
@@ -390,14 +492,19 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Title
             Text(
               "Add Feed Stock",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 5),
 
-            // Feed Selection
+            if (isRequired)
+              Text(
+                "PROVIDE_ALL".tr(),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.red),
+              ),
+            SizedBox(height: 5),
+
             _buildDropdown(
               hintText: "Select Feed",
               value: _selectedFeed,
@@ -407,40 +514,70 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
             ),
             SizedBox(height: 12),
 
-            // Quantity Input
-            _buildTextField(
-              controller: _quantityController,
-              label: "Quantity",
-              icon: Icons.production_quantity_limits,
-              keyboardType: TextInputType.number,
+            Row(
+              children: [
+                Expanded(
+                  child: _buildTextField(
+                    controller: _quantityController,
+                    label: "Quantity",
+                    icon: Icons.production_quantity_limits,
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                SizedBox(width: 10),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade400),
+                  ),
+                  child: Text(
+                    "KG".tr(),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black87),
+                  ),
+                ),
+              ],
             ),
             SizedBox(height: 12),
 
-            // Unit Selection
-            _buildDropdown(
-              hintText: "Select Unit",
-              value: _selectedUnit,
-              items: _unitList,
-              onChanged: (value) => setState(() => _selectedUnit = value),
-              icon: Icons.scale,
+            /// Date Picker
+            InkWell(
+              onTap: _pickDate,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade400),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.calendar_today, color: Utils.getThemeColorBlue()),
+                    SizedBox(width: 10),
+                    Text(
+                      Utils.getFormattedDate(DateFormat('yyyy-MM-dd').format(_selectedDate)),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black87),
+                    ),
+                  ],
+                ),
+              ),
             ),
             SizedBox(height: 12),
 
-            // Source Selection
             _buildDropdown(
               hintText: "Select Source",
               value: _selectedSource,
               items: _sourceList,
               onChanged: (value) => setState(() {
                 _selectedSource = value;
-                _otherSourceController.clear(); // Reset other source input when changing selection
-                _amountController.clear(); // Reset amount when changing selection
+                _otherSourceController.clear();
+                _amountController.clear();
               }),
               icon: Icons.storefront,
             ),
             SizedBox(height: 12),
 
-            // Other Source Input (Only visible if "Other" is selected)
             if (_selectedSource == "Other")
               _buildTextField(
                 controller: _otherSourceController,
@@ -448,7 +585,6 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
                 icon: Icons.create,
               ),
 
-            // Purchase Amount Input (Only visible if "Purchased" is selected)
             if (_selectedSource == "Purchased")
               _buildTextField(
                 controller: _amountController,
@@ -458,70 +594,73 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
               ),
             SizedBox(height: 20),
 
-            // Save Button
-            ElevatedButton(
-              onPressed: _saveStock,
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 40),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                backgroundColor: Colors.green.shade600,
-                elevation: 4,
+            Container(
+              width: Utils.WIDTH_SCREEN - 20,
+              child: ElevatedButton(
+                onPressed: _saveStock,
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 40),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  backgroundColor: Utils.getThemeColorBlue(),
+                  elevation: 4,
+                ),
+                child: Text("Add Stock", style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
               ),
-              child: Text("Save Stock", style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
       ),
     );
   }
-
-  /// Custom Dropdown Widget
-  Widget _buildDropdown({
-    required String hintText,
-    required String? value,
-    required List<String> items,
-    required Function(String?) onChanged,
-    required IconData icon,
-  }) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade400),
-      ),
-      child: DropdownButtonFormField<String>(
-        value: value,
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          prefixIcon: Icon(icon, color: Colors.green),
-        ),
-        hint: Text(hintText, style: TextStyle(color: Colors.black54)),
-        items: items.map((item) {
-          return DropdownMenuItem(value: item, child: Text(item));
-        }).toList(),
-        onChanged: onChanged,
-      ),
-    );
-  }
-
-  /// Custom TextField Widget
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon, color: Colors.green),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        filled: true,
-        fillColor: Colors.grey[100],
-      ),
-    );
-  }
 }
+
+/// Custom Dropdown Widget
+Widget _buildDropdown({
+  required String hintText,
+  required String? value,
+  required List<String> items,
+  required Function(String?) onChanged,
+  required IconData icon,
+}) {
+  return Container(
+    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+    decoration: BoxDecoration(
+      color: Colors.grey[100],
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: Colors.grey.shade400),
+    ),
+    child: DropdownButtonFormField<String>(
+      value: value,
+      decoration: InputDecoration(
+        border: InputBorder.none,
+        prefixIcon: Icon(icon, color: Utils.getThemeColorBlue()),
+      ),
+      hint: Text(hintText, style: TextStyle(color: Colors.black54)),
+      items: items.map((item) {
+        return DropdownMenuItem(value: item, child: Text(item));
+      }).toList(),
+      onChanged: onChanged,
+    ),
+  );
+}
+
+/// Custom TextField Widget
+Widget _buildTextField({
+  required TextEditingController controller,
+  required String label,
+  required IconData icon,
+  TextInputType keyboardType = TextInputType.text,
+}) {
+  return TextField(
+    controller: controller,
+    keyboardType: keyboardType,
+    decoration: InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, color:  Utils.getThemeColorBlue()),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      filled: true,
+      fillColor: Colors.grey[100],
+    ),
+  );
+}
+

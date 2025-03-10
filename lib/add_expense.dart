@@ -66,7 +66,6 @@ class _NewExpense extends State<NewExpense>
   final soldtoController = TextEditingController();
 
 
-
   @override
   void initState() {
     super.initState();

@@ -1,25 +1,15 @@
-import 'dart:async';
-import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:poultary/add_eggs.dart';
 import 'package:poultary/add_feeding.dart';
-import 'package:poultary/inventory.dart';
 import 'package:poultary/model/category_item.dart';
-import 'package:poultary/model/feed_item.dart';
-import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/sub_category_screen.dart';
 import 'package:poultary/utils/utils.dart';
-
-import 'add_flocks.dart';
 import 'database/databse_helper.dart';
-import 'model/egg_item.dart';
-import 'model/flock.dart';
 
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({Key? key}) : super(key: key);

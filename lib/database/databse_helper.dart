@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:poultary/model/egg_item.dart';
 import 'package:poultary/model/flock.dart';
 import 'package:poultary/model/med_vac_item.dart';
+import 'package:poultary/model/medicine_stock_history.dart';
 import 'package:poultary/model/sub_category_item.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:sqflite/sqflite.dart';
@@ -30,8 +31,11 @@ import '../model/finance_summary_flock.dart';
 import '../model/flock_detail.dart';
 import '../model/flock_image.dart';
 import '../model/health_chart_data.dart';
+import '../model/medicine_stock_summary.dart';
 import '../model/transaction_item.dart';
 import '../model/used_item.dart';
+import '../model/vaccine_stock_history.dart';
+import '../model/vaccine_stock_summary.dart';
 class DatabaseHelper  {
   static const _databaseName = "assets/poultary.db";
 
@@ -339,6 +343,51 @@ class DatabaseHelper  {
     }
   }
 
+  static Future<void> addQuantityColumnMedicine() async {
+    try {
+      final tableInfo = await _database?.rawQuery("PRAGMA table_info(Vaccination_Medication)");
+      bool hasColumn = tableInfo?.any((column) => column['name'] == 'quantity') ?? false;
+
+      if (!hasColumn) {
+        await _database?.execute("ALTER TABLE Vaccination_Medication ADD COLUMN quantity TEXT DEFAULT '1'");
+
+        // Set default value for NULL or empty values
+        await _database?.rawUpdate("UPDATE Vaccination_Medication SET quantity = '1' WHERE quantity IS NULL OR quantity = ''");
+
+        print("COLUMN 'quantity' ADDED");
+      } else {
+        // Ensure default values for existing records
+        await _database?.rawUpdate("UPDATE Vaccination_Medication SET quantity = '1' WHERE quantity IS NULL OR quantity = ''");
+
+        print("COLUMN 'quantity' ALREADY EXISTS - Default values updated if needed");
+      }
+    } catch (e) {
+      print("Error adding/updating 'quantity' column: $e");
+    }
+  }
+
+  static Future<void> addUnitColumnMedicine() async {
+    try {
+      final tableInfo = await _database?.rawQuery("PRAGMA table_info(Vaccination_Medication)");
+      bool hasColumn = tableInfo?.any((column) => column['name'] == 'unit') ?? false;
+
+      if (!hasColumn) {
+        await _database?.execute("ALTER TABLE Vaccination_Medication ADD COLUMN unit TEXT DEFAULT 'g'");
+
+        // Set default value for NULL or empty values
+        await _database?.rawUpdate("UPDATE Vaccination_Medication SET unit = 'g' WHERE unit IS NULL OR unit = ''");
+
+        print("COLUMN 'unit' ADDED");
+      } else {
+        // Ensure default values for existing records
+        await _database?.rawUpdate("UPDATE Vaccination_Medication SET unit = 'g' WHERE unit IS NULL OR unit = ''");
+
+        print("COLUMN 'unit' ALREADY EXISTS - Default values updated if needed");
+      }
+    } catch (e) {
+      print("Error adding/updating 'unit' column: $e");
+    }
+  }
 
   static Future<void> addFlockInfoColumn() async {
     try {
@@ -361,7 +410,6 @@ class DatabaseHelper  {
       print("Error adding 'flock_new' column: $e");
     }
   }
-
 
   static Future<int?>  insertFlockImages(Flock_Image image) async {
 
@@ -386,6 +434,77 @@ class DatabaseHelper  {
    // print(await _database?.query(TableName));
     return count;
   }
+
+  static Future<int?> getCategoryIdByName(String categoryName) async {
+
+    List<Map<String, dynamic>>? result = await _database?.query(
+      'Category',
+      columns: ['id'],
+      where: 'name = ?',
+      whereArgs: [categoryName],
+    );
+
+    if (result!.isNotEmpty) {
+      return result.first['id']; // Return existing category ID
+    }
+    return null; // Return null if category not found
+  }
+
+
+  static Future<int?> addCategoryIfNotExists(CategoryItem category) async {
+
+    // Check if category name already exists
+    List<Map<String, dynamic>>? existing = await _database?.query(
+      'Category',
+      where: 'name = ?',
+      whereArgs: [category.name],
+    );
+
+    if (existing!.isNotEmpty) {
+      // If category exists, return its ID
+      return existing.first['id'];
+    } else {
+      // Insert the new category and return the new ID
+      return await _database?.insert(
+        'Category',
+        category.toJson(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+  }
+
+  static Future<int?> addSubcategoryIfNotExists(int categoryId, String subcategoryName) async {
+
+    // Check if the subcategory already exists
+    int? existingId = await getSubcategoryId(categoryId, subcategoryName);
+    if (existingId != null) return existingId; // Return existing ID if found
+
+    // If not found, insert new subcategory
+    int? newId = await _database?.insert(
+      'Category_Detail',
+      {'c_id': categoryId, 'name': subcategoryName},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+
+    return newId; // Return new subcategory ID
+  }
+
+
+  static Future<int?> getSubcategoryId(int categoryId, String subcategoryName) async {
+
+    List<Map<String, dynamic>>? result = await _database?.query(
+      'Category_Detail',
+      columns: ['id'],
+      where: 'c_id = ? AND name = ?',
+      whereArgs: [categoryId, subcategoryName],
+    );
+
+    if (result!.isNotEmpty) {
+      return result.first['id']; // Return existing subcategory ID
+    }
+    return null; // Return null if subcategory does not exist
+  }
+
 
   static Future<List<CategoryItem>>  getCategoryItem() async {
     var result = await _database?.rawQuery("SELECT * FROM Category");
@@ -2409,6 +2528,44 @@ class DatabaseHelper  {
   ''');
   }
 
+  static Future<void> createMedicineStockHistoryTable() async {
+    await _database?.execute('''
+    CREATE TABLE IF NOT EXISTS MedicineStockHistory (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      medicine_id INTEGER NOT NULL,
+      quantity REAL NOT NULL,
+      medicine_name TEXT NOT NULL,
+      unit TEXT NOT NULL,
+      source TEXT NOT NULL,
+      date TEXT NOT NULL
+    )
+  ''');
+  }
+
+  static Future<void> createVaccineStockHistoryTable() async {
+    await _database?.execute('''
+    CREATE TABLE IF NOT EXISTS VaccineStockHistory (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      vaccine_id INTEGER NOT NULL,
+      quantity REAL NOT NULL,
+      vaccine_name TEXT NOT NULL,
+      unit TEXT NOT NULL,
+      source TEXT NOT NULL,
+      date TEXT NOT NULL
+    )
+  ''');
+  }
+
+  static Future<int?> insertVaccineStock(VaccineStockHistory stock) async {
+
+    return await _database?.insert('VaccineStockHistory', stock.toMap());
+  }
+
+  static Future<int?> insertMedicineStock(MedicineStockHistory stock) async {
+
+    return await _database?.insert('MedicineStockHistory', stock.toMap());
+  }
+
   static Future<int?> insertFeedStock(FeedStockHistory stock) async {
 
     return await _database?.insert('FeedStockHistory', stock.toMap());
@@ -2441,7 +2598,7 @@ class DatabaseHelper  {
     });
   }
 
-  static Future<List<FeedStockSummary>?> getFeedStockSummary() async {
+  static Future<List<FeedStockSummary>>? getFeedStockSummary() async {
     final List<Map<String, dynamic>>? maps = await _database?.rawQuery('''
     WITH FirstStock AS (
         SELECT feed_name, MIN(date) AS first_stock_date
@@ -2481,6 +2638,154 @@ class DatabaseHelper  {
       );
     }).toList();
   }
+
+  static Future<List<MedicineStockSummary>> getMedicineStockSummary() async {
+    final List<Map<String, dynamic>>? maps = await _database?.rawQuery('''
+    WITH FirstStock AS (
+        SELECT medicine_name, MIN(date) AS first_stock_date
+        FROM MedicineStockHistory
+        GROUP BY medicine_name
+    )
+    SELECT s.medicine_name, 
+           s.unit,  
+           COALESCE(SUM(s.quantity), 0) AS total_stock,
+           COALESCE((
+             SELECT SUM(CAST(m.quantity AS REAL)) 
+             FROM Vaccination_Medication m
+             WHERE m.medicine = s.medicine_name 
+               AND m.type = 'Medication'  -- Only for medicines
+               AND m.date >= (SELECT first_stock_date FROM FirstStock WHERE medicine_name = s.medicine_name)
+           ), 0) AS used_stock,
+           (COALESCE(SUM(s.quantity), 0) - 
+            COALESCE((SELECT SUM(CAST(m.quantity AS REAL)) 
+                      FROM Vaccination_Medication m
+                      WHERE m.medicine = s.medicine_name 
+                        AND m.type = 'Medication'  
+                        AND m.date >= (SELECT first_stock_date FROM FirstStock WHERE medicine_name = s.medicine_name)
+                    ), 0)
+           ) AS available_stock
+    FROM MedicineStockHistory s
+    GROUP BY s.medicine_name, s.unit;
+  ''');
+
+    if (maps == null || maps.isEmpty) return [];
+
+    return maps.map((map) {
+      return MedicineStockSummary(
+        medicineName: map['medicine_name'] ?? "Unknown",
+        unit: map['unit'] ?? "Unknown",
+        totalStock: (map['total_stock'] as num?)?.toDouble() ?? 0.0,
+        usedStock: (map['used_stock'] as num?)?.toDouble() ?? 0.0,
+        availableStock: (map['available_stock'] as num?)?.toDouble() ?? 0.0,
+      );
+    }).toList();
+  }
+
+  static Future<List<VaccineStockSummary>> getVaccineStockSummary() async {
+    final List<Map<String, dynamic>>? maps = await _database?.rawQuery('''
+    WITH FirstStock AS (
+        SELECT vaccine_name, MIN(date) AS first_stock_date
+        FROM VaccineStockHistory
+        GROUP BY vaccine_name
+    )
+    SELECT s.vaccine_name, 
+           s.unit,  
+           COALESCE(SUM(s.quantity), 0) AS total_stock,
+           COALESCE((
+             SELECT SUM(CAST(m.quantity AS REAL)) 
+             FROM Vaccination_Medication m
+             WHERE m.medicine = s.vaccine_name  
+               AND m.type = 'Vaccination'  -- Only for vaccines
+               AND m.date >= (SELECT first_stock_date FROM FirstStock WHERE vaccine_name = s.vaccine_name)
+           ), 0) AS used_stock,
+           (COALESCE(SUM(s.quantity), 0) - 
+            COALESCE((SELECT SUM(CAST(m.quantity AS REAL)) 
+                      FROM Vaccination_Medication m
+                      WHERE m.medicine = s.vaccine_name  
+                        AND m.type = 'Vaccination'  
+                        AND m.date >= (SELECT first_stock_date FROM FirstStock WHERE vaccine_name = s.vaccine_name)
+                    ), 0)
+           ) AS available_stock
+    FROM VaccineStockHistory s
+    GROUP BY s.vaccine_name, s.unit;
+  ''');
+
+    if (maps == null || maps.isEmpty) return [];
+
+    return maps.map((map) {
+      return VaccineStockSummary(
+        vaccineName: map['vaccine_name'] ?? "Unknown",
+        unit: map['unit'] ?? "Unknown",
+        totalStock: (map['total_stock'] as num?)?.toDouble() ?? 0.0,
+        usedStock: (map['used_stock'] as num?)?.toDouble() ?? 0.0,
+        availableStock: (map['available_stock'] as num?)?.toDouble() ?? 0.0,
+      );
+    }).toList();
+  }
+
+  static Future<List<VaccineStockHistory>> fetchVaccineStockHistory(String feed_name, String unit) async {
+    final List<Map<String, dynamic>>? maps = await _database?.query(
+      'VaccineStockHistory',
+      where: 'vaccine_name = ? AND unit = ?',
+      whereArgs: [feed_name, unit],
+      orderBy: 'date DESC',
+    );
+
+    return List.generate(maps!.length, (i) => VaccineStockHistory.fromMap(maps[i]));
+  }
+
+  static Future<List<MedicineStockHistory>> fetchMedicineStockHistory(String feed_name, String unit) async {
+     final List<Map<String, dynamic>>? maps = await _database?.query(
+      'MedicineStockHistory',
+      where: 'medicine_name = ? AND unit = ?',
+      whereArgs: [feed_name, unit],
+      orderBy: 'date DESC',
+    );
+
+    return List.generate(maps!.length, (i) => MedicineStockHistory.fromMap(maps[i]));
+  }
+
+  static Future<List<Eggs>> getStockHistory() async {
+    final List<Map<String, Object?>>? maps = await _database?.query(
+      'Eggs',
+      where: 'isCollection = 1',
+      orderBy: 'collection_date DESC',
+    );
+
+    return List.generate(maps!.length, (i) => Eggs.fromJson(maps[i]));
+  }
+
+  static Future<Map<String, int>> getEggStockSummary() async {
+    if (_database == null) {
+      return {
+        'totalCollected': 0,
+        'totalUsed': 0,
+        'availableStock': 0
+      };
+    }
+
+    // Ensure rawQuery returns a non-null list
+    final collectedResult = await _database!.rawQuery(
+        "SELECT SUM(total_eggs) as total FROM Eggs WHERE isCollection = 1") ?? [];
+
+    final usedResult = await _database!.rawQuery(
+        "SELECT SUM(total_eggs) as total FROM Eggs WHERE isCollection = 0") ?? [];
+
+    // Extract values safely using .first if available
+    final totalCollected = collectedResult.isNotEmpty ? (collectedResult.first['total'] as int? ?? 0) : 0;
+    final totalUsed = usedResult.isNotEmpty ? (usedResult.first['total'] as int? ?? 0) : 0;
+
+    // Calculate remaining stock
+    int availableStock = totalCollected - totalUsed;
+
+    return {
+      'totalCollected': totalCollected,
+      'totalUsed': totalUsed,
+      'availableStock': availableStock
+    };
+  }
+
+
 
   static Future<List<FeedStockHistory>> fetchStockHistory(String feed_name) async {
     final db = await DatabaseHelper.instance.database;

@@ -344,9 +344,9 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                             _purposeList,
                             _purposeselectedValue,
                                 (String? newValue) {
-                              setState(() {
-                                _purposeselectedValue = newValue!;
-                              });
+                                  _purposeselectedValue = newValue!;
+                                  getFlockID();
+                                  getFilteredTransactions(str_date, end_date);
                             },
                             width: double.infinity,
                             height: 45,

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:poultary/database/databse_helper.dart';
+import 'package:poultary/utils/utils.dart';
 
-import 'model/feed_stock_history.dart';
-import 'model/feed_stock_summary.dart';
+import '../model/feed_stock_history.dart';
+import '../model/feed_stock_summary.dart';
+
 
 class StockDetailScreen extends StatelessWidget {
   final FeedStockSummary stock;
@@ -39,27 +42,64 @@ class StockDetailScreen extends StatelessWidget {
                   itemCount: stockHistory.length,
                   itemBuilder: (context, index) {
                     final entry = stockHistory[index];
-                    return Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 3,
-                      margin: EdgeInsets.symmetric(vertical: 6),
-                      child: ListTile(
-                        leading: Icon(
-                          entry.source == 'Purchase' ? Icons.add_shopping_cart : Icons.sync_alt,
-                          color: entry.source == 'Purchase' ? Colors.green : Colors.orange,
+
+                    return Dismissible(
+                      key: Key(entry.id.toString()), // Use a unique key for each item
+                      background: Container(
+                        color: Colors.red,
+                        alignment: Alignment.centerRight,
+                        padding: EdgeInsets.only(right: 20),
+                        child: Icon(Icons.delete, color: Colors.white),
+                      ),
+                      direction: DismissDirection.endToStart, // Swipe left to delete
+                      confirmDismiss: (direction) async {
+                        return await showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text("Delete Entry"),
+                            content: Text("Are you sure you want to delete this stock entry?"),
+                            actions: [
+                              TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("Cancel")),
+                              TextButton(
+                                onPressed: () async{
+                                 // _deleteStock(entry.id);
+                                   DatabaseHelper.deleteFeedStock(entry.id!);
+                                   Navigator.of(context).pop(true);
+                                },
+                                child: Text("Delete", style: TextStyle(color: Colors.red)),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      onDismissed: (direction) {
+                        DatabaseHelper.deleteFeedStock(entry.id!);
+
+                        // Delete the item from the database
+                      },
+                      child: Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 3,
+                        margin: EdgeInsets.symmetric(vertical: 6),
+                        child: ListTile(
+                          leading: Icon(
+                            entry.source == 'Purchased' ? Icons.add_shopping_cart : Icons.sync_alt,
+                            color: entry.source == 'Purchased' ? Colors.green : Colors.orange,
+                          ),
+                          title: Text(
+                            "${entry.quantity} ${entry.unit} from ${entry.source}",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          subtitle: Text("Date: ${Utils.getFormattedDate(entry.date)}"),
+
                         ),
-                        title: Text(
-                          "${entry.quantity} ${entry.unit} from ${entry.source}",
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        subtitle: Text("Date: ${entry.date}"),
-                        trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
                       ),
                     );
                   },
                 ),
               ),
             ),
+
           ],
         ),
       ),

@@ -4,10 +4,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:poultary/dashboard.dart';
 import 'package:poultary/settings_screen.dart';
-import 'package:poultary/stock_screen.dart';
 import 'package:poultary/utils/utils.dart';
 import 'all_events.dart';
 import 'database/databse_helper.dart';
+import 'model/category_item.dart';
+import 'stock/main_inventory_screen.dart';
 import 'model/farm_item.dart';
 import 'model/flock.dart';
 import 'new_reporting_Screen.dart';
@@ -41,6 +42,64 @@ class _HomeScreen extends State<HomeScreen> {
    // addEggColorColumn();
   }
 
+  Future<void> addMissingCategories() async{
+
+    //Medicine Category
+    CategoryItem categoryItem = CategoryItem(id: null, name: "Medicine");
+    CategoryItem categoryItem1 = CategoryItem(id: null, name: "Vaccine");
+
+    List<String> commonMedicines = [
+      "Amprolium",
+      "Tylosin",
+      "Doxycycline",
+      "Enrofloxacin",
+      "Neomycin",
+      "Sulfaquinoxaline",
+      "Furazolidone",
+      "Flubendazole",
+      "Ivermectin",
+      "Gentamycin",
+      "Ketoprofen",
+      "Multivitamins",
+      "Lincomycin",
+      "Oxytetracycline",
+      "Copper Sulfate",
+      "Probiotics",
+    ];
+
+    List<String> commonVaccines = [
+      "Newcastle",
+      "Gumboro",
+      "Marek’s",
+      "Fowl Pox",
+      "Avian Influenza",
+      "Salmonella",
+      "Bronchitis",
+      "Fowl Cholera",
+      "Mycoplasma",
+      "EDS",
+      "Coryza",
+      "Reovirus",
+      "E. coli",
+      "Coccidiosis",
+    ];
+    int? medicineCategoryID = await DatabaseHelper.addCategoryIfNotExists(categoryItem);
+
+    for(int i=0;i<commonMedicines.length;i++){
+      await DatabaseHelper.addSubcategoryIfNotExists(medicineCategoryID!, commonMedicines[i]);
+      print(commonMedicines[i]);
+    }
+
+    int? vaccineCategoryID  = await DatabaseHelper.addCategoryIfNotExists(categoryItem1);
+
+    for(int i=0;i<commonVaccines.length;i++){
+      await DatabaseHelper.addSubcategoryIfNotExists(vaccineCategoryID!, commonVaccines[i]);
+      print(commonVaccines[i]);
+    }
+
+  }
+
+
   void addEggColorColumn() async {
     DatabaseHelper.instance.database;
 
@@ -57,7 +116,10 @@ class _HomeScreen extends State<HomeScreen> {
 
     await DatabaseHelper.addEggColorColumn();
     await DatabaseHelper.addFlockInfoColumn();
+    await DatabaseHelper.addQuantityColumnMedicine();
+    await DatabaseHelper.addUnitColumnMedicine();
     await addNewColumn();
+    await addMissingCategories();
 
     flocks = await DatabaseHelper.getFlocks();
 
@@ -121,7 +183,7 @@ class _HomeScreen extends State<HomeScreen> {
       child: DashboardScreen(),
     ),
     Center(
-      child: FeedStockScreen(),
+      child: ManageInventoryScreen(),
     ),
     Center(
       child: ReportListScreen(),

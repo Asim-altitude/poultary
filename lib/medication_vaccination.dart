@@ -328,6 +328,8 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                                 (String? newValue) {
                               setState(() {
                                 _purposeselectedValue = newValue!;
+                                getFlockID();
+                                getFilteredTransactions(str_date, end_date);
                               });
                             },
                             width: double.infinity,
@@ -410,7 +412,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            /// 🟢 Medicine Name & Options Menu
+                            /// 🟢 Medicine/Vaccine Name & Options Menu
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -434,6 +436,14 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                                             color: Colors.black54, // Less prominent
                                           ),
                                         ),
+                                        TextSpan(
+                                          text: " - ${vac_med_list[index].quantity} ${vac_med_list[index].unit}".tr(),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.normal,
+                                            fontSize: 16,
+                                            color: Colors.black54,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -452,46 +462,44 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                             SizedBox(height: 6),
                             Divider(thickness: 1, color: Colors.grey.withOpacity(0.3)),
 
-                            /// 📅 Date Section (Aligned Right)
+                            /// 📅 Date & 🏥 Birds Count (Aligned Right)
                             Align(
                               alignment: Alignment.centerRight,
                               child: Row(
-                                mainAxisSize: MainAxisSize.min,
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+
                                 children: [
-                                  Icon(Icons.calendar_today, size: 14, color: Colors.black54),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    Utils.getFormattedDate(vac_med_list[index].date.toString()),
-                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
+                                  Row(
+                                    children: [
+                                      Image.asset("assets/bird_icon.png", width: 25, height: 25),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        '${vac_med_list[index].bird_count!} Birds'.tr(),
+                                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
+                                      ),
+                                    ],
                                   ),
+                                  Expanded(child: Text('')),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.calendar_today, size: 14, color: Colors.black54),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        Utils.getFormattedDate(vac_med_list[index].date.toString()),
+                                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
+                                      ),
+                                    ],
+                                  ),
+
+
                                 ],
                               ),
                             ),
 
                             SizedBox(height: 6),
 
-                            /// 🏥 Birds & Disease
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Image.asset("assets/bird_icon.png", width: 25, height: 25),
-                                    SizedBox(width: 5),
-                                    Text(
-                                      'Birds: '.tr(),
-                                      style: TextStyle(fontSize: 14, color: Colors.black),
-                                    ),
-                                    Text(
-                                      vac_med_list[index].bird_count!.toString(),
-                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-
-                            SizedBox(height: 6),
+                            /// 🦠 Disease
                             Row(
                               children: [
                                 Icon(Icons.coronavirus, size: 16, color: Colors.red),
@@ -544,7 +552,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                           ],
                         ),
                       );
-
+                      ;
 
                     }),
               ) :  Utils.getCustomEmptyMessage("assets/p_health.png", "No vaccination/medication added")

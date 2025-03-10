@@ -316,9 +316,9 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                             _purposeList,
                             _purposeselectedValue,
                                 (String? newValue) {
-                              setState(() {
-                                _purposeselectedValue = newValue!;
-                              });
+                                  _purposeselectedValue = newValue!;
+                                  getFlockID();
+                                  getFilteredTransactions(str_date, end_date);
                             },
                             width: double.infinity,
                             height: 45,
@@ -335,10 +335,8 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                             filterList,
                             date_filter_name,
                                 (String? newValue) {
-                              setState(() {
-                                date_filter_name = newValue!;
-                                getData(date_filter_name);
-                              });
+                                  date_filter_name = newValue!;
+                                  getData(date_filter_name);
                             },
                             width: double.infinity,
                             height: 45,
@@ -1004,7 +1002,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
       child: InkWell(
         onTap: () {
           setState(() {
-            if(label=="Addition")
+            if(label=="Collection")
               filter_name = "1";
             else if(label=="Reduction")
               filter_name ="0";
@@ -1113,12 +1111,10 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
         elevation: 10,
         isExpanded: true,
         onChanged: (String? newValue) {
-          setState(() {
-            _purposeselectedValue = newValue!;
-            getFlockID();
-            getFilteredTransactions(str_date, end_date);
+          _purposeselectedValue = newValue!;
+          getFlockID();
+          getFilteredTransactions(str_date, end_date);
 
-          });
         },
         items: _purposeList.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
