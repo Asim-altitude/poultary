@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/utils/utils.dart';
@@ -30,7 +31,7 @@ class StockDetailScreen extends StatelessWidget {
             Container(
                 margin: EdgeInsets.only(left: 10),
 
-                child: Text("Stock History", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+                child: Text("Stock History".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
 
             SizedBox(height: 8),
 
@@ -56,17 +57,17 @@ class StockDetailScreen extends StatelessWidget {
                         return await showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: Text("Delete Entry"),
-                            content: Text("Are you sure you want to delete this stock entry?"),
+                            title: Text("Delete Entry".tr()),
+                            content: Text("Are you sure you want to delete this stock entry?".tr()),
                             actions: [
-                              TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("Cancel")),
+                              TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("CANCEL".tr())),
                               TextButton(
                                 onPressed: () async{
                                  // _deleteStock(entry.id);
                                    DatabaseHelper.deleteFeedStock(entry.id!);
                                    Navigator.of(context).pop(true);
                                 },
-                                child: Text("Delete", style: TextStyle(color: Colors.red)),
+                                child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
                               ),
                             ],
                           ),
@@ -83,14 +84,14 @@ class StockDetailScreen extends StatelessWidget {
                         margin: EdgeInsets.symmetric(vertical: 6),
                         child: ListTile(
                           leading: Icon(
-                            entry.source == 'Purchased' ? Icons.add_shopping_cart : Icons.sync_alt,
-                            color: entry.source == 'Purchased' ? Colors.green : Colors.orange,
+                            entry.source == 'PURCHASED' ? Icons.add_shopping_cart : Icons.sync_alt,
+                            color: entry.source == 'PURCHASED' ? Colors.green : Colors.orange,
                           ),
                           title: Text(
                             "${entry.quantity} ${entry.unit} from ${entry.source}",
                             style: TextStyle(fontSize: 16),
                           ),
-                          subtitle: Text("Date: ${Utils.getFormattedDate(entry.date)}"),
+                          subtitle: Text("DATE".tr()+": ${Utils.getFormattedDate(entry.date)}"),
 
                         ),
                       ),
@@ -130,7 +131,7 @@ class StockDetailScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      stock.feedName,
+                      stock.feedName.tr(),
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
                     ),
                   ),
@@ -147,12 +148,12 @@ class StockDetailScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Total Stock: ${stock.totalStock}",
+                        "Total Stock".tr()+": ${stock.totalStock}",
                         style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                       ),
                       SizedBox(height: 4),
                       Text(
-                        "Used Stock: ${stock.usedStock}",
+                        "Used Stock".tr()+": ${stock.usedStock}",
                         style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                       ),
                     ],
@@ -174,7 +175,7 @@ class StockDetailScreen extends StatelessWidget {
                           SizedBox(width: 6),
                           Flexible(
                             child: Text(
-                              "Available: ${stock.availableStock}",
+                              "Available".tr()+": ${stock.availableStock}",
                               style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
                               overflow: TextOverflow.ellipsis, // Prevents overflow
                               softWrap: true, // Allows wrapping
@@ -208,7 +209,7 @@ class StockDetailScreen extends StatelessWidget {
                       ),
                       SizedBox(width: 6),
                       Text(
-                        "⚠️ LOW STOCK",
+                        "⚠️" +"LOW STOCK".tr(),
                         style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.red.shade800),
                       ),
                     ],

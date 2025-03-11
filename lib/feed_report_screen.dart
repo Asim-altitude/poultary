@@ -191,24 +191,34 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
               Row(
                 children: [
-              /*    Expanded(
+                  Expanded(
                     child: Container(
                       height: 45,
                       alignment: Alignment.centerRight,
                       padding: EdgeInsets.only(left: 10),
-                      margin: EdgeInsets.only(top: 10,left: 10,right: 5),
+                      margin: EdgeInsets.only(left: 10,right: 5),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: const BorderRadius.all(
-                            Radius.circular(5.0)),
-                        border: Border.all(
-                          color:  Utils.getThemeColorBlue(),
-                          width: 1.0,
+                        gradient: LinearGradient(
+                          colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Utils.getThemeColorBlue(),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: getDropDownList(),
                     ),
-                  ),*/
+                  ),
                   InkWell(
                     onTap: () {
                       openDatePicker();
@@ -216,8 +226,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                     borderRadius: BorderRadius.circular(8), // Adds ripple effect with rounded edges
                     child: Container(
                       height: 45,
-                      width: widthScreen - 20,
-                      margin: EdgeInsets.only(right: 10,left: 10, top: 15, bottom: 10),
+                      margin: EdgeInsets.only(right: 10, top: 15, bottom: 10),
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(

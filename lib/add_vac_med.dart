@@ -567,44 +567,49 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
                               // Choose Flock
                               _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
-                              SizedBox(height: 8),
+                              SizedBox(height: 5),
                               _buildDropdownField(getDropDownList()),
 
-                              SizedBox(height: 20),
+                              SizedBox(height: 15),
 
                               // Choose Disease
                               _buildInputLabel("Choose Disease".tr(), Icons.sick),
-                              SizedBox(height: 8),
+                              SizedBox(height: 5),
                               _buildDropdownField(getDiseaseTypeList()),
 
-                              SizedBox(height: 20),
+                              SizedBox(height: 15),
 
                               // Choose Medicine
-                              _buildInputLabel(Utils.vaccine_medicine.contains("medi")?"Choose Medicine".tr() : "Choose Vaccine".tr(), Icons.medical_information),
-                              SizedBox(height: 8),
+                              _buildInputLabel(Utils.vaccine_medicine.toLowerCase().contains("medi")? "Medicine name".tr() : "Vaccine name".tr(), Icons.medical_information),
+                              SizedBox(height: 5),
                               _buildDropdownField(getMedicineTypeList()),
-                              SizedBox(height: 8),
+                              SizedBox(height: 15),
 
                               Row(
+                                
                                 children: [
                                   Expanded(
-                                    child: Column(
-                                      children: [
-                                        _buildInputLabel("Quantity".tr(), Icons.numbers),
-                                        SizedBox(height: 8),
-                                        _buildNumberField(qtycountController, "Quantity".tr()),
-                                      ],
+                                    child: Container(
+                                      child: Column(
+                                        children: [
+                                          _buildInputLabel("Quantity".tr(), Icons.numbers),
+                                          SizedBox(height: 8),
+                                          _buildNumberField(qtycountController, "Quantity".tr()),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                   SizedBox(width: 5),
-                                  Container(
-                                    width: 120,
-                                    child: Column(
-                                      children: [
-                                        _buildInputLabel("Unit".tr(), Icons.accessibility_sharp),
-                                        SizedBox(height: 8),
-                                        _buildDropdownField(getUnitTypeList()),
-                                      ],
+                                  
+                                  Expanded(
+                                    child: Container(
+                                      child: Column(
+                                        children: [
+                                          _buildInputLabel("Select Unit".tr(), Icons.accessibility_sharp),
+                                          SizedBox(height: 8),
+                                          _buildDropdownField(getUnitTypeList()),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -617,7 +622,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                     Container(
                                       margin: EdgeInsets.only(right: 10),
                                       alignment: Alignment.centerRight,
-                                      child: Text('Stock: ${getAvailableStock()}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: getAvailableStock()=="0.0"? Colors.red :Colors.green),),),
+                                      child: Text('Stock'.tr()+': ${getAvailableStock()}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: getAvailableStock()=="0.0"? Colors.red :Colors.green),),),
                                     getAvailableStock()=="0.0"? InkWell(
                                       onTap: () async{
                                         if(Utils.vaccine_medicine.toLowerCase().contains("medi")) {
@@ -692,25 +697,25 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 5),
+                              SizedBox(height: 15),
 // Bird Count
                               _buildInputLabel("BIRDS_COUNT".tr(), Icons.numbers),
-                              SizedBox(height: 8),
+                              SizedBox(height: 5),
                               _buildNumberField(bird_countController, "BIRDS_COUNT".tr()),
-                              SizedBox(height: 8),
+                              SizedBox(height: 15),
                               // Date Picker
                               _buildInputLabel("DATE".tr(), Icons.calendar_today),
-                              SizedBox(height: 8),
+                              SizedBox(height: 5),
                               _buildDatePickerField(),
 
-                              SizedBox(height: 20),
+                              SizedBox(height: 15),
 
                               // Doctor Name
                               _buildInputLabel("Doctor_Name".tr(), Icons.person),
-                              SizedBox(height: 8),
+                              SizedBox(height: 5),
                               _buildTextField(doctorController, "Doctor_Name".tr()),
 
-                              SizedBox(height: 20),
+                              SizedBox(height: 15),
 
                               // Description
                               _buildInputLabel("DESCRIPTION_1".tr(), Icons.description),
@@ -840,7 +845,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
       ),
       child: TextFormField(
         controller: controller,
-        maxLines: 3,
+        maxLines: 2,
         keyboardType: TextInputType.multiline,
         decoration: InputDecoration(
           border: InputBorder.none,

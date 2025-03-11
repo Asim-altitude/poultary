@@ -885,9 +885,9 @@ class _DashboardScreen extends State<DashboardScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    getFinanceCard(Icons.arrow_upward, "Income", "\$ $gross_income", Colors.green, FinanceReportsScreen(), context),
-                                    getFinanceCard(Icons.arrow_downward, "Expense", "\$ $total_expense", Colors.red, FinanceReportsScreen(), context),
-                                    getFinanceCard(Icons.monetization_on, "NET_PROFIT", net_income >= 0 ? "\$ $net_income" : "-\$ ${-net_income}", net_income >= 0 ? Colors.blue : Colors.orange, FinanceReportsScreen(), context),
+                                    getFinanceCard(Icons.arrow_upward, "Income", "${Utils.currency} $gross_income", Colors.green, FinanceReportsScreen(), context),
+                                    getFinanceCard(Icons.arrow_downward, "Expense", "${Utils.currency} $total_expense", Colors.red, FinanceReportsScreen(), context),
+                                    getFinanceCard(Icons.monetization_on, "NET_PROFIT", net_income >= 0 ? "${Utils.currency} $net_income" : "-${Utils.currency} ${-net_income}", net_income >= 0 ? Colors.white : Colors.white, FinanceReportsScreen(), context),
                                   ],
                                 ),
                               ),

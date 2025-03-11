@@ -25,8 +25,6 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
 
   void createTables() async {
     await DatabaseHelper.instance.database;
-
-    await DatabaseHelper.createFeedStockHistoryTable();
     fetchStockSummary();
   }
    // Nullable variable
@@ -79,7 +77,7 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      stock.feedName,
+                      stock.feedName.tr(),
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
                     ),
                   ),
@@ -99,7 +97,7 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
                       Row(
                         children: [
                           Text(
-                            "Total Stock: ",
+                            "Total Stock".tr()+": ",
                             style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                           ),
                           Text(
@@ -116,7 +114,7 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
                       Row(
                         children: [
                           Text(
-                            "Total Stock: ",
+                            "Used Stock".tr()+": ",
                             style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                           ),
                           Text(
@@ -151,7 +149,7 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
                       SizedBox(width: 6),
                       Flexible(
                         child: Text(
-                          "Available: ${stock.availableStock}"+"KG".tr(),
+                          "Available".tr()+": ${stock.availableStock}"+"KG".tr(),
                           style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
                           overflow: TextOverflow.ellipsis, // Prevents overflow
                           softWrap: true, // Allows wrapping
@@ -183,7 +181,7 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
                       ),
                       SizedBox(width: 6),
                       Text(
-                        "⚠️ LOW STOCK",
+                        "⚠️"+ "LOW STOCK".tr(),
                         style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.red.shade800),
                       ),
                     ],
@@ -301,7 +299,7 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
           ),
           child: AppBar(
             title: Text(
-              "Feed Stock Summary",
+              "Feed Stock Summary".tr(),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
@@ -329,11 +327,11 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
             Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey),
             SizedBox(height: 10),
             Text(
-              "No feed stock available!",
+              "No feed stock available!".tr(),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
             ),
             SizedBox(height: 5),
-            Text("Add stock to see feed details.", style: TextStyle(fontSize: 14, color: Colors.grey)),
+            Text("Add stock to see feed details.".tr(), style: TextStyle(fontSize: 14, color: Colors.grey)),
           ],
         ),
       )
@@ -394,7 +392,7 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
   DateTime _selectedDate = DateTime.now(); // Default to today
   List<String> _feedList = [];
   List<String> _unitList = ["kg"];
-  List<String> _sourceList = ["Purchased", "Gift", "Harvest", "Other"];
+  List<String> _sourceList = ["PURCHASED", "GIFT", "OTHER"];
   List<SubItem> feeds = [];
 
   @override
@@ -435,8 +433,8 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
       return;
     }
 
-    String finalSource = _selectedSource == "Other" ? _otherSourceController.text : _selectedSource!;
-    double? amount = _selectedSource == "Purchased" && _amountController.text.isNotEmpty
+    String finalSource = _selectedSource == "OTHER" ? _otherSourceController.text : _selectedSource!;
+    double? amount = _selectedSource == "PURCHASED" && _amountController.text.isNotEmpty
         ? double.tryParse(_amountController.text)
         : null;
 
@@ -459,8 +457,8 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
           type: "Expense",
           amount: _amountController.text,
           payment_method: "Cash",
-          payment_status: "Cleared",
-          sold_purchased_from: "Market",
+          payment_status: "CLEARED",
+          sold_purchased_from: "Unknown",
           short_note: "$_selectedFeed Purchase made on ${DateFormat('yyyy-MM-dd').format(_selectedDate)}",
           how_many: _quantityController.text,
           extra_cost: "",
@@ -493,7 +491,7 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              "Add Feed Stock",
+              "Add Feed Stock".tr(),
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
             ),
             SizedBox(height: 5),
@@ -506,7 +504,7 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
             SizedBox(height: 5),
 
             _buildDropdown(
-              hintText: "Select Feed",
+              hintText: "Choose Feed".tr(),
               value: _selectedFeed,
               items: _feedList,
               onChanged: (value) => setState(() => _selectedFeed = value),
@@ -519,7 +517,7 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
                 Expanded(
                   child: _buildTextField(
                     controller: _quantityController,
-                    label: "Quantity",
+                    label: "Quantity".tr(),
                     icon: Icons.production_quantity_limits,
                     keyboardType: TextInputType.number,
                   ),
@@ -566,7 +564,7 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
             SizedBox(height: 12),
 
             _buildDropdown(
-              hintText: "Select Source",
+              hintText: "Select Source".tr(),
               value: _selectedSource,
               items: _sourceList,
               onChanged: (value) => setState(() {
@@ -578,17 +576,17 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
             ),
             SizedBox(height: 12),
 
-            if (_selectedSource == "Other")
+            if (_selectedSource == "OTHER")
               _buildTextField(
                 controller: _otherSourceController,
-                label: "Enter Other Source",
+                label: "Enter Other Source".tr(),
                 icon: Icons.create,
               ),
 
-            if (_selectedSource == "Purchased")
+            if (_selectedSource == "PURCHASED")
               _buildTextField(
                 controller: _amountController,
-                label: "Enter Purchase Amount",
+                label: "Amount".tr(),
                 icon: Icons.attach_money,
                 keyboardType: TextInputType.number,
               ),
@@ -604,7 +602,7 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
                   backgroundColor: Utils.getThemeColorBlue(),
                   elevation: 4,
                 ),
-                child: Text("Add Stock", style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
+                child: Text("Add Stock".tr(), style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -635,9 +633,9 @@ Widget _buildDropdown({
         border: InputBorder.none,
         prefixIcon: Icon(icon, color: Utils.getThemeColorBlue()),
       ),
-      hint: Text(hintText, style: TextStyle(color: Colors.black54)),
+      hint: Text(hintText.tr(), style: TextStyle(color: Colors.black54)),
       items: items.map((item) {
-        return DropdownMenuItem(value: item, child: Text(item));
+        return DropdownMenuItem(value: item, child: Text(item.tr()));
       }).toList(),
       onChanged: onChanged,
     ),

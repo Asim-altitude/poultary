@@ -2023,11 +2023,11 @@ class DatabaseHelper  {
     return _transactionList;
   }
 
-  static Future<List<FinancialItem>?> getTopIncomeItems(String str, String end) async {
+  static Future<List<FinancialItem>?> getTopIncomeItems(int f_id, String str, String end) async {
     final List<Map<String, Object?>>? results = await _database?.rawQuery('''
     SELECT sale_item, SUM(amount) as total_amount
     FROM transactions
-    WHERE type = 'Income' AND date >= '$str' AND date <= '$end'
+    WHERE type = 'Income' AND date >= '$str' AND date <= '$end' AND f_id = $f_id
     GROUP BY sale_item
     ORDER BY amount DESC
     LIMIT 5
@@ -2040,11 +2040,11 @@ class DatabaseHelper  {
     )).toList();
   }
 
-  static Future<List<FinancialItem>?> getTopExpenseItems(String str, String end) async {
+  static Future<List<FinancialItem>?> getTopExpenseItems(int f_id, String str, String end) async {
     final List<Map<String, Object?>>? results = await _database?.rawQuery('''
     SELECT expense_item, SUM(amount) as total_amount
     FROM transactions
-    WHERE type = 'Expense' AND date >= '$str' AND date <= '$end'
+    WHERE type = 'Expense' AND date >= '$str' AND date <= '$end'AND f_id = $f_id
     GROUP BY expense_item
     ORDER BY amount DESC
     LIMIT 5
@@ -2267,8 +2267,14 @@ class DatabaseHelper  {
 
 
   //FFUNC
-  static Future<List<Eggs_Chart_Item>>  getEggsReportData(String strDate,String endDate, int itype) async {
-    var result = await _database?.rawQuery("SELECT collection_date,sum(total_eggs) FROM Eggs WHERE collection_date >= '$strDate' and collection_date <= '$endDate' and isCollection = '$itype'  GROUP BY collection_date");
+  static Future<List<Eggs_Chart_Item>>  getEggsReportData(String strDate,String endDate, int itype, int f_id) async {
+
+    var result;
+    if(f_id != -1)
+      result = await _database?.rawQuery("SELECT collection_date,sum(total_eggs) FROM Eggs WHERE collection_date >= '$strDate' and collection_date <= '$endDate' and isCollection = '$itype' and f_id = $f_id  GROUP BY collection_date");
+   else
+      result = await _database?.rawQuery("SELECT collection_date,sum(total_eggs) FROM Eggs WHERE collection_date >= '$strDate' and collection_date <= '$endDate' and isCollection = '$itype'  GROUP BY collection_date");
+
     List<Eggs_Chart_Item> _feedList = [];
     Eggs_Chart_Item feed;
     if(result!=null){

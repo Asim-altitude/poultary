@@ -465,6 +465,20 @@ class Utils {
         spaceBetweenAmountAndSymbol: false,
         symbolOnLeft: true,
       ),
+      Currency(
+        code: "GNF",
+        name: "Guinean Franc",
+        symbol: "FG",
+        flag: "GNF",
+        decimalDigits: 0, // GNF has no decimal units
+        number: 324, // ISO 4217 currency code number for GNF
+        namePlural: "Guinean francs",
+        thousandsSeparator: ",",
+        decimalSeparator: ".",
+        spaceBetweenAmountAndSymbol: true,
+        symbolOnLeft: false,
+      ),
+
     ];
 
 

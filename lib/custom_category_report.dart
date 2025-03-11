@@ -224,7 +224,7 @@ class _CategoryChartScreenState extends State<CategoryChartScreen> {
           children: [
             Row(
               children: [
-                /*Expanded(
+                Expanded(
                   child: Container(
                     height: 45,
                     alignment: Alignment.centerRight,
@@ -241,7 +241,7 @@ class _CategoryChartScreenState extends State<CategoryChartScreen> {
                     ),
                     child: getDropDownList(),
                   ),
-                ),*/
+                ),
                 InkWell(
                   onTap: () {
                     openDatePicker();

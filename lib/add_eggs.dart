@@ -476,8 +476,8 @@ class _NewEggCollection extends State<NewEggCollection>
                                         ? "EDIT".tr() + " " + "COLLECTION".tr()
                                         : "NEW".tr() + " " + "Collection".tr()
                                         : isEdit
-                                        ? "EDIT".tr() + " " + "REDUCTION".tr()
-                                        : "NEW".tr() + " " + "REDUCTION".tr(),
+                                        ? "EDIT".tr() + " " + "Reduction".tr()
+                                        : "NEW".tr() + " " + "Reduction".tr(),
                                     style: TextStyle(
                                       color: Utils.getThemeColorBlue(),
                                       fontSize: 18,
@@ -489,14 +489,14 @@ class _NewEggCollection extends State<NewEggCollection>
 
                                 // Choose Flock
                                 _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.list_alt),
-                                SizedBox(height: 8),
+                                SizedBox(height: 5),
                                 _buildDropdownField(getDropDownList()),
 
                                 SizedBox(height: 20),
 
                                 // Good Eggs Input
                                 _buildInputLabel("Good Eggs".tr(), Icons.egg),
-                                SizedBox(height: 8),
+                                SizedBox(height: 5),
                                 _buildInputFieldIntFLoat(
                                   goodEggsController,
                                   "Enter Good Eggs".tr(),
@@ -512,7 +512,7 @@ class _NewEggCollection extends State<NewEggCollection>
 
                                 // Bad Eggs Input
                                 _buildInputLabel("Bad Eggs".tr(), Icons.egg_outlined),
-                                SizedBox(height: 8),
+                                SizedBox(height: 5),
                                 _buildInputFieldIntFLoat(
                                   badEggsController,
                                   "Enter Bad Eggs".tr(),
@@ -907,7 +907,7 @@ class _NewEggCollection extends State<NewEggCollection>
       ),
       child: TextFormField(
         controller: controller,
-        maxLines: 3,
+        maxLines: 2,
         keyboardType: TextInputType.multiline,
         decoration: InputDecoration(
           hintText: hint,

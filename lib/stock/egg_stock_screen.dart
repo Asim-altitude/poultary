@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -34,7 +35,7 @@ class _EggStockScreenState extends State<EggStockScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Egg Stock")),
+      appBar: AppBar(title: Text("Egg Stock".tr())),
       body: Padding(
         padding: const EdgeInsets.all(5.0),
         child: Column(
@@ -52,62 +53,65 @@ class _EggStockScreenState extends State<EggStockScreen> {
             SizedBox(height: 16),
             Container(
               margin: EdgeInsets.only(left: 10),
-              child: Text("Stock History", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              child: Text("Stock History".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ),
             SizedBox(height: 8),
             Expanded(
-              child:  ListView.builder(
-        itemCount: stockHistory.length,
-        itemBuilder: (context, index) {
-          final entry = stockHistory[index];
+              child:  Container(
+                margin: EdgeInsets.all(10),
+                child: ListView.builder(
+                        itemCount: stockHistory.length,
+                        itemBuilder: (context, index) {
+                          final entry = stockHistory[index];
 
-          return Dismissible(
-            key: Key(entry.id.toString()),
-            background: Container(
-              color: Colors.red,
-              alignment: Alignment.centerRight,
-              padding: EdgeInsets.only(right: 20),
-              child: Icon(Icons.delete, color: Colors.white),
-            ),
-            direction: DismissDirection.endToStart,
-            confirmDismiss: (direction) async {
-              return await showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text("Delete Entry"),
-                  content: Text("Are you sure you want to delete this stock entry?"),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      child: Text("Cancel"),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        DatabaseHelper.deleteItem("Eggs",entry.id!);
-                        Navigator.of(context).pop(true);
-                      },
-                      child: Text("Delete", style: TextStyle(color: Colors.red)),
-                    ),
-                  ],
+                          return Dismissible(
+                            key: Key(entry.id.toString()),
+                            background: Container(
+                color: Colors.red,
+                alignment: Alignment.centerRight,
+                padding: EdgeInsets.only(right: 20),
+                child: Icon(Icons.delete, color: Colors.white),
+                            ),
+                            direction: DismissDirection.endToStart,
+                            confirmDismiss: (direction) async {
+                return await showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text("Delete Entry".tr()),
+                    content: Text("Are you sure you want to delete this stock entry?".tr()),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: Text("CANCEL".tr()),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          DatabaseHelper.deleteItem("Eggs",entry.id!);
+                          Navigator.of(context).pop(true);
+                        },
+                        child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
+                      ),
+                    ],
+                  ),
+                );
+                            },
+                            child: Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 3,
+                margin: EdgeInsets.symmetric(vertical: 6),
+                child: ListTile(
+                  leading: Icon(Icons.egg, color: Colors.orange),
+                  title: Text(
+                    "${entry.total_eggs}"+ "eggs collected".tr(),
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  subtitle: Text("DATE".tr()+": ${entry.date}"),
                 ),
-              );
-            },
-            child: Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              elevation: 3,
-              margin: EdgeInsets.symmetric(vertical: 6),
-              child: ListTile(
-                leading: Icon(Icons.egg, color: Colors.orange),
-                title: Text(
-                  "${entry.total_eggs} eggs collected",
-                  style: TextStyle(fontSize: 16),
-                ),
-                subtitle: Text("Date: ${entry.date}"),
+                            ),
+                          );
+                        },
+                      ),
               ),
-            ),
-          );
-        },
-      ),
             ),
           ],
         ),
@@ -137,7 +141,7 @@ class _EggStockScreenState extends State<EggStockScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    "Egg Stock Summary",
+                    "Egg Stock Summary".tr(),
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
                   ),
                 ),
@@ -152,9 +156,9 @@ class _EggStockScreenState extends State<EggStockScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Total Eggs: $total", style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+                    Text("Total Eggs".tr()+": $total", style: TextStyle(fontSize: 14, color: Colors.grey[700])),
                     SizedBox(height: 4),
-                    Text("Used Eggs: $used", style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+                    Text("Used Eggs".tr()+": $used", style: TextStyle(fontSize: 14, color: Colors.grey[700])),
                   ],
                 ),
 
@@ -178,7 +182,7 @@ class _EggStockScreenState extends State<EggStockScreen> {
                     SizedBox(width: 6),
                     Flexible(
                       child: Text(
-                        "Available: $available",
+                        "Available".tr()+": $available",
                         style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
                         overflow: TextOverflow.ellipsis,
                         softWrap: true,
@@ -209,7 +213,7 @@ class _EggStockScreenState extends State<EggStockScreen> {
                     ),
                     SizedBox(width: 6),
                     Text(
-                      "⚠️ LOW STOCK",
+                      "⚠️"+ "LOW STOCK".tr(),
                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.red.shade800),
                     ),
                   ],

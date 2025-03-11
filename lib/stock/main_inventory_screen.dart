@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/model/category_item.dart';
@@ -35,7 +36,7 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
           ),
           child: AppBar(
             title: Text(
-              "Manage Inventory",
+              "Manage Inventory".tr(),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 22,
@@ -55,8 +56,8 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
           children: [
             _buildInventoryItem(
               icon: Icons.fastfood,
-              title: "Feed Stock",
-              description: "Manage available feed quantity and types",
+              title: "Feed Stock".tr(),
+              description: "Manage available feed quantity and types".tr(),
               onTap: () async {
                 await Navigator.push(
                   context,
@@ -68,8 +69,8 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
             ),
             _buildInventoryItem(
               icon: Icons.egg,
-              title: "Egg Stock",
-              description: "Manage collected eggs and storage",
+              title: "Egg Stock".tr(),
+              description: "Manage collected eggs and storage".tr(),
               onTap: () async {
                 await Navigator.push(
                   context,
@@ -81,8 +82,8 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
             ),
             _buildInventoryItem(
               icon: Icons.medical_services,
-              title: "Medicine Stock",
-              description: "Track medicines and expiration dates",
+              title: "Medicine Stock".tr(),
+              description: "Track medicines and expiration dates".tr(),
               onTap: () async {
                 CategoryItem item = CategoryItem(id: null, name: "Medicine");
                 int? medicineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);
@@ -97,8 +98,8 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
             ),
             _buildInventoryItem(
               icon: Icons.vaccines,
-              title: "Vaccine Stock",
-              description: "Manage vaccination schedules and stock",
+              title: "Vaccine Stock".tr(),
+              description: "Manage vaccination schedules and stock".tr(),
               onTap: () async {
                 CategoryItem item = CategoryItem(id: null, name: "Vaccine");
                 int? vaccineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);

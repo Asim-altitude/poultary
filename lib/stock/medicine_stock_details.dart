@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:sqflite/sqflite.dart';
@@ -15,7 +16,7 @@ class MedicineStockDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Medicine Stock Details")),
+      appBar: AppBar(title: Text("Medicine Stock Details".tr())),
       body: Padding(
         padding: const EdgeInsets.all(5.0),
         child: Column(
@@ -25,7 +26,7 @@ class MedicineStockDetailScreen extends StatelessWidget {
             SizedBox(height: 16),
             Container(
               margin: EdgeInsets.only(left: 10),
-              child: Text("Stock History", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              child: Text("Stock History".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ),
             SizedBox(height: 8),
             Expanded(
@@ -48,8 +49,8 @@ class MedicineStockDetailScreen extends StatelessWidget {
                         return await showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: Text("Delete Entry"),
-                            content: Text("Are you sure you want to delete this medicine entry?"),
+                            title: Text("Delete Entry".tr()),
+                            content: Text("Are you sure you want to delete this medicine entry?".tr()),
                             actions: [
                               TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("Cancel")),
                               TextButton(
@@ -57,7 +58,7 @@ class MedicineStockDetailScreen extends StatelessWidget {
                                   deleteMedicineStock(entry.id!);
                                   Navigator.of(context).pop(true);
                                 },
-                                child: Text("Delete", style: TextStyle(color: Colors.red)),
+                                child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
                               ),
                             ],
                           ),
@@ -76,7 +77,7 @@ class MedicineStockDetailScreen extends StatelessWidget {
                             "${entry.quantity} ${entry.unit} of ${entry.medicineName}",
                             style: TextStyle(fontSize: 16),
                           ),
-                          subtitle: Text("Date: ${Utils.getFormattedDate(entry.date)}"),
+                          subtitle: Text("DATE"+": ${Utils.getFormattedDate(entry.date)}"),
                         ),
                       ),
                     );
@@ -111,7 +112,7 @@ class MedicineStockDetailScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    stock.medicineName +" (${stock.unit})",
+                    stock.medicineName.tr() +" (${stock.unit})",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
                   ),
                 ),
@@ -127,9 +128,9 @@ class MedicineStockDetailScreen extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Total Stock: ${stock.totalStock} ${stock.unit}", style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+                    Text("Total Stock"+": ${stock.totalStock} ${stock.unit}", style: TextStyle(fontSize: 14, color: Colors.grey[700])),
                     SizedBox(height: 4),
-                    Text("Used Stock: ${stock.usedStock} ${stock.unit}", style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+                    Text("Used Stock".tr()+": ${stock.usedStock} ${stock.unit}", style: TextStyle(fontSize: 14, color: Colors.grey[700])),
                   ],
                 ),
               ],
@@ -150,7 +151,7 @@ class MedicineStockDetailScreen extends StatelessWidget {
                     Icon(Icons.medical_services, color: Colors.white, size: 16),
                     SizedBox(width: 6),
                     Text(
-                      "Available: ${stock.availableStock} ${stock.unit}",
+                      "Available"+": ${stock.availableStock} ${stock.unit}",
                       style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                   ],
@@ -178,7 +179,7 @@ class MedicineStockDetailScreen extends StatelessWidget {
                     ),
                     SizedBox(width: 6),
                     Text(
-                      "⚠️ LOW STOCK",
+                      "⚠️"+ "LOW STOCK",
                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.red.shade800),
                     ),
                   ],

@@ -135,8 +135,8 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
     incomeChartData = await DatabaseHelper.getFinanceChartData(st, end,"Income");
     expenseChartData = await DatabaseHelper.getFinanceChartData(st, end,"Expense");
 
-    topIncomeItems = (await DatabaseHelper.getTopIncomeItems(st,end))!;
-    topExpenseItems = (await DatabaseHelper.getTopExpenseItems(st,end))!;
+    topIncomeItems = (await DatabaseHelper.getTopIncomeItems(f_id,st,end))!;
+    topExpenseItems = (await DatabaseHelper.getTopExpenseItems(f_id,st,end))!;
 
     Utils.incomeItems = topIncomeItems;
     Utils.expenseItems = topExpenseItems;
@@ -238,7 +238,6 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
     return SafeArea(child: Scaffold(
       body:SafeArea(
         top: false,
-
          child:Container(
           width: widthScreen,
           height: heightScreen,
@@ -311,7 +310,34 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
               Row(
                 children: [
-                  /// Single Date Picker
+                  Expanded(
+                    child: Container(
+                      height: 45,
+                      alignment: Alignment.centerRight,
+                      padding: EdgeInsets.only(left: 10),
+                      margin: EdgeInsets.only(left: 10,right: 5),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Utils.getThemeColorBlue(),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: getDropDownList(),
+                    ),
+                  ),
                   InkWell(
                     onTap: () {
                       openDatePicker();
@@ -319,8 +345,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                     borderRadius: BorderRadius.circular(8),
                     child: Container(
                       height: 45,
-                      width: widthScreen - 20,
-                      margin: EdgeInsets.only(left: 10, top: 15, bottom: 10),
+                      margin: EdgeInsets.only(right: 10, top: 10, bottom: 10),
                       padding: EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -418,7 +443,8 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
                             SizedBox(height: 10),
 
-                            Column(
+                           if(f_id==-1)
+                             Column(
                               children: flockFinanceList.map((flock) => _buildFlockRow(flock)).toList(),
                             ),
                             SizedBox(height: 10),
@@ -636,7 +662,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
         ),
         SizedBox(height: 4),
         Text(
-          '\$${amount.toStringAsFixed(2)}',
+          '${Utils.currency}${amount.toStringAsFixed(2)}',
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color),
         ),
       ],

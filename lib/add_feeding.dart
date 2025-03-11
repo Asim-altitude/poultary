@@ -469,7 +469,7 @@ class _NewFeeding extends State<NewFeeding>
                                      Container(
                                        margin: EdgeInsets.only(right: 10),
                                          alignment: Alignment.centerRight,
-                                         child: Text('Stock: ${getAvailableStock()}Kg', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: getAvailableStock()=="0.0"? Colors.red :Colors.green),),),
+                                         child: Text('Stock'.tr()+': ${getAvailableStock()}'+'KG'.tr(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: getAvailableStock()=="0.0"? Colors.red :Colors.green),),),
                                     getAvailableStock()=="0.0"? InkWell(
                                       onTap: () async{
                                          await Navigator.push(

@@ -118,6 +118,9 @@ class _HomeScreen extends State<HomeScreen> {
     await DatabaseHelper.addFlockInfoColumn();
     await DatabaseHelper.addQuantityColumnMedicine();
     await DatabaseHelper.addUnitColumnMedicine();
+    await DatabaseHelper.createFeedStockHistoryTable();
+    await DatabaseHelper.createMedicineStockHistoryTable();
+    await DatabaseHelper.createVaccineStockHistoryTable();
     await addNewColumn();
     await addMissingCategories();
 
@@ -183,12 +186,11 @@ class _HomeScreen extends State<HomeScreen> {
       child: DashboardScreen(),
     ),
     Center(
-      child: ManageInventoryScreen(),
-    ),
-    Center(
       child: ReportListScreen(),
     ),
-
+    Center(
+      child: ManageInventoryScreen(),
+    ),
     Center(
       child: AllEventsScreen(),
     ),
@@ -240,8 +242,8 @@ class _HomeScreen extends State<HomeScreen> {
                backgroundColor: Utils.getThemeColorBlue(),
                items: [
                  BottomNavigationBarItem(icon: Icon(Icons.home), label: "DASHBOARD".tr()),
-                 BottomNavigationBarItem(icon: Icon(Icons.inventory), label: "Inventory".tr()),
                  BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: "REPORTS".tr()),
+                 BottomNavigationBarItem(icon: Icon(Icons.inventory), label: "Stock".tr()),
                  BottomNavigationBarItem(icon: Icon(Icons.notifications_active), label: "Reminders".tr()),
                  BottomNavigationBarItem(icon: Icon(Icons.settings), label: "SETTINGS".tr()),
                ],
