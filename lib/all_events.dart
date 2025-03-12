@@ -78,6 +78,34 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
     return SafeArea(child: Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(20.0), // Round bottom-left corner
+            bottomRight: Radius.circular(20.0), // Round bottom-right corner
+          ),
+          child: AppBar(
+            title: Text(
+              "All Reminders".tr(),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Colors.white,
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor: Utils.getThemeColorBlue(), // Customize the color
+            elevation: 8, // Gives it a more elevated appearance
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                Navigator.pop(context); // Navigates back
+              },
+            ),
+          ),
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
     print("FAB Clicked!");
@@ -135,39 +163,6 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
             children:  [
               Utils.getDistanceBar(),
 
-              ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
-                child: Container(
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Utils.getThemeColorBlue(), //(x,y)
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        alignment: Alignment.center,
-                        width: 50,
-                        height: 50,
-                        child: SizedBox(width: 2,),
-                      ),
-                      Container(
-
-                          child: Text(
-                            applied_filter_name.tr(),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          )),
-
-                    ],
-                  ),
-                ),
-              ),
 
               Visibility(
                 visible: false,

@@ -9,14 +9,17 @@ import 'package:image_picker/image_picker.dart';
 import 'package:language_picker/languages.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:poultary/add_feeding.dart';
+import 'package:poultary/all_events.dart';
 import 'package:poultary/category_screen.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/support_screen.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'auto_egg_collection.dart';
 import 'auto_feed_management.dart';
+import 'backup_screen.dart';
 import 'database/databse_helper.dart';
 import 'farm_setup_screen.dart';
 import 'filter_setup_screen.dart';
@@ -138,7 +141,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
     Utils.setupAds();
     getLanguage();
   }
-  
+
   setUpInitial() async {
     bool isInApp = await SessionManager.getInApp();
     if(isInApp){
@@ -186,110 +189,244 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
             children:  [
 
               Utils.getDistanceBar(),
-              // ClipRRect(
-              //   borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
-              //   child: Container(
-              //     decoration: BoxDecoration(
-              //        boxShadow: [
-              //         BoxShadow(
-              //           color: Utils.getThemeColorBlue(), //(x,y)
-              //         ),
-              //       ],
-              //     ),
-              //     child: Row(
-              //       children: [
-              //         Container(
-              //           alignment: Alignment.center,
-              //           width: 52,
-              //           height: 52,
-              //           child: Icon(Icons.settings,
-              //               color: Colors.white),
-              //         ),
-              //         Container(
-              //
-              //             child: Text(
-              //               'SETTINGS'.tr(),
-              //               textAlign: TextAlign.start,
-              //               style: TextStyle(
-              //                   color: Colors.white,
-              //                   fontSize: 18,
-              //                   fontWeight: FontWeight.bold),
-              //             )),
-              //
-              //       ],
-              //     ),
-              //   ),
-              // ),
-              // if(isGetLanguage)
-              //   Visibility(
-              //     visible: false,
-              //     child: Container(
-              //       decoration: BoxDecoration(
-              //           borderRadius: BorderRadius.all(Radius.circular(3)),
-              //           color: Colors.white,
-              //           border: Border.all(color: Colors.blueAccent,width: 1.0)
-              //       ),
-              //       height: 60,
-              //       margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
-              //
-              //       child:
-              //
-              //       Column(
-              //         mainAxisAlignment: MainAxisAlignment.center,
-              //         children: [
-              //           Container(height: 20,
-              //
-              //             color: Colors.white,
-              //             child: Align(
-              //               alignment: Alignment.center,
-              //               child:Text("Language".tr(),
-              //                 textAlign: TextAlign.center,
-              //                 style: new TextStyle(
-              //                   fontSize: 13.0,
-              //                   fontWeight: FontWeight.normal,
-              //                   color: Colors.black54,
-              //
-              //                 ),
-              //               ),),
-              //           ),
-              //
-              //           Container(
-              //             width: Utils.getWidthResized(200),height:24,color: Colors.white,
-              //             child: LanguagePickerDropdown(
-              //               initialValue: _selectedCupertinoLanguage,
-              //               itemBuilder: _buildDropdownItem,
-              //               languages: supportedLanguages,
-              //               onValuePicked: (Language language) {
-              //                 _selectedCupertinoLanguage = language;
-              //                 // Utils.showToast(language.isoCode);
-              //                 Utils.setSelectedLanguage(_selectedCupertinoLanguage,context);
-              //               },
-              //             ),
-              //           ),
-              //
-              //         ],)
-              //
-              //       ,),
-              //   ),
 
-              SizedBox(height: 12,),
-              Container(
-                  padding: EdgeInsets.all(0),
-                  margin: EdgeInsets.all(0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(0)),
-                    color: Colors.white,
-                    boxShadow: [
+                SizedBox(height: 10,),
+                _buildSectionTitle('Settings'.tr()),
+                _buildSettingsTile(
+                  context,
+                  icon: Icons.notifications_active,
+                  title: 'Schedule Reminders'.tr(),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const AllEventsScreen()),
+                    );
+                  },
+                ),
+                _buildSettingsTile(
+                  context,
+                  icon: Icons.account_balance,
+                  title: 'FARM_MANAGMENT'.tr(),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const FarmSetupScreen()),
+                    );
+                  },
+                ),
+                _buildSettingsTile(
+                  context,
+                  icon: Icons.category,
+                  title: 'CATEGORY_MANAGMENT'.tr(),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const CategoryScreen()),
 
-                    ],
-                  ), child: Column(
-                children: [
-                  // Align(
-                  //   alignment: Alignment.center,
-                  //   child:
-                  //   Text('Basic Settings'.tr(),style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
-                  // ),
-                  InkWell(
+                    );
+                  },
+                ),
+                _buildSettingsTile(
+                  context,
+                  icon: Icons.auto_mode,
+                  title: 'Auto Feed Management'.tr(),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>  AutomaticFeedManagementScreen()),
+                    );
+                  },
+                ),
+
+                _buildSettingsTile(
+                  context,
+                  icon: Icons.filter_alt_rounded,
+                  title: 'All Data Filters'.tr(),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>  FilterSetupScreen(inStart: false,)),
+                    );
+                  },
+                ),
+
+                _buildSettingsTile(
+                  context,
+                  icon: Icons.backup,
+                  title: 'BACK_UP_RESTORE_MESSAGE'.tr(),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => BackupRestoreScreen()),
+                    );
+                  },
+                ),
+
+                _buildSettingsTile(
+                  context,
+                  icon: Icons.support,
+                  title: 'Contact & Support'.tr(),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ContactSupportScreen()),
+                    );
+                  },
+                ),
+
+                SizedBox(height: 20,),
+                if(Utils.isShowAdd)
+                  _buildPremiumUpgradeTile(context),
+
+                /* /// **Support Section Card**
+                     Container(
+                       margin: EdgeInsets.all(10),
+                       padding: EdgeInsets.all(5),
+                       decoration: BoxDecoration(
+                         color: Colors.white,
+                         borderRadius: BorderRadius.circular(15),
+                         boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3))],
+                       ),
+                       child: Column(
+                         crossAxisAlignment: CrossAxisAlignment.center,
+                         children: [
+                           _buildSectionTitle('Contact & Support'),
+
+                           /// **WhatsApp Group & Channel Cards**
+                           Row(
+                             mainAxisAlignment: MainAxisAlignment.center,
+                             children: [
+                               /// **WhatsApp Group - Ask a Question**
+                               Expanded(
+                                 child: InkWell(
+                                   onTap: _launchUrl,
+                                   child: Container(
+                                     height: 150, // Slightly increased height to prevent text overflow
+                                     padding: EdgeInsets.all(14),
+                                     margin: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                                     decoration: BoxDecoration(
+                                       borderRadius: BorderRadius.circular(12),
+                                       gradient: LinearGradient(
+                                         colors: [Colors.green.shade700, Colors.green.shade500],
+                                         begin: Alignment.topLeft,
+                                         end: Alignment.bottomRight,
+                                       ),
+                                       boxShadow: [
+                                         BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
+                                       ],
+                                     ),
+                                     child: Column(
+                                       mainAxisAlignment: MainAxisAlignment.center,
+                                       children: [
+                                         /// **WhatsApp Icon**
+                                         CircleAvatar(
+                                           backgroundColor: Colors.white.withOpacity(0.2),
+                                           radius: 25,
+                                           child: Icon(MdiIcons.whatsapp, color: Colors.white, size: 30),
+                                         ),
+                                         SizedBox(height: 8),
+
+                                         /// **Group Title**
+                                         Flexible(
+                                           child: Text(
+                                             "Ask a Question".tr(),
+                                             textAlign: TextAlign.center,
+                                             style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                                             maxLines: 1, // Ensures text does not overflow
+                                             overflow: TextOverflow.ellipsis,
+                                           ),
+                                         ),
+
+                                         /// **Subtitle**
+                                         Flexible(
+                                           child: Text(
+                                             "WhatsApp Group".tr(),
+                                             textAlign: TextAlign.center,
+                                             style: TextStyle(fontSize: 13, color: Colors.white70),
+                                             maxLines: 2, // Allows wrapping
+                                             overflow: TextOverflow.ellipsis,
+                                           ),
+                                         ),
+                                       ],
+                                     ),
+                                   ),
+                                 ),
+                               ),
+
+                               /// **Spacing Between Cards**
+                               SizedBox(width: 10),
+
+                               /// **WhatsApp Channel - Easy Farming Community**
+                               Expanded(
+                                 child: InkWell(
+                                   onTap: _launchUrl2,
+                                   child: Container(
+                                     height: 150, // Same increased height
+                                     padding: EdgeInsets.all(14),
+                                     margin: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                                     decoration: BoxDecoration(
+                                       borderRadius: BorderRadius.circular(12),
+                                       gradient: LinearGradient(
+                                         colors: [Colors.blue.shade700, Colors.blue.shade500],
+                                         begin: Alignment.topLeft,
+                                         end: Alignment.bottomRight,
+                                       ),
+                                       boxShadow: [
+                                         BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
+                                       ],
+                                     ),
+                                     child: Column(
+                                       mainAxisAlignment: MainAxisAlignment.center,
+                                       children: [
+                                         /// **WhatsApp Channel Icon**
+                                         CircleAvatar(
+                                           backgroundColor: Colors.white.withOpacity(0.2),
+                                           radius: 25,
+                                           child: Icon(MdiIcons.whatsapp, color: Colors.white, size: 30),
+                                         ),
+                                         SizedBox(height: 8),
+
+                                         /// **Channel Title**
+                                         Flexible(
+                                           child: Text(
+                                             "Tips & Updates".tr(),
+                                             textAlign: TextAlign.center,
+                                             style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                                             maxLines: 1,
+                                             overflow: TextOverflow.ellipsis,
+                                           ),
+                                         ),
+
+                                         /// **Subtitle**
+                                         Flexible(
+                                           child: Text(
+                                             "WhatsApp Channel".tr(),
+                                             textAlign: TextAlign.center,
+                                             style: TextStyle(fontSize: 13, color: Colors.white70),
+                                             maxLines: 2,
+                                             overflow: TextOverflow.ellipsis,
+                                           ),
+                                         ),
+                                       ],
+                                     ),
+                                   ),
+                                 ),
+                               ),
+                             ],
+                           ),
+
+
+                         ],
+                       ),
+                     ),*/
+
+
+                /*   InkWell(
                     onTap: () {
                       Navigator.push(
                         context,
@@ -335,7 +472,6 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                           ],),),
                     ),
                   ),
-
                   InkWell(
                     onTap: () {
                       Navigator.push(
@@ -428,13 +564,14 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                           ],),),
                     ),
                   ),
-
-                  /*InkWell(
-                    onTap: () {
+                  InkWell(
+                    onTap: ()
+                    {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>  AutomaticEggCollectionScreen()),
+                            builder: (context) =>  FilterSetupScreen(inStart: false,)),
+
                       );
                     },
                     child: Container(
@@ -444,15 +581,15 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                           color: Colors.white,
                           border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
                       ),
-                      margin: EdgeInsets.only(left: 12,right: 12,top: 5,bottom: 8),
+                      margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
                       child: Container(
-                        height: 48,
+                        height: 52,
                         padding: EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.all(Radius.circular(5)),
-                          color: Colors.white,
                           boxShadow: [
                             BoxShadow(
+                              color: Colors.white, //(x,y)
                             ),
                           ],
                         ),
@@ -464,18 +601,268 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                                 alignment: Alignment.topLeft,
                                 child: Row(
                                   children: [
-
                                     SizedBox(width: 2,),
-                                    Image.asset("assets/eggs_tray.png", color: Utils.getThemeColorBlue(), width: 20, height: 20,),
+                                    Icon(Icons.filter_list,color: Utils.getThemeColorBlue(),size: 20,),
                                     SizedBox(width: 8,),
-                                    Text('AUTO_EGG_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                    Text('All Data Filters'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
                                   ],
                                 )),
 
                           ],),),
                     ),
-                  ),*/
-                 /* InkWell(
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(3)),
+                        color: Colors.white,
+                        boxShadow: [
+                        ]
+                    ),
+                    child: Column(children: [
+                      Align(
+                        alignment: Alignment.center,
+                        child:
+                        Text('BACK_UP_RESTORE_MESSAGE'.tr(),style: TextStyle(fontSize: 20,fontFamily: 'Roboto', fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                      ),
+                      SizedBox(height: 4,),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+
+
+                          InkWell(
+                            onTap: () {
+                              shareFiles();
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(3)),
+                                  boxShadow: [
+
+                                  ],
+                                  color: Colors.white,
+                                  border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
+                              ),
+                              margin: EdgeInsets.all(10),
+                              child: Container(
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.white, //(x,y)
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+
+                                  children: [
+                                    Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Column(
+                                          children: [
+
+                                            Icon(Icons.backup,color: Utils.getThemeColorBlue(),size: 25,),
+                                            Text("BACKUP".tr(),style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Utils.getThemeColorBlue()),),
+                                          ],
+                                        )),
+
+                                  ],),),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () async {
+                              await DatabaseHelper.importDataBaseFile(context);
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(3)),
+                                  boxShadow: [
+
+                                  ],
+                                  color: Colors.white,
+                                  border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
+                              ),
+                              margin: EdgeInsets.all(10),
+                              child: Container(
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.white, //(x,y)
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+
+                                  children: [
+                                    Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Column(
+                                          children: [
+
+                                            Icon(Icons.restore,color: Utils.getThemeColorBlue(),size: 25,),
+                                            Text("RESTORE".tr(),style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Utils.getThemeColorBlue()),),
+                                          ],
+                                        )),
+
+                                  ],),),
+                            ),
+                          ),
+
+                        ],),
+
+
+                    ],),),
+*/
+
+
+                /*Container(width: Utils.WIDTH_SCREEN,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(6)),
+
+                          color: Utils.getThemeColorBlue(),
+                          border: Border.all(color: Colors.blueAccent,width: 1.0)
+                      ),
+                      margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                      padding: EdgeInsets.only(left: 0,right: 0,top: 10,bottom: 10),
+
+                      child: Column(
+                        children: [
+                          Text('ADS_REMOVAL'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Colors.white),),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Align(
+                                alignment: Alignment.center,
+                                child:Text("ONLY_FOR".tr(),
+                                  textAlign: TextAlign.center,
+                                  style: new TextStyle(
+                                      fontSize: 13.0,
+                                      fontWeight: FontWeight.normal,
+                                      color: Colors.white70,
+                                      fontFamily: 'PTSANS'
+                                  ),
+                                ),),
+                              if(_products!=null && _products.length>0)
+                                Align(
+                                  alignment: Alignment.center,
+                                  child:Text(" ${_products[0].price.toString()}",
+                                    textAlign: TextAlign.center,
+                                    style: new TextStyle(
+                                        fontSize: 13.0,
+                                        fontWeight: FontWeight.normal,
+                                        color: Colors.white70,
+                                        fontFamily: 'PTSANS'
+                                    ),
+                                  ),),
+                            ],),
+                          SizedBox(height: 8,),
+                          InkWell(
+                            onTap: () {
+                              PurchaseParam purchaseParam = PurchaseParam(productDetails: _products[0]);
+                              _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
+
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(6)),
+
+                                  color: Color.fromRGBO(255, 255, 255, 0.5),
+                                  border: Border.all(color: Colors.transparent,width: 0.0)
+                              ),
+                              margin: EdgeInsets.only(left: 12,right: 12,top: 0,bottom: 0),
+                              child: Container(
+                                height: 50,
+                                padding: EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: Color.fromRGBO(255, 255, 255, 0.5),
+
+                                  borderRadius: BorderRadius.all(Radius.circular(5)),
+
+
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+
+                                  children: [
+                                    Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Row(
+                                          children: [
+
+                                            SizedBox(width: 4,),
+                                            Icon(Icons.remove_circle_outline,color: Utils.getThemeColorBlue(),size: 24,),
+                                            SizedBox(width: 6,),
+                                            Text('REMOVE_ADS'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                          ],
+                                        )),
+
+                                  ],),),
+                            ),
+                          ),
+                          SizedBox(height: 10,),
+                          InkWell(
+                            onTap: () {
+                              _inAppPurchase.restorePurchases();
+
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(4)),
+
+                                  color: Color.fromRGBO(255, 255, 255, 0.5),
+                                  border: Border.all(color: Colors.transparent,width: 0.0)
+                              ),
+                              margin: EdgeInsets.only(left: 12,right: 12,top: 0,bottom: 0),
+                              child: Container(
+                                height: 50,
+                                padding: EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: Color.fromRGBO(255, 255, 255, 0.5),
+
+
+                                  borderRadius: BorderRadius.all(Radius.circular(6)),
+
+
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+
+                                  children: [
+                                    Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Row(
+                                          children: [
+
+                                            SizedBox(width: 4,),
+                                            Icon(Icons.settings_backup_restore,color: Utils.getThemeColorBlue(),size: 25,),
+                                            SizedBox(width: 8,),
+                                            Text('RESTORE_PREMIUM'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                          ],
+                                        )),
+
+                                  ],),),
+                            ),
+                          ),
+
+                        ],
+                      ),
+                    ),*/
+
+
+
+
+                /* InkWell(
                     onTap: () {
                       Navigator.push(
                         context,
@@ -529,6 +916,834 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                           ],),),
                     ),
                   ),*/
+                // SizedBox(height: 4,),
+                // InkWell(
+                //   onTap: () {
+                //     Navigator.push(
+                //       context,
+                //       MaterialPageRoute(
+                //           builder: (context) => const AllEventsScreen()),
+                //
+                //     );
+                //   },
+                //   child: Container(
+                //     decoration: BoxDecoration(
+                //       borderRadius: BorderRadius.all(Radius.circular(3)),
+                //       boxShadow: [
+                //         BoxShadow(
+                //           color: Colors.grey.withOpacity(0.5),
+                //           spreadRadius: 2,
+                //           blurRadius: 2,
+                //           offset: Offset(0, 1), // changes position of shadow
+                //         ),
+                //       ],
+                //       color: Colors.white,
+                //       //  border: Border.all(color: Colors.blueAccent,width: 1.0)
+                //     ),
+                //     margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                //     child: Container(
+                //       height: 52,
+                //       padding: EdgeInsets.all(10),
+                //       decoration: BoxDecoration(
+                //         borderRadius: BorderRadius.all(Radius.circular(5)),
+                //         boxShadow: [
+                //           BoxShadow(
+                //             color: Colors.white, //(x,y)
+                //           ),
+                //         ],
+                //       ),
+                //       child: Column(
+                //         crossAxisAlignment: CrossAxisAlignment.center,
+                //         mainAxisAlignment: MainAxisAlignment.center,
+                //
+                //         children: [
+                //           Align(
+                //               alignment: Alignment.topLeft,
+                //               child: Row(
+                //                 children: [
+                //
+                //                   Icon(Icons.notification_add,color: Utils.getThemeColorBlue(),),
+                //                   SizedBox(width: 4,),
+                //                   Text('Events'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                //                 ],
+                //               )),
+                //
+                //         ],),),
+                //   ),
+                // ),
+
+                /*Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Contact Us',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 20),
+                        ListTile(
+                          leading: Icon(Icons.chat, color: Colors.green),
+                          title: Text('Contact via WhatsApp'),
+                          subtitle: Text('Chat with us directly on WhatsApp'),
+                          trailing: Icon(Icons.arrow_forward, color: Colors.green),
+                          onTap: () => _openWhatsApp(whatsappNumber),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          leading: Icon(Icons.group, color: Colors.blue),
+                          title: Text('Join Our WhatsApp Channel'),
+                          subtitle: Text('Stay updated with our latest news and updates'),
+                          trailing: Icon(Icons.arrow_forward, color: Colors.blue),
+                          onTap: () => _openWhatsAppChannel(whatsappChannelLink),
+                        ),
+                      ],
+                    ),
+                  ),*/
+              ],
+
+
+             /* SizedBox(height: 5,),
+              Container(
+
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(0)),
+                    color: Colors.white,
+                    boxShadow: [
+
+                    ],
+                  ), child: Column(
+                   children: [
+                  // Align(
+                  //   alignment: Alignment.center,
+                  //   child:
+                  //   Text('Basic Settings'.tr(),style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                  // ),
+                     _buildSectionTitle('Settings'.tr()),
+                     _buildSettingsTile(
+                       context,
+                       icon: Icons.notifications_active,
+                       title: 'Schedule Reminders'.tr(),
+                       onTap: () {
+                         Navigator.push(
+                           context,
+                           MaterialPageRoute(
+                               builder: (context) => const AllEventsScreen()),
+                         );
+                       },
+                     ),
+                     _buildSettingsTile(
+                       context,
+                       icon: Icons.account_balance,
+                       title: 'Farm Management'.tr(),
+                       onTap: () {
+                         Navigator.push(
+                           context,
+                           MaterialPageRoute(
+                               builder: (context) => const FarmSetupScreen()),
+                         );
+                       },
+                     ),
+                     _buildSettingsTile(
+                       context,
+                       icon: Icons.category,
+                       title: 'Category Management'.tr(),
+                       onTap: () {
+                         Navigator.push(
+                           context,
+                           MaterialPageRoute(
+                               builder: (context) => const CategoryScreen()),
+
+                         );
+                       },
+                     ),
+                     _buildSettingsTile(
+                       context,
+                       icon: Icons.auto_mode,
+                       title: 'Auto Feed Management'.tr(),
+                       onTap: () {
+                         Navigator.push(
+                           context,
+                           MaterialPageRoute(
+                               builder: (context) =>  AutomaticFeedManagementScreen()),
+                         );
+                       },
+                     ),
+
+                     _buildSettingsTile(
+                       context,
+                       icon: Icons.filter_alt_rounded,
+                       title: 'All Data Filters'.tr(),
+                       onTap: () {
+                         Navigator.push(
+                           context,
+                           MaterialPageRoute(
+                               builder: (context) =>  FilterSetupScreen(inStart: false,)),
+                         );
+                       },
+                     ),
+
+                     _buildSettingsTile(
+                       context,
+                       icon: Icons.backup,
+                       title: 'Backup & Restore'.tr(),
+                       onTap: () {
+                           Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => BackupRestoreScreen()),
+                      );
+                       },
+                     ),
+
+                     _buildSettingsTile(
+                       context,
+                       icon: Icons.support,
+                       title: 'Contact & Support'.tr(),
+                       onTap: () {
+                         Navigator.push(
+                           context,
+                           MaterialPageRoute(builder: (context) => ContactSupportScreen()),
+                         );
+                       },
+                     ),
+
+                     SizedBox(height: 20,),
+                     if(true)
+                       _buildPremiumUpgradeTile(context),
+
+                    *//* /// **Support Section Card**
+                     Container(
+                       margin: EdgeInsets.all(10),
+                       padding: EdgeInsets.all(5),
+                       decoration: BoxDecoration(
+                         color: Colors.white,
+                         borderRadius: BorderRadius.circular(15),
+                         boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3))],
+                       ),
+                       child: Column(
+                         crossAxisAlignment: CrossAxisAlignment.center,
+                         children: [
+                           _buildSectionTitle('Contact & Support'),
+
+                           /// **WhatsApp Group & Channel Cards**
+                           Row(
+                             mainAxisAlignment: MainAxisAlignment.center,
+                             children: [
+                               /// **WhatsApp Group - Ask a Question**
+                               Expanded(
+                                 child: InkWell(
+                                   onTap: _launchUrl,
+                                   child: Container(
+                                     height: 150, // Slightly increased height to prevent text overflow
+                                     padding: EdgeInsets.all(14),
+                                     margin: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                                     decoration: BoxDecoration(
+                                       borderRadius: BorderRadius.circular(12),
+                                       gradient: LinearGradient(
+                                         colors: [Colors.green.shade700, Colors.green.shade500],
+                                         begin: Alignment.topLeft,
+                                         end: Alignment.bottomRight,
+                                       ),
+                                       boxShadow: [
+                                         BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
+                                       ],
+                                     ),
+                                     child: Column(
+                                       mainAxisAlignment: MainAxisAlignment.center,
+                                       children: [
+                                         /// **WhatsApp Icon**
+                                         CircleAvatar(
+                                           backgroundColor: Colors.white.withOpacity(0.2),
+                                           radius: 25,
+                                           child: Icon(MdiIcons.whatsapp, color: Colors.white, size: 30),
+                                         ),
+                                         SizedBox(height: 8),
+
+                                         /// **Group Title**
+                                         Flexible(
+                                           child: Text(
+                                             "Ask a Question".tr(),
+                                             textAlign: TextAlign.center,
+                                             style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                                             maxLines: 1, // Ensures text does not overflow
+                                             overflow: TextOverflow.ellipsis,
+                                           ),
+                                         ),
+
+                                         /// **Subtitle**
+                                         Flexible(
+                                           child: Text(
+                                             "WhatsApp Group".tr(),
+                                             textAlign: TextAlign.center,
+                                             style: TextStyle(fontSize: 13, color: Colors.white70),
+                                             maxLines: 2, // Allows wrapping
+                                             overflow: TextOverflow.ellipsis,
+                                           ),
+                                         ),
+                                       ],
+                                     ),
+                                   ),
+                                 ),
+                               ),
+
+                               /// **Spacing Between Cards**
+                               SizedBox(width: 10),
+
+                               /// **WhatsApp Channel - Easy Farming Community**
+                               Expanded(
+                                 child: InkWell(
+                                   onTap: _launchUrl2,
+                                   child: Container(
+                                     height: 150, // Same increased height
+                                     padding: EdgeInsets.all(14),
+                                     margin: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                                     decoration: BoxDecoration(
+                                       borderRadius: BorderRadius.circular(12),
+                                       gradient: LinearGradient(
+                                         colors: [Colors.blue.shade700, Colors.blue.shade500],
+                                         begin: Alignment.topLeft,
+                                         end: Alignment.bottomRight,
+                                       ),
+                                       boxShadow: [
+                                         BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
+                                       ],
+                                     ),
+                                     child: Column(
+                                       mainAxisAlignment: MainAxisAlignment.center,
+                                       children: [
+                                         /// **WhatsApp Channel Icon**
+                                         CircleAvatar(
+                                           backgroundColor: Colors.white.withOpacity(0.2),
+                                           radius: 25,
+                                           child: Icon(MdiIcons.whatsapp, color: Colors.white, size: 30),
+                                         ),
+                                         SizedBox(height: 8),
+
+                                         /// **Channel Title**
+                                         Flexible(
+                                           child: Text(
+                                             "Tips & Updates".tr(),
+                                             textAlign: TextAlign.center,
+                                             style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                                             maxLines: 1,
+                                             overflow: TextOverflow.ellipsis,
+                                           ),
+                                         ),
+
+                                         /// **Subtitle**
+                                         Flexible(
+                                           child: Text(
+                                             "WhatsApp Channel".tr(),
+                                             textAlign: TextAlign.center,
+                                             style: TextStyle(fontSize: 13, color: Colors.white70),
+                                             maxLines: 2,
+                                             overflow: TextOverflow.ellipsis,
+                                           ),
+                                         ),
+                                       ],
+                                     ),
+                                   ),
+                                 ),
+                               ),
+                             ],
+                           ),
+
+
+                         ],
+                       ),
+                     ),*//*
+
+
+                     *//*   InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const FarmSetupScreen()),
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
+
+                        color: Colors.white,
+                         border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
+                      ),
+                      margin: EdgeInsets.only(left: 12,right: 12,top: 5,bottom: 8),
+                      child: Container(
+                        height: 48,
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Align(
+                                alignment: Alignment.topLeft,
+                                child: Row(
+                                  children: [
+
+                                    SizedBox(width: 2,),
+                                    Icon(Icons.account_balance_rounded,color: Utils.getThemeColorBlue(),size: 20,),
+                                    SizedBox(width: 8,),
+                                    Text('FARM_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                  ],
+                                )),
+
+                          ],),),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const CategoryScreen()),
+
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+
+                          color: Colors.white,
+                          border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
+                      ),
+                      margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                      child: Container(
+                        height: 48,
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white, //(x,y)
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+
+                          children: [
+                            Align(
+                                alignment: Alignment.topLeft,
+                                child: Row(
+                                  children: [
+
+                                    SizedBox(width: 2,),
+
+                                    Icon(Icons.account_tree,color: Utils.getThemeColorBlue(),size: 20,),
+                                    SizedBox(width: 8,),
+                                    Text('CATEGORY_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                  ],
+                                )),
+
+                          ],),),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>  AutomaticFeedManagementScreen()),
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+
+                          color: Colors.white,
+                          border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
+                      ),
+                      margin: EdgeInsets.only(left: 12,right: 12,top: 5,bottom: 8),
+                      child: Container(
+                        height: 48,
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Align(
+                                alignment: Alignment.topLeft,
+                                child: Row(
+                                  children: [
+                                    SizedBox(width: 2,),
+                                    Image.asset("assets/auto_feed_icon.png", color: Utils.getThemeColorBlue(), width: 20, height: 20,),
+                                    SizedBox(width: 8,),
+                                    Text('AUTO_FEED_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                  ],
+                                )),
+                          ],),),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: ()
+                    {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>  FilterSetupScreen(inStart: false,)),
+
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+
+                          color: Colors.white,
+                          border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
+                      ),
+                      margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                      child: Container(
+                        height: 52,
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white, //(x,y)
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Align(
+                                alignment: Alignment.topLeft,
+                                child: Row(
+                                  children: [
+                                    SizedBox(width: 2,),
+                                    Icon(Icons.filter_list,color: Utils.getThemeColorBlue(),size: 20,),
+                                    SizedBox(width: 8,),
+                                    Text('All Data Filters'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                  ],
+                                )),
+
+                          ],),),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(3)),
+                        color: Colors.white,
+                        boxShadow: [
+                        ]
+                    ),
+                    child: Column(children: [
+                      Align(
+                        alignment: Alignment.center,
+                        child:
+                        Text('BACK_UP_RESTORE_MESSAGE'.tr(),style: TextStyle(fontSize: 20,fontFamily: 'Roboto', fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                      ),
+                      SizedBox(height: 4,),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+
+
+                          InkWell(
+                            onTap: () {
+                              shareFiles();
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(3)),
+                                  boxShadow: [
+
+                                  ],
+                                  color: Colors.white,
+                                  border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
+                              ),
+                              margin: EdgeInsets.all(10),
+                              child: Container(
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.white, //(x,y)
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+
+                                  children: [
+                                    Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Column(
+                                          children: [
+
+                                            Icon(Icons.backup,color: Utils.getThemeColorBlue(),size: 25,),
+                                            Text("BACKUP".tr(),style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Utils.getThemeColorBlue()),),
+                                          ],
+                                        )),
+
+                                  ],),),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () async {
+                              await DatabaseHelper.importDataBaseFile(context);
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(3)),
+                                  boxShadow: [
+
+                                  ],
+                                  color: Colors.white,
+                                  border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
+                              ),
+                              margin: EdgeInsets.all(10),
+                              child: Container(
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.white, //(x,y)
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+
+                                  children: [
+                                    Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Column(
+                                          children: [
+
+                                            Icon(Icons.restore,color: Utils.getThemeColorBlue(),size: 25,),
+                                            Text("RESTORE".tr(),style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Utils.getThemeColorBlue()),),
+                                          ],
+                                        )),
+
+                                  ],),),
+                            ),
+                          ),
+
+                        ],),
+
+
+                    ],),),
+*//*
+
+
+                    *//*Container(width: Utils.WIDTH_SCREEN,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(6)),
+
+                          color: Utils.getThemeColorBlue(),
+                          border: Border.all(color: Colors.blueAccent,width: 1.0)
+                      ),
+                      margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                      padding: EdgeInsets.only(left: 0,right: 0,top: 10,bottom: 10),
+
+                      child: Column(
+                        children: [
+                          Text('ADS_REMOVAL'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Colors.white),),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Align(
+                                alignment: Alignment.center,
+                                child:Text("ONLY_FOR".tr(),
+                                  textAlign: TextAlign.center,
+                                  style: new TextStyle(
+                                      fontSize: 13.0,
+                                      fontWeight: FontWeight.normal,
+                                      color: Colors.white70,
+                                      fontFamily: 'PTSANS'
+                                  ),
+                                ),),
+                              if(_products!=null && _products.length>0)
+                                Align(
+                                  alignment: Alignment.center,
+                                  child:Text(" ${_products[0].price.toString()}",
+                                    textAlign: TextAlign.center,
+                                    style: new TextStyle(
+                                        fontSize: 13.0,
+                                        fontWeight: FontWeight.normal,
+                                        color: Colors.white70,
+                                        fontFamily: 'PTSANS'
+                                    ),
+                                  ),),
+                            ],),
+                          SizedBox(height: 8,),
+                          InkWell(
+                            onTap: () {
+                              PurchaseParam purchaseParam = PurchaseParam(productDetails: _products[0]);
+                              _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
+
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(6)),
+
+                                  color: Color.fromRGBO(255, 255, 255, 0.5),
+                                  border: Border.all(color: Colors.transparent,width: 0.0)
+                              ),
+                              margin: EdgeInsets.only(left: 12,right: 12,top: 0,bottom: 0),
+                              child: Container(
+                                height: 50,
+                                padding: EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: Color.fromRGBO(255, 255, 255, 0.5),
+
+                                  borderRadius: BorderRadius.all(Radius.circular(5)),
+
+
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+
+                                  children: [
+                                    Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Row(
+                                          children: [
+
+                                            SizedBox(width: 4,),
+                                            Icon(Icons.remove_circle_outline,color: Utils.getThemeColorBlue(),size: 24,),
+                                            SizedBox(width: 6,),
+                                            Text('REMOVE_ADS'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                          ],
+                                        )),
+
+                                  ],),),
+                            ),
+                          ),
+                          SizedBox(height: 10,),
+                          InkWell(
+                            onTap: () {
+                              _inAppPurchase.restorePurchases();
+
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(4)),
+
+                                  color: Color.fromRGBO(255, 255, 255, 0.5),
+                                  border: Border.all(color: Colors.transparent,width: 0.0)
+                              ),
+                              margin: EdgeInsets.only(left: 12,right: 12,top: 0,bottom: 0),
+                              child: Container(
+                                height: 50,
+                                padding: EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: Color.fromRGBO(255, 255, 255, 0.5),
+
+
+                                  borderRadius: BorderRadius.all(Radius.circular(6)),
+
+
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+
+                                  children: [
+                                    Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Row(
+                                          children: [
+
+                                            SizedBox(width: 4,),
+                                            Icon(Icons.settings_backup_restore,color: Utils.getThemeColorBlue(),size: 25,),
+                                            SizedBox(width: 8,),
+                                            Text('RESTORE_PREMIUM'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                          ],
+                                        )),
+
+                                  ],),),
+                            ),
+                          ),
+
+                        ],
+                      ),
+                    ),*//*
+
+
+
+
+                     *//* InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ManageFlockScreen()),
+
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(3)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 2,
+                            offset: Offset(0, 1), // changes position of shadow
+                          ),
+                        ],
+                        color: Colors.white,
+                        //  border: Border.all(color: Colors.blueAccent,width: 1.0)
+                      ),
+                      margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                      child: Container(
+                        height: 52,
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white, //(x,y)
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+
+                          children: [
+                            Align(
+                                alignment: Alignment.topLeft,
+                                child: Row(
+                                  children: [
+
+                                    Icon(Icons.group_work_outlined,color: Utils.getThemeColorBlue(),),
+                                    SizedBox(width: 4,),
+                                    Text('FLOCK_MANAGMENT'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
+                                  ],
+                                )),
+
+                          ],),),
+                    ),
+                  ),*//*
                   // SizedBox(height: 4,),
                   // InkWell(
                   //   onTap: () {
@@ -584,55 +1799,8 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                   //         ],),),
                   //   ),
                   // ),
-                  SizedBox(height: 0,),
-                  InkWell(
-                    onTap: ()
-                    {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>  FilterSetupScreen(inStart: false,)),
 
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(4)),
-
-                          color: Colors.white,
-                          border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
-                      ),
-                      margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
-                      child: Container(
-                        height: 52,
-                        padding: EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.white, //(x,y)
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Align(
-                                alignment: Alignment.topLeft,
-                                child: Row(
-                                  children: [
-                                    SizedBox(width: 2,),
-                                    Icon(Icons.filter_list,color: Utils.getThemeColorBlue(),size: 20,),
-                                    SizedBox(width: 8,),
-                                    Text('All Data Filters'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
-                                  ],
-                                )),
-
-                          ],),),
-                    ),
-                  ),
-                  /*Padding(
+                  *//*Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -659,385 +1827,244 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                         ),
                       ],
                     ),
-                  ),*/
+                  ),*//*
                 ],
-              ),),
+              ),),*/
 
 
-              Container(
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(3)),
-                    color: Colors.white,
-                  boxShadow: [
-                    ]
-                ),
-                child: Column(children: [
-                Align(
-                  alignment: Alignment.center,
-                  child:
-                  Text('BACK_UP_RESTORE_MESSAGE'.tr(),style: TextStyle(fontSize: 20,fontFamily: 'Roboto', fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
-                ),
-                SizedBox(height: 4,),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-
-
-                  InkWell(
-                    onTap: () {
-                      shareFiles();
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(3)),
-                        boxShadow: [
-
-                        ],
-                        color: Colors.white,
-                        border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
-                      ),
-                      margin: EdgeInsets.all(10),
-                      child: Container(
-                        padding: EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.white, //(x,y)
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-
-                          children: [
-                            Align(
-                                alignment: Alignment.topLeft,
-                                child: Column(
-                                  children: [
-
-                                    Icon(Icons.backup,color: Utils.getThemeColorBlue(),size: 25,),
-                                    Text("BACKUP".tr(),style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Utils.getThemeColorBlue()),),
-                                  ],
-                                )),
-
-                          ],),),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () async {
-                      await DatabaseHelper.importDataBaseFile(context);
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(3)),
-                          boxShadow: [
-
-                          ],
-                          color: Colors.white,
-                          border: Border.all(color: Utils.getThemeColorBlue(),width: 0.5)
-                      ),
-                      margin: EdgeInsets.all(10),
-                      child: Container(
-                        padding: EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.white, //(x,y)
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-
-                          children: [
-                            Align(
-                                alignment: Alignment.topLeft,
-                                child: Column(
-                                  children: [
-
-                                    Icon(Icons.restore,color: Utils.getThemeColorBlue(),size: 25,),
-                                    Text("RESTORE".tr(),style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Utils.getThemeColorBlue()),),
-                                  ],
-                                )),
-
-                          ],),),
-                    ),
-                  ),
-
-                ],),
-
-
-              ],),),
-
-              if(Utils.isShowAdd)
-              Container(width: Utils.WIDTH_SCREEN,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(6)),
-
-                    color: Utils.getThemeColorBlue(),
-                    border: Border.all(color: Colors.blueAccent,width: 1.0)
-                ),
-                margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
-                padding: EdgeInsets.only(left: 0,right: 0,top: 10,bottom: 10),
-
-                child: Column(
-                children: [
-                  Text('ADS_REMOVAL'.tr(),style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Colors.white),),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child:Text("ONLY_FOR".tr(),
-                        textAlign: TextAlign.center,
-                        style: new TextStyle(
-                            fontSize: 13.0,
-                            fontWeight: FontWeight.normal,
-                            color: Colors.white70,
-                            fontFamily: 'PTSANS'
-                        ),
-                      ),),
-                    if(_products!=null && _products.length>0)
-                      Align(
-                        alignment: Alignment.center,
-                        child:Text(" ${_products[0].price.toString()}",
-                          textAlign: TextAlign.center,
-                          style: new TextStyle(
-                              fontSize: 13.0,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.white70,
-                              fontFamily: 'PTSANS'
-                          ),
-                        ),),
-                  ],),
-                  SizedBox(height: 8,),
-                  InkWell(
-                    onTap: () {
-                      PurchaseParam purchaseParam = PurchaseParam(productDetails: _products[0]);
-                      _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
-
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(6)),
-
-                          color: Color.fromRGBO(255, 255, 255, 0.5),
-                          border: Border.all(color: Colors.transparent,width: 0.0)
-                      ),
-                      margin: EdgeInsets.only(left: 12,right: 12,top: 0,bottom: 0),
-                      child: Container(
-                        height: 50,
-                        padding: EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: Color.fromRGBO(255, 255, 255, 0.5),
-
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-
-
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-
-                          children: [
-                            Align(
-                                alignment: Alignment.topLeft,
-                                child: Row(
-                                  children: [
-
-                                    SizedBox(width: 4,),
-                                    Icon(Icons.remove_circle_outline,color: Utils.getThemeColorBlue(),size: 24,),
-                                    SizedBox(width: 6,),
-                                    Text('REMOVE_ADS'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
-                                  ],
-                                )),
-
-                          ],),),
-                    ),
-                  ),
-                  SizedBox(height: 10,),
-                  InkWell(
-                    onTap: () {
-                      _inAppPurchase.restorePurchases();
-
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(4)),
-
-                          color: Color.fromRGBO(255, 255, 255, 0.5),
-                          border: Border.all(color: Colors.transparent,width: 0.0)
-                      ),
-                      margin: EdgeInsets.only(left: 12,right: 12,top: 0,bottom: 0),
-                      child: Container(
-                        height: 50,
-                        padding: EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: Color.fromRGBO(255, 255, 255, 0.5),
-
-
-                          borderRadius: BorderRadius.all(Radius.circular(6)),
-
-
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-
-                          children: [
-                            Align(
-                                alignment: Alignment.topLeft,
-                                child: Row(
-                                  children: [
-
-                                    SizedBox(width: 4,),
-                                    Icon(Icons.settings_backup_restore,color: Utils.getThemeColorBlue(),size: 25,),
-                                    SizedBox(width: 8,),
-                                    Text('RESTORE_PREMIUM'.tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Utils.getThemeColorBlue()),),
-                                  ],
-                                )),
-
-                          ],),),
-                    ),
-                  ),
-
-                ],
-              ),
-              ),
-
-              Padding(padding: EdgeInsets.only(left: 16,right: 12,top: 0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child:Text("Contact Us".tr(),
-                    textAlign: TextAlign.left,
-                    style: new TextStyle(
-                      fontSize: 26.0,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87,
-                    ),
-                  ),),),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-
-                  InkWell(
-                    onTap: (){
-                      _launchUrl();
-                    },
-                    child:Container(width: Utils.WIDTH_SCREEN/2-20,height: 100,
-                        decoration: BoxDecoration(
-                          color: Color.fromRGBO(255, 255, 255, 1),
-                          boxShadow: [
-                            new BoxShadow(
-                              color: Color.fromRGBO(240, 240, 240, 1),
-                              blurRadius: 2.0,
-                            ),
-                          ],
-                          borderRadius: const BorderRadius.all(
-                              Radius.circular(8.0)),
-                          border: Border.all(
-                            color:  Color.fromRGBO(125, 125, 125, 0.5),
-                            width: 0.0,
-                          ),
-                        ),
-                        child:Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(MdiIcons.whatsapp,color: Colors.black54,size: 34,),
-                            Padding(padding: EdgeInsets.only(left: 8,right: 8,bottom: 0,top: 4),
-                              child: Align(
-                                alignment: Alignment.center,
-                                child:Text("Ask a question on Whatsapp".tr(),
-                                  textAlign: TextAlign.center,
-                                  style: new TextStyle(
-                                      fontSize: 13.0,
-                                      fontWeight: FontWeight.normal,
-                                      color: Colors.black54,
-                                      fontFamily: 'PTSans'
-                                  ),
-                                ),),),
-
-
-                          ],)
-
-                    ),),
-                  Container(width: 14,height: 120,),
-                  InkWell(
-                    onTap: (){
-                      _launchUrl2();
-                    },
-                    child:Container(width: Utils.WIDTH_SCREEN/2-20,height: 100,
-                        decoration: BoxDecoration(
-                          color: Color.fromRGBO(255, 255, 255, 1),
-                          boxShadow: [
-                            new BoxShadow(
-                              color: Color.fromRGBO(240, 240, 240, 1),
-                              blurRadius: 2.0,
-                            ),
-                          ],
-                          borderRadius: const BorderRadius.all(
-                              Radius.circular(8.0)),
-                          border: Border.all(
-                            color:  Color.fromRGBO(125, 125, 125, 0.5),
-                            width: 0.0,
-                          ),
-                        ),
-                        child:Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(MdiIcons.whatsapp,color: Colors.green,size: 40,),
-                            Padding(padding: EdgeInsets.only(left: 8,right: 8,bottom: 0,top: 4),
-                              child: Align(
-                                alignment: Alignment.center,
-                                child:Text("For daily updates, join".tr(),
-                                  textAlign: TextAlign.center,
-                                  style: new TextStyle(
-                                      fontSize: 10.0,
-                                      fontWeight: FontWeight.normal,
-                                      color: Colors.black54,
-                                      fontFamily: 'PTSans'
-                                  ),
-                                ),),),
-                            Padding(padding: EdgeInsets.only(left: 0,right: 0,bottom: 0),
-                              child: Align(
-                                alignment: Alignment.center,
-                                child:Text("Easy Farming Community".tr(),
-                                  textAlign: TextAlign.center,
-                                  style: new TextStyle(
-                                      fontSize: 12.0,
-                                      fontWeight: FontWeight.normal,
-                                      color: Colors.green,
-                                      fontFamily: 'PTSans'
-                                  ),
-                                ),),),
-
-
-                          ],)
-
-                    ),),
-
-                ],),
-              Padding(padding: EdgeInsets.only(left: 16,right: 12),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child:Text("NOTE_DETAIL".tr(),
-                    textAlign: TextAlign.left,
-                    style: new TextStyle(
-                      fontSize: 11.0,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.black54,
-                    ),
-                  ),),),
-
-            ]
       ),),),),),);
+  }
+
+  void _showPremiumDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Ensures the sheet adapts properly
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (context) {
+        return FractionallySizedBox(
+          heightFactor: 0.6, // Uses 50% of the screen height
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              /// **Gradient Header with Icon & Title**
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Utils.getThemeColorBlue(), Colors.blue.shade400],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                child: Column(
+                  children: [
+                    /// **Premium Icon**
+                    Image.asset("assets/premium_icon.png", width: 70, height: 70, color: Colors.white,),
+
+                    /// **Title**
+                    SizedBox(height: 8),
+                    Text(
+                      "✨"+ "Unlock Premium Features".tr()+ "✨",
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+
+              /// **Premium Features List**
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: Column(
+                    children: [
+                      _buildFeatureItem(Icons.block, "No Ads".tr(), "Enjoy an ad-free experience".tr()),
+                      _buildFeatureItem(Icons.star, "Premium Features".tr(), "Get exclusive access to new tools".tr()),
+                      Spacer(),
+
+                      /// **Buy Premium Button**
+                      ElevatedButton.icon(
+                        icon: Icon(Icons.shopping_cart, size: 24),
+                        label: Text('Upgrade to Premium'.tr(), style: TextStyle(fontSize: 18)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          minimumSize: Size(double.infinity, 50),
+                        ),
+                        onPressed: () {
+                          PurchaseParam purchaseParam = PurchaseParam(productDetails: _products[0]);
+                          _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
+                          Navigator.pop(context);
+                        },
+                      ),
+                      SizedBox(height: 10),
+
+                      /// **Restore Purchase Button**
+                      TextButton(
+                        onPressed: () {
+                          _inAppPurchase.restorePurchases();
+                          Navigator.pop(context);
+                        },
+                        child: Text('RESTORE_PREMIUM'.tr(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// **Helper Widget for Feature List Items**
+  Widget _buildFeatureItem(IconData icon, String title, String description) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: Colors.orange.withOpacity(0.1),
+            radius: 24,
+            child: Icon(icon, size: 24, color: Colors.orange),
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(description, style: TextStyle(fontSize: 14, color: Colors.black54)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildPremiumUpgradeTile(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _showPremiumDialog(context),
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Utils.getThemeColorBlue(), Colors.blue.shade500],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 3)),
+          ],
+        ),
+        child: Row(
+          children: [
+            /// **Premium Icon**
+            Image.asset("assets/premium_icon.png", width: 40, height: 40, color: Colors.orange),
+
+            /// **Text Section**
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    /// **Main Title**
+                    Text(
+                      'Upgrade to Premium'.tr(),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 4),
+
+                    /// **Subtitle for Price**
+                    Text(
+                      _products.isNotEmpty ? "Only".tr()+" ${_products[0].price}" : "Loading price...",
+                      style: TextStyle(fontSize: 14, color: Colors.white70),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            /// **Forward Arrow**
+            Container(
+              padding: EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.3),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.arrow_forward_ios, color: Colors.white, size: 18),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  /// **Section Title**
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      child: Text(
+        title,
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blueAccent),
+      ),
+    );
+  }
+
+  /// **Card-Based Settings Tile**
+  Widget _buildSettingsTile(BuildContext context, {required IconData icon, required String title, required VoidCallback onTap}) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3))],
+      ),
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+            child: Row(
+              children: [
+                /// **Leading Icon**
+                CircleAvatar(
+                  backgroundColor: Colors.blueAccent.withOpacity(0.15),
+                  radius: 20,
+                  child: Icon(icon, color: Colors.blueAccent, size: 20),
+                ),
+                SizedBox(width: 10),
+
+                /// **Title**
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87),
+                  ),
+                ),
+
+                /// **Forward Arrow**
+                Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void addNewCollection(){

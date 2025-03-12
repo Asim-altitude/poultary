@@ -70,6 +70,35 @@ class _CategoryScreen extends State<CategoryScreen> with SingleTickerProviderSta
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
     return SafeArea(child: Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(20.0), // Round bottom-left corner
+            bottomRight: Radius.circular(20.0), // Round bottom-right corner
+          ),
+          child: AppBar(
+            title: Text(
+              applied_filter_name.tr(),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Colors.white,
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor: Utils.getThemeColorBlue(), // Customize the color
+            elevation: 8, // Gives it a more elevated appearance
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                Navigator.pop(context); // Navigates back
+              },
+            ),
+          ),
+        ),
+      ),
+
       body:SafeArea(
         top: false,
           child:Container(
@@ -83,46 +112,6 @@ class _CategoryScreen extends State<CategoryScreen> with SingleTickerProviderSta
             children:  [
               Utils.getDistanceBar(),
 
-              ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
-                child: Container(
-                  decoration: BoxDecoration(
-                     boxShadow: [
-                      BoxShadow(
-                        color: Utils.getThemeColorBlue(), //(x,y)
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        alignment: Alignment.center,
-                        width: 60,
-                        height: 50,
-                        child: InkWell(
-                          child: Icon(Icons.arrow_back,
-                              color: Colors.white, size: 30),
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ),
-                      Container(
-                          margin: EdgeInsets.only(left: 10),
-                          child: Text(
-                            applied_filter_name.tr(),
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          )),
-
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 12,),
 
               Container(
                 height: heightScreen - 220,

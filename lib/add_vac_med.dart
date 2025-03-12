@@ -586,7 +586,6 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                               SizedBox(height: 15),
 
                               Row(
-                                
                                 children: [
                                   Expanded(
                                     child: Container(
@@ -594,7 +593,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                         children: [
                                           _buildInputLabel("Quantity".tr(), Icons.numbers),
                                           SizedBox(height: 8),
-                                          _buildNumberField(qtycountController, "Quantity".tr()),
+                                          _buildFLoatField(qtycountController, "Quantity".tr()),
                                         ],
                                       ),
                                     ),
@@ -883,12 +882,23 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
         controller: controller,
         keyboardType: TextInputType.number,
         inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r"[0-9]")),
+          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows digits and one decimal point
           TextInputFormatter.withFunction((oldValue, newValue) {
             final text = newValue.text;
-            return text.isEmpty ? newValue : double.tryParse(text) == null ? oldValue : newValue;
+
+            // Allow empty input
+            if (text.isEmpty) return newValue;
+
+            // Prevent multiple decimal points
+            if (text.contains('.') && text.split('.').length > 2) {
+              return oldValue;
+            }
+
+            // Ensure valid float
+            return double.tryParse(text) == null ? oldValue : newValue;
           }),
         ],
+
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText: hint,
@@ -898,6 +908,42 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
     );
   }
 
+  Widget _buildFLoatField(TextEditingController controller, String hint) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade300, width: 1.2),
+      ),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: TextInputType.numberWithOptions(decimal: true), // Enables decimal input
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}$')), // Allows digits and up to 2 decimal places
+          TextInputFormatter.withFunction((oldValue, newValue) {
+            final text = newValue.text;
+
+            // Allow empty input
+            if (text.isEmpty) return newValue;
+
+            // Prevent multiple decimal points
+            if (text == ".") return oldValue; // Disallow single dot input at start
+            if (text.contains('..')) return oldValue; // Prevent multiple decimal points
+
+            // Ensure valid float
+            return double.tryParse(text) == null ? oldValue : newValue;
+          }),
+        ],
+
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: hint,
+          hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 16),
+        ),
+      ),
+    );
+  }
 
   // Custom Number Field
   Widget _buildFloatField(TextEditingController controller, String hint) {

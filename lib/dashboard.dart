@@ -1762,7 +1762,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const SettingsScreen()),
+                            builder: (context) =>  SettingsScreen()),
                       ); // Example route
                     },
                     child:  Text('Activate Now'.tr(), style: TextStyle(color: Colors.white),),

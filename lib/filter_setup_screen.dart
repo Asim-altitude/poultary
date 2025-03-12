@@ -6,23 +6,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:language_picker/language_picker.dart';
-import 'package:language_picker/languages.dart';
-import 'package:poultary/add_feeding.dart';
-import 'package:poultary/category_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
-import 'package:share_plus/share_plus.dart';
-import 'all_events.dart';
-import 'database/databse_helper.dart';
-import 'farm_setup_screen.dart';
-import 'manage_flock_screen.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:in_app_purchase_android/in_app_purchase_android.dart';
-import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
-import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 import 'consume_store.dart';
 class FilterSetupScreen extends StatefulWidget {
   bool inStart;
@@ -83,6 +69,34 @@ class _FilterSetupScreen extends State<FilterSetupScreen> with SingleTickerProvi
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
     return SafeArea(child: Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(20.0), // Round bottom-left corner
+            bottomRight: Radius.circular(20.0), // Round bottom-right corner
+          ),
+          child: AppBar(
+            title: Text(
+              "All Data Filters".tr(),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Colors.white,
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor: Utils.getThemeColorBlue(), // Customize the color
+            elevation: 8, // Gives it a more elevated appearance
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                Navigator.pop(context); // Navigates back
+              },
+            ),
+          ),
+        ),
+      ),
       body:SafeArea(
         top: false,
           child:Container(
@@ -95,44 +109,6 @@ class _FilterSetupScreen extends State<FilterSetupScreen> with SingleTickerProvi
             crossAxisAlignment: CrossAxisAlignment.center,
             children:  [
               Utils.getDistanceBar(),
-              ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
-                child: Container(
-                  decoration: BoxDecoration(
-                     boxShadow: [
-                      BoxShadow(
-                        color: Utils.getThemeColorBlue(), //(x,y)
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      InkWell(
-                        onTap: (){
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          alignment: Alignment.center,
-                          width: 52,
-                          height: 52,
-                          child: Icon(Icons.arrow_back,
-                              color: Colors.white),
-                        ),
-                      ),
-                      Container(
-
-                          child: Text(
-                            'All Data Filters'.tr(),
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          )),
-                    ],
-                  ),
-                ),
-              ),
 
               Container(
                   padding: EdgeInsets.all(10),

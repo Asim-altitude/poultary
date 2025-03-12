@@ -284,9 +284,35 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Auto Feed Sync'.tr()),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(20.0), // Round bottom-left corner
+            bottomRight: Radius.circular(20.0), // Round bottom-right corner
+          ),
+          child: AppBar(
+            title: Text(
+              "Auto Feed Sync".tr(),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Colors.white,
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor: Utils.getThemeColorBlue(), // Customize the color
+            elevation: 8, // Gives it a more elevated appearance
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                Navigator.pop(context); // Navigates back
+              },
+            ),
+          ),
+        ),
       ),
+
       body: Column(
         children: [
           Expanded(

@@ -42,6 +42,48 @@ class _HomeScreen extends State<HomeScreen> {
    // addEggColorColumn();
   }
 
+
+
+  void addEggColorColumn() async {
+    DatabaseHelper.instance.database;
+
+    print("DONE");
+  }
+
+
+
+  bool no_flock = true;
+  List<Flock> flocks = [];
+  void getList() async {
+
+    await DatabaseHelper.instance.database;
+
+    await DatabaseHelper.addEggColorColumn();
+    await DatabaseHelper.addFlockInfoColumn();
+    await DatabaseHelper.addQuantityColumnMedicine();
+    await DatabaseHelper.addUnitColumnMedicine();
+    await DatabaseHelper.createFeedStockHistoryTable();
+    await DatabaseHelper.createMedicineStockHistoryTable();
+    await DatabaseHelper.createVaccineStockHistoryTable();
+    await addNewColumn();
+    await addMissingCategories();
+
+    flocks = await DatabaseHelper.getFlocks();
+
+    if(flocks.length == 0)
+    {
+      no_flock = true;
+      print('No Flocks');
+    }
+
+    flock_total = flocks.length;
+
+    setState(() {
+
+    });
+
+  }
+
   Future<void> addMissingCategories() async{
 
     //Medicine Category
@@ -100,47 +142,6 @@ class _HomeScreen extends State<HomeScreen> {
   }
 
 
-  void addEggColorColumn() async {
-    DatabaseHelper.instance.database;
-
-    print("DONE");
-  }
-
-
-
-  bool no_flock = true;
-  List<Flock> flocks = [];
-  void getList() async {
-
-    await DatabaseHelper.instance.database;
-
-    await DatabaseHelper.addEggColorColumn();
-    await DatabaseHelper.addFlockInfoColumn();
-    await DatabaseHelper.addQuantityColumnMedicine();
-    await DatabaseHelper.addUnitColumnMedicine();
-    await DatabaseHelper.createFeedStockHistoryTable();
-    await DatabaseHelper.createMedicineStockHistoryTable();
-    await DatabaseHelper.createVaccineStockHistoryTable();
-    await addNewColumn();
-    await addMissingCategories();
-
-    flocks = await DatabaseHelper.getFlocks();
-
-    if(flocks.length == 0)
-    {
-      no_flock = true;
-      print('No Flocks');
-    }
-
-    flock_total = flocks.length;
-
-    setState(() {
-
-    });
-
-  }
-
-
   Future<void> addNewColumn() async {
     try{
       int c = await DatabaseHelper.addColumnInFlockDetail();
@@ -192,9 +193,6 @@ class _HomeScreen extends State<HomeScreen> {
       child: ManageInventoryScreen(),
     ),
     Center(
-      child: AllEventsScreen(),
-    ),
-    Center(
       child: SettingsScreen(),
     ),
     // Center(
@@ -244,8 +242,7 @@ class _HomeScreen extends State<HomeScreen> {
                  BottomNavigationBarItem(icon: Icon(Icons.home), label: "DASHBOARD".tr()),
                  BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: "REPORTS".tr()),
                  BottomNavigationBarItem(icon: Icon(Icons.inventory), label: "Stock".tr()),
-                 BottomNavigationBarItem(icon: Icon(Icons.notifications_active), label: "Reminders".tr()),
-                 BottomNavigationBarItem(icon: Icon(Icons.settings), label: "SETTINGS".tr()),
+                  BottomNavigationBarItem(icon: Icon(Icons.settings), label: "SETTINGS".tr()),
                ],
              ),
            ),
