@@ -71,6 +71,9 @@ dependencies:
   csv: ^5.1.1
   flutter_pdfview: ^1.0.3
   step_progress_indicator: ^1.0.2
+  toggle_switch: ^2.3.0
+  hive_flutter: ^1.1.0
+  hive_generator: ^1.1.3
 
 
 
