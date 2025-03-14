@@ -22,7 +22,7 @@ class SessionManager {
   static final String reward_time = "reward_time";
   static final String in_app = "in_app";
   static final String selected_language = "selected_language";
-
+  static final String automaticOnlineBackup = "automatic_backup_drive";
   static final String dash_filter = "dash_filter";
   static final String report_filter = "report_filter";
   static final String other_filter = "other_filter";
@@ -44,6 +44,18 @@ class SessionManager {
     bool app_launch;
     app_launch = pref.getBool(SessionManager.whats_new) ?? true;
     return app_launch;
+  }
+
+  static Future<bool> isAutoOnlineBackup() async {
+    final SharedPreferences pref = await SharedPreferences.getInstance();
+    bool backup;
+    backup = pref.getBool(SessionManager.automaticOnlineBackup) ?? false;
+    return backup;
+  }
+
+  static setOnlineBackup(bool value) async {
+    final SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setBool(SessionManager.automaticOnlineBackup, value);
   }
 
   static setWhatsNewDialog(bool value) async {

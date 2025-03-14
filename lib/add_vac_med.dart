@@ -578,7 +578,6 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                               _buildDropdownField(getDiseaseTypeList()),
 
                               SizedBox(height: 15),
-
                               // Choose Medicine
                               _buildInputLabel(Utils.vaccine_medicine.toLowerCase().contains("medi")? "Medicine name".tr() : "Vaccine name".tr(), Icons.medical_information),
                               SizedBox(height: 5),
@@ -599,7 +598,6 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                     ),
                                   ),
                                   SizedBox(width: 5),
-                                  
                                   Expanded(
                                     child: Container(
                                       child: Column(
@@ -630,8 +628,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                             MaterialPageRoute(
                                               builder: (context) =>
                                                   MedicineStockScreen(id: medicineCategoryID!),
-                                            ),
-                                          );
+                                            ),);
                                           reloadStocks();
 
                                         }else{

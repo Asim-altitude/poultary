@@ -30,7 +30,6 @@ class StockDetailScreen extends StatelessWidget {
             // **Stock History Title**
             Container(
                 margin: EdgeInsets.only(left: 10),
-
                 child: Text("Stock History".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
 
             SizedBox(height: 8),

@@ -109,7 +109,6 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
       acqusitionList = [_acqusitionselectedValue];
 
 
-
     }else{
       _reductionReasonValue = _reductionReasons[1];
       _acqusitionselectedValue = acqusitionList[1];
@@ -372,7 +371,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
 
                             int active_birds = getFlockActiveBirds();
                             active_birds = active_birds + widget.flock_detail!.item_count;
-                            if (int.parse(totalBirdsController.text) <
+                            if (int.parse(totalBirdsController.text) <=
                                 active_birds) {
 
                               active_birds = active_birds -
@@ -417,7 +416,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
 
                             int active_birds = getFlockActiveBirds();
 
-                            if (int.parse(totalBirdsController.text) <
+                            if (int.parse(totalBirdsController.text) <=
                                 active_birds) {
                               active_birds = active_birds -
                                   int.parse(
@@ -600,7 +599,6 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                   SizedBox(height: 20,),
                   Container(
                     height: !is_transaction ? heightScreen-250 : heightScreen - 134,
-
                     child: Column(
                         children: [
 

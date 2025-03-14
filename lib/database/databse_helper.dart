@@ -85,7 +85,8 @@ class DatabaseHelper  {
 // open the database
     return await openDatabase(path, readOnly: false);
   }
-  static getFilePathDB() async {
+
+  static Future<File> getFilePathDB() async {
     // File result = await _db.dBToCopy();
     // print("lllllllllllllllllll ${result.absolute.path}");
     //
@@ -2024,14 +2025,18 @@ class DatabaseHelper  {
   }
 
   static Future<List<FinancialItem>?> getTopIncomeItems(int f_id, String str, String end) async {
-    final List<Map<String, Object?>>? results = await _database?.rawQuery('''
+    String query = '''
     SELECT sale_item, SUM(amount) as total_amount
     FROM transactions
-    WHERE type = 'Income' AND date >= '$str' AND date <= '$end' AND f_id = $f_id
-    GROUP BY sale_item
-    ORDER BY amount DESC
-    LIMIT 5
-  ''');
+    WHERE type = 'Income' AND date >= '$str' AND date <= '$end' ''';
+
+    if (f_id != -1) {
+      query += " AND f_id = $f_id";
+    }
+
+    query += " GROUP BY sale_item ORDER BY total_amount DESC LIMIT 5";
+
+    final List<Map<String, Object?>>? results = await _database?.rawQuery(query);
 
     return results?.map((map) => FinancialItem(
       name: map['sale_item'].toString(),
@@ -2041,14 +2046,18 @@ class DatabaseHelper  {
   }
 
   static Future<List<FinancialItem>?> getTopExpenseItems(int f_id, String str, String end) async {
-    final List<Map<String, Object?>>? results = await _database?.rawQuery('''
+    String query = '''
     SELECT expense_item, SUM(amount) as total_amount
     FROM transactions
-    WHERE type = 'Expense' AND date >= '$str' AND date <= '$end'AND f_id = $f_id
-    GROUP BY expense_item
-    ORDER BY amount DESC
-    LIMIT 5
-  ''');
+    WHERE type = 'Expense' AND date >= '$str' AND date <= '$end' ''';
+
+    if (f_id != -1) {
+      query += " AND f_id = $f_id";
+    }
+
+    query += " GROUP BY expense_item ORDER BY total_amount DESC LIMIT 5";
+
+    final List<Map<String, Object?>>? results = await _database?.rawQuery(query);
 
     return results?.map((map) => FinancialItem(
       name: map['expense_item'].toString(),
@@ -2299,8 +2308,13 @@ class DatabaseHelper  {
   }
 
   //FFUNC
-  static Future<List<Finance_Chart_Item>>  getFinanceChartData(String strDate,String endDate, String itype) async {
-    var result = await _database?.rawQuery("SELECT type,date,sum(CAST(REPLACE(amount,',','.') as REAL)) FROM Transactions WHERE date >= '$strDate' and date <= '$endDate' and type = '$itype'  GROUP BY date");
+  static Future<List<Finance_Chart_Item>>  getFinanceChartData(int f_id, String strDate, String endDate, String itype) async {
+    var result = null;
+    if(f_id ==-1)
+      result = await _database?.rawQuery("SELECT type,date,sum(CAST(REPLACE(amount,',','.') as REAL)) FROM Transactions WHERE date >= '$strDate' and date <= '$endDate' and type = '$itype'  GROUP BY date");
+   else
+      result = await _database?.rawQuery("SELECT type,date,sum(CAST(REPLACE(amount,',','.') as REAL)) FROM Transactions WHERE f_id = $f_id AND date >= '$strDate' and date <= '$endDate' and type = '$itype'  GROUP BY date");
+
     List<Finance_Chart_Item> _feedList = [];
     Finance_Chart_Item feed;
     if(result!=null){

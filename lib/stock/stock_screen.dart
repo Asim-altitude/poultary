@@ -50,9 +50,6 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
   }
 
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
-
-
-
   Widget _buildStockItem(FeedStockSummary stock, int index, Animation<double> animation) {
     double progress = stock.totalStock > 0 ? stock.usedStock / stock.totalStock : 0.0;
     double usedWidth = progress.clamp(0.0, 1.0);
@@ -318,7 +315,6 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
           ),
         ),
       ),
-
       body: _stockSummary!.isEmpty
           ? Center(
         child: Column(
@@ -339,7 +335,6 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
         key: _listKey,
         initialItemCount: _stockSummary!.length,
         itemBuilder: (context, index, animation) {
-
             return InkWell(
                 onTap: () async {
                   List<FeedStockHistory> history = await DatabaseHelper

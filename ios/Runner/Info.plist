@@ -226,8 +226,26 @@
 			<string>3qcr597p9d.skadnetwork</string>
 		</dict>
 	</array>
+
+	<key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>your-client-id.apps.googleusercontent.com</string>
+        </array>
+      </dict>
+    </array>
+
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-2367135251513556~6965974738</string>
+
+	<key>NSAppTransportSecurity</key>
+    <dict>
+      <key>NSAllowsArbitraryLoads</key>
+      <true/>
+    </dict>
+
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Access Photos to add bird images</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>

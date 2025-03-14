@@ -132,8 +132,8 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
     flockFinanceList = (await DatabaseHelper.getFlockWiseIncomeExpense(st,end))!;
     Utils.flockfinanceList = flockFinanceList;
     list = await DatabaseHelper.getReportFilteredTransactions(f_id,"All",st,end);
-    incomeChartData = await DatabaseHelper.getFinanceChartData(st, end,"Income");
-    expenseChartData = await DatabaseHelper.getFinanceChartData(st, end,"Expense");
+    incomeChartData = await DatabaseHelper.getFinanceChartData(f_id,st, end,"Income");
+    expenseChartData = await DatabaseHelper.getFinanceChartData(f_id,st, end,"Expense");
 
     topIncomeItems = (await DatabaseHelper.getTopIncomeItems(f_id,st,end))!;
     topExpenseItems = (await DatabaseHelper.getTopExpenseItems(f_id,st,end))!;
@@ -221,7 +221,6 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
     return t;
   }
-
 
   @override
   Widget build(BuildContext context) {
