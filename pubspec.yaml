@@ -71,6 +71,11 @@ dependencies:
   csv: ^5.1.1
   flutter_pdfview: ^1.0.3
   step_progress_indicator: ^1.0.2
+  google_sign_in: ^6.1.6
+  googleapis: ^11.2.0
+  googleapis_auth: ^1.4.1
+  hive_flutter: ^1.1.0
+  toggle_switch: ^2.3.0
 
 
 
