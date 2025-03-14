@@ -26,6 +26,7 @@ import '../eggs_report_screen.dart';
 import '../financial_report_screen.dart';
 import '../health_report_screen.dart';
 import '../model/bird_item.dart';
+import '../model/bird_model.dart';
 import '../model/bird_product.dart';
 import '../model/custom_category.dart';
 import '../model/egg_item.dart';
@@ -129,7 +130,7 @@ class Utils {
   static BannerAd? _bannerAd ;
   static bool _isBannerAdReady = false;
   static InterstitialAd? _interstitialAd;
-  static List<BirdProduct> products = [];
+  static List<BirdModel> products = [];
   static bool isShowProducts = false;
 
   // static MediationManager? manager;
@@ -545,8 +546,6 @@ class Utils {
       Utils.isShowAdd = true;
       inititalize();
     }
-    Utils.isShowAdd = false;
-
   }
   static Future<void> inititalize() async {
     // CAS.setDebugMode(true);

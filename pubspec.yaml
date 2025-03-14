@@ -71,9 +71,7 @@ dependencies:
   csv: ^5.1.1
   flutter_pdfview: ^1.0.3
   step_progress_indicator: ^1.0.2
-  google_sign_in: ^6.1.5
-  googleapis: ^12.0.0
-  googleapis_auth: ^1.4.1
+
 
 
   # The following adds the Cupertino Icons font to your application.

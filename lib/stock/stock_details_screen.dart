@@ -5,6 +5,7 @@ import 'package:poultary/utils/utils.dart';
 
 import '../model/feed_stock_history.dart';
 import '../model/feed_stock_summary.dart';
+import '../sticky.dart';
 
 
 class StockDetailScreen extends StatelessWidget {
@@ -23,6 +24,7 @@ class StockDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // **Stock Summary Section**
+
             _buildStockItem(stock, 0, kAlwaysCompleteAnimation),
 
             SizedBox(height: 16),

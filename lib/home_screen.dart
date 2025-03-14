@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:poultary/dashboard.dart';
+import 'package:poultary/product_screen.dart';
 import 'package:poultary/settings_screen.dart';
 import 'package:poultary/utils/utils.dart';
 import 'all_events.dart';
@@ -195,6 +196,9 @@ class _HomeScreen extends State<HomeScreen> {
     Center(
       child: SettingsScreen(),
     ),
+    Center(
+      child: ProductScreen(),
+    ),
     // Center(
     //   child: ProductScreen(),
     // ),
@@ -243,6 +247,8 @@ class _HomeScreen extends State<HomeScreen> {
                  BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: "REPORTS".tr()),
                  BottomNavigationBarItem(icon: Icon(Icons.inventory), label: "Stock".tr()),
                   BottomNavigationBarItem(icon: Icon(Icons.settings), label: "SETTINGS".tr()),
+                 BottomNavigationBarItem(icon: Icon(Icons.egg_outlined), label: "Poultry".tr()),
+
                ],
              ),
            ),
