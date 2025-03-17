@@ -1,28 +1,25 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:avatar_view/avatar_view.dart';
+import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:poultary/app_intro/image_slider.dart';
-import 'package:poultary/model/feed_item.dart';
-import 'package:poultary/model/flock_detail.dart';
 import 'package:poultary/model/flock_image.dart';
-import 'package:poultary/model/med_vac_item.dart';
-import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/transactions_screen.dart';
 import 'package:poultary/utils/utils.dart';
 import 'add_reduce_flock.dart';
 import 'custom/all_custom_data_screen.dart';
-import 'custom/all_customcategories_screen.dart';
 import 'custom/custom_flock_category.dart';
 import 'daily_feed.dart';
 import 'database/databse_helper.dart';
 import 'egg_collection.dart';
 import 'medication_vaccination.dart';
 import 'model/custom_category.dart';
+import 'model/flock.dart';
 import 'model/used_item.dart';
 
 class SingleFlockScreen extends StatefulWidget {
@@ -41,7 +38,6 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
   @override
   void dispose() {
     super.dispose();
-
 
   }
 
@@ -297,7 +293,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                       ],
                     ),
 
-                    /// **Bird Usage List**
+                  /*  /// **Bird Usage List**
                     if (birdUsageList.isNotEmpty)
                       Container(
                         height: 45,
@@ -332,7 +328,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                             );
                           },
                         ),
-                      ),
+                      ),*/
 
                     /// **Notes Section**
                     if (Utils.selected_flock!.notes.isNotEmpty)
@@ -354,31 +350,68 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                       Container(
                         height: 80,
                         width: double.infinity,
-                        margin: EdgeInsets.only(top: 10),
+                        margin: const EdgeInsets.only(top: 10),
                         child: ListView.builder(
                           itemCount: byteimages.length,
                           scrollDirection: Axis.horizontal,
                           itemBuilder: (BuildContext context, int index) {
-                            return InkWell(
-                              onTap: () {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => CarouselDemo()));
-                              },
-                              child: Container(
-                                margin: EdgeInsets.all(8),
-                                width: 80,
-                                height: 80,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  image: DecorationImage(
-                                    image: MemoryImage(byteimages[index]),
-                                    fit: BoxFit.cover,
+                            return Stack(
+                              children: [
+                                // Image Container
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => CarouselDemo()));
+                                  },
+                                  child: Container(
+                                    margin: const EdgeInsets.all(8),
+                                    width: 80,
+                                    height: 80,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      image: DecorationImage(
+                                        image: MemoryImage(byteimages[index]),
+                                        fit: BoxFit.cover,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black26,
+                                          blurRadius: 5,
+                                          spreadRadius: 1,
+                                        )
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
+
+                                // Delete Button (Positioned on top-right)
+                                Positioned(
+                                  top: 2,
+                                  right: 2,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        byteimages.removeAt(index);
+                                      });
+                                      DatabaseHelper.deleteItem("Flock_Image", images.elementAt(index).id!);
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black54,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.close,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             );
                           },
-                        ),
-                      ),
+                        ),),
                   ],
                 ),
               ),
@@ -1163,8 +1196,16 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
         }
         else if(value == 2)
         {
-          showAlertDialog(context, Utils.selected_flock!.f_name);
+         // showAlertDialog(context, Utils.selected_flock!.f_name);
+          showEditFlockDialog(context, flock: Utils.selected_flock!, onSave: (flock){
+            Utils.selected_flock = flock;
+            DatabaseHelper.updateFlockInfo(flock);
+            insertFlockImages(Utils.selected_flock!.f_id);
+            Utils.showToast("SUCCESSFUL".tr());
+            setState(() {
 
+            });
+          });
         }else
         {
           print(value);
@@ -1523,6 +1564,311 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     );
     getAllCategories();
   }
+
+
+  void showEditFlockDialog(BuildContext context, {
+    required Flock flock,
+    required Function(Flock) onSave,
+  }) {
+    TextEditingController nameController = TextEditingController(text: flock.f_name);
+    TextEditingController descController = TextEditingController(text: flock.notes);
+
+    TextEditingController dateController = TextEditingController(
+        text: flock.acqusition_date.isNotEmpty ? flock.acqusition_date : ""
+    );
+
+    List<String> _purposeList = ['EGG', 'MEAT', 'EGG_MEAT', 'OTHER'];
+    List<String> _acquisitionList = ['PURCHASED', 'HATCHED', 'GIFT', 'OTHER'];
+
+    String selectedAcquisition = flock.acqusition_type;
+    String selectedPurpose = flock.purpose;
+
+
+    final ImagePicker _picker = ImagePicker();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            Future<void> _pickImages() async {
+              final List<XFile>? pickedFiles = await _picker.pickMultiImage();
+              if (pickedFiles != null && pickedFiles.isNotEmpty) {
+                setState(() {
+                  imageFileList.addAll(pickedFiles.map((file) => file.path));
+                });
+
+                saveImagesDB();
+              }
+            }
+
+            void _removeImage(int index) {
+              setState(() {
+                imageFileList.removeAt(index);
+                base64Images.removeAt(index);
+              });
+
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 16, right: 16, bottom: MediaQuery.of(context).viewInsets.bottom + 16, top: 16,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Button to Pick Images
+
+
+                    // Flock Name
+                    TextFormField(
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        labelText: "Flock Name".tr(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+
+                    // Acquisition Date Picker
+                    TextFormField(
+                      controller: dateController,
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        labelText: "DATE".tr(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                      ),
+                      onTap: () async {
+                        DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: flock.acqusition_date.isNotEmpty
+                              ? DateFormat('yyyy-MM-dd').parse(flock.acqusition_date)
+                              : DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime.now(),
+                        );
+                        if (pickedDate != null) {
+                          String formattedDate = DateFormat('yyyy-MM-dd').format(pickedDate);
+                          setState(() {
+                            dateController.text = formattedDate;
+                            flock = flock.copyWith(acquisitionDate: formattedDate);
+                          });
+                        }
+                      },
+                    ),
+                    SizedBox(height: 12),
+
+                    // Acquisition Type Dropdown
+                    DropdownButtonFormField<String>(
+                      value: selectedAcquisition,
+                      decoration: InputDecoration(
+                        labelText: "ACQUSITION".tr(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                      ),
+                      items: _acquisitionList.map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value.tr(), style: TextStyle(fontSize: 16)),
+                        );
+                      }).toList(),
+                      onChanged: (newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            flock = flock.copyWith(acquisitionType: newValue);
+                          });
+                        }
+                      },
+                    ),
+                    SizedBox(height: 12),
+
+                    // Purpose Dropdown
+                    DropdownButtonFormField<String>(
+                      value: selectedPurpose,
+                      decoration: InputDecoration(
+                        labelText: "PURPOSE1".tr(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                      ),
+                      items: _purposeList.map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value.tr(), style: TextStyle(fontSize: 16)),
+                        );
+                      }).toList(),
+                      onChanged: (newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            flock = flock.copyWith(purpose: newValue);
+                          });
+                        }
+                      },
+                    ),
+                    SizedBox(height: 10),
+                    TextFormField(
+                      controller: descController,
+                      maxLines: 2,
+                      decoration: InputDecoration(
+                        labelText: "DESCRIPTION_1".tr(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    SizedBox(
+                      width: 200,
+                      child: ElevatedButton(
+                        onPressed: _pickImages,
+                        child: Text("+"+"IMAGES".tr()),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+
+                    // Display Selected Images in Grid
+                    if (imageFileList.isNotEmpty)
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4, // Two images per row
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                          childAspectRatio: 1,
+                        ),
+                        itemCount: imageFileList.length,
+                        itemBuilder: (context, index) {
+                          return Stack(
+                            alignment: Alignment.topRight,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  File(imageFileList[index]),
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: GestureDetector(
+                                  onTap: () => _removeImage(index),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.red.withOpacity(0.8),
+                                    ),
+                                    padding: EdgeInsets.all(4),
+                                    child: Icon(Icons.close, color: Colors.white, size: 18),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+
+                    SizedBox(height: 12),
+                    // Save Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            flock = flock.copyWith(
+                              fName: nameController.text,
+                              notes: descController.text,
+                            );
+                          });
+                          onSave(flock);
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          "Update".tr(),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Utils.getThemeColorBlue(),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  List<String> imageFileList = [];
+  void saveImagesDB() async {
+
+    base64Images.clear();
+
+    File file;
+    for (int i=0;i<imageFileList.length;i++) {
+
+      file = await Utils.convertToJPGFileIfRequiredWithCompression(File(imageFileList.elementAt(i)));
+      final bytes = File(file.path).readAsBytesSync();
+      String base64Image =  base64Encode(bytes);
+      base64Images.add(base64Image);
+
+      print("img_pan : $base64Image");
+
+    }
+  }
+  List<String> base64Images = [];
+  void insertFlockImages(int? id) {
+
+    if (base64Images.length > 0){
+
+      for (int i=0;i<base64Images.length;i++){
+        Flock_Image image = Flock_Image(f_id: id,image: base64Images.elementAt(i));
+        DatabaseHelper.insertFlockImages(image);
+      }
+
+      print("Images Inserted");
+      Utils.showToast("FLOCK_CREATED".tr());
+      Navigator.pop(context);
+    }
+
+  }
+
 
 }
 

@@ -2806,6 +2806,16 @@ class DatabaseHelper  {
   }
 
 
+  static Future<int?> updateFlockInfo(Flock flock) async {
+    return await _database?.update(
+      'Flock',
+      flock.toJson(),
+      where: 'f_id = ?',
+      whereArgs: [flock.f_id],
+    );
+  }
+
+
 
   static Future<List<FeedStockHistory>> fetchStockHistory(String feed_name) async {
     final db = await DatabaseHelper.instance.database;
@@ -2842,6 +2852,7 @@ class DatabaseHelper  {
     var result = await _database?.rawQuery("DELETE FROM Category_Detail WHERE id = '${subItem.id}'");
     return 1;
   }
+
 
   static Future<int>  deleteItem(String table, int id) async {
     var result = await _database?.rawQuery("DELETE FROM $table WHERE id = $id");

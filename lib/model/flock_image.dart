@@ -5,6 +5,7 @@ import 'dart:core';
 
 class Flock_Image{
 
+  int? id;
   int? f_id = -1;
   String image = "";
 
@@ -14,6 +15,7 @@ class Flock_Image{
       });
 
   Flock_Image.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
     f_id = json['f_id'];
     image = json['image'].toString();
 

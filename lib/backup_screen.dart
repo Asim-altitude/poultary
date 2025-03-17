@@ -103,7 +103,24 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
               onTap: () async {
                 // Perform Restore Action
 
-                showRestoreOptionsDialog(context, () async {
+                await DatabaseHelper.importDataBaseFile(context);
+                try
+                {
+                  await DatabaseHelper.addEggColorColumn();
+                  await DatabaseHelper.addFlockInfoColumn();
+                  await DatabaseHelper.addQuantityColumnMedicine();
+                  await DatabaseHelper.addUnitColumnMedicine();
+                  await DatabaseHelper.createFeedStockHistoryTable();
+                  await DatabaseHelper.createMedicineStockHistoryTable();
+                  await DatabaseHelper.createVaccineStockHistoryTable();
+                  await addNewColumn();
+                  await addMissingCategories();
+                }
+                catch(ex){
+                  print(ex);
+                }
+
+                /*showRestoreOptionsDialog(context, () async {
                   await DatabaseHelper.importDataBaseFile(context);
                   try {
                     await DatabaseHelper.addEggColorColumn();
@@ -122,7 +139,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                 }, () {
                   restoreDatabaseFromDrive();
                 });
-
+*/
 
               },
             ),

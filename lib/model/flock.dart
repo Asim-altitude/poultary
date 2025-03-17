@@ -54,6 +54,35 @@ class Flock{
 
     return data;
   }
+
+  // CopyWith Method (For Easy Updates)
+  Flock copyWith({
+    int? fId,
+    String? fName,
+    int? birdCount,
+    int? active,
+    int? activeBirdCount,
+    int? flockNew,
+    String? purpose,
+    String? icon,
+    String? acquisitionType,
+    String? acquisitionDate,
+    String? notes,
+  }) {
+    return Flock(
+      f_id: fId ?? this.f_id,
+      f_name: fName ?? this.f_name,
+      bird_count: birdCount ?? this.bird_count,
+      active: active ?? this.active,
+      active_bird_count: active_bird_count ?? this.active_bird_count,
+      flock_new: flockNew ?? this.flock_new,
+      purpose: purpose ?? this.purpose,
+      icon: icon ?? this.icon,
+      acqusition_type: acquisitionType ?? this.acqusition_type,
+      acqusition_date: acquisitionDate ?? this.acqusition_date,
+      notes: notes ?? this.notes,
+    );
+  }
 }
 
 
