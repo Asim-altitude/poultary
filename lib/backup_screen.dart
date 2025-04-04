@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
@@ -15,6 +16,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 
 class BackupRestoreScreen extends StatefulWidget {
@@ -23,6 +25,8 @@ class BackupRestoreScreen extends StatefulWidget {
 }
 
 class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
+  RewardedAd? _rewardedAd;
+  bool _isAdDisplayed = false;
 
 
   @override
@@ -30,6 +34,61 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
     // TODO: implement initState
     super.initState();
     checkAutoBackupEnabled();
+    Utils.setupAds();
+    if(Utils.isShowAdd){
+      _loadRewardedAd();
+    }
+
+  }
+  @override
+  void dispose() {
+    _rewardedAd?.dispose();
+    super.dispose();
+  }
+  void _loadRewardedAd() {
+    RewardedAd.load(
+      adUnitId: Utils.rewardedAdUnitId, // Replace with your AdMob Rewarded Ad Unit ID
+      request: AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (RewardedAd ad) {
+          setState(() {
+            _rewardedAd = ad;
+          });
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          print('Failed to load rewarded ad: $error');
+        },
+      ),
+    );
+  }
+  // Show Rewarded Ad
+  void _showRewardedAd() {
+    if (_rewardedAd == null) {
+      print('Rewarded Ad not loaded yet');
+      Utils.showInterstitial();
+      return;
+    }
+
+    _rewardedAd!.show(
+      onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
+        print('User earned reward: ${reward.amount} ${reward.type}');
+        // Grant the reward (e.g., unlock content, give in-app currency)
+      },
+    );
+
+    // Dispose and reload the ad after it's used
+    _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (RewardedAd ad) {
+        ad.dispose();
+        _loadRewardedAd();
+      },
+      onAdFailedToShowFullScreenContent: (RewardedAd ad, AdError error) {
+        ad.dispose();
+        _loadRewardedAd();
+      },
+    );
+
+    _rewardedAd = null;
   }
 
   void checkAutoBackupEnabled() async {
@@ -78,9 +137,12 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
 
       body: Padding(
         padding: EdgeInsets.all(16),
+
+        child:SingleChildScrollViewWithStickyFirstWidget(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Utils.getDistanceBar(),
 
             SizedBox(height: 10),
 
@@ -150,7 +212,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
             _buildCloudBackupCard(),
           ],
         ),
-      ),
+      ),),
     );
   }
 
@@ -561,6 +623,15 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
   bool backingUp = false;
 
   Future<void> uploadDatabaseToDrive() async {
+
+    if(!_isAdDisplayed){
+      _showRewardedAd();
+      _isAdDisplayed = true;
+      setState(() {
+
+      });
+    }
+
     if (_googleSignIn.currentUser == null) {
       print("User is not signed in.");
       iSUpload = true;
