@@ -9,6 +9,7 @@
 		<string>ar</string>
 		<string>bn</string>
 		<string>de</string>
+        <string>el</string>
 		<string>en</string>
 		<string>es</string>
 		<string>fa</string>
@@ -265,11 +266,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.0.0</string>
+	<string>2.1.0</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>9</string>
+	<string>10</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
