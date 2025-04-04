@@ -141,7 +141,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                         SizedBox(width: 6),
                         Text(
                           'COLLECT'.tr(),
-                          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -180,7 +180,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                         SizedBox(width: 6),
                         Text(
                           'REDUCE'.tr(),
-                          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -427,7 +427,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                                           borderRadius: BorderRadius.circular(5),
                                         ),
                                         child: Text(
-                                          eggs[index].isCollection == 1 ? "Collected".tr() : "Reduced".tr(),
+                                          eggs[index].isCollection == 1 ? "(Collected)".tr() : "Reduced".tr(),
                                           style: TextStyle(fontSize: 12, color: eggs[index].isCollection == 1 ? Colors.green : Colors.red),
                                         ),
                                       ),
@@ -1053,7 +1053,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
               Text(
                 label.tr(),
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: FontWeight.bold,
                   color: isSelected ? Colors.white : Colors.black,
                   letterSpacing: 0.5,

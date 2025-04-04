@@ -480,7 +480,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Frosted Glass Effect
                           child: Container(
                             height: 45,
-                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            padding: EdgeInsets.symmetric(horizontal: 5),
                             decoration: BoxDecoration(
                               color: Colors.white, // Semi-transparent background
                               borderRadius: BorderRadius.circular(12),
@@ -623,7 +623,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    getFinanceCard(Icons.arrow_upward, "Income", "${Utils.currency} $gross_income", Colors.green, FinanceReportsScreen(), context),
+                                    getFinanceCard(Icons.arrow_upward, "Income", "${Utils.currency} $gross_income", Colors.green.shade300, FinanceReportsScreen(), context),
                                     getFinanceCard(Icons.arrow_downward, "Expense", "${Utils.currency} $total_expense", Colors.red, FinanceReportsScreen(), context),
                                     getFinanceCard(Icons.monetization_on, "NET_PROFIT", net_income >= 0 ? "${Utils.currency} $net_income" : "-${Utils.currency} ${-net_income}", net_income >= 0 ? Colors.white : Colors.white, FinanceReportsScreen(), context),
                                   ],
@@ -959,20 +959,28 @@ class _DashboardScreen extends State<DashboardScreen> {
         ),
         margin: EdgeInsets.symmetric(vertical: 3, horizontal: 8),
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(icon, color: color, size: 28),
-              SizedBox(width: 10),
+             // ,
+              SizedBox(width: 5),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title.tr(),
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white)),
+                  Row(
+                    children: [
+                      Icon(icon, color: color, size: 15),
+                      Text(title.tr(),
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color)),
+                    ],
+                  ),
                   SizedBox(height: 3),
-                  Text(amount,
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color)),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(amount,
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                  ),
                 ],
               ),
             ],
@@ -1016,7 +1024,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                 SizedBox(height: 8),
                 Text(title.tr(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white70)),
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.white70)),
 
               ],
             ),

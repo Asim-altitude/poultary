@@ -368,7 +368,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(isAutoBackupEnabled? "Account Connected".tr():"Sign In".tr(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                Text(isAutoBackupEnabled? "Account Connected".tr():"Sign In".tr(), style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
                 Switch(
                   value: isAutoBackupEnabled,
                   onChanged: (bool value) {
@@ -425,7 +425,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
             SizedBox(width: 5), // Spacing between icon & text
             Text(
               "Backup In Progress...".tr(),
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ],
         )  : Row(
@@ -435,7 +435,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
             SizedBox(width: 10), // Spacing between icon & text
             Text(
               "Backup to Google Drive".tr(),
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ],
         ),
