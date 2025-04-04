@@ -636,11 +636,28 @@
   "Save a copy of your data securely": "اپنے ڈیٹا کی ایک کاپی محفوظ طریقے سے محفوظ کریں",
   "Restore data from a previous backup": "پچھلے بیک اپ سے ڈیٹا کو بحال کریں",
   "Poultry": "پولٹری",
-  "Products": "مصنوعات",
-  "Disclosure": "انکشاف",
-  "Disclosure_Detail": "ہم ایمیزون سروسز ایل ایل سی ایسوسی ایٹس پروگرام میں شریک ہیں ، جو ایک وابستہ اشتہاری پروگرام ہے جو ہمارے لئے ایمیزون ڈاٹ کام اور اس سے وابستہ سائٹوں سے لنک کرکے فیس کمانے کے لئے ایک ذریعہ فراہم کرنے کے لئے ڈیزائن کیا گیا ہے۔",
-  "Products not available.": "مصنوعات دستیاب نہیں ہیں۔",
-  "Please try again later.": "براہ کرم بعد میں دوبارہ کوشش کریں۔",
-  "View on Amazon": "ایمیزون پر دیکھیں"
+
+
+  "Select a backup file from the list below": "ذیل کی فہرست میں سے بیک اپ فائل منتخب کریں",
+  "Recommended": "سفارش کی گئی",
+  "Created on": "تخلیق کیا گیا",
+  "✅ Restored from": "✅ سے بحال",
+  "❌ No backups found.": "back کوئی بیک اپ نہیں ملا۔",
+  "❌ Could not Backup": "back بیک اپ نہیں کرسکا",
+  "✅ Backup Created Successfully": "✅ بیک اپ نے کامیابی کے ساتھ تخلیق کیا",
+  "✅ Backup Updated Successfully": "✅ بیک اپ کامیابی کے ساتھ اپ ڈیٹ ہوا",
+  "❌ Database file not found!": "❌ ڈیٹا بیس فائل نہیں ملی!",
+  "Signed in as": "AS میں دستخط کیا",
+  "Backup to Google Drive": "گوگل ڈرائیو کا بیک اپ",
+  "Backup In Progress...": "پیشرفت میں بیک اپ ...",
+  "Account Connected": "اکاؤنٹ منسلک",
+  "Sign In": "سائن ان کریں",
+  "Cloud Backup": "بادل کا بیک اپ",
+  "Choose a restore method to recover your data.": "اپنے ڈیٹا کو بازیافت کرنے کے لئے بحالی کا طریقہ منتخب کریں۔",
+  "Restore from Google Drive": "گوگل ڈرائیو سے بحال کریں",
+  "Restore from Local Storage": "مقامی اسٹوریج سے ایسٹور",
+  "Select a backup file stored on your device.": "اپنے آلے پر ذخیرہ شدہ بیک اپ فائل منتخب کریں۔",
+  "Retrieve the latest backup from Google Drive.": "گوگل ڈرائیو سے تازہ ترین بیک اپ بازیافت کریں۔",
+  "Turn on cloud backup to enable manual backup to Google Drive.": "گوگل ڈرائیو میں دستی بیک اپ کو فعال کرنے کے لئے کلاؤڈ بیک اپ کو آن کریں۔"
 
 }

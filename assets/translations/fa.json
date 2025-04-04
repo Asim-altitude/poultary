@@ -637,12 +637,29 @@
  "Save a copy of your data securely": "یک کپی از داده های خود را با اطمینان ذخیره کنید",
  "Restore data from a previous backup": "داده های پشتیبان قبلی را بازیابی کنید",
  "Poultry": "مرغ",
- "Products": "محصولات",
- "Disclosure": "افشای",
- "Disclosure_Detail": "ما در برنامه Amazon Services LLC Associates شرکت کننده هستیم ، یک برنامه تبلیغاتی وابسته طراحی شده برای فراهم کردن وسیله ای برای ما برای کسب هزینه با پیوند به Amazon.com و سایت های وابسته.",
- "Products not available.": "محصولات موجود نیستند.",
- "Please try again later.": "لطفا بعداً دوباره امتحان کنید.",
- "View on Amazon": "مشاهده در آمازون"
+
+
+ "Select a backup file from the list below": "یک فایل پشتیبان را از لیست زیر انتخاب کنید",
+ "Recommended": "توصیه شده",
+ "Created on": "ایجاد شده در",
+ "✅ Restored from": "✅ ترمیم شده از",
+ "❌ No backups found.": "❌ هیچ نسخه پشتیبان پیدا نشده است.",
+ "❌ Could not Backup": "❌ نمی تواند پشتیبان گیری کند",
+ "✅ Backup Created Successfully": "✅ پشتیبان گیری با موفقیت ایجاد شد",
+ "✅ Backup Updated Successfully": "✅ پشتیبان گیری با موفقیت به روز شد",
+ "❌ Database file not found!": "file فایل پایگاه داده یافت نشد!",
+ "Signed in as": "وارد سیستم شد",
+ "Backup to Google Drive": "پشتیبان گیری از Google Drive",
+ "Backup In Progress...": "پشتیبان گیری در حال انجام ...",
+ "Account Connected": "حساب متصل",
+ "Sign In": "ورود به سیستم",
+ "Cloud Backup": "پشتیبان ابری",
+ "Choose a restore method to recover your data.": "برای بازیابی داده های خود یک روش بازیابی را انتخاب کنید.",
+ "Restore from Google Drive": "بازیابی از Google Drive",
+ "Restore from Local Storage": "استور از ذخیره محلی",
+ "Select a backup file stored on your device.": "یک فایل پشتیبان ذخیره شده در دستگاه خود را انتخاب کنید.",
+ "Retrieve the latest backup from Google Drive.": "آخرین نسخه پشتیبان را از Google Drive بازیابی کنید.",
+ "Turn on cloud backup to enable manual backup to Google Drive.": "برای فعال کردن پشتیبان گیری دستی به Google Drive ، نسخه پشتیبان تهیه Cloud را روشن کنید."
 
 
 }

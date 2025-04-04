@@ -639,10 +639,27 @@
  "Save a copy of your data securely": "Безопасно сохранить копию ваших данных",
  "Restore data from a previous backup": "Восстановить данные из предыдущего резервного копирования",
  "Poultry": "Птица",
- "Products": "Продукция",
- "Disclosure": "Раскрытие",
- "Disclosure_Detail": "Мы являемся участником программы Amazon Services LLC Associates, партнерской рекламной программы, предназначенной для того, чтобы предоставить нам возможность получить сборы, связываясь на Amazon.com и аффилированные сайты.",
- "Products not available.": "Продукты недоступны.",
- "Please try again later.": "Пожалуйста, попробуйте еще раз позже.",
- "View on Amazon": "Посмотреть на Amazon"
+
+
+ "Select a backup file from the list below": "Выберите файл резервного копирования в списке ниже",
+ "Recommended": "Рекомендуется",
+ "Created on": "Создан на",
+ "✅ Restored from": "✅ восстановлено из",
+ "❌ No backups found.": "❌ Резервное копирование не найдено.",
+ "❌ Could not Backup": "❌ Не мог резервно",
+ "✅ Backup Created Successfully": "✅ Резервное копирование создано успешно",
+ "✅ Backup Updated Successfully": "✅ Резервное копирование успешно обновлено",
+ "❌ Database file not found!": "❌ Файл базы данных не найден!",
+ "Signed in as": "Подписался как",
+ "Backup to Google Drive": "Резервное копирование на Google Drive",
+ "Backup In Progress...": "Резервное копирование в процессе ...",
+ "Account Connected": "Учетная запись подключена",
+ "Sign In": "Войти",
+ "Cloud Backup": "Облачная резервная копия",
+ "Choose a restore method to recover your data.": "Выберите метод восстановления для восстановления ваших данных.",
+ "Restore from Google Drive": "Восстановите с Google Drive",
+ "Restore from Local Storage": "Estore из местного хранения",
+ "Select a backup file stored on your device.": "Выберите файл резервного копирования, хранящийся на вашем устройстве.",
+ "Retrieve the latest backup from Google Drive.": "Получить последнюю резервную копию от Google Drive.",
+ "Turn on cloud backup to enable manual backup to Google Drive.": "Включите резервную копию облаков, чтобы включить ручное резервное копирование в Google Drive."
 }

@@ -638,10 +638,27 @@
   "Save a copy of your data securely": "Simpan salinan data Anda dengan aman",
   "Restore data from a previous backup": "Kembalikan data dari cadangan sebelumnya",
   "Poultry": "Unggas",
-  "Products": "Produk",
-  "Disclosure": "Penyingkapan",
-  "Disclosure_Detail": "Kami adalah peserta dalam Program Amazon Services LLC Associates, program iklan afiliasi yang dirancang untuk menyediakan sarana bagi kami untuk mendapatkan biaya dengan menautkan ke Amazon.com dan situs yang berafiliasi.",
-  "Products not available.": "Produk tidak tersedia.",
-  "Please try again later.": "Silakan coba lagi nanti.",
-  "View on Amazon": "Lihat di Amazon"
+
+
+  "Select a backup file from the list below": "Pilih file cadangan dari daftar di bawah ini",
+  "Recommended": "Direkomendasikan",
+  "Created on": "Dibuat di",
+  "✅ Restored from": "✅ dipulihkan dari",
+  "❌ No backups found.": "❌ Tidak ada cadangan yang ditemukan.",
+  "❌ Could not Backup": "❌ Tidak bisa mencadangkan",
+  "✅ Backup Created Successfully": "✅ Cadangan dibuat dengan sukses",
+  "✅ Backup Updated Successfully": "✅ Cadangan berhasil diperbarui",
+  "❌ Database file not found!": "❌ File basis data tidak ditemukan!",
+  "Signed in as": "Masuk As",
+  "Backup to Google Drive": "Cadangan ke Google Drive",
+  "Backup In Progress...": "Cadangan sedang berlangsung ...",
+  "Account Connected": "Akun terhubung",
+  "Sign In": "Masuk",
+  "Cloud Backup": "Cloud Backup",
+  "Choose a restore method to recover your data.": "Pilih metode pemulihan untuk memulihkan data Anda.",
+  "Restore from Google Drive": "Kembalikan dari Google Drive",
+  "Restore from Local Storage": "Estore dari penyimpanan lokal",
+  "Select a backup file stored on your device.": "Pilih file cadangan yang disimpan di perangkat Anda.",
+  "Retrieve the latest backup from Google Drive.": "Ambil cadangan terbaru dari Google Drive.",
+  "Turn on cloud backup to enable manual backup to Google Drive.": "Nyalakan cadangan cloud untuk mengaktifkan cadangan manual ke Google Drive."
 }

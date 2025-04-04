@@ -638,12 +638,28 @@
   "Save a copy of your data securely": "Enregistrez une copie de vos données en toute sécurité",
   "Restore data from a previous backup": "Restaurer les données d'une sauvegarde précédente",
   "Poultry": "Volaille",
-  "Products": "Produits",
-  "Disclosure": "Divulgation",
-  "Disclosure_Detail": "Nous participons au programme Amazon Services LLC Associates, un programme publicitaire d'affiliation conçu pour nous fournir un moyen de gagner des frais en liant à Amazon.com et à des sites affiliés.",
-  "Products not available.": "Produits non disponibles.",
-  "Please try again later.": "Veuillez réessayer plus tard.",
-  "View on Amazon": "Afficher sur Amazon"
+
+  "Select a backup file from the list below": "Sélectionnez un fichier de sauvegarde dans la liste ci-dessous",
+  "Recommended": "Recommandé",
+  "Created on": "Créé sur",
+  "✅ Restored from": "✅ restauré à partir de",
+  "❌ No backups found.": "❌ Pas de sauvegardes trouvées.",
+  "❌ Could not Backup": "❌ n'a pas pu sauvegarder",
+  "✅ Backup Created Successfully": "✅ La sauvegarde a créé avec succès",
+  "✅ Backup Updated Successfully": "✅ Sauvegarde mise à jour avec succès",
+  "❌ Database file not found!": "❌ Fichier de la base de données introuvable!",
+  "Signed in as": "Signé comme",
+  "Backup to Google Drive": "Sauvegarde sur Google Drive",
+  "Backup In Progress...": "Sauvegarde en cours ...",
+  "Account Connected": "Compte connecté",
+  "Sign In": "Se connecter",
+  "Cloud Backup": "Sauvegarde des nuages",
+  "Choose a restore method to recover your data.": "Choisissez une méthode de restauration pour récupérer vos données.",
+  "Restore from Google Drive": "Restaurer à partir de Google Drive",
+  "Restore from Local Storage": "estore du stockage local",
+  "Select a backup file stored on your device.": "Sélectionnez un fichier de sauvegarde stocké sur votre appareil.",
+  "Retrieve the latest backup from Google Drive.": "Récupérez la dernière sauvegarde de Google Drive.",
+  "Turn on cloud backup to enable manual backup to Google Drive.": "Allumez la sauvegarde du cloud pour activer la sauvegarde manuelle vers Google Drive."
 
 
 }

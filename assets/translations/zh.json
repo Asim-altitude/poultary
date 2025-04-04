@@ -635,11 +635,27 @@
   "Save a copy of your data securely": "安全保存数据的副本",
   "Restore data from a previous backup": "还原以前备份的数据",
   "Poultry": "家禽",
-  "Products": "产品",
-  "Disclosure": "披露",
-  "Disclosure_Detail": "我们是Amazon Services LLC Associates计划的参与者，该计划是一项会员广告计划，旨在通过链接到Amazon.com和附属网站来为我们提供一种赚取费用的手段。",
-  "Products not available.": "产品不可用。",
-  "Please try again later.": "请稍后再试。",
-  "View on Amazon": "在亚马逊上查看"
+
+  "Select a backup file from the list below": "从下面的列表中选择一个备份文件",
+  "Recommended": "受到推崇的",
+  "Created on": "创建",
+  "✅ Restored from": "✅恢复",
+  "❌ No backups found.": "❌找不到备份。",
+  "❌ Could not Backup": "❌无法备份",
+  "✅ Backup Created Successfully": "✅备份成功创建了",
+  "✅ Backup Updated Successfully": "✅备份成功更新了",
+  "❌ Database file not found!": "❌找不到数据库文件！",
+  "Signed in as": "登录AS",
+  "Backup to Google Drive": "备份到Google Drive",
+  "Backup In Progress...": "备份正在进行...",
+  "Account Connected": "帐户连接",
+  "Sign In": "登入",
+  "Cloud Backup": "云备份",
+  "Choose a restore method to recover your data.": "选择恢复数据的还原方法。",
+  "Restore from Google Drive": "从Google Drive还原",
+  "Restore from Local Storage": "从本地存储中估计",
+  "Select a backup file stored on your device.": "选择存储在设备上的备份文件。",
+  "Retrieve the latest backup from Google Drive.": "从Google Drive检索最新备份。",
+  "Turn on cloud backup to enable manual backup to Google Drive.": "打开云备份以启用手动备份到Google Drive。"
 
 }

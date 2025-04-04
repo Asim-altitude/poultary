@@ -29,14 +29,16 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-   // checkAutoBackupEnabled();
+    checkAutoBackupEnabled();
   }
 
   void checkAutoBackupEnabled() async {
     isAutoBackupEnabled = await SessionManager.isAutoOnlineBackup();
-    if(isAutoBackupEnabled)
-      uploadDatabaseToDrive();
-
+    /*if(isAutoBackupEnabled)
+      uploadDatabaseToDrive();*/
+    if(isAutoBackupEnabled){
+     signInWithGoogle();
+    }
     setState(() {
 
     });
@@ -103,7 +105,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
               onTap: () async {
                 // Perform Restore Action
 
-                await DatabaseHelper.importDataBaseFile(context);
+               /* await DatabaseHelper.importDataBaseFile(context);
                 try
                 {
                   await DatabaseHelper.addEggColorColumn();
@@ -118,9 +120,9 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                 }
                 catch(ex){
                   print(ex);
-                }
+                }*/
 
-                /*showRestoreOptionsDialog(context, () async {
+                showRestoreOptionsDialog(context, () async {
                   await DatabaseHelper.importDataBaseFile(context);
                   try {
                     await DatabaseHelper.addEggColorColumn();
@@ -139,14 +141,13 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                 }, () {
                   restoreDatabaseFromDrive();
                 });
-*/
 
               },
             ),
 
-            /*/// **Automatic Cloud Backup - Card Option**
+            /// **Automatic Cloud Backup - Card Option**
             SizedBox(height: 20),
-            _buildCloudBackupCard(),*/
+            _buildCloudBackupCard(),
           ],
         ),
       ),
@@ -169,12 +170,12 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
             children: [
               /// **Header**
               Text(
-                "Restore Database",
+                "RESTORE".tr(),
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
               ),
               SizedBox(height: 8),
               Text(
-                "Choose a restore method to recover your data.",
+                "Choose a restore method to recover your data.".tr(),
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: Colors.black54),
               ),
@@ -183,8 +184,8 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
               /// **Restore from Local Storage**
               _buildRestoreOption(
                 icon: MdiIcons.folderOpen,
-                title: "Restore from Local Storage",
-                subtitle: "Select a backup file stored on your device.",
+                title: "Restore from Local Storage".tr(),
+                subtitle: "Select a backup file stored on your device.".tr(),
                 onTap: () {
                   Navigator.pop(context);
                   onLocalRestore(); // Call the Local Restore function
@@ -196,8 +197,8 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
               /// **Restore from Google Drive**
               _buildRestoreOption(
                 icon: MdiIcons.googleDrive,
-                title: "Restore from Google Drive",
-                subtitle: "Retrieve the latest backup from Google Drive.",
+                title: "Restore from Google Drive".tr(),
+                subtitle: "Retrieve the latest backup from Google Drive.".tr(),
                 onTap: () {
                   Navigator.pop(context);
                   onDriveRestore(); // Call the Google Drive Restore function
@@ -209,7 +210,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
               /// **Cancel Button**
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text("Cancel", style: TextStyle(fontSize: 16, color: Colors.redAccent)),
+                child: Text("CANCEL".tr(), style: TextStyle(fontSize: 16, color: Colors.redAccent)),
               ),
             ],
           ),
@@ -344,7 +345,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
 
                 Expanded(
                   child: Text(
-                    _googleSignIn.currentUser?.displayName ?? "Cloud Backup",
+                    _googleSignIn.currentUser?.displayName ?? "Cloud Backup".tr(),
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
@@ -356,37 +357,40 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
 
           /// **Description**
           Text(
-            "Turn on cloud backup to enable manual backup to Google Drive.",
+            "Turn on cloud backup to enable manual backup to Google Drive.".tr(),
             style: TextStyle(fontSize: 14, color: Colors.white70),
           ),
           SizedBox(height: 10),
 
           /// **Enable/Disable Switch**
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Cloud Backup", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-              Switch(
-                value: isAutoBackupEnabled,
-                onChanged: (bool value) {
-                  setState(() {
-                    isAutoBackupEnabled = value;
-                  });
+          Container(
+            margin: EdgeInsets.only(left: 5, right: 5),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(isAutoBackupEnabled? "Account Connected".tr():"Sign In".tr(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                Switch(
+                  value: isAutoBackupEnabled,
+                  onChanged: (bool value) {
+                    setState(() {
+                      isAutoBackupEnabled = value;
+                    });
 
-                  SessionManager.setOnlineBackup(isAutoBackupEnabled);
-                  if (isAutoBackupEnabled) {
-                    signInWithGoogle();
-                  } else {
-                    signOut();
-                  }
-                },
-                activeColor: Colors.white,
-                activeTrackColor: Colors.greenAccent,
-              ),
-            ],
+                    SessionManager.setOnlineBackup(isAutoBackupEnabled);
+                    if (isAutoBackupEnabled) {
+                      signInWithGoogle();
+                    } else {
+                      signOut();
+                    }
+                  },
+                  activeColor: Colors.white,
+                  activeTrackColor: Colors.greenAccent,
+                ),
+              ],
+            ),
           ),
 
-          SizedBox(height: 10),
+          SizedBox(height: 5),
 
           /// **Backup Button (Only Visible When Cloud Backup is Enabled)**
           AnimatedSwitcher(
@@ -414,13 +418,23 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 6, // Smooth shadow effect
         ),
-        child: Row(
+        child: backingUp? Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(color: Colors.white),
+            SizedBox(width: 5), // Spacing between icon & text
+            Text(
+              "Backup In Progress...".tr(),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+          ],
+        )  : Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.cloud_upload, size: 24, color: Colors.white), // ✅ Cloud icon
             SizedBox(width: 10), // Spacing between icon & text
             Text(
-              "Backup to Google Drive",
+              "Backup to Google Drive".tr(),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ],
@@ -522,23 +536,29 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
   Future<void> signInWithGoogle() async {
     try {
       await _googleSignIn.signIn();
-      print("Signed in as: ${_googleSignIn.currentUser?.displayName}");
-      Utils.showToast("Signed In as ${_googleSignIn.currentUser?.displayName}");
+      print("Signed in as".tr()+": ${_googleSignIn.currentUser?.displayName}");
+      Utils.showToast("Signed in as".tr()+ " ${_googleSignIn.currentUser?.displayName}");
       setState(() {
 
       });
     } catch (error) {
       print("Google Sign-In Error: $error");
 
-
     }
+  }
+
+  String getTodayBackupFileName() {
+    final now = DateTime.now();
+    return 'PoultryBackup_${now.year}_${now.month.toString().padLeft(2, '0')}_${now.day.toString().padLeft(2, '0')}.db';
   }
 
   Future<void> signOut() async {
     await _googleSignIn.signOut();
-    Utils.showToast("Signed Out");
+    Utils.showToast("Signed Out".tr());
     print("User signed out");
   }
+
+  bool backingUp = false;
 
   Future<void> uploadDatabaseToDrive() async {
     if (_googleSignIn.currentUser == null) {
@@ -549,6 +569,10 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
       return;
     }
 
+    setState(() {
+      backingUp = true;
+    });
+
     final authHeaders = await _googleSignIn.currentUser!.authHeaders;
     final authenticateClient = GoogleAuthClient(authHeaders!);
     final driveApi = drive.DriveApi(authenticateClient);
@@ -556,25 +580,63 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
     File dbFile = await DatabaseHelper.getFilePathDB();
     if (!dbFile.existsSync()) {
       print("Database file not found!");
+      Utils.showToast("❌ Database file not found!".tr());
+      setState(() {
+        backingUp = false;
+      });
       return;
     }
 
+    final fileName = getTodayBackupFileName(); // e.g., backup_2025_04_04.db
+    final media = drive.Media(dbFile.openRead(), dbFile.lengthSync());
+
+    // Check if today's backup already exists
+    final existingFileId = await _getDriveFileIdByName(fileName, driveApi);
+
     var fileMetadata = drive.File()
-      ..name = "PoultryBackup_${DateTime.now().millisecondsSinceEpoch}.db"
-      ..parents = ["root"]; // ✅ Store in the user's main Google Drive (Visible)
+      ..name = fileName
+      ..parents = ["root"];
 
     try {
-      await driveApi.files.create(
-        fileMetadata,
-        uploadMedia: drive.Media(dbFile.openRead(), dbFile.lengthSync()),
-      );
+      if (existingFileId != null) {
+        // ✅ Don't set parents when updating
+        var updateMetadata = drive.File()..name = fileName;
 
-      print("✅ Database backup uploaded to Google Drive (User-Visible).");
-      Utils.showToast("✅ Backup Successfull");
-    } catch (e) {
-      print("❌ Error uploading database: $e");
-      Utils.showToast("❌ Could not Backup ");
+        await driveApi.files.update(updateMetadata, existingFileId, uploadMedia: media);
+        print("✅ Existing backup updated.");
+        Utils.showToast("✅ Backup Updated Successfully".tr());
+      } else {
+        // ✅ Set parents only when creating
+        var fileMetadata = drive.File()
+          ..name = fileName
+          ..parents = ["root"];
+
+        await driveApi.files.create(fileMetadata, uploadMedia: media);
+        print("✅ New database backup uploaded.");
+        Utils.showToast("✅ Backup Created Successfully".tr());
+      }
     }
+    catch (e) {
+      print("❌ Error uploading database: $e");
+      Utils.showToast("❌ Could not Backup".tr());
+    } finally {
+      setState(() {
+        backingUp = false;
+      });
+    }
+  }
+  Future<String?> _getDriveFileIdByName(String fileName, drive.DriveApi driveApi) async {
+    try {
+      final query = "name = '$fileName' and trashed = false";
+      final result = await driveApi.files.list(q: query, spaces: 'drive');
+
+      if (result.files != null && result.files!.isNotEmpty) {
+        return result.files!.first.id;
+      }
+    } catch (e) {
+      print("❌ Error while checking for existing file: $e");
+    }
+    return null;
   }
 
   Future<drive.File?> getLatestBackup(drive.DriveApi driveApi) async {
@@ -603,32 +665,147 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
     final driveApi = drive.DriveApi(authenticateClient);
 
     try {
-      // **Fetch the latest backup file from Google Drive**
+      // Fetch the last 5 PoultryBackup files from Drive
       drive.FileList fileList = await driveApi.files.list(
-        q: "name contains 'PoultryBackup_'", // ✅ Looks for backup files
-        orderBy: "createdTime desc", // ✅ Gets the latest backup first
+        q: "name contains 'PoultryBackup_' and trashed = false",
+        orderBy: "createdTime desc",
+        $fields: "files(id,name,createdTime)",
+        pageSize: 5,
       );
 
       if (fileList.files == null || fileList.files!.isEmpty) {
-        print("❌ No backups found in Google Drive.");
+        print("❌ No backups found.");
+        Utils.showToast("❌ No backups found.".tr());
         return;
       }
 
-      drive.File latestBackup = fileList.files!.first; // ✅ Pick the latest backup
-      print("📥 Restoring from: ${latestBackup.name}");
+      // Show bottom dialog for selection
+      showBackupSelectionDialog(context, fileList.files!, (drive.File selectedFile) {
+        _downloadAndRestoreBackup(selectedFile, driveApi);
+      });
 
-      // **Download the backup file**
+    } catch (e) {
+      print("❌ Error fetching backups: $e");
+    }
+  }
+
+  void showBackupSelectionDialog(
+      BuildContext context,
+      List<drive.File> files,
+      Function(drive.File) onSelect,
+      ) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.5,
+          minChildSize: 0.4,
+          maxChildSize: 0.85,
+          builder: (context, scrollController) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Column(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  Text(
+                    "RESTORE".tr(),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    "Select a backup file from the list below".tr(),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                  ),
+                  SizedBox(height: 12),
+                  Expanded(
+                    child: ListView.separated(
+                      controller: scrollController,
+                      itemCount: files.length,
+                      separatorBuilder: (_, __) => Divider(),
+                      itemBuilder: (context, index) {
+                        final file = files[index];
+                        final isLatest = index == 0;
+                        final createdTime = file.createdTime ?? DateTime.now();
+                        final formattedDate =
+                            "${createdTime.day.toString().padLeft(2, '0')}-${createdTime.month.toString().padLeft(2, '0')}-${createdTime.year}";
+
+                        return ListTile(
+                          leading: Icon(Icons.backup, color: Colors.blueAccent),
+                          title: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                file.name ?? "Unknown".tr(),
+                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Utils.getThemeColorBlue()),
+                              ),
+                              if (isLatest)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Text(
+                                    "Recommended".tr(),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.green.shade800,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          subtitle: Text("Created on".tr()+" $formattedDate"),
+                          onTap: () {
+                            Navigator.of(context).pop();
+                            onSelect(file);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+
+
+
+  void _downloadAndRestoreBackup(drive.File backupFile, drive.DriveApi driveApi) async {
+    try {
+      print("📥 Restoring from: ${backupFile.name}");
+
       var mediaStream = await driveApi.files.get(
-        latestBackup.id!,
+        backupFile.id!,
         downloadOptions: drive.DownloadOptions.fullMedia,
       );
 
       if (mediaStream is! drive.Media) {
-        print("❌ Error: Downloaded media is invalid.");
+        print("❌ Invalid download stream.");
         return;
       }
 
-      File dbFile = await DatabaseHelper.getFilePathDB(); // ✅ Local database path
+      File dbFile = await DatabaseHelper.getFilePathDB();
       IOSink sink = dbFile.openWrite();
 
       mediaStream.stream.listen(
@@ -638,21 +815,22 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
         onDone: () async {
           await sink.flush();
           await sink.close();
-          print("✅ Database restored successfully!");
-          Utils.showToast("✅ Database restored successfully!");
+          print("✅ Database restored from ${backupFile.name}");
+          Utils.showToast("✅ Restored from".tr() +"${backupFile.name}");
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => HomeScreen()), // ✅ Replace with your Home Screen
-                (Route<dynamic> route) => false, // ✅ Removes all previous screens
+            MaterialPageRoute(builder: (context) => HomeScreen()),
+                (route) => false,
           );
         },
         onError: (error) {
-          print("❌ Error restoring database: $error");
+          print("❌ Error restoring: $error");
         },
       );
     } catch (e) {
-      print("❌ Exception during restore: $e");
+      print("❌ Exception: $e");
     }
   }
+
 
 }
 

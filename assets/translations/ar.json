@@ -642,11 +642,27 @@
  "Save a copy of your data securely": "احفظ نسخة من بياناتك بشكل آمن",
  "Restore data from a previous backup": "استعادة البيانات من نسخة احتياطية سابقة",
  "Poultry": "دواجن",
- "Products": "منتجات",
- "Disclosure": "الكشف",
- "Disclosure_Detail": "نحن مشاركون في برنامج Amazon Services LLC Associates ، وهو برنامج إعلانات تابعة مصمم لتوفير وسيلة لنا لكسب الرسوم من خلال الارتباط بـ Amazon.com والمواقع التابعة.",
- "Products not available.": "المنتجات غير متوفرة.",
- "Please try again later.": "يرجى المحاولة مرة أخرى لاحقًا.",
- "View on Amazon": "عرض على الأمازون"
+
+ "Select a backup file from the list below": "حدد ملف النسخ الاحتياطي من القائمة أدناه",
+ "Recommended": "مُستَحسَن",
+ "Created on": "تم إنشاؤها على",
+ "✅ Restored from": "✅ استعادة من",
+ "❌ No backups found.": "❌ لم يتم العثور على النسخ الاحتياطية.",
+ "❌ Could not Backup": "❌ لم يستطع النسخ الاحتياطي",
+ "✅ Backup Created Successfully": "✅ النسخ الاحتياطي الذي تم إنشاؤه بنجاح",
+ "✅ Backup Updated Successfully": "✅ النسخ الاحتياطي تم تحديثه بنجاح",
+ "❌ Database file not found!": "❌ لم يتم العثور على ملف قاعدة البيانات!",
+ "Signed in as": "وقعت في",
+ "Backup to Google Drive": "النسخ الاحتياطي إلى Google Drive",
+ "Backup In Progress...": "النسخ الاحتياطي قيد التقدم ...",
+ "Account Connected": "حساب متصل",
+ "Sign In": "تسجيل الدخول",
+ "Cloud Backup": "نسخة احتياطية سحابة",
+ "Choose a restore method to recover your data.": "اختر طريقة استعادة لاستعادة بياناتك.",
+ "Restore from Google Drive": "استعادة من Google Drive",
+ "Restore from Local Storage": "Estore من التخزين المحلي",
+ "Select a backup file stored on your device.": "حدد ملف النسخ الاحتياطي المخزن على جهازك.",
+ "Retrieve the latest backup from Google Drive.": "استرداد أحدث نسخة احتياطية من Google Drive.",
+ "Turn on cloud backup to enable manual backup to Google Drive.": "قم بتشغيل النسخ الاحتياطي السحابي لتمكين النسخ الاحتياطي اليدوي إلى Google Drive."
 
 }

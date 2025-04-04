@@ -1729,6 +1729,7 @@ class DatabaseHelper  {
   }
 
 
+
   //HEALTH
 
   static Future<int> getHealthTotal(int f_id, String type, String str_date, String end_date) async {

@@ -640,11 +640,27 @@
   "Save a copy of your data securely": "আপনার ডেটার একটি অনুলিপি নিরাপদে সংরক্ষণ করুন",
   "Restore data from a previous backup": "পূর্ববর্তী ব্যাকআপ থেকে ডেটা পুনরুদ্ধার করুন",
   "Poultry": "হাঁস -মুরগি",
-  "Products": "পণ্য",
-  "Disclosure": "প্রকাশ",
-  "Disclosure_Detail": "আমরা অ্যামাজন সার্ভিসেস এলএলসি অ্যাসোসিয়েটস প্রোগ্রামের একটি অংশগ্রহণকারী, একটি অনুমোদিত বিজ্ঞাপন প্রোগ্রাম, অ্যামাজন ডটকম এবং অনুমোদিত সাইটগুলিতে লিঙ্ক করে ফি উপার্জনের জন্য আমাদের জন্য একটি উপায় সরবরাহ করার জন্য ডিজাইন করা একটি অনুমোদিত বিজ্ঞাপন প্রোগ্রাম।",
-  "Products not available.": "পণ্য উপলব্ধ নয়।",
-  "Please try again later.": "পরে আবার চেষ্টা করুন।",
-  "View on Amazon": "অ্যামাজনে দেখুন"
+
+  "Select a backup file from the list below": "নীচের তালিকা থেকে একটি ব্যাকআপ ফাইল নির্বাচন করুন",
+  "Recommended": "প্রস্তাবিত",
+  "Created on": "তৈরি করা",
+  "✅ Restored from": "✅ থেকে পুনরুদ্ধার",
+  "❌ No backups found.": "❌ কোনও ব্যাকআপ পাওয়া যায় নি।",
+  "❌ Could not Backup": "❌ ব্যাকআপ করতে পারেনি",
+  "✅ Backup Created Successfully": "✅ ব্যাকআপ সফলভাবে তৈরি",
+  "✅ Backup Updated Successfully": "✅ ব্যাকআপ সফলভাবে আপডেট হয়েছে",
+  "❌ Database file not found!": "❌ ডাটাবেস ফাইল পাওয়া যায় নি!",
+  "Signed in as": "সাইন ইন এএস",
+  "Backup to Google Drive": "গুগল ড্রাইভে ব্যাকআপ",
+  "Backup In Progress...": "প্রগতিতে ব্যাকআপ ...",
+  "Account Connected": "অ্যাকাউন্ট সংযুক্ত",
+  "Sign In": "সাইন ইন",
+  "Cloud Backup": "ক্লাউড ব্যাকআপ",
+  "Choose a restore method to recover your data.": "আপনার ডেটা পুনরুদ্ধার করতে একটি পুনরুদ্ধার পদ্ধতি চয়ন করুন।",
+  "Restore from Google Drive": "গুগল ড্রাইভ থেকে পুনরুদ্ধার করুন",
+  "Restore from Local Storage": "স্থানীয় স্টোরেজ থেকে এস্টোর",
+  "Select a backup file stored on your device.": "আপনার ডিভাইসে সঞ্চিত একটি ব্যাকআপ ফাইল নির্বাচন করুন।",
+  "Retrieve the latest backup from Google Drive.": "গুগল ড্রাইভ থেকে সর্বশেষ ব্যাকআপ পুনরুদ্ধার করুন।",
+  "Turn on cloud backup to enable manual backup to Google Drive.": "গুগল ড্রাইভে ম্যানুয়াল ব্যাকআপ সক্ষম করতে ক্লাউড ব্যাকআপ চালু করুন।"
 
 }

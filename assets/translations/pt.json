@@ -639,11 +639,27 @@
  "Save a copy of your data securely": "Salve uma cópia de seus dados com segurança",
  "Restore data from a previous backup": "Restaurar dados de um backup anterior",
  "Poultry": "Aves",
- "Products": "Produtos",
- "Disclosure": "Divulgação",
- "Disclosure_Detail": "Somos participantes do programa Amazon Services LLC Associates, um programa de publicidade afiliado projetado para fornecer um meio para ganharmos taxas vinculando -se à Amazon.com e sites afiliados.",
- "Products not available.": "Produtos não disponíveis.",
- "Please try again later.": "Por favor, tente novamente mais tarde.",
- "View on Amazon": "Vista na Amazon"
+
+ "Select a backup file from the list below": "Selecione um arquivo de backup na lista abaixo",
+ "Recommended": "Recomendado",
+ "Created on": "Criado em",
+ "✅ Restored from": "✅ restaurado de",
+ "❌ No backups found.": "❌ Nenhum backup encontrado.",
+ "❌ Could not Backup": "❌ Não foi possível fazer backup",
+ "✅ Backup Created Successfully": "✅ Backup criado com sucesso",
+ "✅ Backup Updated Successfully": "✅ Backup atualizado com sucesso",
+ "❌ Database file not found!": "❌ Arquivo de banco de dados não encontrado!",
+ "Signed in as": "Assinou como",
+ "Backup to Google Drive": "Backup para o Google Drive",
+ "Backup In Progress...": "Backup em andamento ...",
+ "Account Connected": "Conta conectada",
+ "Sign In": "Entrar",
+ "Cloud Backup": "Backup em nuvem",
+ "Choose a restore method to recover your data.": "Escolha um método de restauração para recuperar seus dados.",
+ "Restore from Google Drive": "Restaurar do Google Drive",
+ "Restore from Local Storage": "Encontro do armazenamento local",
+ "Select a backup file stored on your device.": "Selecione um arquivo de backup armazenado no seu dispositivo.",
+ "Retrieve the latest backup from Google Drive.": "Recupere o backup mais recente do Google Drive.",
+ "Turn on cloud backup to enable manual backup to Google Drive.": "Ligue o backup da nuvem para ativar o backup manual no Google Drive."
 
 }

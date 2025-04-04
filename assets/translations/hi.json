@@ -637,11 +637,28 @@
   "Save a copy of your data securely": "अपने डेटा की एक प्रति सुरक्षित रूप से सहेजें",
   "Restore data from a previous backup": "पिछले बैकअप से डेटा पुनर्स्थापित करें",
   "Poultry": "मुर्गी",
-  "Products": "उत्पादों",
-  "Disclosure": "खुलासा",
-  "Disclosure_Detail": "हम अमेज़ॅन सर्विसेज एलएलसी एसोसिएट्स प्रोग्राम में एक भागीदार हैं, जो एक संबद्ध विज्ञापन कार्यक्रम है, जिसे Amazon.com और संबद्ध साइटों से जुड़कर फीस अर्जित करने के लिए एक साधन प्रदान करने के लिए डिज़ाइन किया गया है।",
-  "Products not available.": "उत्पाद उपलब्ध नहीं हैं।",
-  "Please try again later.": "कृपया बाद में पुन: प्रयास करें।",
-  "View on Amazon": "अमेज़ॅन पर देखें"
+
+
+  "Select a backup file from the list below": "नीचे दी गई सूची से बैकअप फ़ाइल का चयन करें",
+  "Recommended": "अनुशंसित",
+  "Created on": "पर बनाया",
+  "✅ Restored from": "✅ से बहाल किया गया",
+  "❌ No backups found.": "❌ कोई बैकअप नहीं मिला।",
+  "❌ Could not Backup": "❌ बैकअप नहीं कर सका",
+  "✅ Backup Created Successfully": "✅ बैकअप सफलतापूर्वक बनाया गया",
+  "✅ Backup Updated Successfully": "✅ बैकअप सफलतापूर्वक अपडेट किया गया",
+  "❌ Database file not found!": "❌ डेटाबेस फ़ाइल नहीं मिली!",
+  "Signed in as": "इस रूप में साइन इन किया",
+  "Backup to Google Drive": "Google ड्राइव के लिए बैकअप",
+  "Backup In Progress...": "बैकप चल रहा...",
+  "Account Connected": "जुड़ा हुआ खाता",
+  "Sign In": "दाखिल करना",
+  "Cloud Backup": "मेघ बैकअप",
+  "Choose a restore method to recover your data.": "अपना डेटा पुनर्प्राप्त करने के लिए एक पुनर्स्थापना विधि चुनें।",
+  "Restore from Google Drive": "Google ड्राइव से पुनर्स्थापित करें",
+  "Restore from Local Storage": "स्थानीय भंडारण से एस्टोर",
+  "Select a backup file stored on your device.": "अपने डिवाइस पर संग्रहीत एक बैकअप फ़ाइल का चयन करें।",
+  "Retrieve the latest backup from Google Drive.": "Google ड्राइव से नवीनतम बैकअप प्राप्त करें।",
+  "Turn on cloud backup to enable manual backup to Google Drive.": "Google ड्राइव में मैनुअल बैकअप को सक्षम करने के लिए क्लाउड बैकअप चालू करें।"
 
 }

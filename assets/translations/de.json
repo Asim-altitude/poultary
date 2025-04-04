@@ -637,11 +637,28 @@
  "Save a copy of your data securely": "Speichern Sie eine Kopie Ihrer Daten sicher",
  "Restore data from a previous backup": "Stellen Sie Daten aus einer früheren Sicherung wieder her",
  "Poultry": "Geflügel",
- "Products": "Produkte",
- "Disclosure": "Offenlegung",
- "Disclosure_Detail": "Wir sind Teilnehmer am Amazon Services LLC Associates -Programm, einem Affiliate -Werbeprogramm, das uns ein Mittel zur Verfügung stellen soll, um Gebühren zu erhalten, indem wir mit Amazon.com und verbundenen Websites verlinken.",
- "Products not available.": "Produkte nicht verfügbar.",
- "Please try again later.": "Bitte versuchen Sie es später erneut.",
- "View on Amazon": "Ansicht bei Amazon"
+
+ "Select a backup file from the list below": "Wählen Sie aus der folgenden Liste eine Sicherungsdatei aus",
+ "Recommended": "Empfohlen",
+ "Created on": "Erstellt auf",
+ "✅ Restored from": "✅ restauriert von",
+ "❌ No backups found.": "❌ Keine Backups gefunden.",
+ "❌ Could not Backup": "❌ konnte nicht sichern",
+ "✅ Backup Created Successfully": "✅ erfolgreich erstellt wurde",
+ "✅ Backup Updated Successfully": "✅ Backup erfolgreich aktualisiert",
+ "❌ Database file not found!": "❌ Datenbankdatei nicht gefunden!",
+ "Signed in as": "Signiert in As",
+ "Backup to Google Drive": "Sicherung auf Google Drive",
+ "Backup In Progress...": "Backup in Arbeit ...",
+ "Account Connected": "Konto angeschlossen",
+ "Sign In": "Anmelden",
+ "Cloud Backup": "Wolkensicherung",
+ "Choose a restore method to recover your data.": "Wählen Sie eine Wiederherstellungsmethode, um Ihre Daten wiederherzustellen.",
+ "Restore from Google Drive": "Wiederherstellen Sie von Google Drive wieder her",
+ "Restore from Local Storage": "Estore aus lokaler Lagerung",
+ "Select a backup file stored on your device.": "Wählen Sie eine Sicherungsdatei, die auf Ihrem Gerät gespeichert ist.",
+ "Retrieve the latest backup from Google Drive.": "Abrufen Sie die neueste Sicherung von Google Drive ab.",
+ "Turn on cloud backup to enable manual backup to Google Drive.": "Schalten Sie die Cloud -Sicherung ein, um die manuelle Sicherung für Google Drive zu aktivieren."
+
 
 }
