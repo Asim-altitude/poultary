@@ -546,7 +546,6 @@ class Utils {
       Utils.isShowAdd = true;
       inititalize();
     }
-    Utils.isShowAdd = false;
 
   }
   static Future<void> inititalize() async {
@@ -735,6 +734,26 @@ class Utils {
     } else {
       if (Platform.isAndroid) {
         return 'ca-app-pub-2367135251513556/5356132442';
+      } else if (Platform.isIOS) {
+        return 'ca-app-pub-2367135251513556/3625162389';
+      } else {
+        throw new UnsupportedError('Unsupported platform');
+      }
+    }
+  }
+
+  static String get rewardedAdUnitId {
+    if (ISTESTACCOUNT) {
+      if (Platform.isAndroid) {
+        return "ca-app-pub-3940256099942544/5354046379";
+      } else if (Platform.isIOS) {
+        return "ca-app-pub-3940256099942544/6978759866";
+      } else {
+        throw new UnsupportedError("Unsupported platform");
+      }
+    } else {
+      if (Platform.isAndroid) {
+        return 'ca-app-pub-2367135251513556/2933923124';
       } else if (Platform.isIOS) {
         return 'ca-app-pub-2367135251513556/3625162389';
       } else {
