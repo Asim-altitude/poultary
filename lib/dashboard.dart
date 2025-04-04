@@ -946,6 +946,7 @@ class _DashboardScreen extends State<DashboardScreen> {
       },
       borderRadius: BorderRadius.circular(16), // To match the container radius
       child: Container(
+        height: 64,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [Utils.getThemeColorBlue(), Colors.blue.shade700], // Lighter gradient
@@ -971,16 +972,19 @@ class _DashboardScreen extends State<DashboardScreen> {
                   Row(
                     children: [
                       Icon(icon, color: color, size: 15),
+                      SizedBox(width: 2,),
                       Text(title.tr(),
                           style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color)),
                     ],
                   ),
                   SizedBox(height: 3),
-                  FittedBox(
+                  Flexible(
+                    child:
+                    FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(amount,
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-                  ),
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                  ),),
                 ],
               ),
             ],
