@@ -3,7 +3,7 @@ import 'dart:core';
 
 
 
-class FeedFlock_Report_Item{
+class FeedFlock_Report_Item {
 
   String f_name = "";
   num? consumption = 0;

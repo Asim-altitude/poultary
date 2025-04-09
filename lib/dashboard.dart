@@ -963,8 +963,7 @@ class _DashboardScreen extends State<DashboardScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-             // ,
-              SizedBox(width: 5),
+             // ,SizedBox(width: 5),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -972,8 +971,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                     children: [
                       Icon(icon, color: color, size: 15),
                       Text(title.tr(),
-                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color)),
-                    ],
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color)),],
                   ),
                   SizedBox(height: 3),
                   FittedBox(
@@ -1000,7 +998,6 @@ class _DashboardScreen extends State<DashboardScreen> {
         );
       },
       child: Container(
-
         margin: EdgeInsets.only(left: 3,right: 3),
         padding: EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(

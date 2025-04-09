@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
+import 'package:poultary/model/feed_report_item.dart';
 import 'package:poultary/model/feed_summary_flock.dart';
+import 'package:poultary/model/feedflock_report_item.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
@@ -84,7 +86,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
   }
 
-  void getAllData() async{
+  void getAllData() async {
 
     await DatabaseHelper.instance.database;
 
@@ -226,7 +228,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                     borderRadius: BorderRadius.circular(8), // Adds ripple effect with rounded edges
                     child: Container(
                       height: 45,
-                      margin: EdgeInsets.only(right: 10, top: 15, bottom: 10),
+                      margin: EdgeInsets.only(right: 10, top: 10, bottom: 10),
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -763,11 +765,29 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
 
   void prepareListData() async {
 
-    Utils.feed_report_list = await DatabaseHelper.getAllFeedingsReport(str_date,end_date);
-    Utils.feed_flock_report_list = await DatabaseHelper.getAllFeedingsReportByFlock(str_date,end_date);
+   // Utils.feed_report_list = await DatabaseHelper.getAllFeedingsReport(str_date,end_date);
+    //Utils.feed_flock_report_list = await DatabaseHelper.getAllFeedingsReportByFlock(str_date,end_date);
 
+    Feed_Report_Item? feedItem = null;
+    List<Feed_Report_Item> feedList = [];
+
+    FeedFlock_Report_Item? feedFlock = null;
+    List<FeedFlock_Report_Item> feedbyFlocck = [];
+    for(int i=0;i<flockFeedSummary.length; i++)
+    {
+      feedFlock = new FeedFlock_Report_Item(f_name: flockFeedSummary.elementAt(i).f_name, consumption: flockFeedSummary.elementAt(i).totalQuantity);
+      feedbyFlocck.add(feedFlock);
+    }
+
+    for(int i=0;i<feedingSummary.length; i++)
+    {
+      feedItem = new Feed_Report_Item(feed_name: feedingSummary.elementAt(i).feedName, consumption: feedingSummary.elementAt(i).totalQuantity);
+      feedList.add(feedItem);
+    }
+
+    Utils.feed_flock_report_list = feedbyFlocck;
+    Utils.feed_report_list = feedList;
   }
-
 
 }
 

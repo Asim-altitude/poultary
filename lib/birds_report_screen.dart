@@ -429,11 +429,11 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                               children: [
                                 Text(
                                   'Added'.tr()+': ${summary.totalAdded}  ',
-                                  style: TextStyle(fontSize: 14, color: Colors.green.shade700),
+                                  style: TextStyle(fontSize: 12, color: Colors.green.shade700),
                                 ),
                                 Text(
                                   'Reduced'.tr()+': ${summary.totalReduced}',
-                                  style: TextStyle(fontSize: 14, color: Colors.red.shade700),
+                                  style: TextStyle(fontSize: 12, color: Colors.red.shade700),
                                 ),
                               ],
                             ),
