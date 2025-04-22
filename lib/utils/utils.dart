@@ -755,7 +755,7 @@ class Utils {
       if (Platform.isAndroid) {
         return 'ca-app-pub-2367135251513556/2933923124';
       } else if (Platform.isIOS) {
-        return 'ca-app-pub-2367135251513556/3625162389';
+        return 'ca-app-pub-2367135251513556/4974477114';
       } else {
         throw new UnsupportedError('Unsupported platform');
       }

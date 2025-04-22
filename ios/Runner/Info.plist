@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+<key>GIDClientID</key>
+<string>647617333104-nnus87v25dcpbvojdou5e40e45ecpo08.apps.googleusercontent.com</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>This identifier will be used to deliver personalized ads to you.</string>
 	<key>CFBundleLocalizations</key>
@@ -233,7 +235,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>your-client-id.apps.googleusercontent.com</string>
+          <string>com.googleusercontent.apps.647617333104-nnus87v25dcpbvojdou5e40e45ecpo08</string>
         </array>
       </dict>
     </array>
@@ -266,11 +268,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.1.0</string>
+	<string>2.2.0</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>10</string>
+	<string>11</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
