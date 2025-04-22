@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
 
@@ -7,7 +6,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -17,7 +15,6 @@ import 'package:language_picker/languages.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:poultary/model/custom_category_data.dart';
 import 'package:poultary/utils/session_manager.dart';
-import '../CAS_Ads.dart';
 import 'package:uuid/uuid.dart';
 import '../birds_report_screen.dart';
 import '../custom_category_report.dart';
@@ -25,9 +22,7 @@ import '../database/databse_helper.dart';
 import '../eggs_report_screen.dart';
 import '../financial_report_screen.dart';
 import '../health_report_screen.dart';
-import '../model/bird_item.dart';
 import '../model/bird_model.dart';
-import '../model/bird_product.dart';
 import '../model/custom_category.dart';
 import '../model/egg_item.dart';
 import '../model/egg_report_item.dart';
@@ -546,7 +541,7 @@ class Utils {
       Utils.isShowAdd = true;
       inititalize();
     }
-
+    Utils.isShowAdd = false;
   }
   static Future<void> inititalize() async {
     // CAS.setDebugMode(true);

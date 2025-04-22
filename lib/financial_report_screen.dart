@@ -128,9 +128,20 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
     List<Intl> amount = [];
     double tamount = 0;
     int added = -1;
+    flockFinanceList = (await DatabaseHelper.getFlockWiseIncomeExpense(st, end))!;
+    if(f_id != -1) {
+      List<FlockIncomeExpense> singleFlockList = [];
+     for(int i=0;i<flockFinanceList.length;i++){
+       if(flockFinanceList.elementAt(i).fId == f_id)
+         singleFlockList.add(flockFinanceList.elementAt(i));
+     }
+      Utils.flockfinanceList = singleFlockList;
+    }
+    else
+    {
+      Utils.flockfinanceList = flockFinanceList;
+    }
 
-    flockFinanceList = (await DatabaseHelper.getFlockWiseIncomeExpense(st,end))!;
-    Utils.flockfinanceList = flockFinanceList;
     list = await DatabaseHelper.getReportFilteredTransactions(f_id,"All",st,end);
     incomeChartData = await DatabaseHelper.getFinanceChartData(f_id,st, end,"Income");
     expenseChartData = await DatabaseHelper.getFinanceChartData(f_id,st, end,"Expense");
