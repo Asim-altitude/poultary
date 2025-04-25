@@ -43,6 +43,7 @@ class _DashboardScreen extends State<DashboardScreen> {
     Languages.portuguese,
     Languages.turkish,
     Languages.french,
+    Languages.italian,
     Languages.indonesian,
     Languages.hindi,
     Languages.spanish,

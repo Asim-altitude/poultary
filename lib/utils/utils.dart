@@ -1037,6 +1037,9 @@ class Utils {
     else if(language.isoCode =="fr"){
       languageName = "fr";
     }
+    else if(language.isoCode =="it"){
+      languageName = "it";
+    }
     else if(language.isoCode =="id"){
       languageName = "id";
     }
