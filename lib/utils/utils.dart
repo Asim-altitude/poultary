@@ -571,7 +571,6 @@ class Utils {
       Utils.isShowAdd = true;
       inititalize();
     }
-    Utils.isShowAdd = false;
   }
 
   static Future<void> inititalize() async {
@@ -968,6 +967,9 @@ class Utils {
     }
     else if(language =="ta"){
       return Languages.tamil;
+    }
+    else if(language =="it"){
+      return Languages.italian;
     }
     else if(language =="ur"){
       return Languages.urdu;
