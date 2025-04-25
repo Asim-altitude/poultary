@@ -7,17 +7,22 @@ import '../model/feed_stock_history.dart';
 import '../model/feed_stock_summary.dart';
 import '../sticky.dart';
 
+class StockDetailScreen extends StatefulWidget{
+   FeedStockSummary stock;
+   List<FeedStockHistory> stockHistory;
 
-class StockDetailScreen extends StatelessWidget {
-  final FeedStockSummary stock;
-  final List<FeedStockHistory> stockHistory;
+    StockDetailScreen({Key? key, required this.stock, required this. stockHistory}) : super(key: key);
 
-  StockDetailScreen({required this.stock, required this.stockHistory});
+  @override
+  _StockDetailScreen  createState() => _StockDetailScreen();
+}
+
+class _StockDetailScreen extends State<StockDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Stock Details")),
+      appBar: AppBar(title: Text("Stock Details".tr())),
       body: Padding(
         padding: const EdgeInsets.all(5.0),
         child: Column(
@@ -25,7 +30,7 @@ class StockDetailScreen extends StatelessWidget {
           children: [
             // **Stock Summary Section**
 
-            _buildStockItem(stock, 0, kAlwaysCompleteAnimation),
+            _buildStockItem(widget.stock, 0, kAlwaysCompleteAnimation),
 
             SizedBox(height: 16),
 
@@ -41,9 +46,9 @@ class StockDetailScreen extends StatelessWidget {
               child: Container(
                 margin: EdgeInsets.all(10),
                 child: ListView.builder(
-                  itemCount: stockHistory.length,
+                  itemCount: widget.stockHistory.length,
                   itemBuilder: (context, index) {
-                    final entry = stockHistory[index];
+                    final entry = widget.stockHistory[index];
 
                     return Dismissible(
                       key: Key(entry.id.toString()), // Use a unique key for each item
@@ -65,8 +70,16 @@ class StockDetailScreen extends StatelessWidget {
                               TextButton(
                                 onPressed: () async{
                                  // _deleteStock(entry.id);
-                                   DatabaseHelper.deleteFeedStock(entry.id!);
-                                   Navigator.of(context).pop(true);
+                                  DatabaseHelper.deleteFeedStock(entry.id!);
+                                  Utils.showToast("SUCCESSFUL".tr());
+                                  setState(() {
+                                    widget.stockHistory.remove(entry);
+                                  });
+
+                                  if(widget.stockHistory.isEmpty){
+                                    Navigator.pop(context);
+                                  }
+                                  Navigator.of(context).pop(true);
                                 },
                                 child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
                               ),
@@ -89,11 +102,41 @@ class StockDetailScreen extends StatelessWidget {
                             color: entry.source == 'PURCHASED' ? Colors.green : Colors.orange,
                           ),
                           title: Text(
-                            "${entry.quantity} ${entry.unit} from ${entry.source}",
+                            "${entry.quantity} ${entry.unit.tr()} from ${entry.source.tr()}",
                             style: TextStyle(fontSize: 16),
                           ),
                           subtitle: Text("DATE".tr()+": ${Utils.getFormattedDate(entry.date)}"),
+                          trailing: IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () async {
+                              return await showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text("Delete Entry".tr()),
+                                  content: Text("Are you sure you want to delete this stock entry?".tr()),
+                                  actions: [
+                                    TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("CANCEL".tr())),
+                                    TextButton(
+                                      onPressed: () async{
+                                        // _deleteStock(entry.id);
+                                        DatabaseHelper.deleteFeedStock(entry.id!);
+                                        Utils.showToast("SUCCESSFUL".tr());
+                                        setState(() {
+                                          widget.stockHistory.remove(entry);
+                                        });
 
+                                        if(widget.stockHistory.isEmpty){
+                                          Navigator.pop(context);
+                                        }
+                                        Navigator.of(context).pop(true);
+                                      },
+                                      child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
                     );
@@ -107,6 +150,7 @@ class StockDetailScreen extends StatelessWidget {
       ),
     );
   }
+
 
   Widget _buildStockItem(FeedStockSummary stock, int index, Animation<double> animation) {
     double progress = stock.totalStock > 0 ? stock.usedStock / stock.totalStock : 0.0;

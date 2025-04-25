@@ -660,5 +660,10 @@
   "Restore from Local Storage": "Estore z lokalnego przechowywania",
   "Select a backup file stored on your device.": "Wybierz plik kopii zapasowej przechowywany na urządzeniu.",
   "Retrieve the latest backup from Google Drive.": "Odzyskaj najnowszą kopię zapasową z Dysku Google.",
-  "Turn on cloud backup to enable manual backup to Google Drive.": "Włącz kopię zapasową w chmurze, aby umożliwić ręczne kopie zapasowe na Dysk Google."
+  "Turn on cloud backup to enable manual backup to Google Drive.": "Włącz kopię zapasową w chmurze, aby umożliwić ręczne kopie zapasowe na Dysk Google.",
+
+  "Stock Details": "Szczegóły magazynowe",
+  "Age": "Wiek",
+  "lbs": "lbs"
+
 }

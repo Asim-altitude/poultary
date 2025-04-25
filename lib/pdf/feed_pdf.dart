@@ -171,7 +171,7 @@ class Invoice {
                         fontSize: 10,
                       ),
                     ),), pw.Text(
-                    getFeedTotal().toString()+" "+"KG".tr(),
+                    getFeedTotal().toString()+" "+Utils.selected_unit.tr(),
                     style: pw.TextStyle(
                       color: PdfColors.black,
                       fontWeight: pw.FontWeight.bold,
@@ -213,7 +213,7 @@ class Invoice {
                         ),
                       ),),
                   pw.Text(
-                      getFLockTotal().toString()+" "+"KG".tr(),
+                      getFLockTotal().toString()+" "+Utils.selected_unit.tr(),
                       style: pw.TextStyle(
                         color: PdfColors.black,
                         fontWeight: pw.FontWeight.bold,

@@ -639,7 +639,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                             children: [
 
                               Expanded(child: getSummaryCard(Icons.egg, "Eggs", "$total_eggs_collected", Colors.white, EggsReportsScreen(), context)),
-                              Expanded(child: getSummaryCard(Icons.food_bank, "Feed", "$total_feed_consumption"+ "KG".tr(), Colors.white, FeedReportsScreen(), context)),
+                              Expanded(child: getSummaryCard(Icons.food_bank, "Feed", "$total_feed_consumption"+ Utils.selected_unit.tr(), Colors.white, FeedReportsScreen(), context)),
                               Expanded(child: getSummaryCard(Icons.medical_information, "Health", "$treatmentCount", Colors.white, HealthReportScreen(), context)),
                             ],
                           ),

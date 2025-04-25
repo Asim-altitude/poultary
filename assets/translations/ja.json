@@ -660,5 +660,10 @@
  "Restore from Local Storage": "ローカルストレージからのestore",
  "Select a backup file stored on your device.": "デバイスに保存されているバックアップファイルを選択します。",
  "Retrieve the latest backup from Google Drive.": "Googleドライブから最新のバックアップを取得します。",
- "Turn on cloud backup to enable manual backup to Google Drive.": "クラウドバックアップをオンにして、Googleドライブに手動バックアップを有効にします。"
+ "Turn on cloud backup to enable manual backup to Google Drive.": "クラウドバックアップをオンにして、Googleドライブに手動バックアップを有効にします。",
+
+ "Stock Details": "在庫の詳細",
+ "Age": "年",
+ "lbs": "lbs"
+
 }

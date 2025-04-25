@@ -660,5 +660,11 @@
  "Restore from Local Storage": "현지 저장소의 Estore",
  "Select a backup file stored on your device.": "장치에 저장된 백업 파일을 선택하십시오.",
  "Retrieve the latest backup from Google Drive.": "Google 드라이브에서 최신 백업을 검색하십시오.",
- "Turn on cloud backup to enable manual backup to Google Drive.": "클라우드 백업을 켜서 Google 드라이브로 수동 백업을 활성화하십시오."
+ "Turn on cloud backup to enable manual backup to Google Drive.": "클라우드 백업을 켜서 Google 드라이브로 수동 백업을 활성화하십시오.",
+
+ "Stock Details": "주식 세부 사항",
+ "Age": "나이",
+ "lbs": "LBS"
+
+
 }

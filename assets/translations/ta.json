@@ -661,5 +661,10 @@
   "Restore from Local Storage": "உள்ளூர் சேமிப்பகத்திலிருந்து எஸ்டோர்",
   "Select a backup file stored on your device.": "உங்கள் சாதனத்தில் சேமிக்கப்பட்ட காப்பு கோப்பைத் தேர்ந்தெடுக்கவும்.",
   "Retrieve the latest backup from Google Drive.": "கூகிள் டிரைவிலிருந்து சமீபத்திய காப்புப்பிரதியை மீட்டெடுக்கவும்.",
-  "Turn on cloud backup to enable manual backup to Google Drive.": "கூகிள் டிரைவிற்கு கையேடு காப்புப்பிரதியை இயக்க கிளவுட் காப்புப்பிரதியை இயக்கவும்."
+  "Turn on cloud backup to enable manual backup to Google Drive.": "கூகிள் டிரைவிற்கு கையேடு காப்புப்பிரதியை இயக்க கிளவுட் காப்புப்பிரதியை இயக்கவும்.",
+
+  "Stock Details": "பங்கு விவரங்கள்",
+  "Age": "வயது",
+  "lbs": "பவுண்ட்"
+
 }

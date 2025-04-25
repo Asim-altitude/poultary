@@ -660,5 +660,10 @@
   "Restore from Local Storage": "Estore dari penyimpanan lokal",
   "Select a backup file stored on your device.": "Pilih file cadangan yang disimpan di perangkat Anda.",
   "Retrieve the latest backup from Google Drive.": "Ambil cadangan terbaru dari Google Drive.",
-  "Turn on cloud backup to enable manual backup to Google Drive.": "Nyalakan cadangan cloud untuk mengaktifkan cadangan manual ke Google Drive."
+  "Turn on cloud backup to enable manual backup to Google Drive.": "Nyalakan cadangan cloud untuk mengaktifkan cadangan manual ke Google Drive.",
+
+  "Stock Details": "Detail stok",
+  "Age": "Usia",
+  "lbs": "lbs"
+
 }

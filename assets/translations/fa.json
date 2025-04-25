@@ -659,7 +659,11 @@
  "Restore from Local Storage": "استور از ذخیره محلی",
  "Select a backup file stored on your device.": "یک فایل پشتیبان ذخیره شده در دستگاه خود را انتخاب کنید.",
  "Retrieve the latest backup from Google Drive.": "آخرین نسخه پشتیبان را از Google Drive بازیابی کنید.",
- "Turn on cloud backup to enable manual backup to Google Drive.": "برای فعال کردن پشتیبان گیری دستی به Google Drive ، نسخه پشتیبان تهیه Cloud را روشن کنید."
+ "Turn on cloud backup to enable manual backup to Google Drive.": "برای فعال کردن پشتیبان گیری دستی به Google Drive ، نسخه پشتیبان تهیه Cloud را روشن کنید.",
+
+ "Stock Details": "جزئیات سهام",
+ "Age": "پیری",
+ "lbs": "ضامن"
 
 
 }

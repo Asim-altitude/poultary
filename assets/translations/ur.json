@@ -658,6 +658,8 @@
   "Restore from Local Storage": "مقامی اسٹوریج سے ایسٹور",
   "Select a backup file stored on your device.": "اپنے آلے پر ذخیرہ شدہ بیک اپ فائل منتخب کریں۔",
   "Retrieve the latest backup from Google Drive.": "گوگل ڈرائیو سے تازہ ترین بیک اپ بازیافت کریں۔",
-  "Turn on cloud backup to enable manual backup to Google Drive.": "گوگل ڈرائیو میں دستی بیک اپ کو فعال کرنے کے لئے کلاؤڈ بیک اپ کو آن کریں۔"
-
+  "Turn on cloud backup to enable manual backup to Google Drive.": "گوگل ڈرائیو میں دستی بیک اپ کو فعال کرنے کے لئے کلاؤڈ بیک اپ کو آن کریں۔",
+  "Stock Details": "اسٹاک کی تفصیلات",
+  "Age": "عمر",
+  "lbs": "lbs"
 }

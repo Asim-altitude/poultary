@@ -671,6 +671,11 @@
   "Restore from Local Storage": "Restore from Local Storage",
   "Select a backup file stored on your device.": "Select a backup file stored on your device.",
   "Retrieve the latest backup from Google Drive.": "Retrieve the latest backup from Google Drive.",
-  "Turn on cloud backup to enable manual backup to Google Drive.": "Turn on cloud backup to enable manual backup to Google Drive."
+  "Turn on cloud backup to enable manual backup to Google Drive.": "Turn on cloud backup to enable manual backup to Google Drive.",
+
+  "Stock Details": "Stock Details",
+  "Age": "Age",
+  "lbs": "lbs"
+
 
 }

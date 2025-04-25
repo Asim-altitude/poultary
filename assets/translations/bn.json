@@ -661,6 +661,10 @@
   "Restore from Local Storage": "স্থানীয় স্টোরেজ থেকে এস্টোর",
   "Select a backup file stored on your device.": "আপনার ডিভাইসে সঞ্চিত একটি ব্যাকআপ ফাইল নির্বাচন করুন।",
   "Retrieve the latest backup from Google Drive.": "গুগল ড্রাইভ থেকে সর্বশেষ ব্যাকআপ পুনরুদ্ধার করুন।",
-  "Turn on cloud backup to enable manual backup to Google Drive.": "গুগল ড্রাইভে ম্যানুয়াল ব্যাকআপ সক্ষম করতে ক্লাউড ব্যাকআপ চালু করুন।"
+  "Turn on cloud backup to enable manual backup to Google Drive.": "গুগল ড্রাইভে ম্যানুয়াল ব্যাকআপ সক্ষম করতে ক্লাউড ব্যাকআপ চালু করুন।",
+
+  "Stock Details": "স্টক বিশদ",
+  "Age": "বয়স",
+  "lbs": "পাউন্ড"
 
 }

@@ -2775,6 +2775,22 @@ class DatabaseHelper  {
     };
   }
 
+  static Future<int> getFlockMortalityCount( int flockId) async {
+    final List<Map<String, Object?>>? result = await _database?.rawQuery(
+      '''
+    SELECT SUM(item_count) as mortality
+    FROM flock_detail
+    WHERE f_id = ? AND item_type = 'Reduction' AND reason = 'MORTALITY'
+    ''',
+      [flockId],
+    );
+
+    if (result!.isNotEmpty && result.first['mortality'] != null) {
+      return result.first['mortality'] as int;
+    } else {
+      return 0;
+    }
+  }
 
   static Future<int?> updateFlockInfo(Flock flock) async {
     return await _database?.update(

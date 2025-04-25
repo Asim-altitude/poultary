@@ -655,5 +655,10 @@
  "Restore from Local Storage": "Yerel depolamadan estore",
  "Select a backup file stored on your device.": "Cihazınızda depolanan bir yedekleme dosyası seçin.",
  "Retrieve the latest backup from Google Drive.": "Google Drive'dan en son yedeklemeyi alın.",
- "Turn on cloud backup to enable manual backup to Google Drive.": "Google Drive'a manuel yedeklemeyi etkinleştirmek için bulut yedeklemesini açın."
+ "Turn on cloud backup to enable manual backup to Google Drive.": "Google Drive'a manuel yedeklemeyi etkinleştirmek için bulut yedeklemesini açın.",
+
+ "Stock Details": "Stok detayları",
+ "Age": "Yaş",
+ "lbs": "lbs"
+
 }

@@ -102,7 +102,7 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
                             style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
                           ),
                           Text(
-                           "KG".tr(),
+                            Utils.selected_unit.tr(),
                             style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                           ),
                         ],
@@ -119,7 +119,7 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
                             style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            "KG".tr(),
+                            Utils.selected_unit.tr(),
                             style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                           ),
                         ],
@@ -146,7 +146,7 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
                       SizedBox(width: 6),
                       Flexible(
                         child: Text(
-                          "Available".tr()+": ${stock.availableStock}"+"KG".tr(),
+                          "Available".tr()+": ${stock.availableStock}"+Utils.selected_unit.tr(),
                           style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
                           overflow: TextOverflow.ellipsis, // Prevents overflow
                           softWrap: true, // Allows wrapping
@@ -436,7 +436,7 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
     FeedStockHistory stock = FeedStockHistory(
       feedId: getFeedIdbyName(),
       quantity: double.parse(_quantityController.text),
-      unit: "KG",
+      unit: Utils.selected_unit,
       source: finalSource,
       date: DateFormat('yyyy-MM-dd').format(_selectedDate), // Use selected date
       feed_name: _selectedFeed!,
@@ -526,7 +526,7 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
                     border: Border.all(color: Colors.grey.shade400),
                   ),
                   child: Text(
-                    "KG".tr(),
+                    Utils.selected_unit.tr(),
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black87),
                   ),
                 ),

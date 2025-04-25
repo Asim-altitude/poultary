@@ -42,7 +42,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
   }
 
   String date = "Choose date";
-  void getUsage() async{
+  void getUsage() async {
     birdUsageList = await DatabaseHelper.getBirdUSage(Utils.selected_flock!.f_id);
 
     print("BIRD USAGES ${birdUsageList.length}");
@@ -58,6 +58,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
   void getImages() async {
 
    await DatabaseHelper.instance.database;
+
 
    images = await DatabaseHelper.getFlockImage(Utils.selected_flock!.f_id);
 
@@ -93,10 +94,13 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
   }
 
+  int mortalityCount = 0;
+
   List<CustomCategory> categories = [];
   List<CustomCategory> defaultcategories = [];
   Future<void> getAllCategories() async {
 
+    mortalityCount = await DatabaseHelper.getFlockMortalityCount(Utils.selected_flock!.f_id);
     defaultcategories = Utils.getDefaultFlockCatgories();
 
     categories = (await DatabaseHelper.getCustomCategories())!;
@@ -205,16 +209,25 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                       children: [
 
                         /// **Flock Icon**
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white10, // Subtle background
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          padding: EdgeInsets.all(10),
-                          child: Image.asset(
-                            Utils.selected_flock!.icon.replaceAll("jpeg", "png"),
-                            width: 90, height: 90,
-                          ),
+                        Column(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white10, // Subtle background
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: EdgeInsets.all(10),
+                              child: Image.asset(
+                                Utils.selected_flock!.icon.replaceAll("jpeg", "png"),
+                                width: 90, height: 90,
+                              ),
+                            ),
+                            Text(
+                              Utils.selected_flock!.acqusition_type.tr(),
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white,),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
 
                         SizedBox(width: 10),
@@ -224,7 +237,6 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-
                               /// **Bird Count**
                               Row(
                                 children: [
@@ -257,23 +269,20 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
                               SizedBox(height: 5),
 
-                              /// **Acquisition Type**
+
                               Row(
                                 children: [
-                                  Icon(Icons.card_travel, color: Colors.white70, size: 18),
+                                  Icon(Icons.watch_later_outlined, color: Colors.white70, size: 18),
                                   SizedBox(width: 5),
-                                  Text('ACQUSITION'.tr() + ": ", style: TextStyle(fontSize: 12, color: Colors.white70)),
-                                  Expanded(
-                                    child: Text(
-                                      Utils.selected_flock!.acqusition_type.tr(),
-                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white, decoration: TextDecoration.underline),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
+                                  Text('Age'.tr() + ": ", style: TextStyle(fontSize: 12, color: Colors.white70)),
+                                  Text(
+                                    Utils.getAnimalAge(Utils.selected_flock!.acqusition_date),
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
                                   ),
                                 ],
                               ),
-
                               SizedBox(height: 5),
+
 
                               /// **Acquisition Date**
                               Row(
@@ -293,48 +302,12 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                       ],
                     ),
 
-                  /*  /// **Bird Usage List**
-                    if (birdUsageList.isNotEmpty)
-                      Container(
-                        height: 45,
-                        width: double.infinity,
-                        margin: EdgeInsets.symmetric(vertical: 10),
-                        child: ListView.builder(
-                          itemCount: birdUsageList.length,
-                          scrollDirection: Axis.horizontal,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Container(
-                              height: 45,
-                              padding: EdgeInsets.symmetric(horizontal: 10),
-                              margin: EdgeInsets.only(right: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.white12,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    birdUsageList[index].reason.tr(),
-                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    birdUsageList[index].sum,
-                                    style: TextStyle(fontSize: 14, color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),*/
-
+                    SizedBox(height: 10,),
                     /// **Notes Section**
                     if (Utils.selected_flock!.notes.isNotEmpty)
                       Container(
-
                         padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(left: 5, right: 5),
                         decoration: BoxDecoration(
                           color: Colors.white12,
                           borderRadius: BorderRadius.circular(8),
@@ -345,6 +318,34 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                         ),
                       ),
 
+                    Card(
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      color: Utils.getScreenBackground(),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+                                SizedBox(width: 5,),
+                                Text("MORTALITY".tr(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.red)),
+                              ],
+                            ),
+
+                            Row(
+                              children: [
+                                SizedBox(height: 4),
+                                Text("$mortalityCount "+"BIRDS".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+
+                          ],
+                        ),
+                      ),
+                    ),
                     /// **Images List**
                     if (imagesAdded)
                       Container(
@@ -417,7 +418,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
               ),
               Container(
                 height: heightScreen,
-                margin: EdgeInsets.only(top: 30),
+                margin: EdgeInsets.only(top: 20),
                 padding: EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
@@ -1153,6 +1154,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     );
 
     Utils.selected_flock = await DatabaseHelper.findFlock(Utils.selected_flock!.f_id);
+    mortalityCount = await DatabaseHelper.getFlockMortalityCount(Utils.selected_flock!.f_id);
     setState(() {
 
     });

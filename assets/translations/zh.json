@@ -656,6 +656,9 @@
   "Restore from Local Storage": "从本地存储中估计",
   "Select a backup file stored on your device.": "选择存储在设备上的备份文件。",
   "Retrieve the latest backup from Google Drive.": "从Google Drive检索最新备份。",
-  "Turn on cloud backup to enable manual backup to Google Drive.": "打开云备份以启用手动备份到Google Drive。"
+  "Turn on cloud backup to enable manual backup to Google Drive.": "打开云备份以启用手动备份到Google Drive。",
+  "Stock Details": "库存详细信息",
+  "Age": "年龄",
+  "lbs": "磅"
 
 }

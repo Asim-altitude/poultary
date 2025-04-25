@@ -660,6 +660,10 @@
  "Restore from Local Storage": "Encontro do armazenamento local",
  "Select a backup file stored on your device.": "Selecione um arquivo de backup armazenado no seu dispositivo.",
  "Retrieve the latest backup from Google Drive.": "Recupere o backup mais recente do Google Drive.",
- "Turn on cloud backup to enable manual backup to Google Drive.": "Ligue o backup da nuvem para ativar o backup manual no Google Drive."
+ "Turn on cloud backup to enable manual backup to Google Drive.": "Ligue o backup da nuvem para ativar o backup manual no Google Drive.",
+
+ "Stock Details": "Detalhes das ações",
+ "Age": "Idade",
+ "lbs": "lbs"
 
 }

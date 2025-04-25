@@ -659,6 +659,11 @@
   "Restore from Local Storage": "स्थानीय भंडारण से एस्टोर",
   "Select a backup file stored on your device.": "अपने डिवाइस पर संग्रहीत एक बैकअप फ़ाइल का चयन करें।",
   "Retrieve the latest backup from Google Drive.": "Google ड्राइव से नवीनतम बैकअप प्राप्त करें।",
-  "Turn on cloud backup to enable manual backup to Google Drive.": "Google ड्राइव में मैनुअल बैकअप को सक्षम करने के लिए क्लाउड बैकअप चालू करें।"
+  "Turn on cloud backup to enable manual backup to Google Drive.": "Google ड्राइव में मैनुअल बैकअप को सक्षम करने के लिए क्लाउड बैकअप चालू करें।",
+
+
+  "Stock Details": "स्टॉक विवरण",
+  "Age": "आयु",
+  "lbs": "एलबीएस"
 
 }

@@ -26,6 +26,20 @@ class SessionManager {
   static final String dash_filter = "dash_filter";
   static final String report_filter = "report_filter";
   static final String other_filter = "other_filter";
+  static final String unit_key = "unit_key";
+
+
+  static Future<void> setUnit(String countryCode) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString(SessionManager.unit_key, countryCode);
+  }
+
+  static Future<String> getUnit() async {
+    final SharedPreferences pref = await SharedPreferences.getInstance();
+    String unit;
+    unit = pref.getString(SessionManager.unit_key) ?? "KG";
+    return unit;
+  }
 
   static Future<void> setUserID(int userid) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();

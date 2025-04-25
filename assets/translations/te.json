@@ -661,6 +661,11 @@
   "Restore from Local Storage": "స్థానిక నిల్వ నుండి ఎస్టోర్",
   "Select a backup file stored on your device.": "మీ పరికరంలో నిల్వ చేసిన బ్యాకప్ ఫైల్‌ను ఎంచుకోండి.",
   "Retrieve the latest backup from Google Drive.": "గూగుల్ డ్రైవ్ నుండి తాజా బ్యాకప్‌ను తిరిగి పొందండి.",
-  "Turn on cloud backup to enable manual backup to Google Drive.": "గూగుల్ డ్రైవ్‌కు మాన్యువల్ బ్యాకప్‌ను ప్రారంభించడానికి క్లౌడ్ బ్యాకప్‌ను ఆన్ చేయండి."
+  "Turn on cloud backup to enable manual backup to Google Drive.": "గూగుల్ డ్రైవ్‌కు మాన్యువల్ బ్యాకప్‌ను ప్రారంభించడానికి క్లౌడ్ బ్యాకప్‌ను ఆన్ చేయండి.",
+
+
+  "Stock Details": "స్టాక్ వివరాలు",
+  "Age": "వయస్సు",
+  "lbs": "పౌండ్లు"
 
 }

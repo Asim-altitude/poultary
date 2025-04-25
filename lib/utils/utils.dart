@@ -114,6 +114,8 @@ class Utils {
   static String SELECTED_FLOCK = "";
   static int SELECTED_FLOCK_ID = -1;
 
+  static String selected_unit = "KG";
+
   static List<Flock_Report_Item> flock_report_list = [];
   static List<Egg_Report_Item> egg_report_list = [];
   static List<Feed_Report_Item> feed_report_list = [];
@@ -481,6 +483,34 @@ class Utils {
     return missingCurrencies;
   }
 
+  static String getAnimalAge(String dob) {
+    try {
+      DateTime birthDate = DateFormat("yyyy-MM-dd").parse(dob);
+      DateTime today = DateTime.now();
+
+      Duration ageDuration = today.difference(birthDate);
+      int totalDays = ageDuration.inDays;
+      int years = totalDays ~/ 365;
+      int remainingDays = totalDays % 365;
+      int months = remainingDays ~/ 30;
+      int days = remainingDays % 30;
+
+      if (totalDays < 30) {
+        return "$totalDays "+ "days".tr(); // Show only days if less than a month
+      } else if (years > 0 && months == 0) {
+        return "$years "+ "years".tr()+" $days "+ "days".tr(); // Show days if 0 months
+      } else if (years > 0) {
+        return "$years "+ "years".tr()+" $months "+"months".tr();
+      } else {
+        return "$months "+ "months".tr()+" $days "+ "days".tr();
+      }
+    } catch (e) {
+      print("Error parsing DOB: $e");
+      return "-"; // Return '-' if error
+    }
+  }
+
+
   static double roundTo2Decimal(double value) {
     return (value * 100).roundToDouble() / 100;
   }
@@ -541,7 +571,9 @@ class Utils {
       Utils.isShowAdd = true;
       inititalize();
     }
+    Utils.isShowAdd = false;
   }
+
   static Future<void> inititalize() async {
     // CAS.setDebugMode(true);
 
@@ -626,7 +658,7 @@ class Utils {
 
   static bool checkIfContains(List<String> list ,String unit) {
     bool contains = false;
-    for(int i=0;i<list.length;i++){
+    for(int i=0;i<list.length;i++) {
       if(unit == list[i])
       {
         contains = true;

@@ -18,6 +18,7 @@ import 'package:poultary/utils/utils.dart';
 
 import '../database/databse_helper.dart';
 import '../model/farm_item.dart';
+import '../utils/session_manager.dart';
 
 
 class LanguageSetupScreen extends StatefulWidget {
@@ -57,7 +58,7 @@ class _LanguageSetupScreen extends State<LanguageSetupScreen>
     Languages.greek
 
   ];
-
+  String selectedUnit = 'KG';
   String selectedCurrency = "\$";
   late Language _selectedCupertinoLanguage;
   bool isGetLanguage = false;
@@ -181,176 +182,186 @@ class _LanguageSetupScreen extends State<LanguageSetupScreen>
               child: Column(
                 children: [
                   Utils.getDistanceBar(),
-                  SizedBox(height: 30,),
+                  SizedBox(height: 20,),
                   EasyStepper(
                     activeStep: activeStep,
                     activeStepTextColor: Colors.black87,
                     finishedStepTextColor: Colors.black87,
                     internalPadding: 30,
                     showLoadingAnimation: false,
-                    stepRadius: 8,
+                    stepRadius: 18,
                     showStepBorder: false,
                     steps: [
                       EasyStep(
                         customStep: CircleAvatar(
-                          radius: 8,
-                          backgroundColor: Colors.white,
-                          child: CircleAvatar(
-                            radius: 7,
-                            backgroundColor:
-                            activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey,
-                          ),
+                          radius: 15, // Increase size
+                          backgroundColor: activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey.shade300,
+                          child: Icon(Icons.language, size: 26, color: Colors.white),
                         ),
-                        title: 'Step 1',
+                        title: 'Language',
                       ),
                       EasyStep(
                         customStep: CircleAvatar(
-                          radius: 8,
-                          backgroundColor: Colors.white,
-                          child: CircleAvatar(
-                            radius: 7,
-                            backgroundColor:
-                            activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
-                          ),
+                          radius: 15,
+                          backgroundColor: activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey.shade300,
+                          child: Icon(Icons.business, size: 26, color: Colors.white),
                         ),
-                        title: 'Step 2',
-
+                        title: 'Farm Info',
                       ),
                       EasyStep(
                         customStep: CircleAvatar(
-                          radius: 8,
-                          backgroundColor: Colors.white,
-                          child: CircleAvatar(
-                            radius: 7,
-                            backgroundColor:
-                            activeStep >= 2 ? Utils.getThemeColorBlue() : Colors.grey,
-                          ),
+                          radius: 15,
+                          backgroundColor: activeStep >= 2 ? Utils.getThemeColorBlue() : Colors.grey.shade300,
+                          child: Icon(Icons.image, size: 26, color: Colors.white),
                         ),
-                        title: 'Step 3',
+                        title: 'Farm Image',
                       ),
                     ],
+
                     onStepReached: (index) =>
                         setState(() => activeStep = index),
                   ),
-                  SizedBox(height: 80,),
-                  activeStep==0?Image.asset(activeStep==0?"assets/language_icon.png":activeStep==1?"assets/bird_icon.png":"assets/add_icon.webp", width: 150, height: 150, color: Utils.getThemeColorBlue()): activeStep == 1? Image.asset(activeStep==0?"assets/language_icon.png":activeStep==1?"assets/bird_icon.png":"assets/add_icon.webp", width: 150, height: 150, color: Utils.getThemeColorBlue()):SizedBox(width: 1,height: 1,),
+                  activeStep==0? Image.asset(activeStep==0?"assets/language_icon.png":activeStep==1?"assets/bird_icon.png":"assets/photo_icon.png", width: 130, height: 130, color: Utils.getThemeColorBlue()): activeStep >= 1? Image.asset(activeStep==1?"assets/bird_icon.png":"assets/photo_icon.png", width: 150, height: 150, color: Utils.getThemeColorBlue()): SizedBox(width: 1,),
                   Text(activeStep==0?"Language and Currency".tr():activeStep==1?"FARM_NAME".tr()+" and "+"DATE".tr():"FARM_IMAGE".tr(), style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
                   Visibility(
                     visible: activeStep == 0? true : false,
                     child: Container(
                       height: heightScreen,
-                      margin: EdgeInsets.only(top: 20),
-                      child: Column(
-                         /* mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                        */  children: [
+                      margin: EdgeInsets.only(top: 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
 
-
-                          if(isGetLanguage)
-                            Container(
-                              width: widthScreen - 20,height:60,
-                              margin: EdgeInsets.only(left: 15, right: 15),
-                              padding: EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.withAlpha(70),
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(5.0)),
-                                border: Border.all(
-                                  color:  Colors.grey,
-                                  width: 1.0,
-                                ),
-                              ),
-                              child: LanguagePickerDropdown(
-
-                                initialValue: _selectedCupertinoLanguage,
-                                itemBuilder: _buildDropdownItem,
-                                languages: supportedLanguages,
-                                onValuePicked: (Language language) {
-                                  _selectedCupertinoLanguage = language;
-                                  // Utils.showToast(language.isoCode);
-                                  Utils.setSelectedLanguage(_selectedCupertinoLanguage,context);
-
-                                },
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              child: Text(
+                                "Select Language",
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                               ),
                             ),
+                            if (isGetLanguage)
+                              Container(
+                                width: widthScreen - 32,
+                                height: 60,
+                                margin: EdgeInsets.symmetric(horizontal: 16),
+                                padding: EdgeInsets.symmetric(horizontal: 12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.grey.shade400),
+                                ),
+                                child: LanguagePickerDropdown(
+                                  initialValue: _selectedCupertinoLanguage,
+                                  itemBuilder: _buildDropdownItem,
+                                  languages: supportedLanguages,
+                                  onValuePicked: (Language language) {
+                                    _selectedCupertinoLanguage = language;
+                                    Utils.setSelectedLanguage(_selectedCupertinoLanguage, context);
+                                  },
+                                ),
+                              ),
 
-                            SizedBox(height: 10,width: widthScreen),
+                            SizedBox(height: 10),
+
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                              child: Text(
+                                "Select Currency",
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                              ),
+                            ),
                             InkWell(
                               onTap: () {
                                 chooseCurrency();
                               },
                               child: Container(
-                                width: widthScreen,
                                 height: 60,
-                                padding: EdgeInsets.all(0),
-                                margin: EdgeInsets.only(left: 16, right: 16),
-                                child: Container(
-                                  padding: EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.withAlpha(70),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(5.0)),
-                                    border: Border.all(
-                                      color:  Colors.grey,
-                                      width: 1.0,
-                                    ),
-                                  ),
-                                  child: SizedBox(
-                                    height: 60,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text("CURRENCY".tr(), style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),),
-                                        Text(selectedCurrency, style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
+                                margin: EdgeInsets.symmetric(horizontal: 16),
+                                padding: EdgeInsets.symmetric(horizontal: 12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.grey.shade400),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(selectedCurrency,
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: Utils.getThemeColorBlue(),
+                                        )),
+                                    Text("Tap to choose", style: TextStyle(fontSize: 16)),
 
-                                      ],
-                                    )
-                                  ),
+                                  ],
                                 ),
                               ),
                             ),
 
+                            SizedBox(height: 10),
 
-                            SizedBox(height: 20,width: widthScreen),
-                            InkWell(
-                              onTap: () async {
-                                activeStep++;
-                                setState(() {
-
-                                });
-                              },
-                              child: Container(
-                                width: widthScreen,
-                                height: 58,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: Utils.getThemeColorBlue(),
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(5.0)),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5),
-                                      spreadRadius: 2,
-                                      blurRadius: 2,
-                                      offset: Offset(0, 1), // changes position of shadow
-                                    ),
-                                  ],
-
-
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                              child: Text(
+                                "Select Unit",
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                            Container(
+                              height: 60,
+                              width: widthScreen - 20,
+                              margin: EdgeInsets.symmetric(horizontal: 16),
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.grey.shade400),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  value: selectedUnit,
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      selectedUnit = newValue!;
+                                    });
+                                    // Optionally save to DB or preferences
+                                  },
+                                  items: <String>['KG', 'lbs'].map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value, style: TextStyle(fontSize: 16)),
+                                    );
+                                  }).toList(),
                                 ),
-                                margin: EdgeInsets.only( left: 16,right: 16,top: 4),
+                              ),
+                            ),
+
+                            SizedBox(height: 32),
+
+                            Container(
+                              width: widthScreen,
+                              height: 58,
+                              margin: EdgeInsets.symmetric(horizontal: 16),
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  activeStep++;
+                                  setState(() {});
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Utils.getThemeColorBlue(),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  elevation: 4,
+                                ),
                                 child: Text(
                                   "Next".tr(),
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold),
+                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                                 ),
                               ),
                             )
+                          ],
+                        )
 
-                          ]),
                     ),
                   ),
                   Visibility(
@@ -359,195 +370,126 @@ class _LanguageSetupScreen extends State<LanguageSetupScreen>
                       height: heightScreen,
                       margin: EdgeInsets.only(top: 20),
                       child: Column(
-                    children: [
-                      Container(
-                        width: widthScreen,
-                        height: 60,
-                        padding: EdgeInsets.all(0),
-                        margin: EdgeInsets.only(left: 16, right: 16),
-                        decoration: BoxDecoration(
-                            color: Colors.white60,
-                            borderRadius:
-                            BorderRadius.all(Radius.circular(5))),
-                        child: Container(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
 
-                          child: SizedBox(
-                            width: widthScreen,
-                            height: 60,
-                            child: TextFormField(
-                              expands: false,
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            child: Text("Poultry Name", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                          ),
+                          Container(
+                            margin: EdgeInsets.symmetric(horizontal: 16),
+                            child: TextField(
                               controller: nameController,
-                              textAlign: TextAlign.start,
-                              decoration:  InputDecoration(
-                                border: OutlineInputBorder(
-                                    borderRadius:
-                                    BorderRadius.all(Radius.circular(5))),
-                                hintText: 'Poultry Farm'.tr(),
-                                hintStyle: TextStyle(
-                                    color: Colors.grey, fontSize: 16),
-                                labelStyle: TextStyle(
-                                    color: Colors.black, fontSize: 16),
+                              decoration: InputDecoration(
+                                hintText: 'Your farm name',
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 12),
                               ),
                             ),
                           ),
-                        ),
-                      ),
 
+                          SizedBox(height: 20),
 
-                      SizedBox(height: 10,width: widthScreen),
-                      Container(
-                        width: widthScreen,
-                        height: 60,
-                        margin: EdgeInsets.only(left: 16, right: 16),
-
-                        child: InkWell(
-                          onTap: () {
-                            pickDate();
-                          },
-                          child: Container(
-                            alignment: Alignment.centerLeft,
-                            padding: EdgeInsets.only(left: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.withAlpha(70),
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(5.0)),
-                              border: Border.all(
-                                color:  Colors.grey,
-                                width: 1.0,
-                              ),
-                            ),
-                            child: Text(Utils.getFormattedDate(date), style: TextStyle(
-                                color: Colors.black, fontSize: 16),),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text("Starting Date", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                           ),
-                        ),
-                      ),
-
-                      SizedBox(height: 20,width: widthScreen),
-                      InkWell(
-                        onTap: () async {
-                          activeStep++;
-                          setState(() {
-
-                          });
-                        },
-                        child: Container(
-                          width: widthScreen,
-                          height: 58,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Utils.getThemeColorBlue(),
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(5.0)),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 2,
-                                blurRadius: 2,
-                                offset: Offset(0, 1), // changes position of shadow
-                              ),
-                            ],
-
-
-                          ),
-                          margin: EdgeInsets.only( left: 16,right: 16,top: 4),
-                          child: Text(
-                            "Next".tr(),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
+                          InkWell(
+                            onTap: pickDate,
+                            child: Container(
+                              height: 60,
+                              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              alignment: Alignment.centerLeft,
+                              decoration: BoxDecoration(
                                 color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
+                                border: Border.all(color: Colors.grey.shade400),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(Utils.getFormattedDate(date), style: TextStyle(fontSize: 16)),
+                            ),
                           ),
-                        ),
+
+                          SizedBox(height: 30),
+
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: Size.fromHeight(50),
+                                backgroundColor: Utils.getThemeColorBlue(),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              onPressed: () => setState(() => activeStep++),
+                              child: Text("Next", style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
+                            ),
+                          )
+                        ],
                       )
-                    ],
-                  ),)),
+                      ,)),
                   Visibility(
                       visible: activeStep == 2? true:false,
                       child: Container(
                         height: heightScreen,
                         margin: EdgeInsets.only(top: 20),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            InkWell(
-                              onTap: (){
-                                selectImage();
-                              },
-                              child: Container(
-                                  height: 150,
-                                  width: widthScreen - 40,
-                                  decoration: BoxDecoration(
-                                    color: Utils.getThemeColorBlue(),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(5.0)),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.5),
-                                        spreadRadius: 2,
-                                        blurRadius: 2,
-                                        offset: Offset(0, 1), // changes position of shadow
-                                      ),
-                                    ],
 
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: InkWell(
+                                onTap: selectImage,
+                                child: Container(
+                                  height: 150,
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    color: Utils.getThemeColorBlue().withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Utils.getThemeColorBlue(), width: 2),
                                   ),
-                                child: modified==0? Image.asset("assets/farm_icon.png", width: 40, height: 40, color: Colors.white,)
-                                    : Image.memory(Base64Decoder().convert(farmSetup!.image), fit: BoxFit.contain,)
+                                  child: Center(
+                                    child: modified == 0
+                                        ? Icon(Icons.image, size: 60, color: Utils.getThemeColorBlue())
+                                        : Image.memory(Base64Decoder().convert(farmSetup!.image), fit: BoxFit.contain),
+                                  ),
+                                ),
                               ),
                             ),
-                            SizedBox(height: 20,width: widthScreen),
-                            InkWell(
-                              onTap: () async {
-                                await DatabaseHelper.instance.database;
 
-                                 if(!nameController.text.isEmpty) {
-                                  farmSetup!.name = nameController.text;
-                                 }
+                            SizedBox(height: 30),
 
-                                farmSetup!.date = date;
-                                farmSetup!.modified = 1;
-                                DatabaseHelper.updateFarmSetup(farmSetup);
-
-                                Utils.setupCompleted();
-                                Utils.showToast('SUCCESSFUL'.tr());
-                                await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const HomeScreen()),
-                                );
-
-                                Navigator.pop(context);
-
-                              },
-                              child: Container(
-                                width: widthScreen,
-                                height: 58,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: Utils.getThemeColorBlue(),
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(5.0)),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5),
-                                      spreadRadius: 2,
-                                      blurRadius: 2,
-                                      offset: Offset(0, 1), // changes position of shadow
-                                    ),
-                                  ],
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: Size.fromHeight(50),
+                                  backgroundColor: Utils.getThemeColorBlue(),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                 ),
-                                margin: EdgeInsets.only(left: 16,right: 16,top: 4),
-                                child: Text(
-                                  "Finish".tr(),
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold),
-                                ),
+                                onPressed: () async {
+                                  await DatabaseHelper.instance.database;
+                                  if (nameController.text.isNotEmpty) {
+                                    farmSetup!.name = nameController.text;
+                                  }
+                                  SessionManager.setUnit(selectedUnit);
+                                  farmSetup!.date = date;
+                                  farmSetup!.modified = 1;
+                                  DatabaseHelper.updateFarmSetup(farmSetup);
+
+                                  Utils.setupCompleted();
+                                  Utils.showToast('SUCCESSFUL'.tr());
+
+                                  await Navigator.push(context, MaterialPageRoute(builder: (_) => HomeScreen()));
+                                  Navigator.pop(context);
+                                },
+                                child: Text("Finish", style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
                               ),
                             )
                           ],
-                        ),))
+                        )
+                        ,))
                 ],
               ),
             ),

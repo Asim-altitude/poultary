@@ -7,11 +7,17 @@ import '../model/medicine_stock_history.dart';
 import '../model/medicine_stock_summary.dart';
 import '../utils/utils.dart';
 
-class MedicineStockDetailScreen extends StatelessWidget {
+class MedicineStockDetailScreen extends StatefulWidget{
   final MedicineStockSummary stock;
   final List<MedicineStockHistory> stockHistory;
 
-  MedicineStockDetailScreen({required this.stock, required this.stockHistory});
+  MedicineStockDetailScreen({Key? key, required this.stock, required this. stockHistory}) : super(key: key);
+
+  @override
+  _MedicineStockDetailScreen  createState() => _MedicineStockDetailScreen();
+}
+
+class _MedicineStockDetailScreen extends State<MedicineStockDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +28,7 @@ class MedicineStockDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildStockItem(stock),
+            _buildStockItem(widget.stock),
             SizedBox(height: 16),
             Container(
               margin: EdgeInsets.only(left: 10),
@@ -33,51 +39,48 @@ class MedicineStockDetailScreen extends StatelessWidget {
               child: Container(
                 margin: EdgeInsets.all(10),
                 child: ListView.builder(
-                  itemCount: stockHistory.length,
+                  itemCount: widget.stockHistory.length,
                   itemBuilder: (context, index) {
-                    final entry = stockHistory[index];
-                    return Dismissible(
-                      key: Key(entry.id.toString()),
-                      background: Container(
-                        color: Colors.red,
-                        alignment: Alignment.centerRight,
-                        padding: EdgeInsets.only(right: 20),
-                        child: Icon(Icons.delete, color: Colors.white),
-                      ),
-                      direction: DismissDirection.endToStart,
-                      confirmDismiss: (direction) async {
-                        return await showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text("Delete Entry".tr()),
-                            content: Text("Are you sure you want to delete this medicine entry?".tr()),
-                            actions: [
-                              TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("Cancel")),
-                              TextButton(
-                                onPressed: () {
-                                  deleteMedicineStock(entry.id!);
-                                  Navigator.of(context).pop(true);
-                                },
-                                child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
+                    final entry = widget.stockHistory[index];
+                    return Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 3,
+                      margin: EdgeInsets.symmetric(vertical: 6),
+                      child: ListTile(
+                        leading: Icon(Icons.medication, color: Colors.blue),
+                        title: Text(
+                          "${entry.quantity} ${entry.unit} of ${entry.medicineName}",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        subtitle: Text("DATE"+": ${Utils.getFormattedDate(entry.date)}"),
+                        trailing: IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () async {
+                            return await showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text("Delete Entry".tr()),
+                                content: Text("Are you sure you want to delete this stock entry?".tr()),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("CANCEL".tr())),
+                                  TextButton(
+                                    onPressed: () async {
+                                      // _deleteStock(entry.id);
+                                      await deleteMedicineStock(entry.id!);
+                                      Utils.showToast("SUCCESSFUL".tr());
+                                      setState(() {
+                                        widget.stockHistory.remove(entry);
+                                      });
+
+
+                                      Navigator.of(context).pop(true);
+                                    },
+                                    child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        );
-                      },
-                      onDismissed: (direction) {
-                        deleteMedicineStock(entry.id!);
-                      },
-                      child: Card(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 3,
-                        margin: EdgeInsets.symmetric(vertical: 6),
-                        child: ListTile(
-                          leading: Icon(Icons.medication, color: Colors.blue),
-                          title: Text(
-                            "${entry.quantity} ${entry.unit} of ${entry.medicineName}",
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          subtitle: Text("DATE"+": ${Utils.getFormattedDate(entry.date)}"),
+                            );
+                          },
                         ),
                       ),
                     );

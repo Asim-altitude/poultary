@@ -658,7 +658,11 @@
  "Restore from Local Storage": "Estore aus lokaler Lagerung",
  "Select a backup file stored on your device.": "Wählen Sie eine Sicherungsdatei, die auf Ihrem Gerät gespeichert ist.",
  "Retrieve the latest backup from Google Drive.": "Abrufen Sie die neueste Sicherung von Google Drive ab.",
- "Turn on cloud backup to enable manual backup to Google Drive.": "Schalten Sie die Cloud -Sicherung ein, um die manuelle Sicherung für Google Drive zu aktivieren."
+ "Turn on cloud backup to enable manual backup to Google Drive.": "Schalten Sie die Cloud -Sicherung ein, um die manuelle Sicherung für Google Drive zu aktivieren.",
+
+ "Stock Details": "Lagerdetails",
+ "Age": "Alter",
+ "lbs": "lbs"
 
 
 }

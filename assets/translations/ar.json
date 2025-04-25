@@ -663,6 +663,10 @@
  "Restore from Local Storage": "Estore من التخزين المحلي",
  "Select a backup file stored on your device.": "حدد ملف النسخ الاحتياطي المخزن على جهازك.",
  "Retrieve the latest backup from Google Drive.": "استرداد أحدث نسخة احتياطية من Google Drive.",
- "Turn on cloud backup to enable manual backup to Google Drive.": "قم بتشغيل النسخ الاحتياطي السحابي لتمكين النسخ الاحتياطي اليدوي إلى Google Drive."
+ "Turn on cloud backup to enable manual backup to Google Drive.": "قم بتشغيل النسخ الاحتياطي السحابي لتمكين النسخ الاحتياطي اليدوي إلى Google Drive.",
+
+ "Stock Details": "تفاصيل الأسهم",
+ "Age": "عمر",
+ "lbs": "رطل"
 
 }

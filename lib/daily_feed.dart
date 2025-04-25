@@ -580,7 +580,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                                   style: TextStyle(fontSize: 14, color: Colors.black87),
                                 ),
                                 Text(
-                                  "${feedings[index].quantity} KG".tr(),
+                                  "${feedings[index].quantity}"+Utils.selected_unit.tr(),
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -619,8 +619,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                                   size: 16,
                                   color: feedings[index].short_note!.isNotEmpty
                                       ? Colors.grey.shade700
-                                      : Colors.grey.shade500,
-                                ),
+                                      : Colors.grey.shade500,),
                                 SizedBox(width: 6),
                                 Expanded(
                                   child: Text(

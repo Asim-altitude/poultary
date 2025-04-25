@@ -673,5 +673,10 @@
   "Restore from Local Storage": "Есторі з місцевого зберігання",
   "Select a backup file stored on your device.": "Виберіть резервний файл, що зберігається на вашому пристрої.",
   "Retrieve the latest backup from Google Drive.": "Отримайте останню резервну копію від Google Drive.",
-  "Turn on cloud backup to enable manual backup to Google Drive.": "Увімкніть резервну копію хмари, щоб увімкнути резервну копію вручну на Google Drive."
+  "Turn on cloud backup to enable manual backup to Google Drive.": "Увімкніть резервну копію хмари, щоб увімкнути резервну копію вручну на Google Drive.",
+
+  "Stock Details": "Деталі запасів",
+  "Age": "Вік",
+  "lbs": "фунт"
+
 }

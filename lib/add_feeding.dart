@@ -403,11 +403,10 @@ class _NewFeeding extends State<NewFeeding>
                     onStepReached: (index) => setState(() => activeStep = index),
                   ),
                   Container(
-                    alignment: Alignment.center,
                     height: heightScreen - 250,
+                    margin: EdgeInsets.only(top: 30),
                     child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+
                         children: [
                           Container(
                               margin: EdgeInsets.only(left: 10),
@@ -469,7 +468,7 @@ class _NewFeeding extends State<NewFeeding>
                                      Container(
                                        margin: EdgeInsets.only(right: 10),
                                          alignment: Alignment.centerRight,
-                                         child: Text('Stock'.tr()+': ${getAvailableStock()}'+'KG'.tr(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: getAvailableStock()=="0.0"? Colors.red :Colors.green),),),
+                                         child: Text('Stock'.tr()+': ${getAvailableStock()}'+Utils.selected_unit.tr(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: getAvailableStock()=="0.0"? Colors.red :Colors.green),),),
                                     getAvailableStock()=="0.0"? InkWell(
                                       onTap: () async{
                                          await Navigator.push(
@@ -505,7 +504,7 @@ class _NewFeeding extends State<NewFeeding>
                                SizedBox(height: 20),
 
                                // Feed Quantity Input
-                               _buildInputLabel("FEED_QUANTITY_HINT".tr(), Icons.scale),
+                               _buildInputLabel("Quantity".tr()+" (${Utils.selected_unit.tr()})", Icons.scale),
                                SizedBox(height: 8),
                                _buildNumberInputField(quantityController, "FEED_QUANTITY_HINT".tr()),
 

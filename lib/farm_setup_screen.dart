@@ -13,6 +13,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
@@ -63,6 +64,8 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
   void getInfo() async {
 
     await DatabaseHelper.instance.database;
+    selectedUnit = await SessionManager.getUnit();
+    Utils.selected_unit = selectedUnit;
     List<FarmSetup> list = await DatabaseHelper.getFarmInfo();
     farmSetup = list.elementAt(0);
 
@@ -96,7 +99,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
   String date = "Choose date";
   final locationController = TextEditingController();
   final nameController = TextEditingController();
-
+  String selectedUnit = 'KG';
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +116,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
       child: Scaffold(
         bottomNavigationBar: Container(
           height: 60,
-          margin: EdgeInsets.all(15),
+          margin: EdgeInsets.only(bottom: 15),
           child: ElevatedButton(
             onPressed: () {
               // Your button action here
@@ -122,10 +125,11 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                 if(!nameController.text.isEmpty) {
                   farmSetup!.name = nameController.text;
                 }
-
+                Utils.selected_unit = selectedUnit;
                 farmSetup!.date = date;
                 farmSetup!.modified = 1;
                 DatabaseHelper.updateFarmSetup(farmSetup);
+
                 Utils.showToast("SUCCESSFUL".tr());
                 // Save logic here
                 Navigator.pop(context);
@@ -147,7 +151,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                 child: Text(
                   "SAVE".tr(), // Replace with your button label
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
@@ -237,8 +241,8 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                               alignment: Alignment.center,
                               children: [
                                 Container(
-                                  width: 160,
-                                  height: 160,
+                                  width: 140,
+                                  height: 140,
                                   decoration: BoxDecoration(
                                     color: Colors.grey.shade200,
                                     borderRadius: BorderRadius.circular(10),
@@ -262,9 +266,9 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                                     ),
                                     child: Row(
                                       children: [
-                                        Icon(Icons.camera_alt, color: Colors.white, size: 15),
+                                        Icon(Icons.camera_alt, color: Colors.white, size: 12),
                                         SizedBox(width: 6),
-                                        Text("Tap to change".tr(), style: TextStyle(color: Colors.white, fontSize: 12)),
+                                        Text("Tap to change".tr(), style: TextStyle(color: Colors.white, fontSize: 10)),
                                       ],
                                     ),
                                   ),
@@ -273,7 +277,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                             ),
                           ),
                         ),
-                        SizedBox(height: 20),
+                        SizedBox(height: 10),
                     
                         // 📝 Farm Name Input Field
                         _buildInputField(label: "FARM_NAME", controller: nameController, hint: "Enter farm name"),
@@ -283,7 +287,39 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                     
                         // 📅 Date Picker
                         _buildDropdownField(label: "Farm Setup Date", value: date, onTap: pickDate),
-                        
+
+                        Text(
+                          "Select Unit".tr(),
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                        Container(
+                          height: 60,
+                          width: widthScreen,
+                          padding: EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey.shade400),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: selectedUnit,
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  selectedUnit = newValue!;
+                                  SessionManager.setUnit(selectedUnit);
+                                });
+                                // Optionally save to DB or preferences
+                              },
+                              items: <String>['KG', 'lbs'].map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value.tr(), style: TextStyle(fontSize: 16)),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),

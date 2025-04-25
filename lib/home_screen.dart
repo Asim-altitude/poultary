@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:poultary/dashboard.dart';
 import 'package:poultary/product_screen.dart';
 import 'package:poultary/settings_screen.dart';
+import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'all_events.dart';
 import 'database/databse_helper.dart';
@@ -68,6 +69,8 @@ class _HomeScreen extends State<HomeScreen> {
     await DatabaseHelper.createVaccineStockHistoryTable();
     await addNewColumn();
     await addMissingCategories();
+
+    Utils.selected_unit = await SessionManager.getUnit();
 
     flocks = await DatabaseHelper.getFlocks();
 
@@ -246,7 +249,7 @@ class _HomeScreen extends State<HomeScreen> {
                  BottomNavigationBarItem(icon: Icon(Icons.home), label: "DASHBOARD".tr()),
                  BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: "REPORTS".tr()),
                  BottomNavigationBarItem(icon: Icon(Icons.inventory), label: "Stock".tr()),
-                  BottomNavigationBarItem(icon: Icon(Icons.settings), label: "SETTINGS".tr()),
+                 BottomNavigationBarItem(icon: Icon(Icons.settings), label: "SETTINGS".tr()),
                  BottomNavigationBarItem(icon: Icon(Icons.egg_outlined), label: "Poultry".tr()),
 
                ],

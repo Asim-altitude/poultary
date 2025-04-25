@@ -299,7 +299,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                               majorGridLines: MajorGridLines(width: 0.5),
                             ),
                             primaryYAxis: NumericAxis(
-                              labelFormat: '{value}'+' '+ 'KG'.tr(),
+                              labelFormat: '{value}'+' '+ Utils.selected_unit.tr(),
                               majorGridLines: MajorGridLines(width: 0.3),
                             ),
                             zoomPanBehavior: _zoomPanBehavior,
@@ -354,7 +354,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                             // Section 1: By Feed Name
                             Text(
                               "By Feed Name".tr(),
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
                             ),
                             Divider(thickness: 1, color: Colors.black26),
                             Column(
@@ -369,7 +369,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black),
                                       ),
                                       Text(
-                                        "${Utils.roundTo2Decimal(feed.totalQuantity)}"+" "+"KG".tr(),
+                                        "${Utils.roundTo2Decimal(feed.totalQuantity)}"+" "+Utils.selected_unit.tr(),
                                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
                                       ),
                                     ],
@@ -383,7 +383,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                             // Section 2: By Flock Name
                             Text(
                               "By Flock Name".tr(),
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
                             ),
                             Divider(thickness: 1, color: Colors.black26),
                             Column(
@@ -398,7 +398,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black),
                                       ),
                                       Text(
-                                        "${Utils.roundTo2Decimal(flock.totalQuantity)}" + " "+"KG".tr(),
+                                        "${Utils.roundTo2Decimal(flock.totalQuantity)}" + " "+Utils.selected_unit.tr(),
                                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
                                       ),
                                     ],
@@ -422,12 +422,12 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'TOTAL_CONSUMPTION'.tr(),
+                                    'TOTAL'.tr(),
                                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
                                   ),
                                   Text(
-                                    "${total_feed_consumption}"+" "+"KG".tr(),
-                                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
+                                    "${total_feed_consumption}"+" "+Utils.selected_unit.tr(),
+                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
                                   ),
                                 ],
                               ),
@@ -455,22 +455,6 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
     );
   }
 
-  Widget _buildDataList() {
-    return Expanded(
-      child: ListView.separated(
-        itemCount: 10,
-        separatorBuilder: (context, index) => Divider(),
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text("Feed Type ${index + 1}"),
-            subtitle: Text("Quantity: 5kg"),
-            trailing: Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {},
-          );
-        },
-      ),
-    );
-  }
 
 
   //FILTER WORK

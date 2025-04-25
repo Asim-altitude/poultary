@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:poultary/model/sub_category_item.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../database/databse_helper.dart';
 import '../model/medicine_stock_history.dart';
@@ -315,6 +316,17 @@ class _MedicineStockScreenState extends State<MedicineStockScreen> {
       ),
     );
   }
+}
+
+Future<int?> deleteMedicineStock(int id) async{
+
+  Database? _database = await DatabaseHelper.instance.database;
+  return await _database?.delete(
+    'MedicineStockHistory',
+    where: 'id = ?',
+    whereArgs: [id],
+  );
+
 }
 
 // Medicine Stock Bottom Sheet

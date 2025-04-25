@@ -662,5 +662,10 @@
   "Restore from Local Storage": "Estore από τοπική αποθήκευση",
   "Select a backup file stored on your device.": "Επιλέξτε ένα αρχείο αντιγράφων ασφαλείας που είναι αποθηκευμένο στη συσκευή σας.",
   "Retrieve the latest backup from Google Drive.": "Ανακτήστε το τελευταίο αντίγραφο ασφαλείας από το Google Drive.",
-  "Turn on cloud backup to enable manual backup to Google Drive.": "Ενεργοποιήστε το cloud backup για να ενεργοποιήσετε το χειροκίνητο αντίγραφο ασφαλείας στο Google Drive."
+  "Turn on cloud backup to enable manual backup to Google Drive.": "Ενεργοποιήστε το cloud backup για να ενεργοποιήσετε το χειροκίνητο αντίγραφο ασφαλείας στο Google Drive.",
+
+  "Stock Details": "Λεπτομέρειες αποθεμάτων",
+  "Age": "Ηλικία",
+  "lbs": "κιλά"
+
 }
