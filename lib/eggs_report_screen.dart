@@ -551,11 +551,11 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
           children: [
             // 🟡 Flock Icon
             CircleAvatar(
-              radius: 24,
+              radius: 15,
               backgroundColor: Colors.blue.shade200,
-              child: Icon(Icons.egg, color: Colors.white, size: 28),
+              child: Icon(Icons.egg, color: Colors.white, size: 20),
             ),
-            SizedBox(width: 12),
+            SizedBox(width: 6),
 
             // 📋 Flock Details
             Expanded(

@@ -7,6 +7,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../model/medicine_stock_history.dart';
 import '../model/medicine_stock_summary.dart';
+import '../model/stock_expense.dart';
 import '../utils/utils.dart';
 
 class VaccineStockDetailScreen extends StatefulWidget{
@@ -68,12 +69,16 @@ class _VaccineStockDetailScreen extends State<VaccineStockDetailScreen> {
                                   TextButton(
                                     onPressed: () async {
                                       // _deleteStock(entry.id);
+                                      StockExpense? stockExpense = await DatabaseHelper.getByStockItemId(entry.id!);
+                                      if(stockExpense != null){
+                                        await DatabaseHelper.deleteByStockItemId(entry.id!);
+                                        await DatabaseHelper.deleteItem("Transactions", stockExpense.transactionId);
+                                      }
                                       await deleteMedicineStock(entry.id!);
                                       Utils.showToast("SUCCESSFUL".tr());
                                       setState(() {
                                         widget.stockHistory.remove(entry);
                                       });
-
 
                                       Navigator.of(context).pop(true);
                                     },

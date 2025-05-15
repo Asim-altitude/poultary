@@ -7,20 +7,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:poultary/app_intro/image_slider.dart';
+import 'package:poultary/model/flock_detail.dart';
 import 'package:poultary/model/flock_image.dart';
+import 'package:poultary/model/weight_record.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/suggested_notifcations.dart';
 import 'package:poultary/transactions_screen.dart';
 import 'package:poultary/utils/utils.dart';
+import 'package:poultary/weight_record_screen.dart';
+import 'add_birds.dart';
 import 'add_reduce_flock.dart';
 import 'custom/all_custom_data_screen.dart';
 import 'custom/custom_flock_category.dart';
 import 'daily_feed.dart';
 import 'database/databse_helper.dart';
 import 'egg_collection.dart';
+import 'flock_notifications_screen.dart';
 import 'medication_vaccination.dart';
 import 'model/custom_category.dart';
 import 'model/flock.dart';
+import 'model/schedule_notification.dart';
 import 'model/used_item.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 
 class SingleFlockScreen extends StatefulWidget {
   const SingleFlockScreen({Key? key}) : super(key: key);
@@ -59,17 +68,17 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
    await DatabaseHelper.instance.database;
 
-
    images = await DatabaseHelper.getFlockImage(Utils.selected_flock!.f_id);
 
    date = Utils.selected_flock!.acqusition_date;
 
    print(images);
 
+   byteimages.clear();
    for(int i=0;i<images.length;i++){
      Uint8List bytesImage = const Base64Decoder().convert(images.elementAt(i).image);
      byteimages.add(bytesImage);
-     print(images.elementAt(i).image);
+     print("IMAGE_ID "+images.elementAt(i).id.toString());
    }
 
    if (byteimages.length > 0) {
@@ -94,13 +103,16 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
   }
 
-  int mortalityCount = 0;
+  int mortalityCount = 0,cullingCount = 0;
 
   List<CustomCategory> categories = [];
   List<CustomCategory> defaultcategories = [];
   Future<void> getAllCategories() async {
 
     mortalityCount = await DatabaseHelper.getFlockMortalityCount(Utils.selected_flock!.f_id);
+    cullingCount = await DatabaseHelper.getFlockCullingCount(Utils.selected_flock!.f_id);
+    weightRecord = await DatabaseHelper.getLatestWeightRecord(Utils.selected_flock!.f_id);
+
     defaultcategories = Utils.getDefaultFlockCatgories();
 
     categories = (await DatabaseHelper.getCustomCategories())!;
@@ -117,6 +129,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     print("DONE");
   }
 
+  WeightRecord? weightRecord;
 
   @override
   Widget build(BuildContext context) {
@@ -171,16 +184,48 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                       ),
                       Align(
                         alignment: Alignment.topRight,
-                        child:  GestureDetector(
-                          onTapDown: (TapDownDetails details) {
-                            showMemberMenu(details.globalPosition);
-                          },
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            padding: EdgeInsets.all(5),
-                            child: Image.asset('assets/menu_dots.png', color: Colors.white,),
-                          ),
+                        child:  Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () 
+                              async {
+                                 List<ScheduledNotification> notifications = await DatabaseHelper.getScheduledNotificationsByFlockId(Utils.selected_flock!.f_id);
+                                 if(notifications.length > 0){
+                                   await Navigator.push(
+                                     context,
+                                     MaterialPageRoute(
+                                       builder: (context) => FlockNotificationScreen(allNotifications: notifications,),
+                                     ),
+                                   );
+                                 }else{
+                                   print(Utils.selected_flock!.icon.split(".")[0].replaceAll("assets/", ""));
+                                   await Navigator.push(
+                                     context,
+                                     MaterialPageRoute(
+                                       builder: (context) => SuggestedNotificationScreen(birdType: Utils.selected_flock!.icon.split(".")[0].replaceAll("assets/", ""), flockId: Utils.selected_flock!.f_id, flockAgeInDays: Utils.getAgeIndays(Utils.selected_flock!.acqusition_date),),
+                                     ),
+                                   );
+                                 }
+                              },
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                padding: EdgeInsets.all(5),
+                                child: Icon(Icons.notifications_active, color: Colors.amber,),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTapDown: (TapDownDetails details) {
+                                showMemberMenu(details.globalPosition);
+                              },
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                padding: EdgeInsets.all(5),
+                                child: Image.asset('assets/menu_dots.png', color: Colors.white,),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -205,94 +250,136 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
                     /// **Flock Details Row**
                     Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-
-                        /// **Flock Icon**
+                        /// 🐦 Flock Image + Acquisition Type
                         Column(
                           children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white10, // Subtle background
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              padding: EdgeInsets.all(10),
-                              child: Image.asset(
-                                Utils.selected_flock!.icon.replaceAll("jpeg", "png"),
-                                width: 90, height: 90,
+                            InkWell(
+                              onTap: () {
+                                _showFullScreenImage(context, byteimages, 0);
+                              },
+                              child: Container(
+                                width: 120,
+                                height: 120,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 6,
+                                      offset: Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: buildImageGrid(byteimages),
+                                ),
                               ),
                             ),
+                            const SizedBox(height: 6),
                             Text(
                               Utils.selected_flock!.acqusition_type.tr(),
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white,),
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
 
-                        SizedBox(width: 10),
+                        const SizedBox(width: 16),
 
-                        /// **Bird Count & Additional Details**
+                        /// 📋 Details Section
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              /// **Bird Count**
+                              /// 🔢 Bird Count
                               Row(
                                 children: [
-                                   Text(
+                                  Text(
                                     Utils.selected_flock!.active_bird_count.toString(),
-                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                  SizedBox(width: 5),
-                                  Text("BIRDS".tr(), style: TextStyle(color: Colors.white70, fontSize: 16)),
-                                ],
-                              ),
-
-                              SizedBox(height: 8),
-
-                              /// **Purpose**
-                              Row(
-                                children: [
-                                  Icon(Icons.assignment, color: Colors.white70, size: 18),
-                                  SizedBox(width: 5),
-                                  Text('PURPOSE1'.tr() + ": ", style: TextStyle(fontSize: 12, color: Colors.white70)),
-                                  Expanded(
-                                    child: Text(
-                                      Utils.selected_flock!.purpose.tr(),
-                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
-                                      overflow: TextOverflow.ellipsis, // Prevents overflow issues
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    "BIRDS".tr(),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white70,
                                     ),
                                   ),
                                 ],
                               ),
 
-                              SizedBox(height: 5),
+                              const SizedBox(height: 8),
 
-
+                              /// 🎯 Purpose
                               Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(Icons.watch_later_outlined, color: Colors.white70, size: 18),
-                                  SizedBox(width: 5),
-                                  Text('Age'.tr() + ": ", style: TextStyle(fontSize: 12, color: Colors.white70)),
-                                  Text(
-                                    Utils.getAnimalAge(Utils.selected_flock!.acqusition_date),
-                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                                  const Icon(Icons.assignment, color: Colors.white70, size: 18),
+                                  const SizedBox(width: 6),
+                                  Text('PURPOSE1'.tr() + ": ",
+                                      style: const TextStyle(fontSize: 12, color: Colors.white70)),
+                                  Expanded(
+                                    child: Text(
+                                      Utils.selected_flock!.purpose.tr(),
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 5),
 
+                              const SizedBox(height: 8),
 
-                              /// **Acquisition Date**
+                              /// 🕒 Age
                               Row(
                                 children: [
-                                  Icon(Icons.calendar_today, color: Colors.white70, size: 18),
-                                  SizedBox(width: 5),
-                                  Text('DATE'.tr() + ": ", style: TextStyle(fontSize: 12, color: Colors.white70)),
+                                  const Icon(Icons.watch_later_outlined, color: Colors.white70, size: 18),
+                                  const SizedBox(width: 6),
+                                  Text('Age'.tr() + ": ",
+                                      style: const TextStyle(fontSize: 12, color: Colors.white70)),
+                                  Text(
+                                    Utils.getAnimalAge(Utils.selected_flock!.acqusition_date),
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 8),
+
+                              /// 📅 Acquisition Date
+                              Row(
+                                children: [
+                                  const Icon(Icons.calendar_today, color: Colors.white70, size: 18),
+                                  const SizedBox(width: 6),
+                                  Text('DATE'.tr() + ": ",
+                                      style: const TextStyle(fontSize: 12, color: Colors.white70)),
                                   Text(
                                     Utils.getFormattedDate(Utils.selected_flock!.acqusition_date),
-                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -302,7 +389,52 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                       ],
                     ),
 
-                    SizedBox(height: 10,),
+                    Center(
+                      child: InkWell(
+                        onTap: () async{
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => WeightRecordScreen(
+                                flockId: Utils.selected_flock!.f_id,
+                                birdsCount: Utils.selected_flock!.active_bird_count!,
+                              ),
+                            ),
+                          );
+
+                          refreshData();
+                        },
+                        child: Card(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          color: Colors.white12,
+                          elevation: 2,
+                          margin: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.monitor_weight, color: Colors.white70),
+                                SizedBox(width: 8),
+                                Text(
+                                  'AVG Weight'.tr() + ": ",
+                                  style: TextStyle(fontSize: 14, color: Colors.white70),
+                                ),
+                                Text(
+                                  weightRecord != null
+                                      ? "${weightRecord!.averageWeight} ${Utils.selected_unit.tr()}"
+                                      : 'No Record'.tr(),
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                                ),
+                                SizedBox(width: 8),
+                                Icon(Icons.arrow_forward_ios_rounded, color: Colors.white54, size: 18),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
                     /// **Notes Section**
                     if (Utils.selected_flock!.notes.isNotEmpty)
                       Container(
@@ -318,35 +450,108 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                         ),
                       ),
 
+
                     Card(
                       elevation: 3,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       color: Utils.getScreenBackground(),
                       child: Padding(
                         padding: const EdgeInsets.all(12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Title Row
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
-                                SizedBox(width: 5,),
-                                Text("MORTALITY".tr(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.red)),
+                                Row(
+                                  children: [
+                                    Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      "MORTALITY".tr()+"/"+ "CULLING".tr(),
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.red),
+                                    ),
+                                  ],
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    _showAddMortalityDialog(context); // Modified dialog to choose between Mortality / Culling
+                                  },
+                                  child: Icon(Icons.add_circle_outline, color: Utils.getThemeColorBlue(), size: 30),
+                                ),
                               ],
                             ),
 
-                            Row(
-                              children: [
-                                SizedBox(height: 4),
-                                Text("$mortalityCount "+"BIRDS".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                              ],
+                            SizedBox(height: 5),
+
+                            // Mortality Row
+                            GestureDetector(
+                              onTap: () {
+                                _showMortalityRecordsDialog(context, 'MORTALITY');
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "MORTALITY".tr(),
+                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        mortalityCount > 0 ? "$mortalityCount ${'BIRDS'.tr()}" : "No record".tr(),
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: mortalityCount > 0 ? Colors.black : Colors.grey,
+                                        ),
+                                      ),
+                                      Icon(Icons.arrow_forward_ios_rounded, size: 20, color: Colors.grey,),
+                                    ],
+                                  ),
+
+                                ],
+                              ),
                             ),
 
+                            SizedBox(height: 5),
+
+                            // Culling Row
+                            GestureDetector(
+                              onTap: () {
+                                _showMortalityRecordsDialog(context, 'CULLING');
+
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "CULLING".tr(),
+                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        cullingCount > 0 ? "$cullingCount ${'BIRDS'.tr()}" : "No record".tr(),
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: cullingCount > 0 ? Colors.black : Colors.grey,
+                                        ),
+                                      ),
+                                      Icon(Icons.arrow_forward_ios_rounded, size: 20, color: Colors.grey,),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     ),
-                    /// **Images List**
+
+                    /*/// **Images List**
                     if (imagesAdded)
                       Container(
                         height: 80,
@@ -412,13 +617,12 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                               ],
                             );
                           },
-                        ),),
+                        ),),*/
                   ],
                 ),
               ),
               Container(
                 height: heightScreen,
-                margin: EdgeInsets.only(top: 20),
                 padding: EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
@@ -1146,6 +1350,131 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
       ),),),),),);
   }
 
+  void _showFullScreenImage(BuildContext context, List<Uint8List> byteimages, int initialIndex) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.black,
+          insetPadding: EdgeInsets.all(0),
+          child: Stack(
+            children: [
+              PhotoViewGallery.builder(
+                itemCount: byteimages.length,
+                pageController: PageController(initialPage: initialIndex),
+                builder: (context, index) {
+                  return PhotoViewGalleryPageOptions(
+                    imageProvider: MemoryImage(byteimages[index]),
+                    minScale: PhotoViewComputedScale.contained,
+                    maxScale: PhotoViewComputedScale.covered * 2,
+                  );
+                },
+                scrollPhysics: BouncingScrollPhysics(),
+                backgroundDecoration: BoxDecoration(color: Colors.black),
+              ),
+
+              // Close Button
+              Positioned(
+                top: 40,
+                right: 20,
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Icon(Icons.close, color: Colors.white, size: 30),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget buildImageGrid(List<Uint8List> images) {
+    String defaultImage = '${Utils.selected_flock!.icon.replaceAll("jpeg", "png")}';
+
+    if (images.isEmpty) {
+      return Center(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Image.asset(defaultImage, fit: BoxFit.cover, width: 120, height: 120),
+        ),
+      );
+    }
+
+    return Stack(
+      children: [
+        // First image as background
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Image.memory(
+            images.elementAt(0),
+            width: 120,
+            height: 120,
+            fit: BoxFit.cover,
+          ),
+        ),
+
+        // Gradient overlay for better readability
+        Container(
+          width: 120,
+          height: 120,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              colors: [
+                Colors.black.withOpacity(0.6),
+                Colors.black.withOpacity(0.0),
+              ],
+            ),
+          ),
+        ),
+
+        // "+X more" text with center alignment
+        if (images.length > 1)
+          Positioned.fill(
+            child: Align(
+              alignment: Alignment.center,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  "+${images.length - 1} "+"more".tr(),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget ImageWidget(Uint8List image, String defaultImage, {double height = 100, double width = double.infinity}) {
+    return Container(
+      margin: EdgeInsets.all(4),
+      height: height,
+      width: width,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        image: DecorationImage(
+          image: image == "image"
+              ? Image.asset(defaultImage, width: 120, height: 120,) as ImageProvider
+              : MemoryImage(image),
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+
+
   Future<void> moveToAddReduceFlock() async{
     final result = await Navigator.push(
       context,
@@ -1153,8 +1482,16 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
           builder: (context) => AddReduceFlockScreen()),
     );
 
+    refreshData();
+  }
+
+
+  void refreshData() async {
     Utils.selected_flock = await DatabaseHelper.findFlock(Utils.selected_flock!.f_id);
     mortalityCount = await DatabaseHelper.getFlockMortalityCount(Utils.selected_flock!.f_id);
+    cullingCount = await DatabaseHelper.getFlockCullingCount(Utils.selected_flock!.f_id);
+    weightRecord = await DatabaseHelper.getLatestWeightRecord(Utils.selected_flock!.f_id);
+
     setState(() {
 
     });
@@ -1199,14 +1536,19 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
         else if(value == 2)
         {
          // showAlertDialog(context, Utils.selected_flock!.f_name);
-          showEditFlockDialog(context, flock: Utils.selected_flock!, onSave: (flock){
+          showEditFlockDialog(context, flock: Utils.selected_flock!, onSave: (flock) async {
             Utils.selected_flock = flock;
-            DatabaseHelper.updateFlockInfo(flock);
+            await DatabaseHelper.updateFlockInfo(flock);
             insertFlockImages(Utils.selected_flock!.f_id);
-            Utils.showToast("SUCCESSFUL".tr());
+            Utils.selected_flock = await DatabaseHelper.getSingleFlock(Utils.selected_flock!.f_id!);
+            getImages();
+
             setState(() {
 
             });
+
+            Navigator.pop(context);
+
           });
         }else
         {
@@ -1361,6 +1703,367 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     } else {}
 
   }
+
+
+  void _showAddMortalityDialog(BuildContext context) {
+    final _countController = TextEditingController();
+    final _noteController = TextEditingController();
+    DateTime? selectedDate = DateTime.now();
+    String selectedType = "MORTALITY"; // Default option
+
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          top: 24,
+          left: 20,
+          right: 20,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Center(
+                child: Text(
+                  "Add".tr()+" ${selectedType.tr()}".tr(),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+              ),
+              SizedBox(height: 24),
+
+              // Mortality or Culling selection
+              Text(
+                "Type".tr(),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: selectedType,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                items: ["MORTALITY", "CULLING"].map((type) {
+                  return DropdownMenuItem(
+                    value: type,
+                    child: Text(type.tr()),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  selectedType = value!;
+                },
+              ),
+              SizedBox(height: 20),
+
+              // Count Field
+              Text(
+                "Enter Count".tr(),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 8),
+              TextField(
+                controller: _countController,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
+                decoration: InputDecoration(
+                  hintText: "Enter Count".tr(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+
+              // Date Picker
+              Text(
+                "Choose date".tr(),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 8),
+              GestureDetector(
+                onTap: () async {
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime(2100),
+                  );
+                  if (pickedDate != null) {
+                    selectedDate = pickedDate;
+                  }
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    selectedDate == null
+                        ? "Choose date".tr()
+                        : DateFormat('yyyy-MM-dd').format(selectedDate!),
+                    style: TextStyle(fontSize: 16, color: selectedDate == null ? Colors.grey : Colors.black),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+
+              // Note Field
+              Text(
+                "Notes".tr(),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 8),
+              TextField(
+                controller: _noteController,
+                maxLines: 2,
+                decoration: InputDecoration(
+                  hintText: "Notes".tr(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              SizedBox(height: 30),
+
+              // Save Button
+              ElevatedButton.icon(
+                onPressed: () {
+                  if (_countController.text.isEmpty || selectedDate == null) {
+                    Utils.showToast("Please enter count and select date".tr());
+                    return;
+                  }
+                  int count = int.tryParse(_countController.text) ?? 0;
+                  String note = _noteController.text.trim();
+
+                  if (count > 0 && count <= Utils.selected_flock!.active_bird_count!) {
+                    int active_birds = Utils.selected_flock!.active_bird_count!;
+                    active_birds = active_birds - count;
+                    print(active_birds);
+
+                    DatabaseHelper.updateFlockBirds(
+                        active_birds, Utils.selected_flock!.f_id);
+
+                    Flock_Detail reductionObject = Flock_Detail(
+                      f_id: Utils.selected_flock!.f_id,
+                      f_name: Utils.selected_flock!.f_name,
+                      item_type: "Reduction",
+                      item_count: count,
+                      acqusition_type: selectedType, // "MORTALITY" or "CULLING"
+                      acqusition_date: DateFormat('yyyy-MM-dd').format(selectedDate!),
+                      reason: selectedType,
+                      short_note: note,
+                      transaction_id: '-1',
+                    );
+                    DatabaseHelper.insertFlockDetail(reductionObject);
+                    refreshData();
+                    Navigator.pop(context);
+                  } else {
+                    Utils.showToast("Invalid ${selectedType.toLowerCase()} count");
+                  }
+                },
+                icon: Icon(Icons.save, color: Colors.white),
+                label: Text("SAVE".tr(), style: TextStyle(fontSize: 18, color: Colors.white)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Utils.getThemeColorBlue(),
+                  minimumSize: Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showMortalityRecordsDialog(BuildContext context, String reason) async {
+    List<Flock_Detail> mortalityList = await DatabaseHelper.getMortalityRecords(Utils.selected_flock!.f_id,reason);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 16,
+            right: 16,
+            top: 16,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Top Row with Title and Close Button
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "${reason.tr()}"+ "Records".tr(),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+
+              // Mortality List or Empty Message
+              mortalityList.isEmpty
+                  ? Expanded(
+                child: Center(
+                  child: Text(
+                    "No Mortality Records Found".tr(),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              )
+                  : Expanded(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: mortalityList.length,
+                  separatorBuilder: (_, __) => SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final mortality = mortalityList[index];
+                    return Card(
+                      color: Colors.grey[100],
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${"Count".tr()}: ${mortality.item_count}",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    "${"Date".tr()}: ${mortality.acqusition_date}",
+                                    style: TextStyle(color: Colors.grey[700]),
+                                  ),
+                                  if (mortality.short_note != null && mortality.short_note!.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 6.0),
+                                      child: Text(
+                                        "${"Note".tr()}: ${mortality.short_note}",
+                                        style: TextStyle(color: Colors.grey[700]),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.edit, color: Colors.blue),
+                                  onPressed: () async {
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => NewBirdsCollection(
+                                              isCollection: false, flock_detail: mortality)),
+                                    );
+                                    refreshData();
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () async {
+                                    bool confirm = await showConfirmationDialog(context, "Delete this record?".tr());
+                                    if (confirm) {
+                                      int birds_to_del = mortality.item_count;
+                                      int active_count = Utils.selected_flock!.active_bird_count!;
+                                      active_count = active_count + birds_to_del;
+                                      await DatabaseHelper.deleteItemWithFlockID("Flock_Detail", mortality.f_detail_id!);
+                                      await DatabaseHelper.updateFlockBirds(active_count, Utils.selected_flock!.f_id);
+
+                                      Utils.showToast("Deleted successfully");
+                                      refreshData();
+                                      Navigator.pop(context);
+                                       // Refresh after delete
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+
+  static Future<bool> showConfirmationDialog(BuildContext context, String message) async {
+    return await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Confirmation".tr()),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text("Cancel".tr()),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text("Delete".tr(), style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    ) ?? false;
+  }
+
 
 
   List<String> acqusitionList = [
@@ -1585,6 +2288,8 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     String selectedAcquisition = flock.acqusition_type;
     String selectedPurpose = flock.purpose;
 
+    base64Images.clear();
+    imageFileList.clear();
 
     final ImagePicker _picker = ImagePicker();
 
@@ -1598,6 +2303,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
+
             Future<void> _pickImages() async {
               final List<XFile>? pickedFiles = await _picker.pickMultiImage();
               if (pickedFiles != null && pickedFiles.isNotEmpty) {
@@ -1617,6 +2323,16 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
             }
 
+            void _removeImageExisting(int index) async{
+              print("DELETING "+images[index].id!.toString());
+             int result =  await DatabaseHelper.deleteItem("Flock_Image", images[index].id!);
+             print("DELETED "+result.toString());
+              setState(() {
+                byteimages.removeAt(index);
+              });
+
+            }
+
             return Padding(
               padding: EdgeInsets.only(
                 left: 16, right: 16, bottom: MediaQuery.of(context).viewInsets.bottom + 16, top: 16,
@@ -1625,8 +2341,6 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Button to Pick Images
-
 
                     // Flock Name
                     TextFormField(
@@ -1750,7 +2464,45 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                       ),
                     ),
                     SizedBox(height: 12),
-
+// Display Selected Images in Grid
+                    if (byteimages.isNotEmpty)
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4, // Two images per row
+                          crossAxisSpacing: 4,
+                          mainAxisSpacing: 4,
+                          childAspectRatio: 1,
+                        ),
+                        itemCount: byteimages.length,
+                        itemBuilder: (context, index) {
+                          return Stack(
+                            alignment: Alignment.topRight,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.memory(byteimages[index], width: 80, height: 80,fit: BoxFit.cover,)
+                              ),
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: GestureDetector(
+                                  onTap: () => _removeImageExisting(index),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.red.withOpacity(0.8),
+                                    ),
+                                    padding: EdgeInsets.all(4),
+                                    child: Icon(Icons.close, color: Colors.white, size: 18),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
                     // Display Selected Images in Grid
                     if (imageFileList.isNotEmpty)
                       GridView.builder(
@@ -1810,7 +2562,6 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                             );
                           });
                           onSave(flock);
-                          Navigator.pop(context);
                         },
                         child: Text(
                           "Update".tr(),
@@ -1855,18 +2606,17 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     }
   }
   List<String> base64Images = [];
-  void insertFlockImages(int? id) {
+  void insertFlockImages(int? id) async {
 
+    print("IMAGES FOUND ${base64Images.length}");
     if (base64Images.length > 0){
 
       for (int i=0;i<base64Images.length;i++){
         Flock_Image image = Flock_Image(f_id: id,image: base64Images.elementAt(i));
-        DatabaseHelper.insertFlockImages(image);
+        await DatabaseHelper.insertFlockImages(image);
       }
 
       print("Images Inserted");
-      Utils.showToast("FLOCK_CREATED".tr());
-      Navigator.pop(context);
     }
 
   }

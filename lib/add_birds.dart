@@ -44,7 +44,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
 
   List<String> _purposeList = [];
   List<String> _reductionReasons = [
-    'SOLD','PERSONAL_USE','MORTALITY','LOST','OTHER'];
+    'SOLD','PERSONAL_USE','MORTALITY','CULLING','LOST','OTHER'];
 
   List<String> acqusitionList = [
     'PURCHASED',

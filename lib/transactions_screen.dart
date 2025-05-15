@@ -6,24 +6,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:poultary/add_eggs.dart';
 import 'package:poultary/add_expense.dart';
-import 'package:poultary/add_feeding.dart';
 import 'package:poultary/add_income.dart';
 import 'package:poultary/add_reduce_flock.dart';
-import 'package:poultary/inventory.dart';
-import 'package:poultary/model/feed_item.dart';
 import 'package:poultary/model/transaction_item.dart';
-import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:poultary/view_transaction.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
-
-import 'add_flocks.dart';
 import 'database/databse_helper.dart';
-import 'model/egg_item.dart';
+import 'model/egg_income.dart';
 import 'model/flock.dart';
 
 class TransactionsScreen extends StatefulWidget {
@@ -129,6 +121,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
 
 
     tempList = await DatabaseHelper.getFilteredTransactionsWithSort(f_id,filter_name,st,end,sortSelected);
+
     transactionList = tempList.reversed.toList();
     feed_total = transactionList.length;
 
@@ -769,7 +762,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
     var txt = await Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) =>  NewIncome(transactionItem: null,)),
+          builder: (context) =>  NewIncome(transactionItem: null, selectedIncomeType: null, selectedExpenseType: null,)),
     );
 
     getData(date_filter_name);
@@ -1034,7 +1027,6 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
     }
   }
 
-
   int? selected_id = 0;
   int? selected_index = 0;
   void showMemberMenu(Offset offset) async {
@@ -1078,7 +1070,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
             var txt = await Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) =>  NewIncome(transactionItem: transactionList.elementAt(selected_index!),)),
+                  builder: (context) =>  NewIncome(transactionItem: transactionList.elementAt(selected_index!), selectedIncomeType: null, selectedExpenseType: null,)),
             );
 
             getAllTransactions();
@@ -1168,7 +1160,12 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
     );
     Widget continueButton = TextButton(
       child: Text("DELETE".tr()),
-      onPressed:  () {
+      onPressed:  () async {
+        EggTransaction? eggTransaction = await DatabaseHelper.getEggsByTransactionItemId(selected_id!);
+        if(eggTransaction!= null){
+          DatabaseHelper.deleteItem("Eggs", eggTransaction.eggItemId);
+          DatabaseHelper.deleteByEggItemId(eggTransaction.eggItemId);
+        }
         DatabaseHelper.deleteItem("Transactions", selected_id!);
         transactionList.removeAt(selected_index!);
         Utils.showToast("DONE".tr());

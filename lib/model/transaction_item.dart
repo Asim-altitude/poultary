@@ -1,7 +1,6 @@
 import 'dart:core';
 
-
-class TransactionItem{
+class TransactionItem {
 
   int? id = -1;
   int? f_id = -1;

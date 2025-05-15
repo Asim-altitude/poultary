@@ -27,6 +27,9 @@ class SessionManager {
   static final String report_filter = "report_filter";
   static final String other_filter = "other_filter";
   static final String unit_key = "unit_key";
+  static final String tray_size = "tray_size";
+  static final String tray_enabled = "tray_enabled";
+  static final String table_created = "table_created";
 
 
   static Future<void> setUnit(String countryCode) async {
@@ -39,6 +42,34 @@ class SessionManager {
     String unit;
     unit = pref.getString(SessionManager.unit_key) ?? "KG";
     return unit;
+  }
+
+
+  static Future<void> setInt(int traySize) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt(SessionManager.tray_size, traySize);
+  }
+
+  static Future<int> getInt(String key) async {
+    final SharedPreferences pref = await SharedPreferences.getInstance();
+    int count;
+    count = pref.getInt(key) ?? 0;
+    return count;
+  }
+  static Future<void> setBoolValue(String key, bool value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool(key, value);
+  }
+
+  static Future<void> setBool(bool value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool(SessionManager.tray_enabled, value);
+  }
+
+  static Future<bool> getBool(String key) async {
+    final SharedPreferences pref = await SharedPreferences.getInstance();
+    return pref.getBool(key) ?? false;
+
   }
 
   static Future<void> setUserID(int userid) async {

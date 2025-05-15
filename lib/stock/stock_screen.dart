@@ -1,11 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:poultary/feed_batch_screen.dart';
 import 'package:poultary/stock/stock_details_screen.dart';
 import 'package:poultary/utils/utils.dart';
 import '../database/databse_helper.dart';
 import '../model/feed_stock_history.dart';
 import '../model/feed_stock_summary.dart';
+import '../model/stock_expense.dart';
 import '../model/sub_category_item.dart';
 import '../model/transaction_item.dart';
 
@@ -15,7 +17,7 @@ class FeedStockScreen extends StatefulWidget {
 }
 
 class _FeedStockScreenState extends State<FeedStockScreen> {
-  List<FeedStockSummary>? _stockSummary = [];
+  List<FeedStockSummary>? _stockSummary = [], _batchSummary = [];
   @override
   void initState() {
     super.initState();
@@ -31,11 +33,27 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
 
   Future<void> fetchStockSummary() async {
     _stockSummary = await DatabaseHelper.getFeedStockSummary();
+    _batchSummary = await DatabaseHelper.getFeedBatchStockSummary();
+
+    for(int i=0;i<_batchSummary!.length;i++){
+      _stockSummary?.add(_batchSummary![i]);
+    }
     setState(() {}); // Update UI after fetching data
   }
 
+  bool checkIfBatch(String name){
+    bool exists = false;
+    for(int i=0;i<_batchSummary!.length;i++){
+      if(_batchSummary![i].feedName==name){
+        exists = true;
+        break;
+      }
+    }
 
-  void _showAddStockDialog() async{
+    return exists;
+  }
+
+  void _showAddStockDialog() async {
     bool? stockAdded = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -337,21 +355,32 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
         itemBuilder: (context, index, animation) {
             return InkWell(
                 onTap: () async {
-                  List<FeedStockHistory> history = await DatabaseHelper
-                      .fetchStockHistory(
-                      _stockSummary!.elementAt(index).feedName);
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          StockDetailScreen(
-                            stock: _stockSummary!.elementAt(index),
-                            stockHistory: history, // Fetch history
-                          ),
-                    ),
-                  );
 
-                  fetchStockSummary();
+                  if(checkIfBatch(_stockSummary![index].feedName)){
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            FeedBatchScreen(),
+                      ),
+                    );
+                  }else {
+                    List<FeedStockHistory> history = await DatabaseHelper
+                        .fetchStockHistory(
+                        _stockSummary!.elementAt(index).feedName);
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            StockDetailScreen(
+                              stock: _stockSummary!.elementAt(index),
+                              stockHistory: history, // Fetch history
+                            ),
+                      ),
+                    );
+
+                    fetchStockSummary();
+                  }
                 },
                 child: _buildStockItem(
                     _stockSummary![index], index, animation));
@@ -359,7 +388,9 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _showAddStockDialog,
+        onPressed: () {
+          showFeedOptionsBottomSheet(context);
+        },
         child: Icon(Icons.add, size: 28, color: Colors.white),
         backgroundColor: Utils.getThemeColorBlue(),
         shape: CircleBorder(), // Ensures a perfect circle
@@ -368,7 +399,60 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
 
     );
   }
+
+  void showFeedOptionsBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Choose an Option".tr(),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: Icon(Icons.inventory_2_rounded, color: Colors.green),
+                title: Text("Add Feed Stock".tr(), style: TextStyle(fontSize: 16)),
+                onTap: () {
+                  Navigator.pop(context);
+                  // Navigate or call your function
+                  _showAddStockDialog();
+                },
+              ),
+              Divider(),
+              ListTile(
+                leading: Icon(Icons.add_box_rounded, color: Colors.blue),
+                title: Text("New Feed Batch".tr(), style: TextStyle(fontSize: 16)),
+                onTap: () async {
+                  Navigator.pop(context);
+                  // Navigate or call your function
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          FeedBatchScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
 }
+
+
+
 
 class AddStockBottomSheet extends StatefulWidget {
   final VoidCallback onStockAdded;
@@ -442,7 +526,8 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
       feed_name: _selectedFeed!,
     );
 
-    await DatabaseHelper.insertFeedStock(stock);
+   int? stock_item_id =  await DatabaseHelper.insertFeedStock(stock);
+
     if(!_amountController.text.isEmpty){
       TransactionItem transaction_item = TransactionItem(
           f_id: -1,
@@ -460,8 +545,10 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
           extra_cost_details: "",
           f_name: "Farm Wide",
           flock_update_id: '-1');
-      int? id = await DatabaseHelper
-          .insertNewTransaction(transaction_item);
+
+      int? transaction_id = await DatabaseHelper.insertNewTransaction(transaction_item);
+      StockExpense stockExpense = StockExpense(stockItemId: stock_item_id!, transactionId: transaction_id!);
+      await DatabaseHelper.insertStockJunction(stockExpense);
     }
     Navigator.pop(context, true);
   }

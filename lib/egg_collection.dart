@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/add_eggs.dart';
+import 'package:poultary/add_income.dart';
+import 'package:poultary/model/egg_income.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
@@ -38,6 +40,10 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
   void getFilters() async {
 
     await DatabaseHelper.instance.database;
+
+    trayEnabled = await SessionManager.getBool(SessionManager.tray_enabled);
+    traySize = await SessionManager.getInt(SessionManager.tray_size);
+
     flocks = await DatabaseHelper.getFlocks();
 
     flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1, flock_new: 1));
@@ -72,6 +78,9 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
   bool no_colection = true;
   List<Eggs> eggs = [], tempList = [];
   List<String> flock_name = [];
+
+  bool trayEnabled = false;
+  int traySize = 30;
 
   void getEggCollectionList() async {
 
@@ -152,7 +161,12 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
               /// 🔴 Reduce Button
               Expanded(
                 child: InkWell(
-                  onTap: reduceCollection,
+                  onTap: () {
+                    reduceCollection(null);
+                  },
+                 /* onTap: () {
+                    showModifyCollectedEggsDialog(context);
+                  },*/
                   borderRadius: BorderRadius.circular(10),
                   splashColor: Colors.white.withOpacity(0.3),
                   child: Container(
@@ -194,7 +208,6 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
       ),
       body:SafeArea(
         top: false,
-
           child:Container(
           width: widthScreen,
           height: heightScreen,
@@ -470,6 +483,30 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
                               SizedBox(height: 6),
 
+
+                              /// 🥚 Good & Bad Eggs
+                              trayEnabled? Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Icon(Icons.egg, size: 16, color: Colors.green),
+                                  SizedBox(width: 5),
+                                  Text("Good trays".tr() + ": ", style: TextStyle(color: Colors.black, fontSize: 14)),
+                                  Text(
+                                    "${Utils.getEggTrays(eggs[index].good_eggs, traySize)}",
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.green),
+                                  ),
+                                  SizedBox(width: 15),
+                                  Icon(Icons.egg, size: 16, color: Colors.orange),
+                                  SizedBox(width: 5),
+                                  Text("Bad trays".tr() + ": ", style: TextStyle(color: Colors.black, fontSize: 14)),
+                                  Text(
+                                    "${Utils.getEggTrays(eggs[index].bad_eggs, traySize)}",
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.orange),
+                                  ),
+                                ],
+                              ) : SizedBox(width: 1,),
+                              SizedBox(height: 6),
+
                               /// 🥚 Good & Bad Eggs
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -478,7 +515,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                                   SizedBox(width: 5),
                                   Text("Good Eggs".tr() + ": ", style: TextStyle(color: Colors.black, fontSize: 14)),
                                   Text(
-                                    "${eggs[index].good_eggs}",
+                                    trayEnabled? "${Utils.getRemaining(eggs[index].good_eggs, traySize)}" : "${eggs[index].good_eggs}",
                                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.green),
                                   ),
                                   SizedBox(width: 15),
@@ -486,7 +523,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                                   SizedBox(width: 5),
                                   Text("Bad Eggs".tr() + ": ", style: TextStyle(color: Colors.black, fontSize: 14)),
                                   Text(
-                                    "${eggs[index].bad_eggs}",
+                                    trayEnabled? "${Utils.getRemaining(eggs[index].bad_eggs, traySize)}" : "${eggs[index].bad_eggs}",
                                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.orange),
                                   ),
                                 ],
@@ -996,8 +1033,6 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
   Widget buildFilterButton(String label, int index, Color color) {
     bool isSelected = selected == index;
 
-
-
     return Flexible( // Use Flexible instead of Expanded
       child: InkWell(
         onTap: () {
@@ -1072,22 +1107,147 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) =>  NewEggCollection(isCollection: true,eggs: null,)),
+          builder: (context) =>  NewEggCollection(isCollection: true,eggs: null, reason: null,)),
     );
     print(result);
     getData(date_filter_name);
 
   }
 
-  Future<void> reduceCollection() async{
+  Future<void> reduceCollection(String? reason) async{
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) =>  NewEggCollection(isCollection: false,eggs: null)),
+          builder: (context) =>  NewEggCollection(isCollection: false, eggs: null, reason: reason,)),
     );
     print(result);
     getData(date_filter_name);
   }
+
+
+  void showModifyCollectedEggsDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent, // Make the background transparent
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                spreadRadius: 5,
+                blurRadius: 10,
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Title with Close Button
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Modify Collected Eggs',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.close,
+                      color: Colors.redAccent,
+                      size: 28,
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context); // Close the dialog
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+
+              // Option 1 - Sell Eggs
+              ListTile(
+                leading: Icon(
+                  Icons.attach_money,
+                  color: Utils.getThemeColorBlue(),
+                ),
+                title: Text('Egg Sale'.tr()),
+                onTap: () async {
+                  // Handle Sell Eggs
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => NewIncome(
+                        transactionItem: null,
+                        selectedExpenseType: null,
+                        selectedIncomeType: "Egg Sale",
+                      ),
+                    ),
+                  );
+                  Navigator.pop(context);
+                },
+              ),
+
+              // Option 2 - Personal Use
+              ListTile(
+                leading: Icon(
+                  Icons.favorite,
+                  color: Colors.pink,
+                ),
+                title: Text('PERSONAL_USE'.tr()),
+                onTap: () {
+                  reduceCollection('PERSONAL_USE');
+                  // Handle Personal Use
+
+                },
+              ),
+
+              // Option 3 - Lost
+              ListTile(
+                leading: Icon(
+                  Icons.warning,
+                  color: Colors.orange,
+                ),
+                title: Text('LOST'.tr()),
+                onTap: () {
+                  reduceCollection('LOST');
+                  // Handle Lost
+
+                },
+              ),
+
+              // Option 4 - Other (Custom Option)
+              ListTile(
+                leading: Icon(
+                  Icons.more_horiz,
+                  color: Colors.blue,
+                ),
+                title: Text('OTHER'.tr()),
+                onTap: () {
+                  reduceCollection(null);
+                  // Handle Custom Option
+
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
 
 
   //FILTER WORK
@@ -1179,7 +1339,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
     await DatabaseHelper.instance.database;
 
-    eggs = await DatabaseHelper.getFilteredEggsWithSort(f_id,filter_name,st,end,sortSelected);
+    eggs = await DatabaseHelper.getFilteredEggsWithSort(f_id, filter_name, st, end, sortSelected);
     //eggs = tempList.reversed.toList();
 
     setState(() {
@@ -1403,17 +1563,19 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
             await Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) =>  NewEggCollection(isCollection: true,eggs: eggs.elementAt(selected_index!))),
+                  builder: (context) =>  NewEggCollection(isCollection: true,eggs: eggs.elementAt(selected_index!), reason: null,)),
             );
 
-            getEggCollectionList();
+            getFilteredTransactions(str_date, end_date);
+            //getEggCollectionList();
           }else{
             await Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) =>  NewEggCollection(isCollection: false,eggs: eggs.elementAt(selected_index!))),
+                  builder: (context) =>  NewEggCollection(isCollection: false,eggs: eggs.elementAt(selected_index!), reason: null,)),
             );
-            getEggCollectionList();
+            //getEggCollectionList();
+            getFilteredTransactions(str_date, end_date);
           }
         }
         else if(value == 1){
@@ -1436,7 +1598,12 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
     );
     Widget continueButton = TextButton(
       child: Text("DELETE".tr()),
-      onPressed:  () {
+      onPressed:  () async {
+        EggTransaction? eggTransaction = await DatabaseHelper.getByEggItemId(selected_id!);
+        if(eggTransaction!= null){
+          DatabaseHelper.deleteItem("Transactions", eggTransaction.transactionId);
+          DatabaseHelper.deleteByEggItemId(selected_id!);
+        }
         DatabaseHelper.deleteItem("Eggs", selected_id!);
         eggs.removeAt(selected_index!);
         Utils.showToast("DONE".tr());
@@ -1444,7 +1611,6 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
         setState(() {
 
         });
-
       },
     );
 

@@ -6,12 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:poultary/model/feed_batch_summary.dart';
 import 'package:poultary/model/feed_item.dart';
 import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/stock/stock_screen.dart';
 import 'package:poultary/utils/utils.dart';
 import 'database/databse_helper.dart';
+import 'model/feed_batch.dart';
 import 'model/feed_stock_summary.dart';
 import 'model/flock.dart';
 
@@ -124,16 +126,31 @@ class _NewFeeding extends State<NewFeeding>
       }
     }
 
+    if(availableStock == "0.0" && batches.length >0){
+      for(int j=0;j<batches.length;j++){
+        if(_feedselectedValue.toLowerCase() == batches[j].feedName.toLowerCase()){
+          availableStock = batches[j].availableStock.toStringAsFixed(2);
+          break;
+        }
+      }
+    }
+
     return availableStock;
   }
 
+  List<FeedStockSummary> batches = [];
   void getFeedList() async {
     await DatabaseHelper.instance.database;
 
     _subItemList = await DatabaseHelper.getSubCategoryList(3);
+    batches = await DatabaseHelper.getFeedBatchStockSummary();
 
     for(int i=0;i<_subItemList.length;i++){
       _feedList.add(_subItemList.elementAt(i).name!);
+    }
+
+    for(int i=0;i<batches.length;i++){
+      _feedList.add(batches.elementAt(i).feedName);
     }
 
     if(!isEdit)

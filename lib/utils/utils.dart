@@ -37,6 +37,9 @@ import '../model/flock_detail.dart';
 import '../model/flock_report_item.dart';
 import '../model/health_report_item.dart';
 import '../model/med_vac_item.dart';
+import '../model/notification_suggestions.dart';
+import '../model/recurrence_type.dart';
+import '../model/schedule_notification.dart';
 import '../model/transaction_item.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
@@ -483,6 +486,25 @@ class Utils {
     return missingCurrencies;
   }
 
+  static int getAgeIndays(String dob) {
+    try {
+      DateTime birthDate = DateFormat("yyyy-MM-dd").parse(dob);
+      DateTime today = DateTime.now();
+
+      Duration ageDuration = today.difference(birthDate);
+      int totalDays = ageDuration.inDays;
+
+
+      return totalDays;
+
+
+    } catch (e) {
+      print("Error parsing DOB: $e");
+      return 0; // Return '-' if error
+    }
+  }
+
+
   static String getAnimalAge(String dob) {
     try {
       DateTime birthDate = DateFormat("yyyy-MM-dd").parse(dob);
@@ -490,12 +512,15 @@ class Utils {
 
       Duration ageDuration = today.difference(birthDate);
       int totalDays = ageDuration.inDays;
-      int years = totalDays ~/ 365;
+      /*int years = totalDays ~/ 365;
       int remainingDays = totalDays % 365;
       int months = remainingDays ~/ 30;
-      int days = remainingDays % 30;
+      int days = remainingDays % 30;*/
 
-      if (totalDays < 30) {
+
+      return totalDays.toString() +" "+ "days".tr().toString();
+
+      /*if (totalDays < 30) {
         return "$totalDays "+ "days".tr(); // Show only days if less than a month
       } else if (years > 0 && months == 0) {
         return "$years "+ "years".tr()+" $days "+ "days".tr(); // Show days if 0 months
@@ -503,12 +528,450 @@ class Utils {
         return "$years "+ "years".tr()+" $months "+"months".tr();
       } else {
         return "$months "+ "months".tr()+" $days "+ "days".tr();
-      }
+      }*/
     } catch (e) {
       print("Error parsing DOB: $e");
       return "-"; // Return '-' if error
     }
   }
+
+  List<SuggestedNotification> allSuggestedNotifications = [
+    // **Chicken**
+    SuggestedNotification(
+      birdType: 'Chicken',
+      triggerDay: 1,
+      title: 'Vaccination',
+      description: 'Vaccinate for Marek’s Disease',
+      category: 'Vaccination',
+    ),
+    SuggestedNotification(
+      birdType: 'Chicken',
+      triggerDay: 7,
+      title: 'Vaccination',
+      description: 'Vaccinate for Newcastle Disease',
+      category: 'Vaccination',
+    ),
+    SuggestedNotification(
+      birdType: 'Chicken',
+      triggerDay: 21,
+      title: 'Vaccination',
+      description: 'Vaccinate for Fowl Pox',
+      category: 'Vaccination',
+    ),
+    SuggestedNotification(
+      birdType: 'Chicken',
+      triggerDay: 42,
+      title: 'Vaccination',
+      description: 'Vaccinate for IBD/Gumboro',
+      category: 'Vaccination',
+    ),
+    SuggestedNotification(
+      birdType: 'Chicken',
+      triggerDay: 15,
+      title: 'Feeding',
+      description: 'Introduce Grower Feed',
+      category: 'Feeding',
+    ),
+    SuggestedNotification(
+      birdType: 'Chicken',
+      triggerDay: 56,
+      title: 'Laying',
+      description: 'Start laying eggs – check for eggs',
+      category: 'Laying',
+    ),
+    SuggestedNotification(
+      birdType: 'Chicken',
+      triggerDay: 7,
+      title: 'Weight Check',
+      description: 'Weekly weight check',
+      category: 'Weight Check',
+    ),
+    SuggestedNotification(
+      birdType: 'Chicken',
+      triggerDay: 30,
+      title: 'Health Check',
+      description: 'Monthly health check',
+      category: 'Health Check',
+    ),
+
+    // **Duck**
+    SuggestedNotification(
+      birdType: 'Duck',
+      triggerDay: 7,
+      title: 'Vaccination',
+      description: 'Vaccinate for Newcastle Disease',
+      category: 'Vaccination',
+    ),
+    SuggestedNotification(
+      birdType: 'Duck',
+      triggerDay: 30,
+      title: 'Feeding',
+      description: 'Introduce Grit for digestion',
+      category: 'Feeding',
+    ),
+    SuggestedNotification(
+      birdType: 'Duck',
+      triggerDay: 90,
+      title: 'Weight Check',
+      description: 'Weekly weight check',
+      category: 'Weight Check',
+    ),
+    SuggestedNotification(
+      birdType: 'Duck',
+      triggerDay: 180,
+      title: 'Laying',
+      description: 'Check for laying readiness',
+      category: 'Laying',
+    ),
+    SuggestedNotification(
+      birdType: 'Duck',
+      triggerDay: 30,
+      title: 'General Care',
+      description: 'Clean water containers',
+      category: 'General Care',
+    ),
+
+    // **Turkey**
+    SuggestedNotification(
+      birdType: 'Turkey',
+      triggerDay: 30,
+      title: 'Vaccination',
+      description: 'Vaccinate for Fowl Pox',
+      category: 'Vaccination',
+    ),
+    SuggestedNotification(
+      birdType: 'Turkey',
+      triggerDay: 45,
+      title: 'Feeding',
+      description: 'Introduce Grower Feed',
+      category: 'Feeding',
+    ),
+    SuggestedNotification(
+      birdType: 'Turkey',
+      triggerDay: 7,
+      title: 'Weight Check',
+      description: 'Weekly weight check',
+      category: 'Weight Check',
+    ),
+    SuggestedNotification(
+      birdType: 'Turkey',
+      triggerDay: 60,
+      title: 'General Care',
+      description: 'Clean water containers',
+      category: 'General Care',
+    ),
+    SuggestedNotification(
+      birdType: 'Turkey',
+      triggerDay: 150,
+      title: 'Laying',
+      description: 'Monitor egg-laying readiness',
+      category: 'Laying',
+    ),
+
+    // **Peacock**
+    SuggestedNotification(
+      birdType: 'Peacock',
+      triggerDay: 30,
+      title: 'Health Check',
+      description: 'Check for physical health',
+      category: 'Health Check',
+    ),
+    SuggestedNotification(
+      birdType: 'Peacock',
+      triggerDay: 7,
+      title: 'Weight Check',
+      description: 'Weekly weight check',
+      category: 'Weight Check',
+    ),
+    SuggestedNotification(
+      birdType: 'Peacock',
+      triggerDay: 45,
+      title: 'Feeding',
+      description: 'Introduce special diet for growth',
+      category: 'Feeding',
+    ),
+    SuggestedNotification(
+      birdType: 'Peacock',
+      triggerDay: 120,
+      title: 'Laying',
+      description: 'Egg-laying readiness check',
+      category: 'Laying',
+
+    ),
+
+    // **Bob White Quail**
+    SuggestedNotification(
+      birdType: 'Bob white quail',
+      triggerDay: 7,
+      title: 'Vaccination',
+      description: 'Vaccinate for Newcastle Disease',
+      category: 'Vaccination',
+    ),
+    SuggestedNotification(
+      birdType: 'Bob white quail',
+      triggerDay: 21,
+      title: 'Feeding',
+      description: 'Feed high-protein diet',
+      category: 'Feeding',
+    ),
+    SuggestedNotification(
+      birdType: 'Bob white quail',
+      triggerDay: 14,
+      title: 'Weight Check',
+      description: 'Weekly weight check',
+      category: 'Weight Check',
+    ),
+
+    // **Guinea Fowl**
+    SuggestedNotification(
+      birdType: 'Guinea',
+      triggerDay: 7,
+      title: 'Vaccination',
+      description: 'Vaccinate for Fowl Pox',
+      category: 'Vaccination',
+    ),
+    SuggestedNotification(
+      birdType: 'Guinea',
+      triggerDay: 15,
+      title: 'Feeding',
+      description: 'Introduce Grower Feed',
+      category: 'Feeding',
+    ),
+    SuggestedNotification(
+      birdType: 'Guinea',
+      triggerDay: 30,
+      title: 'Weight Check',
+      description: 'Weekly weight check',
+      category: 'Weight Check',
+    ),
+    SuggestedNotification(
+      birdType: 'Guinea',
+      triggerDay: 60,
+      title: 'Laying',
+      description: 'Check for egg-laying readiness',
+      category: 'Laying',
+    ),
+
+    // **Goose**
+    SuggestedNotification(
+      birdType: 'Goose',
+      triggerDay: 15,
+      title: 'Feeding',
+      description: 'Introduce Grower Feed',
+      category: 'Feeding',
+    ),
+    SuggestedNotification(
+      birdType: 'Goose',
+      triggerDay: 30,
+      title: 'Vaccination',
+      description: 'Vaccinate for Newcastle Disease',
+      category: 'Vaccination',
+    ),
+    SuggestedNotification(
+      birdType: 'Goose',
+      triggerDay: 7,
+      title: 'Weight Check',
+      description: 'Weekly weight check',
+      category: 'Weight Check',
+    ),
+    SuggestedNotification(
+      birdType: 'Goose',
+      triggerDay: 180,
+      title: 'Laying',
+      description: 'Check for breeding readiness',
+      category: 'Laying',
+    ),
+
+    // **Pigeon**
+    SuggestedNotification(
+      birdType: 'Pigeon',
+      triggerDay: 7,
+      title: 'Vaccination',
+      description: 'Vaccinate for Pigeon Paramyxovirus',
+      category: 'Vaccination',
+    ),
+    SuggestedNotification(
+      birdType: 'Pigeon',
+      triggerDay: 15,
+      title: 'Feeding',
+      description: 'Provide special diet for growth',
+      category: 'Feeding',
+    ),
+    SuggestedNotification(
+      birdType: 'Pigeon',
+      triggerDay: 30,
+      title: 'Weight Check',
+      description: 'Weekly weight check',
+      category: 'Weight Check',
+    ),
+
+    // **Canary**
+    SuggestedNotification(
+      birdType: 'Canary',
+      triggerDay: 7,
+      title: 'Feeding',
+      description: 'Provide special diet for growth',
+      category: 'Feeding',
+    ),
+    SuggestedNotification(
+      birdType: 'Canary',
+      triggerDay: 30,
+      title: 'Vaccination',
+      description: 'Vaccinate for respiratory diseases',
+      category: 'Vaccination',
+    ),
+    SuggestedNotification(
+      birdType: 'Canary',
+      triggerDay: 7,
+      title: 'Weight Check',
+      description: 'Weekly weight check',
+      category: 'Weight Check',
+    ),
+
+    // **Finch**
+    SuggestedNotification(
+      birdType: 'Finch',
+      triggerDay: 7,
+      title: 'Health Check',
+      description: 'Check for signs of stress or disease',
+      category: 'Health Check',
+    ),
+    SuggestedNotification(
+      birdType: 'Finch',
+      triggerDay: 15,
+      title: 'Feeding',
+      description: 'Provide calcium supplements',
+      category: 'Feeding',
+    ),
+
+    // **Ostrich**
+    SuggestedNotification(
+      birdType: 'Ostrich',
+      triggerDay: 90,
+      title: 'Vaccination',
+      description: 'Vaccinate for Newcastle Disease',
+      category: 'Vaccination',
+    ),
+    SuggestedNotification(
+      birdType: 'Ostrich',
+      triggerDay: 120,
+      title: 'Feeding',
+      description: 'Introduce Grower Feed',
+      category: 'Feeding',
+    ),
+    SuggestedNotification(
+      birdType: 'Ostrich',
+      triggerDay: 30,
+      title: 'Weight Check',
+      description: 'Weekly weight check',
+      category: 'Weight Check',
+    ),
+
+    // **Rhea**
+    SuggestedNotification(
+      birdType: 'Rhea',
+      triggerDay: 90,
+      title: 'Vaccination',
+      description: 'Vaccinate for Newcastle Disease',
+      category: 'Vaccination',
+    ),
+    SuggestedNotification(
+      birdType: 'Rhea',
+      triggerDay: 180,
+      title: 'Feeding',
+      description: 'Provide protein supplements',
+      category: 'Feeding',
+    ),
+    SuggestedNotification(
+      birdType: 'Rhea',
+      triggerDay: 30,
+      title: 'Weight Check',
+      description: 'Weekly weight check',
+      category: 'Weight Check',
+    ),
+  ];
+
+  void checkScheduledNotifications() async {
+    initNotification();
+    final List<PendingNotificationRequest> pendingNotificationRequests =
+    await flutterLocalNotificationsPlugin.pendingNotificationRequests();
+
+    print('Scheduled notifications count: ${pendingNotificationRequests.length}');
+    for (var notification in pendingNotificationRequests) {
+      print(
+          'ID: ${notification.id}, Title: ${notification.title}, Body: ${notification.body}, Payload: ${notification.payload}');
+    }
+  }
+
+
+  List<SuggestedNotification> getSuggestedNotifications({
+    required String birdType,
+    required int ageInDays,
+  }) {
+    return allSuggestedNotifications
+        .where((notif) =>
+    (notif.birdType.toLowerCase() == birdType.toLowerCase() || notif.birdType.toLowerCase() == 'other') &&
+        notif.triggerDay >= ageInDays)
+        .toList();
+  }
+
+  List<ScheduledNotification> generateRecurringNotifications({
+    required String birdType,
+    required int flockId,
+    required String title,
+    required String description,
+    required DateTime startDate,
+    required RecurrenceType recurrence,
+  }) {
+    final List<ScheduledNotification> scheduled = [];
+    Duration interval;
+
+    switch (recurrence) {
+      case RecurrenceType.once:
+        interval = Duration.zero;
+        break;
+      case RecurrenceType.weekly:
+        interval = const Duration(days: 7);
+        break;
+      case RecurrenceType.every15Days:
+        interval = const Duration(days: 15);
+        break;
+      case RecurrenceType.monthly:
+        interval = const Duration(days: 30);
+        break;
+    }
+
+    for (int i = 0; i < (recurrence == RecurrenceType.once ? 1 : 6); i++) {
+      final scheduledAt = startDate.add(interval * i);
+      scheduled.add(ScheduledNotification(
+        id: DateTime.now().millisecondsSinceEpoch + i, // use proper ID generator
+        birdType: birdType,
+        flockId: flockId,
+        title: title,
+        description: description,
+        scheduledAt: scheduledAt,
+        recurrence: recurrence,
+      ));
+    }
+
+    return scheduled;
+  }
+
+
+  /// Returns number of full trays
+  static int getEggTrays(int total, int traySize) {
+   print("TRAY FUNCTION TOTAL $total TRAY $traySize");
+    if (traySize <= 0 || total <= 0) return 0;
+    return total ~/ traySize;
+  }
+
+  /// Returns number of loose eggs after filling trays
+  static int getRemaining(int total, int traySize) {
+    print("REMAINING FUNCTION TOTAL $total TRAY $traySize");
+    if (traySize <= 0 || total <= 0) return 0;
+    return total % traySize;
+  }
+
 
 
   static double roundTo2Decimal(double value) {
@@ -853,7 +1316,8 @@ class Utils {
     return outputDate;
   }
 
-  static void showToast(String msg){
+  static void showToast(String msg)
+  {
     Fluttertoast.showToast(
         msg: msg,
         toastLength: Toast.LENGTH_SHORT,
@@ -861,8 +1325,7 @@ class Utils {
         timeInSecForIosWeb: 1,
         backgroundColor: Colors.black,
         textColor: Colors.white,
-        fontSize: 16.0
-    );
+        fontSize: 16.0 );
   }
 
   static Color getThemeColorBlue2() {
@@ -874,8 +1337,9 @@ class Utils {
     Color themeColor = Color.fromRGBO(2, 83, 179, 1);
     return themeColor;
   }
-  static Widget getAdBar(){
-    if(isShowAdd){
+
+  static Widget getAdBar() {
+    if(isShowAdd) {
       return Container(width: WIDTH_SCREEN,height: 60,
         color: Colors.white,
         child:_isBannerAdReady?Align(
@@ -887,12 +1351,12 @@ class Utils {
           ),
         ):Container(),
       );
-
     }
     return Container(width: WIDTH_SCREEN,height: 0,);
   }
-  static Widget getDistanceBar(){
-    if(isShowAdd){
+
+  static Widget getDistanceBar() {
+    if(isShowAdd) {
       return Container(width: WIDTH_SCREEN,height: 60,
         child:_isBannerAdReady?Align(
           alignment: Alignment.topCenter,
@@ -900,16 +1364,17 @@ class Utils {
             height: 60.0 ,
             width: Utils.WIDTH_SCREEN,
           ),
-        ):Container(),
+        ): Container(),
       );
-
     }
     return Container(width: WIDTH_SCREEN,height: 0,);
   }
+
   static getSelectedLanguage() async {
 
     String? language = await SessionManager.getSelectedLanguage();
-    if(language == "" || language == "en"){
+    if(language == "" || language == "en")
+    {
       return Languages.english;
     }
     else if(language == "ar"){
@@ -1169,6 +1634,36 @@ class Utils {
     }
   }
 
+  static Future<void> scheduleNotification({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime scheduledDate,
+    String? payload,
+  }) async {
+    initNotification();
+    tz.initializeTimeZones();
+
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      id,
+      title,
+      body,
+      tz.TZDateTime.from(scheduledDate, tz.local),
+      const NotificationDetails(
+        android: AndroidNotificationDetails('main_channel', 'Main Channel',
+          channelDescription: "kelsey",
+          importance: Importance.max,
+          priority: Priority.max,
+
+        ),
+      ),
+      androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation:
+      UILocalNotificationDateInterpretation.absoluteTime,
+      payload: payload,
+    );
+  }
+
   static initNotification(){
     var initializationSettingsAndroid =
     new AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -1195,6 +1690,12 @@ class Utils {
     int r = min + rnd.nextInt(max - min);
     return r;
   }
+
+  Future<void> cancelAndRemoveNotification(int id) async {
+    await flutterLocalNotificationsPlugin.cancel(id);
+    await DatabaseHelper.deleteNotification(id);
+  }
+
 
   static Future<bool> isAndroidPermissionGranted() async {
     if (Platform.isAndroid) {

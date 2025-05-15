@@ -60,15 +60,28 @@ class _HomeScreen extends State<HomeScreen> {
 
     await DatabaseHelper.instance.database;
 
-    await DatabaseHelper.addEggColorColumn();
-    await DatabaseHelper.addFlockInfoColumn();
-    await DatabaseHelper.addQuantityColumnMedicine();
-    await DatabaseHelper.addUnitColumnMedicine();
-    await DatabaseHelper.createFeedStockHistoryTable();
-    await DatabaseHelper.createMedicineStockHistoryTable();
-    await DatabaseHelper.createVaccineStockHistoryTable();
-    await addNewColumn();
-    await addMissingCategories();
+
+      await DatabaseHelper.addEggColorColumn();
+      await DatabaseHelper.addFlockInfoColumn();
+      await DatabaseHelper.addQuantityColumnMedicine();
+      await DatabaseHelper.addUnitColumnMedicine();
+      await DatabaseHelper.createFeedStockHistoryTable();
+      await DatabaseHelper.createMedicineStockHistoryTable();
+      await DatabaseHelper.createVaccineStockHistoryTable();
+      await DatabaseHelper.createSaleContractorTable();
+      await DatabaseHelper.createFeedIngridentTable();
+      await DatabaseHelper.createFeedBatchTable();
+      await DatabaseHelper.createFeedBatchItemTable();
+      await DatabaseHelper.createWeightRecordTableIfNotExists();
+      await DatabaseHelper.createScheduledNotificationsTable();
+      await DatabaseHelper.createStockExpenseJunction();
+      await DatabaseHelper.createEggTransactionJunction();
+      await addNewColumn();
+      await addMissingCategories();
+
+      await SessionManager.setBoolValue(SessionManager.table_created,true);
+      print('TABLE CREATION DONE');
+
 
     Utils.selected_unit = await SessionManager.getUnit();
 

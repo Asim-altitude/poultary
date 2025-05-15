@@ -8,18 +8,21 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:poultary/model/sub_category_item.dart';
+import 'package:poultary/sale_contractor_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
-
 import 'database/databse_helper.dart';
 import 'model/finance_flock_item.dart';
 import 'model/flock.dart';
 import 'model/flock_detail.dart';
+import 'model/sale_contractor.dart';
 import 'model/transaction_item.dart';
 
 class NewIncome extends StatefulWidget {
-  TransactionItem? transactionItem;
-   NewIncome({Key? key, required this.transactionItem}) : super(key: key);
+
+   TransactionItem? transactionItem;
+   String? selectedIncomeType; String? selectedExpenseType;
+   NewIncome({Key? key, required this.transactionItem,required this.selectedIncomeType, required this.selectedExpenseType}) : super(key: key);
 
   @override
   _NewIncome createState() => _NewIncome();
@@ -71,6 +74,8 @@ class _NewIncome extends State<NewIncome>
   final howmanyController = TextEditingController();
   final soldtoController = TextEditingController();
 
+  List<SaleContractor> contractors = [];
+  SaleContractor? selectedContractor;
   @override
   void initState() {
     super.initState();
@@ -90,6 +95,10 @@ class _NewIncome extends State<NewIncome>
       print(payment_status);
       print(payment_method);
 
+    }else if(widget.selectedIncomeType != null){
+      _saleselectedValue = widget.selectedIncomeType!;
+    }else if(widget.selectedExpenseType != null){
+      _saleselectedValue = widget.selectedIncomeType!;
     }
 
     getList();
@@ -99,8 +108,15 @@ class _NewIncome extends State<NewIncome>
 
   }
 
+  List<String> contractorNames = [];
    List<Flock> flocks = [];
    void getList() async {
+
+     contractors = await DatabaseHelper.getContractors();
+     if(contractors.length > 0) {
+       selectedContractor = contractors[0];
+       soldtoController.text = selectedContractor!.name;
+     }
 
      if(!isEdit) {
        await DatabaseHelper.instance.database;
@@ -165,6 +181,9 @@ class _NewIncome extends State<NewIncome>
     });
 
   }
+
+
+
 
   void getPayMethodList() async {
     await DatabaseHelper.instance.database;
@@ -261,7 +280,18 @@ class _NewIncome extends State<NewIncome>
         is_bird_sale = false;
       }
 
-    } else{
+    } else if(widget.selectedIncomeType != null || widget.selectedExpenseType != null){
+      if(widget.selectedIncomeType != null){
+        _saleItemList.clear();
+        _saleItemList.add(widget.selectedIncomeType!);
+        isOther = true;
+      }else{
+        _saleItemList.clear();
+        _saleItemList.add(widget.selectedExpenseType!);
+        isOther = true;
+      }
+    }
+    else{
       _mysubItemList = await DatabaseHelper.getSubCategoryList(1);
       _mysaleItemList = [];
       _mysaleItemList.add("-Choose Option-");
@@ -295,7 +325,14 @@ class _NewIncome extends State<NewIncome>
       isOther = false, choose_option = false,
       income_option_invalid = true, purpose_option_invalid = true;
 
-  void checkSelectedOption(){
+  void checkSelectedOption() {
+
+    if(widget.selectedIncomeType != null || widget.selectedExpenseType != null){
+      choose_option = false;
+      is_bird_sale = false;
+      purpose_option_invalid = false;
+      return;
+    }
 
     for(int i=0;i<_saleItemList.length;i++){
       if(_saleselectedValue == _saleItemList[i]){
@@ -476,7 +513,9 @@ class _NewIncome extends State<NewIncome>
                         reduceBirds(widget.transactionItem!.id!);
                         Utils.showToast("SUCCESSFUL".tr());
                         Navigator.pop(context);
-                      }else {
+                      }
+                      else {
+
                         print("Everything Okay");
                         await DatabaseHelper.instance.database;
                         TransactionItem transaction_item = TransactionItem(
@@ -497,7 +536,15 @@ class _NewIncome extends State<NewIncome>
                             f_name: _purposeselectedValue, flock_update_id: '-1');
                         int? id = await DatabaseHelper
                             .insertNewTransaction(transaction_item);
-                        reduceBirds(id!);
+                        if(widget.selectedIncomeType != null){
+                          if(widget.selectedIncomeType!.toLowerCase()=="egg sale"){
+
+                          }
+                        }else if (widget.selectedExpenseType != null){
+
+                        }else {
+                          reduceBirds(id!);
+                        }
                         Utils.showToast("SUCCESSFUL".tr());
                         Navigator.pop(context);
                       }
@@ -628,7 +675,6 @@ class _NewIncome extends State<NewIncome>
                     onStepReached: (index) => setState(() => activeStep = index),
                   ),
 
-
                   SizedBox(height: 30,),
                   Container(
                     alignment: Alignment.center,
@@ -668,17 +714,17 @@ class _NewIncome extends State<NewIncome>
                               ),
                               SizedBox(height: 20),
 
-                              // Flock Selection
-                              _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
-                              SizedBox(height: 8),
-                              _buildDropdownField(getDropDownList()),
-
-                              SizedBox(height: 20),
-
                               // Purpose Selection
                               _buildInputLabel("PURPOSE1".tr(), Icons.assignment),
                               SizedBox(height: 8),
                               _buildDropdownField(getSaleTypeList()),
+
+                              SizedBox(height: 20),
+
+                              // Flock Selection
+                              _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
+                              SizedBox(height: 8),
+                              _buildDropdownField(getDropDownList()),
 
                               if (is_bird_sale && is_specific_flock)
                                 Padding(
@@ -787,9 +833,36 @@ class _NewIncome extends State<NewIncome>
                                 SizedBox(height: 20),
 
                                 // Sold To
-                                _buildInputLabel("SOLD_TO".tr(), Icons.person),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    _buildInputLabel("SOLD_TO".tr(), Icons.person),
+                                    InkWell(
+                                        onTap: () async{
+                                          await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>  SaleContractorScreen()),
+                                          );
+                                          contractors = await DatabaseHelper.getContractors();
+                                          if(contractors.length >0) {
+                                            selectedContractor = contractors[0];
+                                            soldtoController.text = selectedContractor!.name;
+                                          }
+                                          setState(() {
+
+                                          });
+                                        },
+                                        child: Container(
+                                            margin: EdgeInsets.only(right: 10),
+                                            child: Icon(Icons.add, color: Utils.getThemeColorBlue(),))),
+                                  ],
+                                ),
                                 SizedBox(height: 8),
-                                _buildInputField(soldtoController, "SOLD_TO_HINT".tr(), Icons.person),
+                               contractors.length == 0?
+                                _buildInputField(soldtoController, "SOLD_TO_HINT".tr(), Icons.person)
+                               : _buildDropdownContractor(getContractorDropDown())
+
                               ],
                             ),
                           )
@@ -1153,6 +1226,16 @@ class _NewIncome extends State<NewIncome>
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.grey.shade300, width: 1.2),
       ),
+      child: Center(child: dropdownWidget), // Ensuring it is vertically centered
+    );
+  }
+
+  // Custom Dropdown Field (Increased Height)
+  Widget _buildDropdownContractor(Widget dropdownWidget) {
+    return Container(
+      height: 75, // Increased height
+      padding: EdgeInsets.symmetric(horizontal: 5),
+
       child: Center(child: dropdownWidget), // Ensuring it is vertically centered
     );
   }
@@ -1696,6 +1779,45 @@ class _NewIncome extends State<NewIncome>
             ),
           );
         }).toList(),
+      ),
+    );
+  }
+
+  Widget getContractorDropDown() {
+    return Container(
+      width: widthScreen,
+      child: DropdownButtonFormField<SaleContractor>(
+        value: selectedContractor,
+        decoration: InputDecoration(
+          labelText: 'Select Contractor',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        items: contractors.map((contractor) {
+          return DropdownMenuItem<SaleContractor>(
+            value: contractor,
+            child: Row(
+              children: [
+                Icon(Icons.person_outline, size: 20, color: Colors.grey.shade700),
+                const SizedBox(width: 8),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(contractor.name, style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16)),
+                    Text(" (${contractor.type})", style: TextStyle(color: Colors.grey.shade600, fontSize: 14)),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+        onChanged: (value) {
+          if (value != null) {
+            setState(() {
+              selectedContractor = value;
+              soldtoController.text = selectedContractor!.name;
+            });
+          }
+        },
       ),
     );
   }

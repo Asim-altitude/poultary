@@ -490,6 +490,7 @@ class Invoice {
   pw.PageTheme _buildTheme(
       PdfPageFormat pageFormat, pw.Font base, pw.Font bold, pw.Font italic) {
     return pw.PageTheme(
+      textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
       pageFormat: pageFormat,
       theme: pw.ThemeData.withFont(
         base: base,

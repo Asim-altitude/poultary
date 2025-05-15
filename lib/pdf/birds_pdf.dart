@@ -3,15 +3,12 @@ import 'dart:typed_data';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:google_fonts/google_fonts.dart';
 import 'package:poultary/utils/utils.dart';
 
 import '../../data.dart';
-import '../model/flock.dart';
 import '../model/flock_detail.dart';
 import '../model/flock_report_item.dart';
 
@@ -383,6 +380,7 @@ class Invoice {
   pw.PageTheme _buildTheme(
       PdfPageFormat pageFormat, pw.Font base, pw.Font bold, pw.Font italic) {
     return pw.PageTheme(
+      textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
       pageFormat: pageFormat,
       theme: pw.ThemeData.withFont(
         base: base,

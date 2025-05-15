@@ -571,7 +571,7 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
         var txt = await Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) =>  NewIncome(transactionItem: transactionItem,)),
+              builder: (context) =>  NewIncome(transactionItem: transactionItem, selectedIncomeType: null, selectedExpenseType: null,)),
         );
 
         getData();
@@ -590,7 +590,7 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
           var txt = await Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) =>  NewIncome(transactionItem: transactionItem,)),
+                builder: (context) =>  NewIncome(transactionItem: transactionItem, selectedIncomeType: null, selectedExpenseType: null,)),
           );
 
           getData();

@@ -33,7 +33,6 @@ class PDFScreen extends StatefulWidget {
 
   int item = 0;
 
-
   @override
   State<PDFScreen> createState() => _PDFScreen( item: item);
 }
@@ -169,7 +168,8 @@ class _PDFScreen extends State<PDFScreen> {
                               margin: EdgeInsets.only(right: 10),
                               child: Icon(Icons.download,color: Colors.white,),
                             ),
-                          ),InkWell(
+                          ),
+                          InkWell(
                             onTap: () {
                               _shareAsFile(context, (format) => getSelectedPdf(format,item), PdfPageFormat.a4);
 

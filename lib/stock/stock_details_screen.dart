@@ -5,6 +5,7 @@ import 'package:poultary/utils/utils.dart';
 
 import '../model/feed_stock_history.dart';
 import '../model/feed_stock_summary.dart';
+import '../model/stock_expense.dart';
 import '../sticky.dart';
 
 class StockDetailScreen extends StatefulWidget{
@@ -50,93 +51,56 @@ class _StockDetailScreen extends State<StockDetailScreen> {
                   itemBuilder: (context, index) {
                     final entry = widget.stockHistory[index];
 
-                    return Dismissible(
-                      key: Key(entry.id.toString()), // Use a unique key for each item
-                      background: Container(
-                        color: Colors.red,
-                        alignment: Alignment.centerRight,
-                        padding: EdgeInsets.only(right: 20),
-                        child: Icon(Icons.delete, color: Colors.white),
-                      ),
-                      direction: DismissDirection.endToStart, // Swipe left to delete
-                      confirmDismiss: (direction) async {
-                        return await showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text("Delete Entry".tr()),
-                            content: Text("Are you sure you want to delete this stock entry?".tr()),
-                            actions: [
-                              TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("CANCEL".tr())),
-                              TextButton(
-                                onPressed: () async{
-                                 // _deleteStock(entry.id);
-                                  DatabaseHelper.deleteFeedStock(entry.id!);
-                                  Utils.showToast("SUCCESSFUL".tr());
-                                  setState(() {
-                                    widget.stockHistory.remove(entry);
-                                  });
+                    return Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 3,
+                      margin: EdgeInsets.symmetric(vertical: 6),
+                      child: ListTile(
+                        leading: Icon(
+                          entry.source == 'PURCHASED' ? Icons.add_shopping_cart : Icons.sync_alt,
+                          color: entry.source == 'PURCHASED' ? Colors.green : Colors.orange,
+                        ),
+                        title: Text(
+                          "${entry.quantity} ${entry.unit.tr()} from ${entry.source.tr()}",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        subtitle: Text("DATE".tr()+": ${Utils.getFormattedDate(entry.date)}"),
+                        trailing: IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () async {
+                            return await showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text("Delete Entry".tr()),
+                                content: Text("Are you sure you want to delete this stock entry?".tr()),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("CANCEL".tr())),
+                                  TextButton(
+                                    onPressed: () async{
+                                      // _deleteStock(entry.id);
+                                      StockExpense? stockExpense = await DatabaseHelper.getByStockItemId(entry.id!);
+                                      if(stockExpense != null){
+                                        await DatabaseHelper.deleteByStockItemId(entry.id!);
+                                        await DatabaseHelper.deleteItem("Transactions", stockExpense.transactionId);
+                                      }
 
-                                  if(widget.stockHistory.isEmpty){
-                                    Navigator.pop(context);
-                                  }
-                                  Navigator.of(context).pop(true);
-                                },
-                                child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
+                                      DatabaseHelper.deleteFeedStock(entry.id!);
+                                      Utils.showToast("SUCCESSFUL".tr());
+                                      setState(() {
+                                        widget.stockHistory.remove(entry);
+                                      });
+
+                                      if(widget.stockHistory.isEmpty){
+                                        Navigator.pop(context);
+                                      }
+                                      Navigator.of(context).pop(true);
+                                    },
+                                    child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        );
-                      },
-                      onDismissed: (direction) {
-                        DatabaseHelper.deleteFeedStock(entry.id!);
-
-                        // Delete the item from the database
-                      },
-                      child: Card(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 3,
-                        margin: EdgeInsets.symmetric(vertical: 6),
-                        child: ListTile(
-                          leading: Icon(
-                            entry.source == 'PURCHASED' ? Icons.add_shopping_cart : Icons.sync_alt,
-                            color: entry.source == 'PURCHASED' ? Colors.green : Colors.orange,
-                          ),
-                          title: Text(
-                            "${entry.quantity} ${entry.unit.tr()} from ${entry.source.tr()}",
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          subtitle: Text("DATE".tr()+": ${Utils.getFormattedDate(entry.date)}"),
-                          trailing: IconButton(
-                            icon: Icon(Icons.delete, color: Colors.red),
-                            onPressed: () async {
-                              return await showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: Text("Delete Entry".tr()),
-                                  content: Text("Are you sure you want to delete this stock entry?".tr()),
-                                  actions: [
-                                    TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("CANCEL".tr())),
-                                    TextButton(
-                                      onPressed: () async{
-                                        // _deleteStock(entry.id);
-                                        DatabaseHelper.deleteFeedStock(entry.id!);
-                                        Utils.showToast("SUCCESSFUL".tr());
-                                        setState(() {
-                                          widget.stockHistory.remove(entry);
-                                        });
-
-                                        if(widget.stockHistory.isEmpty){
-                                          Navigator.pop(context);
-                                        }
-                                        Navigator.of(context).pop(true);
-                                      },
-                                      child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
+                            );
+                          },
                         ),
                       ),
                     );

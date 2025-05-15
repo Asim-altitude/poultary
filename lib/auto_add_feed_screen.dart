@@ -368,7 +368,7 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Text("Quantity".tr()+": ${record.quantity}"+"kg".tr()),
+                          Text("Quantity".tr()+": ${record.quantity}"+Utils.selected_unit.tr()),
                           const SizedBox(height: 8),
                           Text("DATE".tr()+": ${Utils.getFormattedDate(record.date!)}"),
                           const SizedBox(height: 8),

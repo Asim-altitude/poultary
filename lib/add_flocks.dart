@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/suggested_notifcations.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
@@ -17,6 +18,9 @@ import 'model/bird_item.dart';
 import 'model/flock.dart';
 import 'model/flock_detail.dart';
 import 'model/flock_image.dart';
+import 'model/notification_suggestions.dart';
+import 'model/recurrence_type.dart';
+import 'model/schedule_notification.dart';
 import 'model/sub_category_item.dart';
 import 'model/transaction_item.dart';
 
@@ -119,6 +123,87 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
   bool isPurchase = false;
   List<SubItem> _paymentMethodList = [];
   List<String>  _visiblePaymentMethodList = [];
+  final List<ScheduledNotification> customNotifications = [];
+
+  List<SuggestedNotification> suggestedNotifications = [];
+
+  void getSuggestedNotifications() {
+    Utils utils = new Utils();
+    suggestedNotifications = utils.getSuggestedNotifications(birdType: birds[chosen_index].name, ageInDays: Utils.getAgeIndays(date));
+    setState(() {
+
+    });
+  }
+
+  void _showAddCustomNotificationDialog() {
+    final _titleController = TextEditingController();
+    final _descController = TextEditingController();
+    RecurrenceType _selectedRecurrence = RecurrenceType.once;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, top: 16, left: 16, right: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Add Custom Notification', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _titleController,
+              decoration: InputDecoration(labelText: 'Title'),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _descController,
+              decoration: InputDecoration(labelText: 'Description'),
+              minLines: 1,
+              maxLines: 3,
+            ),
+            const SizedBox(height: 10),
+            DropdownButtonFormField<RecurrenceType>(
+              value: _selectedRecurrence,
+              onChanged: (RecurrenceType? value) {
+                if (value != null) {
+                  _selectedRecurrence = value;
+                }
+              },
+              items: RecurrenceType.values.map((type) {
+                return DropdownMenuItem(
+                  value: type,
+                  child: Text(type.name[0].toUpperCase() + type.name.substring(1)),
+                );
+              }).toList(),
+              decoration: InputDecoration(labelText: 'Recurrence'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              icon: Icon(Icons.save),
+              label: Text('Save'),
+              onPressed: () {
+                final newNotification = ScheduledNotification(
+                  id: DateTime.now().millisecondsSinceEpoch,
+                  birdType: birds[chosen_index].name,
+                  flockId: -1,
+                  title: _titleController.text.trim(),
+                  description: _descController.text.trim(),
+                  scheduledAt: DateTime.now().add(Duration(days: 1)), // Default to tomorrow
+                  recurrence: _selectedRecurrence,
+                );
+                setState(() {
+                  customNotifications.add(newNotification);
+                });
+                Navigator.pop(context);
+              },
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
 
   void getBirds() async {
 
@@ -307,6 +392,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                           } else {
                             Utils.showToast("FLOCK_CREATED".tr());
                             Navigator.pop(context);
+                            gotoNotificationsScreen(id);
                           }
                         } else {
                           Utils.showToast("PROVIDE_ALL".tr());
@@ -1269,10 +1355,14 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
       print("Images Inserted");
       Utils.showToast("FLOCK_CREATED".tr());
       Navigator.pop(context);
+      gotoNotificationsScreen(id!);
     }
 
   }
 
+  void gotoNotificationsScreen(int f_id) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => SuggestedNotificationScreen(birdType: birds[chosen_index].name, flockId: f_id, flockAgeInDays: Utils.getAgeIndays(date),)));
+  }
 
 
 }

@@ -11,6 +11,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:poultary/add_feeding.dart';
 import 'package:poultary/all_events.dart';
 import 'package:poultary/category_screen.dart';
+import 'package:poultary/sale_contractor_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/support_screen.dart';
 import 'package:poultary/utils/session_manager.dart';
@@ -22,6 +23,8 @@ import 'auto_feed_management.dart';
 import 'backup_screen.dart';
 import 'database/databse_helper.dart';
 import 'farm_setup_screen.dart';
+import 'feed_batch_screen.dart';
+import 'feed_ingridient_screen.dart';
 import 'filter_setup_screen.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
@@ -56,6 +59,8 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
   bool _purchasePending = false;
   bool _loading = true;
   String? _queryProductError;
+  bool isTrayEnabled = false;
+  int traySize = 30;
   final supportedLanguages = [
     Languages.english,
     Languages.arabic,
@@ -85,6 +90,9 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
   final Uri _url2 = Uri.parse('https://whatsapp.com/channel/0029Vb358El3gvWaZBGYBU28');
 
   getLanguage() async {
+    isTrayEnabled = await SessionManager.getBool(SessionManager.tray_enabled);
+    traySize = await SessionManager.getInt(SessionManager.tray_size);
+
     _selectedCupertinoLanguage = await Utils.getSelectedLanguage();
     setState(() {
       isGetLanguage = true;
@@ -182,7 +190,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
           height: heightScreen,
             color: Colors.white,
             // color: Utils.getScreenBackground(),
-            child:SingleChildScrollViewWithStickyFirstWidget(
+            child: SingleChildScrollViewWithStickyFirstWidget(
             child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -192,94 +200,218 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
 
                 SizedBox(height: 10,),
                 _buildSectionTitle('Settings'.tr()),
-                _buildSettingsTile(
-                  context,
-                  icon: Icons.notifications_active,
-                  title: 'Schedule Reminders'.tr(),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const AllEventsScreen()),
-                    );
-                  },
-                ),
-                _buildSettingsTile(
-                  context,
-                  icon: Icons.account_balance,
-                  title: 'FARM_MANAGMENT'.tr(),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const FarmSetupScreen()),
-                    );
-                  },
-                ),
-                _buildSettingsTile(
-                  context,
-                  icon: Icons.category,
-                  title: 'CATEGORY_MANAGMENT'.tr(),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const CategoryScreen()),
 
-                    );
-                  },
+              // Farm & Inventory Section
+              Card(
+                margin: const EdgeInsets.all(12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _sectionTitle(context, 'Farm & Inventory'),
+                      _buildSettingsTile(
+                        context,
+                        icon: Icons.account_balance,
+                        title: 'FARM_MANAGMENT'.tr(),
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FarmSetupScreen())),
+                      ),
+                      _buildSettingsTile(
+                        context,
+                        icon: Icons.category,
+                        title: 'CATEGORY_MANAGMENT'.tr(),
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoryScreen())),
+                      ),
+                      _buildSettingsTile(
+                        context,
+                        icon: Icons.dataset,
+                        title: 'Feed Batches'.tr(),
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => FeedBatchScreen())),
+                      ),
+                    ],
+                  ),
                 ),
-                _buildSettingsTile(
-                  context,
-                  icon: Icons.auto_mode,
-                  title: 'Auto Feed Management'.tr(),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>  AutomaticFeedManagementScreen()),
-                    );
-                  },
-                ),
+              ),
 
-                _buildSettingsTile(
-                  context,
-                  icon: Icons.filter_alt_rounded,
-                  title: 'All Data Filters'.tr(),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>  FilterSetupScreen(inStart: false,)),
-                    );
-                  },
+              Card(
+                margin: const EdgeInsets.all(12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _sectionTitle(context, 'Reminders & Automation'),
+                      _buildSettingsTile(
+                        context,
+                        icon: Icons.notifications_active,
+                        title: 'Schedule Reminders'.tr(),
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AllEventsScreen())),
+                      ),
+                      _buildSettingsTile(
+                        context,
+                        icon: Icons.auto_mode,
+                        title: 'Auto Feed Management'.tr(),
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AutomaticFeedManagementScreen())),
+                      ),
+                    ],
+                  ),
                 ),
+              ),
 
-                _buildSettingsTile(
-                  context,
-                  icon: Icons.backup,
-                  title: 'BACK_UP_RESTORE_MESSAGE'.tr(),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => BackupRestoreScreen()),
-                    );
-                  },
+              Card(
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 3,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Egg in Trays', style: Theme.of(context).textTheme.titleMedium),
+                          Switch(
+                            value: isTrayEnabled,
+                            onChanged: (bool value) {
+                              setState(() {
+                                isTrayEnabled = value;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                      if (isTrayEnabled)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  initialValue: traySize.toString(),
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly, // Only allow digits (integers)
+                                  ],
+                                  decoration: InputDecoration(
+                                    hintText: 'Tray size',
+                                    isDense: true,
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                  ),
+                                  onChanged: (value) {
+                                    traySize = int.tryParse(value) ?? traySize;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              ElevatedButton(
+                                onPressed: () {
+                                  if(traySize > 0) {
+                                    SessionManager.setInt(traySize);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(
+                                          'Tray size set to $traySize')),
+                                    );
+                                  }else{
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(
+                                          'Tray size invalid')),
+                                    );
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                                child: const Icon(Icons.save),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
+              ),
 
-                _buildSettingsTile(
-                  context,
-                  icon: Icons.support,
-                  title: 'Contact & Support'.tr(),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ContactSupportScreen()),
-                    );
-                  },
+
+              // Business & Sales
+              Card(
+                margin: const EdgeInsets.all(12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _sectionTitle(context, 'Business & Sales'),
+                      _buildSettingsTile(
+                        context,
+                        icon: Icons.group_add,
+                        title: 'Sale Contractors'.tr(),
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SaleContractorScreen())),
+                      ),
+                    ],
+                  ),
                 ),
+              ),
 
-                SizedBox(height: 20,),
+              // Tools & Data
+              Card(
+                margin: const EdgeInsets.all(12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _sectionTitle(context, 'Tools & Data'),
+                      _buildSettingsTile(
+                        context,
+                        icon: Icons.filter_alt_rounded,
+                        title: 'All Data Filters'.tr(),
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => FilterSetupScreen(inStart: false))),
+                      ),
+                      _buildSettingsTile(
+                        context,
+                        icon: Icons.backup,
+                        title: 'BACK_UP_RESTORE_MESSAGE'.tr(),
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BackupRestoreScreen())),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Help & Support
+              Card(
+                margin: const EdgeInsets.all(12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _sectionTitle(context, 'Help & Support'),
+                      _buildSettingsTile(
+                        context,
+                        icon: Icons.support,
+                        title: 'Contact & Support'.tr(),
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ContactSupportScreen())),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 20,),
                 if(Utils.isShowAdd)
                   _buildPremiumUpgradeTile(context),
 
@@ -1946,6 +2078,16 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _sectionTitle(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+      child: Text(
+        title.tr(),
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
       ),
     );
   }

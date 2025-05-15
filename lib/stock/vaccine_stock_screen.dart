@@ -8,6 +8,7 @@ import 'package:poultary/stock/vaccine_stock_details.dart';
 import '../database/databse_helper.dart';
 import '../model/medicine_stock_history.dart';
 import '../model/medicine_stock_summary.dart';
+import '../model/stock_expense.dart';
 import '../model/transaction_item.dart';
 import '../utils/utils.dart';
 import 'medicine_stock_details.dart';
@@ -402,7 +403,7 @@ class _AddMedicineStockBottomSheetState extends State<AddMedicineStockBottomShee
 
     );
 
-    await DatabaseHelper.insertVaccineStock(stock);
+    int? stock_item_id = await DatabaseHelper.insertVaccineStock(stock);
     widget.onStockAdded();
 
     if(!_amountController.text.isEmpty){
@@ -422,8 +423,10 @@ class _AddMedicineStockBottomSheetState extends State<AddMedicineStockBottomShee
           extra_cost_details: "",
           f_name: "Farm Wide",
           flock_update_id: '-1');
-      int? id = await DatabaseHelper
+      int? transaction_id = await DatabaseHelper
           .insertNewTransaction(transaction_item);
+      StockExpense stockExpense = StockExpense(stockItemId: stock_item_id!, transactionId: transaction_id!);
+      await DatabaseHelper.insertStockJunction(stockExpense);
     }
 
     Navigator.pop(context, true);

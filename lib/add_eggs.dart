@@ -6,17 +6,22 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
+import 'model/egg_income.dart';
 import 'model/egg_item.dart';
 import 'model/flock.dart';
+import 'model/sale_contractor.dart';
+import 'model/transaction_item.dart';
 
 class NewEggCollection extends StatefulWidget {
 
   Eggs? eggs;
   bool isCollection;
-  NewEggCollection({Key? key, required this.isCollection, required this.eggs}) : super(key: key);
+  String? reason;
+  NewEggCollection({Key? key, required this.isCollection, required this.eggs, required this.reason}) : super(key: key);
 
   @override
   _NewEggCollection createState() => _NewEggCollection(this.isCollection);
@@ -43,6 +48,10 @@ class _NewEggCollection extends State<NewEggCollection>
 
   // Selected color
   String? selectedColor = "";
+  bool inTrays = false;
+  int eggsPerTray = 30; // Default value, load from SharedPrefs in initState
+  TextEditingController traysGoodEggsController = TextEditingController();
+  TextEditingController traysBadEggsController = TextEditingController();
 
    bool isCollection;
   _NewEggCollection(this.isCollection);
@@ -53,15 +62,21 @@ class _NewEggCollection extends State<NewEggCollection>
 
   }
 
+  EggTransaction? eggTransaction = null;
   String _purposeselectedValue = "";
   String _reductionReasonValue = "";
   String _acqusitionselectedValue = "";
 
   List<String> _purposeList = [];
   List<String> _reductionReasons = [
-    'SOLD','PERSONAL_USE','LOST','OTHER'];
+    'PERSONAL_USE','SOLD','LOST','OTHER'];
 
   int chosen_index = 0;
+
+  num amount = 0.0;
+  String contractorName = "";
+  String paymentMethod = "Cash";
+  String paymentStatus = "CLEARED";
 
   bool isEdit = false;
 
@@ -80,15 +95,26 @@ class _NewEggCollection extends State<NewEggCollection>
       _purposeselectedValue = widget.eggs!.f_name!;
       selectedColor = widget.eggs!.egg_color;
 
-    }else
+      _reductionReasons.clear();
+      _reductionReasons.add(_reductionReasonValue);
+
+    }
+    else if(widget.reason != null){
+      _reductionReasonValue = widget.reason!;
+      totalEggsController.text = "0";
+      goodEggsController.text ="0";
+      badEggsController.text =  "0";
+      selectedColor = eggColors[0];
+    }
+    else
     {
       DateTime dateTime = DateTime.now();
       date = DateFormat('yyyy-MM-dd').format(dateTime);
 
       _reductionReasonValue = _reductionReasons[0];
-      totalEggsController.text = "10";
-      goodEggsController.text ="5";
-      badEggsController.text =  "5";
+      totalEggsController.text = "0";
+      goodEggsController.text ="0";
+      badEggsController.text =  "0";
       selectedColor = eggColors[0];
     }
 
@@ -98,11 +124,39 @@ class _NewEggCollection extends State<NewEggCollection>
 
   }
 
+  List<SaleContractor> contractors = [];
+  SaleContractor? selectedContractor;
+  TransactionItem? transactionItem = null;
   List<Flock> flocks = [];
   void getList() async {
 
     await DatabaseHelper.instance.database;
 
+    contractors = await DatabaseHelper.getContractors();
+    if(contractors.length > 0) {
+      selectedContractor = contractors[0];
+      contractorName = selectedContractor!.name;
+    }
+
+    if(isEdit){
+      eggTransaction = await DatabaseHelper.getByEggItemId(widget.eggs!.id!);
+      if(eggTransaction!= null){
+        transactionItem = await DatabaseHelper.getSingleTransaction(eggTransaction!.transactionId.toString());
+
+        amount = num.parse(transactionItem!.amount);
+        payment_method = transactionItem!.payment_method;
+        payment_status = transactionItem!.payment_status;
+        contractorName = transactionItem!.sold_purchased_from;
+        amountController.text = amount.toString();
+        print("Contractor: "+contractorName);
+        setState(() {
+
+        });
+      }
+    }
+
+    inTrays = await SessionManager.getBool(SessionManager.tray_enabled);
+    eggsPerTray = await SessionManager.getInt(SessionManager.tray_size);
     flocks = await DatabaseHelper.getFlocks();
 
     flocks.insert(0,Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1, flock_new: 1));
@@ -113,6 +167,14 @@ class _NewEggCollection extends State<NewEggCollection>
 
     if(!isEdit)
     _purposeselectedValue = Utils.selected_flock!.f_name;
+
+    if(inTrays && isEdit) {
+      traysGoodEggsController.text = Utils.getEggTrays(widget.eggs!.good_eggs, eggsPerTray).toString();
+      traysBadEggsController.text = Utils.getEggTrays(widget.eggs!.bad_eggs, eggsPerTray).toString();
+
+      goodEggsController.text = Utils.getRemaining(widget.eggs!.good_eggs, eggsPerTray).toString();
+      badEggsController.text = Utils.getRemaining(widget.eggs!.bad_eggs, eggsPerTray).toString();
+    }
 
     setState(() {
 
@@ -130,6 +192,8 @@ class _NewEggCollection extends State<NewEggCollection>
   final goodEggsController = TextEditingController();
   final badEggsController = TextEditingController();
   final notesController = TextEditingController();
+
+  final amountController = TextEditingController();
 
   bool imagesAdded = false;
 
@@ -204,40 +268,29 @@ class _NewEggCollection extends State<NewEggCollection>
               Expanded(
                 child: GestureDetector(
                   onTap: () async {
-                    good_eggs = int.parse(goodEggsController.text);
-                    bad_eggs = int.parse(badEggsController.text);
+                    good_eggs = int.tryParse(goodEggsController.text) ?? 0;
+                    bad_eggs = int.tryParse(badEggsController.text) ?? 0;
 
-                    activeStep++;
-                    if(activeStep==1) {
-                    bool emptyCheck = true;
-                    if(goodEggsController.text.toString().trim() == ""
-                    || badEggsController.text.toString().trim() =="")
-                    {
-                    activeStep--;
-                    Utils.showToast("PROVIDE_ALL".tr());
+                    checkEggsInTrays();
 
-                    }
                     setState(() {
-
+                      activeStep++;
                     });
-                    }
 
                     if(activeStep==2) {
                       await DatabaseHelper.instance.database;
                       try {
-                        if (isCollection) {
+                        if (isCollection)
+                        {
                           if (isEdit) {
                             widget.eggs!.f_id = getFlockID();
                             widget.eggs!.f_name =
                                 _purposeselectedValue;
                             widget.eggs!.date = this.date;
                             widget.eggs!.egg_color = selectedColor;
-                            widget.eggs!.good_eggs =
-                                int.parse(goodEggsController.text);
-                            widget.eggs!.bad_eggs =
-                                int.parse(badEggsController.text);
-                            widget.eggs!.total_eggs = int.parse(
-                                totalEggsController.text);
+                            widget.eggs!.good_eggs = good_eggs;
+                            widget.eggs!.bad_eggs = bad_eggs;
+                            widget.eggs!.total_eggs = good_eggs + bad_eggs;
                             widget.eggs!.short_note =
                                 notesController.text;
                             await DatabaseHelper.updateEggCollection(
@@ -252,10 +305,9 @@ class _NewEggCollection extends State<NewEggCollection>
                                 f_id: getFlockID(),
                                 f_name: _purposeselectedValue,
                                 image: '',
-                                good_eggs: this.good_eggs,
+                                good_eggs: good_eggs,
                                 bad_eggs: bad_eggs,
-                                total_eggs: int.parse(
-                                    totalEggsController.text),
+                                total_eggs: good_eggs + bad_eggs,
                                 short_note: notesController.text,
                                 date: date,
                                 reduction_reason: '',
@@ -264,46 +316,85 @@ class _NewEggCollection extends State<NewEggCollection>
                             Utils.showToast("SUCCESSFUL".tr());
                             Navigator.pop(context, "Egg ADDED");
                           }
-                        } else {
+                        }
+                        else {
                           if (isEdit) {
                             widget.eggs!.f_id = getFlockID();
                             widget.eggs!.f_name =
                                 _purposeselectedValue;
                             widget.eggs!.date = this.date;
                             widget.eggs!.egg_color = selectedColor;
-                            widget.eggs!.good_eggs =
-                                int.parse(goodEggsController.text);
-                            widget.eggs!.bad_eggs =
-                                int.parse(badEggsController.text);
+                            widget.eggs!.good_eggs = good_eggs;
+                            widget.eggs!.bad_eggs = bad_eggs;
                             widget.eggs!.reduction_reason =
                                 _reductionReasonValue;
-                            widget.eggs!.total_eggs = int.parse(
-                                totalEggsController.text);
+                            widget.eggs!.total_eggs = good_eggs + bad_eggs;
                             widget.eggs!.short_note =
                                 notesController.text;
-                            await DatabaseHelper.updateEggCollection(
-                                widget.eggs!);
+
+                            await DatabaseHelper.updateEggCollection(widget.eggs!);
+
+                            if(transactionItem != null)
+                            {
+
+                              transactionItem!.amount = amount.toString();
+                              transactionItem!.how_many = (good_eggs + bad_eggs).toString();
+                              transactionItem!.payment_status = payment_status;
+                              transactionItem!.payment_method = payment_method;
+                              transactionItem!.sold_purchased_from = contractorName;
+
+                              print("Contractor ${contractorName}");
+                              print("TR Contractor ${transactionItem!.sold_purchased_from}");
+
+                              await DatabaseHelper.updateTransaction(transactionItem!);
+
+                            }else{
+                              print("NO Transaction");
+                            }
 
                             Utils.showToast("SUCCESSFUL".tr());
                             Navigator.pop(context, "Egg ADDED");
                           }
                           else {
-                            int? id = await DatabaseHelper
+                            int? eggs_id = await DatabaseHelper
                                 .insertEggCollection(Eggs(
                                 f_id: getFlockID(),
                                 f_name: _purposeselectedValue,
                                 image: '',
-                                good_eggs: int.parse(
-                                    goodEggsController.text),
-                                bad_eggs: int.parse(
-                                    badEggsController.text),
-                                total_eggs: int.parse(
-                                    totalEggsController.text),
+                                good_eggs: good_eggs,
+                                bad_eggs: bad_eggs,
+                                total_eggs: good_eggs + bad_eggs,
                                 short_note: notesController.text,
                                 date: date,
                                 reduction_reason: _reductionReasonValue,
                                 isCollection: 0,
                                 egg_color: selectedColor));
+
+                            if(isEggSale()){
+                              TransactionItem transaction_item = TransactionItem(
+                                  f_id: getFlockID(),
+                                  date: date,
+                                  sale_item: "Egg Sale",
+                                  expense_item: "",
+                                  type: "Income",
+                                  amount: amount.toString(),
+                                  payment_method: payment_method,
+                                  payment_status: payment_status,
+                                  sold_purchased_from: contractorName,
+                                  short_note: "Egg Sale".tr()+" on $date}",
+                                  how_many: (good_eggs + bad_eggs).toString(),
+                                  extra_cost: "",
+                                  extra_cost_details: "",
+                                  f_name: getFlockName(getFlockID()),
+                                  flock_update_id: '-1');
+
+                              int? transaction_id = await DatabaseHelper.insertNewTransaction(transaction_item);
+
+                              EggTransaction eggTransaction = EggTransaction(eggItemId: eggs_id!, transactionId: transaction_id!);
+                              DatabaseHelper.insertEggJunction(eggTransaction);
+
+                            }
+
                             Utils.showToast("SUCCESSFUL".tr());
                             Navigator.pop(context, "Egg Reduced");
                           }
@@ -444,14 +535,10 @@ class _NewEggCollection extends State<NewEggCollection>
                     onStepReached: (index) => setState(() => activeStep = index),
                   ),
                   Container(
-                    alignment: Alignment.center,
                     child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(height: 10,width: widthScreen),
+                         children: [
                           activeStep == 0? Container(
-                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                             padding: EdgeInsets.all(18),
                             decoration: BoxDecoration(
                               color: Colors.white,
@@ -492,37 +579,145 @@ class _NewEggCollection extends State<NewEggCollection>
                                 SizedBox(height: 5),
                                 _buildDropdownField(getDropDownList()),
 
-                                SizedBox(height: 20),
-
-                                // Good Eggs Input
-                                _buildInputLabel("Good Eggs".tr(), Icons.egg),
-                                SizedBox(height: 5),
-                                _buildInputFieldIntFLoat(
-                                  goodEggsController,
-                                  "Enter Good Eggs".tr(),
-                                  Icons.check_circle,
-                                  onChanged: (text) {
-                                    good_eggs = text.isEmpty ? 0 : int.parse(text);
-                                    calculateTotalEggs();
-                                  },
-                                  isFloat: false
+                                SizedBox(height: 10),
+                                Container(
+                                  margin: EdgeInsets.only(left: 10, right: 10),
+                                  child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text("Enter in Trays".tr(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                        Switch(
+                                          value: inTrays,
+                                          activeColor: Utils.getThemeColorBlue(),
+                                          onChanged: (value) {
+                                            setState(() {
+                                              inTrays = value;
+                                              SessionManager.setBool(inTrays);
+                                              calculateTotalEggs();
+                                            });
+                                          },
+                                        ),
+                                      ]
+                                  ),
                                 ),
 
-                                SizedBox(height: 20),
+                                inTrays? Container(
+                                 padding: EdgeInsets.all(10),
+                                 decoration: BoxDecoration(
+                                   color: Colors.grey.withOpacity(0.1),
+                                   borderRadius: BorderRadius.circular(14),
+                                   border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                                 ),
+                                 child: Column(
+                                   children: [
 
-                                // Bad Eggs Input
-                                _buildInputLabel("Bad Eggs".tr(), Icons.egg_outlined),
-                                SizedBox(height: 5),
-                                _buildInputFieldIntFLoat(
-                                  badEggsController,
-                                  "Enter Bad Eggs".tr(),
-                                  Icons.cancel,
-                                  onChanged: (text) {
-                                    bad_eggs = text.isEmpty ? 0 : int.parse(text);
-                                    calculateTotalEggs();
-                                  },
-                                  isFloat: false
+                                     if (inTrays)
+                                       Row(
+                                         children: [
+                                           Expanded(
+                                             child: Column(
+                                               crossAxisAlignment: CrossAxisAlignment.start,
+                                               children: [
+                                                 _buildInputLabelNoIcon("Good Trays".tr()),
+                                                 SizedBox(height: 5),
+                                                 _buildInputFieldTrays(
+                                                   traysGoodEggsController,
+                                                   "Trays Count".tr(),
+                                                   Icons.check_circle,
+                                                   onChanged: (text) {
+                                                     calculateTotalEggs();
+                                                   },
+                                                   isFloat: false,
+                                                 ),
+                                               ],
+                                             ),
+                                           ),
+                                           SizedBox(width: 16),
+                                           Expanded(
+                                             child: Column(
+                                               crossAxisAlignment: CrossAxisAlignment.start,
+                                               children: [
+                                                 _buildInputLabelNoIcon("Bad Trays".tr()),
+                                                 SizedBox(height: 5),
+                                                 _buildInputFieldTrays(
+                                                   traysBadEggsController,
+                                                   "Trays Count".tr(),
+                                                   Icons.cancel,
+                                                   onChanged: (text) {
+                                                     calculateTotalEggs();
+                                                   },
+                                                   isFloat: false,
+                                                 ),
+                                               ],
+                                             ),
+                                           ),
+                                         ],
+                                       ),
+
+                                     if (inTrays)
+                                       Container(
+                                         margin: EdgeInsets.only(left: 10, right: 10),
+                                         child: Row(
+                                           children: [
+                                             Text("Eggs per Tray".tr()+": " + "$eggsPerTray", style: TextStyle(fontSize: 16)),
+                                             Spacer(),
+                                             TextButton(
+                                               onPressed: () {
+                                                 showChangeEggsPerTrayDialog(context);
+                                               },
+                                               child: Text("Change".tr(), style: TextStyle(color: Utils.getThemeColorBlue())),
+                                             ),
+                                           ],
+                                         ),
+                                       ),
+                                   ],
+                                 ),
+                               ) : SizedBox(width: 1,),
+                                SizedBox(height: 10),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          _buildInputLabel("Good Eggs".tr(), Icons.egg),
+                                          SizedBox(height: 5),
+                                          _buildInputFieldIntFLoat(
+                                            goodEggsController,
+                                            "Enter Good Eggs".tr(),
+                                            Icons.check_circle,
+                                            onChanged: (text) {
+                                              good_eggs = text.isEmpty ? 0 : int.parse(text);
+                                              calculateTotalEggs();
+                                            },
+                                            isFloat: false,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 16), // Space between the two columns
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          _buildInputLabel("Bad Eggs".tr(), Icons.egg_outlined),
+                                          SizedBox(height: 5),
+                                          _buildInputFieldIntFLoat(
+                                            badEggsController,
+                                            "Enter Bad Eggs".tr(),
+                                            Icons.cancel,
+                                            onChanged: (text) {
+                                              bad_eggs = text.isEmpty ? 0 : int.parse(text);
+                                              calculateTotalEggs();
+                                            },
+                                            isFloat: false,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
+
 
                                 SizedBox(height: 20),
 
@@ -536,11 +731,11 @@ class _NewEggCollection extends State<NewEggCollection>
                                   readOnly: true,
 
                                 ),
+                                SizedBox(height: 10),
+
                               ],
                             ),
-                          )
-
-                              :SizedBox(width: 1,),
+                          ) :SizedBox(width: 1,),
 
                           activeStep==1? Container(
                             margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
@@ -578,9 +773,10 @@ class _NewEggCollection extends State<NewEggCollection>
                                   _buildInputLabel("REDUCTIONS_1".tr(), Icons.remove_circle_outline),
                                   SizedBox(height: 8),
                                   _buildDropdownField(getReductionList()),
-                                  SizedBox(height: 20),
+
                                 ],
 
+                                SizedBox(height: 10),
                                 // Egg Color Selection
                                 _buildInputLabel("EGG".tr()+" "+ "Color".tr(), Icons.palette),
                                 SizedBox(height: 8),
@@ -605,8 +801,12 @@ class _NewEggCollection extends State<NewEggCollection>
                                   ),
                                 ),
 
-                                SizedBox(height: 20),
-
+                                if(!isCollection && isEggSale())...[
+                                  SizedBox(height: 10),
+                                  buildPaymentSummaryTile(context, amount: amount, paymentType: payment_method, status: payment_status, c_name: contractorName),
+                                  // Total Eggs (Read-Only)
+                                ],
+                                SizedBox(height: 10),
                                 // Date Selection
                                 _buildInputLabel("DATE".tr(), Icons.calendar_today),
                                 SizedBox(height: 8),
@@ -775,6 +975,96 @@ class _NewEggCollection extends State<NewEggCollection>
       ),
     );
   }
+  void showChangeEggsPerTrayDialog(BuildContext context) {
+    TextEditingController trayCountController = TextEditingController(text: eggsPerTray.toString());
+
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("Eggs per Tray".tr(), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            SizedBox(height: 16),
+            TextField(
+              controller: trayCountController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                hintText: "Eggs per Tray".tr(),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () async {
+                final newVal = int.tryParse(trayCountController.text);
+                if (newVal != null && newVal > 0) {
+                  SessionManager.setInt(newVal);
+                  setState(() {
+                    eggsPerTray = newVal;
+                  });
+                  Navigator.pop(context);
+                }
+              },
+              child: Text("SAVE".tr()),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Custom Dropdown Field (Increased Height)
+  Widget _buildDropdownContractor(Widget dropdownWidget) {
+    return Container(
+      height: 75, // Increased height
+      padding: EdgeInsets.symmetric(horizontal: 5),
+
+      child: Center(child: dropdownWidget), // Ensuring it is vertically centered
+    );
+  }
+
+  Widget getContractorDropDown() {
+    return Container(
+      width: widthScreen,
+      child: DropdownButtonFormField<SaleContractor>(
+        value: selectedContractor,
+        decoration: InputDecoration(
+          labelText: 'Select Contractor',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        items: contractors.map((contractor) {
+          return DropdownMenuItem<SaleContractor>(
+            value: contractor,
+            child: Row(
+              children: [
+                Icon(Icons.person_outline, size: 20, color: Colors.grey.shade700),
+                const SizedBox(width: 8),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(contractor.name, style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16)),
+                    Text(" (${contractor.type})", style: TextStyle(color: Colors.grey.shade600, fontSize: 14)),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+        onChanged: (value) {
+          if (value != null) {
+            setState(() {
+              selectedContractor = value;
+              contractorName = selectedContractor!.name;
+              print(contractorName);
+            });
+          }
+        },
+      ),
+    );
+  }
 
 // Custom Input Field with More Space
   Widget _buildInputField(
@@ -812,7 +1102,48 @@ class _NewEggCollection extends State<NewEggCollection>
       ),
     );
   }
-
+  Widget _buildInputFieldTrays(
+      TextEditingController controller,
+      String label,
+      IconData icon, {
+        bool readOnly = false,
+        Function(String)? onChanged,
+        bool isFloat = false, // New optional parameter
+      }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade300, width: 1.2),
+      ),
+      child: Row(
+        children: [
+          SizedBox(width: 5),
+          Expanded(
+            child: TextFormField(
+              controller: controller,
+              keyboardType: isFloat
+                  ? TextInputType.numberWithOptions(decimal: true)
+                  : TextInputType.numberWithOptions(decimal: false),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(
+                  isFloat ? RegExp(r'^\d*\.?\d*$') : RegExp(r'^\d+$'),
+                ),
+              ],
+              readOnly: readOnly,
+              onChanged: onChanged,
+              decoration: InputDecoration(
+                hintText: label,
+                border: InputBorder.none,
+                hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
   Widget _buildInputFieldIntFLoat(
       TextEditingController controller,
       String label,
@@ -939,6 +1270,27 @@ class _NewEggCollection extends State<NewEggCollection>
     );
   }
 
+  // Custom Input Label with Icon
+  Widget _buildInputLabelNoIcon(String label) {
+    return Container(
+      margin: EdgeInsets.only(left: 10),
+      child: Row(
+        children: [
+          SizedBox(width: 5),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
   Widget _buildStepIcon(IconData icon, int step) {
     bool isActive = activeStep == step; // Current step
     bool isFinished = activeStep > step; // Completed steps
@@ -1006,6 +1358,15 @@ class _NewEggCollection extends State<NewEggCollection>
     );
   }
 
+  bool isEggSale() {
+
+    if(_reductionReasonValue == "SOLD")
+      return true;
+    else
+      return false;
+
+  }
+
   Widget getReductionList() {
     return Container(
       width: widthScreen,
@@ -1039,6 +1400,296 @@ class _NewEggCollection extends State<NewEggCollection>
     );
   }
 
+
+  Widget buildPaymentSummaryTile(
+      BuildContext context, {
+        required num amount,
+        required String paymentType,
+        required String status,
+        required String c_name,
+      }) {
+    final bool hasAmount = amount > 0;
+
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 3,
+      margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        leading: Icon(
+          hasAmount ? Icons.attach_money : Icons.info_outline,
+          color: hasAmount ? Colors.green : Colors.orange,
+          size: 30,
+        ),
+        title: Text(
+          hasAmount
+              ? "Amount".tr()+": ${Utils.currency} ${amount.toStringAsFixed(2)}"
+              : "Provide payment details".tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: hasAmount ? Colors.black : Colors.redAccent,
+            fontSize: 16,
+          ),
+        ),
+        subtitle: hasAmount
+            ? Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children:
+          [
+            const SizedBox(height: 5),
+            Text("Payment Type".tr()+": ${paymentType.tr()}", style: TextStyle(fontSize: 12),),
+            Text("Status".tr()+": ${status.tr()}", style: TextStyle(fontSize: 12),),
+            Text("Contractor".tr()+": $c_name", style: TextStyle(fontSize: 12),),
+          ],
+        )
+            : null,
+        trailing: Icon(Icons.edit, color: Colors.blueAccent),
+        onTap: () {
+          showPaymentEditBottomSheet(context);
+        },
+      ),
+    );
+  }
+
+
+
+
+  void showPaymentEditBottomSheet(BuildContext context) {
+    final TextEditingController contractorController = TextEditingController();
+    contractorController.text = contractorName;
+
+    String selectedPaymentMethod = "Cash";
+    String selectedStatus = "CLEARED";
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.7,
+          builder: (context, scrollController) {
+            return Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                boxShadow: [
+                  BoxShadow(color: Colors.black26, blurRadius: 10),
+                ],
+              ),
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Edit Payment Details".tr(),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.close, color: Colors.redAccent),
+                          onPressed: () => Navigator.pop(context),
+                        )
+                      ],
+                    ),
+                    SizedBox(height: 20),
+
+                    // Amount Input
+                    Text("Amount".tr(), style: TextStyle(fontWeight: FontWeight.bold)),
+                    SizedBox(height: 5),
+                    TextField(
+                      controller: amountController,
+                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r"^\d*\.?\d*$"),
+                        ), // Allows only numbers or float based on flag
+                      ],
+                      decoration: InputDecoration(
+                        hintText: "Enter amount".tr(),
+                        prefixIcon: Icon(Icons.attach_money),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+
+                    // Payment Method Dropdown
+                    Text("Payment Method".tr(), style: TextStyle(fontWeight: FontWeight.bold)),
+                    SizedBox(height: 5),
+                    DropdownButtonFormField<String>(
+                      value: selectedPaymentMethod,
+                      items: ["Cash", "Bank Transfer"].map((method) {
+                        return DropdownMenuItem(
+                          value: method,
+                          child: Text(method.tr()),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        payment_method = value!;
+                      },
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.payment),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+
+                    // Payment Status Dropdown
+                    Text("Payment Status".tr(), style: TextStyle(fontWeight: FontWeight.bold)),
+                    SizedBox(height: 5),
+                    DropdownButtonFormField<String>(
+                      value: selectedStatus,
+                      items: ["CLEARED", "UNCLEAR"].map((status) {
+                        return DropdownMenuItem(
+                          value: status,
+                          child: Text(status.tr()),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        payment_status = value!;
+                      },
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.verified),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+
+                    // Contractor Dropdown/Input
+                    Text("Contractor".tr(), style: TextStyle(fontWeight: FontWeight.bold)),
+                    SizedBox(height: 5),
+                    contractors.isNotEmpty
+                        ? _buildDropdownContractor(getContractorDropDown())
+                        : TextField(
+                      controller: contractorController,
+                      decoration: InputDecoration(
+                        hintText: "Enter Name".tr(),
+                        prefixIcon: Icon(Icons.person_add),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+
+                    SizedBox(height: 30),
+
+                    // Save Button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Utils.getThemeColorBlue(),
+                          padding: EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        onPressed: () {
+                          // Save logic here
+                          if(amountController.text.isEmpty){
+                            Utils.showToast("PROVIDE_ALL".tr());
+                          }else{
+
+                            if(contractors.isEmpty){
+                              contractorName = contractorController.text;
+                            }
+
+                            setState(() {
+                              amount = num.parse(amountController.text);
+                            });
+                            Navigator.pop(context);
+                          }
+
+                        },
+                        child: Text("SAVE".tr(), style: TextStyle(fontSize: 16, color: Colors.white)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+
+
+  String payment_method = "Cash";
+  String payment_status = "CLEARED";
+/*
+  Widget getPaymentMethodList() {
+    return Container(
+      width: widthScreen,
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration.collapsed(hintText: ""),
+        isDense: true,
+        value: payment_method,
+        elevation: 16,
+        isExpanded: true,
+        onChanged: (String? newValue) {
+          setState(() {
+            payment_method = newValue!;
+            print(payment_method);
+
+          });
+        },
+        items: _visiblePaymentMethodList.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(
+              value.tr(),
+              textAlign: TextAlign.right,
+              style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+*/
+
+  List<String> paymentStatusList = ['CLEARED','UNCLEAR','RECONCILED'];
+
+  Widget getPaymentStatusList() {
+    return Container(
+      width: widthScreen,
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration.collapsed(hintText: ''),
+        isDense: true,
+        value: payment_status,
+        elevation: 16,
+        isExpanded: true,
+        onChanged: (String? newValue) {
+          setState(() {
+            payment_status = newValue!;
+
+          });
+        },
+        items: paymentStatusList.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(
+              value.tr(),
+              textAlign: TextAlign.right,
+              style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
   void pickDate() async{
 
      DateTime? pickedDate = await showDatePicker(
@@ -1082,7 +1733,23 @@ class _NewEggCollection extends State<NewEggCollection>
   }
 
   void calculateTotalEggs() {
+    int good = int.tryParse(goodEggsController.text) ?? 0;
+    int bad = int.tryParse(badEggsController.text) ?? 0;
+
+    int traysGood = int.tryParse(traysGoodEggsController.text) ?? 0;
+    int traysBad = int.tryParse(traysBadEggsController.text) ?? 0;
+
+    good_eggs = good;
+    bad_eggs = bad;
+
+    if (inTrays) {
+      good_eggs += traysGood * eggsPerTray;
+      bad_eggs += traysBad * eggsPerTray;
+    }
+
     totalEggsController.text = (good_eggs + bad_eggs).toString();
+
+    setState(() {});
   }
 
   int getFlockID() {
@@ -1096,6 +1763,32 @@ class _NewEggCollection extends State<NewEggCollection>
     }
 
     return selected_id;
+  }
+
+  String getFlockName(int f_id) {
+
+    if(f_id==-1)
+      return "Farm Wide";
+
+    String f_name = "";
+    for(int i=0;i<flocks.length;i++){
+      if(flocks.elementAt(i).f_id == f_id){
+        f_name = flocks.elementAt(i).f_name;
+        break;
+      }
+    }
+
+    return f_name;
+  }
+
+  void checkEggsInTrays() {
+    if (inTrays) {
+      int traysGood = int.tryParse(traysGoodEggsController.text) ?? 0;
+      int traysBad = int.tryParse(traysBadEggsController.text) ?? 0;
+
+      good_eggs += traysGood * eggsPerTray;
+      bad_eggs += traysBad * eggsPerTray;
+    }
   }
 
 

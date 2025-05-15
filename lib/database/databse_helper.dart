@@ -17,8 +17,13 @@ import '../model/bird_item.dart';
 import '../model/category_item.dart';
 import '../model/custom_category.dart';
 import '../model/custom_category_data.dart';
+import '../model/egg_income.dart';
 import '../model/eggs_chart_data.dart';
 import '../model/farm_item.dart';
+import '../model/feed_batch.dart';
+import '../model/feed_batch_item.dart';
+import '../model/feed_batch_summary.dart';
+import '../model/feed_ingridient.dart';
 import '../model/feed_item.dart';
 import '../model/feed_report_item.dart';
 import '../model/feed_stock_history.dart';
@@ -32,10 +37,14 @@ import '../model/flock_detail.dart';
 import '../model/flock_image.dart';
 import '../model/health_chart_data.dart';
 import '../model/medicine_stock_summary.dart';
+import '../model/sale_contractor.dart';
+import '../model/schedule_notification.dart';
+import '../model/stock_expense.dart';
 import '../model/transaction_item.dart';
 import '../model/used_item.dart';
 import '../model/vaccine_stock_history.dart';
 import '../model/vaccine_stock_summary.dart';
+import '../model/weight_record.dart';
 class DatabaseHelper  {
   static const _databaseName = "assets/poultary.db";
 
@@ -176,6 +185,21 @@ class DatabaseHelper  {
 
   }
 
+  static Future<void> createSaleContractorTable() async {
+    await _database?.execute('''
+    CREATE TABLE IF NOT EXISTS SaleContractor(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      type TEXT NOT NULL,
+      address TEXT,
+      phone TEXT,
+      email TEXT,
+      notes TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+  ''');
+  }
+
   static Future<void> createCategoriesDataTable() async {
     await _database?.execute('''
       CREATE TABLE IF NOT EXISTS CustomCategoryData(
@@ -207,6 +231,164 @@ class DatabaseHelper  {
       )
     ''');
   }
+
+
+  static Future<void> createWeightRecordTableIfNotExists() async {
+    await _database?.execute('''
+  CREATE TABLE IF NOT EXISTS WeightRecord(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    f_id INTEGER NOT NULL,
+    date TEXT NOT NULL,
+    average_weight REAL NOT NULL,
+    number_of_birds INTEGER,
+    notes TEXT
+  );
+''');
+  }
+
+  static Future<WeightRecord?> getLatestWeightRecord(int flockId) async {
+    final db = _database;
+    if (db == null) return null;
+
+    final List<Map<String, dynamic>> result = await db.query(
+      'WeightRecord',
+      where: 'f_id = ?',
+      whereArgs: [flockId],
+      orderBy: 'date DESC',
+      limit: 1,
+    );
+
+    if (result.isNotEmpty) {
+      return WeightRecord.fromMap(result.first);
+    }
+
+    return null;
+  }
+
+
+  // Insert
+  static Future<int> insertWeightRecord(WeightRecord record) async {
+    final db = _database;
+    if (db == null) return -1;
+    return await db.insert('WeightRecord', record.toMap());
+  }
+
+// Get all for a flock
+  static Future<List<WeightRecord>> getWeightRecords(int flockId) async {
+    final db = _database;
+    if (db == null) return [];
+    final List<Map<String, dynamic>> maps = await db.query(
+      'WeightRecord',
+      where: 'f_id = ?',
+      whereArgs: [flockId],
+      orderBy: 'date ASC',
+    );
+    return maps.map((map) => WeightRecord.fromMap(map)).toList();
+  }
+
+// Update
+  static Future<int> updateWeightRecord(WeightRecord record) async {
+    final db = _database;
+    if (db == null || record.id == null) return 0;
+    return await db.update(
+      'WeightRecord',
+      record.toMap(),
+      where: 'id = ?',
+      whereArgs: [record.id],
+    );
+  }
+
+// Delete
+  static Future<int> deleteWeightRecord(int id) async {
+    final db = _database;
+    if (db == null) return 0;
+    return await db.delete(
+      'WeightRecord',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+
+  // Insert a SaleContractor into the database
+  static Future<void> insertSaleContractor(SaleContractor contractor) async {
+
+    await _database?.insert(
+      'SaleContractor',
+      contractor.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace, // Replace if exists
+    );
+  }
+
+  // Get all contractors or filter by type
+  static Future<List<SaleContractor>> getContractors({String? type}) async {
+
+    List<Map<String, dynamic>>? maps;
+
+    if (type == null) {
+      // Fetch all contractors
+      maps = await _database?.query('SaleContractor');
+    } else {
+      // Fetch contractors by type
+      maps = await _database?.query(
+        'SaleContractor',
+        where: 'type = ?',
+        whereArgs: [type],
+      );
+    }
+
+    // Convert List<Map<String, dynamic>> to List<SaleContractor>
+    return List.generate(maps!.length, (i) {
+      return SaleContractor.fromMap(maps![i]);
+    });
+  }
+
+  // Update a SaleContractor
+  static Future<void> updateSaleContractor(SaleContractor contractor) async {
+
+    await _database?.update(
+      'SaleContractor',
+      contractor.toMap(),
+      where: 'id = ?',
+      whereArgs: [contractor.id],
+    );
+  }
+
+
+  // Delete a SaleContractor by id
+  static Future<void> deleteSaleContractor(int id) async {
+
+    await _database?.delete(
+      'SaleContractor',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  static Future<List<TransactionItem>> getTransactionsForContractor(String contractorName) async {
+     // Assuming you have a method to get the database instance
+    List<Map<String, Object?>>? result = await _database?.query(
+      'Transactions',
+      where: 'sold_purchased_from = ? AND type = ?',
+      whereArgs: [contractorName, 'Income'],
+    );
+
+    // Convert the result to a list of TransactionItem objects
+    return result!.map((e) => TransactionItem.fromJson(e)).toList();
+  }
+
+  static Future<List<Flock_Detail>> getMortalityRecords(int flockId, String reason) async {
+
+    final List<Map<String, Object?>>? maps = await _database?.query(
+      'Flock_Detail',
+      where: 'f_id = ? AND item_type = ? AND reason = ?',
+      whereArgs: [flockId, 'Reduction', reason],
+      orderBy: 'acqusition_date DESC',
+    );
+    return List.generate(maps!.length, (i) => Flock_Detail.fromJson(maps[i]));
+  }
+
+
   /// **Fetches a unique list of category types (cat_type)**
   static Future<List<String>?> getUniqueCategoryTypes() async {
 
@@ -955,60 +1137,61 @@ class DatabaseHelper  {
     return _eggList;
   }
 
-  static Future<List<Eggs>>  getFilteredEggsWithSort(int f_id,String type,String str_date, String end_date, String sort) async {
+  static Future<List<Eggs>> getFilteredEggsWithSort(
+      int f_id, String type, String str_date, String end_date, String sort) async {
 
-    var result = null;
+    var result;
 
-    if(f_id == -1) {
-      if (type == 'All' && !str_date.isEmpty) {
-        result = await _database?.rawQuery(
-            "SELECT * FROM Eggs where collection_date BETWEEN '$str_date' and '$end_date' ORDER BY collection_date $sort");
-      } else if (str_date.isEmpty && end_date.isEmpty && type == 'All') {
-        result = await _database?.rawQuery("SELECT * FROM Eggs ORDER BY collection_date $sort");
-      } else if (str_date.isEmpty && end_date.isEmpty) {
-        result = await _database?.rawQuery(
-            "SELECT * FROM Eggs where isCollection = $type ORDER BY collection_date $sort");
-      } else {
-        result = await _database?.rawQuery(
-            "SELECT * FROM Eggs where isCollection = $type and collection_date BETWEEN  '$str_date' and '$end_date' ORDER BY collection_date $sort");
-      }
-    }else{
-      if (type == 'All' && !str_date.isEmpty) {
-        result = await _database?.rawQuery(
-            "SELECT * FROM Eggs where f_id = $f_id and collection_date BETWEEN '$str_date' and '$end_date' ORDER BY collection_date $sort");
-      } else if (str_date.isEmpty && end_date.isEmpty && type == 'All') {
-        result = await _database?.rawQuery("SELECT * FROM Eggs where f_id = $f_id ORDER BY collection_date $sort");
-      } else if (str_date.isEmpty && end_date.isEmpty) {
-        result = await _database?.rawQuery(
-            "SELECT * FROM Eggs where f_id = $f_id and isCollection = $type ORDER BY collection_date $sort");
-      } else {
-        result = await _database?.rawQuery(
-            "SELECT * FROM Eggs where f_id = $f_id and isCollection = $type and collection_date BETWEEN '$str_date' and '$end_date' ORDER BY collection_date $sort");
-      }
+    String baseQuery = '''
+    SELECT Eggs.*, Flock.f_name 
+    FROM Eggs 
+    LEFT JOIN Flock ON Eggs.f_id = Flock.f_id
+  ''';
+
+    String whereClause = '';
+    List<String> conditions = [];
+
+    // Build WHERE clause based on filters
+    if (f_id != -1) {
+      conditions.add("Eggs.f_id = $f_id");
     }
 
-    print(result);
+    if (type != 'All') {
+      conditions.add("Eggs.isCollection = $type");
+    }
+
+    if (str_date.isNotEmpty && end_date.isNotEmpty) {
+      conditions.add("Eggs.collection_date BETWEEN '$str_date' AND '$end_date'");
+    }
+
+    if (conditions.isNotEmpty) {
+      whereClause = "WHERE " + conditions.join(" AND ");
+    }
+
+    String finalQuery = '''
+    $baseQuery
+    $whereClause
+    ORDER BY Eggs.collection_date $sort
+  ''';
+
+    result = await _database?.rawQuery(finalQuery);
+
     List<Eggs> _transactionList = [];
-    Eggs _transaction;
-    if(result!=null){
-      if(result.isNotEmpty){
-        if(result.isNotEmpty){
-          for(int i = 0 ; i < result.length ; i ++){
-            Map<String, dynamic> json = result[i];
+    if (result != null && result.isNotEmpty) {
+      for (int i = 0; i < result.length; i++) {
+        Map<String, dynamic> json = Map<String, dynamic>.from(result[i]);
+// This is now safe because `json` is mutable
 
-            _transaction = Eggs.fromJson(json);
-            _transactionList.add(_transaction);
-            print(_transactionList);
-          }
-        }
+        // Override f_name from JOIN result if available
+        json['f_name'] = result[i]['f_name'];
 
-        Map<String, dynamic> json = result[0];
-        _transaction = Eggs.fromJson(json);
+        Eggs _transaction = Eggs.fromJson(json);
+        _transactionList.add(_transaction);
       }
     }
+
     return _transactionList;
   }
-
 
   static Future<List<Eggs>>  getFilteredEggs(int f_id,String type,String str_date, String end_date) async {
 
@@ -2504,6 +2687,61 @@ class DatabaseHelper  {
     return _birdList;
   }
 
+  static Future<void> createFeedIngridentTable() async {
+    await _database?.execute('''
+    CREATE TABLE IF NOT EXISTS FeedIngredient (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE,
+  price_per_kg REAL NOT NULL,
+  unit TEXT DEFAULT 'kg')
+  ''');
+  }
+
+  static Future<void> createFeedBatchTable() async {
+    await _database?.execute('''
+    CREATE TABLE IF NOT EXISTS FeedBatch(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  transaction_id TEXT NOT NULL,
+  total_weight REAL NOT NULL,
+  total_price REAL NOT NULL)
+  ''');
+  }
+
+  static Future<void> createFeedBatchItemTable() async {
+    await _database?.execute('''
+    CREATE TABLE IF NOT EXISTS FeedBatchItem (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  batch_id INTEGER NOT NULL,
+  ingredient_id INTEGER NOT NULL,
+  quantity REAL NOT NULL,
+  FOREIGN KEY (batch_id) REFERENCES FeedBatch(id) ON DELETE CASCADE,
+  FOREIGN KEY (ingredient_id) REFERENCES FeedIngredient(id) ON DELETE CASCADE)
+  ''');
+  }
+
+  static Future<void> createStockExpenseJunction() async {
+    // 3. Create stock_expense linking table
+    await _database?.execute('''
+    CREATE TABLE IF NOT EXISTS StockExpense (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      stock_item_id INTEGER NOT NULL,
+      transaction_id INTEGER NOT NULL,
+      FOREIGN KEY (stock_item_id) REFERENCES stock_items(id) ON DELETE CASCADE,
+      FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE)
+  ''');
+  }
+
+  static Future<void> createEggTransactionJunction() async {
+    // 3. Create stock_expense linking table
+    await _database?.execute('''
+    CREATE TABLE IF NOT EXISTS EggTransaction(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      egg_item_id INTEGER NOT NULL,
+      transaction_id INTEGER NOT NULL)
+  ''');
+  }
+
   static Future<void> createFeedStockHistoryTable() async {
     await _database?.execute('''
     CREATE TABLE IF NOT EXISTS FeedStockHistory (
@@ -2545,6 +2783,305 @@ class DatabaseHelper  {
     )
   ''');
   }
+
+  static Future<void> createScheduledNotificationsTable() async {
+    await _database?.execute('''
+    CREATE TABLE IF NOT EXISTS ScheduledNotification (
+      id INTEGER PRIMARY KEY,
+      bird_type TEXT NOT NULL,
+      flock_id INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT,
+      scheduled_at TEXT NOT NULL,
+      recurrence TEXT NOT NULL
+    )
+  ''');
+  }
+
+  static Future<int?> insertNotification(ScheduledNotification notification) async {
+    return await _database?.insert(
+      'ScheduledNotification',
+      notification.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  static Future<int?> updateNotification( ScheduledNotification notification) async {
+    return await _database?.update(
+      'ScheduledNotification',
+      notification.toMap(),
+      where: 'id = ?',
+      whereArgs: [notification.id],
+    );
+  }
+
+  static Future<int?> deleteNotification( int id) async {
+    return await _database?.delete(
+      'ScheduledNotification',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<List<ScheduledNotification>?> getAllNotifications() async {
+    final List<Map<String, dynamic>?>? maps = await _database?.query('ScheduledNotification');
+    return maps!.map((map) => ScheduledNotification.fromMap(map!)).toList();
+  }
+
+  static Future<List<ScheduledNotification>> getScheduledNotificationsByFlockId(int flockId) async {
+    final nowMillis = DateTime.now().millisecondsSinceEpoch;
+
+    final List<Map<String, dynamic>?>? rows = await _database?.query(
+      'ScheduledNotification',
+      where: 'flock_id = ? AND scheduled_at >= ?',
+      whereArgs: [flockId, nowMillis],
+    );
+
+    return rows!.isNotEmpty
+        ? rows.map((row) => ScheduledNotification.fromMap(row!)).toList()
+        : <ScheduledNotification>[];
+  }
+
+  /// Add a stock expense link
+  static Future<int?> insertStockJunction(StockExpense stockExpense) async {
+    return await _database?.insert(
+      'StockExpense',
+      stockExpense.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Get all stock_expense entries
+  static Future<List<StockExpense>> getAll() async {
+    final List<Map<String, Object?>>? maps = await _database?.query('StockExpense');
+    return maps!.map((map) => StockExpense.fromMap(map)).toList();
+  }
+
+  /// Get a stock expense by stock_item_id
+  static Future<StockExpense?> getByStockItemId(int stockItemId) async {
+    final List<Map<String, Object?>>? maps = await _database?.query(
+      'StockExpense',
+      where: 'stock_item_id = ?',
+      whereArgs: [stockItemId],
+    );
+
+    if (maps!.isNotEmpty) {
+      return StockExpense.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
+  /// Delete stock_expense by stock_item_id
+  static Future<int?> deleteByStockItemId(int stockItemId) async {
+    return await _database?.delete(
+      'StockExpense',
+      where: 'stock_item_id = ?',
+      whereArgs: [stockItemId],
+    );
+  }
+
+  /// Delete stock_expense by transaction_id (optional helper)
+  Future<int?> deleteByTransactionId(int transactionId) async {
+    return await _database?.delete(
+      'StockExpense',
+      where: 'transaction_id = ?',
+      whereArgs: [transactionId],
+    );
+  }
+
+
+  /// Add a egg income link
+  static Future<int?> insertEggJunction(EggTransaction stockExpense) async {
+    return await _database?.insert(
+      'EggTransaction',
+      stockExpense.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Get all stock_expense entries
+  static Future<List<EggTransaction>> getAllEggsJunction() async {
+    final List<Map<String, Object?>>? maps = await _database?.query('EggTransaction');
+    return maps!.map((map) => EggTransaction.fromMap(map)).toList();
+  }
+
+  /// Get a stock expense by stock_item_id
+  static Future<EggTransaction?> getByEggItemId(int stockItemId) async {
+    final List<Map<String, Object?>>? maps = await _database?.query(
+      'EggTransaction',
+      where: 'egg_item_id = ?',
+      whereArgs: [stockItemId],
+    );
+
+    if (maps!.isNotEmpty) {
+      return EggTransaction.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
+  /// Get a stock expense by stock_item_id
+  static Future<EggTransaction?> getEggsByTransactionItemId(int transaction_id) async {
+    final List<Map<String, Object?>>? maps = await _database?.query(
+      'EggTransaction',
+      where: 'transaction_id = ?',
+      whereArgs: [transaction_id],
+    );
+
+    if (maps!.isNotEmpty) {
+      return EggTransaction.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
+  /// Delete stock_expense by stock_item_id
+  static Future<int?> deleteByEggItemId(int stockItemId) async {
+    return await _database?.delete(
+      'EggTransaction',
+      where: 'egg_item_id = ?',
+      whereArgs: [stockItemId],
+    );
+  }
+
+  /// Delete stock_expense by transaction_id (optional helper)
+  Future<int?> deleteEggJunctionByTransactionId(int transactionId) async {
+    return await _database?.delete(
+      'EggTransaction',
+      where: 'transaction_id = ?',
+      whereArgs: [transactionId],
+    );
+  }
+
+  static Future<int?> insertBatch(FeedBatch batch) async {
+    return await _database?.insert('FeedBatch', batch.toMap());
+  }
+
+  static Future<List<FeedBatch>> getAllBatches() async {
+    final batchResults = await _database?.query('FeedBatch', orderBy: 'name ASC');
+    if (batchResults == null) return [];
+
+    print(batchResults);
+    List<FeedBatch> batches = [];
+
+    for (var batchMap in batchResults) {
+      final batch = FeedBatch.fromMap(batchMap);
+
+      // Get ingredients for this batch
+      final ingredientResults = await _database!.rawQuery('''
+      SELECT i.id as ingredient_id, i.name as ingredient_name, bi.quantity
+      FROM FeedBatchItem bi
+      INNER JOIN FeedIngredient i ON bi.ingredient_id = i.id
+      WHERE bi.batch_id = ?
+    ''', [batch.id]);
+
+      batch.ingredients = ingredientResults.map((row) {
+        return FeedBatchItemWithName(
+          ingredientId: row['ingredient_id'] as int,
+          ingredientName: row['ingredient_name'] as String,
+          quantity: (row['quantity'] as num).toDouble(),
+        );
+      }).toList();
+
+      batches.add(batch);
+    }
+
+    return batches;
+  }
+
+
+  static Future<void> updateBatch(FeedBatch batch) async {
+
+    await _database?.update(
+      'FeedBatch',
+      batch.toMap(),
+      where: 'id = ?',
+      whereArgs: [batch.id],
+    );
+  }
+
+
+  static Future<int?> deleteBatch(int id) async {
+    return await _database?.delete(
+      'FeedBatch',
+      where: 'id = ?',
+      whereArgs: [id],);
+  }
+
+
+  static Future<int?> insertBatchItem(FeedBatchItem item) async {
+    return await _database?.insert('FeedBatchItem', item.toMap());
+  }
+
+  static Future<List<FeedBatchItem>?> getItemsByBatchId(int batchId) async {
+    final result = await _database?.query(
+      'FeedBatchItem',
+      where: 'batch_id = ?',
+      whereArgs: [batchId],
+    );
+    return result!.map((map) => FeedBatchItem.fromMap(map)).toList();
+  }
+
+  static Future<int?> deleteItemsByBatchId(int batchId) async {
+    return await _database?.delete(
+      'FeedBatchItem',
+      where: 'batch_id = ?',
+      whereArgs: [batchId],
+    );
+  }
+
+  static Future<List<FeedIngredient>?> getAllIngredients() async {
+    final result = await _database?.query('FeedIngredient', orderBy: 'name ASC');
+    if (result == null) return [];
+
+    return result.map((map) => FeedIngredient.fromMap(map)).toList();
+  }
+
+
+
+  static Future<int?> insertIngredient( String name, double pricePerKg, {String unit = 'KG'}) async {
+    return await _database?.insert(
+      'FeedIngredient',
+      {
+        'name': name,
+        'price_per_kg': pricePerKg,
+        'unit': unit,
+      },
+      conflictAlgorithm: ConflictAlgorithm.ignore, // or replace
+    );
+  }
+
+  static Future<int?> updateIngredient( int id, String name, double pricePerKg, String unit) async {
+    return await _database?.update(
+      'FeedIngredient',
+      {
+        'name': name,
+        'price_per_kg': pricePerKg,
+        'unit': unit,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  static Future<int?> deleteIngredient( int id) async {
+    return await _database?.delete(
+      'FeedIngredient',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  static Future<Map<String, dynamic>?> getIngredientByName(String name) async {
+    final result = await _database?.query(
+      'FeedIngredient',
+      where: 'name = ?',
+      whereArgs: [name],
+    );
+    return result!.isNotEmpty ? result.first : null;
+  }
+
 
   static Future<int?> insertVaccineStock(VaccineStockHistory stock) async {
 
@@ -2671,6 +3208,39 @@ class DatabaseHelper  {
     }).toList();
   }
 
+  static Future<List<FeedStockSummary>> getFeedBatchStockSummary() async {
+    final List<Map<String, dynamic>>? maps = await _database?.rawQuery('''
+    SELECT 
+      b.id AS batch_id,
+      b.name AS batch_name,
+      b.total_weight AS total_stock,
+      COALESCE((
+        SELECT SUM(CAST(f.quantity AS REAL))
+        FROM Feeding f
+        WHERE f.feed_name = b.name
+      ), 0) AS used_stock,
+      (b.total_weight - COALESCE((
+        SELECT SUM(CAST(f.quantity AS REAL))
+        FROM Feeding f
+        WHERE f.feed_name = b.name
+      ), 0)) AS available_stock
+    FROM FeedBatch b
+  ''');
+
+    print(maps);
+    if (maps == null || maps.isEmpty) return [];
+
+    return maps.map((map) {
+      return FeedStockSummary(
+        feedName: map['batch_name'] ?? 'Unnamed',
+        totalStock: (map['total_stock'] as num?)?.toDouble() ?? 0.0,
+        usedStock: (map['used_stock'] as num?)?.toDouble() ?? 0.0,
+        availableStock: (map['available_stock'] as num?)?.toDouble() ?? 0.0,
+      );
+    }).toList();
+  }
+
+
   static Future<List<VaccineStockSummary>> getVaccineStockSummary() async {
     final List<Map<String, dynamic>>? maps = await _database?.rawQuery('''
     WITH FirstStock AS (
@@ -2776,14 +3346,25 @@ class DatabaseHelper  {
   }
 
   static Future<int> getFlockMortalityCount( int flockId) async {
-    final List<Map<String, Object?>>? result = await _database?.rawQuery(
-      '''
+     List<Map<String, Object?>>? result = null;
+
+    if(flockId==-1){
+      result = await _database?.rawQuery(
+        '''
+    SELECT SUM(item_count) as mortality
+    FROM flock_detail
+    WHERE item_type = 'Reduction' AND reason = 'MORTALITY'
+    ''');
+    } else {
+     result = await _database?.rawQuery(
+        '''
     SELECT SUM(item_count) as mortality
     FROM flock_detail
     WHERE f_id = ? AND item_type = 'Reduction' AND reason = 'MORTALITY'
     ''',
-      [flockId],
-    );
+        [flockId],
+      );
+    }
 
     if (result!.isNotEmpty && result.first['mortality'] != null) {
       return result.first['mortality'] as int;
@@ -2791,6 +3372,34 @@ class DatabaseHelper  {
       return 0;
     }
   }
+  static Future<int> getFlockCullingCount( int flockId) async {
+     List<Map<String, Object?>>? result = null;
+    if(flockId==-1){
+      result = await _database?.rawQuery(
+        '''
+    SELECT SUM(item_count) as culling
+    FROM flock_detail
+    WHERE item_type = 'Reduction' AND reason = 'CULLING'
+    '''
+      );
+    }else{
+      result = await _database?.rawQuery(
+        '''
+    SELECT SUM(item_count) as culling
+    FROM flock_detail
+    WHERE f_id = ? AND item_type = 'Reduction' AND reason = 'CULLING'
+    ''',
+        [flockId],
+      );
+    }
+
+    if (result!.isNotEmpty && result.first['culling'] != null) {
+      return result.first['culling'] as int;
+    } else {
+      return 0;
+    }
+  }
+
 
   static Future<int?> updateFlockInfo(Flock flock) async {
     return await _database?.update(
