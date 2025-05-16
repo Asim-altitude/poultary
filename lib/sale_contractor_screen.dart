@@ -229,7 +229,7 @@ class _SaleContractorScreenState extends State<SaleContractorScreen> {
                 DropdownButtonFormField<String>(
                   value: selectedType,
                   items: contractorTypes.map((type) {
-                    return DropdownMenuItem(value: type, child: Text(type));
+                    return DropdownMenuItem(value: type, child: Text(type.tr()));
                   }).toList(),
                   onChanged: (val) {
                     if (val != null) selectedType = val;

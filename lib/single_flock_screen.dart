@@ -423,7 +423,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                 Text(
                                   weightRecord != null
                                       ? "${weightRecord!.averageWeight} ${Utils.selected_unit.tr()}"
-                                      : 'No Record'.tr(),
+                                      : 'No Records'.tr(),
                                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                                 ),
                                 SizedBox(width: 8),
@@ -500,7 +500,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                   Row(
                                     children: [
                                       Text(
-                                        mortalityCount > 0 ? "$mortalityCount ${'BIRDS'.tr()}" : "No record".tr(),
+                                        mortalityCount > 0 ? "$mortalityCount ${'BIRDS'.tr()}" : "No Records".tr(),
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
@@ -533,7 +533,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                   Row(
                                     children: [
                                       Text(
-                                        cullingCount > 0 ? "$cullingCount ${'BIRDS'.tr()}" : "No record".tr(),
+                                        cullingCount > 0 ? "$cullingCount ${'BIRDS'.tr()}" : "No Records".tr(),
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,

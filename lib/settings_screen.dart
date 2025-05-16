@@ -274,7 +274,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Egg in Trays', style: Theme.of(context).textTheme.titleMedium),
+                          Text('Eggs in tray'.tr(), style: Theme.of(context).textTheme.titleMedium),
                           Switch(
                             value: isTrayEnabled,
                             onChanged: (bool value) {

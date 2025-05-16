@@ -58,7 +58,7 @@ Future<Uint8List> generateProductionReportPdf({
       margin: const pw.EdgeInsets.all(20),
       build: (context) => [
 
-        _buildHeader(context),
+        _buildHeader(context,ttfBold),
          pw.SizedBox(height: 20),
 
         _buildSectionTitle('HEADING_DASHBOARD', ttfBold),
@@ -104,7 +104,7 @@ Future<Uint8List> generateProductionReportPdf({
  // await Printing.layoutPdf(onLayout: (format) => pdf.save());
 }
 
-pw.Widget _buildHeader(pw.Context context) {
+pw.Widget _buildHeader(pw.Context context, pw.Font font) {
   return pw.Center(
     child: pw.Directionality(
       textDirection: direction ? pw.TextDirection.ltr : pw.TextDirection.rtl,
@@ -129,8 +129,8 @@ pw.Widget _buildHeader(pw.Context context) {
               Utils.INVOICE_HEADING.tr(),
               style: pw.TextStyle(
                 color: PdfColors.blue800,
-                fontWeight: pw.FontWeight.bold,
                 fontSize: 22,
+                font: font
               ),
             ),
             pw.SizedBox(height: 4),
@@ -140,6 +140,7 @@ pw.Widget _buildHeader(pw.Context context) {
               style: pw.TextStyle(
                 color: PdfColors.black,
                 fontWeight: pw.FontWeight.bold,
+                font: font,
                 fontSize: 18,
               ),
             ),
@@ -167,7 +168,7 @@ pw.Widget _buildSectionTitle(String title, pw.Font font) => pw.Padding(
   padding:  pw.EdgeInsets.symmetric(vertical: 4),
   child: pw.Directionality(
     textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-    child:pw.Text(
+    child: pw.Text(
     title.tr(),
     style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, font: font, color: PdfColors.blue),
   ),),

@@ -173,7 +173,7 @@ class _ContractorProfileScreenState extends State<ContractorProfileScreen> {
               SizedBox(height: 20),
 
               // Balance Summary
-              Text("Balance Summary",
+              Text("Balance Summary".tr(),
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
               SizedBox(height: 12),
               Card(
@@ -224,7 +224,7 @@ class _ContractorProfileScreenState extends State<ContractorProfileScreen> {
                           Text(Utils.getFormattedDate(tx.date),
                               style: TextStyle(fontSize: 13)),
                           SizedBox(height: 2),
-                          Text('Items'.tr()+': ${tx.how_many} ${tx.sale_item}',
+                          Text('Items'.tr()+': ${tx.how_many} ${tx.sale_item.tr()}',
                               style: TextStyle(color: Colors.grey[600], fontSize: 13)),
                         ],
                       ),

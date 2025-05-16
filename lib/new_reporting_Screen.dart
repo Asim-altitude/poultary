@@ -21,7 +21,7 @@ class ReportListScreen extends StatefulWidget {
 
 class _ReportListScreen extends State<ReportListScreen> {
   final List<Item> items = [
-    Item(image: 'assets/eggs_tray.png', title: 'Production Report'.tr(), subtitle: 'View report of Production and Cost'.tr()),
+    Item(image: 'assets/eggs_tray.png', title: 'Production Report'.tr(), subtitle: 'View report of Production'.tr()),
     Item(image: 'assets/finance_icon.png', title: 'Financial Report'.tr(), subtitle: 'View report of Income and Expense'.tr()),
     Item(image: 'assets/bird_icon.png', title: 'BIRDS'.tr()+' '+ 'REPORT'.tr(), subtitle: 'View report of birds additions and reductions'.tr()),
     Item(image: 'assets/eggs_count.png', title: 'EGG'.tr()+" "+ "REPORT".tr(), subtitle: 'View report of egg collection and reduction'.tr()),

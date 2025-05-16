@@ -622,7 +622,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                                  SizedBox(height: 5),
                                                  _buildInputFieldTrays(
                                                    traysGoodEggsController,
-                                                   "Trays Count".tr(),
+                                                   "Trays count".tr(),
                                                    Icons.check_circle,
                                                    onChanged: (text) {
                                                      calculateTotalEggs();
@@ -641,7 +641,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                                  SizedBox(height: 5),
                                                  _buildInputFieldTrays(
                                                    traysBadEggsController,
-                                                   "Trays Count".tr(),
+                                                   "Trays count".tr(),
                                                    Icons.cancel,
                                                    onChanged: (text) {
                                                      calculateTotalEggs();
@@ -758,7 +758,7 @@ class _NewEggCollection extends State<NewEggCollection>
                                 // Title
                                 Center(
                                   child: Text(
-                                    "Choose Date & Description".tr(),
+                                    "Choose date".tr()+" & "+"DESCRIPTION_1".tr(),
                                     style: TextStyle(
                                       color: Utils.getThemeColorBlue(),
                                       fontSize: 18,
