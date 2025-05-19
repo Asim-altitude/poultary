@@ -31,6 +31,7 @@ import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 import 'consume_store.dart';
+import 'manage_flock_screen.dart';
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
@@ -202,6 +203,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                 _buildSectionTitle('Settings'.tr()),
 
               // Farm & Inventory Section
+              // Farm & Inventory Section
               Card(
                 margin: const EdgeInsets.all(12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -217,6 +219,12 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                         icon: Icons.account_balance,
                         title: 'FARM_MANAGMENT'.tr(),
                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FarmSetupScreen())),
+                      ),
+                      _buildSettingsTile(
+                        context,
+                        icon: Icons.manage_history_outlined,
+                        title: 'FLOCK_MANAGMENT'.tr(),
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ManageFlockScreen())),
                       ),
                       _buildSettingsTile(
                         context,
