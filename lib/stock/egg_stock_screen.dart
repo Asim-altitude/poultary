@@ -15,7 +15,7 @@ class EggStockScreen extends StatefulWidget {
 class _EggStockScreenState extends State<EggStockScreen> {
   late Future<Map<String, int>> stockSummary;
    List<Eggs> stockHistory = [];
-  late BannerAd _bannerAd;
+   BannerAd? _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
   @override
@@ -50,13 +50,13 @@ class _EggStockScreenState extends State<EggStockScreen> {
       ),
     );
 
-    _bannerAd.load();
+    _bannerAd?.load();
   }
 
   @override
   void dispose() {
     try{
-      _bannerAd.dispose();
+      _bannerAd?.dispose();
     }catch(ex){
 
     }

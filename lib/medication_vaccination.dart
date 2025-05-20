@@ -25,7 +25,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
 
   double widthScreen = 0;
   double heightScreen = 0;
-  late BannerAd _bannerAd;
+   BannerAd? _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
   _loadBannerAd(){
@@ -51,13 +51,13 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
       ),
     );
 
-    _bannerAd.load();
+    _bannerAd?.load();
   }
 
   @override
   void dispose() {
     try{
-      _bannerAd.dispose();
+      _bannerAd?.dispose();
     }catch(ex){
 
     }

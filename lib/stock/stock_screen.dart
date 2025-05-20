@@ -20,7 +20,7 @@ class FeedStockScreen extends StatefulWidget {
 class _FeedStockScreenState extends State<FeedStockScreen> {
   List<FeedStockSummary>? _stockSummary = [], _batchSummary = [];
 
-  late BannerAd _bannerAd;
+   BannerAd? _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
   @override
@@ -54,13 +54,13 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
       ),
     );
 
-    _bannerAd.load();
+    _bannerAd?.load();
   }
 
   @override
   void dispose() {
     try{
-      _bannerAd.dispose();
+      _bannerAd?.dispose();
     }catch(ex){
 
     }

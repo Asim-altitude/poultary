@@ -54,7 +54,7 @@ class Utils {
   static double HEIGHT_SCREEN = 0;
   static double _standardWidth = 414;
   static double _standardheight = 736;
-  static final bool ISTESTACCOUNT = true;
+  static final bool ISTESTACCOUNT = false;
   static late bool isShowAdd = true;
   static late bool iShowInterStitial = false;
 
@@ -1740,7 +1740,7 @@ class Utils {
 
     }
   }
-  static Widget showBannerAd(BannerAd bannerAds,bool isBannerAdReadyOr){
+  static Widget showBannerAd1(BannerAd bannerAds,bool isBannerAdReadyOr){
     return Align(
       alignment: Alignment.topCenter,
       child: Container(
@@ -1764,4 +1764,28 @@ class Utils {
     );
 
   }
+  static Widget showBannerAd(BannerAd? bannerAds, bool isBannerAdReadyOr) {
+    if(!Utils.isShowAdd) return SizedBox();
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Container(
+        height: 60.0,
+        width: Utils.WIDTH_SCREEN,
+        child: (bannerAds != null && isBannerAdReadyOr)
+            ? AdWidget(ad: bannerAds)
+            : Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+          ),
+          child: Center(
+            child: Text(
+              "Advertisement".tr(),
+              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
 }

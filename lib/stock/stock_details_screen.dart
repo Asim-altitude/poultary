@@ -20,13 +20,13 @@ class StockDetailScreen extends StatefulWidget{
 }
 
 class _StockDetailScreen extends State<StockDetailScreen> {
-  late BannerAd _bannerAd;
+   BannerAd? _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
   @override
   void dispose() {
     try{
-      _bannerAd.dispose();
+      _bannerAd?.dispose();
     }catch(ex){
 
     }
@@ -62,7 +62,7 @@ class _StockDetailScreen extends State<StockDetailScreen> {
       ),
     );
 
-    _bannerAd.load();
+    _bannerAd?.load();
   }
 
   @override

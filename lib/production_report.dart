@@ -36,7 +36,7 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
   late List<bool> _monthlyExpanded;
   DateTimeRange? selectedDateRange;
 
-  late BannerAd _bannerAd;
+   BannerAd? _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
   Future<void> _pickDateRange() async {
@@ -81,7 +81,7 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
   @override
   void dispose() {
     try{
-      _bannerAd.dispose();
+      _bannerAd?.dispose();
     }catch(ex){
 
     }
@@ -188,7 +188,7 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
       ),
     );
 
-    _bannerAd.load();
+    _bannerAd?.load();
   }
 
   String getDateString(DateTime date) {

@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -19,7 +20,50 @@ class MedicineStockDetailScreen extends StatefulWidget{
 }
 
 class _MedicineStockDetailScreen extends State<MedicineStockDetailScreen> {
+  BannerAd? _bannerAd;
+  double _heightBanner = 0;
+  bool _isBannerAdReady = false;
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
 
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _heightBanner = 60;
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _heightBanner = 0;
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd?.load();
+  }
+  @override
+  void initState() {
+    super.initState();
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+    }
+  }
+  @override
+  void dispose() {
+    try{
+      _bannerAd?.dispose();
+    }catch(ex){
+
+    }
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,74 +73,82 @@ class _MedicineStockDetailScreen extends State<MedicineStockDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+
             _buildStockItem(widget.stock),
             SizedBox(height: 16),
             Container(
               margin: EdgeInsets.only(left: 10),
-              child: Text("Stock History".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              child: Text(
+                "Stock History".tr(),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
             ),
             SizedBox(height: 8),
-            Expanded(
-              child: Container(
-                margin: EdgeInsets.all(10),
-                child: ListView.builder(
-                  itemCount: widget.stockHistory.length,
-                  itemBuilder: (context, index) {
-                    final entry = widget.stockHistory[index];
-                    return Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 3,
-                      margin: EdgeInsets.symmetric(vertical: 6),
-                      child: ListTile(
-                        leading: Icon(Icons.medication, color: Colors.blue),
-                        title: Text(
-                          "${entry.quantity} ${entry.unit} of ${entry.medicineName}",
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        subtitle: Text("DATE"+": ${Utils.getFormattedDate(entry.date)}"),
-                        trailing: IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () async {
-                            return await showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text("Delete Entry".tr()),
-                                content: Text("Are you sure you want to delete this stock entry?".tr()),
-                                actions: [
-                                  TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("CANCEL".tr())),
-                                  TextButton(
-                                    onPressed: () async {
-                                      // _deleteStock(entry.id);
-                                      StockExpense? stockExpense = await DatabaseHelper.getByStockItemId(entry.id!);
-                                      if(stockExpense != null){
-                                        await DatabaseHelper.deleteByStockItemId(entry.id!);
-                                        await DatabaseHelper.deleteItem("Transactions", stockExpense.transactionId);
-                                      }
-                                      await deleteMedicineStock(entry.id!);
-                                      Utils.showToast("SUCCESSFUL".tr());
-                                      setState(() {
-                                        widget.stockHistory.remove(entry);
-                                      });
 
-                                      Navigator.of(context).pop(true);
-                                    },
-                                    child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
+            // Use Expanded correctly here
+            Expanded(
+              child: ListView.builder(
+                padding: EdgeInsets.all(10),
+                itemCount: widget.stockHistory.length,
+                itemBuilder: (context, index) {
+                  final entry = widget.stockHistory[index];
+                  return Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 3,
+                    margin: EdgeInsets.symmetric(vertical: 6),
+                    child: ListTile(
+                      leading: Icon(Icons.medication, color: Colors.blue),
+                      title: Text(
+                        "${entry.quantity} ${entry.unit} of ${entry.medicineName}",
+                        style: TextStyle(fontSize: 16),
                       ),
-                    );
-                  },
-                ),
+                      subtitle: Text("DATE: ${Utils.getFormattedDate(entry.date)}"),
+                      trailing: IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () async {
+                          final confirm = await showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text("Delete Entry".tr()),
+                              content: Text("Are you sure you want to delete this stock entry?".tr()),
+                              actions: [
+                                TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("CANCEL".tr())),
+                                TextButton(
+                                  onPressed: () async {
+                                    StockExpense? stockExpense = await DatabaseHelper.getByStockItemId(entry.id!);
+                                    if (stockExpense != null) {
+                                      await DatabaseHelper.deleteByStockItemId(entry.id!);
+                                      await DatabaseHelper.deleteItem("Transactions", stockExpense.transactionId);
+                                    }
+                                    await deleteMedicineStock(entry.id!);
+                                    Utils.showToast("SUCCESSFUL".tr());
+                                    setState(() {
+                                      widget.stockHistory.remove(entry);
+                                    });
+                                    Navigator.of(context).pop(true);
+                                  },
+                                  child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (confirm ?? false) {
+                            // Already deleted in dialog
+                          }
+                        },
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],
         ),
       ),
     );
+
   }
 
   Widget _buildStockItem(MedicineStockSummary stock) {

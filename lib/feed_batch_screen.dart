@@ -20,7 +20,7 @@ class FeedBatchScreen extends StatefulWidget {
 
 class _FeedBatchScreenState extends State<FeedBatchScreen> {
   List<FeedBatch> _batches = [];
-  late BannerAd _bannerAd;
+   BannerAd? _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
   @override
@@ -54,13 +54,13 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> {
       ),
     );
 
-    _bannerAd.load();
+    _bannerAd?.load();
   }
 
   @override
   void dispose() {
     try{
-      _bannerAd.dispose();
+      _bannerAd?.dispose();
     }catch(ex){
 
     }

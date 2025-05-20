@@ -31,7 +31,7 @@ class _ReportListScreen extends State<ReportListScreen> {
   ];
 
   List<CustomCategory> categories = [];
-  late BannerAd _bannerAd;
+  BannerAd? _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
 
@@ -67,13 +67,13 @@ class _ReportListScreen extends State<ReportListScreen> {
       ),
     );
 
-    _bannerAd.load();
+    _bannerAd?.load();
   }
 
   @override
   void dispose() {
     try{
-      _bannerAd.dispose();
+      _bannerAd?.dispose();
     }catch(ex){
 
     }

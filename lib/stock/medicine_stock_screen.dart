@@ -25,7 +25,7 @@ class MedicineStockScreen extends StatefulWidget {
 class _MedicineStockScreenState extends State<MedicineStockScreen> {
   List<MedicineStockSummary>? _stockSummary = [];
   List<String> uniqueMedicineNames = [];
-  late BannerAd _bannerAd;
+  BannerAd? _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
   @override
@@ -39,7 +39,7 @@ class _MedicineStockScreenState extends State<MedicineStockScreen> {
   @override
   void dispose() {
     try{
-      _bannerAd.dispose();
+      _bannerAd?.dispose();
     }catch(ex){
 
     }
@@ -68,7 +68,7 @@ class _MedicineStockScreenState extends State<MedicineStockScreen> {
       ),
     );
 
-    _bannerAd.load();
+    _bannerAd?.load();
   }
   void createTables() async {
     await DatabaseHelper.instance.database;

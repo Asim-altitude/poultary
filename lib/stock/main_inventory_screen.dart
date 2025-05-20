@@ -16,8 +16,7 @@ class ManageInventoryScreen extends StatefulWidget {
 }
 
 class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
-
-  late BannerAd _bannerAd;
+  BannerAd? _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
   @override
@@ -51,13 +50,13 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
       ),
     );
 
-    _bannerAd.load();
+    _bannerAd?.load();
   }
 
   @override
   void dispose() {
     try{
-      _bannerAd.dispose();
+      _bannerAd?.dispose();
     }catch(ex){
 
     }
