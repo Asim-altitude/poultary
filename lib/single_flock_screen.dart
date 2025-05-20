@@ -1020,9 +1020,9 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                         ),
                       ],
                     ),*/
-                    Container(
-                      height: widthScreen,
-                      child: GridView.builder(
+                   GridView.builder(
+                     shrinkWrap: true, // ✅ important!
+                     physics: NeverScrollableScrollPhysics(),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 3,
                           crossAxisSpacing: 5.0,
@@ -1108,7 +1108,6 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                           );
                         },
                       ),
-                    )
 
 
 

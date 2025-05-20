@@ -4,6 +4,7 @@ import 'package:csv/csv.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/birds_report_screen.dart';
 import 'package:poultary/eggs_report_screen.dart';
@@ -31,9 +32,13 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
   DateTime endDate = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1)).add(const Duration(days: 6));
   int totalDays = 0;
 
-  late List<bool> _dailyExpanded;
+  List<bool>? _dailyExpanded;
   late List<bool> _monthlyExpanded;
   DateTimeRange? selectedDateRange;
+
+  late BannerAd _bannerAd;
+  double _heightBanner = 0;
+  bool _isBannerAdReady = false;
   Future<void> _pickDateRange() async {
     DateTime now = DateTime.now();
     DateTime firstDate = DateTime(now.year - 5); // Allows past 5 years
@@ -73,7 +78,15 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
     }
   }
 
+  @override
+  void dispose() {
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
 
+    }
+    super.dispose();
+  }
   Widget _buildWhiteCardVertical(String label, String value) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -148,6 +161,34 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
     // TODO: implement initState
     super.initState();
     getAllData();
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+    }
+  }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _heightBanner = 60;
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _heightBanner = 0;
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
   }
 
   String getDateString(DateTime date) {
@@ -437,105 +478,198 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
         ],
       ),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: GestureDetector(
-                onTap: _pickDateRange,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(12),
+      body: Column(children: [
+        Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+
+        Expanded(child:
+        SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: GestureDetector(
+                  onTap: _pickDateRange,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.date_range, size: 20, color: Colors.white),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${DateFormat.yMMMd().format(startDate)} - ${DateFormat.yMMMd().format(endDate)}',
+                          style: const TextStyle(fontSize: 16, color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                ),
+              ),
+
+              SizedBox(height: 10,),
+
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>  BirdsReportsScreen()),);
+                },
+                child: Container(
+                  padding: EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+                    ],
+                  ),
+                  child:  Column(
                     children: [
-                      const Icon(Icons.date_range, size: 20, color: Colors.white),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${DateFormat.yMMMd().format(startDate)} - ${DateFormat.yMMMd().format(endDate)}',
-                        style: const TextStyle(fontSize: 16, color: Colors.white),
+                      _sectionTitle('BIRDS_SUMMARY'),
+                      Row(
+                        children: [
+
+                          Expanded(child: _buildWhiteCard('Birds Added', '$total_birds_added', Icons.add_circle, iconColor: Colors.green)),
+
+                          Expanded(child: _buildWhiteCard('Birds Reduced', '$total_birds_reduced', Icons.remove_circle, iconColor: Colors.orange)),
+                        ],
+                      ),
+
+                      _buildWhiteCard('MORTALITY'.tr()+ "/"+ "CULLING".tr(), '${mortality + culling}', Icons.warning_amber, iconColor: Colors.red),
+                      const SizedBox(height: 10),
+
+                      Container(
+                        width: 260,
+                        height: 260,
+                        child: SfCircularChart(
+                          title: ChartTitle(text: 'BIRDS_SUMMARY'.tr()),
+                          legend: Legend(isVisible: true, position: LegendPosition.bottom),
+                          series: <CircularSeries>[
+                            PieSeries<_ChartData, String>(
+                              dataSource: [
+                                _ChartData('Added'.tr(), total_birds_added.toDouble(), Colors.green),
+                                _ChartData('Reduced'.tr(), total_birds_reduced.toDouble(), Colors.orange),
+                                _ChartData('MORTALITY'.tr(), mortality.toDouble() + culling.toDouble(), Colors.red),
+                              ],
+                              pointColorMapper: (_ChartData data, _) => data.color,
+                              xValueMapper: (_ChartData data, _) => data.label.tr(),
+                              yValueMapper: (_ChartData data, _) => data.value,
+                              dataLabelSettings: const DataLabelSettings(isVisible: true),
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                ),
+              ),
+
+              SizedBox(height: 10,),
+
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>  EggsReportsScreen()),);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _sectionTitle('EGGS_SUMMARY'),
+                      _buildWhiteCard('eggs collected', '$total_eggs_collected', Icons.egg, iconColor: Colors.purple),
+                      _buildWhiteCard('Reduced Eggs', '$total_eggs_reduced', Icons.restaurant, iconColor: Colors.brown),
+
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        height: 260,
+                        child: SfCircularChart(
+                          title: ChartTitle(text: 'EGGS_SUMMARY'.tr()),
+                          legend: Legend(isVisible: true, position: LegendPosition.bottom),
+                          series: <CircularSeries>[
+                            PieSeries<_ChartData, String>(
+                              dataSource: [
+                                _ChartData('COLLECTION'.tr(), total_eggs_collected.toDouble(), Colors.purple),
+                                _ChartData('Consumption'.tr(), total_eggs_reduced.toDouble(), Colors.brown),
+                              ],
+                              pointColorMapper: (_ChartData data, _) => data.color,
+                              xValueMapper: (_ChartData data, _) => data.label,
+                              yValueMapper: (_ChartData data, _) => data.value,
+                              dataLabelSettings: const DataLabelSettings(isVisible: true),
+                            )
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
 
-            SizedBox(height: 10,),
+              SizedBox(height: 10,),
 
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>  BirdsReportsScreen()),);
-              },
-              child: Container(
-                padding: EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
-                  ],
+              GestureDetector(
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>  FinanceReportsScreen()),);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _sectionTitle('HEADING_DASHBOARD'),
+                      _buildWhiteCard('Income'.tr()+' (' + Utils.currency + ')', '$gross_income', Icons.trending_up, iconColor: Colors.green),
+                      _buildWhiteCard('Expenses'.tr()+' (' + Utils.currency + ')', '$total_expense', Icons.trending_down, iconColor: Colors.red),
+                      _buildWhiteCard('NET_PROFIT'.tr()+' (' + Utils.currency + ')', '$profit', Icons.attach_money, iconColor: Colors.blueAccent),
+
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        height: 260,
+                        child: SfCircularChart(
+                          title: ChartTitle(text: 'HEADING_DASHBOARD'.tr()),
+                          legend: Legend(isVisible: true, position: LegendPosition.bottom),
+                          series: <CircularSeries>[
+                            PieSeries<_ChartData, String>(
+                              dataSource: [
+                                _ChartData('Income'.tr(), gross_income.toDouble(), Colors.green),
+                                _ChartData('Expense'.tr(), total_expense.toDouble(), Colors.red),
+                              ],
+                              pointColorMapper: (_ChartData data, _) => data.color,
+                              xValueMapper: (_ChartData data, _) => data.label,
+                              yValueMapper: (_ChartData data, _) => data.value,
+                              dataLabelSettings: const DataLabelSettings(isVisible: true),
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                child:  Column(
-              children: [
-              _sectionTitle('BIRDS_SUMMARY'),
-              Row(
-                children: [
-                
-                  Expanded(child: _buildWhiteCard('Birds Added', '$total_birds_added', Icons.add_circle, iconColor: Colors.green)),
-             
-                  Expanded(child: _buildWhiteCard('Birds Reduced', '$total_birds_reduced', Icons.remove_circle, iconColor: Colors.orange)),
-                ],
               ),
-             
-              _buildWhiteCard('MORTALITY'.tr()+ "/"+ "CULLING".tr(), '${mortality + culling}', Icons.warning_amber, iconColor: Colors.red),
-              const SizedBox(height: 10),
+              SizedBox(height: 10,),
 
               Container(
-                width: 260,
-                height: 260,
-                child: SfCircularChart(
-                  title: ChartTitle(text: 'BIRDS_SUMMARY'.tr()),
-                  legend: Legend(isVisible: true, position: LegendPosition.bottom),
-                  series: <CircularSeries>[
-                    PieSeries<_ChartData, String>(
-                      dataSource: [
-                        _ChartData('Added'.tr(), total_birds_added.toDouble(), Colors.green),
-                        _ChartData('Reduced'.tr(), total_birds_reduced.toDouble(), Colors.orange),
-                        _ChartData('MORTALITY'.tr(), mortality.toDouble() + culling.toDouble(), Colors.red),
-                      ],
-                      pointColorMapper: (_ChartData data, _) => data.color,
-                      xValueMapper: (_ChartData data, _) => data.label.tr(),
-                      yValueMapper: (_ChartData data, _) => data.value,
-                      dataLabelSettings: const DataLabelSettings(isVisible: true),
-                    )
-                  ],
-                ),
-              ),
-              ],
-            ),
-
-    ),
-            ),
-
-            SizedBox(height: 10,),
-
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>  EggsReportsScreen()),);
-              },
-              child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
@@ -543,119 +677,33 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
                     BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
                   ],
                 ),
+
                 child: Column(
                   children: [
-                    _sectionTitle('EGGS_SUMMARY'),
-                    _buildWhiteCard('eggs collected', '$total_eggs_collected', Icons.egg, iconColor: Colors.purple),
-                    _buildWhiteCard('Reduced Eggs', '$total_eggs_reduced', Icons.restaurant, iconColor: Colors.brown),
-
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      height: 260,
-                      child: SfCircularChart(
-                        title: ChartTitle(text: 'EGGS_SUMMARY'.tr()),
-                        legend: Legend(isVisible: true, position: LegendPosition.bottom),
-                        series: <CircularSeries>[
-                          PieSeries<_ChartData, String>(
-                            dataSource: [
-                              _ChartData('COLLECTION'.tr(), total_eggs_collected.toDouble(), Colors.purple),
-                              _ChartData('Consumption'.tr(), total_eggs_reduced.toDouble(), Colors.brown),
-                            ],
-                            pointColorMapper: (_ChartData data, _) => data.color,
-                            xValueMapper: (_ChartData data, _) => data.label,
-                            yValueMapper: (_ChartData data, _) => data.value,
-                            dataLabelSettings: const DataLabelSettings(isVisible: true),
-                          )
-                        ],
-                      ),
-                    ),
+                    _sectionTitle('FEED_CONSUMPTION'),
+                    _buildWhiteCard('FEED_CONSUMPTION'.tr()+' (' + Utils.selected_unit + ')', '$total_feed_consumption', Icons.rice_bowl, iconColor: Colors.teal),
                   ],
                 ),
               ),
-            ),
 
-            SizedBox(height: 10,),
+              const SizedBox(height: 12),
+              Center(child: buildToggle()),
+              ListView(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
 
-            GestureDetector(
-              onTap: (){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>  FinanceReportsScreen()),);
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
-                  ],
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  children: _selectedView == 'Daily'
+                      ? buildDailyBreakdownList()
+                      : buildMonthlyBreakdownList(monthlyBreakDown ?? []),
                 ),
-                child: Column(
-                  children: [
-                    _sectionTitle('HEADING_DASHBOARD'),
-                    _buildWhiteCard('Income'.tr()+' (' + Utils.currency + ')', '$gross_income', Icons.trending_up, iconColor: Colors.green),
-                    _buildWhiteCard('Expenses'.tr()+' (' + Utils.currency + ')', '$total_expense', Icons.trending_down, iconColor: Colors.red),
-                    _buildWhiteCard('NET_PROFIT'.tr()+' (' + Utils.currency + ')', '$profit', Icons.attach_money, iconColor: Colors.blueAccent),
 
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      height: 260,
-                      child: SfCircularChart(
-                        title: ChartTitle(text: 'HEADING_DASHBOARD'.tr()),
-                        legend: Legend(isVisible: true, position: LegendPosition.bottom),
-                        series: <CircularSeries>[
-                          PieSeries<_ChartData, String>(
-                            dataSource: [
-                              _ChartData('Income'.tr(), gross_income.toDouble(), Colors.green),
-                              _ChartData('Expense'.tr(), total_expense.toDouble(), Colors.red),
-                            ],
-                            pointColorMapper: (_ChartData data, _) => data.color,
-                            xValueMapper: (_ChartData data, _) => data.label,
-                            yValueMapper: (_ChartData data, _) => data.value,
-                            dataLabelSettings: const DataLabelSettings(isVisible: true),
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 10,),
 
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: const [
-                  BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
-                ],
-              ),
-
-              child: Column(
-                children: [
-                  _sectionTitle('FEED_CONSUMPTION'),
-                  _buildWhiteCard('FEED_CONSUMPTION'.tr()+' (' + Utils.selected_unit + ')', '$total_feed_consumption', Icons.rice_bowl, iconColor: Colors.teal),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 12),
-            Center(child: buildToggle()),
-      SizedBox(
-        height: MediaQuery.of(context).size.height * 0.75, // Or any height you need
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          children: _selectedView == 'Daily'
-              ? buildDailyBreakdownList()
-              : buildMonthlyBreakdownList(monthlyBreakDown ?? []),
+            ],
+          ),
         ),
-      ),
-
-      ],
         ),
-      ),
+      ],),
     );
   }
   String _selectedView = 'Daily'; // or 'Monthly'
@@ -706,7 +754,11 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
     return List.generate(totalDays, (index) {
       final date = startDate.add(Duration(days: index));
       final dateKey = DateFormat('yyyy-MM-dd').format(date);
-      final isExpanded = _dailyExpanded[index];
+      bool isExpanded = false;
+      if (_dailyExpanded != null && _dailyExpanded!.isNotEmpty) {
+        isExpanded = _dailyExpanded![index];
+      }
+
       final data = dailyBreakDown?[dateKey] ?? {
         'birdsAdded': 0,
         'birdsReduced': 0,
@@ -723,7 +775,7 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
           GestureDetector(
             onTap: () {
               setState(() {
-                _dailyExpanded[index] = !_dailyExpanded[index];
+                _dailyExpanded![index] = !_dailyExpanded![index];
               });
             },
             child: Container(

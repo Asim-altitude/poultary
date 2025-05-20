@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/feed_batch_screen.dart';
 import 'package:poultary/stock/stock_details_screen.dart';
@@ -18,13 +19,53 @@ class FeedStockScreen extends StatefulWidget {
 
 class _FeedStockScreenState extends State<FeedStockScreen> {
   List<FeedStockSummary>? _stockSummary = [], _batchSummary = [];
+
+  late BannerAd _bannerAd;
+  double _heightBanner = 0;
+  bool _isBannerAdReady = false;
   @override
   void initState() {
     super.initState();
     createTables();
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+    }
+  }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
 
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _heightBanner = 60;
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _heightBanner = 0;
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
   }
 
+  @override
+  void dispose() {
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
+
+    }
+    super.dispose();
+  }
   void createTables() async {
     await DatabaseHelper.instance.database;
     fetchStockSummary();
@@ -309,8 +350,8 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
         preferredSize: Size.fromHeight(kToolbarHeight),
         child: ClipRRect(
           borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(20.0), // Round bottom-left corner
-            bottomRight: Radius.circular(20.0), // Round bottom-right corner
+            bottomLeft: Radius.circular(0.0), // Round bottom-left corner
+            bottomRight: Radius.circular(0.0), // Round bottom-right corner
           ),
           child: AppBar(
             title: Text(
@@ -333,26 +374,29 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
           ),
         ),
       ),
-      body: _stockSummary!.isEmpty
-          ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey),
-            SizedBox(height: 10),
-            Text(
-              "No feed stock available!".tr(),
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
-            ),
-            SizedBox(height: 5),
-            Text("Add stock to see feed details.".tr(), style: TextStyle(fontSize: 14, color: Colors.grey)),
-          ],
-        ),
-      )
-          : AnimatedList(
-        key: _listKey,
-        initialItemCount: _stockSummary!.length,
-        itemBuilder: (context, index, animation) {
+      body:Column(children: [
+        Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+
+        _stockSummary!.isEmpty
+            ? Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey),
+              SizedBox(height: 10),
+              Text(
+                "No feed stock available!".tr(),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+              ),
+              SizedBox(height: 5),
+              Text("Add stock to see feed details.".tr(), style: TextStyle(fontSize: 14, color: Colors.grey)),
+            ],
+          ),
+        )
+            : Expanded(child:AnimatedList(
+          key: _listKey,
+          initialItemCount: _stockSummary!.length,
+          itemBuilder: (context, index, animation) {
             return InkWell(
                 onTap: () async {
 
@@ -385,8 +429,11 @@ class _FeedStockScreenState extends State<FeedStockScreen> {
                 child: _buildStockItem(
                     _stockSummary![index], index, animation));
 
-        },
-      ),
+          },
+        ),),
+      ],),
+
+
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showFeedOptionsBottomSheet(context);

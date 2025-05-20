@@ -550,12 +550,11 @@ class _DashboardScreen extends State<DashboardScreen> {
               ),
             ),
           ),
-              Stack(
+              Column(
                 children: [
 
                   Container(
-                    padding: EdgeInsets.only(bottom: 40),
-                    color: Utils.getThemeColorBlue(),
+                    padding: EdgeInsets.only(bottom: 10),
                     child: Padding(
                       padding: EdgeInsets.all(10),
                       child: Column(
@@ -574,45 +573,62 @@ class _DashboardScreen extends State<DashboardScreen> {
                                 },
                                 child: Container(
                                   width: widthScreen / 2,
-                                  height: 210,
+                                  height: 178,
                                   decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [Colors.blue, Utils.getThemeColorBlue()], // Lighter gradient
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.centerRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(15), // Optional rounded corners
+                                    color: Colors.blue.shade50,
+                                    borderRadius: BorderRadius.circular(15),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.2), // Shadow color
-                                        blurRadius: 10, // Blur effect
-                                        spreadRadius: 3, // Spread radius
-                                        offset: Offset(3, 5), // Shadow position
+                                        color: Colors.black.withOpacity(0.2),
+                                        blurRadius: 10,
+                                        spreadRadius: 3,
+                                        offset: Offset(3, 5),
                                       ),
                                     ],
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.all(1.0), // Padding to prevent chart overflow
-                                    child: SfCircularChart(
-                                      legend: Legend(isVisible: true, textStyle: TextStyle(fontSize: 11, color: Colors.white), padding: 2),
-                                      series: <CircularSeries>[
-                                        PieSeries<PieData, String>(
-                                          dataSource: _piData,
-                                          xValueMapper: (PieData data, _) => data.label,
-                                          yValueMapper: (PieData data, _) => data.value,
-                                          dataLabelSettings: DataLabelSettings(
-                                            isVisible: true,
-                                            textStyle: TextStyle(
-                                              fontSize: 12,  // Change font size
-                                              fontWeight: FontWeight.bold,  // Make it bold
-                                              color: Colors.white,  // Adjust color if needed
-                                            ),
-                                          ),
-                                          pointColorMapper: (PieData data, _) => data.color,
-                                        ),
-                                      ],
+                                    border: Border.all(
+                                      color: Colors.blue.shade300,
                                     ),
                                   ),
+                                  child: _piData.isNotEmpty
+                                ? Padding(
+                                padding: EdgeInsets.all(1.0),
+                      child: SfCircularChart(
+                        legend: Legend(
+                          isVisible: true,
+                          textStyle: TextStyle(fontSize: 11, color: Colors.black),
+                          padding: 2,
+                        ),
+                        series: <CircularSeries>[
+                          PieSeries<PieData, String>(
+                            dataSource: _piData,
+                            xValueMapper: (PieData data, _) => data.label,
+                            yValueMapper: (PieData data, _) => data.value,
+                            dataLabelSettings: DataLabelSettings(
+                              isVisible: true,
+                              textStyle: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            pointColorMapper: (PieData data, _) => data.color,
+                          ),
+                        ],
+                      ),
+                    )
+                : Center(
+          child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.pie_chart_outline, size: 40, color: Colors.blueGrey),
+              SizedBox(height: 8),
+              Text(
+                'No data available'.tr(),
+                style: TextStyle(color: Colors.blueGrey, fontSize: 14),
+              ),
+            ],
+          ),
+      ),
                                 ),
                               ),
 
@@ -623,16 +639,18 @@ class _DashboardScreen extends State<DashboardScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    getFinanceCard(Icons.arrow_upward, "Income", "${Utils.currency} $gross_income", Colors.green.shade300, FinanceReportsScreen(), context),
-                                    getFinanceCard(Icons.arrow_downward, "Expense", "${Utils.currency} $total_expense", Colors.red, FinanceReportsScreen(), context),
-                                    getFinanceCard(Icons.monetization_on, "NET_PROFIT", net_income >= 0 ? "${Utils.currency} $net_income" : "-${Utils.currency} ${-net_income}", net_income >= 0 ? Colors.white : Colors.white, FinanceReportsScreen(), context),
+                                    SizedBox(height:4),
+
+                                    getFinanceCard(Icons.arrow_upward, "Income", "${Utils.currency} $gross_income", Colors.green.shade300, FinanceReportsScreen(), context,0),
+                                    getFinanceCard(Icons.arrow_downward, "Expense", "${Utils.currency} $total_expense", Colors.red, FinanceReportsScreen(), context,1),
+                                    getFinanceCard(Icons.monetization_on, "NET_PROFIT", net_income >= 0 ? "${Utils.currency} $net_income" : "-${Utils.currency} ${-net_income}", net_income >= 0 ? Colors.white : Colors.white, FinanceReportsScreen(), context,2),
                                   ],
                                 ),
                               ),
                             ],
                           ),
 
-                          SizedBox(height: 10,),
+                          SizedBox(height: 5,),
                           // Egg Collection, Feed Consumption, Treatment Summary
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -648,7 +666,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                     ),
                   ),
                   Container(
-                    margin: EdgeInsets.only(top: 340),
+                    margin: EdgeInsets.only(top: 0),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(30),
@@ -936,7 +954,7 @@ class _DashboardScreen extends State<DashboardScreen> {
 
 
   // Finance Info Card (Income, Expense, Net Profit)
-  Widget getFinanceCard(IconData icon, String title, String amount, Color color, Widget nextScreen, BuildContext context) {
+  Widget getFinanceCard(IconData icon, String title, String amount, Color color, Widget nextScreen, BuildContext context,int index) {
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -944,46 +962,88 @@ class _DashboardScreen extends State<DashboardScreen> {
           MaterialPageRoute(builder: (context) => nextScreen),
         );
       },
-      borderRadius: BorderRadius.circular(16), // To match the container radius
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        height: 64,
+
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Utils.getThemeColorBlue(), Colors.blue.shade700], // Lighter gradient
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+          color: index == 0
+              ? Colors.green.shade50
+              : index == 1
+              ? Colors.red.shade50
+              : Colors.blue.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: index == 0
+                ? Colors.green.shade300
+                : index == 1
+                ? Colors.red.shade300
+                : Colors.blue.shade300,
           ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(2, 3)),
-          ],
         ),
-        margin: EdgeInsets.symmetric(vertical: 3, horizontal: 8),
+        margin: EdgeInsets.only(left:5,right:5,top:0,bottom:5),
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+          padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-             // ,SizedBox(width: 5),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(icon, color: color, size: 15),
-                      SizedBox(width: 2,),
-                      Text(title.tr(),
-                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color)),],
-                  ),
-                  SizedBox(height: 3),
-                  Flexible(
-                    child:
+              SizedBox(width: 5),
+              Expanded( // Makes sure content can flex to fit available space
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          icon,
+                          color: index == 0
+                              ? Colors.green[900]
+                              : index == 1
+                              ? Colors.red[900]
+                              : Colors.blue[900],
+                          size: 15,
+                        ),
+                        SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            title.tr(),
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: index == 0
+                                  ? Colors.green[900]
+                                  : index == 1
+                                  ? Colors.red[900]
+                                  : Colors.blue[900],
+                            ),
+                          ),
+                        ),
+
+                      ],
+                    ),
+                    SizedBox(height: 3),
                     FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(amount,
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
-                  ),),
-                ],
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        amount,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: index == 0
+                              ? Colors.green[900]
+                              : index == 1
+                              ? Colors.red[900]
+                              : Colors.blue[900],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+
+                  ],
+                ),
               ),
             ],
           ),
@@ -1003,17 +1063,18 @@ class _DashboardScreen extends State<DashboardScreen> {
       },
       child: Container(
         margin: EdgeInsets.only(left: 3,right: 3),
-        padding: EdgeInsets.symmetric(vertical: 10),
+        padding: EdgeInsets.symmetric(vertical: 5,horizontal: 2),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Utils.getThemeColorBlue(), Colors.blue.shade700], // Lighter gradient
+            colors: [Colors.blue.shade400, Colors.blue.shade700], // Lighter gradient
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(2, 3)),
           ],
+
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1021,15 +1082,21 @@ class _DashboardScreen extends State<DashboardScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 28, color: color),
-                SizedBox(height: 8),
-                Text(title.tr(),
+                Icon(icon, size: 22, color: color),
+                SizedBox(width: 3),
+
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child:
+                  Text(title.tr(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.white70)),
+                      overflow: TextOverflow.ellipsis,
+
+                      style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500, color: Colors.white70)),),
 
               ],
             ),
-              SizedBox(height: 5),
+              SizedBox(height: 2),
             Text(value,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
           ],
