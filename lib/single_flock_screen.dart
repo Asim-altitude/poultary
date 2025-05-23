@@ -115,10 +115,16 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
     defaultcategories = Utils.getDefaultFlockCatgories();
 
-    categories = (await DatabaseHelper.getCustomCategories())!;
-    await DatabaseHelper.createCategoriesDataTable();
 
-    defaultcategories.addAll(categories);
+    try{
+      categories = (await DatabaseHelper.getCustomCategories())!;
+      await DatabaseHelper.createCategoriesDataTable();
+
+      defaultcategories.addAll(categories);
+    }catch(ex){
+
+    }
+
 
     setState(() {});
   }
