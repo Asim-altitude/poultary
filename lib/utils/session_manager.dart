@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:poultary/multiuser/model/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -30,6 +31,31 @@ class SessionManager {
   static final String tray_size = "tray_size";
   static final String tray_enabled = "tray_enabled";
   static final String table_created = "table_created";
+  static final String skipped = "multi_skipped";
+  static final String loggedIn = "loggedIn";
+  static final String isAdmin = "isAdmin";
+
+
+
+
+  static Future<void> saveUserToPrefs(MultiUser user) async {
+    final prefs = await SharedPreferences.getInstance();
+    String userJson = jsonEncode(user.toMap());
+    await prefs.setString('user', userJson);
+  }
+
+  static Future<void> clearUserObject() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user', "");
+  }
+
+  static Future<MultiUser?> getUserFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? userJson = prefs.getString('user');
+    if (userJson == null || userJson == "") return null;
+    Map<String, dynamic> userMap = jsonDecode(userJson);
+    return MultiUser.fromMap(userMap);
+  }
 
 
   static Future<void> setUnit(String countryCode) async {

@@ -45,6 +45,10 @@ import '../model/used_item.dart';
 import '../model/vaccine_stock_history.dart';
 import '../model/vaccine_stock_summary.dart';
 import '../model/weight_record.dart';
+import '../multiuser/model/permission.dart';
+import '../multiuser/model/role.dart';
+import '../multiuser/model/user.dart';
+import '../utils/utils.dart';
 class DatabaseHelper  {
   static const _databaseName = "assets/poultary.db";
 
@@ -112,6 +116,12 @@ class DatabaseHelper  {
 
 
     return file;
+  }
+
+  static restoreDatabase() async {
+    File abcd = await _db.dBToCopy();
+    String recoveryPath =
+        "${abcd.absolute.path}/assets/poultary.db";
   }
   static importDataBaseFile (BuildContext context) async {
     File abcd = await _db.dBToCopy();
@@ -245,6 +255,179 @@ class DatabaseHelper  {
   );
 ''');
   }
+
+
+  static Future<void> createMultiUserTables() async {
+  await _database?.execute('''
+      CREATE TABLE IF NOT EXISTS permissions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        description TEXT
+      );
+    ''');
+
+  await _database?.execute('''
+      CREATE TABLE IF NOT EXISTS roles (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL
+      );
+    ''');
+
+  await _database?.execute('''
+      CREATE TABLE IF NOT EXISTS role_permissions (
+        role_id INTEGER,
+        permission_id INTEGER,
+        PRIMARY KEY (role_id, permission_id),
+        FOREIGN KEY (role_id) REFERENCES roles(id),
+        FOREIGN KEY (permission_id) REFERENCES permissions(id)
+      );
+    ''');
+
+  }
+
+
+  static Future<void> createUsersTableIfNotExists() async {
+    await _database?.execute('''
+    CREATE TABLE IF NOT EXISTS User(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      password TEXT NOT NULL,
+      role TEXT NOT NULL,
+      farm_id TEXT NOT NULL,
+      active INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL
+    )
+  ''');
+  }
+
+  static Future<int?> insertUser(MultiUser user) async {
+
+    return await _database?.insert('User', user.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<List<MultiUser>> getAllUsers() async {
+    try {
+      final result = await _database?.query('User');
+      return result!.map((map) => MultiUser.fromMap(map)).toList();
+    }
+    catch(ex){
+      print(ex);
+      return [];
+    }
+  }
+
+  static Future<List<MultiUser>> getAllNonAdminUsers() async {
+    final result = await _database?.query(
+      'User',
+      where: 'role != ?',
+      whereArgs: ['Admin'],
+    );
+    return result!.map((map) => MultiUser.fromMap(map)).toList();
+  }
+
+
+
+  static Future<int?> updateUser(MultiUser user) async {
+    return await  _database?.update(
+      'User',
+      user.toMap(),
+      where: 'email = ?',
+      whereArgs: [user.email],
+    );
+  }
+
+  static Future<int?> deleteUser(String email) async {
+    return await  _database?.delete(
+      'User',
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+  }
+
+  static Future<MultiUser?> loginUser(String email, String password) async {
+    final hashed = Utils().hashPassword(password);
+    final result = await _database?.query(
+      'User',
+      where: 'email = ? AND password = ?',
+      whereArgs: [email, hashed],
+    );
+    if (result!.isNotEmpty) {
+      return MultiUser.fromMap(result.first);
+    }
+    return null;
+  }
+
+
+
+  static Future<int?> insertRole(Role role) async {
+  return await _database?.insert('roles', role.toMap());
+  }
+
+  static Future<int?> updateRole(Role role) async {
+  return await _database?.update('roles', role.toMap(), where: 'id = ?', whereArgs: [role.id]);
+  }
+
+  static Future<int?> deleteRole(int roleId) async {
+  await  _database?.delete('role_permissions', where: 'role_id = ?', whereArgs: [roleId]);
+  // Then delete role
+  return await  _database?.delete('roles', where: 'id = ?', whereArgs: [roleId]);
+  }
+
+  static Future<List<Role>> getAllRoles() async {
+  final List<Map<String, Object?>>? maps = await  _database?.query('roles');
+  return maps!.map((map) => Role.fromMap(map)).toList();
+  }
+
+  static Future<List<Permission>> getAllPermissions() async {
+  final List<Map<String, Object?>>? maps = await  _database?.query('permissions');
+  return maps!.map((map) => Permission.fromMap(map)).toList();
+  }
+
+  static Future<int?> insertPermission(Permission permission) async {
+  return await  _database?.insert('permissions', permission.toMap());
+  }
+
+  static Future<void> insertPermissionIfNotExists(Permission permission) async {
+    final List<Map<String, dynamic>> existing = await _database!.query(
+      'permissions',
+      where: 'name = ?',
+      whereArgs: [permission.name],
+    );
+
+    if (existing.isEmpty) {
+      await _database!.insert('permissions', permission.toMap());
+    }
+  }
+
+
+  static Future<void> assignPermissionsToRole(int roleId, List<int> permissionIds) async {
+    // First clear existing permissions
+    await _database?.delete(
+        'role_permissions', where: 'role_id = ?', whereArgs: [roleId]);
+    // Insert new ones
+    for (int pid in permissionIds) {
+      await _database?.insert('role_permissions', {
+        'role_id': roleId,
+        'permission_id': pid,
+      });
+    }
+  }
+
+
+  static Future<List<Permission>> getPermissionsForRole(int roleId) async {
+  final List<Map<String, Object?>>? results = await  _database?.rawQuery('''
+      SELECT p.* FROM permissions p
+      INNER JOIN role_permissions rp ON rp.permission_id = p.id
+      WHERE rp.role_id = ?
+    ''', [roleId]);
+
+  return results!.map((map) => Permission.fromMap(map)).toList();
+  }
+
+
+
 
   static Future<WeightRecord?> getLatestWeightRecord(int flockId) async {
     final db = _database;

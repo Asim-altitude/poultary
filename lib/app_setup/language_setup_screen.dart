@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:language_picker/language_picker_dropdown.dart';
 import 'package:language_picker/languages.dart';
 import 'package:poultary/home_screen.dart';
+import 'package:poultary/multiuser/classes/AuthGate.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
 
@@ -481,8 +482,9 @@ class _LanguageSetupScreen extends State<LanguageSetupScreen>
                                   Utils.setupCompleted();
                                   Utils.showToast('SUCCESSFUL'.tr());
 
-                                  await Navigator.push(context, MaterialPageRoute(builder: (_) => HomeScreen()));
-                                  Navigator.pop(context);
+
+                                  await Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => AuthGate(isStart: true)));
+
                                 },
                                 child: Text("Finish", style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
                               ),

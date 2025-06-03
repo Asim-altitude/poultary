@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "488113567172",
+    "project_id": "poultry-multiuser",
+    "storage_bucket": "poultry-multiuser.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:488113567172:android:6547ff1a0aa46bae772091",
+        "android_client_info": {
+          "package_name": "com.zaheer.poultry"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUbWsKSYGYKpfbpS0Y9iru4kJiC1WMw7w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

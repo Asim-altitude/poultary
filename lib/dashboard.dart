@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -15,12 +16,20 @@ import 'package:poultary/settings_screen.dart';
 import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'add_flocks.dart';
 import 'database/databse_helper.dart';
 import 'financial_report_screen.dart';
 import 'model/flock.dart';
+import 'multiuser/model/user.dart';
+import 'multiuser/utils/FirebaseUtils.dart';
+import 'package:http/http.dart' as http;
+import 'dart:io';
+import 'package:path/path.dart' as p;
+import 'package:sqflite/sqflite.dart';
 
+ValueNotifier<double> downloadProgress = ValueNotifier(0.0);
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -103,6 +112,7 @@ class _DashboardScreen extends State<DashboardScreen> {
       ),
     );
   }
+
   @override
   void dispose() {
     super.dispose();
@@ -121,8 +131,122 @@ class _DashboardScreen extends State<DashboardScreen> {
     getLanguage();
     Utils.setupAds();
 
+    checkMultiUSer();
     // Utils.showInterstitial();
   }
+
+  Future<void> checkMultiUSer() async {
+    try {
+      if (Utils.isMultiUSer) {
+
+      MultiUser? user = await SessionManager.getUserFromPrefs();
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      bool initialized = prefs.getBool('db_initialized_${user!.farmId}') ?? false;
+
+        if (initialized) {
+          print("Database already initialized for farm ${user.farmId}");
+          return;
+        }
+
+
+        final latestBackupUrl = await getLatestBackupUrlFromFirestore(
+            user.farmId);
+        if (latestBackupUrl != null) {
+          showBackupFoundDialog(context, () {
+            fetchAndInitializeDatabaseWithProgress(user!.farmId);
+          });
+        }
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
+
+
+  void showBackupFoundDialog(BuildContext context, VoidCallback onRestore) {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.backup, size: 60, color: Colors.blueAccent),
+              SizedBox(height: 16),
+              Text(
+                "Backup Found",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              SizedBox(height: 12),
+              Text(
+                "We found a backup for your farm data.\nWould you like to restore it?",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black54,
+                ),
+              ),
+              SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // close dialog
+                      },
+                      icon: Icon(Icons.cancel),
+                      label: Text("Cancel"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[300],
+                        foregroundColor: Colors.black,
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        onRestore(); // perform restore action
+                      },
+                      icon: Icon(Icons.restore),
+                      label: Text("Restore"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+
   void addEggColorColumn() async{
     DatabaseHelper.instance.database;
     await DatabaseHelper.addEggColorColumn();
@@ -1282,6 +1406,80 @@ class _DashboardScreen extends State<DashboardScreen> {
         );
       },
     );
+  }
+
+
+  bool downloadingDB = false;
+  Future<void> fetchAndInitializeDatabaseWithProgress(String farmId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool initialized = prefs.getBool('db_initialized_$farmId') ?? false;
+
+    if (initialized) {
+      print("Database already initialized for farm $farmId");
+      return;
+    }
+
+    downloadingDB = true;
+    try {
+      final latestBackupUrl = await getLatestBackupUrlFromFirestore(farmId);
+
+      print("BACKUP_URL $latestBackupUrl");
+      final uri = Uri.parse(latestBackupUrl);
+      final client = http.Client();
+      final request = http.Request('GET', uri);
+      final response = await client.send(request);
+
+      if (response.statusCode != 200) {
+        throw Exception("Failed to download DB file");
+      }
+      File abcd = await DatabaseHelper.instance.dBToCopy();
+
+      // Prepare file path
+      String recoveryPath =
+          "${abcd.absolute.path}/assets/poultary.db";
+      final file = File(recoveryPath);
+      final sink = file.openWrite();
+
+      final contentLength = response.contentLength ?? 0;
+      int bytesReceived = 0;
+
+      // Listen to stream and write to file while updating progress
+      await response.stream.listen(
+            (chunk) {
+          bytesReceived += chunk.length;
+          sink.add(chunk);
+          if (contentLength > 0) {
+            downloadProgress.value = bytesReceived / contentLength;
+          }
+        },
+        onDone: () async {
+          await sink.close();
+          await prefs.setBool('db_initialized_$farmId', true);
+          downloadProgress.value = 1.0;
+          print("Database download complete.");
+          downloadingDB = false;
+          Utils.showToast("RESTORE_SUCCESSFUL".tr());
+
+        },
+        onError: (e) {
+          sink.close();
+          Utils.showToast("BACKUP_FAILED".tr());
+
+          throw Exception("Download failed: $e");
+        },
+        cancelOnError: true,
+      );
+    } catch (e) {
+      Utils.showToast("BACKUP_FAILED".tr());
+
+      print("Error during DB download: $e");
+      rethrow;
+    }
+  }
+
+  Future<String> getLatestBackupUrlFromFirestore(String farmId) async {
+    final doc = await FirebaseFirestore.instance.collection(FireBaseUtils.DB_BACKUP).doc(farmId).get();
+    return doc.data()?['last_backup_url'] ?? '';
   }
 
 }

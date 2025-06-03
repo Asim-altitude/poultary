@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/suggested_notifcations.dart';
+import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
@@ -23,6 +24,8 @@ import 'model/recurrence_type.dart';
 import 'model/schedule_notification.dart';
 import 'model/sub_category_item.dart';
 import 'model/transaction_item.dart';
+import 'multiuser/api/server_apis.dart';
+import 'multiuser/model/user.dart';
 
 class ADDFlockScreen extends StatefulWidget {
   const ADDFlockScreen({Key? key}) : super(key: key);
@@ -740,72 +743,87 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
 
 
                   activeStep==2?
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Stack(
                     children: [
-                      SizedBox(height: 30),
-
-                      // Section Title
-                      Center(
-                        child: Text(
-                          "Flock Images and Description".tr(),
-                          style: TextStyle(
-                            color: Utils.getThemeColorBlue(),
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
+                      IgnorePointer(
+                        ignoring: saving_images, // disables child when true
+                        child: Opacity(
+                          opacity: saving_images ? 0.5 : 1.0, // optional visual feedback
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: 30),
+                              Center(
+                                child: Text(
+                                  "Flock Images and Description".tr(),
+                                  style: TextStyle(
+                                    color: Utils.getThemeColorBlue(),
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 25),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildSectionLabel("DATE".tr()),
+                                    GestureDetector(
+                                      onTap: () {
+                                        pickDate();
+                                      },
+                                      child: _buildDatePicker(Utils.getFormattedDate(date)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildSectionLabel("FLOCK_IMAGES".tr()),
+                                    _buildImagePicker(),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 30),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildSectionLabel("FLOCK_DESC".tr()),
+                                    _buildInputField(
+                                      "NOTES_HINT".tr(),
+                                      notesController,
+                                      Icons.notes,
+                                      keyboardType: TextInputType.multiline,
+                                      height: 100,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
 
-                      SizedBox(height: 25),
-
-                      // Date Picker (Aligned with Label)
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildSectionLabel("DATE".tr()),
-                            GestureDetector(
-                              onTap: () {
-                                pickDate();
-                              },
-                              child: _buildDatePicker(Utils.getFormattedDate(date)),
+                      // Optional loading spinner when saving
+                      if (saving_images)
+                        Positioned.fill(
+                          child: Container(
+                            color: Colors.black45,
+                            child: Center(
+                              child: CircularProgressIndicator(),
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-
-                      SizedBox(height: 20),
-
-                      // Image Section (Modern & Advanced)
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildSectionLabel("FLOCK_IMAGES".tr()),
-                            _buildImagePicker(),
-                          ],
-                        ),
-                      ),
-
-                      SizedBox(height: 30),
-
-                      // Description Field
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildSectionLabel("FLOCK_DESC".tr()),
-                            _buildInputField("NOTES_HINT".tr(), notesController, Icons.notes, keyboardType: TextInputType.multiline, height: 100),
-                          ],
-                        ),
-                      ),
                     ],
-                  )
-              : SizedBox(width: 1,),
+                  ) : SizedBox(width: 1,),
 
                 ],
               ),
@@ -997,38 +1015,41 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
           ),
 
           SizedBox(height: 10),
-
+          imageFileList!.length < 5? Text('Add 1-5 images', style: TextStyle(color: Colors.grey, ),) : SizedBox(width: 1,),
           // Add Images Button (Modern Floating Button)
-          GestureDetector(
-            onTap: () {
-              selectImages();
-            },
-            child: Container(
-              width: double.infinity,
-              height: 50,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.blue.shade700, Colors.blueAccent],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.blue.withOpacity(0.5),
-                    blurRadius: 6,
-                    spreadRadius: 2,
-                    offset: Offset(0, 3),
+          Visibility(
+            visible: imageFileList!.length < 5? true : false,
+            child: GestureDetector(
+              onTap: () {
+                selectImages();
+              },
+              child: Container(
+                width: double.infinity,
+                height: 50,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blue.shade700, Colors.blueAccent],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.add_a_photo, color: Colors.white),
-                  SizedBox(width: 8),
-                  Text("IMAGES".tr(), style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                ],
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.blue.withOpacity(0.5),
+                      blurRadius: 6,
+                      spreadRadius: 2,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add_a_photo, color: Colors.white),
+                    SizedBox(width: 8),
+                    Text("IMAGES".tr(), style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                  ],
+                ),
               ),
             ),
           ),
@@ -1240,18 +1261,24 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
     List<XFile>? imageFileList = [];
 
     void selectImages() async {
-      final List<XFile>? selectedImages = await
-      imagePicker.pickMultiImage();
-      if (selectedImages!.isNotEmpty) {
-        imageFileList!.addAll(selectedImages);
+      final List<XFile>? selectedImages = await imagePicker.pickMultiImage();
+
+      if (selectedImages != null && selectedImages.isNotEmpty) {
+        int remainingSlots = 5 - imageFileList!.length;
+
+        final imagesToAdd = selectedImages.take(remainingSlots).toList();
+        imageFileList!.addAll(imagesToAdd);
+
+
+        print("Image List Length:" + imageFileList!.length.toString());
+
+        saveImagesDB();
+
+        imagesAdded = true;
+
+        setState((){});
       }
-      print("Image List Length:" + imageFileList!.length.toString());
 
-      saveImagesDB();
-
-      imagesAdded = true;
-
-      setState((){});
     }
 
 
@@ -1343,19 +1370,58 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
       }
   }
 
-  void insertFlockImages(int? id) {
+  bool saving_images = false;
+  Future<void> insertFlockImages(int? id) async{
 
-    if (base64Images.length > 0){
+    if(Utils.isMultiUSer){
+      try {
 
-      for (int i=0;i<base64Images.length;i++){
-        Flock_Image image = Flock_Image(f_id: id,image: base64Images.elementAt(i));
-        DatabaseHelper.insertFlockImages(image);
+        setState(() {
+          saving_images = true;
+        });
+        MultiUser? user = await SessionManager.getUserFromPrefs();
+        List<String> imageUrls = await FlockImageUploader().uploadFlockImages(
+            farmId: user!.farmId, base64Images: base64Images);
+        for (int i = 0; i < imageUrls.length; i++) {
+          print("IMAGE $i ${imageUrls[i]}");
+        }
+
+        setState(() {
+          saving_images = false;
+        });
+
+        if (base64Images.length > 0) {
+          for (int i = 0; i < base64Images.length; i++) {
+            Flock_Image image = Flock_Image(
+                f_id: id, image: base64Images.elementAt(i));
+            DatabaseHelper.insertFlockImages(image);
+          }
+
+          print("Images Inserted");
+          Utils.showToast("FLOCK_CREATED".tr());
+          Navigator.pop(context);
+          gotoNotificationsScreen(id!);
+        }
+
+
       }
+      catch(ex){
+        Utils.showToast(ex.toString());
+        print(ex);
+      }
+    }else {
+      if (base64Images.length > 0) {
+        for (int i = 0; i < base64Images.length; i++) {
+          Flock_Image image = Flock_Image(
+              f_id: id, image: base64Images.elementAt(i));
+          DatabaseHelper.insertFlockImages(image);
+        }
 
-      print("Images Inserted");
-      Utils.showToast("FLOCK_CREATED".tr());
-      Navigator.pop(context);
-      gotoNotificationsScreen(id!);
+        print("Images Inserted");
+        Utils.showToast("FLOCK_CREATED".tr());
+        Navigator.pop(context);
+        gotoNotificationsScreen(id!);
+      }
     }
 
   }

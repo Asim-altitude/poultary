@@ -43,7 +43,8 @@ import '../model/schedule_notification.dart';
 import '../model/transaction_item.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
-
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 class Utils {
   static const String APPLICATION_ID = "BirdDiary";
@@ -61,7 +62,6 @@ class Utils {
   static final String appIdIOS     = "ca-app-pub-2367135251513556~6965974738";
   static final String appIdAndroid = "ca-app-pub-2367135251513556~8724531818";
   static var box;
-
 
   static final String testIOS     = "ca-app-pub-3940256099942544~1458002511";
   static final String testAndroid = "ca-app-pub-3940256099942544~3347511713";
@@ -132,6 +132,9 @@ class Utils {
   static InterstitialAd? _interstitialAd;
   static List<BirdModel> products = [];
   static bool isShowProducts = false;
+
+
+  static bool isMultiUSer = false;
 
   // static MediationManager? manager;
   // static CASBannerView? view;
@@ -1165,7 +1168,11 @@ class Utils {
   }
 
 
-
+  String hashPassword(String password) {
+    final bytes = utf8.encode(password);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
 
 
   static Color getSciFiThemeColor(){

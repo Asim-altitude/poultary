@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:language_picker/languages.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:poultary/add_feeding.dart';
 import 'package:poultary/all_events.dart';
 import 'package:poultary/category_screen.dart';
@@ -18,13 +17,11 @@ import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'auto_egg_collection.dart';
 import 'auto_feed_management.dart';
 import 'backup_screen.dart';
 import 'database/databse_helper.dart';
 import 'farm_setup_screen.dart';
 import 'feed_batch_screen.dart';
-import 'feed_ingridient_screen.dart';
 import 'filter_setup_screen.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
@@ -32,6 +29,9 @@ import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 import 'consume_store.dart';
 import 'manage_flock_screen.dart';
+import 'multiuser/classes/AdminProfile.dart';
+import 'multiuser/classes/AuthGate.dart';
+import 'multiuser/model/user.dart';
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
@@ -151,7 +151,12 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
     getLanguage();
   }
 
+  MultiUser? admin = null;
+  List<MultiUser> users = [];
+  bool loggedIn = false;
   setUpInitial() async {
+
+
     bool isInApp = await SessionManager.getInApp();
     if(isInApp){
       Utils.isShowAdd = false;
@@ -159,7 +164,18 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
     else{
       Utils.isShowAdd = true;
     }
+
+    loadUsers();
   }
+
+  Future<void> loadUsers() async {
+    loggedIn = await SessionManager.getBool(SessionManager.loggedIn);
+    users = await DatabaseHelper.getAllUsers();
+    setState(() {
+
+    });
+  }
+
   shareFiles() async {
     File newPath = await DatabaseHelper.getFilePathDB();
     XFile file = new XFile(newPath.path);
@@ -242,7 +258,6 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                   ),
                 ),
               ),
-
               Card(
                 margin: const EdgeInsets.all(12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -346,7 +361,6 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                 ),
               ),
 
-
               // Business & Sales
               Card(
                 margin: const EdgeInsets.all(12),
@@ -358,6 +372,15 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _sectionTitle(context, 'Business & Sales'),
+                      _buildSettingsTile(
+                        context,
+                        icon: Icons.group_add,
+                        title: 'Users & Roles'.tr(),
+                        onTap: ()  async =>  {
+                        await Navigator.push(context, MaterialPageRoute(builder: (_) => !loggedIn? AuthGate(isStart: false, ) : AdminProfileScreen(users: users, ))),
+                          loadUsers()
+                        }
+                      ),
                       _buildSettingsTile(
                         context,
                         icon: Icons.group_add,

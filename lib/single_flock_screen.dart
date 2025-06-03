@@ -13,6 +13,7 @@ import 'package:poultary/model/weight_record.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/suggested_notifcations.dart';
 import 'package:poultary/transactions_screen.dart';
+import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:poultary/weight_record_screen.dart';
 import 'add_birds.dart';
@@ -30,6 +31,9 @@ import 'model/schedule_notification.dart';
 import 'model/used_item.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+
+import 'multiuser/api/server_apis.dart';
+import 'multiuser/model/user.dart';
 
 class SingleFlockScreen extends StatefulWidget {
   const SingleFlockScreen({Key? key}) : super(key: key);
@@ -1539,7 +1543,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
           showEditFlockDialog(context, flock: Utils.selected_flock!, onSave: (flock) async {
             Utils.selected_flock = flock;
             await DatabaseHelper.updateFlockInfo(flock);
-            insertFlockImages(Utils.selected_flock!.f_id);
+            await insertFlockImages(Utils.selected_flock!.f_id);
             Utils.selected_flock = await DatabaseHelper.getSingleFlock(Utils.selected_flock!.f_id!);
             getImages();
 
@@ -2065,7 +2069,6 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
   }
 
 
-
   List<String> acqusitionList = [
     'PURCHASED'.tr(),
     'HATCHED'.tr(),
@@ -2305,14 +2308,23 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
           builder: (context, setState) {
 
             Future<void> _pickImages() async {
-              final List<XFile>? pickedFiles = await _picker.pickMultiImage();
-              if (pickedFiles != null && pickedFiles.isNotEmpty) {
-                setState(() {
-                  imageFileList.addAll(pickedFiles.map((file) => file.path));
-                });
+              final List<XFile>? selectedImages = await _picker.pickMultiImage();
+
+              if (selectedImages != null && selectedImages.isNotEmpty) {
+                int remainingSlots = 5 - (byteimages.length + imageFileList.length);
+
+
+                final imagesToAdd = selectedImages.take(remainingSlots).toList();
+                imageFileList.addAll(imagesToAdd);
+
+                print("Image List Length: ${imageFileList.length}");
 
                 saveImagesDB();
+                imagesAdded = true;
+
+                setState(() {});
               }
+
             }
 
             void _removeImage(int index) {
@@ -2449,7 +2461,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                       ),
                     ),
                     SizedBox(height: 16),
-                    SizedBox(
+                    (imageFileList.length + byteimages.length) < 5 ? SizedBox(
                       width: 200,
                       child: ElevatedButton(
                         onPressed: _pickImages,
@@ -2462,9 +2474,13 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                           ),
                         ),
                       ),
-                    ),
+
+                    ) : SizedBox(width: 1,),
+
+                    (imageFileList.length + byteimages.length) < 5 ? Text('Add 1-5 images', style: TextStyle(color: Colors.grey, ),) : SizedBox(width: 1,),
+
                     SizedBox(height: 12),
-// Display Selected Images in Grid
+
                     if (byteimages.isNotEmpty)
                       GridView.builder(
                         shrinkWrap: true,
@@ -2522,7 +2538,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
                                 child: Image.file(
-                                  File(imageFileList[index]),
+                                  File(imageFileList[index].path),
                                   width: double.infinity,
                                   height: double.infinity,
                                   fit: BoxFit.cover,
@@ -2588,7 +2604,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     );
   }
 
-  List<String> imageFileList = [];
+  List<XFile> imageFileList = [];
   void saveImagesDB() async {
 
     base64Images.clear();
@@ -2596,7 +2612,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     File file;
     for (int i=0;i<imageFileList.length;i++) {
 
-      file = await Utils.convertToJPGFileIfRequiredWithCompression(File(imageFileList.elementAt(i)));
+      file = await Utils.convertToJPGFileIfRequiredWithCompression(File(imageFileList.elementAt(i).path));
       final bytes = File(file.path).readAsBytesSync();
       String base64Image =  base64Encode(bytes);
       base64Images.add(base64Image);
@@ -2605,8 +2621,9 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
     }
   }
+  bool saving_images = false;
   List<String> base64Images = [];
-  void insertFlockImages(int? id) async {
+  Future<void> insertFlockImages(int? id) async {
 
     print("IMAGES FOUND ${base64Images.length}");
     if (base64Images.length > 0){
@@ -2616,11 +2633,17 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
         await DatabaseHelper.insertFlockImages(image);
       }
 
+      if(Utils.isMultiUSer) {
+        MultiUser? user = await SessionManager.getUserFromPrefs();
+        List<String> imageUrls = await FlockImageUploader().uploadFlockImages(farmId: user!.farmId,base64Images: base64Images);
+
+
+
+      }
       print("Images Inserted");
     }
 
   }
-
 
 }
 
