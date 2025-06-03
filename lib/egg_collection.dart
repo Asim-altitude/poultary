@@ -389,9 +389,15 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
               eggs.length > 0 ? Container(
                 height: heightScreen - 310,
                 width: widthScreen,
-                child: ListView.builder(
+                child:
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 60), // Adjust this value as needed
+                  child:
+                  ListView.builder(
                     itemCount: eggs.length,
                     scrollDirection: Axis.vertical,
+                    // shrinkWrap: true,
+                    // physics: NeverScrollableScrollPhysics(),
                     itemBuilder: (BuildContext context, int index) {
                       return InkWell(
                         onTap: ()
@@ -616,7 +622,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
                       );
 
-                    }),
+                    }),),
               ) : Utils.getCustomEmptyMessage("assets/egg_collect.png", "No Egg Collections Added")
 
 

@@ -431,13 +431,19 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                 ),
               ),
 
-              transactionList.length > 0 ? Container(
-                margin: EdgeInsets.only(top: 0,bottom: 200),
-                height: heightScreen -340,
+              transactionList.length > 0 ?
+
+              Container(
+                height: heightScreen -280,
                 width: widthScreen,
+                child:
+
+                Padding(
+                    padding: const EdgeInsets.only(bottom: 100), // Adjust this value as needed
                 child: ListView.builder(
                     itemCount: transactionList.length,
                     scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
                         margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -635,7 +641,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
 
 
                     }),
-              ) : Utils.getCustomEmptyMessage("assets/pfinance.png", "No Income/Expense added")
+              ),) : Utils.getCustomEmptyMessage("assets/pfinance.png", "No Income/Expense added")
 
 
                   ]

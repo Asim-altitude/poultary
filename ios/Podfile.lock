@@ -38,6 +38,7 @@ PODS:
   - DKPhotoGallery/Resource (0.0.19):
     - SDWebImage
     - SwiftyGif
+  - FBAudienceNetwork (6.15.2)
   - file_picker (0.0.1):
     - DKImagePickerController/PhotoGallery
     - Flutter
@@ -63,6 +64,9 @@ PODS:
   - FMDB/Core (2.7.12)
   - FMDB/standard (2.7.12):
     - FMDB/Core
+  - gma_mediation_meta (1.0.1):
+    - Flutter
+    - GoogleMobileAdsMediationFacebook (~> 6.15.0)
   - Google-Mobile-Ads-SDK (11.2.0):
     - GoogleUserMessagingPlatform (>= 1.1)
   - google_mobile_ads (5.1.0):
@@ -75,6 +79,9 @@ PODS:
     - FlutterMacOS
     - GoogleSignIn (~> 7.1)
     - GTMSessionFetcher (>= 3.4.0)
+  - GoogleMobileAdsMediationFacebook (6.15.2.1):
+    - FBAudienceNetwork (= 6.15.2)
+    - Google-Mobile-Ads-SDK (~> 11.0)
   - GoogleSignIn (7.1.0):
     - AppAuth (< 2.0, >= 1.7.3)
     - GTMAppAuth (< 5.0, >= 4.1.1)
@@ -152,6 +159,7 @@ DEPENDENCIES:
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - flutter_pdfview (from `.symlinks/plugins/flutter_pdfview/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
+  - gma_mediation_meta (from `.symlinks/plugins/gma_mediation_meta/ios`)
   - google_mobile_ads (from `.symlinks/plugins/google_mobile_ads/ios`)
   - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/darwin`)
   - image_cropper (from `.symlinks/plugins/image_cropper/ios`)
@@ -172,8 +180,10 @@ SPEC REPOS:
     - AppAuth
     - DKImagePickerController
     - DKPhotoGallery
+    - FBAudienceNetwork
     - FMDB
     - Google-Mobile-Ads-SDK
+    - GoogleMobileAdsMediationFacebook
     - GoogleSignIn
     - GoogleUserMessagingPlatform
     - GTMAppAuth
@@ -205,6 +215,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_pdfview/ios"
   fluttertoast:
     :path: ".symlinks/plugins/fluttertoast/ios"
+  gma_mediation_meta:
+    :path: ".symlinks/plugins/gma_mediation_meta/ios"
   google_mobile_ads:
     :path: ".symlinks/plugins/google_mobile_ads/ios"
   google_sign_in_ios:
@@ -239,6 +251,7 @@ SPEC CHECKSUMS:
   AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
+  FBAudienceNetwork: 2457a89b45e2596241fd81b0c2fd8cb6f6053869
   file_picker: 15fd9539e4eb735dc54bae8c0534a7a9511a03de
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_image_compress_common: ec1d45c362c9d30a3f6a0426c297f47c52007e3e
@@ -248,9 +261,11 @@ SPEC CHECKSUMS:
   flutter_pdfview: 2e4d13ffb774858562ffbdfdb61b40744b191adc
   fluttertoast: e9a18c7be5413da53898f660530c56f35edfba9c
   FMDB: 728731dd336af3936ce00f91d9d8495f5718a0e6
+  gma_mediation_meta: 07e8053b4c3b52fbae290c1ba4d4c4517ff0305c
   Google-Mobile-Ads-SDK: 5a6d005a6cb5b5e8f4c7b69ca05cdea79c181139
   google_mobile_ads: 9379c80fdfa9988fb0e105a407890ff8deb3cf86
   google_sign_in_ios: 4111e87aa5e24a4404f00ea13479f35e571969cc
+  GoogleMobileAdsMediationFacebook: 03634215ee58e77f39e8c29dc8121840486aebce
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
   GoogleUserMessagingPlatform: 6b4f48a370e77ce121d034c908cc6ee4fdafaf13
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
@@ -275,6 +290,6 @@ SPEC CHECKSUMS:
   url_launcher_ios: 08a3dfac5fb39e8759aeb0abbd5d9480f30fc8b4
   webview_flutter_wkwebview: be0f0d33777f1bfd0c9fdcb594786704dbf65f36
 
-PODFILE CHECKSUM: 819463e6a0290f5a72f145ba7cde16e8b6ef0796
+PODFILE CHECKSUM: c6a1a2ce493f1542a1de3f1ef212b74310af6bfd
 
 COCOAPODS: 1.15.2

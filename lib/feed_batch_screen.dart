@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/stock/stock_screen.dart';
@@ -19,13 +20,52 @@ class FeedBatchScreen extends StatefulWidget {
 
 class _FeedBatchScreenState extends State<FeedBatchScreen> {
   List<FeedBatch> _batches = [];
-
+   BannerAd? _bannerAd;
+  double _heightBanner = 0;
+  bool _isBannerAdReady = false;
   @override
   void initState() {
     super.initState();
     _loadBatches();
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+    }
+  }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _heightBanner = 60;
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _heightBanner = 0;
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd?.load();
   }
 
+  @override
+  void dispose() {
+    try{
+      _bannerAd?.dispose();
+    }catch(ex){
+
+    }
+    super.dispose();
+  }
   Future<void> _loadBatches() async {
     final list = await DatabaseHelper.getAllBatches();
     setState(() => _batches = list);
@@ -144,6 +184,8 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> {
             child: Column(
               children:
               [
+                Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+
                 Container(
                   margin: EdgeInsets.all(15),
                   child: Column(

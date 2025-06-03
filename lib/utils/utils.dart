@@ -1037,7 +1037,6 @@ class Utils {
       Utils.isShowAdd = true;
       inititalize();
     }
-    Utils.isShowAdd = false;
   }
 
   static Future<void> inititalize() async {
@@ -1747,6 +1746,53 @@ class Utils {
       await androidImplementation?.requestNotificationsPermission();
 
     }
+  }
+  static Widget showBannerAd1(BannerAd bannerAds,bool isBannerAdReadyOr){
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Container(
+          height: 60.0,
+          width: Utils.WIDTH_SCREEN,
+          child: isBannerAdReadyOr
+              ? AdWidget(ad: bannerAds)
+              : Container(
+            decoration: BoxDecoration(
+
+              border: Border.all(color: Colors.grey),
+            ),
+            child: Center(
+              child: Text(
+                "Advertisement".tr(),
+                style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+              ),
+            ),
+          )
+      ),
+    );
+
+  }
+  static Widget showBannerAd(BannerAd? bannerAds, bool isBannerAdReadyOr) {
+    if(!Utils.isShowAdd) return SizedBox();
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Container(
+        height: 60.0,
+        width: Utils.WIDTH_SCREEN,
+        child: (bannerAds != null && isBannerAdReadyOr)
+            ? AdWidget(ad: bannerAds)
+            : Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+          ),
+          child: Center(
+            child: Text(
+              "Advertisement".tr(),
+              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
 }

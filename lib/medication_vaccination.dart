@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/add_vac_med.dart';
 import 'package:poultary/sticky.dart';
@@ -24,13 +25,44 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
 
   double widthScreen = 0;
   double heightScreen = 0;
+   BannerAd? _bannerAd;
+  double _heightBanner = 0;
+  bool _isBannerAdReady = false;
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _heightBanner = 60;
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _heightBanner = 0;
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd?.load();
+  }
 
   @override
   void dispose() {
+    try{
+      _bannerAd?.dispose();
+    }catch(ex){
+
+    }
     super.dispose();
-
   }
-
   int _other_filter = 2;
   void getFilters() async {
     await DatabaseHelper.instance.database;
@@ -69,7 +101,9 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
     }
 
     getFilters();
-    Utils.setupAds();
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+    }
 
   }
 
@@ -209,356 +243,361 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
           width: widthScreen,
           height: heightScreen,
             color: Utils.getScreenBackground(),
-            child:SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children:  [
-              Utils.getDistanceBar(),
+            child:Column(children: [
+              Utils.showBannerAd(_bannerAd, _isBannerAdReady),
 
-              ClipRRect(
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10),
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 6,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                  child: Row(
-                    children: [
-                      /// Back Button
-                      InkWell(
-                        borderRadius: BorderRadius.circular(30),
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          width: 45,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.15),
-                          ),
-                          child: Icon(Icons.arrow_back, color: Colors.white, size: 28),
+              Expanded(child:
+              SingleChildScrollView(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children:  [
+
+                      ClipRRect(
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(10),
+                          bottomRight: Radius.circular(10),
                         ),
-                      ),
-
-                      /// Title
-                      Expanded(
                         child: Container(
-                          margin: EdgeInsets.only(left: 12),
-                          child: Text(
-                            applied_filter_name.tr(),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 6,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
                           ),
-                        ),
-                      ),
-
-                      /// Sort Button
-                      InkWell(
-                        borderRadius: BorderRadius.circular(10),
-                        onTap: () {
-                          openSortDialog(context, (selectedSort) {
-                            setState(() {
-                              sortOption = selectedSort == "date_desc" ? "Date (New)" : "Date (Old)";
-                              sortSelected = selectedSort == "date_desc" ? "DESC" : "ASC";
-                            });
-
-                            getFilteredTransactions(str_date, end_date);
-                          });
-                        },
-                        child: Container(
-                          height: 45,
-                          width: 130,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Expanded(
-                                child: Text(
-                                  sortOption.tr(),
-                                  style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500),
-                                  overflow: TextOverflow.ellipsis,
+                              /// Back Button
+                              InkWell(
+                                borderRadius: BorderRadius.circular(30),
+                                onTap: () => Navigator.pop(context),
+                                child: Container(
+                                  width: 45,
+                                  height: 45,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white.withOpacity(0.15),
+                                  ),
+                                  child: Icon(Icons.arrow_back, color: Colors.white, size: 28),
                                 ),
                               ),
-                              Icon(Icons.sort, color: Colors.white, size: 22),
+
+                              /// Title
+                              Expanded(
+                                child: Container(
+                                  margin: EdgeInsets.only(left: 12),
+                                  child: Text(
+                                    applied_filter_name.tr(),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              /// Sort Button
+                              InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                onTap: () {
+                                  openSortDialog(context, (selectedSort) {
+                                    setState(() {
+                                      sortOption = selectedSort == "date_desc" ? "Date (New)" : "Date (Old)";
+                                      sortSelected = selectedSort == "date_desc" ? "DESC" : "ASC";
+                                    });
+
+                                    getFilteredTransactions(str_date, end_date);
+                                  });
+                                },
+                                child: Container(
+                                  height: 45,
+                                  width: 130,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  alignment: Alignment.center,
+                                  padding: EdgeInsets.symmetric(horizontal: 10),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          sortOption.tr(),
+                                          style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      Icon(Icons.sort, color: Colors.white, size: 22),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
 
-              Center(
-                child: Container(
-                  padding: EdgeInsets.only(top: 10),
-                  margin: EdgeInsets.symmetric(horizontal: 10), // Margin of 10 on left & right
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 3, // 60% of available space
-                        child: SizedBox(
-                          height: 55,
-                          child: _buildDropdownField(
-                            "Select Item",
-                            _purposeList,
-                            _purposeselectedValue,
-                                (String? newValue) {
-                              setState(() {
-                                _purposeselectedValue = newValue!;
-                                getFlockID();
-                                getFilteredTransactions(str_date, end_date);
-                              });
-                            },
-                            width: double.infinity,
-                            height: 45,
+                      Center(
+                        child: Container(
+                          padding: EdgeInsets.only(top: 10),
+                          margin: EdgeInsets.symmetric(horizontal: 10), // Margin of 10 on left & right
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 3, // 60% of available space
+                                child: SizedBox(
+                                  height: 55,
+                                  child: _buildDropdownField(
+                                    "Select Item",
+                                    _purposeList,
+                                    _purposeselectedValue,
+                                        (String? newValue) {
+                                      setState(() {
+                                        _purposeselectedValue = newValue!;
+                                        getFlockID();
+                                        getFilteredTransactions(str_date, end_date);
+                                      });
+                                    },
+                                    width: double.infinity,
+                                    height: 45,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 5), // Space between the dropdowns
+                              Expanded(
+                                flex: 2, // 40% of available space
+                                child: SizedBox(
+                                  height: 55,
+                                  child: _buildDropdownField(
+                                    "Select Item",
+                                    filterList,
+                                    date_filter_name,
+                                        (String? newValue) {
+                                      setState(() {
+                                        date_filter_name = newValue!;
+                                        getData(date_filter_name);
+                                      });
+                                    },
+                                    width: double.infinity,
+                                    height: 45,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      SizedBox(width: 5), // Space between the dropdowns
-                      Expanded(
-                        flex: 2, // 40% of available space
-                        child: SizedBox(
-                          height: 55,
-                          child: _buildDropdownField(
-                            "Select Item",
-                            filterList,
-                            date_filter_name,
-                                (String? newValue) {
-                              setState(() {
-                                date_filter_name = newValue!;
-                                getData(date_filter_name);
-                              });
-                            },
-                            width: double.infinity,
-                            height: 45,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
 
-              Container(
-                height: 55,
-                width: widthScreen,
-                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                  color: Colors.white.withOpacity(0.1), // Light transparent background
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 10,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    buildFilterButton('All', 1, Colors.blue),
-                    buildFilterButton('Medication', 2, Colors.green),
-                    buildFilterButton('Vaccination', 3, Colors.red),
-                  ],
-                ),
-              ),
-
-              vac_med_list.length > 0 ? Container(
-                height: heightScreen - 300,
-                width: widthScreen,
-                child: ListView.builder(
-                    itemCount: vac_med_list.length,
-                    scrollDirection: Axis.vertical,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      Container(
+                        height: 55,
+                        width: widthScreen,
+                        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(30),
+                          color: Colors.white.withOpacity(0.1), // Light transparent background
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 6,
-                              spreadRadius: 2,
+                              color: Colors.black12,
+                              blurRadius: 10,
                               offset: Offset(0, 3),
                             ),
                           ],
                         ),
-                        padding: EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            /// 🟢 Medicine/Vaccine Name & Options Menu
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: "${vac_med_list[index].medicine!.tr()} ",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18,
-                                            color: Utils.getThemeColorBlue(),
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: "(${vac_med_list[index].f_name!.tr()})",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.normal,
-                                            fontSize: 16,
-                                            color: Colors.black54, // Less prominent
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: " - ${vac_med_list[index].quantity} ${vac_med_list[index].unit}".tr(),
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.normal,
-                                            fontSize: 16,
-                                            color: Colors.black54,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTapDown: (TapDownDetails details) {
-                                    selected_id = vac_med_list[index].id;
-                                    selected_index = index;
-                                    showMemberMenu(details.globalPosition);
-                                  },
-                                  child: Icon(Icons.more_vert, color: Colors.black54),
-                                ),
-                              ],
-                            ),
+                            buildFilterButton('All', 1, Colors.blue),
+                            buildFilterButton('Medication', 2, Colors.green),
+                            buildFilterButton('Vaccination', 3, Colors.red),
+                          ],
+                        ),
+                      ),
 
-                            SizedBox(height: 6),
-                            Divider(thickness: 1, color: Colors.grey.withOpacity(0.3)),
-
-                            /// 📅 Date & 🏥 Birds Count (Aligned Right)
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-
-                                children: [
-                                  Row(
-                                    children: [
-                                      Image.asset("assets/bird_icon.png", width: 25, height: 25),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        '${vac_med_list[index].bird_count!} Birds'.tr(),
-                                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
-                                      ),
-                                    ],
-                                  ),
-                                  Expanded(child: Text('')),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.calendar_today, size: 14, color: Colors.black54),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        Utils.getFormattedDate(vac_med_list[index].date.toString()),
-                                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
-                                      ),
-                                    ],
-                                  ),
-
-
-                                ],
-                              ),
-                            ),
-
-                            SizedBox(height: 6),
-
-                            /// 🦠 Disease
-                            Row(
-                              children: [
-                                Icon(Icons.coronavirus, size: 16, color: Colors.red),
-                                SizedBox(width: 5),
-                                Text('Disease: '.tr(), style: TextStyle(fontSize: 14, color: Colors.black)),
-                                Text(
-                                  vac_med_list[index].disease!,
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 6),
-
-                            /// 👨‍⚕️ Doctor Name
-                            Row(
-                              children: [
-                                Icon(Icons.medical_services, size: 16, color: Colors.green),
-                                SizedBox(width: 5),
-                                Text(
-                                  vac_med_list[index].type == 'Medication' ? 'Med by: '.tr() : 'Vac by: '.tr(),
-                                  style: TextStyle(fontSize: 14, color: Colors.black),
-                                ),
-                                Text(
-                                  vac_med_list[index].doctor_name!,
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
-                                ),
-                              ],
-                            ),
-
-                            /// 📝 Notes Section
-                            if (vac_med_list[index].short_note != null && vac_med_list[index].short_note!.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 6),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Icon(Icons.notes, size: 16, color: Colors.black54),
-                                    SizedBox(width: 6),
-                                    Expanded(
-                                      child: Text(
-                                        vac_med_list[index].short_note!,
-                                        maxLines: 3,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(fontSize: 14, color: Colors.black),
-                                      ),
+                      vac_med_list.length > 0 ? Container(
+                        height: heightScreen - 300,
+                        width: widthScreen,
+                        child: ListView.builder(
+                            itemCount: vac_med_list.length,
+                            scrollDirection: Axis.vertical,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Container(
+                                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 6,
+                                      spreadRadius: 2,
+                                      offset: Offset(0, 3),
                                     ),
                                   ],
                                 ),
-                              ),
-                          ],
-                        ),
-                      );
-                      ;
+                                padding: EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    /// 🟢 Medicine/Vaccine Name & Options Menu
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                  text: "${vac_med_list[index].medicine!.tr()} ",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 18,
+                                                    color: Utils.getThemeColorBlue(),
+                                                  ),
+                                                ),
+                                                TextSpan(
+                                                  text: "(${vac_med_list[index].f_name!.tr()})",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.normal,
+                                                    fontSize: 16,
+                                                    color: Colors.black54, // Less prominent
+                                                  ),
+                                                ),
+                                                TextSpan(
+                                                  text: " - ${vac_med_list[index].quantity} ${vac_med_list[index].unit}".tr(),
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.normal,
+                                                    fontSize: 16,
+                                                    color: Colors.black54,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTapDown: (TapDownDetails details) {
+                                            selected_id = vac_med_list[index].id;
+                                            selected_index = index;
+                                            showMemberMenu(details.globalPosition);
+                                          },
+                                          child: Icon(Icons.more_vert, color: Colors.black54),
+                                        ),
+                                      ],
+                                    ),
 
-                    }),
-              ) :  Utils.getCustomEmptyMessage("assets/p_health.png", "No vaccination/medication added")
+                                    SizedBox(height: 6),
+                                    Divider(thickness: 1, color: Colors.grey.withOpacity(0.3)),
 
-                  ]
-      ),),),),),);
+                                    /// 📅 Date & 🏥 Birds Count (Aligned Right)
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Image.asset("assets/bird_icon.png", width: 25, height: 25),
+                                              SizedBox(width: 4),
+                                              Text(
+                                                '${vac_med_list[index].bird_count!} Birds'.tr(),
+                                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
+                                              ),
+                                            ],
+                                          ),
+                                          Expanded(child: Text('')),
+                                          Row(
+                                            children: [
+                                              Icon(Icons.calendar_today, size: 14, color: Colors.black54),
+                                              SizedBox(width: 4),
+                                              Text(
+                                                Utils.getFormattedDate(vac_med_list[index].date.toString()),
+                                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
+                                              ),
+                                            ],
+                                          ),
+
+
+                                        ],
+                                      ),
+                                    ),
+
+                                    SizedBox(height: 6),
+
+                                    /// 🦠 Disease
+                                    Row(
+                                      children: [
+                                        Icon(Icons.coronavirus, size: 16, color: Colors.red),
+                                        SizedBox(width: 5),
+                                        Text('Disease: '.tr(), style: TextStyle(fontSize: 14, color: Colors.black)),
+                                        Text(
+                                          vac_med_list[index].disease!,
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 6),
+
+                                    /// 👨‍⚕️ Doctor Name
+                                    Row(
+                                      children: [
+                                        Icon(Icons.medical_services, size: 16, color: Colors.green),
+                                        SizedBox(width: 5),
+                                        Text(
+                                          vac_med_list[index].type == 'Medication' ? 'Med by: '.tr() : 'Vac by: '.tr(),
+                                          style: TextStyle(fontSize: 14, color: Colors.black),
+                                        ),
+                                        Text(
+                                          vac_med_list[index].doctor_name!,
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
+                                        ),
+                                      ],
+                                    ),
+
+                                    /// 📝 Notes Section
+                                    if (vac_med_list[index].short_note != null && vac_med_list[index].short_note!.isNotEmpty)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 6),
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Icon(Icons.notes, size: 16, color: Colors.black54),
+                                            SizedBox(width: 6),
+                                            Expanded(
+                                              child: Text(
+                                                vac_med_list[index].short_note!,
+                                                maxLines: 3,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(fontSize: 14, color: Colors.black),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              );
+                              ;
+
+                            }),
+                      ) :  Utils.getCustomEmptyMessage("assets/p_health.png", "No vaccination/medication added")
+
+                    ]
+                ),),
+              ),
+            ],)),),),);
   }
 
   /// Function to Build Filter Buttons

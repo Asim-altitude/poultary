@@ -119,10 +119,16 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
     defaultcategories = Utils.getDefaultFlockCatgories();
 
-    categories = (await DatabaseHelper.getCustomCategories())!;
-    await DatabaseHelper.createCategoriesDataTable();
 
-    defaultcategories.addAll(categories);
+    try{
+      categories = (await DatabaseHelper.getCustomCategories())!;
+      await DatabaseHelper.createCategoriesDataTable();
+
+      defaultcategories.addAll(categories);
+    }catch(ex){
+
+    }
+
 
     setState(() {});
   }
@@ -1024,9 +1030,9 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                         ),
                       ],
                     ),*/
-                    Container(
-                      height: widthScreen,
-                      child: GridView.builder(
+                   GridView.builder(
+                     shrinkWrap: true, // ✅ important!
+                     physics: NeverScrollableScrollPhysics(),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 3,
                           crossAxisSpacing: 5.0,
@@ -1112,7 +1118,6 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                           );
                         },
                       ),
-                    )
 
 
 
