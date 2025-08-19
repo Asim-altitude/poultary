@@ -2032,18 +2032,18 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
   void _showPremiumDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // Ensures the sheet adapts properly
+      isScrollControlled: true, // allow full-screen scroll
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       backgroundColor: Colors.white,
       builder: (context) {
         return FractionallySizedBox(
-          heightFactor: 0.6, // Uses 50% of the screen height
+          heightFactor: 0.6, // 60% of screen height
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              /// **Gradient Header with Icon & Title**
+              /// Header
               Container(
                 width: double.infinity,
                 padding: EdgeInsets.all(20),
@@ -2057,61 +2057,79 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                 ),
                 child: Column(
                   children: [
-                    /// **Premium Icon**
-                    Image.asset("assets/premium_icon.png", width: 70, height: 70, color: Colors.white,),
-
-                    /// **Title**
+                    Image.asset(
+                      "assets/premium_icon.png",
+                      width: 70,
+                      height: 70,
+                      color: Colors.white,
+                    ),
                     SizedBox(height: 8),
                     Text(
-                      "✨"+ "Unlock Premium Features".tr()+ "✨",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                      "✨" + "Unlock Premium Features".tr() + "✨",
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
                       textAlign: TextAlign.center,
                     ),
                   ],
                 ),
               ),
 
-              /// **Premium Features List**
+              /// Scrollable Content
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: Column(
-                    children: [
-                      _buildFeatureItem(Icons.group, "Multi-User Access".tr(), "Add multiple users to your farm with individual logins".tr()),
-                      _buildFeatureItem(Icons.admin_panel_settings, "Role-Based Permissions".tr(), "Assign custom roles and control access per user".tr()),
-                      _buildFeatureItem(Icons.block, "No Ads".tr(), "Enjoy an ad-free experience".tr()),
-                      _buildFeatureItem(Icons.cloud_upload, "Cloud Sync".tr(), "Automatically back up your data and access it across devices".tr()),
-                      _buildFeatureItem(Icons.update, "Real-Time Updates".tr(), "See changes from all users instantly with sync-enabled collaboration".tr()),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+// _buildFeatureItem(Icons.group, "Multi-User Access".tr(), "Add multiple users to your farm with individual logins".tr()),
+// _buildFeatureItem(Icons.admin_panel_settings, "Role-Based Permissions".tr(), "Assign custom roles and control access per user".tr()),
+_buildFeatureItem(Icons.block, "No Ads".tr(), "Enjoy an ad-free experience".tr()),
+_buildFeatureItem(Icons.cloud_upload, "Cloud Sync".tr(),
+"Automatically back up your data and access it across devices".tr()),
+// _buildFeatureItem(Icons.update, "Real-Time Updates".tr(),
+// "See changes from all users instantly with sync-enabled collaboration".tr()),
+                        SizedBox(height: 20),
 
-                      Spacer(),
-
-                      /// **Buy Premium Button**
-                      ElevatedButton.icon(
-                        icon: Icon(Icons.shopping_cart, size: 24),
-                        label: Text('Upgrade to Premium'.tr(), style: TextStyle(fontSize: 18)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          minimumSize: Size(double.infinity, 50),
+                        /// Buy Premium Button
+                        ElevatedButton.icon(
+                          icon: Icon(Icons.shopping_cart, size: 24),
+                          label: Text('Upgrade to Premium'.tr(),
+                              style: TextStyle(fontSize: 18)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            minimumSize: Size(double.infinity, 50),
+                          ),
+                          onPressed: () {
+                            PurchaseParam purchaseParam =
+                            PurchaseParam(productDetails: _products[0]);
+                            _inAppPurchase
+                                .buyNonConsumable(purchaseParam: purchaseParam);
+                            Navigator.pop(context);
+                          },
                         ),
-                        onPressed: () {
-                          PurchaseParam purchaseParam = PurchaseParam(productDetails: _products[0]);
-                          _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
-                          Navigator.pop(context);
-                        },
-                      ),
-                      SizedBox(height: 10),
+                        SizedBox(height: 10),
 
-                      /// **Restore Purchase Button**
-                      TextButton(
-                        onPressed: () {
-                          _inAppPurchase.restorePurchases();
-                          Navigator.pop(context);
-                        },
-                        child: Text('RESTORE_PREMIUM'.tr(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
-                      ),
-                    ],
+                        /// Restore Purchase
+                        TextButton(
+                          onPressed: () {
+                            _inAppPurchase.restorePurchases();
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            'RESTORE_PREMIUM'.tr(),
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blueAccent),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -2336,65 +2354,69 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
 
 
   Widget _buildPremiumUpgradeTile(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _showPremiumDialog(context),
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Utils.getThemeColorBlue(), Colors.blue.shade500],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+    return
+      
+      SafeArea(
+        child: GestureDetector(
+        onTap: () => _showPremiumDialog(context),
+        child: Container(
+          margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Utils.getThemeColorBlue(), Colors.blue.shade500],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 3)),
+            ],
           ),
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 3)),
-          ],
-        ),
-        child: Row(
-          children: [
-            /// **Premium Icon**
-            Image.asset("assets/premium_icon.png", width: 40, height: 40, color: Colors.orange),
-
-            /// **Text Section**
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    /// **Main Title**
-                    Text(
-                      'Upgrade to Premium'.tr(),
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 4),
-
-                    /// **Subtitle for Price**
-                    Text(
-                      _products.isNotEmpty ? "Only".tr()+" ${_products[0].price}" : "Loading price...",
-                      style: TextStyle(fontSize: 14, color: Colors.white70),
-                    ),
-                  ],
+          child: Row(
+            children: [
+              /// **Premium Icon**
+              Image.asset("assets/premium_icon.png", width: 40, height: 40, color: Colors.orange),
+        
+              /// **Text Section**
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      /// **Main Title**
+                      Text(
+                        'Upgrade to Premium'.tr(),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 4),
+        
+                      /// **Subtitle for Price**
+                      Text(
+                        _products.isNotEmpty ? "Only".tr()+" ${_products[0].price}" : "Loading price...",
+                        style: TextStyle(fontSize: 14, color: Colors.white70),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-
-            /// **Forward Arrow**
-            Container(
-              padding: EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.3),
-                shape: BoxShape.circle,
+        
+              /// **Forward Arrow**
+              Container(
+                padding: EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.3),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.arrow_forward_ios, color: Colors.white, size: 18),
               ),
-              child: Icon(Icons.arrow_forward_ios, color: Colors.white, size: 18),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
+            ),
+      );
   }
   /// **Section Title**
   Widget _buildSectionTitle(String title) {

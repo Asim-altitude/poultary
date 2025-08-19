@@ -996,41 +996,39 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                 [
                   // 🌍 Language Picker (Left Side)
                   if (isGetLanguage)
-                    GestureDetector(
-                      onTap: () {
-                        showModalBottomSheet(
-                          context: context,
-                          backgroundColor: Colors.transparent,
-                          builder: (context) {
-                            return ClipRRect(
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                              child: Container(
-                                color: Colors.white,
-                                child: ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: supportedLanguages.length,
-                                  itemBuilder: (context, index) {
-                                    final language = supportedLanguages[index];
-                                    return ListTile(
-                                     // leading: Text(Utils.getFlagEmoji(language.isoCode), style: TextStyle(fontSize: 20)),
-                                      title: Text(language.name+" ("+language.isoCode+")"),
-
-                                      onTap: () {
-                                        setState(() {
-                                          _selectedCupertinoLanguage = language;
-                                        });
-                                        Utils.setSelectedLanguage(language, context);
-                                        Navigator.pop(context);
-                                      },
-                                    );
-                                  },
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) {
+                              return ClipRRect(
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                                child: Container(
+                                  color: Colors.white,
+                                  child: ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: supportedLanguages.length,
+                                    itemBuilder: (context, index) {
+                                      final language = supportedLanguages[index];
+                                      return ListTile(
+                                        title: Text("${language.name} (${language.isoCode})"),
+                                        onTap: () {
+                                          setState(() {
+                                            _selectedCupertinoLanguage = language;
+                                          });
+                                          Utils.setSelectedLanguage(language, context);
+                                          Navigator.pop(context);
+                                        },
+                                      );
+                                    },
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                      child: Expanded(
+                              );
+                            },
+                          );
+                        },
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: BackdropFilter(
@@ -1048,7 +1046,9 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                                   Icon(Icons.language, size: 20, color: Colors.black.withOpacity(0.8)),
                                   SizedBox(width: 8),
                                   Text(
-                                    _selectedCupertinoLanguage.name.toLowerCase().contains("chinese")?"Chinese" : _selectedCupertinoLanguage.name,
+                                    _selectedCupertinoLanguage.name.toLowerCase().contains("chinese")
+                                        ? "Chinese"
+                                        : _selectedCupertinoLanguage.name,
                                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                                   ),
                                   SizedBox(width: 5),
@@ -1063,6 +1063,7 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                         ),
                       ),
                     ),
+
 
                   SizedBox(width: 8),
 
