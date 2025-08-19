@@ -8,6 +8,10 @@ class Role {
     return Role(id: map['id'], name: map['name']);
   }
 
+  factory Role.fromJson(Map<String, dynamic> map) {
+    return Role(id: map['id'], name: map['role']);
+  }
+
   Map<String, dynamic> toMap() {
     return {'id': id, 'name': name};
   }

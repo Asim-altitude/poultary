@@ -156,7 +156,6 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
   bool loggedIn = false;
   setUpInitial() async {
 
-
     bool isInApp = await SessionManager.getInApp();
     if(isInApp){
       Utils.isShowAdd = false;
@@ -170,7 +169,14 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
 
   Future<void> loadUsers() async {
     loggedIn = await SessionManager.getBool(SessionManager.loggedIn);
-    users = await DatabaseHelper.getAllUsers();
+    try
+    {
+      users = await DatabaseHelper.getAllUsers();
+    }
+    catch(ex){
+      print(ex);
+    }
+
     setState(() {
 
     });
@@ -372,14 +378,39 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _sectionTitle(context, 'Business & Sales'),
-                      _buildSettingsTile(
-                        context,
-                        icon: Icons.group_add,
-                        title: 'Users & Roles'.tr(),
-                        onTap: ()  async =>  {
-                        await Navigator.push(context, MaterialPageRoute(builder: (_) => !loggedIn? AuthGate(isStart: false, ) : AdminProfileScreen(users: users, ))),
-                          loadUsers()
-                        }
+                      Visibility(
+                        visible: false,
+                        child: _buildSettingsTile(
+                          context,
+                          icon: Icons.supervised_user_circle_sharp,
+                          title: 'Users & Roles'.tr(),
+                          onTap: ()  async {
+                            if(Utils.isMultiUSer && Utils.currentUser!.role.toLowerCase() != 'admin')
+                              {
+                                Utils.showToast("Only Admin can use this feature.".tr());
+
+                              }
+                            else
+                              {
+                                bool hasIntroduced = await SessionManager.getBool("farm_intro");
+                                if(!hasIntroduced){
+                                  SessionManager.setBoolValue("farm_intro", true);
+                                  showFarmAccountIntro(context);
+                                }else{
+                                //  SessionManager.setBoolValue("farm_intro", false);
+
+                                  await Navigator.push(context, MaterialPageRoute(
+                                      builder: (_) =>
+                                      !loggedIn
+                                          ? AuthGate(isStart: false,)
+                                          : AdminProfileScreen(users: Utils.currentUser!,)));
+                                  loadUsers();
+                                }
+
+                               /* */
+                              }
+                          }
+                        ),
                       ),
                       _buildSettingsTile(
                         context,
@@ -2046,8 +2077,12 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   child: Column(
                     children: [
+                      _buildFeatureItem(Icons.group, "Multi-User Access".tr(), "Add multiple users to your farm with individual logins".tr()),
+                      _buildFeatureItem(Icons.admin_panel_settings, "Role-Based Permissions".tr(), "Assign custom roles and control access per user".tr()),
                       _buildFeatureItem(Icons.block, "No Ads".tr(), "Enjoy an ad-free experience".tr()),
-                      _buildFeatureItem(Icons.star, "Premium Features".tr(), "Get exclusive access to new tools".tr()),
+                      _buildFeatureItem(Icons.cloud_upload, "Cloud Sync".tr(), "Automatically back up your data and access it across devices".tr()),
+                      _buildFeatureItem(Icons.update, "Real-Time Updates".tr(), "See changes from all users instantly with sync-enabled collaboration".tr()),
+
                       Spacer(),
 
                       /// **Buy Premium Button**
@@ -2086,6 +2121,182 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
       },
     );
   }
+
+
+  void showFarmAccountIntro(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: Colors.white,
+      isScrollControlled: true,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle Bar
+              Center(
+                child: Container(
+                  height: 5,
+                  width: 50,
+                  margin: EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+              ),
+
+              // Title
+              Row(
+                children: [
+                  Icon(Icons.account_tree, color: Colors.green, size: 28),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      "farm_account_title".tr(),
+                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+
+              // Intro
+              Text(
+                "farm_account_intro".tr(),
+                style: TextStyle(fontSize: 14, color: Colors.grey[800]),
+              ),
+              SizedBox(height: 20),
+
+              // Benefits
+              Row(
+                children: [
+                  Icon(Icons.group, color: Colors.blue, size: 22),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "farm_account_benefit_users".tr(),
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12),
+              Row(
+                children: [
+                  Icon(Icons.admin_panel_settings, color: Colors.orange, size: 22),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "farm_account_benefit_roles".tr(),
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12),
+              Row(
+                children: [
+                  Icon(Icons.manage_accounts, color: Colors.teal, size: 22),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "farm_account_benefit_manage".tr(),
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12),
+              Row(
+                children: [
+                  Icon(Icons.sync, color: Colors.purple, size: 22),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "farm_account_benefit_sync".tr(),
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12),
+
+              Row(
+                children: [
+                  Icon(Icons.backup, color: Colors.indigo, size: 22),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "farm_account_benefit_backup".tr(),
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 12),
+              Row(
+                children: [
+                  Icon(Icons.payment, color: Colors.redAccent, size: 22),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "farm_account_benefit_subscription".tr(),
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+
+              // Actions
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text("CANCEL".tr()),
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                         Navigator.push(context, MaterialPageRoute(
+                            builder: (_) =>
+                            !loggedIn
+                                ? AuthGate(isStart: false,)
+                                : AdminProfileScreen(users: Utils.currentUser!,)));
+                        // Continue logic here
+                      },
+                      child: Text("continue".tr(), style: TextStyle(color: Colors.white),),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
 
   /// **Helper Widget for Feature List Items**
   Widget _buildFeatureItem(IconData icon, String title, String description) {
@@ -2367,6 +2578,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
       _consumables = consumables;
     });
   }
+
   void showPendingUI() {
     setState(() {
       _purchasePending = true;
@@ -2529,6 +2741,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
     }
     return oldSubscription;
   }
+
   loadInAppData(){
     _kProductIds.add(adRemovalID);
   }

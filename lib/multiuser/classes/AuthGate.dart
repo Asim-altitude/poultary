@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/utils/session_manager.dart';
 import '../../home_screen.dart';
+import '../../utils/utils.dart';
 import '../model/user.dart';
 import 'LoginForm.dart';
 import 'SignupForm.dart'; // Make sure you have this screen
@@ -41,11 +43,12 @@ class _AuthGateState extends State<AuthGate> {
       backgroundColor: Colors.blue.shade50,
       body: Stack(
         children: [
-          Positioned(
+          /*Positioned(
             top: 40,
             right: 20,
             child: TextButton(
               onPressed: () {
+                Utils.isMultiUSer = false;
                 SessionManager.setBoolValue(SessionManager.skipped, true);
                 if(widget.isStart) {
                   Navigator.pushReplacement(
@@ -53,19 +56,20 @@ class _AuthGateState extends State<AuthGate> {
                     MaterialPageRoute(builder: (_) => HomeScreen()),
                   );
                 }
-                else{
+                else
+                {
                   Navigator.pop(context);
                 }
               },
-              child: users == null? Text(
-                "Skip",
+              child: (false)? Text(
+                "Continue Offline".tr(),
                 style: TextStyle(
                   color: Colors.blue.shade700,
                   fontWeight: FontWeight.bold,
                 ),
               ) : SizedBox(width: 1,),
             ),
-          ),
+          ),*/
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
@@ -76,7 +80,7 @@ class _AuthGateState extends State<AuthGate> {
                   Image.asset('assets/bird_icon.png', color: Colors.blue.shade700, width: 90, height: 90,),
                   SizedBox(height: 10),
                   Text(
-                    "Easy Poultry Manager",
+                    "Easy Poultry Manager".tr(),
                     style: theme.textTheme.headlineSmall?.copyWith(
                       color: Colors.blue.shade900,
                       fontWeight: FontWeight.bold,
@@ -132,11 +136,11 @@ class _AuthGateState extends State<AuthGate> {
                         children: [
                           TextSpan(
                             text: isLogin
-                                ? "Don't have an account? "
-                                : "Already have an account? ",
+                                ? "Don't have an account?"
+                                : "Already have an account?",
                           ),
                           TextSpan(
-                            text: isLogin ? "Sign Up" : "Login",
+                            text: isLogin ? "Sign Up".tr() : "Login".tr(),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.blue.shade700,

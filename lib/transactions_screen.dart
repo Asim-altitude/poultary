@@ -10,13 +10,19 @@ import 'package:poultary/add_expense.dart';
 import 'package:poultary/add_income.dart';
 import 'package:poultary/add_reduce_flock.dart';
 import 'package:poultary/model/transaction_item.dart';
+import 'package:poultary/multiuser/model/egg_record.dart';
+import 'package:poultary/multiuser/model/financeItem.dart';
+import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:poultary/view_transaction.dart';
 import 'database/databse_helper.dart';
 import 'model/egg_income.dart';
+import 'model/egg_item.dart';
 import 'model/flock.dart';
+import 'multiuser/utils/RefreshMixin.dart';
+import 'multiuser/utils/SyncStatus.dart';
 
 class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({Key? key}) : super(key: key);
@@ -26,7 +32,23 @@ class TransactionsScreen extends StatefulWidget {
 }
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerProviderStateMixin{
+class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerProviderStateMixin, RefreshMixin{
+
+  @override
+  void onRefreshEvent(String event) {
+    try {
+      if (event == FireBaseUtils.FINANCE
+          || event == FireBaseUtils.FLOCKS
+          || event == FireBaseUtils.EGGS)
+      {
+        getData(date_filter_name);
+      }
+    }
+    catch(ex)
+    {
+      print(ex);
+    }
+  }
 
   double widthScreen = 0;
   double heightScreen = 0;
@@ -51,7 +73,8 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
 
     addNewColumn();
 
-    _purposeselectedValue = Utils.selected_flock!.f_name;
+    _purposeselectedValue = Utils.selected_flock==null? _purposeList[0] : Utils.selected_flock!.f_name;
+
     f_id = getFlockID();
     Utils.SELECTED_FLOCK = _purposeselectedValue;
     Utils.SELECTED_FLOCK_ID = f_id;
@@ -62,7 +85,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
 
   }
 
-  void addNewColumn() async{
+  void addNewColumn() async {
     try{
       int c = await DatabaseHelper.addColumnInFlockDetail();
       print("Column Info $c");
@@ -165,6 +188,12 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
               Expanded(
                 child: InkWell(
                   onTap: () {
+                    if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_transaction"))
+                    {
+                      Utils.showMissingPermissionDialog(context, "add_transaction");
+                      return;
+                    }
+
                     addNewIncome();
                   },
                   borderRadius: BorderRadius.circular(10), // Smooth rounded ripple effect
@@ -207,6 +236,12 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
               Expanded(
                 child: InkWell(
                   onTap: () {
+                    if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_transaction"))
+                    {
+                      Utils.showMissingPermissionDialog(context, "add_transaction");
+                      return;
+                    }
+
                     addNewExpense();
                   },
                   borderRadius: BorderRadius.circular(10),
@@ -247,7 +282,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
         ),
         elevation: 0,
       ),
-      body:SafeArea(
+      body: SafeArea(
         top: false,
           child:Container(
           width: widthScreen,
@@ -434,11 +469,9 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
               transactionList.length > 0 ?
 
               Container(
-                height: heightScreen -280,
+                height: heightScreen,
                 width: widthScreen,
-                child:
-
-                Padding(
+                child: Padding(
                     padding: const EdgeInsets.only(bottom: 100), // Adjust this value as needed
                 child: ListView.builder(
                     itemCount: transactionList.length,
@@ -1070,7 +1103,11 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
     ).then((value) async {
       if (value != null) {
         if(value == 2) {
-
+          if(Utils.isMultiUSer && !Utils.hasFeaturePermission("edit_transaction"))
+          {
+            Utils.showMissingPermissionDialog(context, "edit_transaction");
+            return;
+          }
 
           if(transactionList.elementAt(selected_index!).type == "Income") {
             var txt = await Navigator.push(
@@ -1101,6 +1138,12 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
 
             getData(date_filter_name);
           }else {
+            if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_transaction"))
+            {
+              Utils.showMissingPermissionDialog(context, "delete_transaction");
+              return;
+            }
+
             showAlertDialog(context);
           }
         }else {
@@ -1155,6 +1198,19 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
     );
   }
 
+  String? getFlockSyncID(int f_id) {
+
+    String? selected_id = "unknown";
+    for(int i=0;i<flocks.length;i++) {
+      if(f_id == flocks.elementAt(i).f_id){
+        selected_id = flocks.elementAt(i).sync_id;
+        break;
+      }
+    }
+
+    return selected_id;
+  }
+
   showAlertDialog(BuildContext context) {
 
     // set up the buttons
@@ -1167,14 +1223,55 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
     Widget continueButton = TextButton(
       child: Text("DELETE".tr()),
       onPressed:  () async {
+        TransactionItem item = transactionList.elementAt(selected_index!);
+        item.f_sync_id = getFlockSyncID(item.f_id!);
+
         EggTransaction? eggTransaction = await DatabaseHelper.getEggsByTransactionItemId(selected_id!);
+
         if(eggTransaction!= null){
+          Eggs? eggs = await DatabaseHelper.getSingleEggsByID(eggTransaction.eggItemId);
           DatabaseHelper.deleteItem("Eggs", eggTransaction.eggItemId);
           DatabaseHelper.deleteByEggItemId(eggTransaction.eggItemId);
+
+          try {
+            if (Utils.isMultiUSer &&
+                Utils.hasFeaturePermission("delete_transaction")) {
+              EggRecord eggRecord = EggRecord(eggs: eggs!);
+              eggRecord.transaction = item;
+              eggRecord.sync_id = eggs.sync_id;
+              eggRecord.sync_status = SyncStatus.DELETED;
+              eggRecord.farm_id = Utils.currentUser!.farmId;
+              eggRecord.last_modified = Utils.getTimeStamp();
+
+              await FireBaseUtils.deleteEggRecord(eggRecord);
+            }
+          }
+          catch(ex){
+            print(ex);
+          }
+
+        }else{
+
+          try {
+            if (Utils.isMultiUSer &&
+                Utils.hasFeaturePermission("delete_transaction")) {
+
+              FinanceItem financeItem = FinanceItem(transaction: item);
+              financeItem.sync_id = item.sync_id;
+              financeItem.sync_status = SyncStatus.DELETED;
+              financeItem.farm_id = Utils.currentUser!.farmId;
+              financeItem.last_modified = Utils.getTimeStamp();
+
+              await FireBaseUtils.deleteFinanceRecord(financeItem);
+            }
+          }
+          catch(ex){
+            print(ex);
+          }
         }
         DatabaseHelper.deleteItem("Transactions", selected_id!);
         transactionList.removeAt(selected_index!);
-        Utils.showToast("DONE".tr());
+        Utils.showToast("DONE");
         Navigator.pop(context);
         setState(() {
 

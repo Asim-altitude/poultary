@@ -8,6 +8,10 @@ import 'package:poultary/utils/utils.dart';
 
 import 'package:intl/intl.dart';
 
+import 'multiuser/utils/FirebaseUtils.dart';
+import 'multiuser/utils/RefreshMixin.dart';
+import 'multiuser/utils/SyncStatus.dart';
+
 class ContractorProfileScreen extends StatefulWidget {
   final SaleContractor contractor;
 
@@ -17,7 +21,27 @@ class ContractorProfileScreen extends StatefulWidget {
   _ContractorProfileScreenState createState() => _ContractorProfileScreenState();
 }
 
-class _ContractorProfileScreenState extends State<ContractorProfileScreen> {
+class _ContractorProfileScreenState extends State<ContractorProfileScreen> with RefreshMixin {
+
+  @override
+  void onRefreshEvent(String event) async {
+    try {
+      if (event == FireBaseUtils.SALE_CONTRACTOR) {
+        SaleContractor? saleContractor = await DatabaseHelper.getSaleContractorBySyncId(widget.contractor.sync_id!);
+        if(saleContractor == null){
+          Utils.showToast("Contractor deleted".tr());
+          Navigator.pop(context);
+        }else{
+          contractor = widget.contractor;
+          fetchAdditionalData();
+        }
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
+
   bool isLoading = true;
   late SaleContractor contractor;
   num pendingAmount = 0, saleAmount = 0, clearedAmount = 0;
@@ -418,13 +442,31 @@ class _ContractorProfileScreenState extends State<ContractorProfileScreen> {
                       phone: phoneController.text,
                       email: emailController.text,
                       notes: notesController.text,
+                      sync_id: contractor.sync_id,
+                      sync_status: SyncStatus.UPDATED,
+                      farm_id: Utils.isMultiUSer? Utils.currentUser!.farmId : '',
+                      modified_by: Utils.isMultiUSer? Utils.currentUser!.email : '',
+                      last_modified: Utils.getTimeStamp()
                     );
 
                     if (isEdit) {
                       await DatabaseHelper.updateSaleContractor(updatedContractor);
+
+                      if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_contractors")){
+                        await FireBaseUtils.updateSaleContractor(updatedContractor);
+                      }
+
                       setState(() => contractor = updatedContractor);
                     } else {
                       await DatabaseHelper.insertSaleContractor(updatedContractor);
+
+                      if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_contractors")){
+                        updatedContractor.sync_status = SyncStatus.SYNCED;
+                        updatedContractor.sync_id = Utils.getUniueId();
+                        updatedContractor.last_modified = Utils.getTimeStamp();
+                        await FireBaseUtils.addSaleContractor(updatedContractor);
+                      }
+
                     }
 
                     Navigator.pop(context);
@@ -461,6 +503,14 @@ class _ContractorProfileScreenState extends State<ContractorProfileScreen> {
           ElevatedButton(
             onPressed: () async {
               await DatabaseHelper.deleteSaleContractor(contractor.id!);
+
+
+              if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_contractors")){
+                contractor.sync_status = SyncStatus.DELETED;
+                contractor.last_modified = Utils.getTimeStamp();
+                await FireBaseUtils.updateSaleContractor(contractor);
+              }
+
               Navigator.pop(context); // close dialog
               Navigator.pop(context); // close profile screen
             },

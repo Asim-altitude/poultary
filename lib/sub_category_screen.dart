@@ -7,10 +7,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:poultary/model/sub_category_item.dart';
+import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
 import 'database/databse_helper.dart';
+import 'multiuser/model/sub_category_fb.dart';
+import 'multiuser/utils/RefreshMixin.dart';
+import 'multiuser/utils/SyncStatus.dart';
 
 class SubCategoryScreen extends StatefulWidget {
   const SubCategoryScreen({Key? key}) : super(key: key);
@@ -20,7 +24,19 @@ class SubCategoryScreen extends StatefulWidget {
 }
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProviderStateMixin{
+class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProviderStateMixin, RefreshMixin {
+
+  @override
+  void onRefreshEvent(String event) {
+    try {
+      if (event == FireBaseUtils.SUB_CATEGORY) {
+        getSubCategoriesList();
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
 
   double widthScreen = 0;
   double heightScreen = 0;
@@ -78,6 +94,12 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
     width: widthScreen,
     child: InkWell(
       onTap: () async {
+
+        if (Utils.isMultiUSer && !Utils.hasFeaturePermission("edit_settings")) {
+          Utils.showMissingPermissionDialog(context, "edit_settings");
+          return;
+        }
+
         openPopup();
       },
       child: Container(
@@ -219,8 +241,17 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
     );
     Widget continueButton = TextButton(
       child: Text("DELETE".tr()),
-      onPressed:  () {
-        DatabaseHelper.deleteSubItem(categoryList.elementAt(index));
+      onPressed:  () async {
+        SubItem subItem = categoryList.elementAt(index);
+        DatabaseHelper.deleteSubItem(subItem);
+
+        if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_category")){
+          subItem.syncStatus = SyncStatus.DELETED;
+          subItem.modified_by = Utils.currentUser!.email;
+          subItem.last_modified = Utils.getTimeStamp();
+          subItem.farm_id = Utils.currentUser!.farmId;
+          await FireBaseUtils.updateSubCategory(subItem);
+        }
 
         getSubCategoriesList();
         Navigator.pop(context);
@@ -272,11 +303,23 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
                         print(nameController.text);
 
                         if(!nameController.text.isEmpty){
-                          await DatabaseHelper.insertNewSubItem(SubItem(c_id: Utils.selected_category, name: nameController.text));
+                          SubItem subItem = SubItem(c_id: Utils.selected_category, name: nameController.text,
+                            sync_id: Utils.getUniueId(),
+                            syncStatus: SyncStatus.SYNCED,
+                            last_modified: Utils.getTimeStamp(),
+                            farm_id: Utils.currentUser != null? Utils.currentUser!.farmId : '',
+                            modified_by: Utils.currentUser != null? Utils.currentUser!.email : '',);
+                          await DatabaseHelper.insertNewSubItem(subItem);
                           getSubCategoriesList();
+
+                          if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_category")){
+                            await FireBaseUtils.addSubCategory(subItem);
+                          }
+
                           Navigator.pop(context);
                           _scrollDown();
                         }
+
 
                       },
                       child: Container(

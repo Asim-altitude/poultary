@@ -2,12 +2,16 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:poultary/home_screen.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auto_feed_management.dart';
 import 'database/databse_helper.dart';
 import 'model/feed_item.dart';
+import 'model/flock.dart';
+import 'multiuser/utils/FirebaseUtils.dart';
+import 'multiuser/utils/SyncStatus.dart';
 
 class AutoFeedSyncScreen extends StatefulWidget {
   @override
@@ -35,10 +39,12 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
     return null; // No sync date found
   }
 
+  List<Flock> flocks = [];
   // Check if automatic feed management is enabled and retrieve last sync date
   Future<void> _checkAutoFeedSettings() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
+      flocks = await DatabaseHelper.getFlocks();
 
       isAutoFeedEnabled = prefs.getBool('isAutoFeedEnabled') ?? false;
       lastSyncDate = await getLastSyncDate();
@@ -97,6 +103,20 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
     return days[index];
   }
 
+
+  String? getFlockSyncID(int f_id) {
+
+    String? selected_id = "unknown";
+    for(int i=0;i<flocks.length;i++){
+      if(f_id == flocks.elementAt(i).f_id){
+        selected_id = flocks.elementAt(i).sync_id;
+        break;
+      }
+    }
+
+    return selected_id;
+  }
+
   // Sync feeding records and track pending records
   Future<void> _syncFeedingRecords() async {
     try {
@@ -138,6 +158,12 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                 quantity: morningFeedSetting.dailyRequirement,
                 date: formattedDate,
                 short_note: 'Automatically added morning feed for $formattedDate',
+                  sync_id: Utils.getUniueId(),
+                  sync_status: SyncStatus.SYNCED,
+                  last_modified: Utils.getTimeStamp(),
+                  modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                  farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                  f_sync_id: getFlockSyncID(setting.id)
               );
               print("Morning Feeding: F_ID ${morningFeeding.f_id}, date ${morningFeeding.date}, qty ${morningFeeding.quantity}, f_name ${morningFeeding.f_name}");
               setState(() {
@@ -154,6 +180,12 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                 quantity: eveningFeedSetting.dailyRequirement,
                 date: formattedDate,
                 short_note: 'Automatically added evening feed for $formattedDate',
+                  sync_id: Utils.getUniueId(),
+                  sync_status: SyncStatus.SYNCED,
+                  last_modified: Utils.getTimeStamp(),
+                  modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                  farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                  f_sync_id: getFlockSyncID(setting.id)
               );
               print("Evening Feeding: F_ID ${eveningFeeding.f_id}, date ${eveningFeeding.date}, qty ${eveningFeeding.quantity}, f_name ${eveningFeeding.f_name}");
               setState(() {
@@ -175,6 +207,12 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                 quantity: feedSetting.dailyRequirement,
                 date: formattedDate,
                 short_note: 'Automatically added feed for $formattedDate',
+                  sync_id: Utils.getUniueId(),
+                  sync_status: SyncStatus.SYNCED,
+                  last_modified: Utils.getTimeStamp(),
+                  modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                  farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                  f_sync_id: getFlockSyncID(setting.id)
               );
               print("Once a Day Feeding: F_ID ${newFeeding.f_id}, date ${newFeeding.date}, qty ${newFeeding.quantity}, f_name ${newFeeding.f_name}");
               setState(() {
@@ -208,6 +246,15 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
     for (var feeding in pendingFeedRecords) {
       print("Feeding Record $feeding");
       await DatabaseHelper.insertNewFeeding(feeding);
+      if(Utils.isMultiUSer && Utils.hasFeaturePermission('add_feed'))
+      {
+
+        await FireBaseUtils.uploadFeedingRecord(feeding);
+
+      }
+
+      // Add delay of 400 milliseconds
+      await Future.delayed(const Duration(milliseconds: 400));
     }
 
     // Clear the pending records list after saving

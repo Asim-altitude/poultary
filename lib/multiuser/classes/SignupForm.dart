@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,7 +7,9 @@ import 'package:poultary/database/databse_helper.dart';
 import 'dart:math';
 import 'package:poultary/home_screen.dart';
 import 'package:poultary/multiuser/classes/AdminProfile.dart';
+import 'package:poultary/multiuser/classes/AuthGate.dart';
 
+import '../../utils/session_manager.dart';
 import '../../utils/utils.dart';
 import '../model/user.dart';
 import '../utils/FirebaseUtils.dart';
@@ -53,7 +56,7 @@ class _SignupFormState extends State<SignupForm> {
 
     if ([name, email, password, farmName, farmId].any((e) => e.isEmpty)) {
       showDialog(context: context, builder: (_) => AlertDialog(
-        content: Text("Please fill all fields"),
+        content: Text("PROVIDE_ALL".tr()),
       ));
       return;
     }
@@ -72,6 +75,7 @@ class _SignupFormState extends State<SignupForm> {
         email: email,
         password: hashedPassword,
         role: 'Admin',
+        image: '',
         active: true,
         farmId: farmId,
         createdAt: DateTime.now().toIso8601String(),
@@ -99,28 +103,23 @@ class _SignupFormState extends State<SignupForm> {
 
       // Add user profile
       await FirebaseFirestore.instance.collection('users').doc(uid).set(user.toMap())
-          .then((_) {
+          .then((_) async {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Signup completed successfully!')),
+          SnackBar(content: Text('Signup completed successfully!'.tr())),
         );
-        List<MultiUser> users = [];
-        users.add(user);
-        Navigator.pop(context);
-        Navigator.push(context, MaterialPageRoute(builder: (_) =>  AdminProfileScreen(users: users)));
+
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) =>  AuthGate(isStart: true)));
       })
-          .catchError((error) {
+       .catchError((error) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $error')),
+          SnackBar(content: Text("Error:".tr()+" $error")),
         );
       });
-
-
       // Optionally add default roles here
-
 
     } catch (e) {
       showDialog(context: context, builder: (_) => AlertDialog(
-        title: Text("Signup Failed"),
+        title: Text("Signup Failed".tr()),
         content: Text(e.toString()),
       ));
     } finally {
@@ -137,32 +136,32 @@ class _SignupFormState extends State<SignupForm> {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            Text("Create Admin Account", style: textTheme.headlineMedium),
+            Text("Create Admin Account".tr(), style: textTheme.headlineMedium),
             SizedBox(height: 16),
 
             TextField(
               controller: nameController,
-              decoration: InputDecoration(labelText: "Your Name"),
+              decoration: InputDecoration(labelText: "Name".tr()),
             ),
             SizedBox(height: 12),
 
             TextField(
               controller: emailController,
-              decoration: InputDecoration(labelText: "Email Address"),
+              decoration: InputDecoration(labelText: "Email".tr()),
               keyboardType: TextInputType.emailAddress,
             ),
             SizedBox(height: 12),
 
             TextField(
               controller: passwordController,
-              decoration: InputDecoration(labelText: "Password"),
+              decoration: InputDecoration(labelText: "Password".tr()),
               obscureText: true,
             ),
             SizedBox(height: 12),
 
             TextField(
               controller: farmNameController,
-              decoration: InputDecoration(labelText: "Farm Name"),
+              decoration: InputDecoration(labelText: "Farm Name".tr()),
             ),
             SizedBox(height: 12),
 
@@ -171,7 +170,7 @@ class _SignupFormState extends State<SignupForm> {
                 Expanded(
                   child: TextField(
                     controller: farmIdController,
-                    decoration: InputDecoration(labelText: "Farm ID"),
+                    decoration: InputDecoration(labelText: "Farm ID".tr()),
                     readOnly: true,
                   ),
                 ),
@@ -179,7 +178,7 @@ class _SignupFormState extends State<SignupForm> {
                 ElevatedButton.icon(
                   onPressed: generateUniqueFarmId,
                   icon: Icon(Icons.refresh),
-                  label: Text("Generate"),
+                  label: Text("Generate".tr()),
                 )
               ],
             ),
@@ -201,7 +200,7 @@ class _SignupFormState extends State<SignupForm> {
                 shadowColor: Colors.blue.shade100,
               ),
               child: Text(
-                "Sign Up",
+                "Sign Up".tr(),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

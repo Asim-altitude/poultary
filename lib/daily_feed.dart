@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/add_feeding.dart';
 import 'package:poultary/model/feed_item.dart';
+import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
@@ -13,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'auto_feed_management.dart';
 import 'database/databse_helper.dart';
 import 'model/flock.dart';
+import 'multiuser/utils/RefreshMixin.dart';
 
 class DailyFeedScreen extends StatefulWidget {
   const DailyFeedScreen({Key? key}) : super(key: key);
@@ -22,8 +24,20 @@ class DailyFeedScreen extends StatefulWidget {
 }
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderStateMixin{
+class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderStateMixin, RefreshMixin {
 
+  @override
+  void onRefreshEvent(String event) {
+    try {
+      if (event == FireBaseUtils.FEEDING) {
+        getData(date_filter_name);
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
+  
   double widthScreen = 0;
   double heightScreen = 0;
 
@@ -176,6 +190,12 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
+            if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_feed"))
+            {
+              Utils.showMissingPermissionDialog(context, "add_feed");
+              return;
+            }
+
             _addManualFeedingRecord();
           },
           child: Container(
@@ -1250,6 +1270,12 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
     ).then((value) async{
       if (value != null) {
         if(value == 2){
+          if(Utils.isMultiUSer && !Utils.hasFeaturePermission("edit_feed"))
+          {
+            Utils.showMissingPermissionDialog(context, "edit_feed");
+            return;
+          }
+
           await Navigator.push(
             context,
             MaterialPageRoute(
@@ -1259,6 +1285,12 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
           getFilteredTransactions(str_date, end_date);
         }
         else if(value == 1){
+          if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_feed"))
+          {
+            Utils.showMissingPermissionDialog(context, "delete_feed");
+            return;
+          }
+
           showAlertDialog(context);
         }else {
           print(value);
@@ -1278,15 +1310,18 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
     );
     Widget continueButton = TextButton(
       child: Text("DELETE".tr()),
-      onPressed:  () {
+      onPressed:  () async {
+        if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_feed")){
+          await FireBaseUtils.deleteFeedingRecord(feedings.elementAt(selected_index!));
+        }
+
         DatabaseHelper.deleteItem("Feeding", selected_id!);
         feedings.removeAt(selected_index!);
-        Utils.showToast("DONE".tr());
+        Utils.showToast("DONE");
         Navigator.pop(context);
         setState(() {
 
         });
-
 
       },
     );

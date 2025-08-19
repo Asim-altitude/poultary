@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/feed_batch_screen.dart';
+import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/stock/stock_details_screen.dart';
 import 'package:poultary/utils/utils.dart';
 import '../database/databse_helper.dart';
@@ -11,13 +12,30 @@ import '../model/feed_stock_summary.dart';
 import '../model/stock_expense.dart';
 import '../model/sub_category_item.dart';
 import '../model/transaction_item.dart';
+import '../multiuser/model/feedstockfb.dart';
+import '../multiuser/utils/RefreshMixin.dart';
+import '../multiuser/utils/SyncStatus.dart';
 
 class FeedStockScreen extends StatefulWidget {
   @override
   _FeedStockScreenState createState() => _FeedStockScreenState();
 }
 
-class _FeedStockScreenState extends State<FeedStockScreen> {
+class _FeedStockScreenState extends State<FeedStockScreen> with RefreshMixin {
+
+  @override
+  void onRefreshEvent(String event) {
+    try {
+      if (event == FireBaseUtils.FEED_STOCK_HISTORY)
+      {
+         fetchStockSummary();
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
+
   List<FeedStockSummary>? _stockSummary = [], _batchSummary = [];
 
    BannerAd? _bannerAd;
@@ -559,6 +577,7 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
       return;
     }
 
+
     String finalSource = _selectedSource == "OTHER" ? _otherSourceController.text : _selectedSource!;
     double? amount = _selectedSource == "PURCHASED" && _amountController.text.isNotEmpty
         ? double.tryParse(_amountController.text)
@@ -571,9 +590,15 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
       source: finalSource,
       date: DateFormat('yyyy-MM-dd').format(_selectedDate), // Use selected date
       feed_name: _selectedFeed!,
-    );
+      sync_id: Utils.getUniueId(),
+      sync_status: SyncStatus.SYNCED,
+      last_modified: Utils.getTimeStamp(),
+      modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+      farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '');
 
    int? stock_item_id =  await DatabaseHelper.insertFeedStock(stock);
+
+    FeedStockFB feedStockFB = FeedStockFB(stock: stock);
 
     if(!_amountController.text.isEmpty){
       TransactionItem transaction_item = TransactionItem(
@@ -591,12 +616,30 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
           extra_cost: "",
           extra_cost_details: "",
           f_name: "Farm Wide",
-          flock_update_id: '-1');
+          flock_update_id: '-1',
+          sync_id: Utils.getUniueId(),
+          sync_status: SyncStatus.SYNCED,
+          last_modified: Utils.getTimeStamp(),
+          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '');
 
       int? transaction_id = await DatabaseHelper.insertNewTransaction(transaction_item);
       StockExpense stockExpense = StockExpense(stockItemId: stock_item_id!, transactionId: transaction_id!);
       await DatabaseHelper.insertStockJunction(stockExpense);
+
+      feedStockFB.transaction = transaction_item;
     }
+
+    if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_feed")) {
+      feedStockFB.sync_id = stock.sync_id;
+      feedStockFB.sync_status = SyncStatus.SYNCED;
+      feedStockFB.last_modified = Utils.getTimeStamp();
+      feedStockFB.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+      feedStockFB.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+      await FireBaseUtils.uploadFeedStockHistory(feedStockFB);
+    }
+
     Navigator.pop(context, true);
   }
 
@@ -605,9 +648,20 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
   }
 
   bool isRequired = false;
-
+  double widthScreen = 0;
+  double heightScreen = 0;
   @override
   Widget build(BuildContext context) {
+
+    double safeAreaHeight = MediaQuery.of(context).padding.top;
+    double safeAreaHeightBottom = MediaQuery.of(context).padding.bottom;
+    widthScreen =
+        MediaQuery.of(context).size.width; // because of default padding
+    heightScreen = MediaQuery.of(context).size.height;
+    Utils.WIDTH_SCREEN = widthScreen;
+    Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height -
+        (safeAreaHeight + safeAreaHeightBottom);
+
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Container(

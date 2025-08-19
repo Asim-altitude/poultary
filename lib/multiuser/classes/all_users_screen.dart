@@ -1,4 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:poultary/multiuser/classes/user_worker_profile.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
@@ -73,11 +76,30 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
     print('Permissions seeded successfully to Firestore');
   }
 */
+
+
+
+  Future<List<MultiUser>> loadUsersByFarm(String farmId) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('farm_id', isEqualTo: farmId)
+        .get();
+
+    return querySnapshot.docs
+        .map((doc) => MultiUser.fromMap(doc.data()))
+        .where((user) => user.role.toLowerCase() != 'admin')
+        .toList();
+  }
+
+
   String farmID = "";
   Future<void> loadUsers() async {
-    final fetchedUsers = await DatabaseHelper.getAllNonAdminUsers(); // your method
-    farmID = fetchedUsers[0].farmId;
-    setState(() => users = fetchedUsers);
+   // final fetchedUsers = await DatabaseHelper.getAllNonAdminUsers();
+// your method
+    farmID = Utils.currentUser!.farmId;
+    users = await loadUsersByFarm(farmID);
+
+    setState(() => users );
   }
 
   void showAddUserDialog() {
@@ -95,13 +117,13 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("All Users"),
+        title: Text("All Users".tr()),
         backgroundColor: Utils.getThemeColorBlue(),
         foregroundColor: Colors.white,
       ),
       backgroundColor: Colors.grey.shade100,
       body: users.isEmpty
-          ? Center(child: Text("No users found"))
+          ? Center(child: Text("No users found".tr()))
           : ListView.builder(
         padding: EdgeInsets.all(12),
         itemCount: users.length,
@@ -113,15 +135,21 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
             elevation: 4,
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: Colors.blue.shade400,
-                child: Text(user.name[0].toUpperCase(), style: TextStyle(color: Colors.white)),
+                radius: 40,
+                backgroundColor: Colors.blue.shade100,
+                backgroundImage: (user.image != null && user.image!.isNotEmpty)
+                    ? NetworkImage(user.image!)
+                    : null,
+                child: (user.image == null || user.image!.isEmpty)
+                    ? Icon(Icons.person, size: 40, color: Colors.blue)
+                    : null,
               ),
               title: Text(user.name, style: theme.textTheme.titleMedium),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(user.email, style: TextStyle(color: Colors.grey[700])),
-                  Text("Role: ${user.role}", style: TextStyle(color: Colors.grey[600])),
+                  Text("Role:".tr()+" ${user.role}", style: TextStyle(color: Colors.grey[600])),
                 ],
               ),
               trailing: Icon(user.active ? Icons.check_circle : Icons.block, color: user.active ? Colors.green : Colors.red),
@@ -140,7 +168,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: showAddUserDialog,
         icon: Icon(Icons.person_add),
-        label: Text("Add User"),
+        label: Text("Add New User".tr()),
         backgroundColor: Utils.getThemeColorBlue(),
         foregroundColor: Colors.white,
       ),
@@ -161,6 +189,8 @@ class AddUserBottomSheet extends StatefulWidget {
 class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
+  final passController = TextEditingController();
+
   String? selectedRole;
 
 
@@ -172,16 +202,27 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
     loadRoles();
   }
 
+  Future<List<Role>> loadRolesByFarm(String farmId) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('roles')
+        .where('farm_id', isEqualTo: farmId)
+        .get();
+
+    return querySnapshot.docs
+        .map((doc) => Role.fromJson(doc.data()))
+        .toList();
+  }
+
   Future<void> loadRoles() async {
-     roles = await DatabaseHelper.getAllRoles();
+     roles = await loadRolesByFarm(Utils.currentUser!.farmId);
      setState(() {
 
      });
   }
 
-  void handleSave() async {
+  /*void handleSave() async {
     if (nameController.text.isEmpty || emailController.text.isEmpty || selectedRole == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Fill all fields")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("PROVIDE_ALL".tr())));
       return;
     }
 
@@ -189,14 +230,22 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
       name: nameController.text,
       email: emailController.text,
       role: selectedRole!,
+      image: '',
       createdAt: DateTime.now().toIso8601String(),
-      password: '', // Optional: set if needed
+      password: passController.text, // Optional: set if needed
       farmId: widget.farmID,   // Optional: set if needed
     );
 
     // 1. Save to local database
-    await DatabaseHelper.insertUser(user);
+    try{
+      await DatabaseHelper.insertUser(user);
+    }
+    catch(e){
+      print(e);
+    }
 
+
+    Utils.shouldBackup = true;
     // 2. Save to Firestore
     try {
       await FirebaseFirestore.instance.collection(FireBaseUtils.USERS).add({
@@ -204,6 +253,7 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
         'email': user.email,
         'role': user.role,
         'active': 1,
+        'image':'',
         'created_at': user.createdAt,
         'farm_id': user.farmId,
         'password': user.password, // if storing password in Firestore, hash it ideally
@@ -215,6 +265,83 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
     widget.onUserAdded();
     Navigator.pop(context);
   }
+*/
+  void handleSave() async {
+    if (nameController.text.isEmpty || emailController.text.isEmpty || selectedRole == null || passController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("PROVIDE_ALL".tr())),
+      );
+      return;
+    }
+
+    final user = MultiUser(
+      name: nameController.text.trim(),
+      email: emailController.text.trim(),
+      role: selectedRole!,
+      image: '',
+      createdAt: DateTime.now().toIso8601String(),
+      password: passController.text.trim(),
+      farmId: widget.farmID,
+    );
+
+    try {
+      // --- Step 1: Create Auth user in Secondary App ---
+      final FirebaseApp secondaryApp = await Firebase.initializeApp(
+        name: 'SecondaryApp',
+        options: Firebase.app().options,
+      );
+
+      final UserCredential newUserCred = await FirebaseAuth.instanceFor(app: secondaryApp)
+          .createUserWithEmailAndPassword(
+        email: user.email,
+        password: user.password,
+      );
+
+      final String newUid = newUserCred.user!.uid;
+
+      // --- Step 2: Save to Firestore ---
+      await FirebaseFirestore.instance.collection(FireBaseUtils.USERS).doc(newUid).set({
+        'uid': newUid,
+        'name': user.name,
+        'email': user.email,
+        'role': user.role,
+        'active': 1,
+        'image': '',
+        'created_at': user.createdAt,
+        'farm_id': user.farmId,
+        'password': "", // ⚠️ Ideally hash before saving
+      });
+
+      // --- Step 3: Save to Local DB ---
+      try {
+        await DatabaseHelper.insertUser(user);
+      } catch (dbError) {
+        debugPrint("Local DB error: $dbError");
+      }
+
+      // Cleanup: sign out secondary app so it doesn’t affect admin
+      await FirebaseAuth.instanceFor(app: secondaryApp).signOut();
+      await secondaryApp.delete();
+
+      Utils.shouldBackup = true;
+
+
+      widget.onUserAdded();
+      Navigator.pop(context);
+
+    } on FirebaseAuthException catch (authError) {
+      // Handle Firebase Auth errors (email already in use, weak password, etc.)
+      debugPrint("FirebaseAuth error: $authError");
+
+
+      Utils.showToast("Error: ${authError.message}");
+    } catch (e) {
+      debugPrint("General error creating user: $e");
+
+      Utils.showToast("Error: Something went wrong");
+
+    }
+  }
 
 
   @override
@@ -224,15 +351,17 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("Add New User", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          TextField(controller: nameController, decoration: InputDecoration(labelText: "Name")),
-          TextField(controller: emailController, decoration: InputDecoration(labelText: "Email")),
+          Text("Add New User".tr(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          TextField(controller: nameController, decoration: InputDecoration(labelText: "Name".tr())),
+          TextField(controller: emailController, decoration: InputDecoration(labelText: "Email".tr())),
+          TextField(controller: passController, decoration: InputDecoration(labelText: "Password".tr())),
+
           Row(
             children: [
               Expanded(
                 child: DropdownButtonFormField<String>(
                   value: selectedRole,
-                  decoration: InputDecoration(labelText: 'Select Role'),
+                  decoration: InputDecoration(labelText: 'Select Role'.tr()),
                   items: roles.map((role) {
                     return DropdownMenuItem(value: role.name, child: Text(role.name));
                   }).toList(),
@@ -241,10 +370,12 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
               ),
               IconButton(
                 icon: Icon(Icons.add, color: Colors.blue),
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(
+                onPressed: () async {
+                  await Navigator.push(context, MaterialPageRoute(
                     builder: (_) => AllRolesScreen(),
                   ));
+
+                  loadRoles();
                 },
               )
             ],
@@ -253,7 +384,7 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
           ElevatedButton.icon(
             onPressed: handleSave,
             icon: Icon(Icons.save),
-            label: Text("Save"),
+            label: Text("SAVE".tr()),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
           ),
         ],

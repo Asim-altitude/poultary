@@ -1,20 +1,26 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:currency_picker/currency_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:googleapis/androidpublisher/v3.dart' as android_publisher;
 import 'package:intl/intl.dart';
 import 'package:language_picker/languages.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:poultary/model/custom_category_data.dart';
+import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
+import 'package:poultary/multiuser/utils/SyncManager.dart';
 import 'package:poultary/utils/session_manager.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
 import '../birds_report_screen.dart';
 import '../custom_category_report.dart';
@@ -45,6 +51,12 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'package:flutter/src/widgets/image.dart';
+
+import '../multiuser/model/egg_record.dart';
+import '../multiuser/model/flockfb.dart';
+import '../multiuser/model/role_permissions.dart';
+import '../multiuser/model/user.dart';
 
 class Utils {
   static const String APPLICATION_ID = "BirdDiary";
@@ -56,8 +68,10 @@ class Utils {
   static double _standardWidth = 414;
   static double _standardheight = 736;
   static final bool ISTESTACCOUNT = false;
-  static late bool isShowAdd = true;
+  static late bool isShowAdd = false;
   static late bool iShowInterStitial = false;
+
+  static bool shouldBackup = false;
 
   static final String appIdIOS     = "ca-app-pub-2367135251513556~6965974738";
   static final String appIdAndroid = "ca-app-pub-2367135251513556~8724531818";
@@ -117,6 +131,7 @@ class Utils {
   static String SELECTED_FLOCK = "";
   static int SELECTED_FLOCK_ID = -1;
 
+  static MultiUser? currentUser = null;
   static String selected_unit = "KG";
 
   static List<Flock_Report_Item> flock_report_list = [];
@@ -135,14 +150,205 @@ class Utils {
 
 
   static bool isMultiUSer = false;
+  static bool isSyncDone = false;
 
   // static MediationManager? manager;
   // static CASBannerView? view;
 
+  static RoleWithPermissions? rolePerms = null;
 
   static bool direction = true;
 
- static Future<bool> getDirection() async{
+  static DateTime getTimeStamp() {
+
+    return DateTime.now();
+  }
+
+  static void showLoading()  {
+    EasyLoading.show(status: 'Saving...'.tr());
+  }
+
+  static void hideLoading(){
+    EasyLoading.showSuccess('DONE'.tr()+" ✅");
+
+  }
+
+  static void showError(){
+    EasyLoading.showError('Failed...'.tr());
+  }
+
+  static bool hasFeaturePermission(String permission)
+  {
+    if(Utils.currentUser!.role.toLowerCase() == "admin")
+      return true;
+
+    try {
+      bool hasPermission = rolePerms?.permissions.contains(permission) ?? false;
+      return hasPermission;
+    }
+    catch(ex){
+      return false;
+    }
+
+  }
+
+
+  static Future<void> logoutUser() async {
+    await SessionManager.setBoolValue(SessionManager.loggedIn, false);
+    await SessionManager.setBoolValue(SessionManager.isAdmin, false);
+    await SessionManager.setBoolValue('db_initialized_${Utils.currentUser!.farmId}', false);
+    await SessionManager.clearPrefs();
+/*    await SessionManager.clearUserObject();
+    await SessionManager.setLastSyncTime(FireBaseUtils.USERS, null);
+    await SessionManager.setLastSyncTime(FireBaseUtils.FEEDING, null);
+    await SessionManager.setLastSyncTime(FireBaseUtils.HEALTH, null);
+    await SessionManager.setLastSyncTime(FireBaseUtils.BIRDS, null);
+    await SessionManager.setLastSyncTime(FireBaseUtils.EGGS, null);
+    await SessionManager.setLastSyncTime(FireBaseUtils.FINANCE, null);
+    await  SessionManager.setLastSyncTime(FireBaseUtils.FLOCK_DETAILS, null);
+    await SessionManager.setLastSyncTime(FireBaseUtils.FLOCK_IMAGES, null);
+    await  SessionManager.setLastSyncTime(FireBaseUtils.CUSTOM_CATEGORY_DATA, null);
+    await SessionManager.setLastSyncTime(FireBaseUtils.CUSTOM_CATEGORY, null);
+    await  SessionManager.setLastSyncTime(FireBaseUtils.FEED_STOCK_HISTORY, null);
+    await  SessionManager.setLastSyncTime(FireBaseUtils.MEDICINE_STOCK_HISTORY, null);
+
+    await SessionManager.setLastSyncTime(FireBaseUtils.VACCINE_STOCK_HISTORY, null);
+    await SessionManager.setLastSyncTime(FireBaseUtils.FEED_INGRIDIENT, null);
+    await SessionManager.setLastSyncTime(FireBaseUtils.FEED_BATCH, null);
+
+    await SessionManager.setLastSyncTime(FireBaseUtils.SUB_CATEGORY, null);
+    await SessionManager.setLastSyncTime(FireBaseUtils.WEIGHT_RECORD, null);
+    await SessionManager.setLastSyncTime(FireBaseUtils.SALE_CONTRACTOR, null);
+
+    await SessionManager.setLastSyncTime(FireBaseUtils.TRANSACTIONS, null);
+    await SessionManager.setLastSyncTime(FireBaseUtils.EGG_TRANSACTIONS, null);*/
+    SyncManager().stopAllListening();
+  }
+
+
+  static String displayLangCode(language) {
+    if (language.name.contains("Chinese")) return "zh";
+    return language.isoCode.split("_").first; // takes 'zh_Hans' → 'zh'
+  }
+
+
+  static void showMissingPermissionDialog(BuildContext context, String permissionKey) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.lock_outline, size: 48, color: Colors.redAccent),
+              const SizedBox(height: 16),
+               Text(
+                "Access Denied".tr(),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 12),
+               Text(
+                "You do not have permission for this feature.".tr(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black54,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.redAccent),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.warning_amber_rounded, color: Colors.redAccent),
+                    const SizedBox(width: 10),
+                    Text(
+                      permissionKey,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.redAccent,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child:  Text("Close".tr()),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+
+
+  static Future<void> retryFailedSyncs() async {
+    final db = await DatabaseHelper.instance.database;
+    final items = await db?.query('SyncQueue');
+
+    for (final item in items!) {
+      final type = item['type'] as String;
+      final payload = jsonDecode(item['payload'] as String);
+
+      try {
+        if (type == 'egg') {
+          final record = EggRecord.fromJson(payload);
+          await FirebaseFirestore.instance
+              .collection(FireBaseUtils.EGGS)
+              .doc(record.sync_id!)
+              .set(record.toJson());
+        } else if (type == 'flock') {
+          final record = FlockFB.fromJson(payload);
+          await FirebaseFirestore.instance
+              .collection(FireBaseUtils.FLOCKS)
+              .doc(record.flock.sync_id!)
+              .set(record.toJson());
+        }
+
+        // Success, remove from queue
+        await db?.delete('SyncQueue', where: 'id = ?', whereArgs: [item['id']]);
+      } catch (e) {
+        // Increment retry count and save error
+        await db?.update(
+          'SyncQueue',
+          {
+            'retry_count': (item['retry_count'] as int) + 1,
+            'last_error': e.toString(),
+          },
+          where: 'id = ?',
+          whereArgs: [item['id']],
+        );
+      }
+    }
+  }
+
+
+  static Future<bool> getDirection() async{
 
    String? language = await SessionManager.getSelectedLanguage();
 
@@ -280,6 +486,39 @@ class Utils {
 
 
   }
+
+  static void shareSubUserCredentials({
+    required String name,
+    required String email,
+    required String password,
+    required String farmID,
+  }) {
+    String storeLink = "";
+
+    if (Platform.isAndroid) {
+      storeLink = "${"https://play.google.com/store/apps/details?id=com.zaheer.poultry"}";
+    } else if (Platform.isIOS) {
+      storeLink = "${"https://apps.apple.com/pk/app/easy-poultry-chicken-manager/id6469481170"}";
+    }
+
+    final message = '''
+${"sub_user_share_title".tr()}
+
+${"Farm ID".tr()}: $farmID
+👤 ${"sub_user_name".tr()}: $name
+📧 ${"sub_user_email".tr()}: $email
+🔑 ${"sub_user_password".tr()}: $password
+
+${"sub_user_note".tr()}
+
+📱 ${"get_app_here".tr()}:
+$storeLink
+''';
+
+    Share.share(message);
+  }
+
+
 
   static Future<String> getPdfBoldFont() async{
     String language = await SessionManager.getSelectedLanguage();
@@ -504,6 +743,30 @@ class Utils {
     } catch (e) {
       print("Error parsing DOB: $e");
       return 0; // Return '-' if error
+    }
+  }
+  static String getAnimalAgeWeeks(String dob) {
+    try {
+      DateTime birthDate = DateFormat("yyyy-MM-dd").parse(dob);
+      DateTime today = DateTime.now();
+
+      Duration ageDuration = today.difference(birthDate);
+      int totalDays = ageDuration.inDays;
+
+      int weeks = totalDays ~/ 7;
+      int days = totalDays % 7;
+
+      // Example: "12 weeks 3 days"
+      if (weeks == 0) {
+        return "$days " + "days".tr();
+      } else if (days == 0) {
+        return "$weeks " + "weeks".tr();
+      } else {
+        return "$weeks " + "weeks".tr() + " $days " + "days".tr();
+      }
+    } catch (e) {
+      print("Error parsing DOB: $e");
+      return "-"; // Return '-' if error
     }
   }
 
@@ -1027,6 +1290,12 @@ class Utils {
 
   }
 
+  static String getUniueId() {
+    final uuid = Uuid();
+
+    return uuid.v4();
+  }
+
   static Future<void> setupAds() async {
     bool isInApp = await SessionManager.getInApp();
     if(isInApp){
@@ -1037,6 +1306,8 @@ class Utils {
       Utils.isShowAdd = true;
       inititalize();
     }
+
+    Utils.isShowAdd = false;
   }
 
   static Future<void> inititalize() async {
@@ -1322,10 +1593,21 @@ class Utils {
     return outputDate;
   }
 
+  static String getFlagEmoji(String countryCode) {
+    return countryCode.toUpperCase().replaceAllMapped(
+      RegExp(r'[A-Z]'),
+          (match) => String.fromCharCode(match.group(0)!.codeUnitAt(0) + 127397),
+    );
+  }
+
+
   static void showToast(String msg)
   {
+    if(Utils.isMultiUSer && (msg.toLowerCase() == "done" || msg.toLowerCase() == "successful") )
+      return;
+
     Fluttertoast.showToast(
-        msg: msg,
+        msg: msg.tr(),
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.CENTER,
         timeInSecForIosWeb: 1,

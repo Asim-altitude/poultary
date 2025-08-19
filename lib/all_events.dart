@@ -719,7 +719,7 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
       onPressed:  () {
         EventsDatabaseHelper.deleteEventItem(selected_id!);
         events.removeAt(selected_index!);
-        Utils.showToast("DONE".tr());
+        Utils.showToast("DONE");
         Navigator.pop(context);
         setState(() {
 

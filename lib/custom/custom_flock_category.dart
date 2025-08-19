@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/model/custom_category.dart';
 
+import '../multiuser/utils/FirebaseUtils.dart';
+import '../multiuser/utils/SyncStatus.dart';
 import '../utils/utils.dart';
 
 class CustomCategoryScreen extends StatefulWidget {
@@ -270,26 +272,48 @@ class _CustomCategoryScreenState extends State<CustomCategoryScreen> {
       widget.customCategory?.itemtype = _selectedType;
       widget.customCategory?.unit = _selectedUnit!;
 
+      widget.customCategory?.sync_status  = SyncStatus.UPDATED;
+      widget.customCategory?.last_modified = Utils.getTimeStamp();
+      widget.customCategory?.modified_by = Utils.isMultiUSer ? Utils.currentUser!.email : '';
+      widget.customCategory?.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
      await DatabaseHelper.updateCategory(widget.customCategory!);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('SUCCESSFUL'.tr())),
       );
+
+      if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_custom")){
+        await FireBaseUtils.updateCustomCategory(widget.customCategory!);
+      }
+
       Navigator.pop(context);
 
     } else {
 
-      await DatabaseHelper.insertCustomCategory(CustomCategory(
-          name: _nameController.text,
-          itemtype: _selectedType,
-          cat_type: _selectedCategoryType!,
-          unit: _selectedUnit!,
-          enabled: 1,
-          icon: _selectedIcon!));
+      CustomCategory customObject = CustomCategory(
+        name: _nameController.text,
+        itemtype: _selectedType,
+        cat_type: _selectedCategoryType!,
+        unit: _selectedUnit!,
+        enabled: 1,
+        icon: _selectedIcon!,
+        sync_id: Utils.getUniueId(),
+        sync_status: SyncStatus.SYNCED,
+        last_modified: Utils.getTimeStamp(),
+        modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+        farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+
+      );
+      await DatabaseHelper.insertCustomCategory(customObject);
 
       // Display success message and navigate back
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('SUCCESSFUL'.tr())),
       );
+
+      if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_custom")){
+        await FireBaseUtils.addCustomCategory(customObject);
+      }
 
       Navigator.pop(context);
     }
@@ -316,6 +340,12 @@ class _CustomCategoryScreenState extends State<CustomCategoryScreen> {
       }
     }
 
+    aaaSyncColumns();
+  }
+
+  Future<void> aaaSyncColumns() async {
+    await DatabaseHelper.instance.addSyncColumnsToTable("CustomCategory");
+    await DatabaseHelper.instance.assignSyncIds("CustomCategory");
   }
 
   void _chooseIcon() {

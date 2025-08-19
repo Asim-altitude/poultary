@@ -8,6 +8,9 @@ import 'package:intl/intl.dart';
 import 'package:poultary/add_eggs.dart';
 import 'package:poultary/add_income.dart';
 import 'package:poultary/model/egg_income.dart';
+import 'package:poultary/model/transaction_item.dart';
+import 'package:poultary/multiuser/model/egg_record.dart';
+import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
@@ -15,6 +18,9 @@ import 'database/databse_helper.dart';
 import 'model/egg_item.dart';
 import 'model/flock.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'multiuser/utils/RefreshMixin.dart';
+import 'multiuser/utils/SyncStatus.dart';
 
 
 class EggCollectionScreen extends StatefulWidget {
@@ -25,7 +31,19 @@ class EggCollectionScreen extends StatefulWidget {
 }
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerProviderStateMixin{
+class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerProviderStateMixin, RefreshMixin{
+
+  @override
+  void onRefreshEvent(String event) {
+    try {
+      if (event == FireBaseUtils.EGGS ) {
+        getData(date_filter_name);
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
 
   double widthScreen = 0;
   double heightScreen = 0;
@@ -206,7 +224,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
         ),
         elevation: 0,
       ),
-      body:SafeArea(
+      body: SafeArea(
         top: false,
           child:Container(
           width: widthScreen,
@@ -387,7 +405,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
               ),
 
               eggs.length > 0 ? Container(
-                height: heightScreen - 310,
+                height: heightScreen - 250,
                 width: widthScreen,
                 child:
                 Padding(
@@ -435,7 +453,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                                       ),
                                       SizedBox(width: 6),
                                       Text(
-                                        eggs[index].f_name!.tr(),
+                                        "${eggs[index].f_name}",
                                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
                                       ),
                                       SizedBox(width: 6),
@@ -1109,6 +1127,11 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
 
   Future<void> addNewCollection() async {
+    if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_eggs"))
+    {
+      Utils.showMissingPermissionDialog(context, "add_eggs");
+      return;
+    }
 
     final result = await Navigator.push(
       context,
@@ -1121,6 +1144,12 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
   }
 
   Future<void> reduceCollection(String? reason) async{
+    if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_eggs"))
+    {
+      Utils.showMissingPermissionDialog(context, "add_eggs");
+      return;
+    }
+
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -1565,6 +1594,12 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
     ).then((value) async {
       if (value != null) {
         if(value == 2){
+          if(Utils.isMultiUSer && !Utils.hasFeaturePermission("edit_eggs"))
+          {
+            Utils.showMissingPermissionDialog(context, "edit_eggs");
+            return;
+          }
+
           if(eggs.elementAt(selected_index!).isCollection == 1) {
             await Navigator.push(
               context,
@@ -1585,8 +1620,16 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
           }
         }
         else if(value == 1){
+          if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_eggs"))
+          {
+            Utils.showMissingPermissionDialog(context, "delete_eggs");
+            return;
+          }
+
           showAlertDialog(context);
-        }else {
+        }
+        else
+        {
           print(value);
         }
       }
@@ -1605,14 +1648,56 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
     Widget continueButton = TextButton(
       child: Text("DELETE".tr()),
       onPressed:  () async {
+
+        if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_eggs")){
+
+          EggTransaction? eggTransaction = await DatabaseHelper.getByEggItemId(eggs.elementAt(selected_index!).id!);
+          if(eggTransaction!= null) {
+           TransactionItem? transactionItem = await DatabaseHelper.getSingleTransaction(
+                eggTransaction!.transactionId.toString());
+
+            transactionItem!.sync_status = SyncStatus.DELETED;
+            EggRecord eggRecord = EggRecord(eggs: eggs.elementAt(selected_index!), transaction: transactionItem,
+              sync_id: eggs.elementAt(selected_index!).sync_id,
+              sync_status: SyncStatus.DELETED,
+              last_modified: Utils.getTimeStamp(),
+              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+            );
+
+            eggRecord.sync_status = SyncStatus.DELETED;
+            eggRecord.eggs.sync_status = SyncStatus.DELETED;
+
+
+            await FireBaseUtils.updateEggRecord(eggRecord);
+          }else{
+            EggRecord eggRecord = EggRecord(eggs: eggs.elementAt(selected_index!),
+              sync_id: eggs.elementAt(selected_index!).sync_id,
+              sync_status: SyncStatus.DELETED,
+              last_modified: Utils.getTimeStamp(),
+              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',);
+            eggRecord.sync_status = SyncStatus.DELETED;
+            eggRecord.eggs.sync_status = SyncStatus.DELETED;
+
+
+            await FireBaseUtils.updateEggRecord(eggRecord);
+          }
+
+
+
+        }
+
         EggTransaction? eggTransaction = await DatabaseHelper.getByEggItemId(selected_id!);
-        if(eggTransaction!= null){
+        if(eggTransaction!= null) {
           DatabaseHelper.deleteItem("Transactions", eggTransaction.transactionId);
           DatabaseHelper.deleteByEggItemId(selected_id!);
         }
         DatabaseHelper.deleteItem("Eggs", selected_id!);
         eggs.removeAt(selected_index!);
-        Utils.showToast("DONE".tr());
+        Utils.showToast("DONE");
+
+
         Navigator.pop(context);
         setState(() {
 

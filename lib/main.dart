@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/home_screen.dart';
@@ -9,11 +10,14 @@ import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:ui' as ui;
 import 'app_setup/language_setup_screen.dart';
 import 'auto_add_feed_screen.dart';
 import 'model/blog.dart';
 import 'multiuser/classes/AuthGate.dart';
+import 'multiuser/classes/farm_welcome_screen.dart';
+import 'multiuser/classes/welcome_screen.dart';
 
 bool direction = true;
 Future<void> main() async {
@@ -40,30 +44,68 @@ Future<void> main() async {
 
 Future<Widget> getInitialScreen() async {
   await DatabaseHelper.instance.database;
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+
 
   bool launch = await Utils.checkAppLaunch();
-  bool skipped = await SessionManager.getBool(SessionManager.skipped);
+  bool skipped = true;//await SessionManager.getBool(SessionManager.skipped);
   bool loggedIn = await SessionManager.getBool(SessionManager.loggedIn);
   bool isAdmin = await SessionManager.getBool(SessionManager.isAdmin);
   MultiUser? user = await SessionManager.getUserFromPrefs();
   List<MultiUser> users = await DatabaseHelper.getAllUsers();
+  bool isAutoFeedEnabled = prefs.getBool('isAutoFeedEnabled') ?? false;
+  Utils.currentUser = user;
 
+  try{
+    _configEasyLoading();
+  }
+  catch(ex){
+    print(ex);
+  }
 
-    if(launch) {
+  if(launch){
+    return LanguageSetupScreen();
+  } else if (isAutoFeedEnabled){
+    return AutoFeedSyncScreen();
+  }else {
+    return HomeScreen();
+  }
+
+  /*if(launch) {
       return LanguageSetupScreen();
     } else if (loggedIn && isAdmin) {
-      return HomeScreen();
+      Utils.isMultiUSer = true;
+      return FarmWelcomeScreen(multiUser: Utils.currentUser!, isStart: true,);
     } else if (loggedIn && !isAdmin && user != null) {
+      Utils.isMultiUSer = true;
+      return FarmWelcomeScreen(multiUser: Utils.currentUser!, isStart: true,);
       return WorkerDashboardScreen(
           name: user.name, email: user.email, role: user.role);
-    } else if (users.length == 0) {
-        return HomeScreen();
+    } else if (users.length == 0 && skipped && isAutoFeedEnabled) {
+        return AutoFeedSyncScreen();
+    } else if (users.length == 0 && skipped && !isAutoFeedEnabled) {
+      return HomeScreen();
     } else {
       return AuthGate(isStart: true);
-    }
+    }*/
   }
 
 
+void _configEasyLoading() {
+  EasyLoading.instance
+    ..displayDuration = const Duration(milliseconds: 1500)
+    ..indicatorType = EasyLoadingIndicatorType.wave // Smooth animation
+    ..loadingStyle = EasyLoadingStyle.custom
+    ..indicatorSize = 50.0
+    ..radius = 12.0
+    ..progressColor = Colors.white
+    ..backgroundColor = const Color(0xFF222831) // Deep charcoal
+    ..indicatorColor = const Color(0xFF00ADB5) // Neon teal
+    ..textColor = Colors.white
+    ..maskColor = Colors.black.withOpacity(0.4)
+    ..userInteractions = false
+    ..dismissOnTap = false;
+}
 
 void requestGDPR(){
 
@@ -107,6 +149,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      builder: EasyLoading.init(),
       title: 'Easy Poultry Manager',
       debugShowCheckedModeBanner: false,
       localizationsDelegates: context.localizationDelegates,

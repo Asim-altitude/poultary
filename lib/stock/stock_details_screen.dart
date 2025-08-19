@@ -2,11 +2,15 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:poultary/database/databse_helper.dart';
+import 'package:poultary/model/transaction_item.dart';
+import 'package:poultary/multiuser/utils/SyncStatus.dart';
 import 'package:poultary/utils/utils.dart';
 
 import '../model/feed_stock_history.dart';
 import '../model/feed_stock_summary.dart';
 import '../model/stock_expense.dart';
+import '../multiuser/model/feedstockfb.dart';
+import '../multiuser/utils/FirebaseUtils.dart';
 import '../sticky.dart';
 
 class StockDetailScreen extends StatefulWidget{
@@ -124,21 +128,39 @@ class _StockDetailScreen extends State<StockDetailScreen> {
                                   TextButton(
                                     onPressed: () async{
                                       // _deleteStock(entry.id);
+                                      entry.sync_status = SyncStatus.DELETED;
+                                      FeedStockFB feedStockFB = FeedStockFB(stock: entry);
                                       StockExpense? stockExpense = await DatabaseHelper.getByStockItemId(entry.id!);
                                       if(stockExpense != null){
+                                        TransactionItem? transaction = await DatabaseHelper.getSingleTransaction(stockExpense.transactionId.toString());
+                                        feedStockFB.transaction = transaction;
+                                        feedStockFB.transaction!.sync_status = SyncStatus.DELETED;
                                         await DatabaseHelper.deleteByStockItemId(entry.id!);
                                         await DatabaseHelper.deleteItem("Transactions", stockExpense.transactionId);
                                       }
 
                                       DatabaseHelper.deleteFeedStock(entry.id!);
                                       Utils.showToast("SUCCESSFUL".tr());
+
+                                      if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_feed")) {
+                                        feedStockFB.sync_id = entry.sync_id;
+                                        feedStockFB.sync_status = SyncStatus.DELETED;
+                                        feedStockFB.last_modified = Utils.getTimeStamp();
+                                        feedStockFB.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                                        feedStockFB.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+                                        await FireBaseUtils.updateFeedStockHistory(feedStockFB);
+                                      }
+
                                       setState(() {
                                         widget.stockHistory.remove(entry);
                                       });
 
-                                      if(widget.stockHistory.isEmpty){
+                                      if(widget.stockHistory.isEmpty) {
                                         Navigator.pop(context);
                                       }
+
+
                                       Navigator.of(context).pop(true);
                                     },
                                     child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),

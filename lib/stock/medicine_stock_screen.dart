@@ -9,6 +9,10 @@ import '../model/medicine_stock_history.dart';
 import '../model/medicine_stock_summary.dart';
 import '../model/stock_expense.dart';
 import '../model/transaction_item.dart';
+import '../multiuser/model/medicinestockfb.dart';
+import '../multiuser/utils/FirebaseUtils.dart';
+import '../multiuser/utils/RefreshMixin.dart';
+import '../multiuser/utils/SyncStatus.dart';
 import '../utils/utils.dart';
 import 'medicine_stock_details.dart';
 
@@ -22,7 +26,21 @@ class MedicineStockScreen extends StatefulWidget {
   _MedicineStockScreenState createState() => _MedicineStockScreenState();
 }
 
-class _MedicineStockScreenState extends State<MedicineStockScreen> {
+class _MedicineStockScreenState extends State<MedicineStockScreen> with RefreshMixin {
+
+  @override
+  void onRefreshEvent(String event) {
+    try {
+      if (event == FireBaseUtils.MEDICINE_STOCK_HISTORY)
+      {
+        fetchStockSummary();
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
+
   List<MedicineStockSummary>? _stockSummary = [];
   List<String> uniqueMedicineNames = [];
   BannerAd? _bannerAd;
@@ -447,11 +465,17 @@ class _AddMedicineStockBottomSheetState extends State<AddMedicineStockBottomShee
       source: finalSource,
       date: DateFormat('yyyy-MM-dd').format(_selectedDate),
       medicineId: getMedicineIdbyName(), medicineName: _selectedMedicine!,
-
+        sync_id: Utils.getUniueId(),
+        sync_status: SyncStatus.SYNCED,
+        last_modified: Utils.getTimeStamp(),
+        modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+        farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : ''
     );
 
     int? stock_item_id = await DatabaseHelper.insertMedicineStock(stock);
     widget.onStockAdded();
+
+    MedicineStockFB medicineStockFB = MedicineStockFB(stock: stock);
 
     if(!_amountController.text.isEmpty){
       TransactionItem transaction_item = TransactionItem(
@@ -469,12 +493,30 @@ class _AddMedicineStockBottomSheetState extends State<AddMedicineStockBottomShee
           extra_cost: "",
           extra_cost_details: "",
           f_name: "Farm Wide",
-          flock_update_id: '-1');
+          flock_update_id: '-1',
+          sync_id: Utils.getUniueId(),
+          sync_status: SyncStatus.SYNCED,
+          last_modified: Utils.getTimeStamp(),
+          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '');
       int? transaction_id = await DatabaseHelper
           .insertNewTransaction(transaction_item);
       StockExpense stockExpense = StockExpense(stockItemId: stock_item_id!, transactionId: transaction_id!);
       await DatabaseHelper.insertStockJunction(stockExpense);
+
+      medicineStockFB.transaction = transaction_item;
     }
+
+    if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_medicine")) {
+      medicineStockFB.sync_id = stock.sync_id;
+      medicineStockFB.sync_status = SyncStatus.SYNCED;
+      medicineStockFB.last_modified = Utils.getTimeStamp();
+      medicineStockFB.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+      medicineStockFB.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+      await FireBaseUtils.uploadMedicineStock(medicineStockFB);
+    }
+
     Navigator.pop(context, true);
   }
 
@@ -486,9 +528,20 @@ class _AddMedicineStockBottomSheetState extends State<AddMedicineStockBottomShee
   int getMedicineIdbyName() {
     return _subItems.firstWhere((med) => med.name == _selectedMedicine).id!;
   }
-
+  double widthScreen = 0;
+  double heightScreen = 0;
   @override
   Widget build(BuildContext context) {
+
+    double safeAreaHeight = MediaQuery.of(context).padding.top;
+    double safeAreaHeightBottom = MediaQuery.of(context).padding.bottom;
+    widthScreen =
+        MediaQuery.of(context).size.width; // because of default padding
+    heightScreen = MediaQuery.of(context).size.height;
+    Utils.WIDTH_SCREEN = widthScreen;
+    Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height -
+        (safeAreaHeight + safeAreaHeightBottom);
+
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Container(

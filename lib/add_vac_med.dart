@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/model/med_vac_item.dart';
 import 'package:poultary/model/sub_category_item.dart';
+import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/stock/medicine_stock_screen.dart';
 import 'package:poultary/stock/vaccine_stock_screen.dart';
@@ -17,6 +18,7 @@ import 'model/category_item.dart';
 import 'model/flock.dart';
 import 'model/medicine_stock_summary.dart';
 import 'model/vaccine_stock_summary.dart';
+import 'multiuser/utils/SyncStatus.dart';
 
 class NewVaccineMedicine extends StatefulWidget {
   Vaccination_Medication? vaccination_medication;
@@ -346,7 +348,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                       if(qtycountController.text.trim().length==0)
                       {
                         activeStep--;
-                        Utils.showToast("PROVIDE_ALL".tr());
+                        Utils.showToast("PROVIDE_ALL");
                       }else{
                         setState(() {
 
@@ -359,7 +361,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
                       if(doctorController.text.trim().length==0 || qtycountController.text.isEmpty || bird_countController.text.isEmpty){
                         activeStep--;
-                        Utils.showToast("PROVIDE_ALL".tr());
+                        Utils.showToast("PROVIDE_ALL");
                       }else{
                         if(isEdit) {
                           Vaccination_Medication med_vacc = Vaccination_Medication(
@@ -375,11 +377,23 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                             bird_count: int.parse(
                                 bird_countController.text),
                             doctor_name: doctorController.text,
-                            f_name: _purposeselectedValue, quantity: qtycountController.text, unit: _selectedUnit,);
+                            f_name: _purposeselectedValue, quantity: qtycountController.text, unit: _selectedUnit,
+                              sync_id: widget.vaccination_medication!.sync_id,
+                              sync_status: SyncStatus.UPDATED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                              f_sync_id: getFlockSyncID());
+
                           med_vacc.id = widget.vaccination_medication!.id!;
                           int? id = await DatabaseHelper.updateHealth(
                               med_vacc);
-                          Utils.showToast("SUCCESSFUL".tr());
+                          Utils.showToast("SUCCESSFUL");
+
+                          if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_health")){
+                            await FireBaseUtils.updateHealthRecord(med_vacc);
+                          }
+
                           Navigator.pop(context);
                         } else {
                           Vaccination_Medication med_vacc = Vaccination_Medication(
@@ -395,10 +409,20 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                             bird_count: int.parse(
                                 bird_countController.text),
                             doctor_name: doctorController.text,
-                            f_name: _purposeselectedValue, quantity: qtycountController.text, unit: _selectedUnit,);
+                            f_name: _purposeselectedValue, quantity: qtycountController.text, unit: _selectedUnit,
+                              sync_id: Utils.getUniueId(),
+                              sync_status: SyncStatus.SYNCED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                              f_sync_id: getFlockSyncID());
                           int? id = await DatabaseHelper.insertMedVac(
                               med_vacc);
-                          Utils.showToast("SUCCESSFUL".tr());
+                          Utils.showToast("SUCCESSFUL");
+
+                          if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_health")){
+                            await FireBaseUtils.uploadHealthRecord(med_vacc);
+                          }
                           Navigator.pop(context);
                         }
                       }
@@ -1175,6 +1199,18 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
   }
 
+  String? getFlockSyncID() {
+
+    String? selected_id = "unknown";
+    for(int i=0;i<flocks.length;i++){
+      if(_purposeselectedValue.toLowerCase() == flocks.elementAt(i).f_name.toLowerCase()){
+        selected_id = flocks.elementAt(i).sync_id;
+        break;
+      }
+    }
+
+    return selected_id;
+  }
 
   int getFlockID() {
 

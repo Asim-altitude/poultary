@@ -129,7 +129,7 @@ class _NewEventReminder extends State<NewEventReminder>
                 if(nameController.text.isEmpty)
                 {
                   activeStep--;
-                  Utils.showToast("PROVIDE_ALL".tr());
+                  Utils.showToast("PROVIDE_ALL");
                 }
               }
             }
@@ -138,7 +138,7 @@ class _NewEventReminder extends State<NewEventReminder>
             {
               if(notesController.text.isEmpty || !isDateChosen) {
                 activeStep--;
-                Utils.showToast("PROVIDE_ALL".tr());
+                Utils.showToast("PROVIDE_ALL");
               }
               else
               {
@@ -157,7 +157,7 @@ class _NewEventReminder extends State<NewEventReminder>
                       .database;
 
                   EventsDatabaseHelper.updateEvent(myevent);
-                  Utils.showToast("Reminder Added".tr());
+                  Utils.showToast("Reminder Added");
                   Navigator.pop(context);
 
                 } else {
@@ -172,7 +172,7 @@ class _NewEventReminder extends State<NewEventReminder>
 
                   EventsDatabaseHelper.insertNewEvent(myevent);
                   Utils.showNotification(Utils.generateRandomNumber(), myevent.event_name!, myevent.event_detail!, notification_time);
-                  Utils.showToast("Reminder Added".tr());
+                  Utils.showToast("Reminder Added");
                   Navigator.pop(context);
                 }
               }

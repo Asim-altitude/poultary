@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:poultary/app_intro/image_slider.dart';
 import 'package:poultary/model/flock_detail.dart';
 import 'package:poultary/model/flock_image.dart';
 import 'package:poultary/model/weight_record.dart';
+import 'package:poultary/multiuser/utils/SyncManager.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/suggested_notifcations.dart';
 import 'package:poultary/transactions_screen.dart';
@@ -33,7 +35,11 @@ import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
 import 'multiuser/api/server_apis.dart';
+import 'multiuser/model/birds_modification.dart';
 import 'multiuser/model/user.dart';
+import 'multiuser/utils/FirebaseUtils.dart';
+import 'multiuser/utils/RefreshMixin.dart';
+import 'multiuser/utils/SyncStatus.dart';
 
 class SingleFlockScreen extends StatefulWidget {
   const SingleFlockScreen({Key? key}) : super(key: key);
@@ -43,11 +49,31 @@ class SingleFlockScreen extends StatefulWidget {
 }
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProviderStateMixin{
+class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProviderStateMixin, RefreshMixin{
 
+  @override
+  void onRefreshEvent(String event) async {
+    try {
+      if (event == FireBaseUtils.FLOCKS) {
+        Flock? flock = await DatabaseHelper.getSingleFlock(Utils.selected_flock!.f_id);
+        if(flock == null){
+          Utils.showToast("Flock is Deleted".tr());
+          Navigator.pop(context);
+        }else{
+          Utils.selected_flock = flock;
+          setState(() {
+
+          });
+        }
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
   double widthScreen = 0;
   double heightScreen = 0;
-
+  bool ageInWeeks = false;
   @override
   void dispose() {
     super.dispose();
@@ -79,7 +105,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
    print(images);
 
    byteimages.clear();
-   for(int i=0;i<images.length;i++){
+   for(int i=0;i<images.length;i++) {
      Uint8List bytesImage = const Base64Decoder().convert(images.elementAt(i).image);
      byteimages.add(bytesImage);
      print("IMAGE_ID "+images.elementAt(i).id.toString());
@@ -93,6 +119,16 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
    }
 
   }
+
+  Future<List<Flock_Image>> getSavedImages() async {
+
+    await DatabaseHelper.instance.database;
+
+    List<Flock_Image> fimages = await DatabaseHelper.getFlockImage(Utils.selected_flock!.f_id);
+
+    return fimages;
+  }
+
 
   bool imagesAdded = false;
 
@@ -125,6 +161,10 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
       await DatabaseHelper.createCategoriesDataTable();
 
       defaultcategories.addAll(categories);
+
+      await DatabaseHelper.instance.addSyncColumnsToTable("CustomCategoryData");
+      await DatabaseHelper.instance.assignSyncIds("CustomCategoryData");
+
     }catch(ex){
 
     }
@@ -133,7 +173,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     setState(() {});
   }
 
-  void addEggColorColumn() async{
+  void addEggColorColumn() async {
     DatabaseHelper.instance.database;
     await DatabaseHelper.addEggColorColumn();
     print("DONE");
@@ -364,13 +404,22 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                   Text('Age'.tr() + ": ",
                                       style: const TextStyle(fontSize: 12, color: Colors.white70)),
                                   Text(
-                                    Utils.getAnimalAge(Utils.selected_flock!.acqusition_date),
+                                    ageInWeeks? Utils.getAnimalAgeWeeks(Utils.selected_flock!.acqusition_date):Utils.getAnimalAge(Utils.selected_flock!.acqusition_date),
                                     style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
                                     ),
                                   ),
+                                  SizedBox(width: 10,),
+                                  InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        ageInWeeks = !ageInWeeks;
+                                      });
+                                    },
+                                      child: const Icon(Icons.switch_camera_outlined, color: Colors.white70, size: 22)),
+
                                 ],
                               ),
 
@@ -1045,9 +1094,22 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                           return InkWell(
                             onTap: () {
                               if (index == 0) {
+
+                                if(Utils.isMultiUSer && !Utils.hasFeaturePermission("view_birds"))
+                                {
+                                  Utils.showMissingPermissionDialog(context, "view_birds");
+                                  return;
+                                }
+
                                 print("Birds Modification");
                                 moveToAddReduceFlock();
                               } else if (index == 1) {
+                                if(Utils.isMultiUSer && !Utils.hasFeaturePermission("view_eggs"))
+                                {
+                                  Utils.showMissingPermissionDialog(context, "view_eggs");
+                                  return;
+                                }
+
                                 print("Egg Collection");
                                 Navigator.push(
                                   context,
@@ -1055,24 +1117,50 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                       builder: (context) => const EggCollectionScreen()),
                                 );
                               } else if (index == 2) {
+
+                                if(Utils.isMultiUSer && !Utils.hasFeaturePermission("view_feed"))
+                                {
+                                  Utils.showMissingPermissionDialog(context, "view_feed");
+                                  return;
+                                }
+
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => const DailyFeedScreen()),
                                 );
                               } else if (index == 3) {
+                                if(Utils.isMultiUSer && !Utils.hasFeaturePermission("view_health"))
+                                {
+                                  Utils.showMissingPermissionDialog(context, "view_health");
+                                  return;
+                                }
+
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => const MedicationVaccinationScreen()),
                                 );
                               } else if (index == 4) {
+
+                                if(Utils.isMultiUSer && !Utils.hasFeaturePermission("view_transaction"))
+                                {
+                                  Utils.showMissingPermissionDialog(context, "view_transaction");
+                                  return;
+                                }
+
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => const TransactionsScreen()),
                                 );
                               } else {
+                                if(Utils.isMultiUSer && !Utils.hasFeaturePermission("view_custom_category"))
+                                {
+                                  Utils.showMissingPermissionDialog(context, "view_custom_category");
+                                  return;
+                                }
+
                                 _showOptions(index);
                               }
                             },
@@ -1506,6 +1594,31 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     });
   }
 
+  List<String> flock_urls = [];
+  Future<void> getFlockImagesFirestore(Flock flock, String farmId) async {
+    final query = FirebaseFirestore.instance
+        .collection(FireBaseUtils.FLOCK_IMAGES)
+        .where('farm_id', isEqualTo: farmId)
+        .where('f_sync_id', isEqualTo: flock.sync_id); // Use correct field name
+
+    final snapshot = await query.get();
+
+    for (var doc in snapshot.docs) {
+      final data = doc.data();
+      final List<dynamic>? imageUrls = data['image_urls'];
+
+      if (imageUrls != null && imageUrls.isNotEmpty) {
+        flock_urls = imageUrls.cast<String>();
+        print("🖼️ Flock Image URLs: $flock_urls");
+
+        // TODO: Save URLs to SQLite or use them as needed
+      } else {
+        print("⚠️ No images found for flock: ${data['f_sync_id']}");
+      }
+    }
+
+  }
+
 
   void showMemberMenu(Offset offset) async {
     double left = offset.dx;
@@ -1540,25 +1653,55 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     ).then((value) async {
       if (value != null) {
         if(value == 1){
+
+          if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_flocks"))
+          {
+            Utils.showMissingPermissionDialog(context, "delete_flocks");
+            return;
+          }
+
          showDeleteConfirmation(context);
         }
         else if(value == 2)
         {
+
+          if(Utils.isMultiUSer && !Utils.hasFeaturePermission("edit_flocks"))
+            {
+              Utils.showMissingPermissionDialog(context, "edit_flocks");
+
+              return;
+            }
+
          // showAlertDialog(context, Utils.selected_flock!.f_name);
           showEditFlockDialog(context, flock: Utils.selected_flock!, onSave: (flock) async {
             Utils.selected_flock = flock;
             await DatabaseHelper.updateFlockInfo(flock);
-            await insertFlockImages(Utils.selected_flock!.f_id);
+
+            await insertFlockImages(Utils.selected_flock!.f_id, Utils.selected_flock!.sync_id);
             Utils.selected_flock = await DatabaseHelper.getSingleFlock(Utils.selected_flock!.f_id!);
             getImages();
-
+            // UPDATE ON SERVER
+            if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_flocks")) {
+              SyncManager().addModifiedId(flock.f_id.toString());
+              flock.sync_status = SyncStatus.UPDATED;
+              flock.modified_by = Utils.currentUser!.email;
+              flock.last_modified = Utils.getTimeStamp();
+              await FireBaseUtils.updateFlock(flock);
+            }
             setState(() {
 
             });
 
             Navigator.pop(context);
-
           });
+
+          if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_flocks")){
+            getFlockImagesFirestore(Utils.selected_flock!, Utils.currentUser!.farmId);
+          }else{
+
+          }
+
+
         }else
         {
           print(value);
@@ -1584,7 +1727,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
       onPressed:  () async {
         Utils.selected_flock!.f_name = nameController.text;
         await DatabaseHelper.updateFlockName(nameController.text, Utils.selected_flock!.f_id);
-        Utils.showToast("DONE".tr());
+        Utils.showToast("DONE");
         Navigator.pop(context);
         setState(() {
 
@@ -1857,7 +2000,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
               // Save Button
               ElevatedButton.icon(
-                onPressed: () {
+                onPressed: () async {
                   if (_countController.text.isEmpty || selectedDate == null) {
                     Utils.showToast("Please enter count and select date".tr());
                     return;
@@ -1873,6 +2016,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                     DatabaseHelper.updateFlockBirds(
                         active_birds, Utils.selected_flock!.f_id);
 
+
                     Flock_Detail reductionObject = Flock_Detail(
                       f_id: Utils.selected_flock!.f_id,
                       f_name: Utils.selected_flock!.f_name,
@@ -1883,8 +2027,29 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                       reason: selectedType,
                       short_note: note,
                       transaction_id: '-1',
+                      sync_id: Utils.getUniueId(),
+                      sync_status: SyncStatus.SYNCED,
+                      last_modified: Utils.getTimeStamp(),
+                      modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                      farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                      f_sync_id: Utils.selected_flock!.sync_id
                     );
                     DatabaseHelper.insertFlockDetail(reductionObject);
+
+                    if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_birds")){
+                      BirdsModification birdsModify = BirdsModification(flockDetail: reductionObject);
+                      birdsModify.farm_id = Utils.currentUser!.farmId;
+                      birdsModify.modified_by = Utils.currentUser!.email;
+
+                      await FireBaseUtils.uploadBirdsDetails(birdsModify);
+
+                      // UPDATE FLOCK
+                      Flock? flock = Utils.selected_flock;
+                      flock!.active_bird_count = active_birds;
+                      FireBaseUtils.updateFlock(flock);
+
+                    }
+
                     refreshData();
                     Navigator.pop(context);
                   } else {
@@ -2127,11 +2292,28 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
       child: Text("DONE".tr()),
       onPressed:  () async {
 
-        await DatabaseHelper.deleteFlockAndRelatedInfo(Utils.selected_flock!.f_id);
-        Utils.selected_flock = null;
-        Utils.showToast("RECORD_DELETED".tr());
-        Navigator.pop(context);
-        Navigator.pop(context);
+        if(Utils.isMultiUSer) {
+          Utils.selected_flock!.sync_status = SyncStatus.DELETED;
+          bool deleted = await FireBaseUtils.updateFlock(Utils.selected_flock!);
+          if (deleted) {
+            await DatabaseHelper.deleteFlockAndRelatedInfo(
+                Utils.selected_flock!.f_id);
+            Utils.selected_flock = null;
+            Utils.showToast("RECORD_DELETED".tr());
+            Navigator.pop(context);
+            Navigator.pop(context);
+          }else{
+            Utils.showToast("Error_Deleting".tr());
+
+          }
+        }else{
+          await DatabaseHelper.deleteFlockAndRelatedInfo(
+              Utils.selected_flock!.f_id);
+          Utils.selected_flock = null;
+          Utils.showToast("RECORD_DELETED".tr());
+          Navigator.pop(context);
+          Navigator.pop(context);
+        }
       },
     );
 
@@ -2256,6 +2438,13 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     await DatabaseHelper.deleteCategoryData(defaultcategories.elementAt(index).id!);
     await DatabaseHelper.deleteCategory(defaultcategories.elementAt(index).id!);
 
+    if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_custom_category")){
+      defaultcategories[index].sync_status = SyncStatus.DELETED;
+      defaultcategories[index].last_modified = Utils.getTimeStamp();
+      defaultcategories[index].modified_by = Utils.currentUser!.email;
+      await FireBaseUtils.updateCustomCategory(defaultcategories[index]);
+    }
+
     setState(() {
       defaultcategories.removeAt(index);
     });
@@ -2264,6 +2453,14 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
   Future<void> _toggleCategoryStatus(int index) async {
     defaultcategories[index].enabled = defaultcategories[index].enabled == 1? 0:1;
     await DatabaseHelper.updateCategory(defaultcategories[index]);
+
+    if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_custom_category")){
+      defaultcategories[index].sync_status = SyncStatus.UPDATED;
+      defaultcategories[index].last_modified = Utils.getTimeStamp();
+      defaultcategories[index].modified_by = Utils.currentUser!.email;
+      await FireBaseUtils.updateCustomCategory(defaultcategories[index]);
+    }
+
     setState(() {
 
     });
@@ -2343,6 +2540,9 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
             void _removeImageExisting(int index) async{
               print("DELETING "+images[index].id!.toString());
              int result =  await DatabaseHelper.deleteItem("Flock_Image", images[index].id!);
+              if(flock_urls.length > 0){
+                flock_urls.removeAt(index);
+              }
              print("DELETED "+result.toString());
               setState(() {
                 byteimages.removeAt(index);
@@ -2396,7 +2596,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                           String formattedDate = DateFormat('yyyy-MM-dd').format(pickedDate);
                           setState(() {
                             dateController.text = formattedDate;
-                            flock = flock.copyWith(acquisitionDate: formattedDate);
+                            flock = flock.copyWith(acqusition_date: formattedDate);
                           });
                         }
                       },
@@ -2422,7 +2622,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                       onChanged: (newValue) {
                         if (newValue != null) {
                           setState(() {
-                            flock = flock.copyWith(acquisitionType: newValue);
+                            flock = flock.copyWith(acqusition_type: newValue);
                           });
                         }
                       },
@@ -2578,7 +2778,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                         onPressed: () {
                           setState(() {
                             flock = flock.copyWith(
-                              fName: nameController.text,
+                              f_name: nameController.text,
                               notes: descController.text,
                             );
                           });
@@ -2609,6 +2809,18 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     );
   }
 
+
+  Future<List<String>> getBase64Images(List<Flock_Image> images) async {
+
+  List<String> oldImagesBase64 = [];
+
+  for(int i=0;i<images.length;i++){
+  oldImagesBase64.add(images.elementAt(i).image);
+  }
+
+  return oldImagesBase64;
+  }
+
   List<XFile> imageFileList = [];
   void saveImagesDB() async {
 
@@ -2626,29 +2838,97 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
     }
   }
+
+
+
   bool saving_images = false;
   List<String> base64Images = [];
-  Future<void> insertFlockImages(int? id) async {
+  Future<void> insertFlockImages(int f_id, String? id) async {
 
-    print("IMAGES FOUND ${base64Images.length}");
-    if (base64Images.length > 0){
+    if(Utils.isMultiUSer){
+      try {
 
-      for (int i=0;i<base64Images.length;i++){
-        Flock_Image image = Flock_Image(f_id: id,image: base64Images.elementAt(i));
-        await DatabaseHelper.insertFlockImages(image);
-      }
+        setState(() {
+          saving_images = true;
+        });
+        List<Flock_Image> photos = await getSavedImages();
+        List<String> oldPhoto = await getBase64Images(photos);
 
-      if(Utils.isMultiUSer) {
         MultiUser? user = await SessionManager.getUserFromPrefs();
-        List<String> imageUrls = await FlockImageUploader().uploadFlockImages(farmId: user!.farmId,base64Images: base64Images);
+        List<String> imageUrls = await FlockImageUploader().uploadFlockImages(
+            farmId: user!.farmId, base64Images: base64Images);
 
 
+        if(flock_urls.length == 0){
+          List<String> imUrls = await FlockImageUploader().uploadFlockImages(
+              farmId: user.farmId, base64Images: oldPhoto);
+          imageUrls.addAll(imUrls);
+        }else {
+          imageUrls.addAll(flock_urls);
+        }
+
+        final firestore = FirebaseFirestore.instance;
+        //final timestamp = FieldValue.serverTimestamp(); VALID ONLY FOR CREATION
+
+        final imagesCollection = firestore
+            .collection(FireBaseUtils.FLOCK_IMAGES)
+            .doc("${user.farmId}_$id");
+
+        //UPDATE URLS
+       await FireBaseUtils.saveFlockImagesToFirestore(farmId: user.farmId, flockId: Utils.selected_flock!.sync_id!, imageUrls: imageUrls, uploadedBy: user.email);
+
+
+        setState(() {
+          saving_images = false;
+        });
+
+        if (base64Images.length > 0) {
+          for (int i = 0; i < base64Images.length; i++) {
+            Flock_Image image = Flock_Image(
+              f_id: f_id, image: base64Images.elementAt(i),
+              sync_id: Utils.getUniueId(),
+              sync_status: SyncStatus.SYNCED,
+              last_modified: Utils.getTimeStamp(),
+              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+            );
+            DatabaseHelper.insertFlockImages(image);
+          }
+
+          print("Images Inserted");
+
+        }
 
       }
-      print("Images Inserted");
+      catch(ex){
+        setState(() {
+          saving_images = false;
+        });
+        Utils.showToast(ex.toString());
+        print(ex);
+      }
+    } else {
+      if (base64Images.length > 0) {
+        for (int i = 0; i < base64Images.length; i++) {
+          Flock_Image image = Flock_Image(
+              f_id: f_id, image: base64Images.elementAt(i),
+              sync_id: Utils.getUniueId(),
+              sync_status: SyncStatus.SYNCED,
+              last_modified: Utils.getTimeStamp(),
+              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : ''
+          );
+
+          DatabaseHelper.insertFlockImages(image);
+        }
+
+        print("Images Inserted");
+
+      }
     }
 
   }
+
 
 }
 

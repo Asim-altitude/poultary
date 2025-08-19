@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:poultary/model/sub_category_item.dart';
+import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
 
@@ -17,6 +18,8 @@ import 'model/finance_flock_item.dart';
 import 'model/flock.dart';
 import 'model/flock_detail.dart';
 import 'model/transaction_item.dart';
+import 'multiuser/model/financeItem.dart';
+import 'multiuser/utils/SyncStatus.dart';
 
 class NewExpense extends StatefulWidget {
   TransactionItem? transactionItem;
@@ -94,6 +97,7 @@ class _NewExpense extends State<NewExpense>
 
   }
 
+  FinanceItem? financeItem = null;
   int total_brids = 0;
   List<Flock> flocks = [];
   void getList() async {
@@ -105,7 +109,7 @@ class _NewExpense extends State<NewExpense>
       await DatabaseHelper.instance.database;
       flocks = await DatabaseHelper.getFlocks();
       is_specific_flock = true;
-      if(flocks.length > 1){
+      /*if(flocks.length > 1){
         flocks.insert(0, Flock(f_id: -1,
             f_name: 'Farm Wide'.tr(),
             bird_count: 0,
@@ -117,7 +121,7 @@ class _NewExpense extends State<NewExpense>
             active_bird_count: 0,
             active: 1, flock_new: 1));
         is_specific_flock = false;
-      }
+      }*/
 
       for (int i = 0; i < flocks.length; i++) {
         _purposeList.add(flocks.elementAt(i).f_name);
@@ -221,6 +225,7 @@ class _NewExpense extends State<NewExpense>
           choose_option = true;
           is_bird_sale = false;
           purpose_option_invalid = false;
+          isOther = true;
         }else{
           choose_option = false;
           is_bird_sale = false;
@@ -426,7 +431,7 @@ class _NewExpense extends State<NewExpense>
                       if(invalidInput())
                       {
                         activeStep--;
-                        Utils.showToast("PROVIDE_ALL".tr());
+                        Utils.showToast("PROVIDE_ALL");
                       }else {
                         setState(() {
 
@@ -438,7 +443,7 @@ class _NewExpense extends State<NewExpense>
 
                       if(soldtoController.text.trim().length == 0){
                         activeStep--;
-                        Utils.showToast("PROVIDE_ALL".tr());
+                        Utils.showToast("PROVIDE_ALL");
                       }else{
                         setState(() {
 
@@ -452,16 +457,18 @@ class _NewExpense extends State<NewExpense>
                       if(invalidInput() && soldtoController.text.isEmpty)
                       {
                         activeStep--;
-                        Utils.showToast("PROVIDE_ALL".tr());
+                        Utils.showToast("PROVIDE_ALL");
                       }else {
-                        if (isEdit) {
+
+                        if (isEdit)
+                        {
                           await DatabaseHelper.instance.database;
                           TransactionItem transaction_item = TransactionItem(
 
                               f_id: getFlockID(),
                               date: date,
                               sale_item: "",
-                              expense_item: _saleselectedValue,
+                              expense_item: isOther? _mysaleselectedValue : _saleselectedValue,
                               type: "Expense",
                               amount: amountController.text,
                               payment_method: payment_method,
@@ -473,13 +480,28 @@ class _NewExpense extends State<NewExpense>
                               extra_cost: "",
                               extra_cost_details: "",
                               f_name: _purposeselectedValue,
-                              flock_update_id: '-1');
+                              flock_update_id: '-1',
+                              sync_id: widget.transactionItem!.sync_id,
+                              sync_status: SyncStatus.SYNCED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                              f_sync_id: getFlockSyncID());
                           transaction_item.id =
                               widget.transactionItem!.id;
                           int? id = await DatabaseHelper
                               .updateTransaction(transaction_item);
-                          addBirds(widget.transactionItem!.id!);
-                          Utils.showToast("SUCCESSFUL".tr());
+
+                          financeItem = FinanceItem(transaction: transaction_item);
+                          financeItem!.sync_id = transaction_item.sync_id;
+                          financeItem!.sync_status = SyncStatus.UPDATED;
+                          financeItem!.last_modified = Utils.getTimeStamp();
+                          financeItem!.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                          financeItem!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+                          Utils.showToast("SUCCESSFUL");
+
+                          await addBirds(widget.transactionItem!.id!);
                           Navigator.pop(context);
                         }
                         else {
@@ -488,7 +510,7 @@ class _NewExpense extends State<NewExpense>
                               f_id: getFlockID(),
                               date: date,
                               sale_item: "",
-                              expense_item: _saleselectedValue,
+                              expense_item: isOther? _mysaleselectedValue : _saleselectedValue,
                               type: "Expense",
                               amount: amountController.text,
                               payment_method: payment_method,
@@ -500,11 +522,25 @@ class _NewExpense extends State<NewExpense>
                               extra_cost: "",
                               extra_cost_details: "",
                               f_name: _purposeselectedValue,
-                              flock_update_id: '-1');
+                              flock_update_id: '-1',
+                              sync_id: Utils.getUniueId(),
+                              sync_status: SyncStatus.SYNCED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                              f_sync_id: getFlockSyncID());
                           int? id = await DatabaseHelper
                               .insertNewTransaction(transaction_item);
-                          addBirds(id!);
-                          Utils.showToast("SUCCESSFUL".tr());
+
+                          financeItem = FinanceItem(transaction: transaction_item);
+                          financeItem!.sync_id = transaction_item.sync_id;
+                          financeItem!.sync_status = SyncStatus.SYNCED;
+                          financeItem!.last_modified = Utils.getTimeStamp();
+                          financeItem!.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                          financeItem!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+                          Utils.showToast("SUCCESSFUL");
+                          await addBirds(id!);
                           Navigator.pop(context);
                         }
                       }
@@ -1515,7 +1551,18 @@ class _NewExpense extends State<NewExpense>
     return valid;
 
   }
+  String? getFlockSyncID() {
 
+    String? selected_id = "unknown";
+    for(int i=0;i<flocks.length;i++){
+      if(_purposeselectedValue.toLowerCase() == flocks.elementAt(i).f_name.toLowerCase()){
+        selected_id = flocks.elementAt(i).sync_id;
+        break;
+      }
+    }
+
+    return selected_id;
+  }
 
   int getFlockID() {
 
@@ -1904,11 +1951,10 @@ class _NewExpense extends State<NewExpense>
         active_birds = active_birds + int.parse(howmanyController.text);
         print(active_birds);
 
-        DatabaseHelper.updateFlockBirds(
-            active_birds, getFlockID());
+        DatabaseHelper.updateFlockBirds(active_birds, getFlockID());
+        uploadBirdsToServer(getFlockID(), active_birds);
 
-        int? flock_detail_id = await DatabaseHelper
-            .insertFlockDetail(Flock_Detail(
+        Flock_Detail flock_detail = Flock_Detail(
             f_id: getFlockID(),
             item_type: 'Addition',
             item_count: int.parse(
@@ -1918,15 +1964,27 @@ class _NewExpense extends State<NewExpense>
             reason: "",
             short_note: notesController.text,
             f_name: _purposeselectedValue,
-            transaction_id: transactionn_id.toString()
+            transaction_id: transactionn_id.toString(),
+            sync_id: Utils.getUniueId(),
+            sync_status: SyncStatus.SYNCED,
+            last_modified: Utils.getTimeStamp(),
+            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+            f_sync_id: getFlockSyncID()
+        );
+        int? flock_detail_id = await DatabaseHelper.insertFlockDetail(flock_detail);
 
-        ));
-
+        financeItem!.flockDetails = [];
+        financeItem!.flockDetails?.add(flock_detail);
         await DatabaseHelper.updateLinkedTransaction(transactionn_id.toString(), flock_detail_id.toString());
 
+        if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_transaction")) {
+          await FireBaseUtils.uploadExpenseRecord(financeItem!);
+        }
       }
 
-    }else if(is_specific_flock && is_bird_sale && isEdit){
+    }
+    else if(is_specific_flock && is_bird_sale && isEdit){
       try {
         print("SPECIFIC FLOCK+BIRDSALE+EDIT");
 
@@ -1934,7 +1992,7 @@ class _NewExpense extends State<NewExpense>
 
         if (f_detail_id != -1) {
           Flock_Detail? flock_detail = await DatabaseHelper.getSingleFlockDetails(f_detail_id);
-          if(flock_detail!= null){
+          if(flock_detail!= null) {
             int first_addition = flock_detail.item_count;
             int second_addition = int.parse(howmanyController.text);
             if(first_addition > second_addition){
@@ -1942,18 +2000,44 @@ class _NewExpense extends State<NewExpense>
               int current_active = getActiveBirdsbyFlock(getFlockID());
               current_active = current_active - diff;
               await DatabaseHelper.updateFlockBirds(current_active, getFlockID());
-              Flock_Detail flock_detail_1 = Flock_Detail(f_id: getFlockID(), f_name: _purposeselectedValue, item_type: flock_detail.item_type, item_count: second_addition, acqusition_type: flock_detail.acqusition_type, acqusition_date: flock_detail.acqusition_date, reason: '', short_note:  notesController.text, transaction_id: transactionn_id.toString());
+              uploadBirdsToServer(getFlockID(), current_active);
+              Flock_Detail flock_detail_1 = Flock_Detail(f_id: getFlockID(), f_name: _purposeselectedValue, item_type: flock_detail.item_type, item_count: second_addition, acqusition_type: flock_detail.acqusition_type, acqusition_date: flock_detail.acqusition_date, reason: '', short_note:  notesController.text, transaction_id: transactionn_id.toString(),
+                  sync_id: flock_detail.sync_id,
+                  sync_status: SyncStatus.UPDATED,
+                  last_modified: Utils.getTimeStamp(),
+                  modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                  farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                  f_sync_id: getFlockSyncID());
               flock_detail_1.f_detail_id = f_detail_id;
               await DatabaseHelper.updateFlock(flock_detail_1);
+
+              financeItem!.flockDetails = [];
+              financeItem!.flockDetails?.add(flock_detail_1);
+              if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_transaction")) {
+                await FireBaseUtils.updateExpenseRecord(financeItem!);
+              }
               Navigator.pop(context);
             }else{
               int diff = second_addition - first_addition;
               int current_active = getActiveBirdsbyFlock(getFlockID());
               current_active = current_active + diff;
               await DatabaseHelper.updateFlockBirds(current_active, getFlockID());
-              Flock_Detail flock_detail_1 = Flock_Detail(f_id: getFlockID(), f_name: _purposeselectedValue, item_type: flock_detail.item_type, item_count: second_addition, acqusition_type: flock_detail.acqusition_type, acqusition_date: flock_detail.acqusition_date, reason: '', short_note:  notesController.text, transaction_id: transactionn_id.toString());
+              uploadBirdsToServer(getFlockID(), current_active);
+              Flock_Detail flock_detail_1 = Flock_Detail(f_id: getFlockID(), f_name: _purposeselectedValue, item_type: flock_detail.item_type, item_count: second_addition, acqusition_type: flock_detail.acqusition_type, acqusition_date: flock_detail.acqusition_date, reason: '', short_note:  notesController.text, transaction_id: transactionn_id.toString(),
+                  sync_id: flock_detail.sync_id,
+                  sync_status: SyncStatus.UPDATED,
+                  last_modified: Utils.getTimeStamp(),
+                  modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                  farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                  f_sync_id: getFlockSyncID());
               flock_detail_1.f_detail_id = f_detail_id;
               await DatabaseHelper.updateFlock(flock_detail_1);
+
+              financeItem!.flockDetails = [];
+              financeItem!.flockDetails?.add(flock_detail_1);
+              if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_transaction")) {
+                await FireBaseUtils.updateExpenseRecord(financeItem!);
+              }
               Navigator.pop(context);
 
             }
@@ -1964,7 +2048,8 @@ class _NewExpense extends State<NewExpense>
       }catch(ex){
         print(ex);
       }
-    }else if(!is_specific_flock && is_bird_sale && !isEdit){
+    }
+    else if(!is_specific_flock && is_bird_sale && !isEdit){
       print("FARMWIDE+BIRDSALE+NEW");
 
       for(int i = 0;i<financeList.length;i++){
@@ -1973,22 +2058,43 @@ class _NewExpense extends State<NewExpense>
         }
       }
       await DatabaseHelper.updateLinkedTransaction(transactionn_id.toString(), farm_wide_f_detail_id);
-
-    }else if(!is_specific_flock && is_bird_sale && isEdit){
+      if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_transaction")) {
+        await FireBaseUtils.uploadExpenseRecord(financeItem!);
+      }
+    }
+    else if(!is_specific_flock && is_bird_sale && isEdit){
       print("FARMWIDE+BIRDSALE+EDIT");
       for(int i = 0;i<financeList.length;i++){
         await addBirdsFarmWideEdit(i);
       }
       await DatabaseHelper.updateLinkedTransaction(transactionn_id.toString(), farm_wide_f_detail_id);
-
+      if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_transaction")) {
+        await FireBaseUtils.updateExpenseRecord(financeItem!);
+      }
     }
+    else
+    {
+      if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_transaction")) {
+        await FireBaseUtils.uploadExpenseRecord(financeItem!);
+      }
+    }
+  }
 
+  Future<void> uploadBirdsToServer(int id, int active_birds) async{
+    if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_transaction")){
+      Flock? flock = await DatabaseHelper.getSingleFlock(id);
+      flock!.active_bird_count = active_birds;
+      await FireBaseUtils.updateFlock(flock);
+    }
   }
 
   String farm_wide_f_detail_id = "";
   Future<int> addBirdsFarmWide(int index, int transactionn_id) async{
 
     try {
+      if(financeItem!.flockDetails == null)
+         financeItem!.flockDetails = [];
+
       print("reduceBirdsFarmWide $index $transactionn_id");
       FinanceFlockItem financeFlockItem = financeList.elementAt(index);
 
@@ -1998,10 +2104,10 @@ class _NewExpense extends State<NewExpense>
 
         print(active_birds);
         DatabaseHelper.updateFlockBirds(active_birds, financeFlockItem.id!);
+        uploadBirdsToServer(financeFlockItem.id!, active_birds);
         print("reduceBirdsFarmWide BIRDS UPDATED $active_birds ${financeFlockItem.name}");
 
-        int? flock_detail_id = await DatabaseHelper
-            .insertFlockDetail(Flock_Detail(
+        Flock_Detail flock_detail = Flock_Detail(
             f_id: financeFlockItem.id!,
             item_type: 'Addition',
             item_count: financeFlockItem.selected_birds,
@@ -2010,7 +2116,18 @@ class _NewExpense extends State<NewExpense>
             reason: '',
             short_note: notesController.text,
             f_name: financeFlockItem.name,
-            transaction_id: transactionn_id.toString()));
+            transaction_id: transactionn_id.toString(),
+            sync_id: Utils.getUniueId(),
+            sync_status: SyncStatus.SYNCED,
+            last_modified: Utils.getTimeStamp(),
+            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+            f_sync_id: getFlockSyncID());
+
+        int? flock_detail_id = await DatabaseHelper
+            .insertFlockDetail(flock_detail);
+
+        financeItem!.flockDetails?.add(flock_detail);
 
         if (index == 0)
           farm_wide_f_detail_id = flock_detail_id.toString();
@@ -2027,7 +2144,11 @@ class _NewExpense extends State<NewExpense>
 
     return 0;
   }
-  Future<int> addBirdsFarmWideEdit(int index) async{
+  Future<int> addBirdsFarmWideEdit(int index) async {
+
+    if(financeItem!.flockDetails == null)
+      financeItem!.flockDetails = [];
+
     FinanceFlockItem financeFlockItem = financeList.elementAt(index);
 
     int f_detail_id = int.parse(widget.transactionItem!.flock_update_id.split(",")[index]);
@@ -2066,10 +2187,18 @@ class _NewExpense extends State<NewExpense>
         reason: '',
         short_note: notesController.text,
         f_name: financeFlockItem.name,
-        transaction_id: widget.transactionItem!.id.toString());
+        transaction_id: widget.transactionItem!.id.toString(),
+        sync_id: flock_detail.sync_id,
+        sync_status: SyncStatus.UPDATED,
+        last_modified: Utils.getTimeStamp(),
+        modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+        farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+        f_sync_id: getFlockSyncID());
     object.f_detail_id = f_detail_id;
 
     await DatabaseHelper.updateFlock(object);
+
+    financeItem!.flockDetails?.add(object);
 
 
     if (index == 0)

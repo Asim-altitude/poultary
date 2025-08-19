@@ -1,17 +1,24 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:poultary/multiuser/api/server_apis.dart';
 
 import '../../database/databse_helper.dart';
+import '../../utils/utils.dart';
 import '../model/role.dart';
 import '../model/user.dart';
 import '../model/user_logs.dart';
 import '../utils/FirebaseUtils.dart';
 
 class UserEditScreen extends StatefulWidget {
-  final MultiUser user;
+  MultiUser user;
 
-  const UserEditScreen({Key? key, required this.user}) : super(key: key);
+  UserEditScreen({Key? key, required this.user}) : super(key: key);
 
   @override
   State<UserEditScreen> createState() => _UserEditScreenState();
@@ -23,16 +30,29 @@ class _UserEditScreenState extends State<UserEditScreen> {
   @override
   void initState() {
     super.initState();
-    loadRoles();
+    fetchRoles();
   }
 
+  String imageUrl = '';
   UserLog? userLog = null;
-  Future<void> loadRoles() async {
-    List<Role> roles = await DatabaseHelper.getAllRoles();
-    userLog = await fetchUserLogs(widget.user.farmId);
 
+
+  Future<List<String>> loadRolesByFarm(String farmId) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('roles')
+        .where('farm_id', isEqualTo: farmId)
+        .get();
+
+    return querySnapshot.docs
+        .map((doc) => Role.fromJson(doc.data()).name)
+        .toList();
+  }
+
+  Future<void> fetchRoles() async {
+
+    String farmID = Utils.currentUser!.farmId;
+    availableRoles = await loadRolesByFarm(farmID);
     setState(() {
-      availableRoles = roles.map((role) => role.name).toList();
     });
   }
 
@@ -76,6 +96,24 @@ class _UserEditScreenState extends State<UserEditScreen> {
     final nameController = TextEditingController(text: widget.user.name);
     String selectedRole = widget.user.role;
     bool isActive = widget.user.active; // assuming 1 = active, 0 = inactive
+    XFile? selectedImage; // picked image file
+    String? imageUrl = widget.user.image; // existing image
+
+
+    Future<void> pickImage(Function setModalState) async {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80, // reduce size for faster upload
+      );
+
+      if (pickedFile != null) {
+        setModalState(() {
+          selectedImage = pickedFile; // your XFile? variable
+        });
+      }
+    }
+
 
     return showModalBottomSheet(
       context: context,
@@ -96,8 +134,41 @@ class _UserEditScreenState extends State<UserEditScreen> {
               children: [
                 Center(
                   child: Text(
-                    "Edit User",
+                    "Edit User".tr(),
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                // Profile Picture
+                Center(
+                  child: Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundImage: selectedImage != null
+                            ? FileImage(File(selectedImage!.path))
+                            : (imageUrl != null && imageUrl!.isNotEmpty)
+                            ? NetworkImage(imageUrl!) as ImageProvider
+                            : null, // No image when we want to show the icon
+                        child: (selectedImage == null && (imageUrl == null || imageUrl!.isEmpty))
+                            ? Icon(Icons.person, size: 50, color: Colors.blue)
+                            : null,
+                        backgroundColor: Colors.blue.shade100,
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: InkWell(
+                          onTap: () {
+                            pickImage(setModalState);
+                          },
+                          child: CircleAvatar(
+                            backgroundColor: Colors.indigo,
+                            radius: 18,
+                            child: Icon(Icons.camera_alt, size: 18, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 SizedBox(height: 24),
@@ -107,7 +178,7 @@ class _UserEditScreenState extends State<UserEditScreen> {
                   child: TextField(
                     controller: nameController,
                     decoration: InputDecoration(
-                      labelText: "Name",
+                      labelText: "Name".tr(),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
@@ -119,7 +190,7 @@ class _UserEditScreenState extends State<UserEditScreen> {
                     enabled: false,
                     controller: TextEditingController(text: widget.user.email),
                     decoration: InputDecoration(
-                      labelText: "Email",
+                      labelText: "Email".tr(),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
@@ -130,7 +201,7 @@ class _UserEditScreenState extends State<UserEditScreen> {
                   child: DropdownButtonFormField<String>(
                     value: selectedRole,
                     decoration: InputDecoration(
-                      labelText: "Role",
+                      labelText: "Role".tr(),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     items: availableRoles.map((role) {
@@ -143,7 +214,7 @@ class _UserEditScreenState extends State<UserEditScreen> {
                 ),
 
                 SwitchListTile(
-                  title: Text("Active"),
+                  title: Text("Active".tr()),
                   value: isActive,
                   onChanged: (value) {
                     setModalState(() {
@@ -159,7 +230,7 @@ class _UserEditScreenState extends State<UserEditScreen> {
                   child: ElevatedButton.icon(
                     icon: Icon(Icons.save_alt, color: Colors.white),
                     label: Text(
-                      "Save Changes",
+                      "SAVE".tr(),
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -170,28 +241,53 @@ class _UserEditScreenState extends State<UserEditScreen> {
                       ),
                     ),
                     onPressed: () async {
-                      final updatedUser = MultiUser(
-                        name: nameController.text.trim(),
-                        email: widget.user.email,
-                        role: selectedRole,
-                        password: widget.user.password,
-                        farmId: widget.user.farmId,
-                        createdAt: widget.user.createdAt,
-                        active: isActive,
-                      );
 
-                      await DatabaseHelper.updateUser(updatedUser);
-                      await updateUserInFirestore(updatedUser);
+                      try {
+                        Utils.showLoading();
+                        String userId = widget.user.email
+                            .split('@')
+                            .first;
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("User updated successfully")),
-                      );
+                       File file = await Utils.convertToJPGFileIfRequiredWithCompression(File(selectedImage!.path));
 
-                      setState(() {
-                        widget.user.name = updatedUser.name;
-                        widget.user.role = updatedUser.role;
-                        widget.user.active = updatedUser.active;
-                      });
+
+                        final bytes = await file.readAsBytes();
+                        final base64Image = 'data:image/jpeg;base64,${base64Encode(
+                            bytes)}';
+                        imageUrl = await FlockImageUploader()
+                            .uploadProfilePicture(
+                            userId: userId, base64Image: base64Image);
+
+
+                        final updatedUser = MultiUser(
+                          name: nameController.text.trim(),
+                          email: widget.user.email,
+                          role: selectedRole,
+                          image: imageUrl!,
+                          password: widget.user.password,
+                          farmId: widget.user.farmId,
+                          createdAt: widget.user.createdAt,
+                          active: isActive,
+                        );
+
+                        await updateUserInFirestore(updatedUser);
+
+                        try{
+                          await DatabaseHelper.updateUser(updatedUser);
+                        }catch(e){
+                          print(e);
+                        }
+
+                        setState(() {
+                          widget.user = updatedUser;
+                        });
+
+                        Utils.hideLoading();
+                      }
+                      catch(ex){
+                        Utils.showError();
+                        print(ex);
+                      }
 
                       Navigator.pop(context);
                     },
@@ -216,9 +312,12 @@ class _UserEditScreenState extends State<UserEditScreen> {
 
     if (query.docs.isNotEmpty) {
       final docId = query.docs.first.id;
-      await FirebaseFirestore.instance.collection(FireBaseUtils.USERS).doc(docId).update({
+      await FirebaseFirestore.instance.collection(FireBaseUtils.USERS)
+          .doc(docId)
+          .update({
         'name': user.name,
         'role': user.role,
+        'image' : user.image,
         'active': user.active ? 1 : 0,
         'updated_at': DateTime.now().toIso8601String(),
       });
@@ -249,7 +348,12 @@ class _UserEditScreenState extends State<UserEditScreen> {
                 CircleAvatar(
                   radius: 40,
                   backgroundColor: Colors.blue.shade100,
-                  child: Icon(Icons.person, size: 40, color: Colors.blue),
+                  backgroundImage: (widget.user.image != null && widget.user.image!.isNotEmpty)
+                      ? NetworkImage(widget.user.image!)
+                      : null,
+                  child: (widget.user.image == null || widget.user.image!.isEmpty)
+                      ? Icon(Icons.person, size: 40, color: Colors.blue)
+                      : null,
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -264,13 +368,26 @@ class _UserEditScreenState extends State<UserEditScreen> {
                 const SizedBox(height: 8),
                 Chip(label: Text(widget.user.role), backgroundColor: Colors.indigo.shade100),
                 const SizedBox(height: 16),
+                InkWell(
+                  onTap: () {
+                    Utils.shareSubUserCredentials(name: widget.user.name, email: widget.user.email, password: widget.user.password, farmID: widget.user.farmId);
+                  },
+                  child: Row(
+                    children: [
+                      Icon(Icons.share, size: 20, color: Colors.blue,),
+                      const SizedBox(width: 8),
+                      Text('Share Credentials', style: TextStyle(fontSize: 14, color: Colors.black, ),)
+                    ],
+
+                  ),
+                ),
                 Divider(),
                 const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _infoTile("Last Sign In", userLog==null? "Unknown": userLog!.lastSigned.toString()),
-                    _infoTile("Records Modified", userLog==null? "NO" : userLog!.dataChanges),
+                   // _infoTile("Records Modified", userLog==null? "NO" : userLog!.dataChanges),
                   ],
                 ),
               ],

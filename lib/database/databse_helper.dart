@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:googleapis/connectors/v1.dart';
 import 'package:poultary/model/egg_item.dart';
 import 'package:poultary/model/flock.dart';
 import 'package:poultary/model/med_vac_item.dart';
@@ -47,8 +48,12 @@ import '../model/vaccine_stock_summary.dart';
 import '../model/weight_record.dart';
 import '../multiuser/model/permission.dart';
 import '../multiuser/model/role.dart';
+import '../multiuser/model/sync_queue.dart';
 import '../multiuser/model/user.dart';
+import '../multiuser/utils/SyncStatus.dart';
 import '../utils/utils.dart';
+import 'package:uuid/uuid.dart';
+
 class DatabaseHelper  {
   static const _databaseName = "assets/poultary.db";
 
@@ -68,6 +73,7 @@ class DatabaseHelper  {
     return _database;
 
   }
+
   Future<Database> _init() async {
     var databasesPath = await getDatabasesPath();
     var path = join(databasesPath, _databaseName);
@@ -96,8 +102,99 @@ class DatabaseHelper  {
         print("Opening existing database");
     }
 // open the database
-    return await openDatabase(path, readOnly: false);
+    return await openDatabase(path,readOnly: false, /*onUpgrade: (db, oldVersion, newVersion) async {
+      if (oldVersion < 1) {
+
+
+
+        List<String> tables = [
+          'Flock',
+          'Flock_Image',
+          'Eggs',
+          'Feeding',
+          'Transactions',
+          'Vaccination_Medication',
+          'Category_Detail',
+          'EggTransaction',
+          'FeedBatch',
+          'FeedBatchItem',
+          'FeedIngredient',
+          'FeedStockHistory',
+          'Flock_Detail',
+          'MedicineStockHistory',
+          'SaleContractor',
+          'ScheduledNotification',
+          'VaccineStockHistory',
+          'WeightRecord',
+          'StockExpense',
+
+        ]; // Add your actual table names
+
+        for (final table in tables) {
+          await addSyncColumnsToTable( table);
+          await assignSyncIds(table);
+        }
+      }
+    }*/);
   }
+
+  Future<void> addSyncColumnsToTable(String tableName) async {
+    final columns = await _getTableColumns( tableName);
+
+    try{
+      Future<void> addColumn(String name, String type) async {
+        if (!columns.contains(name)) {
+          await _database?.execute('ALTER TABLE $tableName ADD COLUMN $name $type');
+        }
+      }
+
+      await addColumn('sync_id', 'TEXT');
+      await addColumn('sync_status', 'TEXT');
+      await addColumn('last_modified', 'INTEGER');
+      await addColumn('modified_by', 'TEXT');
+      await addColumn('farm_id', 'TEXT');
+    }
+    catch(ex){
+      print(ex);
+    }
+
+    print("Colums ADDED");
+  }
+
+  Future<void> assignSyncIds( String tableName) async {
+    final uuid = Uuid();
+
+    try {
+      final List<Map<String, Object?>>? rows = await _database?.query(
+        tableName,
+        where: 'sync_id IS NULL OR sync_id = ""',
+      );
+
+      for (final row in rows!) {
+        final id = row['id']; // assuming each row has an `id` column
+        final newSyncId = uuid.v4();
+        await _database?.update(
+          tableName,
+          {'sync_id': newSyncId},
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+
+    print("IDS Assigned");
+  }
+
+
+// Helper: Get column names for a table
+  Future<List<String>> _getTableColumns(String tableName) async {
+    final result = await _database?.rawQuery('PRAGMA table_info($tableName)');
+    return result!.map((row) => row['name'] as String).toList();
+  }
+
 
   static Future<File> getFilePathDB() async {
     // File result = await _db.dBToCopy();
@@ -193,6 +290,21 @@ class DatabaseHelper  {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
 
+  }
+
+  static Future<void> createSyncFailedTable() async {
+    await _database?.execute('''
+      CREATE TABLE IF NOT EXISTS SyncQueue(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  type TEXT,                     
+  payload TEXT,                  
+  sync_id TEXT,  
+  operation_type TEXT,               
+  retry_count INTEGER DEFAULT 0,
+  last_error TEXT,
+  created_at TEXT
+)
+  ''');
   }
 
   static Future<void> createSaleContractorTable() async {
@@ -301,9 +413,318 @@ class DatabaseHelper  {
   ''');
   }
 
+  static Future<void> saveToSyncQueue({
+    required String type,
+    required String syncId,
+    required String payload,
+    required String opType,
+    String? lastError,
+  }) async {
+    await _database?.insert("SyncQueue", {
+      'type': type,
+      'sync_id': syncId,
+      'payload': payload,
+      'retry_count': 0,
+      'operation_type' : opType,
+      'last_error': lastError,
+      'created_at': DateTime.now().toIso8601String(),
+    });
+  }
+
+  static Future<void> updateSyncQueueError({required int id, required String error,required int retryCount}) async {
+    await _database?.update(
+      'SyncQueue',
+      {
+        'retry_count': retryCount,
+        'last_error': error,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+
+  static Future<List<SyncQueue>?> getAllSyncQueueItems(String syncId) async {
+    try {
+      final List<Map<String, dynamic>> maps = await _database!.query(
+        'SyncQueue',
+        where: 'sync_id = ?',
+        whereArgs: [syncId],
+      );
+
+      return maps.map((map) => SyncQueue.fromMap(map)).toList();
+    } catch (ex) {
+      print('Error fetching sync queue items: $ex');
+      return null;
+    }
+  }
+
+
+
+  static Future<void> deleteSyncQueueRecord(int id) async {
+    await _database?.delete('SyncQueue', where: 'id = ?', whereArgs: [id]);
+  }
+
+
+  static Future<bool> checkIfRecordExistsSyncID(String table, String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      table,                        // Your table name
+      columns: ['sync_id'],
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    return result!.isNotEmpty;
+  }
+
+  static Future<bool> checkFlockBySyncID(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'Flock',                        // Your table name
+      columns: ['sync_id'],
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    return result!.isNotEmpty;
+  }
+
+  static Future<FeedBatch?> getFeedBatchById(int Id) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'FeedBatch',
+      where: 'id = ?',
+      whereArgs: [Id],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return FeedBatch.fromJson(result.first);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<FeedBatch?> getFeedBatchBySyncId(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'FeedBatch',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return FeedBatch.fromMap(result.first);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<Feeding?> getFeedingBySyncId(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'Feeding',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return Feeding.fromJson(result.first);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<VaccineStockHistory?> getVaccineStockHistotyBySyncID(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'VaccineStockHistory',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return VaccineStockHistory.fromMap(result.first);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<MedicineStockHistory?> getMedicineStockHistotyBySyncID(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'MedicineStockHistory',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return MedicineStockHistory.fromJson(result.first);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<FeedStockHistory?> getFeedStockHistotyBySyncID(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'FeedStockHistory',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return FeedStockHistory.fromJson(result.first);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<CustomCategoryData?> getCustomCategoryDataBySyncId(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'CustomCategoryData',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return CustomCategoryData.fromJson(result.first);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<SaleContractor?> getSaleContractorBySyncId(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'SaleContractor',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return SaleContractor.fromMap(result.first);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<WeightRecord?> getWeightRecordBySyncId(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'WeightRecord',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return WeightRecord.fromJson(result.first);
+    } else {
+      return null;
+    }
+  }
+
+
+  static Future<SubItem?> getSubCategoryBySyncId(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'Category_Detail',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return SubItem.fromJson(result.first);
+    } else {
+      return null;
+    }
+  }
+
+
+  static Future<CustomCategory?> getCustomCategoryBySyncId(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'CustomCategory',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return CustomCategory.fromJson(result.first);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<FeedIngredient?> getFeedIngredientBySyncId(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'FeedIngredient',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return FeedIngredient.fromMap(result.first);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<TransactionItem?> getTransactionBySyncId(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'Transactions',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return TransactionItem.fromJson(result.first);
+    } else {
+      return null;
+    }
+  }
+
+
+  static Future<Vaccination_Medication?> getVaccinationBySyncId(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'Vaccination_Medication',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return Vaccination_Medication.fromJson(result.first);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<Flock?> getFlockBySyncId(String? syncId) async {
+
+    if(syncId == null || syncId == "")
+      return Flock(f_id: -1, f_name: "Farm Wide", purpose: "All Purpose", icon: "", acqusition_type: "", acqusition_date: "", notes: "notes");
+
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'Flock',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return Flock.fromMap(result.first);
+    } else {
+      return null;
+    }
+  }
+
   static Future<int?> insertUser(MultiUser user) async {
 
-    return await _database?.insert('User', user.toMap(),
+    return await _database?.insert('User', user.toLocalMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
@@ -328,11 +749,10 @@ class DatabaseHelper  {
   }
 
 
-
   static Future<int?> updateUser(MultiUser user) async {
     return await  _database?.update(
       'User',
-      user.toMap(),
+      user.toLocalMap(),
       where: 'email = ?',
       whereArgs: [user.email],
     );
@@ -482,10 +902,8 @@ class DatabaseHelper  {
   }
 
 // Delete
-  static Future<int> deleteWeightRecord(int id) async {
-    final db = _database;
-    if (db == null) return 0;
-    return await db.delete(
+  static Future<int?> deleteWeightRecord(int id) async {
+    return await _database?.delete(
       'WeightRecord',
       where: 'id = ?',
       whereArgs: [id],
@@ -1010,6 +1428,45 @@ class DatabaseHelper  {
 
   }
 
+  static Future<Eggs?> getSingleEggsByID(int id) async {
+
+    final map = await _database?.rawQuery(
+        "SELECT * FROM Eggs WHERE id = ?",[id]
+    );
+
+    if (map!.isNotEmpty) {
+      return Eggs.fromJson(map.first);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<Eggs?> getSingleEggsBySyncID(String sync_id) async {
+
+    final map = await _database?.rawQuery(
+        "SELECT * FROM Eggs WHERE sync_id = ?",[sync_id]
+    );
+
+    if (map!.isNotEmpty) {
+      return Eggs.fromJson(map.first);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<Flock_Detail?> getSingleFlockDetailsBySyncID(String sync_id) async {
+
+    final map = await _database?.rawQuery(
+        "SELECT * FROM Flock_Detail WHERE sync_id = ?",[sync_id]
+    );
+
+    if (map!.isNotEmpty) {
+      return Flock_Detail.fromJson(map.first);
+    } else {
+      return null;
+    }
+  }
+
   static Future<Flock_Detail?> getSingleFlockDetails(int f_detail_id) async {
 
     final map = await _database?.rawQuery(
@@ -1369,6 +1826,10 @@ class DatabaseHelper  {
         json['f_name'] = result[i]['f_name'];
 
         Eggs _transaction = Eggs.fromJson(json);
+
+        if(_transaction.f_id == -1)
+          _transaction.f_name = "Farm Wide";
+
         _transactionList.add(_transaction);
       }
     }
@@ -3073,6 +3534,25 @@ class DatabaseHelper  {
     );
   }
 
+  static Future<int?> deleteMedicineStockHistoryById(int id) async {
+
+    return await _database?.delete(
+      'MedicineStockHistory',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  static Future<int?> deleteVaccineStockHistoryById(int id) async {
+
+    return await _database?.delete(
+      'VaccineStockHistory',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+
 
   /// Add a egg income link
   static Future<int?> insertEggJunction(EggTransaction stockExpense) async {
@@ -3184,6 +3664,21 @@ class DatabaseHelper  {
     );
   }
 
+  static Future<FeedBatch?> getBatchById(int id) async {
+    final result = await _database?.query(
+      'FeedBatch',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return FeedBatch.fromMap(result.first);
+    }
+
+    return null;
+  }
+
 
   static Future<int?> deleteBatch(int id) async {
     return await _database?.delete(
@@ -3221,21 +3716,77 @@ class DatabaseHelper  {
     return result.map((map) => FeedIngredient.fromMap(map)).toList();
   }
 
+  static Future<FeedIngredient?> getIngredientById(int id) async {
+    final result = await _database?.query(
+      'FeedIngredient',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
 
+    if (result != null && result.isNotEmpty) {
+      return FeedIngredient.fromMap(result.first);
+    }
 
-  static Future<int?> insertIngredient( String name, double pricePerKg, {String unit = 'KG'}) async {
+    return null;
+  }
+
+  static Future<int?> insertIngredientWithSyncID(String name, double pricePerKg, String sync_id,  {String unit = 'KG'}) async {
     return await _database?.insert(
       'FeedIngredient',
       {
         'name': name,
         'price_per_kg': pricePerKg,
         'unit': unit,
+        'sync_id' : sync_id,
+        'sync_status': SyncStatus.SYNCED,
+        'modified_by' : Utils.isMultiUSer? Utils.currentUser!.email :'',
+        'farm_id' : Utils.isMultiUSer? Utils.currentUser!.farmId :'',
+        'last_modified' : DateTime.now().toIso8601String()
       },
       conflictAlgorithm: ConflictAlgorithm.ignore, // or replace
     );
   }
 
-  static Future<int?> updateIngredient( int id, String name, double pricePerKg, String unit) async {
+
+  static Future<int?> insertIngredient(String name, double pricePerKg, {String unit = 'KG'}) async {
+    return await _database?.insert(
+      'FeedIngredient',
+      {
+        'name': name,
+        'price_per_kg': pricePerKg,
+        'unit': unit,
+        'sync_id' : Utils.getUniueId(),
+        'sync_status': SyncStatus.SYNCED,
+        'modified_by' : Utils.isMultiUSer? Utils.currentUser!.email :'',
+        'farm_id' : Utils.isMultiUSer? Utils.currentUser!.farmId :'',
+        'last_modified' : DateTime.now().toIso8601String()
+      },
+      conflictAlgorithm: ConflictAlgorithm.ignore, // or replace
+    );
+  }
+
+  static Future<int?> updateIngredientByObject(FeedIngredient ingredient) async {
+    if (ingredient.id == null) return null;
+
+    return await _database?.update(
+      'FeedIngredient',
+      {
+        'name': ingredient.name,
+        'price_per_kg': ingredient.pricePerKg,
+        'unit': ingredient.unit,
+        'sync_id': ingredient.sync_id,
+        'sync_status': ingredient.sync_status,
+        'last_modified': ingredient.last_modified?.toIso8601String(),
+        'modified_by': ingredient.modified_by,
+        'farm_id': ingredient.farm_id,
+      },
+      where: 'id = ?',
+      whereArgs: [ingredient.id],
+    );
+  }
+
+  static Future<int?> updateIngredient(int id, String name, double pricePerKg, String unit) async {
     return await _database?.update(
       'FeedIngredient',
       {
@@ -3583,7 +4134,14 @@ class DatabaseHelper  {
     }
   }
 
-
+  static Future<int?> updateFlockInfoBySyncID(Flock flock) async {
+    return await _database?.update(
+      'Flock',
+      flock.toJson(),
+      where: 'sync_id = ?',
+      whereArgs: [flock.sync_id],
+    );
+  }
   static Future<int?> updateFlockInfo(Flock flock) async {
     return await _database?.update(
       'Flock',
@@ -3608,7 +4166,22 @@ class DatabaseHelper  {
   }
 
 
+  static Future<void> deleteFlockAndRelatedInfoSyncID(String sync_id) async {
 
+    // Begin a transaction to ensure atomicity
+    await _database?.transaction((txn) async {
+
+      await txn.delete('Eggs', where: 'sync_id = ?', whereArgs: [sync_id]);
+      await txn.delete('Transactions', where: 'sync_id = ?', whereArgs: [sync_id]);
+      await txn.delete('Feeding', where: 'sync_id = ?', whereArgs: [sync_id]);
+      await txn.delete('Vaccination_Medication', where: 'sync_id = ?', whereArgs: [sync_id]);
+      await txn.delete('Flock_Detail', where: 'sync_id = ?', whereArgs: [sync_id]);
+
+      // Delete flock
+      await txn.delete('Flock', where: 'sync_id = ?', whereArgs: [sync_id]);
+    });
+
+  }
   static Future<void> deleteFlockAndRelatedInfo(int flockId) async {
 
     // Begin a transaction to ensure atomicity
@@ -3630,6 +4203,7 @@ class DatabaseHelper  {
     var result = await _database?.rawQuery("DELETE FROM Category_Detail WHERE id = '${subItem.id}'");
     return 1;
   }
+
 
 
   static Future<int>  deleteItem(String table, int id) async {
@@ -3658,7 +4232,10 @@ class DatabaseHelper  {
     var result = await _database?.rawQuery("DELETE FROM Flock WHERE f_id = '${flock.f_id}'");
     return 1;
   }
-
+  static Future<int>  deleteFlockDetailsRecord(int f_detal_id) async {
+    var result = await _database?.rawQuery("DELETE FROM Flock_Detail WHERE f_detail_id = $f_detal_id");
+    return 1;
+  }
   static Future<int>  deleteFlockDetails (int id) async {
     var result = await _database?.rawQuery("DELETE FROM Flock_Detail WHERE f_id = $id");
     return 1;

@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/suggested_notifcations.dart';
 import 'package:poultary/utils/session_manager.dart';
@@ -25,7 +26,9 @@ import 'model/schedule_notification.dart';
 import 'model/sub_category_item.dart';
 import 'model/transaction_item.dart';
 import 'multiuser/api/server_apis.dart';
+import 'multiuser/model/flockfb.dart';
 import 'multiuser/model/user.dart';
+import 'multiuser/utils/SyncStatus.dart';
 
 class ADDFlockScreen extends StatefulWidget {
   const ADDFlockScreen({Key? key}) : super(key: key);
@@ -63,6 +66,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
     'GIFT',
     'OTHER',
   ];
+
 
   List<Bird> birds = [];
 
@@ -212,7 +216,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
 
     await DatabaseHelper.instance.database;
     birds = await DatabaseHelper.getBirds();
-    for (int i = 0; i< birds.length;i++){
+    for (int i = 0; i< birds.length;i++) {
       print(birds.elementAt(i).name);
       print(birds.elementAt(i).image);
       print(birds.elementAt(i).id);
@@ -307,6 +311,10 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                 Expanded(
                   child: GestureDetector(
                     onTap: () async {
+
+                      if(saving_images)
+                        return;
+
                       bool validate = checkValidation();
             
                       if (activeStep == 0) {
@@ -315,11 +323,11 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                             activeStep++;
                           });
                         } else {
-                          Utils.showToast("PROVIDE_ALL".tr());
+                          Utils.showToast("PROVIDE_ALL");
                         }
                       } else if (activeStep == 1) {
                         if (!checkValidationOption()) {
-                          Utils.showToast("PROVIDE_ALL".tr());
+                          Utils.showToast("PROVIDE_ALL");
                         } else {
                           notesController.text = "${nameController.text} Added on ${Utils.getFormattedDate(date)} with ${birdcountController.text} BIRDS";
                           setState(() {
@@ -330,22 +338,40 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                         if (validate) {
                           print("Saving Data...");
                           await DatabaseHelper.instance.database;
-                          int? id = await DatabaseHelper.insertFlock(
-                            Flock(
-                              f_id: 1,
-                              f_name: nameController.text,
-                              bird_count: int.parse(birdcountController.text),
-                              purpose: _purposeselectedValue,
-                              acqusition_type: _acqusitionselectedValue,
-                              acqusition_date: date,
-                              notes: notesController.text,
-                              icon: birds.elementAt(chosen_index).image,
-                              active_bird_count: int.parse(birdcountController.text),
-                              active: 1,
-                              flock_new: 1,
-                            ),
+                          Flock flock = Flock(
+                            f_id: 1,
+                            f_name: nameController.text,
+                            bird_count: int.parse(birdcountController.text),
+                            purpose: _purposeselectedValue,
+                            acqusition_type: _acqusitionselectedValue,
+                            acqusition_date: date,
+                            notes: notesController.text,
+                            icon: birds.elementAt(chosen_index).image,
+                            active_bird_count: int.parse(birdcountController.text),
+                            active: 1,
+                            flock_new: 1,
+                            sync_id: Utils.getUniueId(),
+                            sync_status: SyncStatus.SYNCED,
+                            last_modified: Utils.getTimeStamp(),
+                            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : ''
+
                           );
-            
+
+                          int? id = await DatabaseHelper.insertFlock(
+                            flock
+                          );
+
+                          /*// SET FLOCK ONLINE
+                          if(Utils.isMultiUSer) {
+                            flock.f_id = id!;
+                            bool synced = await FireBaseUtils.uploadFlock(flock);
+                            if (!synced) {
+                              flock.sync_status = SyncStatus.PENDING;
+                              await DatabaseHelper.updateFlockInfo(flock);
+                            }
+                          }
+            */
                           if (isPurchase) {
                             TransactionItem transaction = TransactionItem(
                               flock_update_id: "-1",
@@ -360,7 +386,15 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                               short_note: notesController.text,
                               how_many: birdcountController.text,
                               f_name: nameController.text, sale_item: '', extra_cost: '', extra_cost_details: '',
+                              sync_id: Utils.getUniueId(),
+                              sync_status: SyncStatus.SYNCED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                              f_sync_id: flock.sync_id
+
                             );
+
                             int? tr_id = await DatabaseHelper.insertNewTransaction(transaction);
             
                             Flock_Detail flockDetail = Flock_Detail(
@@ -372,11 +406,53 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                               short_note: notesController.text,
                               f_name: nameController.text,
                               transaction_id: tr_id!.toString(), reason: '',
+
+                                sync_id: Utils.getUniueId(),
+                                sync_status: SyncStatus.SYNCED,
+                                last_modified: Utils.getTimeStamp(),
+                                modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                                farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                                f_sync_id: flock.sync_id
                             );
                             int? flock_detail_id = await DatabaseHelper.insertFlockDetail(flockDetail);
             
                             await DatabaseHelper.updateLinkedTransaction(tr_id.toString(), flock_detail_id.toString());
-                          } else {
+
+                            if(Utils.isMultiUSer) {
+                              FlockFB flockFB = FlockFB(flock: flock,
+                                  transaction: transaction,
+                                  flockDetail: flockDetail);
+
+                              flockFB.farm_id = Utils.currentUser!.farmId;
+                              flockFB.modified_by = Utils.currentUser!.email;
+                             bool synced =  await FireBaseUtils.uploadFlock(flockFB);
+                             if(!synced){
+                               // Save to local for later sync
+                             }
+
+                            }
+                            // SET TRANSACTION AND FLOCK_DETAILS ONLINE
+                            /*if(Utils.isMultiUSer) {
+                              transaction.flock_update_id = flock_detail_id.toString();
+                              bool synced = await FireBaseUtils.uploadTransactions(transaction);
+                              if(!synced)
+                              {
+                                  transaction.sync_status = SyncStatus.PENDING;
+                                  await DatabaseHelper.updateTransaction(transaction);
+                              }
+
+                              flockDetail.transaction_id = tr_id.toString();
+                              synced = await FireBaseUtils.uploadFlockDetails(flockDetail);
+                              if(!synced)
+                              {
+                                flockDetail.sync_status = SyncStatus.PENDING;
+                                await DatabaseHelper.updateFlock(flockDetail);
+                              }
+
+                            }*/
+
+                          }
+                          else {
                             Flock_Detail flockDetail = Flock_Detail(
                               f_id: id!,
                               item_type: 'Addition',
@@ -386,19 +462,41 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                               short_note: notesController.text,
                               f_name: nameController.text,
                               transaction_id: "-1", reason: '',
+                                sync_id: Utils.getUniueId(),
+                                sync_status: SyncStatus.SYNCED,
+                                last_modified: Utils.getTimeStamp(),
+                                modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                                farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                                f_sync_id: flock.sync_id
                             );
-                            await DatabaseHelper.insertFlockDetail(flockDetail);
+                            if(Utils.isMultiUSer) {
+                              FlockFB flockFB = FlockFB(flock: flock, flockDetail: flockDetail);
+                              flockFB.farm_id = Utils.currentUser!.farmId;
+                              flockFB.modified_by = Utils.currentUser!.email;
+                              bool synced =  await FireBaseUtils.uploadFlock(flockFB);
+                              if(!synced){
+                                // Save to local for later sync
+                              }
+
+                            }
+                           /* bool synced = await FireBaseUtils.uploadFlockDetails(flockDetail);
+                            if(!synced)
+                            {
+                              flockDetail.sync_status = SyncStatus.PENDING;
+                              await DatabaseHelper.insertFlockDetail(flockDetail);
+                            }*/
+
                           }
             
                           if (base64Images.isNotEmpty) {
-                            insertFlockImages(id);
+                            insertFlockImages(id!, flock.sync_id);
                           } else {
-                            Utils.showToast("FLOCK_CREATED".tr());
+                            Utils.showToast("FLOCK_CREATED");
                             Navigator.pop(context);
                             gotoNotificationsScreen(id);
                           }
                         } else {
-                          Utils.showToast("PROVIDE_ALL".tr());
+                          Utils.showToast("PROVIDE_ALL");
                         }
                       }
                     },
@@ -1371,7 +1469,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
   }
 
   bool saving_images = false;
-  Future<void> insertFlockImages(int? id) async{
+  Future<void> insertFlockImages(int f_id, String? id) async {
 
     if(Utils.isMultiUSer){
       try {
@@ -1382,9 +1480,13 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
         MultiUser? user = await SessionManager.getUserFromPrefs();
         List<String> imageUrls = await FlockImageUploader().uploadFlockImages(
             farmId: user!.farmId, base64Images: base64Images);
-        for (int i = 0; i < imageUrls.length; i++) {
-          print("IMAGE $i ${imageUrls[i]}");
-        }
+
+        await FireBaseUtils.saveFlockImagesToFirestore(
+          farmId: user.farmId,
+          flockId: id!,
+          imageUrls: imageUrls,
+          uploadedBy: user.email,
+        );
 
         setState(() {
           saving_images = false;
@@ -1393,34 +1495,51 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
         if (base64Images.length > 0) {
           for (int i = 0; i < base64Images.length; i++) {
             Flock_Image image = Flock_Image(
-                f_id: id, image: base64Images.elementAt(i));
+                f_id: f_id, image: base64Images.elementAt(i),
+                sync_id: Utils.getUniueId(),
+                sync_status: SyncStatus.SYNCED,
+                last_modified: Utils.getTimeStamp(),
+                modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+
+
+            );
             DatabaseHelper.insertFlockImages(image);
           }
 
           print("Images Inserted");
-          Utils.showToast("FLOCK_CREATED".tr());
+          Utils.showToast("FLOCK_CREATED");
           Navigator.pop(context);
-          gotoNotificationsScreen(id!);
+          gotoNotificationsScreen(f_id!);
         }
-
 
       }
       catch(ex){
+        setState(() {
+          saving_images = false;
+        });
         Utils.showToast(ex.toString());
         print(ex);
       }
-    }else {
+    } else {
       if (base64Images.length > 0) {
         for (int i = 0; i < base64Images.length; i++) {
           Flock_Image image = Flock_Image(
-              f_id: id, image: base64Images.elementAt(i));
+              f_id: f_id, image: base64Images.elementAt(i),
+              sync_id: Utils.getUniueId(),
+              sync_status: SyncStatus.SYNCED,
+    last_modified: Utils.getTimeStamp(),
+    modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+    farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : ''
+    );
+
           DatabaseHelper.insertFlockImages(image);
         }
 
         print("Images Inserted");
-        Utils.showToast("FLOCK_CREATED".tr());
+        Utils.showToast("FLOCK_CREATED");
         Navigator.pop(context);
-        gotoNotificationsScreen(id!);
+        gotoNotificationsScreen(f_id!);
       }
     }
 

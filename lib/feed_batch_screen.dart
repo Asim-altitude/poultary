@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/model/transaction_item.dart';
+import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/stock/stock_screen.dart';
 import 'package:poultary/utils/utils.dart';
 
@@ -10,6 +13,10 @@ import 'feed_ingridient_screen.dart';
 import 'model/feed_batch.dart';
 import 'model/feed_batch_item.dart';
 import 'model/feed_ingridient.dart';
+import 'multiuser/model/feedbatchfb.dart';
+import 'multiuser/model/ingridientfb.dart';
+import 'multiuser/utils/RefreshMixin.dart';
+import 'multiuser/utils/SyncStatus.dart';
 
 class FeedBatchScreen extends StatefulWidget {
   const FeedBatchScreen({super.key});
@@ -18,7 +25,20 @@ class FeedBatchScreen extends StatefulWidget {
   State<FeedBatchScreen> createState() => _FeedBatchScreenState();
 }
 
-class _FeedBatchScreenState extends State<FeedBatchScreen> {
+class _FeedBatchScreenState extends State<FeedBatchScreen> with RefreshMixin {
+
+  @override
+  void onRefreshEvent(String event) {
+    try {
+      if (event == FireBaseUtils.FEED_BATCH) {
+        _loadBatches();
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
+
   List<FeedBatch> _batches = [];
    BannerAd? _bannerAd;
   double _heightBanner = 0;
@@ -66,12 +86,20 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> {
     }
     super.dispose();
   }
+
   Future<void> _loadBatches() async {
     final list = await DatabaseHelper.getAllBatches();
     setState(() => _batches = list);
   }
 
   void _openCreateBatchDialog(FeedBatch? batch) {
+
+    if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_feed"))
+    {
+      Utils.showMissingPermissionDialog(context, "add_feed");
+      return;
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -95,6 +123,7 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> {
             Expanded(
               child: InkWell(
                 onTap: () => {
+
                   _openCreateBatchDialog(null)
                 },
                 borderRadius: BorderRadius.circular(10),
@@ -242,13 +271,25 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> {
                                            IconButton(
                                              icon: const Icon(Icons.edit_note, color: Colors.blueAccent),
                                              onPressed: () {
+                                               if(Utils.isMultiUSer && !Utils.hasFeaturePermission("edit_feed"))
+                                               {
+                                                 Utils.showMissingPermissionDialog(context, "edit_feed");
+                                                 return;
+                                               }
+
                                                _openCreateBatchDialog(batch);
                                              },
                                            ),
                                            IconButton(
                                              icon: const Icon(Icons.delete_forever, color: Colors.redAccent),
                                              onPressed: () {
-                                               _confirmDeleteBatch(batch.id!, batch.transaction_id!);
+                                               if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_feed"))
+                                               {
+                                                 Utils.showMissingPermissionDialog(context, "delete_feed");
+                                                 return;
+                                               }
+
+                                               _confirmDeleteBatch(batch.id!, batch.transaction_id);
                                              },
                                            ),
                                          ],
@@ -264,7 +305,7 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> {
                                      children: [
                                        Text('Weight'.tr()+': ${batch.totalWeight.toStringAsFixed(2)} ${Utils.selected_unit.tr()}',
                                            style: const TextStyle(fontSize: 15, color: Colors.black87)),
-                                       Text(Utils.selected_unit.tr()+' ${batch.totalPrice.toStringAsFixed(2)}',
+                                       Text(Utils.currency.tr()+' ${batch.totalPrice.toStringAsFixed(2)}',
                                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
                                      ],
                                    ),
@@ -331,9 +372,23 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> {
     );
 
     if (shouldDelete == true) {
+      FeedBatch? feedbatch = await DatabaseHelper.getFeedBatchById(batchId);
+      FeedBatchFB feedBatchFB = FeedBatchFB(feedbatch!);
+
       await DatabaseHelper.deleteItem("Transactions", transactionId);
       await _deleteBatch(batchId);
+
+      if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_feed")){
+        feedBatchFB.modified_by = Utils.currentUser!.email;
+        feedBatchFB.last_modified = Utils.getTimeStamp();
+        feedBatchFB.farm_id = Utils.currentUser!.farmId;
+        feedBatchFB.sync_status = SyncStatus.DELETED;
+
+        await FireBaseUtils.updateFeedBatch(feedBatchFB);
+      }
+
       _loadBatches();
+
     }
   }
 
@@ -428,22 +483,27 @@ class _CreateFeedBatchBottomDialogState
 
   }
 
+  bool isSaving = false;
   Future<void> _saveBatch() async {
     final name = _nameController.text.trim();
     if (name.isEmpty || _selectedIngredientIds.isEmpty) return;
 
+    isSaving = true;
     // Recalculate totals before saving the batch
     _calculateTotals();
-
+    TransactionItem? transactionItem;
     if(transaction_id!= null) {
-      TransactionItem? transactionItem = await DatabaseHelper.getSingleTransaction(transaction_id.toString());
+      transactionItem = await DatabaseHelper.getSingleTransaction(transaction_id.toString());
       transactionItem!.amount = _totalPrice.toString();
       transactionItem.how_many = _totalWeight.toString();
+      transactionItem.sync_status = SyncStatus.SYNCED;
+      transactionItem.modified_by = Utils.isMultiUSer ? Utils.currentUser!.email : '';
+      transactionItem.last_modified = Utils.getTimeStamp();
 
       await DatabaseHelper.updateTransaction(transactionItem);
 
     } else {
-      TransactionItem transactionItem = TransactionItem(f_id: -1,
+      transactionItem = TransactionItem(f_id: -1,
           date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
           f_name: "Farm Wide",
           sale_item: "sale_item",
@@ -457,8 +517,20 @@ class _CreateFeedBatchBottomDialogState
           how_many: _totalWeight.toString(),
           extra_cost: "extra_cost",
           extra_cost_details: "extra_cost_details",
-          flock_update_id: "-1");
+          flock_update_id: "-1",
+          sync_id: Utils.getUniueId(),
+          sync_status: SyncStatus.SYNCED,
+          last_modified: Utils.getTimeStamp(),
+          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',);
+
       transaction_id = await DatabaseHelper.insertNewTransaction(transactionItem);
+    }
+
+    FeedBatchFB feedbatchfb;
+    FeedBatch? fbatch = null;
+    if(_editingBatchId!= null) {
+      fbatch = await DatabaseHelper.getBatchById(_editingBatchId!);
     }
 
     final batch = FeedBatch(
@@ -467,7 +539,15 @@ class _CreateFeedBatchBottomDialogState
       totalWeight: _totalWeight,
       totalPrice: _totalPrice,
       transaction_id: transaction_id!,
+      sync_id: fbatch!= null? fbatch.sync_id : Utils.getUniueId(),
+      sync_status: fbatch!= null? SyncStatus.UPDATED : SyncStatus.SYNCED,
+      last_modified: Utils.getTimeStamp(),
+      modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+      farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
     );
+
+    feedbatchfb = FeedBatchFB(batch);
+    feedbatchfb.transaction = transactionItem;
 
     int? batchId;
     if (_editingBatchId != null) {
@@ -484,6 +564,7 @@ class _CreateFeedBatchBottomDialogState
       await DatabaseHelper.deleteItemsByBatchId(_editingBatchId!);
     }
 
+    feedbatchfb.ingredientList = [];
     // Insert new batch items
     for (var ing in _ingredients) {
       if (_selectedIngredientIds.contains(ing.id)) {
@@ -494,11 +575,34 @@ class _CreateFeedBatchBottomDialogState
             ingredientId: ing.id!,
             quantity: qty,
           ));
+
+          FeedIngredient? feedIngredient = await DatabaseHelper.getIngredientById(ing.id!);
+          IngredientFB ingredientFb = IngredientFB(feedIngredient!.sync_id!, qty);
+          ingredientFb.ingredient = feedIngredient;
+          feedbatchfb.ingredientList!.add(ingredientFb);
+
         }
       }
     }
 
     widget.onSaved();
+
+    if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_feed")) {
+      feedbatchfb.farm_id = Utils.currentUser!.farmId;
+      feedbatchfb.last_modified = Utils.getTimeStamp();
+      feedbatchfb.modified_by = Utils.currentUser!.email;
+
+      if (_editingBatchId == null) {
+        feedbatchfb.sync_status = SyncStatus.SYNCED;
+        await FireBaseUtils.addFeedBatch(feedbatchfb);
+      } else {
+        feedbatchfb.sync_status = SyncStatus.UPDATED;
+        await FireBaseUtils.updateFeedBatch(feedbatchfb);
+      }
+    }
+
+    isSaving = false;
+
   }
 
   @override

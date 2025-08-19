@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/model/vaccine_stock_history.dart';
 import 'package:poultary/model/vaccine_stock_summary.dart';
+import 'package:poultary/multiuser/utils/SyncStatus.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../model/medicine_stock_history.dart';
 import '../model/medicine_stock_summary.dart';
 import '../model/stock_expense.dart';
+import '../model/transaction_item.dart';
+import '../multiuser/model/vaccinestockfb.dart';
+import '../multiuser/utils/FirebaseUtils.dart';
 import '../utils/utils.dart';
 
 class VaccineStockDetailScreen extends StatefulWidget{
@@ -69,11 +73,31 @@ class _VaccineStockDetailScreen extends State<VaccineStockDetailScreen> {
                                   TextButton(
                                     onPressed: () async {
                                       // _deleteStock(entry.id);
+                                      entry.sync_status = SyncStatus.DELETED;
+                                      VaccineStockFB vaccineStockfb = VaccineStockFB(stock: entry);
                                       StockExpense? stockExpense = await DatabaseHelper.getByStockItemId(entry.id!);
-                                      if(stockExpense != null){
+                                      if(stockExpense != null)
+                                      {
+                                        TransactionItem? transaction = await DatabaseHelper.getSingleTransaction(stockExpense.transactionId.toString());
+                                        vaccineStockfb.transaction = transaction;
+                                        vaccineStockfb.transaction!.sync_status = SyncStatus.DELETED;
+
                                         await DatabaseHelper.deleteByStockItemId(entry.id!);
                                         await DatabaseHelper.deleteItem("Transactions", stockExpense.transactionId);
+
+                                        vaccineStockfb.transaction = transaction;
                                       }
+
+                                      if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_vaccine")) {
+                                        vaccineStockfb.sync_id = entry.sync_id;
+                                        vaccineStockfb.sync_status = SyncStatus.DELETED;
+                                        vaccineStockfb.last_modified = Utils.getTimeStamp();
+                                        vaccineStockfb.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                                        vaccineStockfb.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+                                        await FireBaseUtils.updateVaccineStock(vaccineStockfb);
+                                      }
+
                                       await deleteMedicineStock(entry.id!);
                                       Utils.showToast("SUCCESSFUL".tr());
                                       setState(() {

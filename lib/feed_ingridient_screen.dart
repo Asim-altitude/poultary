@@ -1,9 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:poultary/database/databse_helper.dart';
+import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
+import 'package:poultary/multiuser/utils/SyncStatus.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:sqflite/sqflite.dart';
 import 'model/feed_ingridient.dart';
+import 'multiuser/utils/RefreshMixin.dart';
 
 class FeedIngredientScreen extends StatefulWidget {
 
@@ -14,8 +17,20 @@ class FeedIngredientScreen extends StatefulWidget {
   State<FeedIngredientScreen> createState() => _FeedIngredientScreenState();
 }
 
-class _FeedIngredientScreenState extends State<FeedIngredientScreen> {
+class _FeedIngredientScreenState extends State<FeedIngredientScreen> with RefreshMixin {
   List<FeedIngredient> ingredients = [];
+
+  @override
+  void onRefreshEvent(String event) {
+    try {
+      if (event == FireBaseUtils.FEED_INGRIDIENT) {
+        _loadIngredients();
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
 
   @override
   void initState() {
@@ -25,12 +40,22 @@ class _FeedIngredientScreenState extends State<FeedIngredientScreen> {
 
   Future<void> _loadIngredients() async {
     ingredients = (await DatabaseHelper.getAllIngredients())!;
+    for(int i=0;i<ingredients.length;i++){
+      print(ingredients.elementAt(i).toLocalFBJson());
+    }
     setState(() {
 
     });
   }
 
   Future<void> _showIngredientDialog({FeedIngredient? ingredient}) async {
+
+    if(Utils.isMultiUSer && !Utils.hasFeaturePermission("edit_feed"))
+    {
+      Utils.showMissingPermissionDialog(context, "edit_feed");
+      return;
+    }
+
     final nameController = TextEditingController(text: ingredient?.name ?? '');
     final priceController = TextEditingController(
         text: ingredient != null ? ingredient.pricePerKg.toString() : '');
@@ -94,11 +119,33 @@ class _FeedIngredientScreenState extends State<FeedIngredientScreen> {
               final price = double.tryParse(priceController.text.trim()) ?? 0;
               final unit = unitController.text.trim();
 
+              FeedIngredient? feedIngredient;
               if (name.isNotEmpty && price > 0) {
                 if (isEditing) {
-                  await DatabaseHelper.updateIngredient(ingredient!.id!, name, price, unit);
+                  feedIngredient = FeedIngredient(name: name, pricePerKg: price, unit:  Utils.selected_unit,
+
+                  sync_id: ingredient.sync_id, sync_status: SyncStatus.UPDATED);
+                  feedIngredient.id = ingredient.id;
+                  feedIngredient.farm_id = Utils.isMultiUSer? Utils.currentUser!.farmId :'';
+                  feedIngredient.modified_by = Utils.isMultiUSer? Utils.currentUser!.email :'';
+
+                  await DatabaseHelper.updateIngredientByObject(feedIngredient);
+                  if(Utils.isMultiUSer && Utils.hasFeaturePermission("update_stock")){
+                    await FireBaseUtils.updateFeedIngredient(feedIngredient);
+                  }
                 } else {
-                  await DatabaseHelper.insertIngredient(name, price, unit: Utils.selected_unit);
+                    feedIngredient = FeedIngredient(name: name, pricePerKg: price, unit:  Utils.selected_unit);
+
+                    int? id = await DatabaseHelper.insertIngredient(name, price, unit: Utils.selected_unit);
+                    FeedIngredient? newItem = await DatabaseHelper.getIngredientById(id!);
+                    feedIngredient.sync_id = newItem!.sync_id;
+                    feedIngredient.sync_status = SyncStatus.SYNCED;
+                    feedIngredient.farm_id = Utils.isMultiUSer? Utils.currentUser!.farmId :'';
+                    feedIngredient.modified_by = Utils.isMultiUSer? Utils.currentUser!.email :'';
+
+                  if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_stock")){
+                    await FireBaseUtils.addFeedIngredient(feedIngredient);
+                  }
                 }
                 Navigator.pop(context);
                 _loadIngredients();
@@ -111,6 +158,13 @@ class _FeedIngredientScreenState extends State<FeedIngredientScreen> {
   }
 
   Future<void> _deleteIngredient(int id) async {
+    if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_feed"))
+    {
+      Utils.showMissingPermissionDialog(context, "delete_feed");
+      return;
+
+    }
+
     await DatabaseHelper.deleteIngredient(id);//.delete('ingredients', where: 'id = ?', whereArgs: [id]);
     _loadIngredients();
   }
@@ -125,7 +179,16 @@ class _FeedIngredientScreenState extends State<FeedIngredientScreen> {
         child: Expanded(
           child: InkWell(
             onTap: () => {
-              _showIngredientDialog()
+
+              if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_feed"))
+                {
+                  Utils.showMissingPermissionDialog(context, "add_feed")
+
+                }else{
+
+                _showIngredientDialog()
+              }
+
             },
             borderRadius: BorderRadius.circular(10),
             child: AnimatedContainer(

@@ -616,7 +616,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
 
   Future<void> signOut() async {
     await _googleSignIn.signOut();
-    Utils.showToast("Signed Out".tr());
+    Utils.showToast("Signed Out");
     print("User signed out");
   }
 
@@ -651,7 +651,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
     File dbFile = await DatabaseHelper.getFilePathDB();
     if (!dbFile.existsSync()) {
       print("Database file not found!");
-      Utils.showToast("❌ Database file not found!".tr());
+      Utils.showToast("❌ Database file not found!");
       setState(() {
         backingUp = false;
       });
@@ -675,7 +675,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
 
         await driveApi.files.update(updateMetadata, existingFileId, uploadMedia: media);
         print("✅ Existing backup updated.");
-        Utils.showToast("✅ Backup Updated Successfully".tr());
+        Utils.showToast("✅ Backup Updated Successfully");
       } else {
         // ✅ Set parents only when creating
         var fileMetadata = drive.File()

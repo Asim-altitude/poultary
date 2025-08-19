@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:poultary/multiuser/model/farm_plan.dart';
 import 'package:poultary/multiuser/model/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -34,9 +35,41 @@ class SessionManager {
   static final String skipped = "multi_skipped";
   static final String loggedIn = "loggedIn";
   static final String isAdmin = "isAdmin";
+  static final String accessExpired = "accessExpired";
+  static final String isSubscribed = "hasSubscription";
+  static final String offlineConfirmation = "offlineConfirmation";
 
 
+  static Future<void> clearPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
 
+  }
+
+  static Future<DateTime?> getLastSyncTime(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    final timestamp = prefs.getInt('last_sync_$key');
+    return timestamp != null ? DateTime.fromMillisecondsSinceEpoch(timestamp) : null;
+  }
+
+  static Future<void> setLastSyncTime(String key, DateTime? dateTime) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('last_sync_$key', dateTime!.millisecondsSinceEpoch);
+  }
+
+  static Future<void> saveFarmPlan(FarmPlan farmPlan) async {
+    final prefs = await SharedPreferences.getInstance();
+    String userJson = jsonEncode(farmPlan.toJson());
+    await prefs.setString('farmPlan', userJson);
+  }
+
+  static Future<FarmPlan?> getFarmPlan() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? userJson = prefs.getString('farmPlan');
+    if (userJson == null || userJson == "") return null;
+    Map<String, dynamic> userMap = jsonDecode(userJson);
+    return FarmPlan.fromJson(userMap);
+  }
 
   static Future<void> saveUserToPrefs(MultiUser user) async {
     final prefs = await SharedPreferences.getInstance();
@@ -168,6 +201,7 @@ class SessionManager {
     isPremium = pref.getBool(SessionManager.is_premium);
     return isPremium;
   }
+
   static Future<void> setCountryCode(String countryCode) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString(SessionManager.countryCode, countryCode);

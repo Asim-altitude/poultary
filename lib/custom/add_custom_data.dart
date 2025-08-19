@@ -13,6 +13,8 @@ import 'package:poultary/utils/utils.dart';
 
 import '../database/databse_helper.dart';
 import '../model/flock.dart';
+import '../multiuser/utils/FirebaseUtils.dart';
+import '../multiuser/utils/SyncStatus.dart';
 
 class NewCustomData extends StatefulWidget {
   CustomCategoryData? customCategoryData;
@@ -219,22 +221,45 @@ class _NewCustomData extends State<NewCustomData>
                       if(isEdit){
                         await DatabaseHelper.instance.database;
 
-                        CustomCategoryData custom_data = CustomCategoryData(fId: getFlockID(), cId: widget.customCategory.id!, cType: widget.customCategory.cat_type, cName: widget.customCategory.name, itemType: widget.customCategory.itemtype, quantity: double.parse(quantityController.text), unit: widget.customCategory.unit, date: date, fName: _purposeselectedValue, note: notesController.text);
+                        CustomCategoryData custom_data = CustomCategoryData(fId: getFlockID(), cId: widget.customCategory.id!, cType: widget.customCategory.cat_type, cName: widget.customCategory.name, itemType: widget.customCategory.itemtype, quantity: double.parse(quantityController.text), unit: widget.customCategory.unit, date: date, fName: _purposeselectedValue, note: notesController.text,
+                          sync_id: widget.customCategoryData!.sync_id,
+                          sync_status: SyncStatus.UPDATED,
+                          last_modified: Utils.getTimeStamp(),
+                          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                          f_sync_id: getFlockSyncID());
 
                         custom_data.id = widget.customCategoryData!.id;
                         int? id = await DatabaseHelper
                             .updateCustomCategoryData(custom_data);
 
                         Utils.showToast("SUCCESSFUL".tr());
+
+                        if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_custom")){
+                          await FireBaseUtils.updateCustomCategoryData(custom_data);
+                        }
+
                         Navigator.pop(context);
                       } else {
                         await DatabaseHelper.instance.database;
 
-                        CustomCategoryData custom_data = CustomCategoryData(fId: getFlockID(), cId: widget.customCategory.id!, cType: widget.customCategory.cat_type, cName: widget.customCategory.name, itemType: widget.customCategory.itemtype, quantity: double.parse(quantityController.text), unit: widget.customCategory.unit, date: date, fName: _purposeselectedValue, note: notesController.text);
+                        CustomCategoryData custom_data = CustomCategoryData(fId: getFlockID(), cId: widget.customCategory.id!, cType: widget.customCategory.cat_type, cName: widget.customCategory.name, itemType: widget.customCategory.itemtype, quantity: double.parse(quantityController.text), unit: widget.customCategory.unit, date: date, fName: _purposeselectedValue, note: notesController.text,
+                          sync_id: Utils.getUniueId(),
+                          sync_status: SyncStatus.SYNCED,
+                          last_modified: Utils.getTimeStamp(),
+                          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                          f_sync_id: getFlockSyncID()
+                        );
 
                         int? id = await DatabaseHelper
                             .insertCategoryData(custom_data);
                         Utils.showToast("SUCCESSFUL".tr());
+
+                        if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_custom")){
+                          await FireBaseUtils.addCustomCategoryData(custom_data);
+                        }
+
                         Navigator.pop(context);
                       }
 
@@ -848,6 +873,18 @@ class _NewCustomData extends State<NewCustomData>
 
   }
 
+  String? getFlockSyncID() {
+
+    String? selected_id = "unknown";
+    for(int i=0;i<flocks.length;i++){
+      if(_purposeselectedValue.toLowerCase() == flocks.elementAt(i).f_name.toLowerCase()){
+        selected_id = flocks.elementAt(i).sync_id;
+        break;
+      }
+    }
+
+    return selected_id;
+  }
 
   int getFlockID() {
 

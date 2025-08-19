@@ -14,6 +14,12 @@ import 'package:poultary/view_transaction.dart';
 import 'database/databse_helper.dart';
 import 'model/flock.dart';
 import 'model/flock_detail.dart';
+import 'model/transaction_item.dart';
+import 'multiuser/model/birds_modification.dart';
+import 'multiuser/model/financeItem.dart';
+import 'multiuser/utils/FirebaseUtils.dart';
+import 'multiuser/utils/RefreshMixin.dart';
+import 'multiuser/utils/SyncStatus.dart';
 
 class AddReduceFlockScreen extends StatefulWidget {
 
@@ -24,7 +30,19 @@ class AddReduceFlockScreen extends StatefulWidget {
 }
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTickerProviderStateMixin{
+class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTickerProviderStateMixin, RefreshMixin {
+
+  @override
+  void onRefreshEvent(String event) {
+    try {
+      if (event == FireBaseUtils.BIRDS || event == FireBaseUtils.FLOCKS) {
+        getData(date_filter_name);
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
 
   double widthScreen = 0;
   double heightScreen = 0;
@@ -48,7 +66,8 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
     for(int i=0;i<flocks.length;i++){
       _purposeList.add(flocks.elementAt(i).f_name);
     }
-    _purposeselectedValue = Utils.selected_flock!.f_name;
+    _purposeselectedValue = Utils.selected_flock==null? _purposeList[0] : Utils.selected_flock!.f_name;
+
     f_id = getFlockID();
     _other_filter = (await SessionManager.getOtherFilter())!;
     date_filter_name = filterList.elementAt(_other_filter);
@@ -942,6 +961,13 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
   }
 
   Future<void> addNewCollection() async{
+
+    if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_birds"))
+    {
+      Utils.showMissingPermissionDialog(context, "add_birds");
+      return;
+    }
+
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -952,7 +978,14 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
     ;
   }
 
-  Future<void> reduceCollection() async{
+  Future<void> reduceCollection() async {
+
+    if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_birds"))
+    {
+      Utils.showMissingPermissionDialog(context, "add_birds");
+      return;
+    }
+
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -1268,6 +1301,13 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
     ).then((value) async {
       if (value != null) {
         if(value == 2){
+
+          if(Utils.isMultiUSer && !Utils.hasFeaturePermission("edit_birds"))
+          {
+            Utils.showMissingPermissionDialog(context, "edit_birds");
+            return;
+          }
+
           if(list.elementAt(selected_index!).item_type == "Addition") {
             await Navigator.push(
               context,
@@ -1292,7 +1332,14 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
           }
         }
-        else if(value == 1){
+        else if(value == 1)
+        {
+          if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_birds"))
+          {
+            Utils.showMissingPermissionDialog(context, "delete_birds");
+            return;
+          }
+
           if(list.elementAt(selected_index!).transaction_id != "-1")
           {
             // View Complete Record
@@ -1310,6 +1357,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
           {
             showAlertDialog(context);
           }
+
         }else {
           print(value);
         }
@@ -1347,6 +1395,20 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
   }
 
 
+  String? getFlockSyncID(int f_id) {
+
+    String? selected_id = "unknown";
+    for(int i=0;i<flocks.length;i++) {
+      if(f_id == flocks.elementAt(i).f_id){
+        selected_id = flocks.elementAt(i).sync_id;
+        break;
+      }
+    }
+
+    return selected_id;
+  }
+
+
   showAlertDialog(BuildContext context) {
     // set up the buttons
     Widget cancelButton = TextButton(
@@ -1369,7 +1431,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
             }else{
 
-              await DatabaseHelper.deleteItem("Transactions",int.parse(list
+              await DatabaseHelper.deleteItem("Transactions", int.parse(list
                   .elementAt(selected_index!).transaction_id));
 
               int birds_to_delete = list
@@ -1392,6 +1454,32 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                   current_birds, list
                   .elementAt(selected_index!)
                   .f_id);
+
+              if(Utils.isMultiUSer){
+                Flock? flock = await DatabaseHelper.getSingleFlock(list
+                    .elementAt(selected_index!)
+                    .f_id);
+                flock!.active_bird_count = current_birds;
+                await FireBaseUtils.updateFlock(flock);
+
+                list.elementAt(selected_index!).f_sync_id = getFlockSyncID(list
+                    .elementAt(selected_index!).f_id);
+                list.elementAt(selected_index!).sync_status = SyncStatus.DELETED;
+                BirdsModification modification = BirdsModification(flockDetail: list
+                    .elementAt(selected_index!));
+
+                modification.last_modified = Utils.getTimeStamp();
+                modification.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                modification.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+                TransactionItem? transaction_item = await DatabaseHelper.getSingleTransaction(list
+                    .elementAt(selected_index!).transaction_id);
+
+                modification.transaction = transaction_item!;
+
+                await FireBaseUtils.deleteBirdsDetails(modification);
+
+              }
             }
           }else {
             int birds_to_delete = list
@@ -1414,12 +1502,33 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                 current_birds, list
                 .elementAt(selected_index!)
                 .f_id);
+
+            if(Utils.isMultiUSer){
+              Flock? flock = await DatabaseHelper.getSingleFlock(list
+                  .elementAt(selected_index!)
+                  .f_id);
+              flock!.active_bird_count = current_birds;
+              await FireBaseUtils.updateFlock(flock);
+
+              list.elementAt(selected_index!).f_sync_id = getFlockSyncID(list
+                  .elementAt(selected_index!).f_id);
+              list.elementAt(selected_index!).sync_status = SyncStatus.DELETED;
+              BirdsModification modification = BirdsModification(flockDetail: list
+                  .elementAt(selected_index!));
+
+              modification.last_modified = Utils.getTimeStamp();
+              modification.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+              modification.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+              await FireBaseUtils.deleteBirdsDetails(modification);
+
+            }
           }
 
         }
         DatabaseHelper.deleteItemWithFlockID("Flock_Detail", selected_id!);
         list.removeAt(selected_index!);
-        Utils.showToast("RECORD_DELETED".tr());
+        Utils.showToast("RECORD_DELETED");
         Navigator.pop(context);
         setState(() {
 

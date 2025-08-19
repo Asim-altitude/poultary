@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/multiuser/model/user.dart';
+import '../../utils/utils.dart';
 import '../model/permission.dart';
 import '../model/role.dart';
 import '../model/role_permissions.dart';
@@ -26,13 +28,25 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
   String farmID = "";
   List<MultiUser> users = [];
   Future<void> fetchRoles() async {
-    users = await DatabaseHelper.getAllUsers();
-    final data = await DatabaseHelper.getAllRoles();
-    farmID = users![0].farmId;
+
+    farmID = Utils.currentUser!.farmId;
+    roles = await loadRolesByFarm(farmID);
     setState(() {
-      roles = data;
+      roles;
     });
   }
+
+  Future<List<Role>> loadRolesByFarm(String farmId) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('roles')
+        .where('farm_id', isEqualTo: farmId)
+        .get();
+
+    return querySnapshot.docs
+        .map((doc) => Role.fromJson(doc.data()))
+        .toList();
+  }
+
 
   void showAddRoleDialog() async {
     final TextEditingController roleNameController = TextEditingController();
@@ -69,11 +83,11 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text("Create New Role", style: Theme.of(context).textTheme.headlineSmall),
+                    Text("Create New Role".tr(), style: Theme.of(context).textTheme.headlineSmall),
                     const SizedBox(height: 10),
                     TextField(
                       controller: roleNameController,
-                      decoration: InputDecoration(labelText: 'Role Name'),
+                      decoration: InputDecoration(labelText: 'Role Name'.tr()),
                     ),
                     const SizedBox(height: 20),
 
@@ -82,7 +96,7 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                       controller: searchController,
                       onChanged: filterPermissions,
                       decoration: InputDecoration(
-                        labelText: "Search Permissions",
+                        labelText: "Search Permissions".tr(),
                         prefixIcon: Icon(Icons.search),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -91,7 +105,7 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                     const SizedBox(height: 10),
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text("Tap a permission to select it:", style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text("Tap a permission to select it:".tr(), style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(height: 8),
 
@@ -123,7 +137,7 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                     const SizedBox(height: 20),
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text("Selected Permissions:", style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text("Selected Permissions:".tr(), style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(height: 8),
 
@@ -135,7 +149,7 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: selectedPermissions.isEmpty
-                          ? Center(child: Text("No permissions selected"))
+                          ? Center(child: Text("No permissions selected".tr()))
                           : ListView.builder(
                         itemCount: selectedPermissions.length,
                         itemBuilder: (context, index) {
@@ -165,7 +179,7 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                         final roleName = roleNameController.text.trim();
                         if (roleName.isEmpty || selectedPermissions.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Please enter role name and select permissions')),
+                            SnackBar(content: Text("Please enter role name and select permissions".tr())),
                           );
                           return;
                         }
@@ -175,10 +189,11 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                         await DatabaseHelper.assignPermissionsToRole(roleId!, permissionIds);
                         await uploadRoleToFirebase(farmID,Role(name: roleName, id: roleId));
                         await uploadRoleWithPermissionsToFirestore(farmID,roleName,selectedPermissions.map((p) => p.name).toList());
+                        Utils.shouldBackup = true;
                         Navigator.pop(context);
                         fetchRoles();
                       },
-                      child: Text("Create Role"),
+                      child: Text("Create Role".tr()),
                     )
                   ],
                 ),
@@ -221,7 +236,7 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Roles Management"),
+        title: Text("Roles Management".tr()),
         actions: [
           IconButton(
             icon: Icon(Icons.add),
@@ -283,18 +298,18 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text("Edit Role", style: Theme.of(context).textTheme.headlineSmall),
+                    Text("Edit Role".tr(), style: Theme.of(context).textTheme.headlineSmall),
                     const SizedBox(height: 10),
                     TextField(
                       controller: roleNameController,
-                      decoration: InputDecoration(labelText: 'Role Name'),
+                      decoration: InputDecoration(labelText: "Role Name".tr()),
                     ),
                     const SizedBox(height: 20),
                     TextField(
                       controller: searchController,
                       onChanged: filterPermissions,
                       decoration: InputDecoration(
-                        labelText: "Search Permissions",
+                        labelText: "Search Permissions".tr(),
                         prefixIcon: Icon(Icons.search),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -302,7 +317,7 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                     const SizedBox(height: 10),
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text("Tap a permission to select it:", style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text("Tap a permission to select it:".tr(), style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(height: 8),
                     Container(
@@ -331,7 +346,7 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                     const SizedBox(height: 20),
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text("Selected Permissions:", style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text("Selected Permissions:".tr(), style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(height: 8),
                     Container(
@@ -341,7 +356,7 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: selectedPermissions.isEmpty
-                          ? Center(child: Text("No permissions selected"))
+                          ? Center(child: Text("No permissions selected".tr()))
                           : ListView.builder(
                         itemCount: selectedPermissions.length,
                         itemBuilder: (context, index) {
@@ -369,7 +384,7 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                       children: [
                         ElevatedButton.icon(
                           icon: Icon(Icons.delete),
-                          label: Text("Delete"),
+                          label: Text("DELETE".tr()),
                           style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                           onPressed: () async {
                             await DatabaseHelper.deleteRole(role.id!);
@@ -386,12 +401,12 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                           },
                         ),
                         ElevatedButton(
-                          child: Text("Update Role"),
+                          child: Text("Update Role".tr()),
                           onPressed: () async {
                             final updatedRoleName = roleNameController.text.trim();
                             if (updatedRoleName.isEmpty || selectedPermissions.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Enter role name and select permissions')),
+                                SnackBar(content: Text('Enter role name and select permissions'.tr())),
                               );
                               return;
                             }

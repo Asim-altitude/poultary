@@ -2,6 +2,7 @@ class MultiUser {
   final int? id;
   String name;
   String email;
+  String image;
   String password;
   String role;
   final String farmId;
@@ -15,6 +16,7 @@ class MultiUser {
     required this.password,
     required this.role,
     required this.farmId,
+    required this.image,
     this.active = true,
     required this.createdAt,
   });
@@ -27,10 +29,23 @@ class MultiUser {
       email: map['email'],
       password: map['password'],
       role: map['role'],
+      image: map['image'] ?? '',
       farmId: map['farm_id'],
       active: map['active'] == 1,
       createdAt: map['created_at']
     );
+  }
+
+  Map<String, dynamic> toLocalMap() {
+    return {
+      'name': name,
+      'email': email,
+      'password': password,
+      'role': role,
+      'farm_id': farmId,
+      'active': active ? 1 : 0,
+      'created_at': createdAt
+    };
   }
 
   Map<String, dynamic> toMap() {
@@ -40,6 +55,7 @@ class MultiUser {
       'password': password,
       'role': role,
       'farm_id': farmId,
+      'image': image,
       'active': active ? 1 : 0,
       'created_at': createdAt
     };

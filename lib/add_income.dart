@@ -17,6 +17,9 @@ import 'model/flock.dart';
 import 'model/flock_detail.dart';
 import 'model/sale_contractor.dart';
 import 'model/transaction_item.dart';
+import 'multiuser/model/financeItem.dart';
+import 'multiuser/utils/FirebaseUtils.dart';
+import 'multiuser/utils/SyncStatus.dart';
 
 class NewIncome extends StatefulWidget {
 
@@ -62,6 +65,8 @@ class _NewIncome extends State<NewIncome>
   Flock? currentFlock = null;
 
   bool _validate = false;
+
+  FinanceItem? financeItem = null;
 
   String date = "Choose date";
   String displayDate = "";
@@ -122,8 +127,8 @@ class _NewIncome extends State<NewIncome>
        await DatabaseHelper.instance.database;
        flocks = await DatabaseHelper.getFlocks();
        is_specific_flock = true;
-       if(flocks.length > 1){
-         flocks.insert(0, Flock(f_id: -1,
+       /*if(flocks.length > 1){
+         *//*flocks.insert(0, Flock(f_id: -1,
              f_name: 'Farm Wide'.tr(),
              bird_count: 0,
              purpose: '',
@@ -132,9 +137,9 @@ class _NewIncome extends State<NewIncome>
              notes: '',
              icon: '',
              active_bird_count: 0,
-             active: 1, flock_new: 1));
+             active: 1, flock_new: 1));*//*
          is_specific_flock = false;
-       }
+       }*/
 
        for (int i = 0; i < flocks.length; i++) {
          _purposeList.add(flocks.elementAt(i).f_name);
@@ -464,7 +469,7 @@ class _NewIncome extends State<NewIncome>
                       if(invalidInput())
                       {
                         activeStep--;
-                        Utils.showToast("PROVIDE_ALL".tr());
+                        Utils.showToast("PROVIDE_ALL");
                       }else{
                         setState(() {
 
@@ -480,7 +485,7 @@ class _NewIncome extends State<NewIncome>
                         });
                       }else{
                         activeStep--;
-                        Utils.showToast("PROVIDE_ALL".tr());
+                        Utils.showToast("PROVIDE_ALL");
                       }
                     }
 
@@ -503,15 +508,29 @@ class _NewIncome extends State<NewIncome>
                             how_many: howmanyController.text,
                             extra_cost: "",
                             extra_cost_details: "",
-                            f_name: _purposeselectedValue, flock_update_id: '-1');
+                            f_name: _purposeselectedValue, flock_update_id: '-1',
+                            sync_id: widget.transactionItem!.sync_id,
+                            sync_status: SyncStatus.SYNCED,
+                            last_modified: Utils.getTimeStamp(),
+                            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                            f_sync_id: getFlockSyncID());
 
                         transaction_item.id = widget.transactionItem!.id;
 
                         int? id = await DatabaseHelper
                             .updateTransaction(transaction_item);
 
+                        financeItem = FinanceItem(transaction: transaction_item);
+                        financeItem!.sync_id = transaction_item.sync_id;
+                        financeItem!.sync_status = SyncStatus.UPDATED;
+                        financeItem!.last_modified = Utils.getTimeStamp();
+                        financeItem!.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                        financeItem!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+
                         reduceBirds(widget.transactionItem!.id!);
-                        Utils.showToast("SUCCESSFUL".tr());
+                        Utils.showToast("SUCCESSFUL");
                         Navigator.pop(context);
                       }
                       else {
@@ -521,7 +540,7 @@ class _NewIncome extends State<NewIncome>
                         TransactionItem transaction_item = TransactionItem(
                             f_id: getFlockID(),
                             date: date,
-                            sale_item: choose_option?_mysaleselectedValue : _saleselectedValue,
+                            sale_item: choose_option? _mysaleselectedValue : _saleselectedValue,
                             expense_item: "",
                             type: "Income",
                             amount: amountController.text,
@@ -533,19 +552,34 @@ class _NewIncome extends State<NewIncome>
                             how_many: howmanyController.text,
                             extra_cost: "",
                             extra_cost_details: "",
-                            f_name: _purposeselectedValue, flock_update_id: '-1');
+                            f_name: _purposeselectedValue, flock_update_id: '-1',
+                            sync_id: Utils.getUniueId(),
+                            sync_status: SyncStatus.SYNCED,
+                            last_modified: Utils.getTimeStamp(),
+                            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                            f_sync_id: getFlockSyncID());
                         int? id = await DatabaseHelper
                             .insertNewTransaction(transaction_item);
+
+                        financeItem = FinanceItem(transaction: transaction_item);
+                        financeItem!.sync_id = transaction_item.sync_id;
+                        financeItem!.sync_status = SyncStatus.SYNCED;
+                        financeItem!.last_modified = Utils.getTimeStamp();
+                        financeItem!.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                        financeItem!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+
                         if(widget.selectedIncomeType != null){
                           if(widget.selectedIncomeType!.toLowerCase()=="egg sale"){
 
                           }
                         }else if (widget.selectedExpenseType != null){
 
-                        }else {
+                        } else {
                           reduceBirds(id!);
                         }
-                        Utils.showToast("SUCCESSFUL".tr());
+                        Utils.showToast("SUCCESSFUL");
                         Navigator.pop(context);
                       }
                     }
@@ -1339,8 +1373,7 @@ class _NewIncome extends State<NewIncome>
         DatabaseHelper.updateFlockBirds(
             active_birds, getFlockID());
 
-        int? flock_detail_id = await DatabaseHelper
-            .insertFlockDetail(Flock_Detail(
+        Flock_Detail flock_detail = Flock_Detail(
             f_id: getFlockID(),
             item_type: 'Reduction',
             item_count: int.parse(
@@ -1350,14 +1383,26 @@ class _NewIncome extends State<NewIncome>
             reason: "Bird Sale".tr(),
             short_note: notesController.text,
             f_name: _purposeselectedValue,
-            transaction_id: transactionn_id.toString()
-
-        ));
-
+            transaction_id: transactionn_id.toString(),
+            sync_id: Utils.getUniueId(),
+            sync_status: SyncStatus.SYNCED,
+            last_modified: Utils.getTimeStamp(),
+            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+            f_sync_id: getFlockSyncID()
+        );
+        int? flock_detail_id = await DatabaseHelper
+            .insertFlockDetail(flock_detail);
+        financeItem!.flockDetails = [];
+        financeItem!.flockDetails?.add(flock_detail);
         await DatabaseHelper.updateLinkedTransaction(transactionn_id.toString(), flock_detail_id.toString());
 
+        if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_transaction")) {
+          await FireBaseUtils.uploadExpenseRecord(financeItem!);
+        }
       }
-    }else if(is_specific_flock && is_bird_sale && isEdit){
+    }
+    else if(is_specific_flock && is_bird_sale && isEdit){
       try {
         print("SPECIFIC FLOCK+BIRDSALE+EDIT");
 
@@ -1372,20 +1417,42 @@ class _NewIncome extends State<NewIncome>
               int current_active = getActiveBirds(getFlockID());
               current_active = current_active + diff;
               await DatabaseHelper.updateFlockBirds(current_active, getFlockID());
-              Flock_Detail flock_detail_1 = Flock_Detail(f_id: getFlockID(), f_name: _purposeselectedValue, item_type: flock_detail.item_type, item_count: second_reduction, acqusition_type: flock_detail.acqusition_type, acqusition_date: flock_detail.acqusition_date, reason: flock_detail.reason, short_note: notesController.text, transaction_id: transactionn_id.toString());
+              Flock_Detail flock_detail_1 = Flock_Detail(f_id: getFlockID(), f_name: _purposeselectedValue, item_type: flock_detail.item_type, item_count: second_reduction, acqusition_type: flock_detail.acqusition_type, acqusition_date: flock_detail.acqusition_date, reason: flock_detail.reason, short_note: notesController.text, transaction_id: transactionn_id.toString(),
+                  sync_id: flock_detail.sync_id,
+                  sync_status: SyncStatus.UPDATED,
+                  last_modified: Utils.getTimeStamp(),
+                  modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                  farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                  f_sync_id: getFlockSyncID());
               flock_detail_1.f_detail_id = f_detail_id;
               await DatabaseHelper.updateFlock(flock_detail_1);
 
+              financeItem!.flockDetails = [];
+              financeItem!.flockDetails?.add(flock_detail_1);
+              if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_transaction")) {
+                await FireBaseUtils.updateExpenseRecord(financeItem!);
+              }
 
             }else{
               int diff = second_reduction - first_reduction;
               int current_active = getActiveBirds(getFlockID());
               current_active = current_active - diff;
               await DatabaseHelper.updateFlockBirds(current_active, getFlockID());
-              Flock_Detail flock_detail_1 = Flock_Detail(f_id: getFlockID(), f_name: _purposeselectedValue, item_type: flock_detail.item_type, item_count: second_reduction, acqusition_type: flock_detail.acqusition_type, acqusition_date: flock_detail.acqusition_date, reason: flock_detail.reason, short_note:  notesController.text, transaction_id: transactionn_id.toString());
+              Flock_Detail flock_detail_1 = Flock_Detail(f_id: getFlockID(), f_name: _purposeselectedValue, item_type: flock_detail.item_type, item_count: second_reduction, acqusition_type: flock_detail.acqusition_type, acqusition_date: flock_detail.acqusition_date, reason: flock_detail.reason, short_note:  notesController.text, transaction_id: transactionn_id.toString(),
+                  sync_id: flock_detail.sync_id,
+                  sync_status: SyncStatus.UPDATED,
+                  last_modified: Utils.getTimeStamp(),
+                  modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                  farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                  f_sync_id: getFlockSyncID());
               flock_detail_1.f_detail_id = f_detail_id;
               await DatabaseHelper.updateFlock(flock_detail_1);
 
+              financeItem!.flockDetails = [];
+              financeItem!.flockDetails?.add(flock_detail_1);
+              if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_transaction")) {
+                await FireBaseUtils.updateExpenseRecord(financeItem!);
+              }
 
             }
 
@@ -1397,7 +1464,8 @@ class _NewIncome extends State<NewIncome>
       }catch(ex){
         print(ex);
       }
-    }else if(!is_specific_flock && is_bird_sale && !isEdit){
+    }
+    else if(!is_specific_flock && is_bird_sale && !isEdit){
       print("FARMWIDE+BIRDSALE+NEW");
 
       for(int i = 0;i<financeList.length;i++){
@@ -1406,14 +1474,25 @@ class _NewIncome extends State<NewIncome>
         }
       }
       await DatabaseHelper.updateLinkedTransaction(transactionn_id.toString(), farm_wide_f_detail_id);
-
-    }else if(!is_specific_flock && is_bird_sale && isEdit){
+      if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_transaction")) {
+        await FireBaseUtils.uploadExpenseRecord(financeItem!);
+      }
+    }
+    else if(!is_specific_flock && is_bird_sale && isEdit){
       print("FARMWIDE+BIRDSALE+EDIT");
       for(int i = 0;i<financeList.length;i++){
         await reduceBirdsFarmWideEdit(i);
       }
       await DatabaseHelper.updateLinkedTransaction(transactionn_id.toString(), farm_wide_f_detail_id);
-
+      if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_transaction")) {
+        await FireBaseUtils.updateExpenseRecord(financeItem!);
+      }
+    }
+    else
+    {
+      if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_transaction")) {
+        await FireBaseUtils.uploadExpenseRecord(financeItem!);
+      }
     }
 
   }
@@ -1422,6 +1501,10 @@ class _NewIncome extends State<NewIncome>
   Future<int> reduceBirdsFarmWide(int index, int transactionn_id) async{
 
     try {
+
+      if(financeItem!.flockDetails == null)
+        financeItem!.flockDetails = [];
+
       print("reduceBirdsFarmWide $index $transactionn_id");
       FinanceFlockItem financeFlockItem = financeList.elementAt(index);
 
@@ -1434,8 +1517,7 @@ class _NewIncome extends State<NewIncome>
         DatabaseHelper.updateFlockBirds(active_birds, financeFlockItem.id!);
         print("reduceBirdsFarmWide BIRDS UPDATED $active_birds ${financeFlockItem.name}");
 
-        int? flock_detail_id = await DatabaseHelper
-            .insertFlockDetail(Flock_Detail(
+        Flock_Detail flock_detail = Flock_Detail(
             f_id: financeFlockItem.id!,
             item_type: 'Reduction',
             item_count: financeFlockItem.selected_birds,
@@ -1444,7 +1526,18 @@ class _NewIncome extends State<NewIncome>
             reason: "Bird Sale".tr(),
             short_note: notesController.text,
             f_name: financeFlockItem.name,
-            transaction_id: transactionn_id.toString()));
+            transaction_id: transactionn_id.toString(),
+            sync_id: Utils.getUniueId(),
+            sync_status: SyncStatus.SYNCED,
+            last_modified: Utils.getTimeStamp(),
+            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+            f_sync_id: getFlockSyncID());
+        int? flock_detail_id = await DatabaseHelper
+            .insertFlockDetail(flock_detail);
+
+        financeItem!.flockDetails?.add(flock_detail);
+
 
         if (index == 0)
           farm_wide_f_detail_id = flock_detail_id.toString();
@@ -1462,6 +1555,10 @@ class _NewIncome extends State<NewIncome>
     return 0;
   }
   Future<int> reduceBirdsFarmWideEdit(int index) async{
+
+    if(financeItem!.flockDetails == null)
+      financeItem!.flockDetails = [];
+
     FinanceFlockItem financeFlockItem = financeList.elementAt(index);
 
     int f_detail_id = int.parse(widget.transactionItem!.flock_update_id.split(",")[index]);
@@ -1500,10 +1597,18 @@ class _NewIncome extends State<NewIncome>
         reason: "Bird Sale".tr(),
         short_note: notesController.text,
         f_name: financeFlockItem.name,
-        transaction_id: widget.transactionItem!.id.toString());
+        transaction_id: widget.transactionItem!.id.toString(),
+        sync_id: flock_detail.sync_id,
+        sync_status: SyncStatus.SYNCED,
+        last_modified: Utils.getTimeStamp(),
+        modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+        farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+        f_sync_id: getFlockSyncID());
     object.f_detail_id = f_detail_id;
 
     await DatabaseHelper.updateFlock(object);
+
+    financeItem!.flockDetails?.add(object);
 
 
     if (index == 0)
@@ -1889,6 +1994,18 @@ class _NewIncome extends State<NewIncome>
 
   }
 
+  String? getFlockSyncID() {
+
+    String? selected_id = "unknown";
+    for(int i=0;i<flocks.length;i++) {
+      if(_purposeselectedValue.toLowerCase() == flocks.elementAt(i).f_name.toLowerCase()){
+        selected_id = flocks.elementAt(i).sync_id;
+        break;
+      }
+    }
+
+    return selected_id;
+  }
 
   int getFlockID() {
 

@@ -1,10 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
 import 'model/weight_record.dart';
+import 'multiuser/utils/RefreshMixin.dart';
+import 'multiuser/utils/SyncStatus.dart';
 
 class WeightRecordScreen extends StatefulWidget {
   final int flockId,birdsCount;
@@ -14,7 +17,20 @@ class WeightRecordScreen extends StatefulWidget {
   State<WeightRecordScreen> createState() => _WeightScreenState();
 }
 
-class _WeightScreenState extends State<WeightRecordScreen> {
+class _WeightScreenState extends State<WeightRecordScreen> with RefreshMixin {
+
+  @override
+  void onRefreshEvent(String event) {
+    try {
+      if (event == FireBaseUtils.WEIGHT_RECORD) {
+        _loadWeightRecords();
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
+
   List<WeightRecord> _records = [];
 
   @override
@@ -29,6 +45,13 @@ class _WeightScreenState extends State<WeightRecordScreen> {
   }
 
   void _showAddWeightDialog() {
+
+    if(Utils.isMultiUSer && !Utils.hasFeaturePermission("edit_flocks"))
+    {
+      Utils.showMissingPermissionDialog(context, "edit_flocks");
+      return;
+    }
+
     final weightController = TextEditingController();
     final notesController = TextEditingController();
     DateTime selectedDate = DateTime.now();
@@ -154,15 +177,25 @@ class _WeightScreenState extends State<WeightRecordScreen> {
                     final weight = double.tryParse(weightController.text.trim());
                     final notes = notesController.text.trim();
                     if (weight != null && weight > 0) {
-                      await DatabaseHelper.insertWeightRecord(
-                        WeightRecord(
-                          f_id: widget.flockId,
-                          date: DateFormat('yyyy-MM-dd').format(selectedDate),
-                          averageWeight: weight,
-                          numberOfBirds: widget.birdsCount,
-                          notes: notes,
-                        ),
+                      WeightRecord weightRecord = WeightRecord(
+                        f_id: widget.flockId,
+                        date: DateFormat('yyyy-MM-dd').format(selectedDate),
+                        averageWeight: weight,
+                        numberOfBirds: widget.birdsCount,
+                        notes: notes,
+                        sync_id : Utils.getUniueId(),
+                        sync_status : SyncStatus.SYNCED,
+                        last_modified : Utils.getTimeStamp(),
+                        modified_by :  Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                        farm_id : Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                        f_sync_id: Utils.selected_flock!.sync_id
                       );
+                      await DatabaseHelper.insertWeightRecord(weightRecord);
+
+                      if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_weight")){
+                        await FireBaseUtils.addWeightRecords(weightRecord);
+                      }
+
                       Navigator.pop(context);
                       _loadWeightRecords();
                     }
@@ -199,7 +232,23 @@ class _WeightScreenState extends State<WeightRecordScreen> {
               trailing: IconButton(
                 icon: const Icon(Icons.delete, color: Colors.red),
                 onPressed: () async {
+                  if(Utils.isMultiUSer && !Utils.hasFeaturePermission("edit_flock"))
+                  {
+                    Utils.showMissingPermissionDialog(context, "edit_flock");
+                    return;
+                  }
+
                   await DatabaseHelper.deleteWeightRecord(record.id!);
+
+                  if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_weight")){
+                    record.sync_status = SyncStatus.DELETED;
+                    record.modified_by = Utils.currentUser!.email;
+                    record.farm_id = Utils.currentUser!.farmId;
+                    record.f_sync_id = Utils.selected_flock!.sync_id;
+
+                    await FireBaseUtils.updateWeightRecords(record);
+                  }
+
                   _loadWeightRecords();
                 },
               ),

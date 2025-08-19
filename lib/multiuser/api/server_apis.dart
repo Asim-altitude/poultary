@@ -21,7 +21,9 @@ import '../../utils/utils.dart';
 ValueNotifier<double> uploadProgress = ValueNotifier(0.0);
 
 class FlockImageUploader {
-  final String uploadUrl = 'http://photogallerytv.com/Api/upload_flock_images.php';
+  final String uploadUrl = 'https://photogallerytv.com/Api/upload_flock_images.php';
+  final String uploadProfilePicUrl = 'https://photogallerytv.com/Api/upload_profile_picture.php';
+
   int uploadedBytes = 0;
 
   Future<List<String>> uploadFlockImages({
@@ -51,12 +53,41 @@ class FlockImageUploader {
   }
 
 
+  Future<String> uploadProfilePicture({
+    required String userId,
+    required String base64Image,
+  }) async {
+    final response = await http.post(
+      Uri.parse(uploadProfilePicUrl), // your profile upload PHP API endpoint
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'user_id': userId,
+        'image': base64Image,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      if (json['status'] == 'success') {
+        return json['url']; // return the uploaded image URL
+      } else {
+        throw Exception('Upload failed: ${json['message'] ?? 'Unknown error'}');
+      }
+    } else {
+      throw Exception('HTTP ${response.statusCode}: ${response.body}');
+    }
+  }
+
+
   Future<void> uploadDatabaseFile(String farmId) async {
     File dbFile = await DatabaseHelper.getFilePathDB();
     final fileLength = await dbFile.length();
-    final uri = Uri.parse("http://photogallerytv.com/Api/upload_db.php");
+    final uri = Uri.parse("https://photogallerytv.com/Api/upload_db.php");
 
     final request = http.MultipartRequest('POST', uri);
+    request.headers.addAll({
+      'Content-Type': 'multipart/form-data',
+    });
     request.fields['farm_id'] = farmId;
 
     final stream = http.ByteStream(dbFile.openRead().transform(
@@ -98,6 +129,8 @@ class FlockImageUploader {
 
           print("Backup info saved to Firestore!");
           Utils.showToast("✅ Backup Updated Successfully".tr());
+          Utils.shouldBackup = false;
+
         } else {
           Utils.showToast("❌ Could not Backup".tr());
 
@@ -113,7 +146,26 @@ class FlockImageUploader {
     }
   }
 
-
+  Future<String?> downloadImageAsBase64(String imageUrl) async {
+    try {
+      print("DOWNLOADING "+imageUrl);
+      final response = await http.get(Uri.parse(imageUrl));
+      if (response.statusCode == 200) {
+        print("DONE");
+        final bytes = response.bodyBytes;
+        return base64Encode(bytes);
+      } else {
+        print('❌ Failed to download image: $imageUrl');
+        print('FAILED');
+        return null;
+      }
+    } catch (e) {
+      print('❌ Error downloading image: $e');
+      print('FAILED ${e.toString()}');
+      return null;
+    }
+  }
+  
   // Optional: Use image picker to test
   Future<List<File>> pickImages() async {
     final picker = ImagePicker();

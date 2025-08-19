@@ -1,20 +1,21 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
-
 import 'add_birds.dart';
 import 'add_expense.dart';
 import 'add_income.dart';
 import 'database/databse_helper.dart';
 import 'model/flock.dart';
 import 'model/flock_detail.dart';
+import 'multiuser/model/birds_modification.dart';
+import 'multiuser/model/financeItem.dart';
+import 'multiuser/utils/FirebaseUtils.dart';
+import 'multiuser/utils/SyncStatus.dart';
 
 class ViewCompleteTransaction extends StatefulWidget {
 
@@ -93,7 +94,7 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
       }
 
     }else{
-      Utils.showToast("No Transaction found".tr());
+      Utils.showToast("No Transaction found");
       DatabaseHelper.updateLinkedFlockDetail(widget.flock_detail_id, "-1");
       Flock_Detail? flock_detail = await DatabaseHelper.getSingleFlockDetails(int.parse(widget.flock_detail_id));
       Navigator.pop(context);
@@ -585,7 +586,7 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
         getData();
       }
     }else{
-      if(flock_details.length > 1){
+      if(flock_details.length > 1) {
         if(transactionItem!.type == "Income") {
           var txt = await Navigator.push(
             context,
@@ -615,7 +616,7 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
 
           getData();
 
-        }else{
+        } else {
           await Navigator.push(
             context,
             MaterialPageRoute(
@@ -625,7 +626,6 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
           );
 
           getData();
-
         }
       }
     }
@@ -646,10 +646,41 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
       child: Text("DELETE".tr()),
       onPressed:  () async {
 
+        FinanceItem? financeItem = FinanceItem(transaction: transactionItem!);
+        financeItem.sync_id = transactionItem!.sync_id;
+        financeItem.sync_status = SyncStatus.DELETED;
+        financeItem.last_modified = Utils.getTimeStamp();
+        financeItem.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+        financeItem.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+        financeItem.flockDetails = [];
+
+      /*  if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_transaction")) {
+
+          if (!widget.isTransaction) {
+            flock_details.elementAt(0).sync_status = SyncStatus.DELETED;
+            transactionItem!.sync_status = SyncStatus.DELETED;
+
+            BirdsModification birdsmodify = BirdsModification(
+                flockDetail: flock_details.elementAt(0),
+                transaction: transactionItem);
+
+            birdsmodify.farm_id = Utils.currentUser!.farmId;
+            birdsmodify.modified_by = Utils.currentUser!.email;
+            birdsmodify.last_modified = Utils.getTimeStamp();
+
+            await FireBaseUtils.deleteBirdsDetails(birdsmodify);
+          }
+        }
+*/
+
         try {
           if (transactionItem!.type == "Income") {
             print("INCOME");
             for (int i = 0; i < flock_details.length; i++) {
+
+              financeItem.flockDetails!.add(flock_details.elementAt(i));
+
               int birds_to_delete = flock_details
                   .elementAt(i)
                   .item_count;
@@ -671,6 +702,13 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
                 int current_birds = flock.active_bird_count!;
                 current_birds = current_birds + birds_to_delete;
 
+                if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_transaction")){
+                  Flock? flock = await DatabaseHelper.getSingleFlock(flock_details
+                      .elementAt(i).f_id);
+                  flock!.active_bird_count = current_birds;
+                  await FireBaseUtils.updateFlock(flock);
+                }
+
                 await DatabaseHelper.updateFlockBirds(
                     current_birds, flock_details
                     .elementAt(i)
@@ -682,11 +720,16 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
                     .elementAt(i)
                     .f_detail_id!);
                 print("DELETE FLOCK DETAIL");
+
               }
             }
           } else {
             print("EXPENSE ");
             for (int i = 0; i < flock_details.length; i++) {
+
+              financeItem.flockDetails!.add(flock_details.elementAt(i));
+
+
               int birds_to_delete = flock_details
                   .elementAt(i)
                   .item_count;
@@ -710,6 +753,14 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
                 int current_birds = flock.active_bird_count!;
                 current_birds = current_birds - birds_to_delete;
 
+
+                if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_transaction")){
+                  Flock? flock = await DatabaseHelper.getSingleFlock(flock_details
+                      .elementAt(i).f_id);
+                  flock!.active_bird_count = current_birds;
+                  await FireBaseUtils.updateFlock(flock);
+                }
+
                 await DatabaseHelper.updateFlockBirds(
                     current_birds, flock_details
                     .elementAt(i)
@@ -725,8 +776,12 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
             }
           }
 
+          if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_transaction")){
+              await FireBaseUtils.deleteFinanceRecord(financeItem);
+          }
+
           await DatabaseHelper.deleteItem("Transactions", transactionItem!.id!);
-          Utils.showToast("RECORD_DELETED".tr());
+          Utils.showToast("RECORD_DELETED");
           Navigator.pop(context);
           Navigator.pop(context);
 
@@ -734,7 +789,8 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
 
           });
         }
-        catch(ex){
+        catch(ex)
+        {
           Utils.showToast(ex.toString());
         }
       },

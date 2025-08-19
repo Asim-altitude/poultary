@@ -6,12 +6,13 @@ import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/add_vac_med.dart';
-import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'database/databse_helper.dart';
 import 'model/flock.dart';
 import 'model/med_vac_item.dart';
+import 'multiuser/utils/FirebaseUtils.dart';
+import 'multiuser/utils/RefreshMixin.dart';
 
 class MedicationVaccinationScreen extends StatefulWidget {
   const MedicationVaccinationScreen({Key? key}) : super(key: key);
@@ -21,7 +22,19 @@ class MedicationVaccinationScreen extends StatefulWidget {
 }
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> with SingleTickerProviderStateMixin{
+class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> with SingleTickerProviderStateMixin, RefreshMixin{
+
+  @override
+  void onRefreshEvent(String event) {
+    try {
+      if (event == FireBaseUtils.HEALTH) {
+        getData(date_filter_name);
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
 
   double widthScreen = 0;
   double heightScreen = 0;
@@ -152,6 +165,12 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
               Expanded(
                 child: InkWell(
                   onTap: () {
+                    if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_health"))
+                    {
+                      Utils.showMissingPermissionDialog(context, "add_health");
+                      return;
+                    }
+
                     Utils.vaccine_medicine = "Vaccination";
                     addNewVacMad();
                   },
@@ -195,6 +214,12 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
               Expanded(
                 child: InkWell(
                   onTap: () {
+                    if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_health"))
+                    {
+                      Utils.showMissingPermissionDialog(context, "add_health");
+                      return;
+                    }
+
                     Utils.vaccine_medicine = "Medication";
                     addNewVacMad();
                   },
@@ -238,8 +263,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
       ),
       body:SafeArea(
         top: false,
-
-          child:Container(
+          child: Container(
           width: widthScreen,
           height: heightScreen,
             color: Utils.getScreenBackground(),
@@ -1039,6 +1063,13 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
     ).then((value) async {
       if (value != null) {
         if(value == 2){
+
+          if(Utils.isMultiUSer && !Utils.hasFeaturePermission("edit_health"))
+          {
+            Utils.showMissingPermissionDialog(context, "edit_health");
+            return;
+          }
+
           if(vac_med_list.elementAt(selected_index!).type == 'Medication') {
             Utils.vaccine_medicine = "Medication";
             var str = await Navigator.push(
@@ -1066,6 +1097,12 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
           }
         }
         else if(value == 1){
+          if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_health"))
+          {
+            Utils.showMissingPermissionDialog(context, "delete_health");
+            return;
+          }
+
           showAlertDialog(context);
         }else {
           print(value);
@@ -1085,15 +1122,18 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
     );
     Widget continueButton = TextButton(
       child: Text("DELETE".tr()),
-      onPressed:  () {
+      onPressed:  () async {
+        if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_health")){
+          await FireBaseUtils.deleteHealthRecord(vac_med_list.elementAt(selected_index!));
+        }
+
         DatabaseHelper.deleteItem("Vaccination_Medication", selected_id!);
         vac_med_list.removeAt(selected_index!);
-        Utils.showToast("DONE".tr());
+        Utils.showToast("DONE");
         Navigator.pop(context);
         setState(() {
 
         });
-
 
       },
     );

@@ -183,7 +183,7 @@ class _LanguageSetupScreen extends State<LanguageSetupScreen>
               child: Column(
                 children: [
                   Utils.getDistanceBar(),
-                  SizedBox(height: 20,),
+                  SizedBox(height: 30,),
                   EasyStepper(
                     activeStep: activeStep,
                     activeStepTextColor: Colors.black87,
@@ -222,218 +222,416 @@ class _LanguageSetupScreen extends State<LanguageSetupScreen>
                     onStepReached: (index) =>
                         setState(() => activeStep = index),
                   ),
-                  activeStep==0? Image.asset(activeStep==0?"assets/language_icon.png":activeStep==1?"assets/bird_icon.png":"assets/photo_icon.png", width: 130, height: 130, color: Utils.getThemeColorBlue()): activeStep >= 1? Image.asset(activeStep==1?"assets/bird_icon.png":"assets/photo_icon.png", width: 150, height: 150, color: Utils.getThemeColorBlue()): SizedBox(width: 1,),
-                  Text(activeStep==0?"Language and Currency".tr():activeStep==1?"FARM_NAME".tr()+" and "+"DATE".tr():"FARM_IMAGE".tr(), style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
+                  activeStep==0? Image.asset(activeStep==0?"assets/language_icon.png":activeStep==1?"assets/bird_icon.png":"assets/photo_icon.png", width: 120, height: 120, color: Utils.getThemeColorBlue()): activeStep >= 1? Image.asset(activeStep==1?"assets/bird_icon.png":"assets/photo_icon.png", width: 150, height: 150, color: Utils.getThemeColorBlue()): SizedBox(width: 1,),
+                  Text(activeStep==0?"Language and Currency".tr():activeStep==1?"FARM_NAME".tr()+" and "+"DATE".tr():"FARM_IMAGE".tr(), style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),),
                   Visibility(
-                    visible: activeStep == 0? true : false,
+                  visible: activeStep == 0,
+                  child: Center(
                     child: Container(
                       height: heightScreen,
-                      margin: EdgeInsets.only(top: 10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                              child: Text(
-                                "Select Language",
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                            if (isGetLanguage)
-                              Container(
-                                width: widthScreen - 32,
-                                height: 60,
-                                margin: EdgeInsets.symmetric(horizontal: 16),
-                                padding: EdgeInsets.symmetric(horizontal: 12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: Colors.grey.shade400),
-                                ),
-                                child: LanguagePickerDropdown(
-                                  initialValue: _selectedCupertinoLanguage,
-                                  itemBuilder: _buildDropdownItem,
-                                  languages: supportedLanguages,
-                                  onValuePicked: (Language language) {
-                                    _selectedCupertinoLanguage = language;
-                                    Utils.setSelectedLanguage(_selectedCupertinoLanguage, context);
-                                  },
-                                ),
-                              ),
-
-                            SizedBox(height: 10),
-
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                              child: Text(
-                                "Select Currency",
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                            InkWell(
-                              onTap: () {
-                                chooseCurrency();
-                              },
-                              child: Container(
-                                height: 60,
-                                margin: EdgeInsets.symmetric(horizontal: 16),
-                                padding: EdgeInsets.symmetric(horizontal: 12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: Colors.grey.shade400),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(selectedCurrency,
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: Utils.getThemeColorBlue(),
-                                        )),
-                                    Text("Tap to choose", style: TextStyle(fontSize: 16)),
-
-                                  ],
-                                ),
-                              ),
-                            ),
-
-                            SizedBox(height: 10),
-
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                              child: Text(
-                                "Select Unit",
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                            Container(
-                              height: 60,
-                              width: widthScreen - 20,
-                              margin: EdgeInsets.symmetric(horizontal: 16),
-                              padding: EdgeInsets.symmetric(horizontal: 12),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.grey.shade400),
-                              ),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<String>(
-                                  value: selectedUnit,
-                                  onChanged: (String? newValue) {
-                                    setState(() {
-                                      selectedUnit = newValue!;
-                                    });
-                                    // Optionally save to DB or preferences
-                                  },
-                                  items: <String>['KG', 'lbs'].map((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(value, style: TextStyle(fontSize: 16)),
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                            ),
-
-                            SizedBox(height: 32),
-
-                            Container(
-                              width: widthScreen,
-                              height: 58,
-                              margin: EdgeInsets.symmetric(horizontal: 16),
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  activeStep++;
-                                  setState(() {});
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Utils.getThemeColorBlue(),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                  elevation: 4,
-                                ),
-                                child: Text(
-                                  "Next".tr(),
-                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                                ),
-                              ),
-                            )
-                          ],
-                        )
-
-                    ),
-                  ),
-                  Visibility(
-                    visible: activeStep == 1? true:false,
-                    child: Container(
-                      height: heightScreen,
-                      margin: EdgeInsets.only(top: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
 
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            child: Text("Poultry Name", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                          ),
+                          const SizedBox(height: 16),
+
+                          // Select Language
+                          Text("Select Language".tr(),
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 6),
                           Container(
-                            margin: EdgeInsets.symmetric(horizontal: 16),
+                            width: double.infinity,
+                            height: 60,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.grey.shade300),
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
+                              ],
+                            ),
+                            child: isGetLanguage
+                                ? LanguagePickerDropdown(
+                              initialValue: _selectedCupertinoLanguage,
+                              itemBuilder: _buildDropdownItem,
+                              languages: supportedLanguages,
+                              onValuePicked: (Language language) {
+                                _selectedCupertinoLanguage = language;
+                                Utils.setSelectedLanguage(
+                                    _selectedCupertinoLanguage, context);
+                              },
+                            )
+                                : Center(child: CircularProgressIndicator()),
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          // Currency & Unit in Equal Space
+                          Row(
+                            children: [
+                              // Currency
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Select Currency".tr(),
+                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    InkWell(
+                                      onTap: chooseCurrency,
+                                      child: Container(
+                                        height: 60,
+                                        width: double.infinity, // 👈 ensures full width
+                                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(color: Colors.grey.shade300),
+                                          boxShadow: [
+                                            BoxShadow(
+                                                color: Colors.black12,
+                                                blurRadius: 4,
+                                                offset: Offset(0, 2))
+                                          ],
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.attach_money,
+                                                color: Utils.getThemeColorBlue(), size: 22),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                selectedCurrency,
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Utils.getThemeColorBlue(),
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              const SizedBox(width: 16), // spacing between boxes
+
+                              // Unit
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Select Unit".tr(),
+                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Container(
+                                      height: 60,
+                                      width: double.infinity, // 👈 ensures full width
+                                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(color: Colors.grey.shade300),
+                                        boxShadow: [
+                                          BoxShadow(
+                                              color: Colors.black12,
+                                              blurRadius: 4,
+                                              offset: Offset(0, 2))
+                                        ],
+                                      ),
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton<String>(
+                                          value: selectedUnit,
+                                          isExpanded: true, // 👈 make dropdown fill
+                                          icon: Icon(Icons.keyboard_arrow_down_rounded,
+                                              color: Colors.grey),
+                                          onChanged: (String? newValue) {
+                                            setState(() {
+                                              selectedUnit = newValue!;
+                                            });
+                                          },
+                                          items: ['KG', 'lbs'].map((String value) {
+                                            return DropdownMenuItem<String>(
+                                              value: value,
+                                              child: Text(value.tr(), style: TextStyle(fontSize: 16)),
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          SizedBox(height: 30,),
+
+                          // Next button
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 5),
+                            height: 60,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Utils.getThemeColorBlue(), Colors.blue], // blue gradients
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  offset: Offset(0, 4),
+                                  blurRadius: 8,
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent, // removes default shadow
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              onPressed: () => setState(() => activeStep++),
+                              child:  Text(
+                                "Next".tr(),
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 10,),
+                          Visibility(
+                            visible: false,
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 20),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    "Looking for a Farm Account? ",
+                                    style: TextStyle(fontSize: 12, color: Colors.black87),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      // Navigate to Join/Register Farm Screen
+                                      Utils.setupCompleted();
+                                      await Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => AuthGate(isStart: true)));
+
+                                    },
+                                    child: Text(
+                                     " " + "Join here",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Utils.getThemeColorBlue(),
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                  Visibility(
+                    visible: activeStep == 1,
+                    child: Container(
+                      height: heightScreen,
+                      margin: const EdgeInsets.only(top: 30),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Title
+                          Text(
+                            "Farm Name".tr(),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey.shade800,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+
+                          // Farm name input with shadow
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 6,
+                                  offset: Offset(0, 3),
+                                )
+                              ],
+                            ),
                             child: TextField(
                               controller: nameController,
                               decoration: InputDecoration(
-                                hintText: 'Your farm name',
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                                hintText: 'Farm Name'.tr(),
+                                hintStyle: TextStyle(color: Colors.grey.shade500),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                                prefixIcon: Icon(Icons.home_outlined, color: Utils.getThemeColorBlue()),
                               ),
                             ),
                           ),
 
-                          SizedBox(height: 20),
+                          const SizedBox(height: 25),
 
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Text("Starting Date", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                          // Starting Date
+                          Text(
+                            "Starting Date".tr(),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey.shade800,
+                            ),
                           ),
+                          const SizedBox(height: 6),
+
                           InkWell(
                             onTap: pickDate,
                             child: Container(
                               height: 60,
-                              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                              padding: EdgeInsets.symmetric(horizontal: 12),
-                              alignment: Alignment.centerLeft,
+                              padding: const EdgeInsets.symmetric(horizontal: 14),
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                border: Border.all(color: Colors.grey.shade400),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.grey.shade300),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 6,
+                                    offset: Offset(0, 3),
+                                  )
+                                ],
                               ),
-                              child: Text(Utils.getFormattedDate(date), style: TextStyle(fontSize: 16)),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.calendar_today_outlined,
+                                      color: Utils.getThemeColorBlue(), size: 22),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      Utils.getFormattedDate(date),
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
 
-                          SizedBox(height: 30),
+                          const SizedBox(height: 30),
 
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                          // Next button
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 5),
+                            height: 60,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Utils.getThemeColorBlue(), Colors.blue], // blue gradients
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  offset: Offset(0, 4),
+                                  blurRadius: 8,
+                                ),
+                              ],
+                            ),
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                minimumSize: Size.fromHeight(50),
-                                backgroundColor: Utils.getThemeColorBlue(),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent, // removes default shadow
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                               onPressed: () => setState(() => activeStep++),
-                              child: Text("Next", style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
+                              child: const Text(
+                                "Next",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  letterSpacing: 1,
+                                ),
+                              ),
                             ),
-                          )
+                          ),
+                          SizedBox(height: 10,),
+                          Visibility(
+                            visible: false,
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 20),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                   Text(
+                                    "Looking for a Farm Account?".tr(),
+                                    style: TextStyle(fontSize: 12, color: Colors.black87),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      // Navigate to Join/Register Farm Screen
+                                      Utils.setupCompleted();
+                                      await Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => AuthGate(isStart: true)));
+
+                                    },
+                                    child: Text(
+                                      " "+"Join here".tr(),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Utils.getThemeColorBlue(),
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ],
-                      )
-                      ,)),
+                      ),
+                    ),
+                  ),
                   Visibility(
                       visible: activeStep == 2? true:false,
                       child: Container(
                         height: heightScreen,
                         margin: EdgeInsets.only(top: 20),
+                        padding: EdgeInsets.all(10),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
@@ -461,19 +659,39 @@ class _LanguageSetupScreen extends State<LanguageSetupScreen>
 
                             SizedBox(height: 30),
 
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                            Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 5),
+                              height: 60,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [Utils.getThemeColorBlue(), Colors.lightGreen], // blue gradients
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(30),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black26,
+                                    offset: Offset(0, 4),
+                                    blurRadius: 8,
+                                  ),
+                                ],
+                              ),
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  minimumSize: Size.fromHeight(50),
-                                  backgroundColor: Utils.getThemeColorBlue(),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent, // removes default shadow
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                 ),
                                 onPressed: () async {
                                   await DatabaseHelper.instance.database;
                                   if (nameController.text.isNotEmpty) {
                                     farmSetup!.name = nameController.text;
                                   }
+
                                   SessionManager.setUnit(selectedUnit);
                                   farmSetup!.date = date;
                                   farmSetup!.modified = 1;
@@ -483,15 +701,55 @@ class _LanguageSetupScreen extends State<LanguageSetupScreen>
                                   Utils.showToast('SUCCESSFUL'.tr());
 
 
-                                  await Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => AuthGate(isStart: true)));
+                                  await Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeScreen()));
 
                                 },
-                                child: Text("Finish", style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
+                                child:  Text(
+                                  "DONE".tr(),
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
                               ),
-                            )
+                            ),
+                            SizedBox(height: 10,),
+                            Visibility(
+                              visible: false,
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 20),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                     Text(
+                                      "Looking for a Farm Account?".tr(),
+                                      style: TextStyle(fontSize: 12, color: Colors.black87),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () async {
+                                        Utils.setupCompleted();
+                                        await Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => AuthGate(isStart: true)));
+
+                                      },
+                                      child: Text(
+                                        " "+"Join here".tr(),
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: Utils.getThemeColorBlue(),
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
                         )
-                        ,))
+                     ,)),
                 ],
               ),
             ),

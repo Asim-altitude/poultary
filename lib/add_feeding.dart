@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:poultary/model/feed_batch_summary.dart';
 import 'package:poultary/model/feed_item.dart';
 import 'package:poultary/model/sub_category_item.dart';
+import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/stock/stock_screen.dart';
 import 'package:poultary/utils/utils.dart';
@@ -16,6 +17,7 @@ import 'database/databse_helper.dart';
 import 'model/feed_batch.dart';
 import 'model/feed_stock_summary.dart';
 import 'model/flock.dart';
+import 'multiuser/utils/SyncStatus.dart';
 
 class NewFeeding extends StatefulWidget {
    Feeding? feeding;
@@ -257,7 +259,7 @@ class _NewFeeding extends State<NewFeeding>
                           .trim()
                           .length == 0) {
                         activeStep--;
-                        Utils.showToast("PROVIDE_ALL".tr());
+                        Utils.showToast("PROVIDE_ALL");
                       }else{
                         setState(() {
 
@@ -276,24 +278,50 @@ class _NewFeeding extends State<NewFeeding>
                           date: date,
                           feed_name: _feedselectedValue,
                           quantity: quantityController.text,
-                          f_name: _purposeselectedValue,);
+                          f_name: _purposeselectedValue,
+                            sync_id: widget.feeding!.sync_id,
+                            sync_status: SyncStatus.UPDATED,
+                            last_modified: Utils.getTimeStamp(),
+                            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                            f_sync_id: getFlockSyncID());
                         feeding.id = widget.feeding!.id;
+
                         int? id = await DatabaseHelper
                             .updateFeeding(feeding);
 
-                        Utils.showToast("SUCCESSFUL".tr());
+                        if(Utils.isMultiUSer && Utils.hasFeaturePermission('edit_feed'))
+                        {
+                          await FireBaseUtils.updateFeedingRecord(feeding);
+                        }
+
+                        Utils.showToast("SUCCESSFUL");
                         Navigator.pop(context);
                       } else {
+                        Feeding feeding = Feeding(
+                            f_id: getFlockID(),
+                            short_note: notesController.text,
+                            date: date,
+                            feed_name: _feedselectedValue,
+                            quantity: quantityController.text,
+                            f_name: _purposeselectedValue,
+                            sync_id: Utils.getUniueId(),
+                            sync_status: SyncStatus.SYNCED,
+                            last_modified: Utils.getTimeStamp(),
+                            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                            f_sync_id: getFlockSyncID()
+                        );
                         await DatabaseHelper.instance.database;
                         int? id = await DatabaseHelper
-                            .insertNewFeeding(Feeding(
-                          f_id: getFlockID(),
-                          short_note: notesController.text,
-                          date: date,
-                          feed_name: _feedselectedValue,
-                          quantity: quantityController.text,
-                          f_name: _purposeselectedValue,));
-                        Utils.showToast("SUCCESSFUL".tr());
+                            .insertNewFeeding(feeding);
+                        Utils.showToast("SUCCESSFUL");
+
+                        if(Utils.isMultiUSer && Utils.hasFeaturePermission('add_feed'))
+                        {
+                          await FireBaseUtils.uploadFeedingRecord(feeding);
+                        }
+
                         Navigator.pop(context);
                       }
 
@@ -912,6 +940,18 @@ class _NewFeeding extends State<NewFeeding>
 
   }
 
+  String? getFlockSyncID() {
+
+    String? selected_id = "unknown";
+    for(int i=0;i<flocks.length;i++){
+      if(_purposeselectedValue.toLowerCase() == flocks.elementAt(i).f_name.toLowerCase()){
+        selected_id = flocks.elementAt(i).sync_id;
+        break;
+      }
+    }
+
+    return selected_id;
+  }
 
   int getFlockID() {
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,13 +8,19 @@ import 'package:poultary/product_screen.dart';
 import 'package:poultary/settings_screen.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
-import 'all_events.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:uuid/uuid.dart';
 import 'database/databse_helper.dart';
 import 'model/category_item.dart';
+import 'multiuser/classes/NetworkAcceessNotifier.dart';
+import 'multiuser/utils/FirebaseUtils.dart';
+import 'multiuser/utils/SyncManager.dart';
 import 'stock/main_inventory_screen.dart';
 import 'model/farm_item.dart';
 import 'model/flock.dart';
 import 'new_reporting_Screen.dart';
+
+final ValueNotifier<DateTime?> syncTimeNotifier = ValueNotifier(null);
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -30,9 +37,13 @@ class _HomeScreen extends State<HomeScreen> {
 
   @override
   void dispose() {
+    if (Utils.isMultiUSer) {
+      _networkNotifier.dispose();
+    }
     super.dispose();
-
   }
+  final _networkNotifier = NetworkSnackNotifier();
+
 
   @override
   void initState() {
@@ -42,6 +53,13 @@ class _HomeScreen extends State<HomeScreen> {
     getList();
     getCurrency();
    // addEggColorColumn();
+
+    if(Utils.isMultiUSer){
+      // Delay to ensure context is available
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _networkNotifier.initialize(context);
+      });
+    }
   }
 
 
@@ -58,47 +76,158 @@ class _HomeScreen extends State<HomeScreen> {
   List<Flock> flocks = [];
   void getList() async {
 
-    await DatabaseHelper.instance.database;
+   Database? db =  await DatabaseHelper.instance.database;
+
+   try {
+     await DatabaseHelper.addEggColorColumn();
+     await DatabaseHelper.addFlockInfoColumn();
+     await DatabaseHelper.addQuantityColumnMedicine();
+     await DatabaseHelper.addUnitColumnMedicine();
+     await DatabaseHelper.createFeedStockHistoryTable();
+     await DatabaseHelper.createMedicineStockHistoryTable();
+     await DatabaseHelper.createVaccineStockHistoryTable();
+     await DatabaseHelper.createSaleContractorTable();
+     await DatabaseHelper.createFeedIngridentTable();
+     await DatabaseHelper.createFeedBatchTable();
+     await DatabaseHelper.createFeedBatchItemTable();
+     await DatabaseHelper.createWeightRecordTableIfNotExists();
+     await DatabaseHelper.createScheduledNotificationsTable();
+     await DatabaseHelper.createStockExpenseJunction();
+     await DatabaseHelper.createEggTransactionJunction();
+     await DatabaseHelper.createSyncFailedTable();
+     await addNewColumn();
+     await addMissingCategories();
+   }
+   catch(ex){
+     print(ex);
+   }
+
+   try {
+     List<String> tables = [
+       'Flock',
+       'Flock_Image',
+       'Eggs',
+       'Feeding',
+       'Transactions',
+       'Vaccination_Medication',
+       'Category_Detail',
+       'EggTransaction',
+       'FeedBatch',
+       'FeedBatchItem',
+       'FeedIngredient',
+       'FeedStockHistory',
+       'Flock_Detail',
+       'MedicineStockHistory',
+       'SaleContractor',
+       'ScheduledNotification',
+       'VaccineStockHistory',
+       'WeightRecord',
+       'StockExpense',
+       'CustomCategory',
+       'CustomCategoryData',
+
+     ]; // Add your actual table names
+
+     for (final table in tables) {
+       await DatabaseHelper.instance.addSyncColumnsToTable(table);
+       await DatabaseHelper.instance.assignSyncIds(table);
+     }
+
+     await SessionManager.setBoolValue(SessionManager.table_created, true);
+     print('TABLE CREATION DONE');
+   }
+   catch(ex){
+     print(ex);
+   }
 
 
-      await DatabaseHelper.addEggColorColumn();
-      await DatabaseHelper.addFlockInfoColumn();
-      await DatabaseHelper.addQuantityColumnMedicine();
-      await DatabaseHelper.addUnitColumnMedicine();
-      await DatabaseHelper.createFeedStockHistoryTable();
-      await DatabaseHelper.createMedicineStockHistoryTable();
-      await DatabaseHelper.createVaccineStockHistoryTable();
-      await DatabaseHelper.createSaleContractorTable();
-      await DatabaseHelper.createFeedIngridentTable();
-      await DatabaseHelper.createFeedBatchTable();
-      await DatabaseHelper.createFeedBatchItemTable();
-      await DatabaseHelper.createWeightRecordTableIfNotExists();
-      await DatabaseHelper.createScheduledNotificationsTable();
-      await DatabaseHelper.createStockExpenseJunction();
-      await DatabaseHelper.createEggTransactionJunction();
-      await addNewColumn();
-      await addMissingCategories();
+   try {
+     Utils.selected_unit = await SessionManager.getUnit();
 
-      await SessionManager.setBoolValue(SessionManager.table_created,true);
-      print('TABLE CREATION DONE');
+     flocks = await DatabaseHelper.getFlocks();
 
+     if (flocks.length == 0) {
+       no_flock = true;
+       print('No Flocks');
+     }
 
-    Utils.selected_unit = await SessionManager.getUnit();
+     flock_total = flocks.length;
+   }
+   catch(ex){
+     print(ex);
+   }
 
-    flocks = await DatabaseHelper.getFlocks();
-
-    if(flocks.length == 0)
-    {
-      no_flock = true;
-      print('No Flocks');
-    }
-
-    flock_total = flocks.length;
+   try
+   {
+     if(Utils.isMultiUSer) {
+      // NetworkSnackNotifier().initialize(context);
+       setupDataListners();
+     }
+   }
+   catch(ex){
+     print(ex);
+   }
 
     setState(() {
 
     });
 
+  }
+
+  Future<void> addSyncColumnsToTable(Database _database, String tableName) async {
+    final columns = await _getTableColumns(_database, tableName);
+
+    try{
+      Future<void> addColumn(String name, String type) async {
+        if (!columns.contains(name)) {
+          await _database?.execute('ALTER TABLE $tableName ADD COLUMN $name $type');
+        }
+      }
+
+      await addColumn('sync_id', 'TEXT');
+      await addColumn('sync_status', 'TEXT');
+      await addColumn('last_modified', 'INTEGER');
+      await addColumn('modified_by', 'TEXT');
+      await addColumn('farm_id', 'TEXT');
+    }
+    catch(ex){
+      print(ex);
+    }
+
+    print("Colums ADDED");
+  }
+
+  Future<void> assignSyncIds(Database _database, String tableName) async {
+    final uuid = Uuid();
+
+    try {
+      final List<Map<String, Object?>>? rows = await _database?.query(
+        tableName,
+        where: 'sync_id IS NULL OR sync_id = ""',
+      );
+
+      for (final row in rows!) {
+        final id = row['id']; // assuming each row has an `id` column
+        final newSyncId = uuid.v4();
+        await _database?.update(
+          tableName,
+          {'sync_id': newSyncId},
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+
+    print("IDS Assigned");
+  }
+
+// Helper: Get column names for a table
+  Future<List<String>> _getTableColumns(Database _database,String tableName) async {
+    final result = await _database?.rawQuery('PRAGMA table_info($tableName)');
+    return result!.map((row) => row['name'] as String).toList();
   }
 
   Future<void> addMissingCategories() async{
@@ -158,7 +287,6 @@ class _HomeScreen extends State<HomeScreen> {
 
   }
 
-
   Future<void> addNewColumn() async {
     try{
       int c = await DatabaseHelper.addColumnInFlockDetail();
@@ -185,7 +313,6 @@ class _HomeScreen extends State<HomeScreen> {
     }
   }
 
-
   bool direction = true;
 
   List<_PieData> _piData =[];
@@ -201,7 +328,7 @@ class _HomeScreen extends State<HomeScreen> {
 
   List _pages = [
     Center(
-      child: DashboardScreen(),
+      child: DashboardScreen(syncTimeNotifier: syncTimeNotifier),
     ),
     Center(
       child: ReportListScreen(),
@@ -679,6 +806,51 @@ class _HomeScreen extends State<HomeScreen> {
   }
 
 
+  Future<void> setupDataListners() async {
+
+    final docRef = FirebaseFirestore.instance.collection(FireBaseUtils.DB_BACKUP)
+        .doc(Utils.currentUser!.farmId);
+    final docSnapshot = await docRef.get();
+    final DateTime lastBackupDate;
+    if (docSnapshot.exists) {
+      final data = docSnapshot.data();
+      final Timestamp? lastTimestamp = data?['timestamp'];
+
+      print("DB BACKUP "+lastTimestamp.toString());
+      if (lastTimestamp != null) {
+        lastBackupDate = lastTimestamp.toDate();
+        synclastSyncTime = lastBackupDate;
+
+        SyncManager().setSyncTimeNotifier(syncTimeNotifier);
+       // getFlocksFromFirebase(Utils.currentUser!.farmId, lastBackupDate);
+        SyncManager().startAllListeners(Utils.currentUser!.farmId, lastBackupDate);
+      }
+    }
+  }
+
+  DateTime? synclastSyncTime = null;
+
+
+  void listenToFlocks(String farmId, DateTime? lastSyncTime) async {
+
+    SyncManager().stopAllListening();
+    // 🔹 Real-time listener (new changes only)
+    SyncManager().startFockListening(farmId, lastSyncTime);
+    SyncManager().startFinanceListening(farmId, lastSyncTime);
+    SyncManager().startBirdModificationListening(farmId, lastSyncTime);
+    SyncManager().startEggRecordListening(farmId, lastSyncTime);
+    SyncManager().startFeedingListening(farmId, lastSyncTime);
+    SyncManager().startCustomCategoryListening(farmId, lastSyncTime);
+    SyncManager().startFeedIngredientListening(farmId, lastSyncTime);
+    SyncManager().startHealthListening(farmId, lastSyncTime);
+    SyncManager().startCustomCategoryDataListening(farmId, lastSyncTime);
+    SyncManager().startFeedBatchFBListening(farmId, lastSyncTime);
+    SyncManager().startFeedStockFBListening(farmId, lastSyncTime);
+    SyncManager().startMedicineStockFBListening(farmId, lastSyncTime);
+    SyncManager().startVaccineStockFBListening(farmId, lastSyncTime);
+
+
+  }
 
 }
 

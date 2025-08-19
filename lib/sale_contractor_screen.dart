@@ -1,18 +1,34 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
+import 'package:poultary/multiuser/utils/SyncStatus.dart';
 import 'package:poultary/sale_contractor_profile.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
 import 'model/sale_contractor.dart';
+import 'multiuser/utils/RefreshMixin.dart';
 
 class SaleContractorScreen extends StatefulWidget {
   @override
   _SaleContractorScreenState createState() => _SaleContractorScreenState();
 }
 
-class _SaleContractorScreenState extends State<SaleContractorScreen> {
+class _SaleContractorScreenState extends State<SaleContractorScreen> with RefreshMixin {
+
+  @override
+  void onRefreshEvent(String event) {
+    try {
+      if (event == FireBaseUtils.SALE_CONTRACTOR) {
+        getAllContractors();
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
+
   List<SaleContractor> contractors = [];
   List<SaleContractor> filteredContractors = []; // To store filtered contractors
   final TextEditingController searchController = TextEditingController();
@@ -147,6 +163,17 @@ class _SaleContractorScreenState extends State<SaleContractorScreen> {
                               ),
                               onTap: () async {
                                 // Navigate to contractor details if needed
+
+                                try {
+                                  if (Utils.isMultiUSer &&
+                                      Utils.currentUser!.role.toLowerCase() != "admin") {
+                                    Utils.showMissingPermissionDialog(context, "Admin");
+                                    return;
+                                  }
+                                }catch(ex){
+                                  print(ex);
+                                }
+
                                await Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -183,6 +210,17 @@ class _SaleContractorScreenState extends State<SaleContractorScreen> {
 
 
   void _showAddContractorDialog(BuildContext context) {
+
+    try {
+      if (Utils.isMultiUSer &&
+          Utils.currentUser!.role.toLowerCase() != "admin") {
+        Utils.showMissingPermissionDialog(context, "Admin");
+        return;
+      }
+    }catch(ex){
+      print(ex);
+    }
+
     final nameController = TextEditingController();
     final phoneController = TextEditingController();
     final emailController = TextEditingController();
@@ -290,10 +328,20 @@ class _SaleContractorScreenState extends State<SaleContractorScreen> {
                       phone: phoneController.text,
                       email: emailController.text,
                       notes: notesController.text,
+                      sync_id: Utils.getUniueId(),
+                      sync_status: SyncStatus.SYNCED,
+                      last_modified: Utils.getTimeStamp(),
+                      farm_id: Utils.isMultiUSer? Utils.currentUser!.farmId : '',
+                      modified_by: Utils.isMultiUSer? Utils.currentUser!.email : '',
                     );
 
                     // Insert into the database
                     await DatabaseHelper.insertSaleContractor(contractor);
+
+                    if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_contractors")){
+                      await FireBaseUtils.addSaleContractor(contractor);
+                    }
+
                     getAllContractors();
                     Navigator.pop(context);
                   },

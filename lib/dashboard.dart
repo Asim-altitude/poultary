@@ -12,6 +12,7 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:poultary/eggs_report_screen.dart';
 import 'package:poultary/feed_report_screen.dart';
 import 'package:poultary/health_report_screen.dart';
+import 'package:poultary/multiuser/classes/AdminProfile.dart';
 import 'package:poultary/settings_screen.dart';
 import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/utils/session_manager.dart';
@@ -22,6 +23,10 @@ import 'add_flocks.dart';
 import 'database/databse_helper.dart';
 import 'financial_report_screen.dart';
 import 'model/flock.dart';
+import 'model/flock_image.dart';
+import 'multiuser/api/server_apis.dart';
+import 'multiuser/classes/AuthGate.dart';
+import 'multiuser/model/flockfb.dart';
 import 'multiuser/model/user.dart';
 import 'multiuser/utils/FirebaseUtils.dart';
 import 'package:http/http.dart' as http;
@@ -29,17 +34,42 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 
+import 'multiuser/utils/RefreshMixin.dart';
+import 'multiuser/utils/SyncManager.dart';
+import 'multiuser/utils/SyncStatus.dart';
+import 'multiuser/utils/SyncStatusManager.dart';
+
 ValueNotifier<double> downloadProgress = ValueNotifier(0.0);
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({Key? key}) : super(key: key);
+  const DashboardScreen({required this.syncTimeNotifier, Key? key}) : super(key: key);
+  final ValueNotifier<DateTime?> syncTimeNotifier;
 
   @override
   _DashboardScreen createState() => _DashboardScreen();
 }
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _DashboardScreen extends State<DashboardScreen> {
+class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
+
+  @override
+  void onRefreshEvent(String event) {
+    try {
+      if (event == FireBaseUtils.FLOCKS || event == FireBaseUtils.FINANCE ||
+          event == FireBaseUtils.EGGS || event == FireBaseUtils.FEEDING) {
+        getList();
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
+
+
+  late SyncManager syncManager;
+  bool isSyncing = true;
+  int completed = 0;
+  int total = 16;
 
   final supportedLanguages = [
     Languages.english,
@@ -122,6 +152,8 @@ class _DashboardScreen extends State<DashboardScreen> {
   Map<String, double> dataMap = {"Income".tr(): 0,
     "Expense".tr(): 0};
 
+
+
   @override
   void initState() {
     super.initState();
@@ -132,7 +164,149 @@ class _DashboardScreen extends State<DashboardScreen> {
     Utils.setupAds();
 
     checkMultiUSer();
+
     // Utils.showInterstitial();
+  }
+
+  Future<void> getFlocksFromFirebase(String farmId, DateTime? lastSyncTime) async {
+
+
+    final lastTime = await SessionManager.getLastSyncTime(FireBaseUtils.FLOCKS);
+
+    try {
+      Query query = FirebaseFirestore.instance
+          .collection(FireBaseUtils.FLOCKS)
+          .where('farm_id', isEqualTo: farmId);
+
+      if (lastTime != null) {
+        query = query.where(
+          'last_modified',
+          isGreaterThan: Timestamp.fromDate(lastTime),
+        );
+      }else{
+        query = query.where(
+          'last_modified',
+          isGreaterThan: Timestamp.fromDate(lastSyncTime!),
+        );
+      }
+
+      final snapshot = await query.get();
+
+      if (snapshot.docs.isEmpty) {
+        print("📭 No flocks found for farm: $farmId");
+        // ✅ Start image/follow-up listeners anyway
+      //  SyncManager().startAllListeners(farmId, lastSyncTime);
+        return;
+      }
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        FlockFB? flockFB = FlockFB.fromJson(data);
+        print("📥 Syncing FLOCK: ${flockFB.flock.f_name}");
+
+        if (flockFB.last_modified!.isAfter(lastSyncTime!)) {
+          lastSyncTime = flockFB.last_modified;
+        }
+
+        bool isAlreadyAdded = await DatabaseHelper.checkFlockBySyncID(flockFB.flock.sync_id!);
+        if (isAlreadyAdded) {
+          if (flockFB.flock.sync_status == SyncStatus.UPDATED || flockFB.flock.sync_status == SyncStatus.SYNCED) {
+            await DatabaseHelper.updateFlockInfoBySyncID(flockFB.flock);
+            Flock? flock = await DatabaseHelper.getFlockBySyncId(flockFB.flock.sync_id!);
+            await listenToFlockImages(flock!, flock.farm_id ?? "");
+          } else if (flockFB.flock.sync_status == SyncStatus.DELETED) {
+            await DatabaseHelper.deleteFlockAndRelatedInfoSyncID(flockFB.flock.sync_id!);
+          }
+        } else {
+          if (flockFB.flock.sync_status != SyncStatus.DELETED) {
+            int? f_id = await DatabaseHelper.insertFlock(flockFB.flock);
+
+            if (flockFB.transaction != null) {
+              flockFB.transaction!.f_id = f_id!;
+              int? tr_id = await DatabaseHelper.insertNewTransaction(flockFB.transaction!);
+              flockFB.flockDetail!.transaction_id = tr_id.toString();
+              flockFB.flockDetail!.f_id = f_id;
+              int? f_detail_id = await DatabaseHelper.insertFlockDetail(flockFB.flockDetail!);
+              await DatabaseHelper.updateLinkedTransaction(tr_id!.toString(), f_detail_id!.toString());
+            } else {
+              flockFB.flockDetail!.transaction_id = "-1";
+              flockFB.flockDetail!.f_id = f_id!;
+              await DatabaseHelper.insertFlockDetail(flockFB.flockDetail!);
+            }
+
+            Flock? insertedFlock = await DatabaseHelper.getFlockBySyncId(flockFB.flock.sync_id!);
+            await listenToFlockImages(insertedFlock!, flockFB.flock.farm_id ?? "");
+          }
+        }
+      }
+
+      getList();
+
+      SessionManager.setLastSyncTime(FireBaseUtils.FLOCKS, lastSyncTime!);
+
+      // ✅ Start real-time sync listener after initial fetch
+     // SyncManager().startAllListeners(farmId, lastSyncTime);
+
+    } catch (e) {
+      print("❌ Error in getFlocksFromFirebase: $e");
+    //  SyncManager().startAllListeners(farmId, lastSyncTime);
+
+    }
+  }
+
+  Future<void> listenToFlockImages(Flock flock, String farmId) async {
+    final query = FirebaseFirestore.instance
+        .collection(FireBaseUtils.FLOCK_IMAGES)
+        .where('farm_id', isEqualTo: farmId)
+        .where('f_sync_id', isEqualTo: flock.sync_id); // Use correct field name
+
+    final snapshot = await query.get();
+
+    if(!snapshot.docs.isEmpty){
+      List<Flock_Image> images = await DatabaseHelper.getFlockImage(flock.f_id);
+      for(var image in images) {
+        int result =  await DatabaseHelper.deleteItem("Flock_Image", image.id!);
+        print("DELETED $result");
+      }
+    }
+
+    print("DOC LENGTH ${snapshot.docs.length} Flock ${flock.f_name}");
+
+    for (var doc in snapshot.docs) {
+      final data = doc.data();
+      final List<dynamic>? imageUrls = data['image_urls'];
+
+      if (imageUrls != null && imageUrls.isNotEmpty) {
+        List<String> urls = imageUrls.cast<String>();
+
+        print("🖼️ Flock Image URLs: $urls");
+        if (imageUrls != null) {
+          for (String url in urls) {
+            print("DOWNLOADING URL $url");
+            final base64 = await FlockImageUploader().downloadImageAsBase64(url);
+
+            if (base64 != null) {
+              Flock_Image image = Flock_Image(
+                  f_id: flock.f_id, image: base64,
+                  sync_id: Utils.getUniueId(),
+                  sync_status: SyncStatus.SYNCED,
+                  last_modified: flock.last_modified,
+                  modified_by: flock.modified_by,
+                  farm_id: flock.farm_id);
+
+              await DatabaseHelper.insertFlockImages(image);
+              print("SAVED URL $url for Flock ${flock.f_name}");
+            }
+          }
+        }
+
+        // TODO: Save URLs to SQLite or use them as needed
+      } else {
+        print("⚠️ No images found for flock: ${data['f_sync_id']}");
+      }
+    }
+
+
   }
 
   Future<void> checkMultiUSer() async {
@@ -143,20 +317,47 @@ class _DashboardScreen extends State<DashboardScreen> {
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       bool initialized = prefs.getBool('db_initialized_${user!.farmId}') ?? false;
+      //final lastTime = await SessionManager.getLastSyncTime(FireBaseUtils.FLOCKS);
+
+      widget.syncTimeNotifier.addListener(() {
+        final syncTime = widget.syncTimeNotifier.value;
+        if (syncTime != null) {
+         // getFlocksFromFirebase(user.farmId, syncTime); // or startSyncListeners(syncTime)
+          getList();
+        }
+      });
+
+
+      syncManager = SyncManager();
+      syncManager.init(
+        totalListeners: total,
+        onAllComplete: () {
+          setState(() {
+            isSyncing = false;
+            Utils.isSyncDone = true;
+          });
+        },
+        onProgress: (c, t) {
+          setState(() {
+            completed = c;
+          });
+        },
+      );
 
         if (initialized) {
           print("Database already initialized for farm ${user.farmId}");
+        //  getFlocksFromFirebase(user.farmId, lastSyncTime);
           return;
         }
 
 
-        final latestBackupUrl = await getLatestBackupUrlFromFirestore(
+        /*final latestBackupUrl = await getLatestBackupUrlFromFirestore(
             user.farmId);
         if (latestBackupUrl != null) {
           showBackupFoundDialog(context, () {
             fetchAndInitializeDatabaseWithProgress(user!.farmId);
           });
-        }
+        }*/
       }
     }
     catch(ex){
@@ -259,6 +460,178 @@ class _DashboardScreen extends State<DashboardScreen> {
     date_filter_name = filterList.elementAt(_dashboard_filter);
     addEggColorColumn();
 
+  }
+
+  void showFarmAccountIntro(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: Colors.white,
+      isScrollControlled: true,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle Bar
+              Center(
+                child: Container(
+                  height: 5,
+                  width: 50,
+                  margin: EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+              ),
+
+              // Title
+              Row(
+                children: [
+                  Icon(Icons.account_tree, color: Colors.green, size: 28),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      "farm_account_title".tr(),
+                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+
+              // Intro
+              Text(
+                "farm_account_intro".tr(),
+                style: TextStyle(fontSize: 14, color: Colors.grey[800]),
+              ),
+              SizedBox(height: 20),
+
+              // Benefits
+              Row(
+                children: [
+                  Icon(Icons.group, color: Colors.blue, size: 22),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "farm_account_benefit_users".tr(),
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12),
+              Row(
+                children: [
+                  Icon(Icons.admin_panel_settings, color: Colors.orange, size: 22),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "farm_account_benefit_roles".tr(),
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12),
+              Row(
+                children: [
+                  Icon(Icons.manage_accounts, color: Colors.teal, size: 22),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "farm_account_benefit_manage".tr(),
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12),
+              Row(
+                children: [
+                  Icon(Icons.sync, color: Colors.purple, size: 22),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "farm_account_benefit_sync".tr(),
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12),
+
+              Row(
+                children: [
+                  Icon(Icons.backup, color: Colors.indigo, size: 22),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "farm_account_benefit_backup".tr(),
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 12),
+              Row(
+                children: [
+                  Icon(Icons.payment, color: Colors.redAccent, size: 22),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "farm_account_benefit_subscription".tr(),
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+
+              // Actions
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text("CANCEL".tr()),
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.push(context, MaterialPageRoute(
+                            builder: (_) =>
+                            AuthGate(isStart: false,)));
+                        // Continue logic here
+                      },
+                      child: Text("continue".tr(), style: TextStyle(color: Colors.white),),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
   }
 
 
@@ -524,11 +897,11 @@ class _DashboardScreen extends State<DashboardScreen> {
       print("NO_FLOCKS".tr());
       Utils.showToast("Please add new flock to continue.".tr());
 
-    }else{
+    }/*else{
       bool isShow = await SessionManager.isShowWhatsNewDialog();
-      if(isShow)
+      if(isShow &)
         _showFeatureDialog();
-    }
+    }*/
 
     flock_total = flocks.length;
 
@@ -581,69 +954,124 @@ class _DashboardScreen extends State<DashboardScreen> {
             child: Column(
             children:  [
               // Utils.getDistanceBar(),
+              // Show sync status at top
+              (Utils.isMultiUSer && !Utils.isSyncDone)? Padding(
+                padding: const EdgeInsets.all(0.0),
+                child: SyncStatusWidget(
+                  isSyncing: isSyncing,
+                  completed: completed,
+                  total: total,
+                ),
+              ) : SizedBox.shrink(),
               ClipRRect(
             child: Container(
               width: widthScreen,
               height: 65,
               padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
               decoration: BoxDecoration(
-                color: Utils.getThemeColorBlue(),
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.blue.shade700,
+                    Colors.blue.shade400,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 boxShadow: [
-                  BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(0, 3)),
+                  BoxShadow(
+                    color: Colors.black26.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
                 ],
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
               ),
+
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
+                children:
+                [
                   // 🌍 Language Picker (Left Side)
                   if (isGetLanguage)
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Frosted Glass Effect
-                          child: Container(
-                            height: 45,
-                            padding: EdgeInsets.symmetric(horizontal: 5),
-                            decoration: BoxDecoration(
-                              color: Colors.white, // Semi-transparent background
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.white.withOpacity(0.3)),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(Icons.language, size: 20, color: Colors.black.withOpacity(0.8)),
-                                SizedBox(width: 8),
-                                Expanded(
-                                  child: SizedBox(
-                                    width: 200,
-                                    child: LanguagePickerDropdown(
-                                      initialValue: _selectedCupertinoLanguage,
-                                      itemBuilder: (Language language) => _buildDropdownItem(language),
-                                      languages: supportedLanguages,
-                                      onValuePicked: (Language language) {
-                                        _selectedCupertinoLanguage = language;
-                                        Utils.setSelectedLanguage(_selectedCupertinoLanguage, context);
+                    GestureDetector(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) {
+                            return ClipRRect(
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                              child: Container(
+                                color: Colors.white,
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: supportedLanguages.length,
+                                  itemBuilder: (context, index) {
+                                    final language = supportedLanguages[index];
+                                    return ListTile(
+                                     // leading: Text(Utils.getFlagEmoji(language.isoCode), style: TextStyle(fontSize: 20)),
+                                      title: Text(language.name+" ("+language.isoCode+")"),
+
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedCupertinoLanguage = language;
+                                        });
+                                        Utils.setSelectedLanguage(language, context);
+                                        Navigator.pop(context);
                                       },
-                                    ),
-                                  ),
+                                    );
+                                  },
                                 ),
-                              ],
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      child: Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                            child: Container(
+                              height: 45,
+                              padding: EdgeInsets.symmetric(horizontal: 10),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.white),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.language, size: 20, color: Colors.black.withOpacity(0.8)),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    _selectedCupertinoLanguage.name.toLowerCase().contains("chinese")?"Chinese" : _selectedCupertinoLanguage.name,
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    "(${Utils.displayLangCode(_selectedCupertinoLanguage)})",
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
 
-                  SizedBox(width: 12),
+                  SizedBox(width: 8),
 
-                  // 📅 Date Picker (Right Side)
                   Expanded(
                     child: GestureDetector(
                       onTap: openDatePicker,
                       child: Container(
                         height: 45,
-                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        padding: EdgeInsets.symmetric(horizontal: 5),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
@@ -670,6 +1098,68 @@ class _DashboardScreen extends State<DashboardScreen> {
                       ),
                     ),
                   ),
+
+                  SizedBox(width: 8),
+
+                Utils.isMultiUSer?
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AdminProfileScreen(users: Utils.currentUser!)),
+                    );
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(2), // Thickness of the border
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white, // Border color
+                        width: 2, // Border width
+                      ),
+                    ),
+                    child: CircleAvatar(
+                      radius: 22,
+
+                      backgroundImage: (Utils.currentUser!.image != null && Utils.currentUser!.image.isNotEmpty)
+                          ? NetworkImage(Utils.currentUser!.image)
+                          : null,
+                      child: (Utils.currentUser!.image == null || Utils.currentUser!.image.isEmpty)
+                          ? Icon(Icons.person, size: 25, color: Colors.white)
+                          : null,
+                    ),
+                  ))
+                : Visibility(
+                      visible: false,
+                      child: InkWell(
+                                        onTap: () async {
+                      bool hasIntroduced = await SessionManager.getBool("farm_intro");
+                      if(!hasIntroduced){
+                        SessionManager.setBoolValue("farm_intro", true);
+                        showFarmAccountIntro(context);
+                      }else{
+                        //  SessionManager.setBoolValue("farm_intro", false);
+                       bool loggedIn = await SessionManager.getBool(SessionManager.loggedIn);
+                        await Navigator.push(context, MaterialPageRoute(
+                            builder: (_) =>
+                            !loggedIn
+                                ? AuthGate(isStart: false,)
+                                : AdminProfileScreen(users: Utils.currentUser!,)));
+                      
+                      }
+                                        },
+                        child: CircleAvatar(
+                        radius: 22, // Size of the circle
+                        backgroundColor: Colors.white, // White background
+                        child: Icon(
+                          Icons.person,
+                          size: 25, // Icon size inside
+                          color: Colors.black, // Icon color
+                        ),
+                                          ),
+                      ),
+                    )
+
                 ],
               ),
             ),
@@ -697,7 +1187,7 @@ class _DashboardScreen extends State<DashboardScreen> {
                                 },
                                 child: Container(
                                   width: widthScreen / 2,
-                                  height: 178,
+                                  height: 200,
                                   decoration: BoxDecoration(
                                     color: Colors.blue.shade50,
                                     borderRadius: BorderRadius.circular(15),
