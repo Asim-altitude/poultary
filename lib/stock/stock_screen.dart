@@ -363,105 +363,107 @@ class _FeedStockScreenState extends State<FeedStockScreen> with RefreshMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),
-        child: ClipRRect(
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(0.0), // Round bottom-left corner
-            bottomRight: Radius.circular(0.0), // Round bottom-right corner
-          ),
-          child: AppBar(
-            title: Text(
-              "Feed Stock Summary".tr(),
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: Colors.white,
-              ),
+    return SafeArea(
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(kToolbarHeight),
+          child: ClipRRect(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(0.0), // Round bottom-left corner
+              bottomRight: Radius.circular(0.0), // Round bottom-right corner
             ),
-            centerTitle: true,
-            backgroundColor: Utils.getThemeColorBlue(), // Customize the color
-            elevation: 8, // Gives it a more elevated appearance
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () {
-                Navigator.pop(context); // Navigates back
-              },
+            child: AppBar(
+              title: Text(
+                "Feed Stock Summary".tr(),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: Colors.white,
+                ),
+              ),
+              centerTitle: true,
+              backgroundColor: Utils.getThemeColorBlue(), // Customize the color
+              elevation: 8, // Gives it a more elevated appearance
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () {
+                  Navigator.pop(context); // Navigates back
+                },
+              ),
             ),
           ),
         ),
-      ),
-      body:Column(children: [
-        Utils.showBannerAd(_bannerAd, _isBannerAdReady),
-
-        _stockSummary!.isEmpty
-            ? Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey),
-              SizedBox(height: 10),
-              Text(
-                "No feed stock available!".tr(),
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
-              ),
-              SizedBox(height: 5),
-              Text("Add stock to see feed details.".tr(), style: TextStyle(fontSize: 14, color: Colors.grey)),
-            ],
-          ),
-        )
-            : Expanded(child:AnimatedList(
-          key: _listKey,
-          initialItemCount: _stockSummary!.length,
-          itemBuilder: (context, index, animation) {
-            return InkWell(
-                onTap: () async {
-
-                  if(checkIfBatch(_stockSummary![index].feedName)){
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            FeedBatchScreen(),
-                      ),
-                    );
-                  }else {
-                    List<FeedStockHistory> history = await DatabaseHelper
-                        .fetchStockHistory(
-                        _stockSummary!.elementAt(index).feedName);
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            StockDetailScreen(
-                              stock: _stockSummary!.elementAt(index),
-                              stockHistory: history, // Fetch history
-                            ),
-                      ),
-                    );
-
-                    fetchStockSummary();
-                  }
-                },
-                child: _buildStockItem(
-                    _stockSummary![index], index, animation));
-
+        body:Column(children: [
+          Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+      
+          _stockSummary!.isEmpty
+              ? Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey),
+                SizedBox(height: 10),
+                Text(
+                  "No feed stock available!".tr(),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+                ),
+                SizedBox(height: 5),
+                Text("Add stock to see feed details.".tr(), style: TextStyle(fontSize: 14, color: Colors.grey)),
+              ],
+            ),
+          )
+              : Expanded(child:AnimatedList(
+            key: _listKey,
+            initialItemCount: _stockSummary!.length,
+            itemBuilder: (context, index, animation) {
+              return InkWell(
+                  onTap: () async {
+      
+                    if(checkIfBatch(_stockSummary![index].feedName)){
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              FeedBatchScreen(),
+                        ),
+                      );
+                    }else {
+                      List<FeedStockHistory> history = await DatabaseHelper
+                          .fetchStockHistory(
+                          _stockSummary!.elementAt(index).feedName);
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              StockDetailScreen(
+                                stock: _stockSummary!.elementAt(index),
+                                stockHistory: history, // Fetch history
+                              ),
+                        ),
+                      );
+      
+                      fetchStockSummary();
+                    }
+                  },
+                  child: _buildStockItem(
+                      _stockSummary![index], index, animation));
+      
+            },
+          ),),
+        ],),
+      
+      
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            showFeedOptionsBottomSheet(context);
           },
-        ),),
-      ],),
-
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showFeedOptionsBottomSheet(context);
-        },
-        child: Icon(Icons.add, size: 28, color: Colors.white),
-        backgroundColor: Utils.getThemeColorBlue(),
-        shape: CircleBorder(), // Ensures a perfect circle
-        elevation: 6, // Adds a slight shadow effect
+          child: Icon(Icons.add, size: 28, color: Colors.white),
+          backgroundColor: Utils.getThemeColorBlue(),
+          shape: CircleBorder(), // Ensures a perfect circle
+          elevation: 6, // Adds a slight shadow effect
+        ),
+      
       ),
-
     );
   }
 
@@ -472,42 +474,44 @@ class _FeedStockScreenState extends State<FeedStockScreen> with RefreshMixin {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Choose an Option".tr(),
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: Icon(Icons.inventory_2_rounded, color: Colors.green),
-                title: Text("Add Feed Stock".tr(), style: TextStyle(fontSize: 16)),
-                onTap: () {
-                  Navigator.pop(context);
-                  // Navigate or call your function
-                  _showAddStockDialog();
-                },
-              ),
-              Divider(),
-              ListTile(
-                leading: Icon(Icons.add_box_rounded, color: Colors.blue),
-                title: Text("New Feed Batch".tr(), style: TextStyle(fontSize: 16)),
-                onTap: () async {
-                  Navigator.pop(context);
-                  // Navigate or call your function
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          FeedBatchScreen(),
-                    ),
-                  );
-                },
-              ),
-            ],
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Choose an Option".tr(),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  leading: Icon(Icons.inventory_2_rounded, color: Colors.green),
+                  title: Text("Add Feed Stock".tr(), style: TextStyle(fontSize: 16)),
+                  onTap: () {
+                    Navigator.pop(context);
+                    // Navigate or call your function
+                    _showAddStockDialog();
+                  },
+                ),
+                Divider(),
+                ListTile(
+                  leading: Icon(Icons.add_box_rounded, color: Colors.blue),
+                  title: Text("New Feed Batch".tr(), style: TextStyle(fontSize: 16)),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    // Navigate or call your function
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            FeedBatchScreen(),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -662,133 +666,135 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height -
         (safeAreaHeight + safeAreaHeightBottom);
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "Add Feed Stock".tr(),
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
-            ),
-            SizedBox(height: 5),
-
-            if (isRequired)
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: Container(
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
               Text(
-                "PROVIDE_ALL".tr(),
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.red),
+                "Add Feed Stock".tr(),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
               ),
-            SizedBox(height: 5),
-
-            _buildDropdown(
-              hintText: "Choose Feed".tr(),
-              value: _selectedFeed,
-              items: _feedList,
-              onChanged: (value) => setState(() => _selectedFeed = value),
-              icon: Icons.grain,
-            ),
-            SizedBox(height: 12),
-
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    controller: _quantityController,
-                    label: "Quantity".tr(),
-                    icon: Icons.production_quantity_limits,
-                    keyboardType: TextInputType.number,
-                  ),
+              SizedBox(height: 5),
+      
+              if (isRequired)
+                Text(
+                  "PROVIDE_ALL".tr(),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.red),
                 ),
-                SizedBox(width: 10),
-                Container(
+              SizedBox(height: 5),
+      
+              _buildDropdown(
+                hintText: "Choose Feed".tr(),
+                value: _selectedFeed,
+                items: _feedList,
+                onChanged: (value) => setState(() => _selectedFeed = value),
+                icon: Icons.grain,
+              ),
+              SizedBox(height: 12),
+      
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildTextField(
+                      controller: _quantityController,
+                      label: "Quantity".tr(),
+                      icon: Icons.production_quantity_limits,
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade400),
+                    ),
+                    child: Text(
+                      Utils.selected_unit.tr(),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black87),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12),
+      
+              /// Date Picker
+              InkWell(
+                onTap: _pickDate,
+                child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.grey.shade400),
                   ),
-                  child: Text(
-                    Utils.selected_unit.tr(),
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black87),
+                  child: Row(
+                    children: [
+                      Icon(Icons.calendar_today, color: Utils.getThemeColorBlue()),
+                      SizedBox(width: 10),
+                      Text(
+                        Utils.getFormattedDate(DateFormat('yyyy-MM-dd').format(_selectedDate)),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black87),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            SizedBox(height: 12),
-
-            /// Date Picker
-            InkWell(
-              onTap: _pickDate,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade400),
+              ),
+              SizedBox(height: 12),
+      
+              _buildDropdown(
+                hintText: "Select Source".tr(),
+                value: _selectedSource,
+                items: _sourceList,
+                onChanged: (value) => setState(() {
+                  _selectedSource = value;
+                  _otherSourceController.clear();
+                  _amountController.clear();
+                }),
+                icon: Icons.storefront,
+              ),
+              SizedBox(height: 12),
+      
+              if (_selectedSource == "OTHER")
+                _buildTextField(
+                  controller: _otherSourceController,
+                  label: "Enter Other Source".tr(),
+                  icon: Icons.create,
                 ),
-                child: Row(
-                  children: [
-                    Icon(Icons.calendar_today, color: Utils.getThemeColorBlue()),
-                    SizedBox(width: 10),
-                    Text(
-                      Utils.getFormattedDate(DateFormat('yyyy-MM-dd').format(_selectedDate)),
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black87),
-                    ),
-                  ],
+      
+              if (_selectedSource == "PURCHASED")
+                _buildTextField(
+                  controller: _amountController,
+                  label: "Amount".tr(),
+                  icon: Icons.attach_money,
+                  keyboardType: TextInputType.number,
+                ),
+              SizedBox(height: 20),
+      
+              Container(
+                width: Utils.WIDTH_SCREEN - 20,
+                child: ElevatedButton(
+                  onPressed: _saveStock,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 40),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    backgroundColor: Utils.getThemeColorBlue(),
+                    elevation: 4,
+                  ),
+                  child: Text("Add Stock".tr(), style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ),
-            ),
-            SizedBox(height: 12),
-
-            _buildDropdown(
-              hintText: "Select Source".tr(),
-              value: _selectedSource,
-              items: _sourceList,
-              onChanged: (value) => setState(() {
-                _selectedSource = value;
-                _otherSourceController.clear();
-                _amountController.clear();
-              }),
-              icon: Icons.storefront,
-            ),
-            SizedBox(height: 12),
-
-            if (_selectedSource == "OTHER")
-              _buildTextField(
-                controller: _otherSourceController,
-                label: "Enter Other Source".tr(),
-                icon: Icons.create,
-              ),
-
-            if (_selectedSource == "PURCHASED")
-              _buildTextField(
-                controller: _amountController,
-                label: "Amount".tr(),
-                icon: Icons.attach_money,
-                keyboardType: TextInputType.number,
-              ),
-            SizedBox(height: 20),
-
-            Container(
-              width: Utils.WIDTH_SCREEN - 20,
-              child: ElevatedButton(
-                onPressed: _saveStock,
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 40),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  backgroundColor: Utils.getThemeColorBlue(),
-                  elevation: 4,
-                ),
-                child: Text("Add Stock".tr(), style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -233,128 +233,130 @@ class _SaleContractorScreenState extends State<SaleContractorScreen> with Refres
       isScrollControlled: true,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            top: 16,
-            left: 16,
-            right: 16,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Container(
-                  width: 50,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(10),
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              top: 16,
+              left: 16,
+              right: 16,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Container(
+                    width: 50,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                Text('Add Sale Contractor'.tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 16),
-
-                TextField(
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    labelText: 'Enter Name'.tr(),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  const SizedBox(height: 12),
+                  Text('Add Sale Contractor'.tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
+          
+                  TextField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      labelText: 'Enter Name'.tr(),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-
-                DropdownButtonFormField<String>(
-                  value: selectedType,
-                  items: contractorTypes.map((type) {
-                    return DropdownMenuItem(value: type, child: Text(type.tr()));
-                  }).toList(),
-                  onChanged: (val) {
-                    if (val != null) selectedType = val;
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'Type'.tr(),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  const SizedBox(height: 12),
+          
+                  DropdownButtonFormField<String>(
+                    value: selectedType,
+                    items: contractorTypes.map((type) {
+                      return DropdownMenuItem(value: type, child: Text(type.tr()));
+                    }).toList(),
+                    onChanged: (val) {
+                      if (val != null) selectedType = val;
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Type'.tr(),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-
-                TextField(
-                  controller: phoneController,
-                  decoration: InputDecoration(
-                    labelText: 'Phone'.tr(),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  const SizedBox(height: 12),
+          
+                  TextField(
+                    controller: phoneController,
+                    decoration: InputDecoration(
+                      labelText: 'Phone'.tr(),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    keyboardType: TextInputType.phone,
                   ),
-                  keyboardType: TextInputType.phone,
-                ),
-                const SizedBox(height: 12),
-
-                TextField(
-                  controller: emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email'.tr(),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  const SizedBox(height: 12),
+          
+                  TextField(
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Email'.tr(),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
                   ),
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: 12),
-
-                TextField(
-                  controller: addressController,
-                  decoration: InputDecoration(
-                    labelText: 'Address'.tr(),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  const SizedBox(height: 12),
+          
+                  TextField(
+                    controller: addressController,
+                    decoration: InputDecoration(
+                      labelText: 'Address'.tr(),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-
-                TextField(
-                  controller: notesController,
-                  decoration: InputDecoration(
-                    labelText: 'Notes'.tr(),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  const SizedBox(height: 12),
+          
+                  TextField(
+                    controller: notesController,
+                    decoration: InputDecoration(
+                      labelText: 'Notes'.tr(),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    maxLines: 2,
                   ),
-                  maxLines: 2,
-                ),
-                const SizedBox(height: 20),
-
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    // Create a new SaleContractor object
-                    SaleContractor contractor = SaleContractor(
-                      name: nameController.text,
-                      type: selectedType,
-                      address: addressController.text,
-                      phone: phoneController.text,
-                      email: emailController.text,
-                      notes: notesController.text,
-                      sync_id: Utils.getUniueId(),
-                      sync_status: SyncStatus.SYNCED,
-                      last_modified: Utils.getTimeStamp(),
-                      farm_id: Utils.isMultiUSer? Utils.currentUser!.farmId : '',
-                      modified_by: Utils.isMultiUSer? Utils.currentUser!.email : '',
-                    );
-
-                    // Insert into the database
-                    await DatabaseHelper.insertSaleContractor(contractor);
-
-                    if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_contractors")){
-                      await FireBaseUtils.addSaleContractor(contractor);
-                    }
-
-                    getAllContractors();
-                    Navigator.pop(context);
-                  },
-                  icon: Icon(Icons.save, color: Colors.white,),
-                  label: Text("SAVE".tr(), style: TextStyle(color: Colors.white),),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Utils.getThemeColorBlue(),
-                    minimumSize: Size(double.infinity, 48),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  const SizedBox(height: 20),
+          
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      // Create a new SaleContractor object
+                      SaleContractor contractor = SaleContractor(
+                        name: nameController.text,
+                        type: selectedType,
+                        address: addressController.text,
+                        phone: phoneController.text,
+                        email: emailController.text,
+                        notes: notesController.text,
+                        sync_id: Utils.getUniueId(),
+                        sync_status: SyncStatus.SYNCED,
+                        last_modified: Utils.getTimeStamp(),
+                        farm_id: Utils.isMultiUSer? Utils.currentUser!.farmId : '',
+                        modified_by: Utils.isMultiUSer? Utils.currentUser!.email : '',
+                      );
+          
+                      // Insert into the database
+                      await DatabaseHelper.insertSaleContractor(contractor);
+          
+                      if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_contractors")){
+                        await FireBaseUtils.addSaleContractor(contractor);
+                      }
+          
+                      getAllContractors();
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(Icons.save, color: Colors.white,),
+                    label: Text("SAVE".tr(), style: TextStyle(color: Colors.white),),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Utils.getThemeColorBlue(),
+                      minimumSize: Size(double.infinity, 48),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20),
-              ],
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         );

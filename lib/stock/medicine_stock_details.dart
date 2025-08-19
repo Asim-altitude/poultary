@@ -70,103 +70,105 @@ class _MedicineStockDetailScreen extends State<MedicineStockDetailScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Medicine Stock Details".tr())),
-      body: Padding(
-        padding: const EdgeInsets.all(5.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Utils.showBannerAd(_bannerAd, _isBannerAdReady),
-
-            _buildStockItem(widget.stock),
-            SizedBox(height: 16),
-            Container(
-              margin: EdgeInsets.only(left: 10),
-              child: Text(
-                "Stock History".tr(),
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(title: Text("Medicine Stock Details".tr())),
+        body: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+      
+              _buildStockItem(widget.stock),
+              SizedBox(height: 16),
+              Container(
+                margin: EdgeInsets.only(left: 10),
+                child: Text(
+                  "Stock History".tr(),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-            SizedBox(height: 8),
-
-            // Use Expanded correctly here
-            Expanded(
-              child: ListView.builder(
-                padding: EdgeInsets.all(10),
-                itemCount: widget.stockHistory.length,
-                itemBuilder: (context, index) {
-                  final entry = widget.stockHistory[index];
-                  return Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 3,
-                    margin: EdgeInsets.symmetric(vertical: 6),
-                    child: ListTile(
-                      leading: Icon(Icons.medication, color: Colors.blue),
-                      title: Text(
-                        "${entry.quantity} ${entry.unit} of ${entry.medicineName}",
-                        style: TextStyle(fontSize: 16),
+              SizedBox(height: 8),
+      
+              // Use Expanded correctly here
+              Expanded(
+                child: ListView.builder(
+                  padding: EdgeInsets.all(10),
+                  itemCount: widget.stockHistory.length,
+                  itemBuilder: (context, index) {
+                    final entry = widget.stockHistory[index];
+                    return Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 3,
+                      margin: EdgeInsets.symmetric(vertical: 6),
+                      child: ListTile(
+                        leading: Icon(Icons.medication, color: Colors.blue),
+                        title: Text(
+                          "${entry.quantity} ${entry.unit} of ${entry.medicineName}",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        subtitle: Text("DATE: ${Utils.getFormattedDate(entry.date)}"),
+                        trailing: IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () async {
+                            final confirm = await showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text("Delete Entry".tr()),
+                                content: Text("Are you sure you want to delete this stock entry?".tr()),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("CANCEL".tr())),
+                                  TextButton(
+                                    onPressed: () async {
+                                      entry.sync_status = SyncStatus.DELETED;
+                                      MedicineStockFB medicineStockFB = MedicineStockFB(stock: entry);
+      
+                                      StockExpense? stockExpense = await DatabaseHelper.getByStockItemId(entry.id!);
+                                      if (stockExpense != null) {
+                                        TransactionItem? transaction = await DatabaseHelper.getSingleTransaction(stockExpense.transactionId.toString());
+                                        medicineStockFB.transaction = transaction;
+                                        medicineStockFB.transaction!.sync_status = SyncStatus.DELETED;
+      
+                                        await DatabaseHelper.deleteByStockItemId(entry.id!);
+                                        await DatabaseHelper.deleteItem("Transactions", stockExpense.transactionId);
+                                      }
+                                      await deleteMedicineStock(entry.id!);
+                                      Utils.showToast("SUCCESSFUL".tr());
+      
+                                      if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_medicine")) {
+                                        medicineStockFB.sync_id = entry.sync_id;
+                                        medicineStockFB.sync_status = SyncStatus.DELETED;
+                                        medicineStockFB.last_modified = Utils.getTimeStamp();
+                                        medicineStockFB.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                                        medicineStockFB.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+      
+                                        await FireBaseUtils.updateMedicineStock(medicineStockFB);
+                                      }
+      
+                                      setState(() {
+                                        widget.stockHistory.remove(entry);
+                                      });
+                                      Navigator.of(context).pop(true);
+                                    },
+                                    child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
+                                  ),
+                                ],
+                              ),
+                            );
+      
+                            if (confirm ?? false) {
+                              // Already deleted in dialog
+                            }
+                          },
+                        ),
                       ),
-                      subtitle: Text("DATE: ${Utils.getFormattedDate(entry.date)}"),
-                      trailing: IconButton(
-                        icon: Icon(Icons.delete, color: Colors.red),
-                        onPressed: () async {
-                          final confirm = await showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text("Delete Entry".tr()),
-                              content: Text("Are you sure you want to delete this stock entry?".tr()),
-                              actions: [
-                                TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("CANCEL".tr())),
-                                TextButton(
-                                  onPressed: () async {
-                                    entry.sync_status = SyncStatus.DELETED;
-                                    MedicineStockFB medicineStockFB = MedicineStockFB(stock: entry);
-
-                                    StockExpense? stockExpense = await DatabaseHelper.getByStockItemId(entry.id!);
-                                    if (stockExpense != null) {
-                                      TransactionItem? transaction = await DatabaseHelper.getSingleTransaction(stockExpense.transactionId.toString());
-                                      medicineStockFB.transaction = transaction;
-                                      medicineStockFB.transaction!.sync_status = SyncStatus.DELETED;
-
-                                      await DatabaseHelper.deleteByStockItemId(entry.id!);
-                                      await DatabaseHelper.deleteItem("Transactions", stockExpense.transactionId);
-                                    }
-                                    await deleteMedicineStock(entry.id!);
-                                    Utils.showToast("SUCCESSFUL".tr());
-
-                                    if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_medicine")) {
-                                      medicineStockFB.sync_id = entry.sync_id;
-                                      medicineStockFB.sync_status = SyncStatus.DELETED;
-                                      medicineStockFB.last_modified = Utils.getTimeStamp();
-                                      medicineStockFB.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
-                                      medicineStockFB.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
-
-                                      await FireBaseUtils.updateMedicineStock(medicineStockFB);
-                                    }
-
-                                    setState(() {
-                                      widget.stockHistory.remove(entry);
-                                    });
-                                    Navigator.of(context).pop(true);
-                                  },
-                                  child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
-                                ),
-                              ],
-                            ),
-                          );
-
-                          if (confirm ?? false) {
-                            // Already deleted in dialog
-                          }
-                        },
-                      ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

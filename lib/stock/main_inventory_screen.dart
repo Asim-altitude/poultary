@@ -64,105 +64,107 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),
-        child: ClipRRect(
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(0.0),
-            bottomRight: Radius.circular(0.0),
-          ),
-          child: AppBar(
-            title: Text(
-              "Manage Inventory".tr(),
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-                color: Colors.white,
-              ),
+    return SafeArea(
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(kToolbarHeight),
+          child: ClipRRect(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(0.0),
+              bottomRight: Radius.circular(0.0),
             ),
-            centerTitle: true,
-            backgroundColor: Utils.getThemeColorBlue(),
-            elevation: 8,
-            automaticallyImplyLeading: false,
+            child: AppBar(
+              title: Text(
+                "Manage Inventory".tr(),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                  color: Colors.white,
+                ),
+              ),
+              centerTitle: true,
+              backgroundColor: Utils.getThemeColorBlue(),
+              elevation: 8,
+              automaticallyImplyLeading: false,
+            ),
           ),
         ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Utils.showBannerAd(_bannerAd, _isBannerAdReady),
-            Padding(
-              padding: EdgeInsets.all(16.0),
-              child: GridView.count(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 1.0,
-                children: [
-                  _buildInventoryItem(
-                    icon: Icons.fastfood,
-                    title: "Feed Stock".tr(),
-                    description: "Manage available feed quantity and types".tr(),
-                    onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => FeedStockScreen()),
-                      );
-                    },
-                  ),
-                  _buildInventoryItem(
-                    icon: Icons.egg,
-                    title: "Egg Stock".tr(),
-                    description: "Manage collected eggs and storage".tr(),
-                    onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => EggStockScreen()),
-                      );
-                    },
-                  ),
-                  _buildInventoryItem(
-                    icon: Icons.medical_services,
-                    title: "Medicine Stock".tr(),
-                    description: "Track medicines and expiration dates".tr(),
-                    onTap: () async {
-                      CategoryItem item = CategoryItem(id: null, name: "Medicine");
-                      int? medicineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);
-
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => MedicineStockScreen(id: medicineCategoryID!),
-                        ),
-                      );
-                    },
-                  ),
-                  _buildInventoryItem(
-                    icon: Icons.vaccines,
-                    title: "Vaccine Stock".tr(),
-                    description: "Manage vaccination schedules and stock".tr(),
-                    onTap: () async {
-                      CategoryItem item = CategoryItem(id: null, name: "Vaccine");
-                      int? vaccineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);
-
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => VaccineStockScreen(id: vaccineCategoryID!),
-                        ),
-                      );
-                    },
-                  ),
-                ],
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+              Padding(
+                padding: EdgeInsets.all(16.0),
+                child: GridView.count(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 1.0,
+                  children: [
+                    _buildInventoryItem(
+                      icon: Icons.fastfood,
+                      title: "Feed Stock".tr(),
+                      description: "Manage available feed quantity and types".tr(),
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => FeedStockScreen()),
+                        );
+                      },
+                    ),
+                    _buildInventoryItem(
+                      icon: Icons.egg,
+                      title: "Egg Stock".tr(),
+                      description: "Manage collected eggs and storage".tr(),
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => EggStockScreen()),
+                        );
+                      },
+                    ),
+                    _buildInventoryItem(
+                      icon: Icons.medical_services,
+                      title: "Medicine Stock".tr(),
+                      description: "Track medicines and expiration dates".tr(),
+                      onTap: () async {
+                        CategoryItem item = CategoryItem(id: null, name: "Medicine");
+                        int? medicineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);
+      
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MedicineStockScreen(id: medicineCategoryID!),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildInventoryItem(
+                      icon: Icons.vaccines,
+                      title: "Vaccine Stock".tr(),
+                      description: "Manage vaccination schedules and stock".tr(),
+                      onTap: () async {
+                        CategoryItem item = CategoryItem(id: null, name: "Vaccine");
+                        int? vaccineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);
+      
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => VaccineStockScreen(id: vaccineCategoryID!),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+      
       ),
-
     );
   }
 

@@ -330,161 +330,163 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),
-        child: ClipRRect(
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(20.0), // Round bottom-left corner
-            bottomRight: Radius.circular(20.0), // Round bottom-right corner
-          ),
-          child: AppBar(
-            title: Text(
-              "Auto Feed Sync".tr(),
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: Colors.white,
+    return SafeArea(
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(kToolbarHeight),
+          child: ClipRRect(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20.0), // Round bottom-left corner
+              bottomRight: Radius.circular(20.0), // Round bottom-right corner
+            ),
+            child: AppBar(
+              title: Text(
+                "Auto Feed Sync".tr(),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: Colors.white,
+                ),
               ),
-            ),
-            centerTitle: true,
-            backgroundColor: Utils.getThemeColorBlue(), // Customize the color
-            elevation: 8, // Gives it a more elevated appearance
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () {
-                Navigator.pop(context); // Navigates back
-              },
-            ),
-          ),
-        ),
-      ),
-
-      body: Column(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: pendingFeedRecords.isEmpty
-                  ?  Center(child: Text('No Records'.tr()))
-                  : ListView.builder(
-                itemCount: pendingFeedRecords.length,
-                itemBuilder: (context, index) {
-                  Feeding record = pendingFeedRecords[index];
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '${record.f_name.tr()}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-
-                              Row(
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit, color: Colors.blue),
-                                    onPressed: () {
-                                      _editFeedRecord(index);
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete, color: Colors.red),
-                                    onPressed: () {
-                                      _deleteFeedRecord(index);
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          Text(
-                            '${record.feed_name?.tr()}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text("Quantity".tr()+": ${record.quantity}"+Utils.selected_unit.tr()),
-                          const SizedBox(height: 8),
-                          Text("DATE".tr()+": ${Utils.getFormattedDate(record.date!)}"),
-                          const SizedBox(height: 8),
-                          Text(
-                            '${record.short_note}',
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
+              centerTitle: true,
+              backgroundColor: Utils.getThemeColorBlue(), // Customize the color
+              elevation: 8, // Gives it a more elevated appearance
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () {
+                  Navigator.pop(context); // Navigates back
                 },
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Skip Button
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {
-                     _showSkipWarningDialog();
-                    },
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14.0),
-                      side: BorderSide(color: Utils.getThemeColorBlue(), width: 2.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
+        ),
+      
+        body: Column(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: pendingFeedRecords.isEmpty
+                    ?  Center(child: Text('No Records'.tr()))
+                    : ListView.builder(
+                  itemCount: pendingFeedRecords.length,
+                  itemBuilder: (context, index) {
+                    Feeding record = pendingFeedRecords[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '${record.f_name.tr()}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+      
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit, color: Colors.blue),
+                                      onPressed: () {
+                                        _editFeedRecord(index);
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete, color: Colors.red),
+                                      onPressed: () {
+                                        _deleteFeedRecord(index);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Text(
+                              '${record.feed_name?.tr()}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text("Quantity".tr()+": ${record.quantity}"+Utils.selected_unit.tr()),
+                            const SizedBox(height: 8),
+                            Text("DATE".tr()+": ${Utils.getFormattedDate(record.date!)}"),
+                            const SizedBox(height: 8),
+                            Text(
+                              '${record.short_note}',
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    child:  Text(
-                      'Skip'.tr(),
-                      style: TextStyle(fontSize: 16.0, color: Utils.getThemeColorBlue()),
-                    ),
-                  ),
+                    );
+                  },
                 ),
-                const SizedBox(width: 16.0),
-                // Save Button
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      await _savePendingRecords();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      backgroundColor: Utils.getThemeColorBlue(),
-                      elevation: 4.0,
-                    ),
-                    child: Text(
-                      'SAVE'.tr(),
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Skip Button
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                       _showSkipWarningDialog();
+                      },
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14.0),
+                        side: BorderSide(color: Utils.getThemeColorBlue(), width: 2.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      child:  Text(
+                        'Skip'.tr(),
+                        style: TextStyle(fontSize: 16.0, color: Utils.getThemeColorBlue()),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16.0),
+                  // Save Button
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        await _savePendingRecords();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        backgroundColor: Utils.getThemeColorBlue(),
+                        elevation: 4.0,
+                      ),
+                      child: Text(
+                        'SAVE'.tr(),
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -107,7 +107,9 @@ class _FlockNotificationScreenState extends State<FlockNotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return
+      SafeArea(child:
+      Scaffold(
       appBar: AppBar(
         title:  Text('Flock Notifications'.tr(), style: TextStyle(fontSize: 18),),
         backgroundColor: Utils.getThemeColorBlue(),
@@ -196,7 +198,7 @@ class _FlockNotificationScreenState extends State<FlockNotificationScreen> {
             ],
           ),
         ),
-      ),
+      ),),
     );
   }
 

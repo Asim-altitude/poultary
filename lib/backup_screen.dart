@@ -194,8 +194,54 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                     await DatabaseHelper.createFeedStockHistoryTable();
                     await DatabaseHelper.createMedicineStockHistoryTable();
                     await DatabaseHelper.createVaccineStockHistoryTable();
+                    await DatabaseHelper.createSaleContractorTable();
+                    await DatabaseHelper.createFeedIngridentTable();
+                    await DatabaseHelper.createFeedBatchTable();
+                    await DatabaseHelper.createFeedBatchItemTable();
+                    await DatabaseHelper.createWeightRecordTableIfNotExists();
+                    await DatabaseHelper.createScheduledNotificationsTable();
+                    await DatabaseHelper.createStockExpenseJunction();
+                    await DatabaseHelper.createEggTransactionJunction();
+                    await DatabaseHelper.createSyncFailedTable();
                     await addNewColumn();
                     await addMissingCategories();
+                  }
+                  catch(ex){
+                    print(ex);
+                  }
+                  try {
+                    List<String> tables = [
+                      'Flock',
+                      'Flock_Image',
+                      'Eggs',
+                      'Feeding',
+                      'Transactions',
+                      'Vaccination_Medication',
+                      'Category_Detail',
+                      'EggTransaction',
+                      'FeedBatch',
+                      'FeedBatchItem',
+                      'FeedIngredient',
+                      'FeedStockHistory',
+                      'Flock_Detail',
+                      'MedicineStockHistory',
+                      'SaleContractor',
+                      'ScheduledNotification',
+                      'VaccineStockHistory',
+                      'WeightRecord',
+                      'StockExpense',
+                      'CustomCategory',
+                      'CustomCategoryData',
+
+                    ]; // Add your actual table names
+
+                    for (final table in tables) {
+                      await DatabaseHelper.instance.addSyncColumnsToTable(table);
+                      await DatabaseHelper.instance.assignSyncIds(table);
+                    }
+
+                    await SessionManager.setBoolValue(SessionManager.table_created, true);
+                    print('TABLE CREATION DONE');
                   }
                   catch(ex){
                     print(ex);
