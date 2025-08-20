@@ -28,98 +28,100 @@ class _VaccineStockDetailScreen extends State<VaccineStockDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Vaccine Stock Details".tr())),
-      body: Padding(
-        padding: const EdgeInsets.all(5.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildStockItem(widget.stock),
-            SizedBox(height: 16),
-            Container(
-              margin: EdgeInsets.only(left: 10),
-              child: Text("Stock History".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            ),
-            SizedBox(height: 8),
-            Expanded(
-              child: Container(
-                margin: EdgeInsets.all(10),
-                child: ListView.builder(
-                  itemCount: widget.stockHistory.length,
-                  itemBuilder: (context, index) {
-                    final entry = widget.stockHistory[index];
-                    return Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 3,
-                      margin: EdgeInsets.symmetric(vertical: 6),
-                      child: ListTile(
-                        leading: Icon(Icons.medication, color: Colors.blue),
-                        title: Text(
-                          "${entry.quantity} ${entry.unit} of ${entry.vaccineName}",
-                          style: TextStyle(fontSize: 16),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(title: Text("Vaccine Stock Details".tr())),
+        body: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildStockItem(widget.stock),
+              SizedBox(height: 16),
+              Container(
+                margin: EdgeInsets.only(left: 10),
+                child: Text("Stock History".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              SizedBox(height: 8),
+              Expanded(
+                child: Container(
+                  margin: EdgeInsets.all(10),
+                  child: ListView.builder(
+                    itemCount: widget.stockHistory.length,
+                    itemBuilder: (context, index) {
+                      final entry = widget.stockHistory[index];
+                      return Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 3,
+                        margin: EdgeInsets.symmetric(vertical: 6),
+                        child: ListTile(
+                          leading: Icon(Icons.medication, color: Colors.blue),
+                          title: Text(
+                            "${entry.quantity} ${entry.unit} of ${entry.vaccineName}",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          subtitle: Text("DATE".tr()+": ${Utils.getFormattedDate(entry.date)}"),
+                          trailing: IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () async {
+                              return await showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text("Delete Entry".tr()),
+                                  content: Text("Are you sure you want to delete this stock entry?".tr()),
+                                  actions: [
+                                    TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("CANCEL".tr())),
+                                    TextButton(
+                                      onPressed: () async {
+                                        // _deleteStock(entry.id);
+                                        entry.sync_status = SyncStatus.DELETED;
+                                        VaccineStockFB vaccineStockfb = VaccineStockFB(stock: entry);
+                                        StockExpense? stockExpense = await DatabaseHelper.getByStockItemId(entry.id!);
+                                        if(stockExpense != null)
+                                        {
+                                          TransactionItem? transaction = await DatabaseHelper.getSingleTransaction(stockExpense.transactionId.toString());
+                                          vaccineStockfb.transaction = transaction;
+                                          vaccineStockfb.transaction!.sync_status = SyncStatus.DELETED;
+      
+                                          await DatabaseHelper.deleteByStockItemId(entry.id!);
+                                          await DatabaseHelper.deleteItem("Transactions", stockExpense.transactionId);
+      
+                                          vaccineStockfb.transaction = transaction;
+                                        }
+      
+                                        if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_vaccine")) {
+                                          vaccineStockfb.sync_id = entry.sync_id;
+                                          vaccineStockfb.sync_status = SyncStatus.DELETED;
+                                          vaccineStockfb.last_modified = Utils.getTimeStamp();
+                                          vaccineStockfb.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                                          vaccineStockfb.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+      
+                                          await FireBaseUtils.updateVaccineStock(vaccineStockfb);
+                                        }
+      
+                                        await deleteMedicineStock(entry.id!);
+                                        Utils.showToast("SUCCESSFUL".tr());
+                                        setState(() {
+                                          widget.stockHistory.remove(entry);
+                                        });
+      
+                                        Navigator.of(context).pop(true);
+                                      },
+                                      child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
                         ),
-                        subtitle: Text("DATE".tr()+": ${Utils.getFormattedDate(entry.date)}"),
-                        trailing: IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () async {
-                            return await showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text("Delete Entry".tr()),
-                                content: Text("Are you sure you want to delete this stock entry?".tr()),
-                                actions: [
-                                  TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("CANCEL".tr())),
-                                  TextButton(
-                                    onPressed: () async {
-                                      // _deleteStock(entry.id);
-                                      entry.sync_status = SyncStatus.DELETED;
-                                      VaccineStockFB vaccineStockfb = VaccineStockFB(stock: entry);
-                                      StockExpense? stockExpense = await DatabaseHelper.getByStockItemId(entry.id!);
-                                      if(stockExpense != null)
-                                      {
-                                        TransactionItem? transaction = await DatabaseHelper.getSingleTransaction(stockExpense.transactionId.toString());
-                                        vaccineStockfb.transaction = transaction;
-                                        vaccineStockfb.transaction!.sync_status = SyncStatus.DELETED;
-
-                                        await DatabaseHelper.deleteByStockItemId(entry.id!);
-                                        await DatabaseHelper.deleteItem("Transactions", stockExpense.transactionId);
-
-                                        vaccineStockfb.transaction = transaction;
-                                      }
-
-                                      if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_vaccine")) {
-                                        vaccineStockfb.sync_id = entry.sync_id;
-                                        vaccineStockfb.sync_status = SyncStatus.DELETED;
-                                        vaccineStockfb.last_modified = Utils.getTimeStamp();
-                                        vaccineStockfb.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
-                                        vaccineStockfb.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
-
-                                        await FireBaseUtils.updateVaccineStock(vaccineStockfb);
-                                      }
-
-                                      await deleteMedicineStock(entry.id!);
-                                      Utils.showToast("SUCCESSFUL".tr());
-                                      setState(() {
-                                        widget.stockHistory.remove(entry);
-                                      });
-
-                                      Navigator.of(context).pop(true);
-                                    },
-                                    child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

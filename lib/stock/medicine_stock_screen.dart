@@ -305,78 +305,80 @@ class _MedicineStockScreenState extends State<MedicineStockScreen> with RefreshM
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),
-        child: ClipRRect(
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(0.0), // Round bottom-left corner
-            bottomRight: Radius.circular(0.0), // Round bottom-right corner
-          ),
-          child: AppBar(
-            title: Text(
-              "Medicine Stock Summary".tr(),
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: Colors.white,
-              ),
+    return SafeArea(
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(kToolbarHeight),
+          child: ClipRRect(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(0.0), // Round bottom-left corner
+              bottomRight: Radius.circular(0.0), // Round bottom-right corner
             ),
-            centerTitle: true,
-            backgroundColor: Utils.getThemeColorBlue(), // Customize the color
-            elevation: 8, // Gives it a more elevated appearance
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () {
-                Navigator.pop(context); // Navigates back
-              },
+            child: AppBar(
+              title: Text(
+                "Medicine Stock Summary".tr(),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: Colors.white,
+                ),
+              ),
+              centerTitle: true,
+              backgroundColor: Utils.getThemeColorBlue(), // Customize the color
+              elevation: 8, // Gives it a more elevated appearance
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () {
+                  Navigator.pop(context); // Navigates back
+                },
+              ),
             ),
           ),
         ),
-      ),
-      body:Column(children: [
-        Utils.showBannerAd(_bannerAd, _isBannerAdReady),
-
-        _stockSummary!.isEmpty ? Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey),
-              SizedBox(height: 10),
-              Text(
-                "No medicine stock available!".tr(),
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
-              ),
-              SizedBox(height: 5),
-              Text("Add stock to see details.".tr(), style: TextStyle(fontSize: 14, color: Colors.grey)),
-            ],
-          ),
-        ) :
-        Expanded(child:
-        AnimatedList(
-          key: _listKey,
-          initialItemCount: _stockSummary!.length,
-          itemBuilder: (context, index, animation) {
-            return InkWell(
-              onTap: () async {
-                List<MedicineStockHistory> history = await DatabaseHelper.fetchMedicineStockHistory(_stockSummary![index].medicineName, _stockSummary![index].unit);
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MedicineStockDetailScreen(stock: _stockSummary![index], stockHistory: history),
-                  ),
-                );
-                fetchStockSummary();
-              },
-              child: _buildStockItem(_stockSummary![index], index, animation),
-            );
-          },
-        ),),
-      ],),
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddStockDialog,
-        child: Icon(Icons.add),
+        body:Column(children: [
+          Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+      
+          _stockSummary!.isEmpty ? Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey),
+                SizedBox(height: 10),
+                Text(
+                  "No medicine stock available!".tr(),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+                ),
+                SizedBox(height: 5),
+                Text("Add stock to see details.".tr(), style: TextStyle(fontSize: 14, color: Colors.grey)),
+              ],
+            ),
+          ) :
+          Expanded(child:
+          AnimatedList(
+            key: _listKey,
+            initialItemCount: _stockSummary!.length,
+            itemBuilder: (context, index, animation) {
+              return InkWell(
+                onTap: () async {
+                  List<MedicineStockHistory> history = await DatabaseHelper.fetchMedicineStockHistory(_stockSummary![index].medicineName, _stockSummary![index].unit);
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MedicineStockDetailScreen(stock: _stockSummary![index], stockHistory: history),
+                    ),
+                  );
+                  fetchStockSummary();
+                },
+                child: _buildStockItem(_stockSummary![index], index, animation),
+              );
+            },
+          ),),
+        ],),
+      
+        floatingActionButton: FloatingActionButton(
+          onPressed: _showAddStockDialog,
+          child: Icon(Icons.add),
+        ),
       ),
     );
   }
@@ -542,135 +544,139 @@ class _AddMedicineStockBottomSheetState extends State<AddMedicineStockBottomShee
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height -
         (safeAreaHeight + safeAreaHeightBottom);
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Title
-            Text(
-              "Add Medicine Stock".tr(),
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
-            ),
-            SizedBox(height: 5),
-
-            if (isRequired)
+    return 
+      
+      SafeArea(
+        child: Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: Container(
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Title
               Text(
-                "PROVIDE_ALL".tr(),
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.red),
+                "Add Medicine Stock".tr(),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
               ),
-            SizedBox(height: 5),
-
-            // Medicine Selection
-            _buildDropdown(
-              hintText: "Choose Medicine".tr(),
-              value: _selectedMedicine,
-              items: _medicineList,
-              onChanged: (value) => setState(() => _selectedMedicine = value),
-              icon: Icons.medication,
-            ),
-            SizedBox(height: 12),
-
-            // Quantity and Unit in the same line
-            _buildTextField(
-              controller: _quantityController,
-              label: "Quantity".tr(),
-              icon: Icons.production_quantity_limits,
-              keyboardType: TextInputType.number,
-            ),
-
-            SizedBox(height: 12),
-
-            // Unit Selection (Tablets, mL, mg, etc.)
-            _buildDropdown(
-              hintText: "Select Unit".tr(),
-              value: _selectedUnit,
-              items: _unitList,
-              onChanged: (value) {
-                _selectedUnit = value!;
-              },
-              icon: Icons.balance,
-            ),
-            SizedBox(height: 12),
-            /// Date Picker
-            InkWell(
-              onTap: _pickDate,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade400),
+              SizedBox(height: 5),
+        
+              if (isRequired)
+                Text(
+                  "PROVIDE_ALL".tr(),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.red),
                 ),
-                child: Row(
-                  children: [
-                    Icon(Icons.calendar_today, color: Utils.getThemeColorBlue()),
-                    SizedBox(width: 10),
-                    Text(
-                      Utils.getFormattedDate(DateFormat('yyyy-MM-dd').format(_selectedDate)),
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black87),
-                    ),
-                  ],
-                ),
+              SizedBox(height: 5),
+        
+              // Medicine Selection
+              _buildDropdown(
+                hintText: "Choose Medicine".tr(),
+                value: _selectedMedicine,
+                items: _medicineList,
+                onChanged: (value) => setState(() => _selectedMedicine = value),
+                icon: Icons.medication,
               ),
-            ),
-            SizedBox(height: 12),
-            // Source Selection
-            _buildDropdown(
-              hintText: "Select Source".tr(),
-              value: _selectedSource,
-              items: _sourceList,
-              onChanged: (value) => setState(() {
-                _selectedSource = value;
-                _otherSourceController.clear(); // Reset other source input when changing selection
-                _amountController.clear(); // Reset amount when changing selection
-              }),
-              icon: Icons.storefront,
-            ),
-            SizedBox(height: 12),
-
-            // Other Source Input (Only visible if "Other" is selected)
-            if (_selectedSource == "OTHER")
+              SizedBox(height: 12),
+        
+              // Quantity and Unit in the same line
               _buildTextField(
-                controller: _otherSourceController,
-                label: "Enter Other Source".tr(),
-                icon: Icons.create,
-              ),
-
-            // Purchase Amount Input (Only visible if "Purchased" is selected)
-            if (_selectedSource == "PURCHASED")
-              _buildTextField(
-                controller: _amountController,
-                label: "Amount".tr(),
-                icon: Icons.attach_money,
+                controller: _quantityController,
+                label: "Quantity".tr(),
+                icon: Icons.production_quantity_limits,
                 keyboardType: TextInputType.number,
               ),
-            SizedBox(height: 20),
-
-            // Save Button
-            Container(
-              width: Utils.WIDTH_SCREEN - 20,
-              child: ElevatedButton(
-                onPressed: _saveStock,
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 40),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  backgroundColor: Utils.getThemeColorBlue(),
-                  elevation: 4,
-                ),
-                child: Text("Add Stock".tr(), style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
+        
+              SizedBox(height: 12),
+        
+              // Unit Selection (Tablets, mL, mg, etc.)
+              _buildDropdown(
+                hintText: "Select Unit".tr(),
+                value: _selectedUnit,
+                items: _unitList,
+                onChanged: (value) {
+                  _selectedUnit = value!;
+                },
+                icon: Icons.balance,
               ),
-            ),
-          ],
+              SizedBox(height: 12),
+              /// Date Picker
+              InkWell(
+                onTap: _pickDate,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade400),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.calendar_today, color: Utils.getThemeColorBlue()),
+                      SizedBox(width: 10),
+                      Text(
+                        Utils.getFormattedDate(DateFormat('yyyy-MM-dd').format(_selectedDate)),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.black87),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 12),
+              // Source Selection
+              _buildDropdown(
+                hintText: "Select Source".tr(),
+                value: _selectedSource,
+                items: _sourceList,
+                onChanged: (value) => setState(() {
+                  _selectedSource = value;
+                  _otherSourceController.clear(); // Reset other source input when changing selection
+                  _amountController.clear(); // Reset amount when changing selection
+                }),
+                icon: Icons.storefront,
+              ),
+              SizedBox(height: 12),
+        
+              // Other Source Input (Only visible if "Other" is selected)
+              if (_selectedSource == "OTHER")
+                _buildTextField(
+                  controller: _otherSourceController,
+                  label: "Enter Other Source".tr(),
+                  icon: Icons.create,
+                ),
+        
+              // Purchase Amount Input (Only visible if "Purchased" is selected)
+              if (_selectedSource == "PURCHASED")
+                _buildTextField(
+                  controller: _amountController,
+                  label: "Amount".tr(),
+                  icon: Icons.attach_money,
+                  keyboardType: TextInputType.number,
+                ),
+              SizedBox(height: 20),
+        
+              // Save Button
+              Container(
+                width: Utils.WIDTH_SCREEN - 20,
+                child: ElevatedButton(
+                  onPressed: _saveStock,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 40),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    backgroundColor: Utils.getThemeColorBlue(),
+                    elevation: 4,
+                  ),
+                  child: Text("Add Stock".tr(), style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+            ),
+      );
 
   }
 

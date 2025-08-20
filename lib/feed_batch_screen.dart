@@ -113,236 +113,238 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> with RefreshMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title:  Text('Feed Batches'.tr()), backgroundColor: Utils.getThemeColorBlue(), foregroundColor: Colors.white,),
-      bottomNavigationBar: Container(
-        color: Colors.white,
-        padding: EdgeInsets.all(10),
-        child: Row(
-          children: [
-            Expanded(
-              child: InkWell(
-                onTap: () => {
-
-                  _openCreateBatchDialog(null)
-                },
-                borderRadius: BorderRadius.circular(10),
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 300),
-                  height: 55,
-                  margin: EdgeInsets.symmetric(horizontal: 6),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Utils.getThemeColorBlue(), Colors.blue],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(title:  Text('Feed Batches'.tr()), backgroundColor: Utils.getThemeColorBlue(), foregroundColor: Colors.white,),
+        bottomNavigationBar: Container(
+          color: Colors.white,
+          padding: EdgeInsets.all(10),
+          child: Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: () => {
+      
+                    _openCreateBatchDialog(null)
+                  },
+                  borderRadius: BorderRadius.circular(10),
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 300),
+                    height: 55,
+                    margin: EdgeInsets.symmetric(horizontal: 6),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Utils.getThemeColorBlue(), Colors.blue],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.green.withOpacity(0.4),
+                          blurRadius: 6,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
                     ),
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.4),
-                        blurRadius: 6,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.add_circle_outline_sharp, color: Colors.white, size: 28),
-                      SizedBox(width: 6),
-                      Text(
-                        'New Batch'.tr(),
-                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-                      ),
-                    ],
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add_circle_outline_sharp, color: Colors.white, size: 28),
+                        SizedBox(width: 6),
+                        Text(
+                          'New Batch'.tr(),
+                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            Expanded(
-              child: InkWell(
-                onTap: () => {
-                Navigator.push(
-                context,
-                MaterialPageRoute(
-                builder: (context) =>  FeedIngredientScreen()),
-                )
-                },
-                borderRadius: BorderRadius.circular(10),
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 300),
-                  height: 55,
-                  margin: EdgeInsets.symmetric(horizontal: 6),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.green.shade500, Colors.blue],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+              Expanded(
+                child: InkWell(
+                  onTap: () => {
+                  Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                  builder: (context) =>  FeedIngredientScreen()),
+                  )
+                  },
+                  borderRadius: BorderRadius.circular(10),
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 300),
+                    height: 55,
+                    margin: EdgeInsets.symmetric(horizontal: 6),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.green.shade500, Colors.blue],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.green.withOpacity(0.4),
+                          blurRadius: 6,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
                     ),
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.4),
-                        blurRadius: 6,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Ingredients'.tr(),
-                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-                      ),
-
-                      Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 28),
-
-                    ],
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Ingredients'.tr(),
+                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+      
+                        Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 28),
+      
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-      body: _batches.isEmpty
-          ?  Center(child: Text('No feed batches created yet.'.tr()))
-          : SingleChildScrollView(
-            child: Column(
-              children:
-              [
-                Utils.showBannerAd(_bannerAd, _isBannerAdReady),
-
-                Container(
-                  margin: EdgeInsets.all(15),
-                  child: Column(
-                    children: [
-                      Text('View available stock for feed batches'.tr(), style: TextStyle(color: Colors.black),),
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>  FeedStockScreen()),
-
-                          );
-                        },
-                        child: Container(
-                          child: Text('View Stock'.tr(), style: TextStyle(color: Colors.black, fontSize: 16, fontWeight:  FontWeight.bold)),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                Container(
-                  child: ListView.builder(
-                          itemCount: _batches.length,
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                          itemBuilder: (context, index) {
-                  final batch = _batches[index];
-                           return Card(
-                             margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                             shape: RoundedRectangleBorder(
-                               borderRadius: BorderRadius.circular(16),
-                             ),
-                             elevation: 4,
-                             child: Padding(
-                               padding: const EdgeInsets.all(16),
-                               child: Column(
-                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                 children: [
-                                   /// Header with name and actions
-                                   Row(
-                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                     children: [
-                                       Text(
-                                         batch.name,
-                                         style:  TextStyle(
-                                           fontSize: 20,
-                                           fontWeight: FontWeight.bold,
-                                           color: Utils.getThemeColorBlue(),
-                                         ),
-                                       ),
-                                       Row(
-                                         children: [
-                                           IconButton(
-                                             icon: const Icon(Icons.edit_note, color: Colors.blueAccent),
-                                             onPressed: () {
-                                               if(Utils.isMultiUSer && !Utils.hasFeaturePermission("edit_feed"))
-                                               {
-                                                 Utils.showMissingPermissionDialog(context, "edit_feed");
-                                                 return;
-                                               }
-
-                                               _openCreateBatchDialog(batch);
-                                             },
-                                           ),
-                                           IconButton(
-                                             icon: const Icon(Icons.delete_forever, color: Colors.redAccent),
-                                             onPressed: () {
-                                               if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_feed"))
-                                               {
-                                                 Utils.showMissingPermissionDialog(context, "delete_feed");
-                                                 return;
-                                               }
-
-                                               _confirmDeleteBatch(batch.id!, batch.transaction_id);
-                                             },
-                                           ),
-                                         ],
-                                       ),
-                                     ],
-                                   ),
-
-                                   const SizedBox(height: 8),
-
-                                   /// Weight and Price
-                                   Row(
-                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                     children: [
-                                       Text('Weight'.tr()+': ${batch.totalWeight.toStringAsFixed(2)} ${Utils.selected_unit.tr()}',
-                                           style: const TextStyle(fontSize: 15, color: Colors.black87)),
-                                       Text(Utils.currency.tr()+' ${batch.totalPrice.toStringAsFixed(2)}',
-                                           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-                                     ],
-                                   ),
-
-                                   const SizedBox(height: 12),
-
-                                   /// Ingredients title
-                                    Text(
-                                     "Ingredients".tr(),
-                                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black54),
-                                   ),
-                                   const SizedBox(height: 6),
-
-                                   /// Ingredient chips
-                                   Wrap(
-                                     spacing: 8,
-                                     runSpacing: 4,
-                                     children: batch.ingredients.map((ing) {
-                                       return Chip(
-                                         label: Text('${ing.ingredientName} - ${ing.quantity.toStringAsFixed(2)} ${Utils.selected_unit.tr()}'),
-                                         backgroundColor: Colors.grey.shade100,
-                                         labelStyle: const TextStyle(color: Colors.black87),
-                                       );
-                                     }).toList(),
-                                   ),
-                                 ],
-                               ),
-                             ),
-                           );
-
-                          },
-                        ),
-                ),
-              ],
-            ),
+            ],
           ),
-
+        ),
+        body: _batches.isEmpty
+            ?  Center(child: Text('No feed batches created yet.'.tr()))
+            : SingleChildScrollView(
+              child: Column(
+                children:
+                [
+                  Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+      
+                  Container(
+                    margin: EdgeInsets.all(15),
+                    child: Column(
+                      children: [
+                        Text('View available stock for feed batches'.tr(), style: TextStyle(color: Colors.black),),
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>  FeedStockScreen()),
+      
+                            );
+                          },
+                          child: Container(
+                            child: Text('View Stock'.tr(), style: TextStyle(color: Colors.black, fontSize: 16, fontWeight:  FontWeight.bold)),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  Container(
+                    child: ListView.builder(
+                            itemCount: _batches.length,
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                            itemBuilder: (context, index) {
+                    final batch = _batches[index];
+                             return Card(
+                               margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                               shape: RoundedRectangleBorder(
+                                 borderRadius: BorderRadius.circular(16),
+                               ),
+                               elevation: 4,
+                               child: Padding(
+                                 padding: const EdgeInsets.all(16),
+                                 child: Column(
+                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                   children: [
+                                     /// Header with name and actions
+                                     Row(
+                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                       children: [
+                                         Text(
+                                           batch.name,
+                                           style:  TextStyle(
+                                             fontSize: 20,
+                                             fontWeight: FontWeight.bold,
+                                             color: Utils.getThemeColorBlue(),
+                                           ),
+                                         ),
+                                         Row(
+                                           children: [
+                                             IconButton(
+                                               icon: const Icon(Icons.edit_note, color: Colors.blueAccent),
+                                               onPressed: () {
+                                                 if(Utils.isMultiUSer && !Utils.hasFeaturePermission("edit_feed"))
+                                                 {
+                                                   Utils.showMissingPermissionDialog(context, "edit_feed");
+                                                   return;
+                                                 }
+      
+                                                 _openCreateBatchDialog(batch);
+                                               },
+                                             ),
+                                             IconButton(
+                                               icon: const Icon(Icons.delete_forever, color: Colors.redAccent),
+                                               onPressed: () {
+                                                 if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_feed"))
+                                                 {
+                                                   Utils.showMissingPermissionDialog(context, "delete_feed");
+                                                   return;
+                                                 }
+      
+                                                 _confirmDeleteBatch(batch.id!, batch.transaction_id);
+                                               },
+                                             ),
+                                           ],
+                                         ),
+                                       ],
+                                     ),
+      
+                                     const SizedBox(height: 8),
+      
+                                     /// Weight and Price
+                                     Row(
+                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                       children: [
+                                         Text('Weight'.tr()+': ${batch.totalWeight.toStringAsFixed(2)} ${Utils.selected_unit.tr()}',
+                                             style: const TextStyle(fontSize: 15, color: Colors.black87)),
+                                         Text(Utils.currency.tr()+' ${batch.totalPrice.toStringAsFixed(2)}',
+                                             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                                       ],
+                                     ),
+      
+                                     const SizedBox(height: 12),
+      
+                                     /// Ingredients title
+                                      Text(
+                                       "Ingredients".tr(),
+                                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black54),
+                                     ),
+                                     const SizedBox(height: 6),
+      
+                                     /// Ingredient chips
+                                     Wrap(
+                                       spacing: 8,
+                                       runSpacing: 4,
+                                       children: batch.ingredients.map((ing) {
+                                         return Chip(
+                                           label: Text('${ing.ingredientName} - ${ing.quantity.toStringAsFixed(2)} ${Utils.selected_unit.tr()}'),
+                                           backgroundColor: Colors.grey.shade100,
+                                           labelStyle: const TextStyle(color: Colors.black87),
+                                         );
+                                       }).toList(),
+                                     ),
+                                   ],
+                                 ),
+                               ),
+                             );
+      
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            ),
+      
+      ),
     );
   }
 
@@ -607,189 +609,191 @@ class _CreateFeedBatchBottomDialogState
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16), // Increased padding for a more spacious layout
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                widget.batch == null ? "Create New Feed Batch".tr() : "Edit Feed Batch".tr(),
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20, // Increased font size for the title
-                  color: Colors.blueGrey, // Light color for the title
-                ),
-              ),
-              const SizedBox(height: 20),
-              // Batch Name Input Field
-              TextField(
-                controller: _nameController,
-                readOnly: widget.batch != null? true : false,
-                decoration:  InputDecoration(
-                  labelText: "Batch Name".tr(),
-                  labelStyle: TextStyle(color: Colors.blueGrey), // Color for label text
-                  border: OutlineInputBorder(),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue), // Highlighted border color
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey), // Default border color
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16), // Increased padding for a more spacious layout
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.batch == null ? "Create New Feed Batch".tr() : "Edit Feed Batch".tr(),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20, // Increased font size for the title
+                    color: Colors.blueGrey, // Light color for the title
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              // Ingredients Selection Title
-               Text(
-                'Select Ingredients'.tr(),
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.blueGrey, // Color to match the title style
-                ),
-              ),
-              const SizedBox(height: 8),
-              // Ingredients List or No Ingredients Message
-              _ingredients.isEmpty
-                  ? Column(
-                children: [
-                   Center(child: Text('No ingredients found.'.tr())),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>  FeedIngredientScreen()),
-
-                      );
-
-                    },
-                    child:  Text("New Ingredient".tr()),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(45), backgroundColor: Colors.blue, // Primary color for button
+                const SizedBox(height: 20),
+                // Batch Name Input Field
+                TextField(
+                  controller: _nameController,
+                  readOnly: widget.batch != null? true : false,
+                  decoration:  InputDecoration(
+                    labelText: "Batch Name".tr(),
+                    labelStyle: TextStyle(color: Colors.blueGrey), // Color for label text
+                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.blue), // Highlighted border color
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey), // Default border color
                     ),
                   ),
-                ],
-              )
-                  : Column(
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          // Navigate to add a new ingredient screen
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>  FeedIngredientScreen()),
-
-                          );
-
-                        },
-                        child:  Text("New Ingredient".tr(), style: TextStyle(color: Colors.white),),
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(45), backgroundColor: Utils.getThemeColorBlue(), // Primary color for button
-                        ),
-                      ),
-                      ListView.builder(
-                                      shrinkWrap: true,
-                                      physics: const NeverScrollableScrollPhysics(),
-                                      itemCount: _ingredients.length,
-                                      itemBuilder: (_, index) {
-                      final ing = _ingredients[index];
-                      final isSelected = _selectedIngredientIds.contains(ing.id);
-
-                      return Card(
-                        elevation: 5, // Added shadow for the cards
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10), // Rounded corners for the card
-                        ),
-                        child: ListTile(
-                          leading: Checkbox(
-                            value: isSelected,
-                            onChanged: (value) {
-                              setState(() {
-                                if (value == true) {
-                                  _selectedIngredientIds.add(ing.id!);
-                                } else {
-                                  _selectedIngredientIds.remove(ing.id!);
-                                  _qtyControllers[ing.id!]!.text = '';
-                                }
-                              });
-                              _calculateTotals();
-                            },
-                          ),
-                          title: Text(
-                            ing.name,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Price'.tr()+': ${Utils.currency} ${ing.pricePerKg.toStringAsFixed(2)}' +"per".tr() +' ${Utils.selected_unit.tr()}',
-                                style: TextStyle(color: Colors.grey[600]),
-                              ),
-                              const SizedBox(height: 4),
-                              SizedBox(
-                                width: 120,
-                                height: 40,
-                                child: TextField(
-                                  controller: _qtyControllers[ing.id!]!,
-                                  enabled: isSelected,
-                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                  decoration: InputDecoration(
-                                    labelText: 'Qty'.tr()+' (${Utils.selected_unit.tr()})',
-                                    labelStyle: TextStyle(color: Colors.blueGrey),
-                                    border: OutlineInputBorder(),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(color: Colors.blue),
-                                    ),
-                                  ),
-                                  onChanged: (_) => _calculateTotals(),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                                      },
-                                    ),
-                    ],
-                  ),
-              const SizedBox(height: 10),
-              // Total Weight and Price Display
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Weight'.tr()+': ${_totalWeight.toStringAsFixed(2)} ${Utils.selected_unit.tr()}',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  Text(
-                    'Price'.tr()+': '+Utils.currency+'. ${_totalPrice.toStringAsFixed(2)}',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              // Save Button
-              ElevatedButton.icon(
-                onPressed: _saveBatch,
-                icon: const Icon(Icons.save, color: Colors.white,),
-                label:  Text("SAVE".tr(), style: TextStyle(color: Colors.white),),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50), backgroundColor: Utils.getThemeColorBlue(), // Green color for the button
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8), // Rounded corners for button
+                ),
+                const SizedBox(height: 20),
+                // Ingredients Selection Title
+                 Text(
+                  'Select Ingredients'.tr(),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blueGrey, // Color to match the title style
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 8),
+                // Ingredients List or No Ingredients Message
+                _ingredients.isEmpty
+                    ? Column(
+                  children: [
+                     Center(child: Text('No ingredients found.'.tr())),
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>  FeedIngredientScreen()),
+      
+                        );
+      
+                      },
+                      child:  Text("New Ingredient".tr()),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(45), backgroundColor: Colors.blue, // Primary color for button
+                      ),
+                    ),
+                  ],
+                )
+                    : Column(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            // Navigate to add a new ingredient screen
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>  FeedIngredientScreen()),
+      
+                            );
+      
+                          },
+                          child:  Text("New Ingredient".tr(), style: TextStyle(color: Colors.white),),
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(45), backgroundColor: Utils.getThemeColorBlue(), // Primary color for button
+                          ),
+                        ),
+                        ListView.builder(
+                                        shrinkWrap: true,
+                                        physics: const NeverScrollableScrollPhysics(),
+                                        itemCount: _ingredients.length,
+                                        itemBuilder: (_, index) {
+                        final ing = _ingredients[index];
+                        final isSelected = _selectedIngredientIds.contains(ing.id);
+      
+                        return Card(
+                          elevation: 5, // Added shadow for the cards
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10), // Rounded corners for the card
+                          ),
+                          child: ListTile(
+                            leading: Checkbox(
+                              value: isSelected,
+                              onChanged: (value) {
+                                setState(() {
+                                  if (value == true) {
+                                    _selectedIngredientIds.add(ing.id!);
+                                  } else {
+                                    _selectedIngredientIds.remove(ing.id!);
+                                    _qtyControllers[ing.id!]!.text = '';
+                                  }
+                                });
+                                _calculateTotals();
+                              },
+                            ),
+                            title: Text(
+                              ing.name,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Price'.tr()+': ${Utils.currency} ${ing.pricePerKg.toStringAsFixed(2)}' +"per".tr() +' ${Utils.selected_unit.tr()}',
+                                  style: TextStyle(color: Colors.grey[600]),
+                                ),
+                                const SizedBox(height: 4),
+                                SizedBox(
+                                  width: 120,
+                                  height: 40,
+                                  child: TextField(
+                                    controller: _qtyControllers[ing.id!]!,
+                                    enabled: isSelected,
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    decoration: InputDecoration(
+                                      labelText: 'Qty'.tr()+' (${Utils.selected_unit.tr()})',
+                                      labelStyle: TextStyle(color: Colors.blueGrey),
+                                      border: OutlineInputBorder(),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.blue),
+                                      ),
+                                    ),
+                                    onChanged: (_) => _calculateTotals(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                                        },
+                                      ),
+                      ],
+                    ),
+                const SizedBox(height: 10),
+                // Total Weight and Price Display
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Weight'.tr()+': ${_totalWeight.toStringAsFixed(2)} ${Utils.selected_unit.tr()}',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    Text(
+                      'Price'.tr()+': '+Utils.currency+'. ${_totalPrice.toStringAsFixed(2)}',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                // Save Button
+                ElevatedButton.icon(
+                  onPressed: _saveBatch,
+                  icon: const Icon(Icons.save, color: Colors.white,),
+                  label:  Text("SAVE".tr(), style: TextStyle(color: Colors.white),),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(50), backgroundColor: Utils.getThemeColorBlue(), // Green color for the button
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8), // Rounded corners for button
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

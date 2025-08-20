@@ -71,113 +71,115 @@ class _StockDetailScreen extends State<StockDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Stock Details".tr())),
-      body: Padding(
-        padding: const EdgeInsets.all(5.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // **Stock Summary Section**
-            Utils.showBannerAd(_bannerAd, _isBannerAdReady),
-
-            _buildStockItem(widget.stock, 0, kAlwaysCompleteAnimation),
-
-            SizedBox(height: 16),
-
-            // **Stock History Title**
-            Container(
-                margin: EdgeInsets.only(left: 10),
-                child: Text("Stock History".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-
-            SizedBox(height: 8),
-
-            // **Stock History List**
-            Expanded(
-              child: Container(
-                margin: EdgeInsets.all(10),
-                child: ListView.builder(
-                  itemCount: widget.stockHistory.length,
-                  itemBuilder: (context, index) {
-                    final entry = widget.stockHistory[index];
-
-                    return Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 3,
-                      margin: EdgeInsets.symmetric(vertical: 6),
-                      child: ListTile(
-                        leading: Icon(
-                          entry.source == 'PURCHASED' ? Icons.add_shopping_cart : Icons.sync_alt,
-                          color: entry.source == 'PURCHASED' ? Colors.green : Colors.orange,
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(title: Text("Stock Details".tr())),
+        body: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // **Stock Summary Section**
+              Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+      
+              _buildStockItem(widget.stock, 0, kAlwaysCompleteAnimation),
+      
+              SizedBox(height: 16),
+      
+              // **Stock History Title**
+              Container(
+                  margin: EdgeInsets.only(left: 10),
+                  child: Text("Stock History".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+      
+              SizedBox(height: 8),
+      
+              // **Stock History List**
+              Expanded(
+                child: Container(
+                  margin: EdgeInsets.all(10),
+                  child: ListView.builder(
+                    itemCount: widget.stockHistory.length,
+                    itemBuilder: (context, index) {
+                      final entry = widget.stockHistory[index];
+      
+                      return Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 3,
+                        margin: EdgeInsets.symmetric(vertical: 6),
+                        child: ListTile(
+                          leading: Icon(
+                            entry.source == 'PURCHASED' ? Icons.add_shopping_cart : Icons.sync_alt,
+                            color: entry.source == 'PURCHASED' ? Colors.green : Colors.orange,
+                          ),
+                          title: Text(
+                            "${entry.quantity} ${entry.unit.tr()} from ${entry.source.tr()}",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          subtitle: Text("DATE".tr()+": ${Utils.getFormattedDate(entry.date)}"),
+                          trailing: IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () async {
+                              return await showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text("Delete Entry".tr()),
+                                  content: Text("Are you sure you want to delete this stock entry?".tr()),
+                                  actions: [
+                                    TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("CANCEL".tr())),
+                                    TextButton(
+                                      onPressed: () async{
+                                        // _deleteStock(entry.id);
+                                        entry.sync_status = SyncStatus.DELETED;
+                                        FeedStockFB feedStockFB = FeedStockFB(stock: entry);
+                                        StockExpense? stockExpense = await DatabaseHelper.getByStockItemId(entry.id!);
+                                        if(stockExpense != null){
+                                          TransactionItem? transaction = await DatabaseHelper.getSingleTransaction(stockExpense.transactionId.toString());
+                                          feedStockFB.transaction = transaction;
+                                          feedStockFB.transaction!.sync_status = SyncStatus.DELETED;
+                                          await DatabaseHelper.deleteByStockItemId(entry.id!);
+                                          await DatabaseHelper.deleteItem("Transactions", stockExpense.transactionId);
+                                        }
+      
+                                        DatabaseHelper.deleteFeedStock(entry.id!);
+                                        Utils.showToast("SUCCESSFUL".tr());
+      
+                                        if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_feed")) {
+                                          feedStockFB.sync_id = entry.sync_id;
+                                          feedStockFB.sync_status = SyncStatus.DELETED;
+                                          feedStockFB.last_modified = Utils.getTimeStamp();
+                                          feedStockFB.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                                          feedStockFB.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+      
+                                          await FireBaseUtils.updateFeedStockHistory(feedStockFB);
+                                        }
+      
+                                        setState(() {
+                                          widget.stockHistory.remove(entry);
+                                        });
+      
+                                        if(widget.stockHistory.isEmpty) {
+                                          Navigator.pop(context);
+                                        }
+      
+      
+                                        Navigator.of(context).pop(true);
+                                      },
+                                      child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
                         ),
-                        title: Text(
-                          "${entry.quantity} ${entry.unit.tr()} from ${entry.source.tr()}",
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        subtitle: Text("DATE".tr()+": ${Utils.getFormattedDate(entry.date)}"),
-                        trailing: IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () async {
-                            return await showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text("Delete Entry".tr()),
-                                content: Text("Are you sure you want to delete this stock entry?".tr()),
-                                actions: [
-                                  TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("CANCEL".tr())),
-                                  TextButton(
-                                    onPressed: () async{
-                                      // _deleteStock(entry.id);
-                                      entry.sync_status = SyncStatus.DELETED;
-                                      FeedStockFB feedStockFB = FeedStockFB(stock: entry);
-                                      StockExpense? stockExpense = await DatabaseHelper.getByStockItemId(entry.id!);
-                                      if(stockExpense != null){
-                                        TransactionItem? transaction = await DatabaseHelper.getSingleTransaction(stockExpense.transactionId.toString());
-                                        feedStockFB.transaction = transaction;
-                                        feedStockFB.transaction!.sync_status = SyncStatus.DELETED;
-                                        await DatabaseHelper.deleteByStockItemId(entry.id!);
-                                        await DatabaseHelper.deleteItem("Transactions", stockExpense.transactionId);
-                                      }
-
-                                      DatabaseHelper.deleteFeedStock(entry.id!);
-                                      Utils.showToast("SUCCESSFUL".tr());
-
-                                      if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_feed")) {
-                                        feedStockFB.sync_id = entry.sync_id;
-                                        feedStockFB.sync_status = SyncStatus.DELETED;
-                                        feedStockFB.last_modified = Utils.getTimeStamp();
-                                        feedStockFB.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
-                                        feedStockFB.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
-
-                                        await FireBaseUtils.updateFeedStockHistory(feedStockFB);
-                                      }
-
-                                      setState(() {
-                                        widget.stockHistory.remove(entry);
-                                      });
-
-                                      if(widget.stockHistory.isEmpty) {
-                                        Navigator.pop(context);
-                                      }
-
-
-                                      Navigator.of(context).pop(true);
-                                    },
-                                    child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
-
-          ],
+      
+            ],
+          ),
         ),
       ),
     );

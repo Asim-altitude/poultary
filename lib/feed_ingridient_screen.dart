@@ -171,124 +171,126 @@ class _FeedIngredientScreenState extends State<FeedIngredientScreen> with Refres
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Feed Ingredients'.tr()), backgroundColor: Utils.getThemeColorBlue(), foregroundColor: Colors.white,),
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.all(10),
-        color: Colors.white,
-        child: Expanded(
-          child: InkWell(
-            onTap: () => {
-
-              if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_feed"))
-                {
-                  Utils.showMissingPermissionDialog(context, "add_feed")
-
-                }else{
-
-                _showIngredientDialog()
-              }
-
-            },
-            borderRadius: BorderRadius.circular(10),
-            child: AnimatedContainer(
-              duration: Duration(milliseconds: 300),
-              height: 55,
-              margin: EdgeInsets.symmetric(horizontal: 6),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Utils.getThemeColorBlue(), Colors.blue],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(title: Text('Feed Ingredients'.tr()), backgroundColor: Utils.getThemeColorBlue(), foregroundColor: Colors.white,),
+        bottomNavigationBar: Container(
+          padding: EdgeInsets.all(10),
+          color: Colors.white,
+          child: Expanded(
+            child: InkWell(
+              onTap: () => {
+      
+                if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_feed"))
+                  {
+                    Utils.showMissingPermissionDialog(context, "add_feed")
+      
+                  }else{
+      
+                  _showIngredientDialog()
+                }
+      
+              },
+              borderRadius: BorderRadius.circular(10),
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 300),
+                height: 55,
+                margin: EdgeInsets.symmetric(horizontal: 6),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Utils.getThemeColorBlue(), Colors.blue],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green.withOpacity(0.4),
+                      blurRadius: 6,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
                 ),
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.green.withOpacity(0.4),
-                    blurRadius: 6,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.add_circle_outline_sharp, color: Colors.white, size: 28),
-                  SizedBox(width: 6),
-                  Text(
-                    'New Ingredient'.tr(),
-                    style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                ],
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add_circle_outline_sharp, color: Colors.white, size: 28),
+                    SizedBox(width: 6),
+                    Text(
+                      'New Ingredient'.tr(),
+                      style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-      body: ingredients.isEmpty
-          ? Center(child: Text('No ingredients yet.'.tr()))
-          : ListView.builder(
-        itemCount: ingredients.length,
-        itemBuilder: (_, index) {
-          final ingredient = ingredients[index];
-         return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-            elevation: 2,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  /// Ingredient info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+        body: ingredients.isEmpty
+            ? Center(child: Text('No ingredients yet.'.tr()))
+            : ListView.builder(
+          itemCount: ingredients.length,
+          itemBuilder: (_, index) {
+            final ingredient = ingredients[index];
+           return Card(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    /// Ingredient info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${ingredient.name} (${ingredient.unit.tr()})',
+                            style:  TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Utils.getThemeColorBlue(),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            Utils.currency+' ${ingredient.pricePerKg.toStringAsFixed(2)} '+'per'.tr()+' ${ingredient.unit}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+      
+                    /// Action buttons
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          '${ingredient.name} (${ingredient.unit.tr()})',
-                          style:  TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Utils.getThemeColorBlue(),
-                          ),
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blueAccent),
+                          onPressed: () => _showIngredientDialog(ingredient: ingredient),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          Utils.currency+' ${ingredient.pricePerKg.toStringAsFixed(2)} '+'per'.tr()+' ${ingredient.unit}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.black87,
-                          ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.redAccent),
+                          onPressed: () => _deleteIngredient(ingredient.id!),
                         ),
                       ],
                     ),
-                  ),
-
-                  /// Action buttons
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blueAccent),
-                        onPressed: () => _showIngredientDialog(ingredient: ingredient),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.redAccent),
-                        onPressed: () => _deleteIngredient(ingredient.id!),
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-
-        },
+            );
+      
+          },
+        ),
+      
       ),
-
     );
   }
 }

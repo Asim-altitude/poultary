@@ -68,7 +68,7 @@ class Utils {
   static double _standardWidth = 414;
   static double _standardheight = 736;
   static final bool ISTESTACCOUNT = false;
-  static late bool isShowAdd = false;
+  static late bool isShowAdd = true;
   static late bool iShowInterStitial = false;
 
   static bool shouldBackup = false;
@@ -1306,8 +1306,8 @@ $storeLink
       Utils.isShowAdd = true;
       inititalize();
     }
-
     Utils.isShowAdd = false;
+
   }
 
   static Future<void> inititalize() async {
@@ -1888,14 +1888,14 @@ $storeLink
   static late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   static Future<void> showNotification(int id, String title, String body, int time) async {
+    int notificationId = generateRandomNumber();
 
     try{
       initNotification();
       tz.initializeTimeZones();
-      print("Notification Pressed");
 
       await flutterLocalNotificationsPlugin.zonedSchedule(
-          generateRandomNumber(),
+          notificationId,
           title,
           body,
           tz.TZDateTime.now(tz.local).add(Duration(seconds: time)),
@@ -1915,10 +1915,48 @@ $storeLink
               presentSound: true,
             ),
           ),
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+
           // Type of time interpretation
           uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-          androidAllowWhileIdle: true);
+          UILocalNotificationDateInterpretation.absoluteTime,);
+
+    }catch(ex){
+      pushInexactNotification(notificationId,title,body,time);
+
+    }
+  }
+  static pushInexactNotification(int notificationId,String title,String body,int time) async {
+    try{
+      await initNotification();
+      tz.initializeTimeZones();
+
+
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        notificationId,
+        title,
+        body,
+        tz.TZDateTime.now(tz.local).add(Duration(seconds: time)),
+        const NotificationDetails(
+          // Android details
+          android: AndroidNotificationDetails('main_channel', 'Main Channel',
+            channelDescription: "kelsey",
+            importance: Importance.max,
+            priority: Priority.max,
+
+          ),
+          // iOS details
+          iOS: DarwinNotificationDetails(
+            sound: 'default.wav',
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        // Type of time interpretation
+        uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,);
 
     }catch(ex){
 
@@ -1935,24 +1973,61 @@ $storeLink
     initNotification();
     tz.initializeTimeZones();
 
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tz.TZDateTime.from(scheduledDate, tz.local),
-      const NotificationDetails(
-        android: AndroidNotificationDetails('main_channel', 'Main Channel',
-          channelDescription: "kelsey",
-          importance: Importance.max,
-          priority: Priority.max,
+    try{
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tz.TZDateTime.from(scheduledDate, tz.local),
+        const NotificationDetails(
+          android: AndroidNotificationDetails('main_channel', 'Main Channel',
+            channelDescription: "kelsey",
+            importance: Importance.max,
+            priority: Priority.max,
 
+          ),
         ),
-      ),
-      androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
-      payload: payload,
-    );
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+        payload: payload,
+      );
+    }catch(ex){
+      scheduleInexactNotification(id: id, title: title, body: body, scheduledDate: scheduledDate);
+    }
+  }
+  static scheduleInexactNotification({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime scheduledDate,
+    String? payload,
+  }) async {
+    initNotification();
+    tz.initializeTimeZones();
+
+    try{
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tz.TZDateTime.from(scheduledDate, tz.local),
+        const NotificationDetails(
+          android: AndroidNotificationDetails('main_channel', 'Main Channel',
+            channelDescription: "kelsey",
+            importance: Importance.max,
+            priority: Priority.max,
+
+          ),
+        ),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+        payload: payload,
+      );
+    }catch(ex){
+
+    }
   }
 
   static initNotification(){
