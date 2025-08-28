@@ -47,48 +47,67 @@ Future<Widget> getInitialScreen() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
 
 
-  bool launch = await Utils.checkAppLaunch();
-  bool skipped = true;//await SessionManager.getBool(SessionManager.skipped);
+  bool initialSetupDone = await Utils.checkAppLaunch();
+  bool skipped = true; //await SessionManager.getBool(SessionManager.skipped);
   bool loggedIn = await SessionManager.getBool(SessionManager.loggedIn);
+  bool loggedOut = await SessionManager.getBool(SessionManager.loggedOut);
+
   bool isAdmin = await SessionManager.getBool(SessionManager.isAdmin);
   MultiUser? user = await SessionManager.getUserFromPrefs();
   List<MultiUser> users = await DatabaseHelper.getAllUsers();
   bool isAutoFeedEnabled = prefs.getBool('isAutoFeedEnabled') ?? false;
   Utils.currentUser = user;
 
-  try{
+  try {
     _configEasyLoading();
   }
-  catch(ex){
+  catch (ex) {
     print(ex);
   }
 
-  if(launch){
+  /*if(launch){
     return LanguageSetupScreen();
   } else if (isAutoFeedEnabled){
     return AutoFeedSyncScreen();
   }else {
     return HomeScreen();
-  }
+  }*/
 
   /*if(launch) {
       return LanguageSetupScreen();
-    } else if (loggedIn && isAdmin) {
-      Utils.isMultiUSer = true;
+    } else if (loggedIn) {
       return FarmWelcomeScreen(multiUser: Utils.currentUser!, isStart: true,);
-    } else if (loggedIn && !isAdmin && user != null) {
-      Utils.isMultiUSer = true;
-      return FarmWelcomeScreen(multiUser: Utils.currentUser!, isStart: true,);
-      return WorkerDashboardScreen(
-          name: user.name, email: user.email, role: user.role);
-    } else if (users.length == 0 && skipped && isAutoFeedEnabled) {
+    } else if (isAutoFeedEnabled) {
         return AutoFeedSyncScreen();
     } else if (users.length == 0 && skipped && !isAutoFeedEnabled) {
       return HomeScreen();
     } else {
       return AuthGate(isStart: true);
     }*/
+
+  // 1. If user has NOT done initial setup → Show SetupScreen
+  if (initialSetupDone) {
+    return LanguageSetupScreen();
   }
+
+  // 2. If user is logged in → Show UserFarmScreen
+  if (loggedIn) {
+    return FarmWelcomeScreen(multiUser: Utils.currentUser!, isStart: true);
+  }
+
+  // 3. If user is logged out AND initial setup is done → Show LoginScreen
+  if (loggedOut) {
+    return AuthGate(isStart: true);
+  }
+
+  // 4. If initial setup is done, user is neither logged in nor logged out, BUT auto feed is enabled → Show AutoFeed
+  if (isAutoFeedEnabled) {
+    return AutoFeedSyncScreen();
+  }
+
+  // 5. Default → HomeScreen
+  return HomeScreen();
+}
 
 
 void _configEasyLoading() {

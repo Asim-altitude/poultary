@@ -63,7 +63,7 @@ class _LoginFormState extends State<LoginForm> {
 
           if (snapshot.exists && snapshot.data()?['role'] == 'Admin') {
             final data = snapshot.data();
-            MultiUser multiUser = MultiUser(name: data!['name'], email: data['email'], password: "password", role: data['role'], farmId: data['farm_id'], createdAt: data['created_at'], image: data['image'] ?? '');
+            MultiUser multiUser = MultiUser(name: data!['name'], email: data['email'], password: data['password'], role: data['role'], farmId: data['farm_id'], createdAt: data['created_at'], image: data['image'] ?? '');
             SessionManager.saveUserToPrefs(multiUser);
             Utils.currentUser = multiUser;
             await SessionManager.setBoolValue(SessionManager.loggedIn, true);
@@ -151,7 +151,7 @@ class _LoginFormState extends State<LoginForm> {
         if (snapshot.docs.isNotEmpty) {
           final data = snapshot.docs.first.data();
 
-          MultiUser multiUser = MultiUser(name: data['name'], email: data['email'], password: password, role: data['role'], farmId: data['farm_id'], createdAt: data['created_at'], image: data['image'] ?? '');
+          MultiUser multiUser = MultiUser(name: data['name'], email: data['email'], password: data['password'], role: data['role'], farmId: data['farm_id'], createdAt: data['created_at'], image: data['image'] ?? '');
           SessionManager.saveUserToPrefs(multiUser);
           await SessionManager.setBoolValue(SessionManager.loggedIn, true);
           await SessionManager.setBoolValue(SessionManager.isAdmin, false);

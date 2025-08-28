@@ -442,6 +442,7 @@ class _CreateFeedBatchBottomDialogState
     setState(() {
       _editingBatchId = widget.batch?.id;
       _nameController.text = widget.batch!.name;
+      transaction_id = widget.batch!.transaction_id;
       for (var item in widget.batch!.ingredients) {
         _selectedIngredientIds.add(item.ingredientId);
         _qtyControllers[item.ingredientId] = TextEditingController(text: item.quantity.toString());

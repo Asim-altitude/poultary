@@ -242,6 +242,12 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
     Widget continueButton = TextButton(
       child: Text("DELETE".tr()),
       onPressed:  () async {
+
+        if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_category")){
+          Utils.showMissingPermissionDialog(context, "delete_category");
+          return;
+        }
+
         SubItem subItem = categoryList.elementAt(index);
         DatabaseHelper.deleteSubItem(subItem);
 

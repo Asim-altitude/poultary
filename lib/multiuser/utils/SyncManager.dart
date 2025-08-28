@@ -89,6 +89,21 @@ class SyncManager {
 
   }
 
+
+  static final ValueNotifier<int> activeListeners = ValueNotifier<int>(0);
+
+  static void startSync() {
+    activeListeners.value++;
+  }
+
+  static void completeSync() {
+    if (activeListeners.value > 0) {
+      activeListeners.value--;
+    }
+  }
+
+  static bool get isSyncing => activeListeners.value > 0;
+
   final List<StreamSubscription> _subscriptions = [];
   final deduplicator = UpdateDeduplicator();
 
@@ -124,6 +139,8 @@ class SyncManager {
           if (change.type == DocumentChangeType.added ||
               change.type == DocumentChangeType.modified) {
             final data = change.doc.data() as Map<String, dynamic>;
+            Utils.backup_changes += snapshot.docChanges.length;
+            startSync();
             FlockFB? flockFB = FlockFB.fromJson(data);
             print("🟢 New/Updated FLOCK: ${flockFB.flock.f_name}");
 
@@ -153,7 +170,8 @@ class SyncManager {
                 await listenToFlockImages(flock!, flock.farm_id ?? "");
               }else if (flockFB.flock.sync_status == SyncStatus.DELETED) {
                 //Delete Entire Flock and related Data
-                await DatabaseHelper.deleteFlockAndRelatedInfoSyncID(flockFB.flock.sync_id!);
+                Flock? flock = await DatabaseHelper.getFlockBySyncId(flockFB.flock.sync_id!);
+                await DatabaseHelper.deleteFlockAndRelatedInfoSyncID(flockFB.flock.sync_id!, flock!.f_id);
               }
 
               SessionManager.setLastSyncTime(FireBaseUtils.FLOCKS, lastSyncTime!);
@@ -188,6 +206,7 @@ class SyncManager {
               SessionManager.setLastSyncTime(FireBaseUtils.FLOCKS, lastSyncTime!);
             }
             RefreshEventBus().emit(FireBaseUtils.FLOCKS);
+            completeSync();
             // Save/update in SQLite
           }
         }
@@ -201,6 +220,7 @@ class SyncManager {
     }
     catch(ex){
       print(ex);
+      completeSync();
     }
   }
 
@@ -281,10 +301,11 @@ class SyncManager {
         }
 
         for (var change in snapshot.docChanges) {
+          startSync();
           final data = change.doc.data() as Map<String, dynamic>;
           final modification = BirdsModification.fromJson(data);
           print("🔄 BIRD MODIFIED: ${modification.flockDetail.item_type}");
-
+          Utils.backup_changes += snapshot.docChanges.length;
           if (modification.last_modified!.isAfter(lastSyncTime!)) {
             lastSyncTime = modification.last_modified;
           }
@@ -362,6 +383,7 @@ class SyncManager {
               SessionManager.setLastSyncTime(FireBaseUtils.BIRDS, lastSyncTime!);
             }
             RefreshEventBus().emit(FireBaseUtils.BIRDS);
+            completeSync();
           }
         }
       });
@@ -369,6 +391,7 @@ class SyncManager {
       _subscriptions.add(sub);
       print("BIRDS SYNC STARTED");
     } catch (e) {
+      completeSync();
       print("❌ BirdModification sync error: $e");
     }
   }
@@ -398,11 +421,12 @@ class SyncManager {
         }
 
         for (var change in snapshot.docChanges) {
+          startSync();
           final data = change.doc.data() as Map<String, dynamic>;
           final eggRecord = EggRecord.fromJson(data);
 
           print("🥚 EGG RECORD SYNC: ${eggRecord.eggs.f_name}, ${eggRecord.eggs.total_eggs} ${eggRecord.toJson()}");
-
+          Utils.backup_changes += snapshot.docChanges.length;
           if (eggRecord.last_modified!.isAfter(lastSyncTime!)) {
             lastSyncTime = eggRecord.last_modified;
           }
@@ -496,6 +520,7 @@ class SyncManager {
 
           }
           RefreshEventBus().emit(FireBaseUtils.EGGS);
+          completeSync();
         }
       });
 
@@ -503,6 +528,7 @@ class SyncManager {
 
       print("EGGS SYNC STARTED");
     } catch (e) {
+      completeSync();
       print("❌ EggRecord sync error: $e");
     }
   }
@@ -532,11 +558,12 @@ class SyncManager {
         }
 
         for (var change in snapshot.docChanges) {
+          startSync();
           final data = change.doc.data() as Map<String, dynamic>;
           final feeding = Feeding.fromJson(data);
 
           print("🔄 FEEDING SYNC: ${feeding.feed_name}, ${feeding.quantity}");
-
+          Utils.backup_changes += snapshot.docChanges.length;
           if (feeding.last_modified!.isAfter(lastSyncTime!)) {
             lastSyncTime = feeding.last_modified;
           }
@@ -577,12 +604,14 @@ class SyncManager {
 
           }
           RefreshEventBus().emit(FireBaseUtils.FEEDING);
+          completeSync();
         }
       });
 
       _subscriptions.add(sub);
       print("FEEDING SYNC STARTED");
     } catch (e) {
+      completeSync();
       print("❌ Feeding sync error: $e");
     }
   }
@@ -615,10 +644,11 @@ class SyncManager {
         for (var change in snapshot.docChanges) {
           final data = change.doc.data() as Map<String, dynamic>;
           print("HEALTH $data");
+          startSync();
           final vaccination = Vaccination_Medication.fromJson(data);
 
           print("🔄 HEALTH SYNC: ${vaccination.medicine}, ${vaccination.bird_count}");
-
+          Utils.backup_changes += snapshot.docChanges.length;
           if (vaccination.last_modified!.isAfter(lastSyncTime!)) {
             lastSyncTime = vaccination.last_modified;
           }
@@ -660,6 +690,7 @@ class SyncManager {
             SessionManager.setLastSyncTime(FireBaseUtils.HEALTH, lastSyncTime!);
           }
           RefreshEventBus().emit(FireBaseUtils.HEALTH);
+          completeSync();
         }
       });
 
@@ -667,6 +698,7 @@ class SyncManager {
 
       print("HEALTH SYNC STARTED");
     } catch (e) {
+      completeSync();
       print("❌ Vaccination sync error: $e");
     }
   }
@@ -697,11 +729,12 @@ class SyncManager {
 
 
         for (var change in snapshot.docChanges) {
+          startSync();
           final data = change.doc.data() as Map<String, dynamic>;
           final finance = FinanceItem.fromJson(data);
 
           print("🔄 FINANCE SYNC: ${finance.transaction.type} ${finance.transaction.amount}");
-
+          Utils.backup_changes += snapshot.docChanges.length;
           if (finance.last_modified!.isAfter(lastSyncTime!)) {
             lastSyncTime = finance.last_modified;
           }
@@ -840,6 +873,7 @@ class SyncManager {
 
           }
           RefreshEventBus().emit(FireBaseUtils.FINANCE);
+          completeSync();
         }
       });
 
@@ -847,6 +881,7 @@ class SyncManager {
 
       print("FINANCE SYNC STARTED");
     } catch (e) {
+      completeSync();
       print("❌ Finance sync error: $e");
     }
   }
@@ -875,11 +910,12 @@ class SyncManager {
         }
 
         for (var change in snapshot.docChanges) {
+          startSync();
           final data = change.doc.data() as Map<String, dynamic>;
           final category = CustomCategory.fromJson(data);
 
           print("🔄 CATEGORY SYNC: ${category.name}");
-
+          Utils.backup_changes += snapshot.docChanges.length;
           if (category.last_modified!.isAfter(lastSyncTime!)) {
             lastSyncTime = category.last_modified;
           }
@@ -916,6 +952,7 @@ class SyncManager {
             SessionManager.setLastSyncTime(FireBaseUtils.CUSTOM_CATEGORY, lastSyncTime!);
           }
           RefreshEventBus().emit(FireBaseUtils.CUSTOM_CATEGORY);
+          completeSync();
         }
       });
 
@@ -950,11 +987,12 @@ class SyncManager {
         }
 
         for (var change in snapshot.docChanges) {
+          startSync();
           final data = change.doc.data() as Map<String, dynamic>;
           final customData = CustomCategoryData.fromJson(data);
 
           print("🔄 CUSTOM DATA SYNC: ${customData.cName}, Qty: ${customData.quantity}");
-
+          Utils.backup_changes += snapshot.docChanges.length;
           if (customData.last_modified!.isAfter(lastSyncTime!)) {
             lastSyncTime = customData.last_modified;
           }
@@ -994,6 +1032,7 @@ class SyncManager {
             SessionManager.setLastSyncTime(FireBaseUtils.CUSTOM_CATEGORY_DATA, lastSyncTime!);
           }
           RefreshEventBus().emit(FireBaseUtils.CUSTOM_CATEGORY_DATA);
+          completeSync();
         }
       });
 
@@ -1001,6 +1040,7 @@ class SyncManager {
 
       print("CUSTOM CATEGORY DATA SYNC STARTED");
     } catch (e) {
+      completeSync();
       print("❌ CustomCategoryData sync error: $e");
     }
   }
@@ -1030,6 +1070,7 @@ class SyncManager {
         }
 
         for (var change in snapshot.docChanges) {
+          startSync();
           final data = change.doc.data() as Map<String, dynamic>;
           final item = FeedStockFB.fromJson(data);
 
@@ -1037,7 +1078,7 @@ class SyncManager {
           final TransactionItem? txn = item.transaction;
 
           print("🔄 FEED STOCK SYNC: ${stock.feed_name} (${stock.quantity} ${stock.unit})");
-
+          Utils.backup_changes += snapshot.docChanges.length;
           if (item.last_modified!.isAfter(lastSyncTime!)) {
             lastSyncTime = item.last_modified;
           }
@@ -1124,7 +1165,7 @@ class SyncManager {
           }
 
           RefreshEventBus().emit(FireBaseUtils.FEED_STOCK_HISTORY);
-
+          completeSync();
         }
       });
 
@@ -1132,6 +1173,7 @@ class SyncManager {
 
       print("FEED STOCK SYNC STARTED");
     } catch (e) {
+      completeSync();
       print("❌ FeedStockFB sync error: $e");
     }
   }
@@ -1161,6 +1203,7 @@ class SyncManager {
         }
 
         for (var change in snapshot.docChanges) {
+          startSync();
           final data = change.doc.data() as Map<String, dynamic>;
           final item = MedicineStockFB.fromJson(data);
 
@@ -1168,7 +1211,7 @@ class SyncManager {
           final TransactionItem? txn = item.transaction;
 
           print("🔄 MEDICINE STOCK SYNC: ${stock.medicineName} (${stock.quantity} ${stock.unit})");
-
+          Utils.backup_changes += snapshot.docChanges.length;
           if (item.last_modified!.isAfter(lastSyncTime!)) {
             lastSyncTime = item.last_modified;
           }
@@ -1253,7 +1296,7 @@ class SyncManager {
           }
 
           RefreshEventBus().emit(FireBaseUtils.MEDICINE_STOCK_HISTORY);
-
+          completeSync();
         }
       });
 
@@ -1261,6 +1304,7 @@ class SyncManager {
 
       print("MEDICINE SYNC STARTED");
     } catch (e) {
+      completeSync();
       print("❌ MedicineStockFB sync error: $e");
     }
   }
@@ -1289,6 +1333,7 @@ class SyncManager {
           firstSnapshotHandled = true;
         }
         for (var change in snapshot.docChanges) {
+          startSync();
           final data = change.doc.data() as Map<String, dynamic>;
           final item = VaccineStockFB.fromJson(data);
 
@@ -1297,7 +1342,7 @@ class SyncManager {
 
           print("🔄 VACCINE STOCK SYNC: ${stock.vaccineName} (${stock.quantity} ${stock.unit})");
 
-
+          Utils.backup_changes += snapshot.docChanges.length;
           if (item.last_modified!.isAfter(lastSyncTime!)) {
             lastSyncTime = item.last_modified;
           }
@@ -1384,7 +1429,7 @@ class SyncManager {
           }
 
           RefreshEventBus().emit(FireBaseUtils.VACCINE_STOCK_HISTORY);
-
+          completeSync();
         }
       });
 
@@ -1392,6 +1437,7 @@ class SyncManager {
 
       print("VACCINE SYNC STARTED");
     } catch (e) {
+      completeSync();
       print("❌ VaccineStockFB sync error: $e");
     }
   }
@@ -1421,11 +1467,12 @@ class SyncManager {
         }
 
         for (var change in snapshot.docChanges) {
+          startSync();
           final data = change.doc.data() as Map<String, dynamic>;
           final FeedIngredient ingredient = FeedIngredient.fromJson(data);
 
           print("🔄 FEED INGREDIENT SYNC: ${ingredient.name} (${ingredient.pricePerKg}/${ingredient.unit})");
-
+          Utils.backup_changes += snapshot.docChanges.length;
           if (ingredient.last_modified!.isAfter(lastSyncTime!)) {
             lastSyncTime = ingredient.last_modified;
           }
@@ -1461,13 +1508,14 @@ class SyncManager {
             SessionManager.setLastSyncTime(FireBaseUtils.FEED_INGRIDIENT, lastSyncTime!);
           }
           RefreshEventBus().emit(FireBaseUtils.FEED_INGRIDIENT);
-
+          completeSync();
         }
       });
 
       _subscriptions.add(sub);
       print("FeedIngredient SYNC STARTED");// Add to your listener tracking list
     } catch (e) {
+      completeSync();
       print("❌ FeedIngredient sync error: $e");
     }
   }
@@ -1499,15 +1547,16 @@ class SyncManager {
         for (var change in snapshot.docChanges) {
           final data = change.doc.data() as Map<String, dynamic>;
 
+          startSync();
           final item = FeedBatchFB.fromJson(data);
 
-          print(item.toJson());
+
           final FeedBatch batch = item.feedbatch;
           final List<IngredientFB>? ingredients = item.ingredientList;
           final TransactionItem? txn = item.transaction;
 
-          print("🔄 FEED BATCH SYNC: ${batch.name} (${batch.totalWeight}kg) ${item.toJson()}");
-
+          print("🔄 FEED BATCH SYNC: ${batch.name} (${batch.totalWeight}kg) ${item.transaction!.toJson()}");
+          Utils.backup_changes += snapshot.docChanges.length;
           if (item.last_modified!.isAfter(lastSyncTime!)) {
             lastSyncTime = item.last_modified;
           }
@@ -1577,8 +1626,10 @@ class SyncManager {
 
             SessionManager.setLastSyncTime(FireBaseUtils.FEED_BATCH, lastSyncTime!);
 
-          } else {
-            if (item.sync_status != SyncStatus.DELETED) {
+          }
+          else {
+            if (item.sync_status != SyncStatus.DELETED)
+            {
               int? txnID = await DatabaseHelper.insertNewTransaction(txn!);
               batch.transaction_id = txnID!;
               int? newId = await DatabaseHelper.insertBatch(batch);
@@ -1618,7 +1669,7 @@ class SyncManager {
 
           }
           RefreshEventBus().emit(FireBaseUtils.FEED_BATCH);
-
+          completeSync();
         }
       });
 
@@ -1626,6 +1677,7 @@ class SyncManager {
       print("FEEDBATCH SYNC STARTED");// Add to your listener tracking list
 
     } catch (e) {
+      completeSync();
       print("❌ FeedBatchFB sync error: $e");
     }
   }
@@ -1655,11 +1707,12 @@ class SyncManager {
         }
 
         for (var change in snapshot.docChanges) {
+          startSync();
           final data = change.doc.data() as Map<String, dynamic>;
           final category = SubItem.fromJson(data);
 
           print("🔄 CATEGORY SYNC: ${category.name} ${category.toJson()}");
-
+          Utils.backup_changes += snapshot.docChanges.length;
           if (category.last_modified!.isAfter(lastSyncTime!)) {
             lastSyncTime = category.last_modified;
           }
@@ -1696,7 +1749,7 @@ class SyncManager {
             SessionManager.setLastSyncTime(FireBaseUtils.SUB_CATEGORY, lastSyncTime!);
           }
           RefreshEventBus().emit(FireBaseUtils.SUB_CATEGORY);
-
+          completeSync();
         }
       });
 
@@ -1731,11 +1784,12 @@ class SyncManager {
           firstSnapshotHandled = true;
         }
         for (var change in snapshot.docChanges) {
+          startSync();
           final data = change.doc.data() as Map<String, dynamic>;
           final weightRecord = WeightRecord.fromJson(data);
 
           print("🔄 WEIGHT_RECORD SYNC: ${weightRecord.averageWeight} ${weightRecord.toJson()}");
-
+          Utils.backup_changes += snapshot.docChanges.length;
           if (weightRecord.last_modified!.isAfter(lastSyncTime!)) {
             lastSyncTime = weightRecord.last_modified;
           }
@@ -1777,7 +1831,7 @@ class SyncManager {
           }
 
           RefreshEventBus().emit(FireBaseUtils.WEIGHT_RECORD);
-
+          completeSync();
         }
       });
 
@@ -1812,11 +1866,12 @@ class SyncManager {
           firstSnapshotHandled = true;
         }
         for (var change in snapshot.docChanges) {
+          startSync();
           final data = change.doc.data() as Map<String, dynamic>;
           final saleContractor = SaleContractor.fromFBJson(data);
 
           print("🔄 SALE_CONTRACTOR SYNC: ${saleContractor.name} ${saleContractor.toLocalJson()}");
-
+          Utils.backup_changes += snapshot.docChanges.length;
           if (saleContractor.last_modified!.isAfter(lastSyncTime!)) {
             lastSyncTime = saleContractor.last_modified;
           }
@@ -1854,7 +1909,7 @@ class SyncManager {
             SessionManager.setLastSyncTime(FireBaseUtils.SALE_CONTRACTOR, lastSyncTime!);
           }
           RefreshEventBus().emit(FireBaseUtils.SALE_CONTRACTOR);
-
+          completeSync();
         }
       });
 

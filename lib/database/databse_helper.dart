@@ -74,6 +74,15 @@ class DatabaseHelper  {
 
   }
 
+
+
+  Future<void> close() async {
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+    }
+  }
+
   Future<Database> _init() async {
     var databasesPath = await getDatabasesPath();
     var path = join(databasesPath, _databaseName);
@@ -4166,16 +4175,16 @@ class DatabaseHelper  {
   }
 
 
-  static Future<void> deleteFlockAndRelatedInfoSyncID(String sync_id) async {
+  static Future<void> deleteFlockAndRelatedInfoSyncID(String sync_id, int f_id) async {
 
     // Begin a transaction to ensure atomicity
     await _database?.transaction((txn) async {
 
-      await txn.delete('Eggs', where: 'sync_id = ?', whereArgs: [sync_id]);
-      await txn.delete('Transactions', where: 'sync_id = ?', whereArgs: [sync_id]);
-      await txn.delete('Feeding', where: 'sync_id = ?', whereArgs: [sync_id]);
-      await txn.delete('Vaccination_Medication', where: 'sync_id = ?', whereArgs: [sync_id]);
-      await txn.delete('Flock_Detail', where: 'sync_id = ?', whereArgs: [sync_id]);
+      await txn.delete('Eggs', where: 'f_id = ?', whereArgs: [f_id]);
+      await txn.delete('Transactions', where: 'f_id = ?', whereArgs: [f_id]);
+      await txn.delete('Feeding', where: 'f_id = ?', whereArgs: [f_id]);
+      await txn.delete('Vaccination_Medication', where: 'f_id = ?', whereArgs: [f_id]);
+      await txn.delete('Flock_Detail', where: 'f_id = ?', whereArgs: [f_id]);
 
       // Delete flock
       await txn.delete('Flock', where: 'sync_id = ?', whereArgs: [sync_id]);

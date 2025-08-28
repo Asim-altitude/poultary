@@ -88,7 +88,8 @@ dependencies:
   connectivity_plus: ^6.0.1
   internet_connection_checker: ^1.0.0+1
   flutter_easyloading: ^3.0.5
-
+  package_info_plus: ^8.0.0
+  in_app_review: ^2.0.9
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2

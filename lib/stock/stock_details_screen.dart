@@ -119,6 +119,14 @@ class _StockDetailScreen extends State<StockDetailScreen> {
                           trailing: IconButton(
                             icon: Icon(Icons.delete, color: Colors.red),
                             onPressed: () async {
+
+
+                              if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_feed")){
+                                Utils.showMissingPermissionDialog(context, "delete_feed");
+                                return;
+                              }
+
+
                               return await showDialog(
                                 context: context,
                                 builder: (context) => AlertDialog(

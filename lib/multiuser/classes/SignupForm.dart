@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -28,24 +31,35 @@ class _SignupFormState extends State<SignupForm> {
 
   bool isLoading = false;
 
-  // Generate random farm ID and ensure uniqueness
+
   Future<void> generateUniqueFarmId() async {
-    final random = Random();
-    final chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    String id;
-    bool exists = true;
+    String email = emailController.text.trim();
+
+    if (!Utils.isValidEmail(email)) {
+      Utils.showToast("Invalid_email".tr());
+      return;
+    }
 
     setState(() => isLoading = true);
 
-    do {
-      id = List.generate(6, (_) => chars[random.nextInt(chars.length)]).join();
-      final doc = await FirebaseFirestore.instance.collection('farms').doc(id).get();
-      exists = doc.exists;
-    } while (exists);
+    // Use email + current time + random number, then hash it
+    final random = Random();
+    final input = "$email-${DateTime.now().millisecondsSinceEpoch}-${random.nextInt(999999)}";
+
+    // SHA1 hash and take first 10 characters
+    final hash = sha1.convert(utf8.encode(input)).toString().substring(0, 10).toUpperCase();
+
+    // Add first 3 chars of email for readability
+    String emailPart = email.split('@').first.toUpperCase();
+    if (emailPart.length > 3) emailPart = emailPart.substring(0, 3);
+
+    String id = "$emailPart-$hash"; // Example: "ASI-9F3A7D2B1C"
 
     farmIdController.text = id;
+
     setState(() => isLoading = false);
   }
+
 
   Future<void> handleSignup() async {
     final name = nameController.text.trim();

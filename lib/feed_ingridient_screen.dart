@@ -130,7 +130,7 @@ class _FeedIngredientScreenState extends State<FeedIngredientScreen> with Refres
                   feedIngredient.modified_by = Utils.isMultiUSer? Utils.currentUser!.email :'';
 
                   await DatabaseHelper.updateIngredientByObject(feedIngredient);
-                  if(Utils.isMultiUSer && Utils.hasFeaturePermission("update_stock")){
+                  if(Utils.isMultiUSer && Utils.hasFeaturePermission("update_feed")){
                     await FireBaseUtils.updateFeedIngredient(feedIngredient);
                   }
                 } else {
@@ -143,7 +143,7 @@ class _FeedIngredientScreenState extends State<FeedIngredientScreen> with Refres
                     feedIngredient.farm_id = Utils.isMultiUSer? Utils.currentUser!.farmId :'';
                     feedIngredient.modified_by = Utils.isMultiUSer? Utils.currentUser!.email :'';
 
-                  if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_stock")){
+                  if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_feed")){
                     await FireBaseUtils.addFeedIngredient(feedIngredient);
                   }
                 }
@@ -157,12 +157,22 @@ class _FeedIngredientScreenState extends State<FeedIngredientScreen> with Refres
     );
   }
 
-  Future<void> _deleteIngredient(int id) async {
+  Future<void> _deleteIngredient(int id, String sync_id) async {
     if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_feed"))
     {
       Utils.showMissingPermissionDialog(context, "delete_feed");
       return;
 
+    }
+
+
+    if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_feed")){
+      FeedIngredient? ingredient = await DatabaseHelper.getFeedIngredientBySyncId(sync_id);
+      ingredient!.sync_status = SyncStatus.DELETED;
+      ingredient.last_modified = Utils.getTimeStamp();
+      ingredient.modified_by = Utils.currentUser!.email;
+
+      await FireBaseUtils.updateFeedIngredient(ingredient);
     }
 
     await DatabaseHelper.deleteIngredient(id);//.delete('ingredients', where: 'id = ?', whereArgs: [id]);
@@ -278,7 +288,7 @@ class _FeedIngredientScreenState extends State<FeedIngredientScreen> with Refres
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.redAccent),
-                          onPressed: () => _deleteIngredient(ingredient.id!),
+                          onPressed: () => _deleteIngredient(ingredient.id!, ingredient.sync_id!),
                         ),
                       ],
                     ),

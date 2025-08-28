@@ -110,14 +110,13 @@ class _AllFlocksScreen extends State<AllFlocksScreen> with RefreshMixin {
                           borderRadius: BorderRadius.circular(30),
                           onTap: () async {
 
-                            if(Utils.hasFeaturePermission("view_flocks")
-                                || Utils.hasFeaturePermission("view_flock")) {
+                            if(Utils.hasFeaturePermission("add_flocks")) {
                               await Navigator.push(
                                 context,
                                 CupertinoPageRoute(builder: (
                                     context) => const ADDFlockScreen()),);
                             }else{
-                              Utils.showMissingPermissionDialog(context, "view_flock");
+                              Utils.showMissingPermissionDialog(context, "add_flock");
 
                             }
                             // Refresh logic
@@ -144,8 +143,6 @@ class _AllFlocksScreen extends State<AllFlocksScreen> with RefreshMixin {
                         ),
                       ),
                     ),
-
-
 
                 ],
               ),
@@ -301,28 +298,7 @@ class _AllFlocksScreen extends State<AllFlocksScreen> with RefreshMixin {
                       ),
                     ),
                     SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () async {
-                          await Navigator.push(
-                            context,
-                            CupertinoPageRoute(builder: (context) => const ADDFlockScreen()),
-                          );
-                          // Refresh
-                        },
-                        icon: Icon(Icons.add, color: Colors.white),
-                        label: Text("NEW_FLOCK".tr(), style: TextStyle(fontSize: 16)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Utils.getThemeColorBlue(),
-                          elevation: 6,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          padding: EdgeInsets.symmetric(vertical: 14),
-                        ),
-                      ),
-                    ),
+                    buildGradientButton(context)
                   ],
                 ),
               ),
@@ -332,4 +308,69 @@ class _AllFlocksScreen extends State<AllFlocksScreen> with RefreshMixin {
 
     );
   }
+
+  Widget buildGradientButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.blue,
+              Utils.getThemeColorBlue(),
+            ],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              offset: const Offset(0, 4),
+              blurRadius: 6,
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () async {
+              if (Utils.hasFeaturePermission("add_flocks")) {
+                await Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                      builder: (context) => const ADDFlockScreen()),
+                );
+              } else {
+                Utils.showMissingPermissionDialog(context, "add_flock");
+              }
+              // Refresh logic
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.add, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Text(
+                    "NEW_FLOCK".tr(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
 }

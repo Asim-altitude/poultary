@@ -248,15 +248,18 @@ class _UserEditScreenState extends State<UserEditScreen> {
                             .split('@')
                             .first;
 
-                       File file = await Utils.convertToJPGFileIfRequiredWithCompression(File(selectedImage!.path));
+                        if(selectedImage != null) {
+                          File file = await Utils
+                              .convertToJPGFileIfRequiredWithCompression(
+                              File(selectedImage!.path));
 
-
-                        final bytes = await file.readAsBytes();
-                        final base64Image = 'data:image/jpeg;base64,${base64Encode(
-                            bytes)}';
-                        imageUrl = await FlockImageUploader()
-                            .uploadProfilePicture(
-                            userId: userId, base64Image: base64Image);
+                          final bytes = await file.readAsBytes();
+                          final base64Image = 'data:image/jpeg;base64,${base64Encode(
+                              bytes)}';
+                          imageUrl = await FlockImageUploader()
+                              .uploadProfilePicture(
+                              userId: userId, base64Image: base64Image);
+                        }
 
 
                         final updatedUser = MultiUser(

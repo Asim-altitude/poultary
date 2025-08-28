@@ -701,7 +701,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                                       Column(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
-                                          Image.asset(birds[index].image, height: 90, width: 90, fit: BoxFit.contain),
+                                          Image.asset(birds[index].image.replaceAll("jpeg", "png"), height: 90, width: 90, fit: BoxFit.contain),
                                           SizedBox(height: 10),
                                           Text(
                                             birds[index].name.tr(),

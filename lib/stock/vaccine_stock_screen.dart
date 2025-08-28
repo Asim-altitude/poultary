@@ -384,9 +384,17 @@ class _MedicineStockScreenState extends State<VaccineStockScreen> with RefreshMi
           ),
       ],),
         floatingActionButton: FloatingActionButton(
-          onPressed: _showAddStockDialog,
+          onPressed: () {
+            if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_health")){
+              Utils.showMissingPermissionDialog(context, "add_health");
+              return;
+            }
+
+            _showAddStockDialog();
+          },
           child: Icon(Icons.add),
         ),
+
       ),
     );
   }
@@ -510,7 +518,7 @@ class _AddMedicineStockBottomSheetState extends State<AddMedicineStockBottomShee
       vaccineStockFB.transaction = transaction_item;
     }
 
-    if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_vaccine")) {
+    if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_health")) {
       vaccineStockFB.sync_id = stock.sync_id;
       vaccineStockFB.sync_status = SyncStatus.SYNCED;
       vaccineStockFB.last_modified = Utils.getTimeStamp();

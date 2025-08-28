@@ -51,6 +51,8 @@ class DashboardScreen extends StatefulWidget {
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
 class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
+  final GlobalKey profileKey = GlobalKey();
+
 
   @override
   void onRefreshEvent(String event) {
@@ -168,7 +170,7 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
     // Utils.showInterstitial();
   }
 
-  Future<void> getFlocksFromFirebase(String farmId, DateTime? lastSyncTime) async {
+  /*Future<void> getFlocksFromFirebase(String farmId, DateTime? lastSyncTime) async {
 
 
     final lastTime = await SessionManager.getLastSyncTime(FireBaseUtils.FLOCKS);
@@ -253,7 +255,7 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
 
     }
   }
-
+*/
   Future<void> listenToFlockImages(Flock flock, String farmId) async {
     final query = FirebaseFirestore.instance
         .collection(FireBaseUtils.FLOCK_IMAGES)
@@ -335,6 +337,10 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
           setState(() {
             isSyncing = false;
             Utils.isSyncDone = true;
+            /*if (Utils.backup_changes >= 10) {
+              Utils.showFloatingMessage(context, profileKey, "${Utils.backup_changes}"+"Changes".tr()+" "+"Backup Recommended".tr());
+
+            }*/
           });
         },
         onProgress: (c, t) {
@@ -955,14 +961,14 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
             children:  [
               // Utils.getDistanceBar(),
               // Show sync status at top
-              (Utils.isMultiUSer && !Utils.isSyncDone)? Padding(
+              /*(Utils.isMultiUSer && !Utils.isSyncDone)? Padding(
                 padding: const EdgeInsets.all(0.0),
                 child: SyncStatusWidget(
                   isSyncing: isSyncing,
                   completed: completed,
                   total: total,
                 ),
-              ) : SizedBox.shrink(),
+              ) : SizedBox.shrink(),*/
               ClipRRect(
             child: Container(
               width: widthScreen,
@@ -1111,6 +1117,7 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                     );
                   },
                   child: Container(
+                    key: profileKey,
                     padding: EdgeInsets.all(2), // Thickness of the border
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -1131,10 +1138,21 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                     ),
                   ))
                 : Visibility(
-                      visible: false,
+                      visible: true,
                       child: InkWell(
                                         onTap: () async {
-                      bool hasIntroduced = await SessionManager.getBool("farm_intro");
+                       bool loggedIn = await SessionManager.getBool(SessionManager.loggedIn);
+
+                       if(loggedIn){
+                         await Navigator.push(context, MaterialPageRoute(
+                             builder: (_) =>
+                             AdminProfileScreen(users: Utils.currentUser!,)));
+                       }else {
+                         showFarmAccountIntro(context);
+                       }
+                                          // SessionManager.setBoolValue("farm_intro", true);
+
+                     /* bool hasIntroduced = await SessionManager.getBool("farm_intro");
                       if(!hasIntroduced){
                         SessionManager.setBoolValue("farm_intro", true);
                         showFarmAccountIntro(context);
@@ -1147,7 +1165,7 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                                 ? AuthGate(isStart: false,)
                                 : AdminProfileScreen(users: Utils.currentUser!,)));
                       
-                      }
+                      }*/
                                         },
                         child: CircleAvatar(
                         radius: 22, // Size of the circle
@@ -1270,7 +1288,6 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-
                               Expanded(child: getSummaryCard(Icons.egg, "Eggs", "$total_eggs_collected", Colors.white, EggsReportsScreen(), context)),
                               Expanded(child: getSummaryCard(Icons.food_bank, "Feed", "$total_feed_consumption"+ Utils.selected_unit.tr(), Colors.white, FeedReportsScreen(), context)),
                               Expanded(child: getSummaryCard(Icons.medical_information, "Health", "$treatmentCount", Colors.white, HealthReportScreen(), context)),
@@ -1280,6 +1297,22 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                       ),
                     ),
                   ),
+                 /* Container(
+                    height: 50,
+                    padding: EdgeInsets.all(10),
+                    child: ValueListenableBuilder<int>(
+                      valueListenable: SyncManager.activeListeners,
+                      builder: (context, value, child) {
+                        if (value > 0) {
+                          return Text(
+                            "Syncing".tr()+"...",
+                            style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ),*/
                   Container(
                     margin: EdgeInsets.only(top: 0),
                     decoration: BoxDecoration(
@@ -1401,8 +1434,8 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                                           ],
                                         ),
                                         child: Image.asset(
-                                          flocks[index].icon,
-                                          fit: BoxFit.cover,
+                                          flocks[index].icon.replaceAll("jpeg", "png"),
+                                          fit: BoxFit.contain,
                                         ),
                                       ),
                                       SizedBox(width: 12),

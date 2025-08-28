@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:googleapis/servicemanagement/v1.dart';
 import 'package:poultary/dashboard.dart';
 import 'package:poultary/product_screen.dart';
 import 'package:poultary/settings_screen.dart';
@@ -12,6 +13,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 import 'database/databse_helper.dart';
 import 'model/category_item.dart';
+import 'multiuser/classes/AdminProfile.dart';
 import 'multiuser/classes/NetworkAcceessNotifier.dart';
 import 'multiuser/utils/FirebaseUtils.dart';
 import 'multiuser/utils/SyncManager.dart';
@@ -21,6 +23,7 @@ import 'model/flock.dart';
 import 'new_reporting_Screen.dart';
 
 final ValueNotifier<DateTime?> syncTimeNotifier = ValueNotifier(null);
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -34,6 +37,117 @@ class _HomeScreen extends State<HomeScreen> {
 
   double widthScreen = 0;
   double heightScreen = 0;
+
+
+  void _showGlobalBackupPrompt(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        elevation: 8,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Icon Header
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.cloud_upload_outlined,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 40,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Title
+              Text(
+                "backup_title".tr(), // e.g. "Backup Recommended"
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+
+              // Main message
+              Text(
+                "backup_message".tr(),
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+
+              // Hint
+              Text(
+                "backup_hint".tr(),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+
+              // Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        side: BorderSide(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text("later".tr()), // "Later"
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        elevation: 3,
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => AdminProfileScreen(users: Utils.currentUser!)),
+                        );
+                        // Trigger backup logic here
+                      },
+                      child: Text(
+                        "backup_now".tr(), // "Backup Now"
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
 
   @override
   void dispose() {
@@ -58,11 +172,31 @@ class _HomeScreen extends State<HomeScreen> {
       // Delay to ensure context is available
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _networkNotifier.initialize(context);
+        //scheduleBackupPrompt(synclastSyncTime!);
+       /* Future.delayed(const Duration(seconds: 10), () {
+          _showGlobalBackupPrompt(context);
+        });*/
       });
     }
   }
 
 
+  /*void scheduleBackupPrompt(DateTime lastBackupDate) {
+    final now = DateTime.now();
+    final difference = now.difference(lastBackupDate);
+
+    if (difference.inDays >= 3) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(seconds: 20), () {
+          final ctx = navigatorKey.currentState?.overlay?.context;
+          if (ctx != null) {
+            _showGlobalBackupPrompt(ctx);
+          }
+        });
+      });
+    }
+  }
+*/
 
   void addEggColorColumn() async {
     DatabaseHelper.instance.database;
@@ -824,9 +958,45 @@ class _HomeScreen extends State<HomeScreen> {
         SyncManager().setSyncTimeNotifier(syncTimeNotifier);
        // getFlocksFromFirebase(Utils.currentUser!.farmId, lastBackupDate);
         SyncManager().startAllListeners(Utils.currentUser!.farmId, lastBackupDate);
+
+
+        try {
+          final DateTime now = DateTime.now();
+          final Duration difference = now.difference(lastBackupDate);
+          if (difference.inDays >= 3) {
+            print("BACKUP NEEDED");
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Future.delayed(const Duration(seconds: 15), () {
+                // final ctx = navigatorKey.currentState?.overlay?.context;
+                if (true) {
+                  _showGlobalBackupPrompt(context);
+                } else {
+                  print("Context still not available, retrying...");
+                  _retryShowBackupPrompt();
+                }
+              });
+            });
+          }
+        }
+        catch(ex){
+          print(ex);
+        }
       }
     }
   }
+
+  void _retryShowBackupPrompt() {
+    Future.delayed(const Duration(seconds: 2), () {
+      final ctx = navigatorKey.currentState?.overlay?.context;
+      if (ctx != null) {
+        _showGlobalBackupPrompt(ctx);
+      } else {
+        print("Failed again, giving up.");
+      }
+    });
+  }
+
+
 
   DateTime? synclastSyncTime = null;
 

@@ -307,7 +307,13 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                           children: [
                             InkWell(
                               onTap: () {
-                                _showFullScreenImage(context, byteimages, 0);
+                                if(byteimages.length==0){
+                                  String defaultImage = '${Utils.selected_flock!.icon.replaceAll("jpeg", "png")}';
+
+                                  showAssetImageDialog(context, defaultImage);
+                                }else {
+                                  _showFullScreenImage(context, byteimages, 0);
+                                }
                               },
                               child: Container(
                                 width: 120,
@@ -1447,6 +1453,46 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
       ),),),),),);
   }
 
+
+  void showAssetImageDialog(BuildContext context, String image) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Your asset image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    image, // put your asset path here
+                    fit: BoxFit.cover,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Close"),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+
   void _showFullScreenImage(BuildContext context, List<Uint8List> byteimages, int initialIndex) {
     showDialog(
       context: context,
@@ -1493,7 +1539,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
       return Center(
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
-          child: Image.asset(defaultImage, fit: BoxFit.cover, width: 120, height: 120),
+          child: Image.asset(defaultImage, fit: BoxFit.contain, width: 120, height: 120),
         ),
       );
     }

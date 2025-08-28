@@ -52,7 +52,7 @@ class CustomCategory {
       cat_type: map['cat_type'],
       unit: map['unit'],
       enabled: map['enabled'],
-      icon: IconData(map['icon'], fontFamily: 'MaterialIcons'),
+      icon:  IconData(map['icon'], fontFamily: 'MaterialIcons'),
       sync_id: map['sync_id'],
       sync_status: map['sync_status'],
       last_modified: lastModified,

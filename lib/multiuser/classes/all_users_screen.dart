@@ -8,7 +8,9 @@ import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../database/databse_helper.dart';
+import '../../utils/session_manager.dart';
 import '../../utils/utils.dart';
+import '../model/farm_plan.dart';
 import '../model/permission.dart';
 import '../model/role.dart';
 import '../model/user.dart';
@@ -92,14 +94,20 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
   }
 
 
+  late FarmPlan? farmPlan;
   String farmID = "";
   Future<void> loadUsers() async {
    // final fetchedUsers = await DatabaseHelper.getAllNonAdminUsers();
 // your method
     farmID = Utils.currentUser!.farmId;
     users = await loadUsersByFarm(farmID);
-
+    farmPlan = await SessionManager.getFarmPlan();
+    print(farmPlan!.toJson());
     setState(() => users );
+  }
+
+  void showUserLimitFull() {
+    Utils.showToast("Maximum users created".tr()+" ${farmPlan!.userCapacity}. "+"Contact Support for assistance.".tr());
   }
 
   void showAddUserDialog() {
@@ -166,7 +174,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: showAddUserDialog,
+        onPressed: (farmPlan!.isActive && farmPlan!.userCapacity > users.length)?  showAddUserDialog : showUserLimitFull,
         icon: Icon(Icons.person_add),
         label: Text("Add New User".tr()),
         backgroundColor: Utils.getThemeColorBlue(),
@@ -381,14 +389,70 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
             ],
           ),
           SizedBox(height: 20),
-          ElevatedButton.icon(
+         /* ElevatedButton.icon(
             onPressed: handleSave,
             icon: Icon(Icons.save),
             label: Text("SAVE".tr()),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
           ),
+          */
+          buildSaveButton(context)
         ],
       ),
     );
   }
+
+  Widget buildSaveButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.teal,
+              Colors.teal.shade700,
+            ],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              offset: const Offset(0, 4),
+              blurRadius: 6,
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: handleSave,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.save, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Text(
+                    "SAVE".tr(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
 }

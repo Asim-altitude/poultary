@@ -64,6 +64,14 @@ class _VaccineStockDetailScreen extends State<VaccineStockDetailScreen> {
                           trailing: IconButton(
                             icon: Icon(Icons.delete, color: Colors.red),
                             onPressed: () async {
+
+
+                              if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_health")){
+                                Utils.showMissingPermissionDialog(context, "delete_health");
+                                return;
+                              }
+
+
                               return await showDialog(
                                 context: context,
                                 builder: (context) => AlertDialog(
@@ -73,6 +81,8 @@ class _VaccineStockDetailScreen extends State<VaccineStockDetailScreen> {
                                     TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text("CANCEL".tr())),
                                     TextButton(
                                       onPressed: () async {
+
+
                                         // _deleteStock(entry.id);
                                         entry.sync_status = SyncStatus.DELETED;
                                         VaccineStockFB vaccineStockfb = VaccineStockFB(stock: entry);
@@ -89,7 +99,7 @@ class _VaccineStockDetailScreen extends State<VaccineStockDetailScreen> {
                                           vaccineStockfb.transaction = transaction;
                                         }
       
-                                        if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_vaccine")) {
+                                        if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_health")) {
                                           vaccineStockfb.sync_id = entry.sync_id;
                                           vaccineStockfb.sync_status = SyncStatus.DELETED;
                                           vaccineStockfb.last_modified = Utils.getTimeStamp();

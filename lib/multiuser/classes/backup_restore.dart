@@ -79,6 +79,10 @@ class _BackupFoundScreenState extends State<BackupFoundScreen> {
       },
       onDone: () async {
         await sink.close();
+
+        // 🔑 Reset database connection
+        await DatabaseHelper.instance.database; // forces re-open
+
         await SessionManager.setBoolValue('db_initialized_${user!.farmId}', true);
         downloadProgress.value = 1.0;
         print("Database download complete.");

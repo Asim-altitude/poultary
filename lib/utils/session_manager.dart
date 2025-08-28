@@ -34,6 +34,7 @@ class SessionManager {
   static final String table_created = "table_created";
   static final String skipped = "multi_skipped";
   static final String loggedIn = "loggedIn";
+  static final String loggedOut = "loggedOut";
   static final String isAdmin = "isAdmin";
   static final String accessExpired = "accessExpired";
   static final String isSubscribed = "hasSubscription";
@@ -44,6 +45,18 @@ class SessionManager {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
 
+  }
+
+  static Future<DateTime?> getLastBackupTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastBackup = prefs.getString('last_backup_time');
+    return lastBackup != null ? DateTime.parse(lastBackup) : null;
+  }
+
+  static Future<void> saveBackupTimestamp() async {
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now().toIso8601String();
+    await prefs.setString('last_backup_time', now);
   }
 
   static Future<DateTime?> getLastSyncTime(String key) async {

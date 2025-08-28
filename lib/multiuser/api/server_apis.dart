@@ -130,7 +130,7 @@ class FlockImageUploader {
           print("Backup info saved to Firestore!");
           Utils.showToast("✅ Backup Updated Successfully".tr());
           Utils.shouldBackup = false;
-
+          await SessionManager.saveBackupTimestamp();
         } else {
           Utils.showToast("❌ Could not Backup".tr());
 

@@ -919,8 +919,30 @@
   "Select Currency": "Select Currency",
   "Starting Date": "Starting Date",
   "Looking for a Farm Account?": "Looking for a Farm Account?",
-  "Join here": "Join here"
-
+  "Join here": "Join here",
+  "Premium Support": "Premium Support",
+  "Priority Customer Care": "Priority Customer Care",
+  "Changes": "Changes",
+  "Backup Recommended": "Backup Recommended",
+  "Max": "Max",
+  "Maximum users created": "Maximum users created",
+  "Contact Support for assistance.": "Contact Support for assistance.",
+  "Your Account is Banned. Contact Admin": "Your Account is Banned. Contact Admin",
+  "Invalid_email": "Invalid_email",
+  "Share App": "Share App",
+  "About App": "About App",
+  "Easy Poultry - Chicken Manager": "Easy Poultry - Chicken Manager",
+  "Version": "Version",
+  "app_desc": "Easy Poultry - Chicken Manager is a comprehensive poultry farm management application designed to simplify daily operations of poultry farmers.",
+  "Key Features:": "Key Features:",
+  "Privacy Policy": "Privacy Policy",
+  "Syncing": "Syncing",
+  "backup_title": "Backup Recommended",
+  "backup_message": "It’s been a while since your last backup. Would you like to create one now?",
+  "backup_hint": "💡 You can always create a backup anytime from Profile.",
+  "backup_later": "Later",
+  "backup_now": "Backup Now",
+  "Last Backup": "Last Backup"
 
 
 

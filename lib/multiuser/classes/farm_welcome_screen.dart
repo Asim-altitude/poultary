@@ -94,11 +94,13 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
 
 
     } catch (e) {
-      print('Error loading plan info: $e');
       setState(() {
         _planStatus = PlanStatus.notStarted;
         loading = false;
       });
+
+      print('Error loading plan info: $e');
+
     }
   }
 
@@ -384,7 +386,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
       farmId: widget.multiUser.farmId,
       adminEmail: widget.multiUser.email,
       planName: "Basic",
-      planType: type,
+      planType: "Renewal",
       planStartDate: planStartDate,
       planExpiryDate: planExpiryDate,
       userCapacity: 10,
@@ -487,7 +489,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
   }
 
   loadInAppData(){
-    _kProductIds.add(adRemovalID);
+    _kProductIds.add(premiumPoultry);
   }
   beforeInit(){
     final Stream<List<PurchaseDetails>> purchaseUpdated =
@@ -522,13 +524,12 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
 
 
     // IMPORTANT!! Always verify purchase details before delivering the product.
-    if (purchaseDetails.productID == adRemovalID) {
+    if (purchaseDetails.productID == premiumPoultry) {
       await ConsumableStore.save(purchaseDetails.purchaseID!);
       final List<String> consumables = await ConsumableStore.load();
       await SessionManager.setInApp(true);
       Utils.isShowAdd = false;
       Utils.setupAds();
-
       await _handlePlanUpgrade("Premium");
       setState(() {
         _purchasePending = false;
@@ -568,8 +569,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
       } else {
         if (purchaseDetails.status == PurchaseStatus.error) {
           handleError(purchaseDetails.error!);
-        } else if (purchaseDetails.status == PurchaseStatus.purchased ||
-            purchaseDetails.status == PurchaseStatus.restored) {
+        } else if (purchaseDetails.status == PurchaseStatus.purchased) {
           final bool valid = await _verifyPurchase(purchaseDetails);
           if (valid) {
             deliverProduct(purchaseDetails);
@@ -579,7 +579,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
           }
         }
         if (Platform.isAndroid) {
-          if (!_kAutoConsume && purchaseDetails.productID == adRemovalID) {
+          if (!_kAutoConsume && purchaseDetails.productID == premiumPoultry) {
             final InAppPurchaseAndroidPlatformAddition androidAddition =
             _inAppPurchase.getPlatformAddition<
                 InAppPurchaseAndroidPlatformAddition>();
@@ -656,7 +656,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
     });
   }
 
-  String adRemovalID = "removeadspoultry";
+  String premiumPoultry = "premiumsubscriptionpoultry1";
   final bool _kAutoConsume = Platform.isIOS || true;
   List<String> _kProductIds = <String>[
   ];
@@ -672,7 +672,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
   bool _loading = true;
   String? _queryProductError;
 
-  Widget _buildFeatureItem(IconData icon, String title, String description) {
+  /*Widget _buildFeatureItem(IconData icon, String title, String description) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 5),
       child: Row(
@@ -696,93 +696,288 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
       ),
     );
   }
-
+*/
 
   void _showPremiumDialog(BuildContext context) {
+    int selectedPlan = 0; // 0 = Ads Removal, 1 = Premium Subscription
+
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // Ensures the sheet adapts properly
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      isScrollControlled: true,
       backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) {
-        return FractionallySizedBox(
-          heightFactor: 0.8, // Uses 50% of the screen height
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              /// **Gradient Header with Icon & Title**
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Utils.getThemeColorBlue(), Colors.blue.shade400],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                child: Column(
-                  children: [
-                    /// **Premium Icon**
-                    Image.asset("assets/premium_icon.png", width: 70, height: 70, color: Colors.white,),
-
-                    /// **Title**
-                    SizedBox(height: 8),
-                    Text(
-                      "✨"+ "Unlock Premium Features".tr()+ "✨",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-
-              /// **Premium Features List**
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: Column(
-                    children: [
-
-                      _buildFeatureItem(Icons.group, "Multi-User Access".tr(), "Add multiple users to your farm with individual logins".tr()),
-                      _buildFeatureItem(Icons.admin_panel_settings, "Role-Based Permissions".tr(), "Assign custom roles and control access per user".tr()),
-                      _buildFeatureItem(Icons.block, "No Ads".tr(), "Enjoy an ad-free experience".tr()),
-                      _buildFeatureItem(Icons.cloud_upload, "Cloud Sync".tr(), "Automatically back up your data and access it across devices".tr()),
-                      _buildFeatureItem(Icons.update, "Real-Time Updates".tr(), "See changes from all users instantly with sync-enabled collaboration".tr()),
-
-                      Spacer(),
-                      /// **Buy Premium Button**
-                      ElevatedButton.icon(
-                        icon: Icon(Icons.shopping_cart, size: 24),
-                        label: Text('Upgrade to Premium'.tr(), style: TextStyle(fontSize: 18)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          minimumSize: Size(double.infinity, 50),
-                        ),
-                        onPressed: () {
-                          PurchaseParam purchaseParam = PurchaseParam(productDetails: _products[0]);
-                          _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
-                          Navigator.pop(context);
-                        },
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return FractionallySizedBox(
+              heightFactor: 0.65,
+              child: Column(
+                children: [
+                  /// **Header**
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.blue, Colors.green],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      SizedBox(height: 10),
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+                    ),
+                    child: Column(
+                      children: [
+                        Align(
+                            alignment: Alignment.centerRight,
+                            child: InkWell(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Icon(Icons.cancel_outlined, size: 30, color: Colors.white))),
 
-                    ],
+                        Icon(Icons.workspace_premium, size: 70, color: Colors.white),
+                        SizedBox(height: 8),
+                        Text(
+                          "Upgrade Farm Plan",
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          "Upgrade to unlock farm features",
+                          style: TextStyle(fontSize: 14, color: Colors.white70),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+
+                  const SizedBox(height: 10),
+
+                  /// Features Checklist
+                  Expanded(
+                    child: ListView(
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      children: [
+                        _buildFeatureItem(
+                            "Cloud Sync".tr(),
+                            "Access your data anywhere".tr(),
+                            included: true,
+                            alwaysIncluded: true,
+                            duration: "6 months"),
+                        _buildFeatureItem(
+                            "Multi-User Access".tr(),
+                            "Add multiple users".tr(),
+                            included: true,
+                            alwaysIncluded: true,
+                            duration: "6 months"),
+                        _buildFeatureItem(
+                            "Role-Based Permissions".tr(),
+                            "Control access levels".tr(),
+                            included: true,
+                            alwaysIncluded: true,
+                            duration: "6 months"),
+
+                        _buildFeatureItem(
+                            "Other Features".tr(),
+                            "All other features are completely free".tr(),
+                            included: true,
+                            alwaysIncluded: true,
+                            duration: "Lifetime"),
+
+                      ],
+                    ),
+                  ),
+
+                  /// Plan Selection (Horizontal)
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      children: [
+
+                        /*_buildPlanOption(
+                          title: "Ads Removal".tr(),
+                          price: _products.isNotEmpty ? _products[0].price : "Loading...",
+                          duration: "Lifetime",
+                          selected: selectedPlan == 0,
+                          onTap: () => setState(() => selectedPlan = 0),
+                        ),*/
+
+                        /*const SizedBox(width: 8),
+                        _buildPlanOption(
+                          title: "Premium".tr(),
+                          price: _products.isNotEmpty ? "${_products[0].price}" : "Loading...",
+                          duration: "6 months",
+                          selected: selectedPlan == 0,
+                          onTap: () => setState(() => selectedPlan = 0),
+                        ),*/
+                      ],
+                    ),
+                  ),
+
+                  /// Purchase Button
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF00C853), Color(0xFF2196F3)], // Green to Blue
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(28), // More round
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 6,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            elevation: 0, // Remove default elevation (handled by boxShadow)
+                            backgroundColor: Colors.transparent, // Use gradient instead
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28),
+                            ),
+                          ),
+                          onPressed: () {
+                            final product = _products.firstWhere((p) => p.id == premiumPoultry);
+                            final purchaseParam = PurchaseParam(productDetails: product);
+                            InAppPurchase.instance.buyConsumable(purchaseParam: purchaseParam);
+
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            "Upgrade ".tr()+"(${_products[0].price})",
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
   }
 
+  /// Feature Row with check or cross + duration display
+  Widget _buildFeatureItem(
+      String title,
+      String subtitle, {
+        bool included = false,
+        bool alwaysIncluded = false,
+        String? duration, // <-- New optional parameter
+      }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            included || alwaysIncluded ? Icons.check_circle : Icons.cancel,
+            color: duration?.toLowerCase() == "lifetime" ? Colors.green :  Colors.green,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    SizedBox(width: 10,),
+                    if (duration != null) // Show duration if provided
+                      Text(
+                        "($duration)",
+                        style:  TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: duration.toLowerCase() == "lifetime" ? Colors.green :  Colors.orange,),
+                      ),
+                  ],
+                ),
+                Text(
+                  subtitle,
+                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                ),
+
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Horizontal Plan Option Card
+  Widget _buildPlanOption(
+      {required String title,
+        required String price,
+        required String duration,
+        required bool selected,
+        required VoidCallback onTap}) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: selected ? Colors.blue.shade50 : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+                color: selected ? Colors.blue : Colors.grey.shade300, width: 2),
+          ),
+          child: Column(
+            children: [
+              Icon(Icons.check_circle, color: selected?  Colors.blue: Colors.grey),
+
+              Text(title,
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight:
+                      selected ? FontWeight.bold : FontWeight.w500)),
+              const SizedBox(height: 4),
+              Text(price,
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: selected ? Colors.blue : Colors.grey.shade700)),
+              Text(duration,
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: selected ? Colors.blue : Colors.grey.shade700)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   void showOfflineModeDialog(BuildContext context, void Function(bool dontShowAgain) onContinue) {
     bool dontShowAgain = false;
@@ -799,14 +994,14 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.wifi_off, size: 50, color: Colors.orangeAccent),
+              Icon(Icons.wifi_off, size: 50, color: Colors.blue),
               const SizedBox(height: 16),
               Text(
                 "offline_mode_title".tr(), // "Offline Mode"
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.orangeAccent,
+                  color: Colors.blue.shade400,
                 ),
               ),
               const SizedBox(height: 16),
@@ -836,7 +1031,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
                 icon: Icon(Icons.arrow_forward_rounded),
                 label: Text("continue_offline".tr()), // "Continue Offline"
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orangeAccent,
+                  backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
                   minimumSize: Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(

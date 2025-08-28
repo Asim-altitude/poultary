@@ -1,6 +1,13 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:language_picker/languages.dart';
+import 'package:language_picker/languages.g.dart';
 import 'package:poultary/add_reduce_flock.dart';
 import 'package:poultary/daily_feed.dart';
 import 'package:poultary/egg_collection.dart';
@@ -34,13 +41,14 @@ import '../model/flockfb.dart';
 import '../model/medicinestockfb.dart';
 import '../model/sync_queue.dart';
 import '../model/vaccinestockfb.dart';
+import '../utils/RefreshEventBus.dart';
 import '../utils/SyncManager.dart';
 import '../utils/SyncStatus.dart';
 import 'AuthGate.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'dart:io';
+import 'dart:io' as io;
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 
@@ -88,6 +96,43 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
   };
 
   ValueNotifier<double> downloadProgress = ValueNotifier(0.0);
+
+
+  final supportedLanguages = [
+    Languages.english,
+    Languages.arabic,
+    Languages.russian,
+    Languages.persian,
+    Languages.german,
+    Languages.japanese,
+    Languages.korean,
+    Languages.portuguese,
+    Languages.turkish,
+    Languages.french,
+    Languages.italian,
+    Languages.indonesian,
+    Languages.hindi,
+    Languages.spanish,
+    Languages.chineseSimplified,
+    Languages.ukrainian,
+    Languages.polish,
+    Languages.bengali,
+    Languages.telugu,
+    Languages.tamil,
+    Languages.greek
+  ];
+  double widthScreen = 0;
+  double heightScreen = 0;
+  late Language _selectedCupertinoLanguage;
+  bool isGetLanguage = false;
+  getLanguage() async {
+    _selectedCupertinoLanguage = await Utils.getSelectedLanguage();
+    setState(() {
+      isGetLanguage = true;
+
+    });
+
+  }
 
   bool changes_made = true;
   Future<void> postUserLog(String farmId, String email) async {
@@ -156,7 +201,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
       // Prepare file path
       final dbDir = await getDatabasesPath();
       final dbPath = p.join(dbDir, 'poultry.db');
-      final file = File(dbPath);
+      final file = io.File(dbPath);
       final sink = file.openWrite();
 
       final contentLength = response.contentLength ?? 0;
@@ -218,8 +263,11 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
         .limit(1)
         .get();
 
-    isUSerActive = snapshot.docs.first.data()['active']! == 1? true : false;
-    print("isUSerActive $isUSerActive");
+    final doc = snapshot.docs.first;
+    Utils.currentUser = MultiUser.fromMap(doc.data());
+
+    Utils.isUSerActive = snapshot.docs.first.data()['active']! == 1? true : false;
+   // print("isUSerActive $isUSerActive");
     final querySnapshot = await FirebaseFirestore.instance
         .collection('roles_permissions')
         .doc(user!.farmId+"_"+user!.role)
@@ -229,8 +277,11 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
       final data = querySnapshot.data();
       rolePerms =  RoleWithPermissions.fromMap(data!);
       Utils.rolePerms = rolePerms;// return as a list
-      print("PERMS ${rolePerms!.toMap()}");
+     // print("PERMS ${rolePerms!.toMap()}");
     }
+
+    startUserActiveListener();
+    startRolePermissionListener();
 
     fetchAndInitializeDatabaseWithProgress(user!.farmId);
 
@@ -239,13 +290,286 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
     });
   }
 
+  StreamSubscription? userActiveSub;
+
+  void startUserActiveListener() {
+    userActiveSub = FirebaseFirestore.instance
+        .collection(FireBaseUtils.USERS)
+        .where('email', isEqualTo: user!.email)
+        .where('farm_id', isEqualTo: user!.farmId)
+        .limit(1)
+        .snapshots()
+        .listen((querySnapshot) {
+      if (querySnapshot.docs.isNotEmpty) {
+        final docData = querySnapshot.docs.first.data();
+
+        Utils.currentUser = MultiUser.fromMap(docData);
+
+        Utils.isUSerActive = (docData['active'] ?? 0) == 1;
+        print("👤 User active status updated: ${Utils.isUSerActive}");
+
+        // Optionally notify UI
+       // RefreshEventBus().emit("USER_ACTIVE_UPDATED");
+      } else {
+        print("⚠️ No user document found for this email+farmId");
+      }
+    });
+  }
+
+  void stopUserActiveListener() {
+    userActiveSub?.cancel();
+    userActiveSub = null;
+  }
+
+  Future<void> showEditBottomSheet() async {
+    final nameController = TextEditingController(text: Utils.currentUser!.name);
+    String selectedRole = Utils.currentUser!.role;
+    bool isActive = Utils.currentUser!.active; // assuming 1 = active, 0 = inactive
+    XFile? selectedImage; // picked image file
+    String? imageUrl = Utils.currentUser!.image; // existing image
+
+
+    Future<void> pickImage(Function setModalState) async {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80, // reduce size for faster upload
+      );
+
+      if (pickedFile != null) {
+        setModalState(() {
+          selectedImage = pickedFile; // your XFile? variable
+        });
+      }
+    }
+
+
+    final updated = await showModalBottomSheet<MultiUser>(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          top: 20,
+          left: 20,
+          right: 20,
+        ),
+        child: StatefulBuilder(
+          builder: (context, setModalState) {
+            return Wrap(
+              children: [
+                Center(
+                  child: Text(
+                    "Edit User".tr(),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                // Profile Picture
+                Center(
+                  child: Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundImage: selectedImage != null
+                            ? FileImage(io.File(selectedImage!.path))
+                            : (imageUrl != null && imageUrl!.isNotEmpty)
+                            ? NetworkImage(imageUrl!) as ImageProvider
+                            : null, // No image when we want to show the icon
+                        child: (selectedImage == null && (imageUrl == null || imageUrl!.isEmpty))
+                            ? Icon(Icons.person, size: 50, color: Colors.blue)
+                            : null,
+                        backgroundColor: Colors.blue.shade100,
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: InkWell(
+                          onTap: () {
+                            pickImage(setModalState);
+                          },
+                          child: CircleAvatar(
+                            backgroundColor: Colors.indigo,
+                            radius: 18,
+                            child: Icon(Icons.camera_alt, size: 18, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 24),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: TextField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      labelText: "Name".tr(),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+
+
+                SizedBox(height: 32),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: Icon(Icons.save_alt, color: Colors.white),
+                    label: Text(
+                      "SAVE".tr(),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.indigo,
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: () async {
+
+                      try {
+                        Utils.showLoading();
+                        String userId = Utils.currentUser!.email
+                            .split('@')
+                            .first;
+
+
+                        if(selectedImage != null) {
+                          io.File file = await Utils
+                              .convertToJPGFileIfRequiredWithCompression(
+                              io.File(selectedImage!.path));
+
+                          final bytes = await file.readAsBytes();
+                          final base64Image = 'data:image/jpeg;base64,${base64Encode(
+                              bytes)}';
+                          imageUrl = await FlockImageUploader()
+                              .uploadProfilePicture(
+                              userId: userId, base64Image: base64Image);
+                        }
+
+                        final updatedUser = MultiUser(
+                          name: nameController.text.trim(),
+                          email: Utils.currentUser!.email,
+                          role: selectedRole,
+                          image: imageUrl!,
+                          password: "",
+                          farmId: Utils.currentUser!.farmId,
+                          createdAt: Utils.currentUser!.createdAt,
+                          active: isActive,
+                        );
+
+                        await updateUserInFirestore(updatedUser);
+
+                        try{
+                          await DatabaseHelper.updateUser(updatedUser);
+                        }catch(e){
+                          print(e);
+                        }
+
+                        refreshState(updatedUser);
+
+                        Utils.hideLoading();
+
+                        Navigator.pop(context, updatedUser);
+                      }
+                      catch(ex){
+                        Utils.showError();
+                        Navigator.pop(context, null);
+                        print(ex);
+                      }
+
+                    },
+                  ),
+                ),
+                SizedBox(height: 20),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+
+    if (updated != null) {
+      setState(() {
+        Utils.currentUser = updated;
+      });
+    }
+  }
+
+
+
+  Future<void> updateUserInFirestore(MultiUser user) async {
+    final query = await FirebaseFirestore.instance
+        .collection(FireBaseUtils.USERS)
+        .where('email', isEqualTo: user.email)
+        .where('farm_id', isEqualTo: user.farmId)
+        .limit(1)
+        .get();
+
+    if (query.docs.isNotEmpty) {
+      final docId = query.docs.first.id;
+      await FirebaseFirestore.instance.collection(FireBaseUtils.USERS)
+          .doc(docId)
+          .update({
+        'name': user.name,
+        'image' : user.image,
+        'updated_at': DateTime.now().toIso8601String(),
+      });
+
+      await SessionManager.saveUserToPrefs(user);
+      Utils.currentUser!.name = user.name;
+      Utils.currentUser!.image = user.image;
+
+    }
+  }
+
+
+
+  void startRolePermissionListener() {
+    FirebaseFirestore.instance
+        .collection('roles_permissions')
+        .doc("${user!.farmId}_${user!.role}")
+        .snapshots()
+        .listen((docSnapshot) {
+      if (docSnapshot.exists) {
+        final data = docSnapshot.data();
+        if (data != null) {
+          rolePerms = RoleWithPermissions.fromMap(data);
+          Utils.rolePerms = rolePerms;
+
+          print("🔄 Role permissions updated: ${rolePerms!.toMap()}");
+
+          // Notify other parts of app if needed
+         // RefreshEventBus().emit("ROLE_PERMISSIONS_UPDATED");
+
+          setState(() {
+
+          });
+        }
+      } else {
+        print("⚠️ No permissions found for this role");
+      }
+    });
+  }
+
+
+
   bool downloadingDB = false;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
     getSyncQueueList();
     loadLatestUser();
+    getLanguage();
 
   }
 
@@ -262,24 +586,111 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title:  Text("Worker Dashboard".tr()),
-        backgroundColor: Colors.blue.shade700,
+        title: Text(
+          "Worker Dashboard".tr(),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        ),
+        backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
+        elevation: 4,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: logout,
-            tooltip: "Logout".tr(),
-          )
+          // Language Selector
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(25),
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) {
+                    return ClipRRect(
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                      child: Container(
+                        color: Colors.white,
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: supportedLanguages.length,
+                          itemBuilder: (context, index) {
+                            final language = supportedLanguages[index];
+                            return ListTile(
+                              title: Text("${language.name} (${language.isoCode})"),
+                              onTap: () {
+                                setState(() {
+                                  _selectedCupertinoLanguage = language;
+                                });
+                                Utils.setSelectedLanguage(language, context);
+                                Navigator.pop(context);
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.language, color: Colors.white, size: 20),
+                    const SizedBox(width: 6),
+                    Text(
+                      _selectedCupertinoLanguage.name.toLowerCase().startsWith("chinese")
+                          ? "zh"
+                          : _selectedCupertinoLanguage.isoCode,
+                      style: const TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          // Logout Button
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(25),
+              onTap: logout,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.redAccent.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(color: Colors.redAccent.withOpacity(0.2), width: 1),
+                ),
+                child: Row(
+                  children: const [
+                    Icon(Icons.logout, color: Colors.white, size: 20),
+                    SizedBox(width: 6),
+                    Text("Logout", style: TextStyle(color: Colors.white, fontSize: 14)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 8),
         ],
       ),
-      body: SingleChildScrollView(
+        body: SingleChildScrollView(
         child: Column(
           children: [
             _buildProfileCard(),
@@ -307,26 +718,68 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
     );
   }
 
+
+  void refreshState(MultiUser updated) {
+    setState(() {
+      Utils.currentUser = updated;
+    });
+  }
+
   Widget _buildProfileCard() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        elevation: 6,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Column(
+          children: [
+            // Header Section with Gradient Background
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blue.shade400, Colors.blue.shade700],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: Colors.blue.shade200,
-                    child: Text(
-                      widget.name.isNotEmpty ? widget.name[0].toUpperCase() : '?',
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
+                  Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 40,
+                        backgroundColor: Colors.white,
+                        backgroundImage: (Utils.currentUser!.image != null &&
+                            Utils.currentUser!.image!.isNotEmpty)
+                            ? NetworkImage(Utils.currentUser!.image!)
+                            : null,
+                        child: (Utils.currentUser!.image == null ||
+                            Utils.currentUser!.image!.isEmpty)
+                            ? Icon(Icons.person, size: 40, color: Colors.blue)
+                            : null,
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: () {
+                            showEditBottomSheet();
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: Colors.blueAccent,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                            child: const Icon(Icons.edit, size: 16, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -335,40 +788,66 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                       children: [
                         Text(
                           widget.name,
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           widget.email,
-                          style: const TextStyle(color: Colors.grey),
+                          style: const TextStyle(color: Colors.white70),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          isUSerActive ? 'Active'.tr() : 'Disabled'.tr(),
-                          style: TextStyle(
-                            color: isUSerActive ? Colors.green : Colors.red,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Chip(
-                          label: Text(widget.role),
-                          backgroundColor: Colors.blue.shade100,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                widget.role,
+                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 5,
+                                  backgroundColor: isUSerActive ? Colors.green : Colors.red,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  isUSerActive ? 'Active'.tr() : 'Disabled'.tr(),
+                                  style: TextStyle(
+                                    color: isUSerActive ? Colors.greenAccent : Colors.redAccent,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              Visibility(
-                visible: (pendingRecords == null || pendingRecords!.length==0) ? false : true,
-                child: Center(
+            ),
+
+            // Action Button Section
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Visibility(
+                visible: (pendingRecords != null && pendingRecords!.isNotEmpty),
+                child: SizedBox(
+                  width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: (pendingRecords == null || pendingRecords!.length==0)
-                        ? null
-                        : () {
+                    onPressed: () {
                       try {
                         getFlocksFromFirebase(Utils.currentUser!.farmId, synclastSyncTime);
                         sendPendingChangesToServer();
@@ -377,22 +856,24 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                       }
                     },
                     icon: const Icon(Icons.sync),
-                    label: pendingRecords == null
-                        ?  Text("Send Changes".tr())
-                        : Text("Send Changes".tr()+" (${pendingRecords!.length})"),
+                    label: Text(
+                      pendingRecords == null
+                          ? "Send Changes".tr()
+                          : "Send Changes".tr() + " (${pendingRecords!.length})",
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blueAccent,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
                       ),
                     ),
                   ),
                 ),
-              )
-            ],
-          ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -400,18 +881,19 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
 
   Widget _buildModuleGrid() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8),
       child: GridView.count(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         crossAxisCount: 3,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
-        childAspectRatio: 1.2,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 1.0,
         children: modules.map((module) {
           bool hasPermission = rolePerms?.permissions.contains(modulePermissionMap[module]) ?? false;
-
           bool isDisabled = !isUSerActive || !hasPermission;
+
+          IconData moduleIcon = _getModuleIcon(module); // Map module to icon
 
           return GestureDetector(
             onTap: () {
@@ -419,86 +901,62 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                 _showBlockedMessage("Your access is blocked by Admin".tr());
                 return;
               }
-
               if (!hasPermission) {
-                _showBlockedMessage("You do not have permission to access".tr()+" $module");
+                _showBlockedMessage("You do not have permission to access".tr() + " $module");
                 return;
               }
-
-              if(module.toLowerCase() == "flocks"){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AllFlocksScreen()),
-                );
-              }else if(module.toLowerCase() == "eggs"){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => EggCollectionScreen()),
-                );
-              }else if(module.toLowerCase() == "birds"){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AddReduceFlockScreen()),
-                );
-              }else if(module.toLowerCase() == "finance"){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => TransactionsScreen()),
-                );
-              }else if(module.toLowerCase() == "feed"){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => DailyFeedScreen()),
-                );
-              }else if(module.toLowerCase() == "health"){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => MedicationVaccinationScreen()),
-                );
-              }else if(module.toLowerCase() == "stock"){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ManageInventoryScreen()),
-                );
-              }else if(module.toLowerCase() == "reports"){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ReportListScreen()),
-                );
-              }else if(module.toLowerCase() == "settings"){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SettingsScreen()),
-                );
-              }
-
-
-              // Navigate to module screen
-              // Navigator.push(...);
+              _navigateToModule(module);
             },
-            child: Opacity(
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 300),
               opacity: isDisabled ? 0.4 : 1.0,
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    colors: [Colors.blue.shade400, Colors.blue.shade700],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.shade300,
-                      blurRadius: 6,
-                      offset: const Offset(2, 2),
-                    )
-                  ],
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 10),
-                    Text(
-                      module,
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                      color: Colors.black26,
+                      blurRadius: 8,
+                      offset: const Offset(2, 4),
                     ),
                   ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: isDisabled ? null : () => _navigateToModule(module),
+                    splashColor: Colors.white24,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircleAvatar(
+                            radius: 28,
+                            backgroundColor: Colors.white.withOpacity(0.2),
+                            child: Icon(moduleIcon, color: Colors.white, size: 30),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            module,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -506,6 +964,55 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
         }).toList(),
       ),
     );
+  }
+
+  /// Helper function to map module names to icons
+  IconData _getModuleIcon(String module) {
+    switch (module.toLowerCase()) {
+      case "flocks":
+        return Icons.pets;
+      case "eggs":
+        return Icons.egg;
+      case "birds":
+        return Icons.air;
+      case "finance":
+        return Icons.attach_money;
+      case "feed":
+        return Icons.local_dining;
+      case "health":
+        return Icons.healing;
+      case "stock":
+        return Icons.inventory;
+      case "reports":
+        return Icons.bar_chart;
+      case "settings":
+        return Icons.settings;
+      default:
+        return Icons.apps;
+    }
+  }
+
+  /// Helper function to navigate to the respective screen
+  void _navigateToModule(String module) {
+    if (module.toLowerCase() == "flocks") {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => AllFlocksScreen()));
+    } else if (module.toLowerCase() == "eggs") {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => EggCollectionScreen()));
+    } else if (module.toLowerCase() == "birds") {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => AddReduceFlockScreen()));
+    } else if (module.toLowerCase() == "finance") {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => TransactionsScreen()));
+    } else if (module.toLowerCase() == "feed") {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => DailyFeedScreen()));
+    } else if (module.toLowerCase() == "health") {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => MedicationVaccinationScreen()));
+    } else if (module.toLowerCase() == "stock") {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => ManageInventoryScreen()));
+    } else if (module.toLowerCase() == "reports") {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => ReportListScreen()));
+    } else if (module.toLowerCase() == "settings") {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => SettingsScreen()));
+    }
   }
 
   void _showBlockedMessage(String message) {
@@ -582,7 +1089,9 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
             Flock? flock = await DatabaseHelper.getFlockBySyncId(flockFB.flock.sync_id!);
             await listenToFlockImages(flock!, flock.farm_id ?? "");
           } else if (flockFB.flock.sync_status == SyncStatus.DELETED) {
-            await DatabaseHelper.deleteFlockAndRelatedInfoSyncID(flockFB.flock.sync_id!);
+            Flock? flock = await DatabaseHelper.getFlockBySyncId(flockFB.flock.sync_id!);
+
+            await DatabaseHelper.deleteFlockAndRelatedInfoSyncID(flockFB.flock.sync_id!, flock!.f_id);
           }
         } else {
           if (flockFB.flock.sync_status != SyncStatus.DELETED) {

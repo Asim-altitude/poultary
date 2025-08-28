@@ -148,6 +148,8 @@ class Utils {
   static List<BirdModel> products = [];
   static bool isShowProducts = false;
 
+  // Replace with your actual Play Store and App Store links
+
 
   static bool isMultiUSer = false;
   static bool isSyncDone = false;
@@ -155,9 +157,20 @@ class Utils {
   // static MediationManager? manager;
   // static CASBannerView? view;
 
+  static bool isUSerActive = false;
   static RoleWithPermissions? rolePerms = null;
 
   static bool direction = true;
+
+
+  static void shareApp() {
+    final String androidLink = "https://play.google.com/store/apps/details?id=com.zaheer.poultry";
+    final String iosLink = "https://apps.apple.com/app/id6469481170";
+
+    final String link = Platform.isAndroid ? androidLink : iosLink;
+    Share.share("Easy Poultry & Chicken manager: $link");
+  }
+
 
   static DateTime getTimeStamp() {
 
@@ -182,6 +195,11 @@ class Utils {
     if(Utils.currentUser!.role.toLowerCase() == "admin")
       return true;
 
+    if(!Utils.isUSerActive) {
+      Utils.showToast("Your Account is Banned. Contact Admin".tr());
+      return false;
+    }
+
     try {
       bool hasPermission = rolePerms?.permissions.contains(permission) ?? false;
       return hasPermission;
@@ -197,7 +215,8 @@ class Utils {
     await SessionManager.setBoolValue(SessionManager.loggedIn, false);
     await SessionManager.setBoolValue(SessionManager.isAdmin, false);
     await SessionManager.setBoolValue('db_initialized_${Utils.currentUser!.farmId}', false);
-    await SessionManager.clearPrefs();
+    await SessionManager.setBoolValue(SessionManager.loggedOut, true);
+   // await SessionManager.clearPrefs();
 /*    await SessionManager.clearUserObject();
     await SessionManager.setLastSyncTime(FireBaseUtils.USERS, null);
     await SessionManager.setLastSyncTime(FireBaseUtils.FEEDING, null);
@@ -1296,19 +1315,63 @@ $storeLink
     return uuid.v4();
   }
 
+
+  static bool isValidEmail(String email) {
+    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+  }
+
+
   static Future<void> setupAds() async {
     bool isInApp = await SessionManager.getInApp();
     if(isInApp){
       Utils.isShowAdd = false;
       hideBanner();
     }
-    else{
+    else
+    {
       Utils.isShowAdd = true;
       inititalize();
     }
-    Utils.isShowAdd = false;
+   // Utils.isShowAdd = true;
 
   }
+
+
+  static void showFloatingMessage(BuildContext context, GlobalKey key, String text) {
+    final overlay = Overlay.of(context);
+    final renderBox = key.currentContext!.findRenderObject() as RenderBox;
+    final position = renderBox.localToGlobal(Offset.zero);
+
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        left: position.dx,
+        top: position.dy + renderBox.size.height + 5, // below widget
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.black87,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              text,
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+
+    // Auto remove after 3 seconds
+    Future.delayed(const Duration(seconds: 3), () {
+      overlayEntry.remove();
+    });
+  }
+
+  static int backup_changes = 12;
 
   static Future<void> inititalize() async {
     // CAS.setDebugMode(true);
@@ -1436,6 +1499,8 @@ $storeLink
     //   },
     // );
   }
+
+
 
 
   String hashPassword(String password) {

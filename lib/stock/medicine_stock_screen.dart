@@ -376,7 +376,14 @@ class _MedicineStockScreenState extends State<MedicineStockScreen> with RefreshM
         ],),
       
         floatingActionButton: FloatingActionButton(
-          onPressed: _showAddStockDialog,
+          onPressed: () {
+            if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_health")){
+              Utils.showMissingPermissionDialog(context, "add_health");
+              return;
+            }
+
+            _showAddStockDialog();
+        },
           child: Icon(Icons.add),
         ),
       ),
@@ -509,7 +516,7 @@ class _AddMedicineStockBottomSheetState extends State<AddMedicineStockBottomShee
       medicineStockFB.transaction = transaction_item;
     }
 
-    if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_medicine")) {
+    if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_health")) {
       medicineStockFB.sync_id = stock.sync_id;
       medicineStockFB.sync_status = SyncStatus.SYNCED;
       medicineStockFB.last_modified = Utils.getTimeStamp();

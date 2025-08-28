@@ -320,19 +320,28 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
     adminUser = widget.users;
 
     farmPlan = await SessionManager.getFarmPlan();
+    latestBackupTime = await SessionManager.getLastBackupTime();
 
     if(farmPlan!= null) {
       if (farmPlan!.isActive)
         await checkAndBackupIfNeeded(adminUser!.farmId);
     }
+    else
+    {
+      farmPlan = FarmPlan(farmId: Utils.currentUser!.farmId, adminEmail: Utils.currentUser!.email, planName: "Premium", planType: "planType", planStartDate: DateTime.now().subtract(Duration(days: 2)), planExpiryDate: DateTime.now().subtract(Duration(days: 2)), userCapacity: 0);
+    }
+
+    setState(() {
+
+    });
 
   }
 
-  DateTime? lastBackupDate = null;
+  DateTime? lastBackupDate = null, latestBackupTime;
   /// Function to check if a backup already exists today, and if not, perform it
   Future<void> checkAndBackupIfNeeded(String farmId) async {
     final docRef = FirebaseFirestore.instance.collection(FireBaseUtils.DB_BACKUP).doc(farmId);
-    final docSnapshot = await docRef.get();
+    final docSnapshot = await docRef.get(const GetOptions(source: Source.server));
 
     bool shouldBackup = true;
 
@@ -343,6 +352,9 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
       if (lastTimestamp != null) {
         lastBackupDate = lastTimestamp.toDate();
         final DateTime now = DateTime.now();
+
+        if(latestBackupTime == null)
+          latestBackupTime = lastBackupDate;
 
 // Compare difference in full days between now and lastBackupDate
         final Duration difference = now.difference(lastBackupDate!);
@@ -356,6 +368,9 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
         print("Last Backup: ${DateFormat('yyyy-MM-dd').format(lastBackupDate!)}");
         print("Today: ${DateFormat('yyyy-MM-dd').format(now)}");
 
+        setState(() {
+
+        });
       }
     }
 
@@ -492,29 +507,38 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
                             isUploading = true;
                           });
                           await FlockImageUploader().uploadDatabaseFile(Utils.currentUser!.farmId);
+                          latestBackupTime = await SessionManager.getLastBackupTime();
+                          setState(() {
+
+                          });
                         },
-                        child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.blue,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.backup, color: Colors.white, size: 18),
-                              SizedBox(width: 5),
-                              Text(
-                                'Backup Database',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 12,
-                                ),
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: Colors.blue,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
                               ),
-                            ],
-                          ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.backup, color: Colors.white, size: 18),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    " "+'BACKUP'.tr()+" ",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            latestBackupTime != null? Text('Last Backup'.tr()+" ${DateFormat('dd MMM yyyy HH:MM a').format(latestBackupTime!)}", style: TextStyle(color: Colors.grey, fontSize: 8, fontWeight: FontWeight.normal),) : Text('Last Backup'.tr()+" Unknown", style: TextStyle(color: Colors.grey, fontSize: 8, fontWeight: FontWeight.normal),)
+                          ],
                         ),
                       ),
                     ),
