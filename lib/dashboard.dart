@@ -896,7 +896,9 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
 
     await DatabaseHelper.instance.database;
     flocks = await DatabaseHelper.getFlocks();
-
+    for(int i=0; i < flocks.length;i++){
+      print(flocks.elementAt(i).toJson());
+    }
     if(flocks.length == 0)
     {
       no_flock = true;
@@ -934,6 +936,13 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
 
   @override
   Widget build(BuildContext context) {
+
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.blue, // same as appbar color
+      statusBarIconBrightness: Brightness.light, // for Android (light = white icons)
+      statusBarBrightness: Brightness.dark, // for iOS (dark = white text)
+    ));
+
     double widthScreen = MediaQuery.of(context).size.width;
     Color backgroundColor = Color(0xFFF0F0F3);
     Color shadowColor = Utils.getThemeColorBlue();
@@ -1130,7 +1139,7 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                       radius: 22,
 
                       backgroundImage: (Utils.currentUser!.image != null && Utils.currentUser!.image.isNotEmpty)
-                          ? NetworkImage(Utils.currentUser!.image)
+                          ? NetworkImage(Utils.ProxyAPI+Utils.currentUser!.image)
                           : null,
                       child: (Utils.currentUser!.image == null || Utils.currentUser!.image.isEmpty)
                           ? Icon(Icons.person, size: 25, color: Colors.white)

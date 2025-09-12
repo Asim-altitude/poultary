@@ -69,9 +69,28 @@ class _ManageFlockScreen extends State<ManageFlockScreen> with SingleTickerProvi
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
-    return SafeArea(child: Scaffold(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'MANAGE_FLCOKS'.tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blue, // Customize the color
+        elevation: 8, // Gives it a more elevated appearance
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context); // Navigates back
+          },
+        ),
+      ),
+
       body:SafeArea(
-        top: false,
           child:Container(
           width: widthScreen,
           height: heightScreen,
@@ -83,44 +102,6 @@ class _ManageFlockScreen extends State<ManageFlockScreen> with SingleTickerProvi
             children:  [
               Utils.getDistanceBar(),
 
-              ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
-                child: Container(
-                  decoration: BoxDecoration(
-                     boxShadow: [
-                      BoxShadow(
-                        color: Utils.getThemeColorBlue(), //(x,y)
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          alignment: Alignment.center,
-                          width: 50,
-                          height: 50,
-                          child: Icon(Icons.arrow_back,
-                              color: Colors.white, size: 30),
-                        ),
-                      ),
-                      Container(
-                          child: Text(
-                            'MANAGE_FLCOKS'.tr(),
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          )),
-
-                    ],
-                  ),
-                ),
-              ),
               flocks.length > 0 ?Column(
                 children: [
                   Container(
@@ -232,7 +213,7 @@ class _ManageFlockScreen extends State<ManageFlockScreen> with SingleTickerProvi
                   child: Text('No Flocks Added Yet. Add new from Dashboard'.tr(),textAlign: TextAlign.center,style: TextStyle( fontSize: 16,color: Colors.black,),),),),
 
                   ]
-      ),),),),),);
+      ),),),),);
   }
 
 }

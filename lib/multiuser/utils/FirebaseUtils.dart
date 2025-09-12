@@ -113,55 +113,55 @@ class FireBaseUtils{
   }
 
   static Future<bool> updateFlock(Flock flock) async {
+    final firestore = FirebaseFirestore.instance;
+
     try {
       Utils.showLoading();
-      final firestore = FirebaseFirestore.instance;
 
-      await firestore
-          .collection(FLOCKS)
-          .doc(flock.sync_id)
-          .update({
-            'last_modified': FieldValue.serverTimestamp(),
-            'modified_by' : Utils.currentUser!.email,
-            'flock': flock.toFBJson(),
-      });
+      final docRef = firestore.collection(FLOCKS).doc(flock.sync_id);
+      final docSnap = await docRef.get();
 
-      Utils.hideLoading();
-      return true;
-    } catch (e) {
-      Utils.showError();
-      print("❌ Failed to update: $e");
-      if (e is FirebaseException && e.code == 'not-found') {
-        // Document doesn't exist, fallback to set
-        final firestore = FirebaseFirestore.instance;
-
-        flock.sync_status = SyncStatus.UPDATED;
-        FlockFB flockFB = FlockFB(flock: flock);
-        flockFB.farm_id = flock.farm_id;
-        flockFB.modified_by = flock.modified_by;
-        flockFB.last_modified = flock.last_modified;
-
-        await firestore
-            .collection(FLOCKS)
-            .doc(flock.sync_id)
-            .set(flockFB.toJson());
-
-        return false;
+      if (docSnap.exists) {
+        // ✅ Update existing flock
+        await docRef.update({
+          'last_modified': FieldValue.serverTimestamp(),
+          'modified_by': Utils.currentUser!.email,
+          'flock': flock.toFBJson(),
+        });
+        return true;
       } else {
-        FlockFB flockFB = FlockFB(flock: flock);
-        flockFB.farm_id = flock.farm_id;
-        flockFB.modified_by = flock.modified_by;
-        flockFB.last_modified = flock.last_modified;
+        // ✅ Create new flock if not exists
+        flock.sync_status = SyncStatus.UPDATED;
+        FlockFB flockFB = FlockFB(flock: flock)
+          ..farm_id = flock.farm_id
+          ..modified_by = flock.modified_by
+          ..last_modified = flock.last_modified;
 
-        await DatabaseHelper.saveToSyncQueue(
-          type: FLOCKS,
-          syncId: Utils.currentUser!.email,
-          opType: 'update',
-          payload: jsonEncode(flockFB.toJson()),
-          lastError: e.toString(),
-        );
+        await docRef.set(flockFB.toJson());
+        return true; // treat as success
       }
+    } catch (e) {
+      print("❌ Failed to update flock: $e");
+
+      Utils.showError();
+
+      // Save operation into local sync queue for retry later
+      FlockFB flockFB = FlockFB(flock: flock)
+        ..farm_id = flock.farm_id
+        ..modified_by = flock.modified_by
+        ..last_modified = flock.last_modified;
+
+      await DatabaseHelper.saveToSyncQueue(
+        type: FLOCKS,
+        syncId: Utils.currentUser!.email,
+        opType: 'update',
+        payload: jsonEncode(flockFB.toJson()),
+        lastError: e.toString(),
+      );
+
       return false;
+    } finally {
+      Utils.hideLoading();
     }
   }
 

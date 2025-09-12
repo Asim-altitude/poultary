@@ -55,12 +55,41 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
     List<Permission> allPermissions = await DatabaseHelper.getAllPermissions();
     List<Permission> displayedPermissions = List.from(allPermissions);
     List<Permission> selectedPermissions = [];
+    bool showError = false;
+
+    Color getPermissionColor(String permission) {
+      if (permission.startsWith("view_")) {
+        return Colors.green.shade600; // Safe
+      } else if (permission.startsWith("add_")) {
+        return Colors.blue.shade600; // Normal
+      } else if (permission.startsWith("edit_")) {
+        return Colors.orange.shade700; // Sensitive
+      } else if (permission.startsWith("delete_")) {
+        return Colors.red.shade700; // Danger
+      } else {
+        return Colors.grey.shade600; // Fallback
+      }
+    }
+
+    Widget _buildLegendDot(Color color, String label) {
+      return Row(
+        children: [
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 4),
+          Text(label, style: TextStyle(fontSize: 12, color: color)),
+        ],
+      );
+    }
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
@@ -83,11 +112,13 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text("Create New Role".tr(), style: Theme.of(context).textTheme.headlineSmall),
+                    Text("Create New Role".tr(),
+                        style: Theme.of(context).textTheme.headlineSmall),
                     const SizedBox(height: 10),
                     TextField(
                       controller: roleNameController,
-                      decoration: InputDecoration(labelText: 'Role Name'.tr()),
+                      decoration:
+                      InputDecoration(labelText: 'Role Name'.tr()),
                     ),
                     const SizedBox(height: 20),
 
@@ -97,15 +128,30 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                       onChanged: filterPermissions,
                       decoration: InputDecoration(
                         labelText: "Search Permissions".tr(),
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
-
                     const SizedBox(height: 10),
+
+                    // Legend row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildLegendDot(Colors.green.shade600, "Safe".tr()),
+                        _buildLegendDot(Colors.blue.shade600, "Normal".tr()),
+                        _buildLegendDot(Colors.orange.shade700, "Sensitive".tr()),
+                        _buildLegendDot(Colors.red.shade700, "Danger".tr()),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text("Tap a permission to select it:".tr(), style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text("Tap a permission to select it:".tr(),
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(height: 8),
 
@@ -118,9 +164,18 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                         itemBuilder: (context, index) {
                           final p = displayedPermissions[index];
                           return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            padding:
+                            const EdgeInsets.symmetric(horizontal: 4),
                             child: ActionChip(
-                              label: Text(p.name),
+                              backgroundColor:
+                              getPermissionColor(p.name).withOpacity(0.15),
+                              label: Text(
+                                p.name,
+                                style: TextStyle(
+                                  color: getPermissionColor(p.name),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                               onPressed: () {
                                 setModalState(() {
                                   selectedPermissions.add(p);
@@ -133,11 +188,23 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                         },
                       ),
                     ),
+                    const SizedBox(height: 10),
 
-                    const SizedBox(height: 20),
+                    showError
+                        ? Text(
+                      "Please enter role name and select permissions".tr(),
+                      style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.red,
+                          fontWeight: FontWeight.normal),
+                    )
+                        : const SizedBox.shrink(),
+                    const SizedBox(height: 10),
+
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text("Selected Permissions:".tr(), style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text("Selected Permissions:".tr(),
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(height: 8),
 
@@ -149,52 +216,69 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: selectedPermissions.isEmpty
-                          ? Center(child: Text("No permissions selected".tr()))
+                          ? Center(
+                          child: Text("No permissions selected".tr()))
                           : ListView.builder(
                         itemCount: selectedPermissions.length,
                         itemBuilder: (context, index) {
                           final p = selectedPermissions[index];
                           return ListTile(
-                            title: Text(p.name),
+                            title: Text(
+                              p.name,
+                              style: TextStyle(
+                                color: getPermissionColor(p.name),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             subtitle: Text(p.description ?? ''),
                             trailing: IconButton(
-                              icon: Icon(Icons.close),
+                              icon: Icon(Icons.close,
+                                  color: Colors.red.shade400),
                               onPressed: () {
                                 setModalState(() {
                                   selectedPermissions.remove(p);
                                   allPermissions.add(p);
-                                  filterPermissions(searchController.text);
+                                  filterPermissions(
+                                      searchController.text);
                                 });
                               },
-
                             ),
                           );
                         },
                       ),
                     ),
 
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () async {
+                    const SizedBox(height: 10),
+                    InkWell(
+                      onTap: () async {
                         final roleName = roleNameController.text.trim();
                         if (roleName.isEmpty || selectedPermissions.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Please enter role name and select permissions".tr())),
-                          );
+                          setModalState(() {
+                            showError = true;
+                          });
                           return;
                         }
 
-                        final roleId = await DatabaseHelper.insertRole(Role(name: roleName));
-                        final permissionIds = selectedPermissions.map((p) => p.id!).toList();
-                        await DatabaseHelper.assignPermissionsToRole(roleId!, permissionIds);
-                        await uploadRoleToFirebase(farmID,Role(name: roleName, id: roleId));
-                        await uploadRoleWithPermissionsToFirestore(farmID,roleName,selectedPermissions.map((p) => p.name).toList());
+                        final roleId = await DatabaseHelper
+                            .insertRole(Role(name: roleName));
+                        final permissionIds =
+                        selectedPermissions.map((p) => p.id!).toList();
+                        await DatabaseHelper.assignPermissionsToRole(
+                            roleId!, permissionIds);
+                        await uploadRoleToFirebase(
+                            farmID, Role(name: roleName, id: roleId));
+                        await uploadRoleWithPermissionsToFirestore(
+                            farmID,
+                            roleName,
+                            selectedPermissions
+                                .map((p) => p.name)
+                                .toList());
                         Utils.shouldBackup = true;
                         Navigator.pop(context);
                         fetchRoles();
                       },
-                      child: Text("Create Role".tr()),
-                    )
+                      child: buildCreateButton(context),
+                    ),
                   ],
                 ),
               );
@@ -203,8 +287,58 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
         );
       },
     );
-
   }
+
+
+  Widget buildCreateButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.blue,
+              Colors.green,
+            ],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              offset: const Offset(0, 4),
+              blurRadius: 6,
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.save, color: Colors.white),
+                const SizedBox(width: 8),
+                Text(
+                  "Create Role".tr(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
 
   Future<void> uploadRoleWithPermissionsToFirestore(
       String farmId, String roleName, List<String> permissionNames) async {
@@ -264,20 +398,53 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
   }
 
   void showEditRoleDialog(Role role) async {
-    final TextEditingController roleNameController = TextEditingController(text: role.name);
+    final TextEditingController roleNameController =
+    TextEditingController(text: role.name);
     final TextEditingController searchController = TextEditingController();
 
     List<Permission> allPermissions = await DatabaseHelper.getAllPermissions();
-    List<Permission> selectedPermissions = await DatabaseHelper.getPermissionsForRole(role.id!);
+    List<Permission> selectedPermissions =
+    await DatabaseHelper.getPermissionsForRole(role.id!);
 
-    allPermissions.removeWhere((perm) => selectedPermissions.any((sp) => sp.id == perm.id));
+    allPermissions.removeWhere(
+            (perm) => selectedPermissions.any((sp) => sp.id == perm.id));
     List<Permission> displayedPermissions = List.from(allPermissions);
+
+    Color getPermissionColor(String permission) {
+      if (permission.startsWith("view_")) {
+        return Colors.green.shade600; // Safe
+      } else if (permission.startsWith("add_")) {
+        return Colors.blue.shade600; // Normal
+      } else if (permission.startsWith("edit_")) {
+        return Colors.orange.shade700; // Sensitive
+      } else if (permission.startsWith("delete_")) {
+        return Colors.red.shade700; // Danger
+      } else {
+        return Colors.grey.shade600; // Fallback
+      }
+    }
+
+    Widget _buildLegendDot(Color color, String label) {
+      return Row(
+        children: [
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 4),
+          Text(label, style: TextStyle(fontSize: 12, color: color)),
+        ],
+      );
+    }
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
         return Padding(
           padding: const EdgeInsets.only(top: 20, left: 16, right: 16, bottom: 40),
@@ -298,11 +465,13 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text("Edit Role".tr(), style: Theme.of(context).textTheme.headlineSmall),
+                    Text("Edit Role".tr(),
+                        style: Theme.of(context).textTheme.headlineSmall),
                     const SizedBox(height: 10),
                     TextField(
                       controller: roleNameController,
-                      decoration: InputDecoration(labelText: "Role Name".tr()),
+                      decoration:
+                      InputDecoration(labelText: "Role Name".tr()),
                     ),
                     const SizedBox(height: 20),
                     TextField(
@@ -310,14 +479,30 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                       onChanged: filterPermissions,
                       decoration: InputDecoration(
                         labelText: "Search Permissions".tr(),
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 10),
+
+                    // Legend row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildLegendDot(Colors.green.shade600, "Safe".tr()),
+                        _buildLegendDot(Colors.blue.shade600, "Normal".tr()),
+                        _buildLegendDot(Colors.orange.shade700, "Sensitive".tr()),
+                        _buildLegendDot(Colors.red.shade700, "Danger".tr()),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text("Tap a permission to select it:".tr(), style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text("Tap a permission to select it:".tr(),
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(height: 8),
                     Container(
@@ -328,9 +513,18 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                         itemBuilder: (context, index) {
                           final p = displayedPermissions[index];
                           return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            padding:
+                            const EdgeInsets.symmetric(horizontal: 4),
                             child: ActionChip(
-                              label: Text(p.name),
+                              backgroundColor:
+                              getPermissionColor(p.name).withOpacity(0.15),
+                              label: Text(
+                                p.name,
+                                style: TextStyle(
+                                  color: getPermissionColor(p.name),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                               onPressed: () {
                                 setModalState(() {
                                   selectedPermissions.add(p);
@@ -344,9 +538,11 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
+
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text("Selected Permissions:".tr(), style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text("Selected Permissions:".tr(),
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(height: 8),
                     Container(
@@ -362,15 +558,23 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                         itemBuilder: (context, index) {
                           final p = selectedPermissions[index];
                           return ListTile(
-                            title: Text(p.name),
+                            title: Text(
+                              p.name,
+                              style: TextStyle(
+                                color: getPermissionColor(p.name),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             subtitle: Text(p.description ?? ''),
                             trailing: IconButton(
-                              icon: Icon(Icons.close),
+                              icon: Icon(Icons.close,
+                                  color: Colors.red.shade400),
                               onPressed: () {
                                 setModalState(() {
                                   selectedPermissions.remove(p);
                                   allPermissions.add(p);
-                                  filterPermissions(searchController.text);
+                                  filterPermissions(
+                                      searchController.text);
                                 });
                               },
                             ),
@@ -379,13 +583,16 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
+
+                    // Buttons row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         ElevatedButton.icon(
-                          icon: Icon(Icons.delete),
+                          icon: const Icon(Icons.delete),
                           label: Text("DELETE".tr()),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red),
                           onPressed: () async {
                             await DatabaseHelper.deleteRole(role.id!);
                             await FirebaseFirestore.instance
@@ -403,22 +610,33 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
                         ElevatedButton(
                           child: Text("Update Role".tr()),
                           onPressed: () async {
-                            final updatedRoleName = roleNameController.text.trim();
-                            if (updatedRoleName.isEmpty || selectedPermissions.isEmpty) {
+                            final updatedRoleName =
+                            roleNameController.text.trim();
+                            if (updatedRoleName.isEmpty ||
+                                selectedPermissions.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Enter role name and select permissions'.tr())),
+                                SnackBar(
+                                    content: Text(
+                                        'Enter role name and select permissions'
+                                            .tr())),
                               );
                               return;
                             }
 
-                            await DatabaseHelper.updateRole(Role(name: updatedRoleName, id: role.id));
-                            final permissionIds = selectedPermissions.map((p) => p.id!).toList();
-                            await DatabaseHelper.assignPermissionsToRole(role.id!, permissionIds);
-                            await uploadRoleToFirebase(farmID, Role(name: updatedRoleName, id: role.id));
+                            await DatabaseHelper.updateRole(Role(
+                                name: updatedRoleName, id: role.id));
+                            final permissionIds =
+                            selectedPermissions.map((p) => p.id!).toList();
+                            await DatabaseHelper.assignPermissionsToRole(
+                                role.id!, permissionIds);
+                            await uploadRoleToFirebase(farmID,
+                                Role(name: updatedRoleName, id: role.id));
                             await uploadRoleWithPermissionsToFirestore(
                               farmID,
                               updatedRoleName,
-                              selectedPermissions.map((p) => p.name).toList(),
+                              selectedPermissions
+                                  .map((p) => p.name)
+                                  .toList(),
                             );
                             Navigator.pop(context);
                             fetchRoles();

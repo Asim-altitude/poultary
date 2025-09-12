@@ -175,631 +175,643 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
       child:
 
     return SafeArea(child: Scaffold(
-      body:SafeArea(
-        top: false,
+      appBar: AppBar(
+        title: Text(
+          "All Reports".tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.blue,
+        elevation: 8,
+        automaticallyImplyLeading: (Utils.isMultiUSer && Utils.currentUser!.role.toLowerCase() != "admin")? true : false,
+      ),
+      body: Container(
+       width: widthScreen,
+       height: heightScreen,
+        color: Colors.white,
+         child: SingleChildScrollViewWithStickyFirstWidget(
+         child: Column(
+         mainAxisAlignment: MainAxisAlignment.center,
+         crossAxisAlignment: CrossAxisAlignment.center,
+         children:  [
+           Utils.getDistanceBar(),
 
-         child:Container(
-          width: widthScreen,
-          height: heightScreen,
-           color: Colors.white,
-            child: SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children:  [
-              Utils.getDistanceBar(),
+          /* ClipRRect(
+             borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
+             child: Container(
+               decoration: BoxDecoration(
+                 boxShadow: [
+                   BoxShadow(
+                     color: Utils.getThemeColorBlue(),
+                   ),
+                 ],
+               ),
+               child: Row(
+                 children: [
+                   Container(
+                     alignment: Alignment.center,
+                     width: 50,
+                     height: 50,
+                     child: InkWell(
+                       child: Container(
+                           width: 25,
+                           height: 25,
+                           child: Image.asset("assets/income.png", color: Colors.white,)),
+                       onTap: () {
+                         // Navigator.pop(context);
+                       },
+                     ),
+                   ),
+                   Expanded(
+                     child: Container(
+                         margin: EdgeInsets.only(left: 5),
+                         child: Text(
+                           "ALL_REPORTS".tr(),
+                           textAlign: TextAlign.start,
+                           style: TextStyle(
+                               color: Colors.white,
+                               fontSize: 18,
+                               fontWeight: FontWeight.bold),
+                         )),
+                   ),
 
-              ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
-                child: Container(
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Utils.getThemeColorBlue(),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        alignment: Alignment.center,
-                        width: 50,
-                        height: 50,
-                        child: InkWell(
-                          child: Container(
-                              width: 25,
-                              height: 25,
-                              child: Image.asset("assets/income.png", color: Colors.white,)),
-                          onTap: () {
-                            // Navigator.pop(context);
-                          },
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                            margin: EdgeInsets.only(left: 5),
-                            child: Text(
-                              "ALL_REPORTS".tr(),
-                              textAlign: TextAlign.start,
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold),
-                            )),
-                      ),
+                 ],
+               ),
+             ),
+           ),*/
 
-                    ],
-                  ),
-                ),
-              ),
+           Row(
+             children: [
+               Expanded(
+                 child: Container(
+                   height: 45,
+                   alignment: Alignment.centerRight,
+                   padding: EdgeInsets.only(left: 10),
+                   margin: EdgeInsets.only(top: 10,left: 12,right: 5),
+                   decoration: BoxDecoration(
+                     color: Colors.white,
+                     borderRadius: const BorderRadius.all(
+                         Radius.circular(5.0)),
+                     boxShadow: [
+                       BoxShadow(
+                         color: Colors.grey.withOpacity(0.5),
+                         spreadRadius: 2,
+                         blurRadius: 2,
+                         offset: Offset(0, 1), // changes position of shadow
+                       ),
+                     ],
+                     border: Border.all(
+                       color:  Utils.getThemeColorBlue(),
+                       width: 1.0,
+                     ),
+                   ),
+                   child: getDropDownList(),
+                 ),
+               ),
+               InkWell(
+                   onTap: () {
+                     openDatePicker();
+                   },
+                   child: Align(
+                     alignment: Alignment.centerRight,
+                     child: Container(
+                       height: 45,
+                       decoration: BoxDecoration(
+                         color: Colors.white,
+                         borderRadius: const BorderRadius.all(
+                             Radius.circular(5.0)),
+                         border: Border.all(
+                           color:  Utils.getThemeColorBlue(),
+                           width: 1.0,
+                         ),
+                         boxShadow: [
+                           BoxShadow(
+                             color: Colors.grey.withOpacity(0.5),
+                             spreadRadius: 2,
+                             blurRadius: 2,
+                             offset: Offset(0, 1), // changes position of shadow
+                           ),
+                         ],
+                       ),
+                       margin: EdgeInsets.only(right: 12,top: 15,bottom: 5),
+                       padding: EdgeInsets.only(left: 5,right: 5),
+                       child: Row(
+                         mainAxisAlignment: MainAxisAlignment.end,
+                         children: [
+                           Text(date_filter_name.tr(), style: TextStyle(fontSize: 14),),
+                           Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
+                         ],
+                       ),
+                     ),
+                   )),
+             ],
+           ),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 45,
-                      alignment: Alignment.centerRight,
-                      padding: EdgeInsets.only(left: 10),
-                      margin: EdgeInsets.only(top: 10,left: 12,right: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: const BorderRadius.all(
-                            Radius.circular(5.0)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 2,
-                            offset: Offset(0, 1), // changes position of shadow
-                          ),
-                        ],
-                        border: Border.all(
-                          color:  Utils.getThemeColorBlue(),
-                          width: 1.0,
-                        ),
-                      ),
-                      child: getDropDownList(),
-                    ),
-                  ),
-                  InkWell(
-                      onTap: () {
-                        openDatePicker();
-                      },
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Container(
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: const BorderRadius.all(
-                                Radius.circular(5.0)),
-                            border: Border.all(
-                              color:  Utils.getThemeColorBlue(),
-                              width: 1.0,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 2,
-                                blurRadius: 2,
-                                offset: Offset(0, 1), // changes position of shadow
-                              ),
-                            ],
-                          ),
-                          margin: EdgeInsets.only(right: 12,top: 15,bottom: 5),
-                          padding: EdgeInsets.only(left: 5,right: 5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text(date_filter_name.tr(), style: TextStyle(fontSize: 14),),
-                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(),),
-                            ],
-                          ),
-                        ),
-                      )),
-                ],
-              ),
+           Container(
+             padding: EdgeInsets.only(bottom: 30,right: 10,left: 10),
+             decoration: BoxDecoration(
+               // borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+               color: Colors.white,
+              /* boxShadow: [
+                 BoxShadow(
+                   color: Colors.grey.withOpacity(0.5),
+                   spreadRadius: 2,
+                   blurRadius: 2,
+                   offset: Offset(0, 1), // changes position of shadow
+                 ),
+               ],*/
 
-              Container(
-                padding: EdgeInsets.only(bottom: 30,right: 10,left: 10),
-                decoration: BoxDecoration(
-                  // borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-                  color: Colors.white,
-                 /* boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 2,
-                      blurRadius: 2,
-                      offset: Offset(0, 1), // changes position of shadow
-                    ),
-                  ],*/
+             ),
+             child: Column(
+               children: [
+                 Visibility(
+                   visible: false,
+                   child: InkWell(
+                     onTap: () {
+                       openDatePicker();
+                     },
+                     child: Container(
+                       width: widthScreen,
+                       margin: EdgeInsets.all(5),
+                       child: Row(
+                         mainAxisAlignment: MainAxisAlignment.end,
+                         crossAxisAlignment: CrossAxisAlignment.end,
+                         children: [
+                           Icon(Icons.keyboard_arrow_left, color: Colors.white70,),
+                           Container(
+                               margin: EdgeInsets.only(left: 5, right: 5),
+                               child:Text(date_filter_name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white),)),
+                           Icon(Icons.keyboard_arrow_right, color: Colors.white70,),
+                         ],),
+                     ),
+                   ),
+                 ),
+                 Container(
+                     decoration: BoxDecoration(
+                         borderRadius: BorderRadius.all(Radius.circular(6)),
+                         color: Utils.getThemeColorBlue(),
+                         border: Border.all(color: Colors.white38,width: 1.0)
+                     ),
+                     padding: EdgeInsets.all(10),
+                     margin: EdgeInsets.only(top: 10),
+                     child: InkWell(onTap : () async{
+                       await Navigator.push(
+                         context,
+                         MaterialPageRoute(
+                             builder: (context) => const FinanceReportsScreen()),
+                       );
+                       getData(_reports_filter);
+                     },child: Column(
+                       children: [
 
-                ),
-                child: Column(
-                  children: [
-                    Visibility(
-                      visible: false,
-                      child: InkWell(
-                        onTap: () {
-                          openDatePicker();
-                        },
-                        child: Container(
-                          width: widthScreen,
-                          margin: EdgeInsets.all(5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Icon(Icons.keyboard_arrow_left, color: Colors.white70,),
-                              Container(
-                                  margin: EdgeInsets.only(left: 5, right: 5),
-                                  child:Text(date_filter_name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white),)),
-                              Icon(Icons.keyboard_arrow_right, color: Colors.white70,),
-                            ],),
-                        ),
-                      ),
-                    ),
-                    Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(6)),
-                            color: Utils.getThemeColorBlue(),
-                            border: Border.all(color: Colors.white38,width: 1.0)
-                        ),
-                        padding: EdgeInsets.all(10),
-                        margin: EdgeInsets.only(top: 10),
-                        child: InkWell(onTap : () async{
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const FinanceReportsScreen()),
-                          );
-                          getData(_reports_filter);
-                        },child: Column(
-                          children: [
-
-                            Row(
-                              /* mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,*/
-                              children: [
-                                Image.asset("assets/finance_icon.png", color: Colors.white, width: 40, height: 40,),
-                                Text(" "+"Financial Report".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),),
-                              ],
-                            ),
-
-                            SizedBox(height: 5,),
-                            Text(net_income>=0?Utils.currency+'$net_income' : "-"+Utils.currency+"${-net_income}",style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: net_income>=0? Colors.white : Colors.red),),
-                            Text("NET_INCOME".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white70),),
-                            SizedBox(height: 5,),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Expanded(child: getDashboardDataBox(Colors.white12, "Income".tr(), '$gross_income', Icons.arrow_upward,Colors.green)),
-                                Expanded(child: getDashboardDataBox(Colors.white12, "Expense".tr(), '$total_expense', Icons.arrow_downward, Colors.pink)),
-
-                              ],
-                            ),
-                          ],
-                        ))),
-                    Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(6)),
-                            //  color: Colors.white10.withAlpha(30),
-                            color: Utils.getThemeColorBlue(),
-
-                            border: Border.all(color: Colors.white38,width: 1.0)
-                        ),
-                        padding: EdgeInsets.all(10),
-                        margin: EdgeInsets.only(top: 10),
-                        child: InkWell(onTap : () async{
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const BirdsReportsScreen()),
-                          );
-                          getData(_reports_filter);
-                        },child: Column(
-                          children: [
-
-                            Row(
-                              /* mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,*/
-                              children: [
-                                Image.asset("assets/bird_icon.png", color: Colors.white, width: 40, height: 40,),
-                                Text(" "+"BIRDS_SUMMARY".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),),
-                              ],
-                            ),
-
-                        /*    SizedBox(height: 5,),
-                            Text('$current_birds',style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),),
-                            Text("CURRENT_BIRDS".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white70),),
-                       */     SizedBox(height: 5,),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-
-                                Expanded(child: getCustomDataBox(Colors.white12, "TOTAL_ADDED".tr(), '$total_birds_added', '','')),
-                                Expanded(child: getCustomDataBox(Colors.white12, "TOTAL_REDUCED".tr(), '$total_birds_reduced', '','')),
-                                Expanded(child: getCustomDataBox(Colors.white12, "CURRENT_BIRDS".tr(), '$current_birds', '','')),
-
-                              ],
-                            ),
-                          ],
-                        ))),
-                    Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(6)),
-                        //  color: Colors.white10.withAlpha(30),
-                            color: Utils.getThemeColorBlue(),
-
-                            border: Border.all(color: Colors.white38,width: 1.0)
-                        ),
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.only(top: 10),
-                      child: InkWell(onTap : () async{
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const EggsReportsScreen()),
-                      );
-                      getAllData();
-                    },child: Column(
-                      children: [
-
-                        Row(
-                         /* mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,*/
-                          children: [
-                            Image.asset("assets/eggs_count.png", color: Colors.white, width: 40, height: 40,),
-                            Text(" "+"EGG_COLLECTION".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),),
+                         Row(
+                           /* mainAxisAlignment: MainAxisAlignment.center,
+                       crossAxisAlignment: CrossAxisAlignment.center,*/
+                           children: [
+                             Image.asset("assets/finance_icon.png", color: Colors.white, width: 40, height: 40,),
+                             Text(" "+"Financial Report".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),),
                            ],
-                        ),
-                       
-                        /*SizedBox(height: 5,),
-                        Text('$total_eggs',style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),),
-                        Text("Remaining Eggs".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white70),),
-                        SizedBox(height: 5,),*/
-                        Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                            Expanded(child: getCustomDataBox(Colors.white12, "TOTAL_ADDED".tr(), '$total_eggs_collected', '','')),
-                            Expanded(child: getCustomDataBox(Colors.white12, "TOTAL_REDUCED".tr(), '$total_eggs_reduced', '','')),
-                            Expanded(child: getCustomDataBox(Colors.white12, "Remaining".tr(), '$total_eggs', '','')),
+                         ),
 
-                            ],
-                        ),
-                      ],
-                    ))),
-                    Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(6)),
-                            //  color: Colors.white10.withAlpha(30),
-                            color: Utils.getThemeColorBlue(),
+                         SizedBox(height: 5,),
+                         Text(net_income>=0?Utils.currency+'$net_income' : "-"+Utils.currency+"${-net_income}",style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: net_income>=0? Colors.white : Colors.red),),
+                         Text("NET_INCOME".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white70),),
+                         SizedBox(height: 5,),
+                         Row(
+                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                           children: [
+                             Expanded(child: getDashboardDataBox(Colors.white12, "Income".tr(), '$gross_income', Icons.arrow_upward,Colors.green)),
+                             Expanded(child: getDashboardDataBox(Colors.white12, "Expense".tr(), '$total_expense', Icons.arrow_downward, Colors.pink)),
 
-                            border: Border.all(color: Colors.white38,width: 1.0)
-                        ),
-                        padding: EdgeInsets.all(10),
-                        margin: EdgeInsets.only(top: 10),
-                        child: InkWell(onTap : () async{
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const FeedReportsScreen()),
-                          );
-                          getAllData();
-                        },child: Column(
-                          children: [
+                           ],
+                         ),
+                       ],
+                     ))),
+                 Container(
+                     decoration: BoxDecoration(
+                         borderRadius: BorderRadius.all(Radius.circular(6)),
+                         //  color: Colors.white10.withAlpha(30),
+                         color: Utils.getThemeColorBlue(),
 
-                            Row(
-                              /* mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,*/
-                              children: [
-                                Image.asset("assets/feed.png", color: Colors.white, width: 40, height: 40,),
-                                Text(" "+"Feeding Report".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),),
-                              ],
-                            ),
+                         border: Border.all(color: Colors.white38,width: 1.0)
+                     ),
+                     padding: EdgeInsets.all(10),
+                     margin: EdgeInsets.only(top: 10),
+                     child: InkWell(onTap : () async{
+                       await Navigator.push(
+                         context,
+                         MaterialPageRoute(
+                             builder: (context) => const BirdsReportsScreen()),
+                       );
+                       getData(_reports_filter);
+                     },child: Column(
+                       children: [
 
-                            SizedBox(height: 5,),
-                            Text('$total_feed_consumption' + 'KG'.tr(),style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),),
-                            Text("TOTAL_CONSUMPTION".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white70),),
-                            SizedBox(height: 5,),
-                            Container(
-                              height: feedingSummary.length==0?10:feedingSummary.length*45,
-                              width: widthScreen,
-                              child: ListView.builder(
-                                  itemCount: feedingSummary.length,
-                                  scrollDirection: Axis.vertical,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemBuilder: (BuildContext context, int index) {
-                                    return Container(
-                                      padding: EdgeInsets.all(5),
-                                      margin: EdgeInsets.only(top: 5),
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.all(Radius.circular(6)),
-                                            color: Colors.white12,
-                                          border: Border.all(color: Colors.white12,width: 1.0)
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(feedingSummary.elementAt(index).feedName.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.white),),
-                                          Text(Utils.roundTo2Decimal(feedingSummary.elementAt(index).totalQuantity).toString() +"KG".tr(),style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.white),),
+                         Row(
+                           /* mainAxisAlignment: MainAxisAlignment.center,
+                       crossAxisAlignment: CrossAxisAlignment.center,*/
+                           children: [
+                             Image.asset("assets/bird_icon.png", color: Colors.white, width: 40, height: 40,),
+                             Text(" "+"BIRDS_SUMMARY".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),),
+                           ],
+                         ),
 
-                                        ],),
-                                    );
+                     /*    SizedBox(height: 5,),
+                         Text('$current_birds',style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),),
+                         Text("CURRENT_BIRDS".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white70),),
+                    */     SizedBox(height: 5,),
+                         Row(
+                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                           children: [
 
-                                  }),
-                            ),
-                          ],
-                        ))),
-                    Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(6)),
-                            //  color: Colors.white10.withAlpha(30),
-                            color: Utils.getThemeColorBlue(),
-                            border: Border.all(color: Colors.white38,width: 1.0)
-                        ),
-                        padding: EdgeInsets.all(10),
-                        margin: EdgeInsets.only(top: 10),
-                        child: InkWell(onTap : () async{
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const HealthReportScreen()),
-                          );
-                          getAllData();
-                        },child: Column(
-                          children: [
-                            Row(
-                              /* mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,*/
-                              children: [
-                                Image.asset("assets/health.png", color: Colors.white, width: 40, height: 40,),
-                                Text(" "+"HEALTH_SUMMARY".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),),
-                              ],
-                            ),
+                             Expanded(child: getCustomDataBox(Colors.white12, "TOTAL_ADDED".tr(), '$total_birds_added', '','')),
+                             Expanded(child: getCustomDataBox(Colors.white12, "TOTAL_REDUCED".tr(), '$total_birds_reduced', '','')),
+                             Expanded(child: getCustomDataBox(Colors.white12, "CURRENT_BIRDS".tr(), '$current_birds', '','')),
 
-                            /*SizedBox(height: 5,),
-                            Text('$total_health_count',style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),),
-                            Text("TOTAL".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white70),),
-                            SizedBox(height: 5,),*/
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Expanded(child: getCustomDataBox(Colors.white12, "VACCINATIONS".tr(), '$vac_count', '','')),
-                                Expanded(child: getCustomDataBox(Colors.white12, "MEDICATIONS".tr(), '$med_count', '','')),
-                                Expanded(child: getCustomDataBox(Colors.white12, "TOTAL".tr(), '$total_health_count', '','')),
+                           ],
+                         ),
+                       ],
+                     ))),
+                 Container(
+                     decoration: BoxDecoration(
+                       borderRadius: BorderRadius.all(Radius.circular(6)),
+                     //  color: Colors.white10.withAlpha(30),
+                         color: Utils.getThemeColorBlue(),
 
-                              ],
-                            ),
-                          ],
-                        ))),
+                         border: Border.all(color: Colors.white38,width: 1.0)
+                     ),
+                   padding: EdgeInsets.all(10),
+                   margin: EdgeInsets.only(top: 10),
+                   child: InkWell(onTap : () async{
+                   await Navigator.push(
+                     context,
+                     MaterialPageRoute(
+                         builder: (context) => const EggsReportsScreen()),
+                   );
+                   getAllData();
+                 },child: Column(
+                   children: [
+
+                     Row(
+                      /* mainAxisAlignment: MainAxisAlignment.center,
+                       crossAxisAlignment: CrossAxisAlignment.center,*/
+                       children: [
+                         Image.asset("assets/eggs_count.png", color: Colors.white, width: 40, height: 40,),
+                         Text(" "+"EGG_COLLECTION".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),),
+                        ],
+                     ),
+
+                     /*SizedBox(height: 5,),
+                     Text('$total_eggs',style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),),
+                     Text("Remaining Eggs".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white70),),
+                     SizedBox(height: 5,),*/
+                     Row(
+                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                         children: [
+                         Expanded(child: getCustomDataBox(Colors.white12, "TOTAL_ADDED".tr(), '$total_eggs_collected', '','')),
+                         Expanded(child: getCustomDataBox(Colors.white12, "TOTAL_REDUCED".tr(), '$total_eggs_reduced', '','')),
+                         Expanded(child: getCustomDataBox(Colors.white12, "Remaining".tr(), '$total_eggs', '','')),
+
+                         ],
+                     ),
                    ],
-                ),
-              ),
+                 ))),
+                 Container(
+                     decoration: BoxDecoration(
+                         borderRadius: BorderRadius.all(Radius.circular(6)),
+                         //  color: Colors.white10.withAlpha(30),
+                         color: Utils.getThemeColorBlue(),
+
+                         border: Border.all(color: Colors.white38,width: 1.0)
+                     ),
+                     padding: EdgeInsets.all(10),
+                     margin: EdgeInsets.only(top: 10),
+                     child: InkWell(onTap : () async{
+                       await Navigator.push(
+                         context,
+                         MaterialPageRoute(
+                             builder: (context) => const FeedReportsScreen()),
+                       );
+                       getAllData();
+                     },child: Column(
+                       children: [
+
+                         Row(
+                           /* mainAxisAlignment: MainAxisAlignment.center,
+                       crossAxisAlignment: CrossAxisAlignment.center,*/
+                           children: [
+                             Image.asset("assets/feed.png", color: Colors.white, width: 40, height: 40,),
+                             Text(" "+"Feeding Report".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),),
+                           ],
+                         ),
+
+                         SizedBox(height: 5,),
+                         Text('$total_feed_consumption' + 'KG'.tr(),style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),),
+                         Text("TOTAL_CONSUMPTION".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white70),),
+                         SizedBox(height: 5,),
+                         Container(
+                           height: feedingSummary.length==0?10:feedingSummary.length*45,
+                           width: widthScreen,
+                           child: ListView.builder(
+                               itemCount: feedingSummary.length,
+                               scrollDirection: Axis.vertical,
+                               physics: NeverScrollableScrollPhysics(),
+                               itemBuilder: (BuildContext context, int index) {
+                                 return Container(
+                                   padding: EdgeInsets.all(5),
+                                   margin: EdgeInsets.only(top: 5),
+                                   decoration: BoxDecoration(
+                                       borderRadius: BorderRadius.all(Radius.circular(6)),
+                                         color: Colors.white12,
+                                       border: Border.all(color: Colors.white12,width: 1.0)
+                                   ),
+                                   child: Row(
+                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                     children: [
+                                       Text(feedingSummary.elementAt(index).feedName.tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.white),),
+                                       Text(Utils.roundTo2Decimal(feedingSummary.elementAt(index).totalQuantity).toString() +"KG".tr(),style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: Colors.white),),
+
+                                     ],),
+                                 );
+
+                               }),
+                         ),
+                       ],
+                     ))),
+                 Container(
+                     decoration: BoxDecoration(
+                         borderRadius: BorderRadius.all(Radius.circular(6)),
+                         //  color: Colors.white10.withAlpha(30),
+                         color: Utils.getThemeColorBlue(),
+                         border: Border.all(color: Colors.white38,width: 1.0)
+                     ),
+                     padding: EdgeInsets.all(10),
+                     margin: EdgeInsets.only(top: 10),
+                     child: InkWell(onTap : () async{
+                       await Navigator.push(
+                         context,
+                         MaterialPageRoute(
+                             builder: (context) => const HealthReportScreen()),
+                       );
+                       getAllData();
+                     },child: Column(
+                       children: [
+                         Row(
+                           /* mainAxisAlignment: MainAxisAlignment.center,
+                       crossAxisAlignment: CrossAxisAlignment.center,*/
+                           children: [
+                             Image.asset("assets/health.png", color: Colors.white, width: 40, height: 40,),
+                             Text(" "+"HEALTH_SUMMARY".tr(),style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),),
+                           ],
+                         ),
+
+                         /*SizedBox(height: 5,),
+                         Text('$total_health_count',style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),),
+                         Text("TOTAL".tr(),style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white70),),
+                         SizedBox(height: 5,),*/
+                         Row(
+                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                           children: [
+                             Expanded(child: getCustomDataBox(Colors.white12, "VACCINATIONS".tr(), '$vac_count', '','')),
+                             Expanded(child: getCustomDataBox(Colors.white12, "MEDICATIONS".tr(), '$med_count', '','')),
+                             Expanded(child: getCustomDataBox(Colors.white12, "TOTAL".tr(), '$total_health_count', '','')),
+
+                           ],
+                         ),
+                       ],
+                     ))),
+                ],
+             ),
+           ),
 
 
 
-             /* Container( margin: EdgeInsets.all(20),
-                padding: EdgeInsets.all(10),
-                child: Column(
-                  children: [
-                    Text(
-                      "View Reports",
-                      textAlign: TextAlign.start,
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(width: widthScreen, height: 40,),
-                    InkWell(
-                        child: Container(
-                          width: widthScreen - (widthScreen / 5),
-                          height: 60,
-                          padding: const EdgeInsets.all(10),
-                          margin: const EdgeInsets.only(left: 10, right: 10),
-                          decoration: const BoxDecoration(
-                              color: Colors.blueGrey,
-                              borderRadius:
-                              BorderRadius.all(Radius.circular(10))),
-                          child: Container(
-                            width: 40,height: 40,
-                            margin: EdgeInsets.only(left: 10),
-                            child: Row(
-                              children: [
-                                Image( image: AssetImage(
-                                    'assets/add_reduce.png'),
-                                  fit: BoxFit.fill,
-                                  color: Colors.white,
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    "Stock Report",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.bold
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        onTap: () {
-                          //STOCK REPORT
-                        }),
+          /* Container( margin: EdgeInsets.all(20),
+             padding: EdgeInsets.all(10),
+             child: Column(
+               children: [
+                 Text(
+                   "View Reports",
+                   textAlign: TextAlign.start,
+                   style: TextStyle(
+                       color: Colors.black,
+                       fontSize: 22,
+                       fontWeight: FontWeight.bold),
+                 ),
+                 SizedBox(width: widthScreen, height: 40,),
+                 InkWell(
+                     child: Container(
+                       width: widthScreen - (widthScreen / 5),
+                       height: 60,
+                       padding: const EdgeInsets.all(10),
+                       margin: const EdgeInsets.only(left: 10, right: 10),
+                       decoration: const BoxDecoration(
+                           color: Colors.blueGrey,
+                           borderRadius:
+                           BorderRadius.all(Radius.circular(10))),
+                       child: Container(
+                         width: 40,height: 40,
+                         margin: EdgeInsets.only(left: 10),
+                         child: Row(
+                           children: [
+                             Image( image: AssetImage(
+                                 'assets/add_reduce.png'),
+                               fit: BoxFit.fill,
+                               color: Colors.white,
+                             ),
+                             Expanded(
+                               child: Text(
+                                 "Stock Report",
+                                 textAlign: TextAlign.center,
+                                 style: TextStyle(
+                                     fontSize: 16,
+                                     color: Colors.white,
+                                     fontFamily: 'Roboto',
+                                     fontWeight: FontWeight.bold
+                                 ),
+                               ),
+                             ),
+                           ],
+                         ),
+                       ),
+                     ),
+                     onTap: () {
+                       //STOCK REPORT
+                     }),
 
-                    SizedBox(width: widthScreen, height: 10,),
-                    InkWell(
-                        child: Container(
-                          width: widthScreen - (widthScreen / 5),
-                          height: 60,
-                          padding: const EdgeInsets.all(10),
-                          margin: const EdgeInsets.only(left: 10, right: 10),
-                          decoration: const BoxDecoration(
-                              color: Colors.blueGrey,
-                              borderRadius:
-                              BorderRadius.all(Radius.circular(10))),
-                          child: Container(
-                            width: 40,height: 40,
-                            margin: EdgeInsets.only(left: 10),
-                            child: Row(
-                              children: [
-                                Image(image: AssetImage(
-                                    'assets/egg.png'),
-                                  fit: BoxFit.fill,
-                                  color: Colors.white,
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    "Egg Collection Report",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.bold
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        onTap: () {
+                 SizedBox(width: widthScreen, height: 10,),
+                 InkWell(
+                     child: Container(
+                       width: widthScreen - (widthScreen / 5),
+                       height: 60,
+                       padding: const EdgeInsets.all(10),
+                       margin: const EdgeInsets.only(left: 10, right: 10),
+                       decoration: const BoxDecoration(
+                           color: Colors.blueGrey,
+                           borderRadius:
+                           BorderRadius.all(Radius.circular(10))),
+                       child: Container(
+                         width: 40,height: 40,
+                         margin: EdgeInsets.only(left: 10),
+                         child: Row(
+                           children: [
+                             Image(image: AssetImage(
+                                 'assets/egg.png'),
+                               fit: BoxFit.fill,
+                               color: Colors.white,
+                             ),
+                             Expanded(
+                               child: Text(
+                                 "Egg Collection Report",
+                                 textAlign: TextAlign.center,
+                                 style: TextStyle(
+                                     fontSize: 16,
+                                     color: Colors.white,
+                                     fontFamily: 'Roboto',
+                                     fontWeight: FontWeight.bold
+                                 ),
+                               ),
+                             ),
+                           ],
+                         ),
+                       ),
+                     ),
+                     onTap: () {
 
-                        }),
+                     }),
 
-                    SizedBox(width: widthScreen, height: 10,),
-                    InkWell(
-                        child: Container(
-                          width: widthScreen - (widthScreen / 5),
-                          height: 60,
-                          padding: const EdgeInsets.all(10),
-                          margin: const EdgeInsets.only(left: 10, right: 10),
-                          decoration: const BoxDecoration(
-                              color: Colors.blueGrey,
-                              borderRadius:
-                              BorderRadius.all(Radius.circular(10))),
-                          child: Container(
-                            width: 40,height: 40,
-                            margin: EdgeInsets.only(left: 10),
-                            child: Row(
-                              children: [
-                                Image(image: AssetImage(
-                                    'assets/feed.png'),
-                                  fit: BoxFit.fill,
-                                  color: Colors.white,
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    "Feeding Reports",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.bold
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        onTap: () {
+                 SizedBox(width: widthScreen, height: 10,),
+                 InkWell(
+                     child: Container(
+                       width: widthScreen - (widthScreen / 5),
+                       height: 60,
+                       padding: const EdgeInsets.all(10),
+                       margin: const EdgeInsets.only(left: 10, right: 10),
+                       decoration: const BoxDecoration(
+                           color: Colors.blueGrey,
+                           borderRadius:
+                           BorderRadius.all(Radius.circular(10))),
+                       child: Container(
+                         width: 40,height: 40,
+                         margin: EdgeInsets.only(left: 10),
+                         child: Row(
+                           children: [
+                             Image(image: AssetImage(
+                                 'assets/feed.png'),
+                               fit: BoxFit.fill,
+                               color: Colors.white,
+                             ),
+                             Expanded(
+                               child: Text(
+                                 "Feeding Reports",
+                                 textAlign: TextAlign.center,
+                                 style: TextStyle(
+                                     fontSize: 16,
+                                     color: Colors.white,
+                                     fontFamily: 'Roboto',
+                                     fontWeight: FontWeight.bold
+                                 ),
+                               ),
+                             ),
+                           ],
+                         ),
+                       ),
+                     ),
+                     onTap: () {
 
-                        }),
+                     }),
 
-                    SizedBox(width: widthScreen, height: 10,),
-                    InkWell(
-                        child: Container(
-                          width: widthScreen - (widthScreen / 5),
-                          height: 60,
-                          padding: const EdgeInsets.all(10),
-                          margin: const EdgeInsets.only(left: 10, right: 10),
-                          decoration: const BoxDecoration(
-                              color: Colors.blueGrey,
-                              borderRadius:
-                              BorderRadius.all(Radius.circular(10))),
-                          child: Container(
-                            width: 40,height: 40,
-                            margin: EdgeInsets.only(left: 10),
-                            child: Row(
-                              children: [
-                                Image(image: AssetImage(
-                                    'assets/health.png'),
-                                  fit: BoxFit.fill,
-                                  color: Colors.white,
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    "Health Reports",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.bold
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        onTap: () {
+                 SizedBox(width: widthScreen, height: 10,),
+                 InkWell(
+                     child: Container(
+                       width: widthScreen - (widthScreen / 5),
+                       height: 60,
+                       padding: const EdgeInsets.all(10),
+                       margin: const EdgeInsets.only(left: 10, right: 10),
+                       decoration: const BoxDecoration(
+                           color: Colors.blueGrey,
+                           borderRadius:
+                           BorderRadius.all(Radius.circular(10))),
+                       child: Container(
+                         width: 40,height: 40,
+                         margin: EdgeInsets.only(left: 10),
+                         child: Row(
+                           children: [
+                             Image(image: AssetImage(
+                                 'assets/health.png'),
+                               fit: BoxFit.fill,
+                               color: Colors.white,
+                             ),
+                             Expanded(
+                               child: Text(
+                                 "Health Reports",
+                                 textAlign: TextAlign.center,
+                                 style: TextStyle(
+                                     fontSize: 16,
+                                     color: Colors.white,
+                                     fontFamily: 'Roboto',
+                                     fontWeight: FontWeight.bold
+                                 ),
+                               ),
+                             ),
+                           ],
+                         ),
+                       ),
+                     ),
+                     onTap: () {
 
-                        }),
+                     }),
 
-                    SizedBox(width: widthScreen, height: 10,),
-                    InkWell(
-                        child: Container(
-                          width: widthScreen - (widthScreen / 5),
-                          height: 60,
-                          padding: const EdgeInsets.all(10),
-                          margin: const EdgeInsets.only(left: 10, right: 10),
-                          decoration: const BoxDecoration(
-                              color: Colors.blueGrey,
-                              borderRadius:
-                              BorderRadius.all(Radius.circular(10))),
-                          child: Container(
-                            width: 40,height: 40,
-                            margin: EdgeInsets.only(left: 10),
-                            child: Row(
-                              children: [
-                                Image(image: AssetImage(
-                                    'assets/income.png'),
-                                  fit: BoxFit.fill,
-                                  color: Colors.white,
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    "Financial Reports",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.bold
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        onTap: () {
+                 SizedBox(width: widthScreen, height: 10,),
+                 InkWell(
+                     child: Container(
+                       width: widthScreen - (widthScreen / 5),
+                       height: 60,
+                       padding: const EdgeInsets.all(10),
+                       margin: const EdgeInsets.only(left: 10, right: 10),
+                       decoration: const BoxDecoration(
+                           color: Colors.blueGrey,
+                           borderRadius:
+                           BorderRadius.all(Radius.circular(10))),
+                       child: Container(
+                         width: 40,height: 40,
+                         margin: EdgeInsets.only(left: 10),
+                         child: Row(
+                           children: [
+                             Image(image: AssetImage(
+                                 'assets/income.png'),
+                               fit: BoxFit.fill,
+                               color: Colors.white,
+                             ),
+                             Expanded(
+                               child: Text(
+                                 "Financial Reports",
+                                 textAlign: TextAlign.center,
+                                 style: TextStyle(
+                                     fontSize: 16,
+                                     color: Colors.white,
+                                     fontFamily: 'Roboto',
+                                     fontWeight: FontWeight.bold
+                                 ),
+                               ),
+                             ),
+                           ],
+                         ),
+                       ),
+                     ),
+                     onTap: () {
 
-                        }),
-                  ],
-                ),
-              ),*/
-            ]
-      ),),),),),);
+                     }),
+               ],
+             ),
+           ),*/
+         ]
+            ),),),),);
   }
 
 

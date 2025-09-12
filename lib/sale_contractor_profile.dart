@@ -149,123 +149,135 @@ class _ContractorProfileScreenState extends State<ContractorProfileScreen> with 
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height -
         (safeAreaHeight + safeAreaHeightBottom);
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('${contractor.name}'),
-          backgroundColor: Utils.getThemeColorBlue(),
-          foregroundColor: Colors.white,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          contractor.name,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.white,
+          ),
         ),
-        body: isLoading
-            ? Center(child: CircularProgressIndicator())
-            : Padding(
-          padding: const EdgeInsets.all(16),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Contractor Info Card (same as before)
-                Card(
-                  elevation: 5,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        GestureDetector(
-                          onTapDown: (details) {
-                            showMemberMenu(details.globalPosition);
-                          },
-                          child: Align(
-                            alignment: Alignment.topRight,
-                            child: Image.asset("assets/options.png", width: 30, height: 20, color: Colors.black),
-                          ),
-                        ),
-                        Text(contractor.name,
-                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                        SizedBox(height: 6),
-                        Text('Type'.tr()+': ${contractor.type}', style: TextStyle(color: Colors.grey[700])),
-                        SizedBox(height: 5),
-                        Text('${contractor.address}', style: TextStyle(color: Colors.grey[700])),
-                        SizedBox(height: 10),
-                        _infoRow(Icons.phone, contractor.phone ?? 'Not Available'.tr()),
-                        _infoRow(Icons.email, contractor.email ?? 'Not Available'.tr()),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20),
-      
-                // Balance Summary
-                Text("Balance Summary".tr(),
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-                SizedBox(height: 12),
-                Card(
-                  elevation: 5,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _balanceRow('Sale Amount', formatter.format(saleAmount), Colors.teal),
-                        SizedBox(height: 12),
-                        _balanceRow('Cleared Amount', formatter.format(clearedAmount), Colors.green),
-                        SizedBox(height: 12),
-                        _balanceRow('Pending Amount', formatter.format(pendingAmount), Colors.orange),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20),
-                // Transaction History
-                Text("Transaction History".tr(),
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-                SizedBox(height: 10),
-      
-                transactions.isEmpty
-                    ? Center(child: Text("No transactions found".tr()))
-                    : ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: transactions.length,
-                  itemBuilder: (context, index) {
-                    final tx = transactions[index];
-                    return Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 3,
-                      margin: EdgeInsets.symmetric(vertical: 8),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Colors.blueAccent,
-                          child: Icon(Icons.receipt, color: Colors.white),
-                        ),
-                        title: Text(Utils.currency+'${tx.amount}', style: TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 4),
-                            Text(Utils.getFormattedDate(tx.date),
-                                style: TextStyle(fontSize: 13)),
-                            SizedBox(height: 2),
-                            Text('Items'.tr()+': ${tx.how_many} ${tx.sale_item.tr()}',
-                                style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-                          ],
-                        ),
-                        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 18),
-                        onTap: () {
-                          // Detail page
+        centerTitle: true,
+        backgroundColor: Colors.blue, // Customize the color
+        elevation: 8, // Gives it a more elevated appearance
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context); // Navigates back
+          },
+        ),
+      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
+        padding: const EdgeInsets.all(16),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Contractor Info Card (same as before)
+              Card(
+                elevation: 5,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      GestureDetector(
+                        onTapDown: (details) {
+                          showMemberMenu(details.globalPosition);
                         },
+                        child: Align(
+                          alignment: Alignment.topRight,
+                          child: Image.asset("assets/options.png", width: 30, height: 20, color: Colors.black),
+                        ),
                       ),
-                    );
-                  },
+                      Text(contractor.name,
+                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                      SizedBox(height: 6),
+                      Text('Type'.tr()+': ${contractor.type}', style: TextStyle(color: Colors.grey[700])),
+                      SizedBox(height: 5),
+                      Text('${contractor.address}', style: TextStyle(color: Colors.grey[700])),
+                      SizedBox(height: 10),
+                      _infoRow(Icons.phone, contractor.phone ?? 'Not Available'.tr()),
+                      _infoRow(Icons.email, contractor.email ?? 'Not Available'.tr()),
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          )
-          ,
-        ),
+              ),
+              SizedBox(height: 20),
+
+              // Balance Summary
+              Text("Balance Summary".tr(),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+              SizedBox(height: 12),
+              Card(
+                elevation: 5,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _balanceRow('Sale Amount', formatter.format(saleAmount), Colors.teal),
+                      SizedBox(height: 12),
+                      _balanceRow('Cleared Amount', formatter.format(clearedAmount), Colors.green),
+                      SizedBox(height: 12),
+                      _balanceRow('Pending Amount', formatter.format(pendingAmount), Colors.orange),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              // Transaction History
+              Text("Transaction History".tr(),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+              SizedBox(height: 10),
+
+              transactions.isEmpty
+                  ? Center(child: Text("No transactions found".tr()))
+                  : ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: transactions.length,
+                itemBuilder: (context, index) {
+                  final tx = transactions[index];
+                  return Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 3,
+                    margin: EdgeInsets.symmetric(vertical: 8),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.blueAccent,
+                        child: Icon(Icons.receipt, color: Colors.white),
+                      ),
+                      title: Text(Utils.currency+'${tx.amount}', style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 4),
+                          Text(Utils.getFormattedDate(tx.date),
+                              style: TextStyle(fontSize: 13)),
+                          SizedBox(height: 2),
+                          Text('Items'.tr()+': ${tx.how_many} ${tx.sale_item.tr()}',
+                              style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                        ],
+                      ),
+                      trailing: Icon(Icons.arrow_forward_ios_rounded, size: 18),
+                      onTap: () {
+                        // Detail page
+                      },
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        )
+        ,
       ),
     );
   }

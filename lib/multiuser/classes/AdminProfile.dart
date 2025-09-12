@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/multiuser/classes/AuthGate.dart';
 import 'package:poultary/multiuser/classes/farm_welcome_screen.dart';
+import 'package:poultary/multiuser/classes/sync_status_screen.dart';
 import 'package:poultary/multiuser/model/farm_plan.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/multiuser/utils/SyncManager.dart';
@@ -159,7 +160,7 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
                         backgroundImage: selectedImage != null
                             ? FileImage(File(selectedImage!.path))
                             : (imageUrl != null && imageUrl!.isNotEmpty)
-                            ? NetworkImage(imageUrl!) as ImageProvider
+                            ? NetworkImage(Utils.ProxyAPI+imageUrl!) as ImageProvider
                             : null, // No image when we want to show the icon
                         child: (selectedImage == null && (imageUrl == null || imageUrl!.isEmpty))
                             ? Icon(Icons.person, size: 50, color: Colors.blue)
@@ -435,7 +436,7 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
                                 radius: 35,
                                 backgroundColor: Colors.blue.shade100,
                                 backgroundImage: (adminUser!.image != null && adminUser!.image!.isNotEmpty)
-                                    ? NetworkImage(adminUser!.image!)
+                                    ? NetworkImage(Utils.ProxyAPI+adminUser!.image!)
                                     : null,
                                 child: (adminUser!.image == null || adminUser!.image!.isEmpty)
                                     ? Icon(Icons.person, size: 35, color: Colors.blue)
@@ -552,9 +553,10 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
                     context,
                     MaterialPageRoute(builder: (context) => FarmWelcomeScreen(multiUser: adminUser!, isStart: false,)),
                   );
+
+                  init();
                 },
               ),
-
 
               const SizedBox(height: 10),
               Visibility(
@@ -659,6 +661,17 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
                   }
                 },
               ),
+              /*_AdminActionCard(
+                icon: Icons.sync,
+                label: 'view_sync_info'.tr(),
+                color: Colors.yellow,
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SyncScreen()),
+                  );
+                },
+              ),*/
               _AdminActionCard(
                 icon: Icons.monetization_on,
                 label: 'premium_plan'.tr(),
@@ -727,7 +740,7 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancel'.tr()), // "Cancel"
+            child: Text('CANCEL'.tr()), // "Cancel"
           ),
           ElevatedButton(
             onPressed: () {

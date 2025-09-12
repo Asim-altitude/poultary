@@ -68,13 +68,13 @@ class _FilterSetupScreen extends State<FilterSetupScreen> with SingleTickerProvi
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
-    return SafeArea(child: Scaffold(
+    return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight),
         child: ClipRRect(
           borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(20.0), // Round bottom-left corner
-            bottomRight: Radius.circular(20.0), // Round bottom-right corner
+            bottomLeft: Radius.circular(10.0), // Round bottom-left corner
+            bottomRight: Radius.circular(10.0), // Round bottom-right corner
           ),
           child: AppBar(
             title: Text(
@@ -86,7 +86,7 @@ class _FilterSetupScreen extends State<FilterSetupScreen> with SingleTickerProvi
               ),
             ),
             centerTitle: true,
-            backgroundColor: Utils.getThemeColorBlue(), // Customize the color
+            backgroundColor: Colors.blue, // Customize the color
             elevation: 8, // Gives it a more elevated appearance
             leading: IconButton(
               icon: Icon(Icons.arrow_back, color: Colors.white),
@@ -98,7 +98,7 @@ class _FilterSetupScreen extends State<FilterSetupScreen> with SingleTickerProvi
         ),
       ),
       body:SafeArea(
-        top: false,
+
           child:Container(
           width: widthScreen,
           height: heightScreen,
@@ -270,7 +270,7 @@ class _FilterSetupScreen extends State<FilterSetupScreen> with SingleTickerProvi
                 ],
               ),),
        ]
-      ),),),),),);
+      ),),),),);
   }
 
   List<String> filterList = ['TODAY'.tr(),'YESTERDAY'.tr(),'THIS_MONTH'.tr(), 'LAST_MONTH'.tr(),'LAST3_MONTHS'.tr(), 'LAST6_MONTHS'.tr(),'THIS_YEAR'.tr(),

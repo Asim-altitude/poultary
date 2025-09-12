@@ -28,7 +28,24 @@ class _LoginFormState extends State<LoginForm> {
   final farmIdController = TextEditingController(); // for member only
 
   bool isLoading = false;
-  String loginMode = 'admin'; // 'admin' or 'member'
+  String loginMode = 'admin';
+  String farmID = "";// 'admin' or 'member'
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    init();
+  }
+
+  Future<void> init() async {
+    farmID = (await SessionManager.getValue("farmID"))!;
+    farmIdController.text = farmID;
+    setState(() {
+
+    });
+  }
+
 
   void handleLogin() async {
     final email = emailController.text.trim();
@@ -179,6 +196,8 @@ class _LoginFormState extends State<LoginForm> {
           }
 
         } else {
+          print("User not found with provided email and farm ID.");
+
           showDialog(
             context: context,
             builder: (_) => AlertDialog(
@@ -188,6 +207,7 @@ class _LoginFormState extends State<LoginForm> {
           );
         }
       } catch (e) {
+        print("LOGIN FAILED ${e.toString()}");
         showDialog(
           context: context,
           builder: (_) => AlertDialog(
@@ -281,7 +301,7 @@ class _LoginFormState extends State<LoginForm> {
               child: Row(
                 children: [
                   Spacer(),
-                  Text('Forgot Password?', style: TextStyle(color: Colors.blue, fontSize: 14),)
+                  Text('Forgot Password?'.tr(), style: TextStyle(color: Colors.blue, fontSize: 14),)
                 ],
               ),
             ),
@@ -379,5 +399,6 @@ class _LoginFormState extends State<LoginForm> {
       },
     );
   }
+
 
 }

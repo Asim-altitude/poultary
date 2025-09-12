@@ -70,16 +70,16 @@ class _MedicineStockDetailScreen extends State<MedicineStockDetailScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(title: Text("Medicine Stock Details".tr())),
-        body: Padding(
+    return Scaffold(
+      appBar: AppBar(title: Text("Medicine Stock Details".tr())),
+      body: SafeArea(
+        child: Padding(
           padding: const EdgeInsets.all(5.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Utils.showBannerAd(_bannerAd, _isBannerAdReady),
-      
+            
               _buildStockItem(widget.stock),
               SizedBox(height: 16),
               Container(
@@ -90,7 +90,7 @@ class _MedicineStockDetailScreen extends State<MedicineStockDetailScreen> {
                 ),
               ),
               SizedBox(height: 8),
-      
+            
               // Use Expanded correctly here
               Expanded(
                 child: ListView.builder(
@@ -112,15 +112,15 @@ class _MedicineStockDetailScreen extends State<MedicineStockDetailScreen> {
                         trailing: IconButton(
                           icon: Icon(Icons.delete, color: Colors.red),
                           onPressed: () async {
-
-
+            
+            
                             if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_health")){
                               Utils.showMissingPermissionDialog(context, "delete_health");
                               return;
                             }
-
-
-
+            
+            
+            
                             final confirm = await showDialog(
                               context: context,
                               builder: (context) => AlertDialog(
@@ -132,32 +132,35 @@ class _MedicineStockDetailScreen extends State<MedicineStockDetailScreen> {
                                     onPressed: () async {
                                       entry.sync_status = SyncStatus.DELETED;
                                       MedicineStockFB medicineStockFB = MedicineStockFB(stock: entry);
-      
+            
                                       StockExpense? stockExpense = await DatabaseHelper.getByStockItemId(entry.id!);
+            
                                       if (stockExpense != null) {
                                         TransactionItem? transaction = await DatabaseHelper.getSingleTransaction(stockExpense.transactionId.toString());
                                         medicineStockFB.transaction = transaction;
                                         medicineStockFB.transaction!.sync_status = SyncStatus.DELETED;
-      
+            
                                         await DatabaseHelper.deleteByStockItemId(entry.id!);
                                         await DatabaseHelper.deleteItem("Transactions", stockExpense.transactionId);
                                       }
+            
                                       await deleteMedicineStock(entry.id!);
                                       Utils.showToast("SUCCESSFUL".tr());
-      
+            
                                       if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_medicine")) {
                                         medicineStockFB.sync_id = entry.sync_id;
                                         medicineStockFB.sync_status = SyncStatus.DELETED;
                                         medicineStockFB.last_modified = Utils.getTimeStamp();
                                         medicineStockFB.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
                                         medicineStockFB.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
-      
+            
                                         await FireBaseUtils.updateMedicineStock(medicineStockFB);
                                       }
-      
+            
                                       setState(() {
                                         widget.stockHistory.remove(entry);
                                       });
+            
                                       Navigator.of(context).pop(true);
                                     },
                                     child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
@@ -165,7 +168,7 @@ class _MedicineStockDetailScreen extends State<MedicineStockDetailScreen> {
                                 ],
                               ),
                             );
-      
+            
                             if (confirm ?? false) {
                               // Already deleted in dialog
                             }

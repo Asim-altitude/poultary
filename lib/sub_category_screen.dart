@@ -86,8 +86,28 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
 
-    return SafeArea(child: Scaffold(
-    bottomNavigationBar: BottomAppBar(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          applied_filter_name.tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blue, // Customize the color
+        elevation: 8, // Gives it a more elevated appearance
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context); // Navigates back
+          },
+        ),
+      ),
+
+      bottomNavigationBar: BottomAppBar(
     color: Colors.transparent,
     child: Container(
     height: 60,
@@ -130,7 +150,6 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
     elevation: 0,
     ),
       body:SafeArea(
-        top: false,
           child:Container(
           width: widthScreen,
           height: heightScreen ,
@@ -143,45 +162,6 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
             children:  [
               Utils.getDistanceBar(),
 
-              ClipRRect(
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
-                child: Container(
-                  decoration: BoxDecoration(
-                     boxShadow: [
-                      BoxShadow(
-                        color: Utils.getThemeColorBlue(), //(x,y)
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        alignment: Alignment.center,
-                        width: 50,
-                        height: 50,
-                        child: InkWell(
-                          child: Icon(Icons.arrow_back,
-                              color: Colors.white, size: 30),
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ),
-                      Container(
-                          margin: EdgeInsets.only(left: 10),
-                          child: Text(
-                            applied_filter_name.tr(),
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          )),
-
-                    ],
-                  ),
-                ),
-              ),
 
               SizedBox(height: 10,),
               Container(
@@ -227,7 +207,7 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
               )
 
                   ]
-      ),),),),),);
+      ),),),),);
   }
 
   showAlertDialog(BuildContext context, int index) {

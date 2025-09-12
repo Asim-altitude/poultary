@@ -343,8 +343,8 @@ class _SuggestedNotificationScreenState extends State<SuggestedNotificationScree
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(description),
+        title: Text(title.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(description.tr()),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -354,7 +354,7 @@ class _SuggestedNotificationScreenState extends State<SuggestedNotificationScree
                 color: Colors.blue.shade100,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Text(trailingText, style: const TextStyle(fontSize: 12)),
+              child: Text(trailingText.tr(), style: const TextStyle(fontSize: 12)),
             ),
             IconButton(
               icon: const Icon(Icons.close, color: Colors.redAccent),
@@ -439,157 +439,155 @@ class _SuggestedNotificationScreenState extends State<SuggestedNotificationScree
   Widget build(BuildContext context) {
     return
       
-      SafeArea(
-        child: Scaffold(
-        appBar: AppBar(
-          title:  Text('Flock Notifications'.tr()),
-          backgroundColor: Utils.getThemeColorBlue(),
-          foregroundColor: Colors.white,
-        ),
-        bottomNavigationBar: Container(
-        color: Colors.white,
-        padding: EdgeInsets.all(10),
-        child: Row(
+      Scaffold(
+      appBar: AppBar(
+        title:  Text('Flock Notifications'.tr()),
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+      ),
+      bottomNavigationBar: Container(
+      color: Colors.white,
+      padding: EdgeInsets.all(10),
+      child: Row(
+        children: [
+          Expanded(
+            child: InkWell(
+              onTap: () => {
+                _showAddCustomNotificationDialog()
+              },
+              borderRadius: BorderRadius.circular(10),
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 300),
+                height: 55,
+                margin: EdgeInsets.symmetric(horizontal: 6),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Utils.getThemeColorBlue(), Colors.blue],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green.withOpacity(0.4),
+                      blurRadius: 6,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.notification_add_outlined, color: Colors.white, size: 28),
+                    SizedBox(width: 6),
+                    Text(
+                      'Custom'.tr(),
+                      style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: InkWell(
+              onTap: () => {
+                // SCHEDULE DATABASE
+                 showConfirmNotificationDialog(context: context, title: "Flock Notifications", description: "You can disable them later in flock details screen", onConfirm: () {
+                  //SAVED
+                  saveFinalNotifications();
+                })
+              },
+              borderRadius: BorderRadius.circular(10),
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 300),
+                height: 55,
+                margin: EdgeInsets.symmetric(horizontal: 6),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.green.shade500, Colors.blue],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green.withOpacity(0.4),
+                      blurRadius: 6,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.schedule, color: Colors.white, size: 24),
+                    SizedBox(width: 5,),
+                    Text(
+                      'Schedule'.tr(),
+                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+          ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ListView(
           children: [
-            Expanded(
-              child: InkWell(
-                onTap: () => {
-                  _showAddCustomNotificationDialog()
-                },
-                borderRadius: BorderRadius.circular(10),
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 300),
-                  height: 55,
-                  margin: EdgeInsets.symmetric(horizontal: 6),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Utils.getThemeColorBlue(), Colors.blue],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.4),
-                        blurRadius: 6,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.notification_add_outlined, color: Colors.white, size: 28),
-                      SizedBox(width: 6),
-                      Text(
-                        'Custom'.tr(),
-                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
-                ),
+            if (suggestions.isNotEmpty) ...[
+              Row(
+                children:  [
+                  Icon(Icons.lightbulb_outline, color: Colors.amber),
+                  SizedBox(width: 8),
+                  Text('Suggested Notifications'.tr(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ],
               ),
-            ),
-            Expanded(
-              child: InkWell(
-                onTap: () => {
-                  // SCHEDULE DATABASE
-                   showConfirmNotificationDialog(context: context, title: "Flock Notifications", description: "You can disable them later in flock details screen", onConfirm: () {
-                    //SAVED
-                    saveFinalNotifications();
-                  })
-                },
-                borderRadius: BorderRadius.circular(10),
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 300),
-                  height: 55,
-                  margin: EdgeInsets.symmetric(horizontal: 6),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.green.shade500, Colors.blue],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.4),
-                        blurRadius: 6,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.schedule, color: Colors.white, size: 24),
-                      SizedBox(width: 5,),
-                      Text(
-                        'Schedule'.tr(),
-                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-        
-                    ],
-                  ),
-                ),
+              const SizedBox(height: 8),
+              ...List.generate(suggestions.length, (index) {
+                final s = suggestions[index];
+                return _buildNotificationCard(
+                  title: s.title,
+                  description: s.description,
+                  trailingText: 'day'.tr()+' ${s.triggerDay}',
+                  onDelete: () {
+                    setState(() => suggestions.removeAt(index));
+                  },
+                );
+              }),
+              const SizedBox(height: 24),
+            ],
+            if (customNotifications.isNotEmpty) ...[
+              Row(
+                children:  [
+                  Icon(Icons.notifications_active, color: Utils.getThemeColorBlue()),
+                  SizedBox(width: 8),
+                  Text('Custom Notifications'.tr(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ],
               ),
-            ),
+              const SizedBox(height: 8),
+              ...List.generate(customNotifications.length, (index) {
+                final c = customNotifications[index];
+                return _buildCustomNotificationCard(
+                  title: c.title,
+                  description: c.description,
+                  onDelete: () {
+                    setState(() => customNotifications.removeAt(index));
+                  }, scheduledAt: c.scheduledAt, recurrence: c.recurrence,
+                );
+              }),
+              const SizedBox(height: 24),
+            ],
+
           ],
         ),
-            ),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: ListView(
-            children: [
-              if (suggestions.isNotEmpty) ...[
-                Row(
-                  children:  [
-                    Icon(Icons.lightbulb_outline, color: Colors.amber),
-                    SizedBox(width: 8),
-                    Text('Suggested Notifications'.tr(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ...List.generate(suggestions.length, (index) {
-                  final s = suggestions[index];
-                  return _buildNotificationCard(
-                    title: s.title,
-                    description: s.description,
-                    trailingText: 'day'.tr()+' ${s.triggerDay}',
-                    onDelete: () {
-                      setState(() => suggestions.removeAt(index));
-                    },
-                  );
-                }),
-                const SizedBox(height: 24),
-              ],
-              if (customNotifications.isNotEmpty) ...[
-                Row(
-                  children:  [
-                    Icon(Icons.notifications_active, color: Utils.getThemeColorBlue()),
-                    SizedBox(width: 8),
-                    Text('Custom Notifications'.tr(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ...List.generate(customNotifications.length, (index) {
-                  final c = customNotifications[index];
-                  return _buildCustomNotificationCard(
-                    title: c.title,
-                    description: c.description,
-                    onDelete: () {
-                      setState(() => customNotifications.removeAt(index));
-                    }, scheduledAt: c.scheduledAt, recurrence: c.recurrence,
-                  );
-                }),
-                const SizedBox(height: 24),
-              ],
-        
-            ],
-          ),
-        ),
-            ),
-      );
+      ),
+          );
   }
 
 

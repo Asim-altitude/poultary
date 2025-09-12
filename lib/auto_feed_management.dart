@@ -169,309 +169,307 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          iconTheme: IconThemeData(color: Colors.white),
-          backgroundColor: Utils.getThemeColorBlue(),
-          title: Text(
-            'Automatic Feed Management'.tr(),
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
+        backgroundColor: Colors.blue,
+        title: Text(
+          'Automatic Feed Management'.tr(),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
         ),
-        body: Column(
-          children: [
-            // Toggle Switch
-            SwitchListTile(
-              title: Text(
-                'Turn On/Off'.tr(),
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
-              ),
-              value: isAutoFeedEnabled,
-              activeColor: Utils.getThemeColorBlue(),
-              onChanged: (value) async {
-                setState(() {
-                  isAutoFeedEnabled = value;
-                });
-                _saveFlockSettings();
-      
-                /*if (isAutoFeedEnabled) {
-                  await requestNotificationPermissions();
-                  await scheduleDailyNotification();
-                } else {
-                  await flutterLocalNotificationsPlugin.cancel(1);
-                  // Cancels auto-feed notification with ID 1
-                }*/
-              },
+      ),
+      body: Column(
+        children: [
+          // Toggle Switch
+          SwitchListTile(
+            title: Text(
+              'Turn On/Off'.tr(),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
             ),
-      
-            // Show Starting Date Picker if isAutoFeedEnabled is true
-            if (isAutoFeedEnabled)
-              Column(
-                children: [
-                  Text(
-                    "Automatic Daily Feed Records will be generated.".tr(),
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16.0, right: 16.0,top: 8),
-                    child: Row(
-                      children: [
-                        Text(
-                          "Last Sync:".tr(),
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                        ),
-                        SizedBox(width: 16),
-                        Expanded(
-                          child: InkWell(
-                            onTap: () async {
-                              DateTime? pickedDate = await showDatePicker(
-                                context: context,
-                                initialDate: _startingDate ?? DateTime.now(),
-                                firstDate: DateTime(2000),
-                                lastDate: DateTime(2100),
-                              );
-                              if (pickedDate != null) {
-                                setState(() {
-                                  _startingDate = pickedDate;
-                                });
-                                SharedPreferences prefs = await SharedPreferences.getInstance();
-                                await prefs.setString('lastSyncDate', pickedDate.toIso8601String());
-      
-                              }
-                            },
-                            child: Container(
-                              height: 48,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey.shade300),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              alignment: Alignment.centerLeft,
-                              padding: EdgeInsets.symmetric(horizontal: 12),
-                              child: Text(
-                                _startingDate != null
-                                    ? "${_startingDate!.day}-${_startingDate!.month}-${_startingDate!.year}"
-                                    : "Select Date".tr(),
-                                style: TextStyle(fontSize: 16, color: Colors.black87),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-      
-            // Flock List
-            Expanded(
-              child: ListView.builder(
-                itemCount: automaticFeedFlocks.length,
-                itemBuilder: (context, index) {
-                  final flock = automaticFeedFlocks[index];
-                  return Card(
-                    margin: EdgeInsets.all(8),
-                    elevation: 3,
-                    child: ExpansionTile(
-                      title: Text(
-                        flock.name,
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
-                      ),
-                      subtitle: Text(
-                        "Expand to customize feed".tr(),
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.grey),
-                      ),
-                      children: [
-                        // Toggle Between Once and Twice a Day
-                        SwitchListTile(
-                          title: Text("Enable Twice a Day Feed".tr()),
-                          value: flock.isTwiceADay,
-                          onChanged: isAutoFeedEnabled
-                              ? (value) {
-                            setState(() {
-                              flock.isTwiceADay = value;
-      
-                              // Initialize morning and evening feed settings if switching to Twice a Day
-                              if (value) {
-                                flock.morningFeedSettings ??= List.from(flock.feedSettings);
-                                flock.eveningFeedSettings ??= _generateDefaultFeedSettings();
-                              }
-                            });
-                          }
-                              : null,
-                        ),
-                        // Show Tab View for Morning and Evening Feed Settings if Twice a Day is Enabled
-                        if (flock.isTwiceADay)
-                          DefaultTabController(
-                            length: 2,
-                            child: Column(
-                              children: [
-                                TabBar(
-                                  labelColor: Utils.getThemeColorBlue(),
-                                  unselectedLabelColor: Colors.grey,
-                                  indicatorColor: Utils.getThemeColorBlue(),
-                                  tabs: [
-                                    Tab(text: "Morning Feed".tr()),
-                                    Tab(text: "Evening Feed".tr()),
-                                  ],
-                                ),
-                                Container(
-                                  height: 420, // Adjust the height as needed
-                                  child: TabBarView(
-                                    children: [
-                                      // Morning Feed Settings
-                                      Column(
-                                        children: [
-                                          _buildGlobalFeedControl(
-                                            context,
-                                            "Global",
-                                            flock.morningFeedSettings,
-                                                (index,feedName, qty) {
-                                              setState(() {
-      
-      
-                                                flock.morningFeedSettings =
-                                                    flock.morningFeedSettings.map((setting) {
-                                                      return setting.copyWith(
-                                                        feedName: feedName,
-                                                        dailyRequirement: qty,
-                                                      );
-                                                    }).toList();
-                                              });
-                                            }, // Pass function
-                                            index, // Pass index
-                                          ),
-                                          Expanded(
-                                            child: ListView.builder(
-                                              itemCount: flock.morningFeedSettings.length,
-                                              itemBuilder: (context, index) {
-                                                final setting = flock.morningFeedSettings[index];
-                                                return _buildFeedSettingRow(setting);
-                                              },
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      // Evening Feed Settings
-                                      Column(
-                                        children: [
-                                          _buildGlobalFeedControl(
-                                            context,
-                                            "Global",
-                                            flock.eveningFeedSettings,
-                                                (index,feedName, qty) {
-                                              setState(() {
-                                                // Update both evening and morning settings
-                                                flock.eveningFeedSettings =
-                                                    flock.eveningFeedSettings.map((setting) {
-                                                      return setting.copyWith(
-                                                        feedName: feedName,
-                                                        dailyRequirement: qty,
-                                                      );
-                                                    }).toList();
-      
-                                              });
-                                            }, // Pass function
-                                            index, // Pass index
-                                          ),
-                                          Expanded(
-                                            child: ListView.builder(
-                                              itemCount: flock.eveningFeedSettings.length,
-                                              itemBuilder: (context, index) {
-                                                final setting = flock.eveningFeedSettings[index];
-                                                return _buildFeedSettingRow(setting);
-                                              },
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        else
-                        // Single Feed Setting for Once a Day
-                          Column(
-                            children: [
-                              _buildGlobalFeedControlForOnceADay(
-                                context,
-                                "Once a Day",
-                                flock.feedSettings,
-                                    (index,feedName, qty) {
-                                  setState(() {
-                                    // Update both evening and morning settings
-                                    flock.feedSettings =
-                                        flock.feedSettings.map((setting) {
-                                          return setting.copyWith(
-                                            feedName: feedName,
-                                            dailyRequirement: qty,
-                                          );
-                                        }).toList();
-      
-                                  });
-                                }, // Pass function
-                                index, // Pass index
-                              ),
-                              ListView.builder(
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                itemCount: flock.feedSettings.length,
-                                itemBuilder: (context, index) {
-                                  final setting = flock.feedSettings[index];
-                                  return _buildFeedSettingRow(setting);
-                                },
-                              ),
-                            ],
-                          ),
-      
-                      ],
-                    ),
-                  );
-      
-      
-                },
-              ),
-            ),
-      
-          ],
-        ),
-        bottomNavigationBar: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ElevatedButton(
-            onPressed: () {
-              if(isAutoFeedEnabled){
-                _saveFlockSettings();
-              }
+            value: isAutoFeedEnabled,
+            activeColor: Utils.getThemeColorBlue(),
+            onChanged: (value) async {
+              setState(() {
+                isAutoFeedEnabled = value;
+              });
+              _saveFlockSettings();
+
+              /*if (isAutoFeedEnabled) {
+                await requestNotificationPermissions();
+                await scheduleDailyNotification();
+              } else {
+                await flutterLocalNotificationsPlugin.cancel(1);
+                // Cancels auto-feed notification with ID 1
+              }*/
             },
-            style: ElevatedButton.styleFrom(
-              elevation: 5,
-              backgroundColor: isAutoFeedEnabled ? Utils.getThemeColorBlue() : Colors.grey.shade300,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+          ),
+
+          // Show Starting Date Picker if isAutoFeedEnabled is true
+          if (isAutoFeedEnabled)
+            Column(
               children: [
-                Icon(
-                  Icons.save,
-                  color: isAutoFeedEnabled ? Colors.white : Colors.grey.shade600,
-                  size: 20,
-                ),
-                SizedBox(width: 8),
                 Text(
-                  'Save Settings'.tr(),
-                  style: TextStyle(
-                    color: isAutoFeedEnabled ? Colors.white : Colors.grey.shade600,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
+                  "Automatic Daily Feed Records will be generated.".tr(),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: Colors.grey),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16.0, right: 16.0,top: 8),
+                  child: Row(
+                    children: [
+                      Text(
+                        "Last Sync:".tr(),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () async {
+                            DateTime? pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: _startingDate ?? DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (pickedDate != null) {
+                              setState(() {
+                                _startingDate = pickedDate;
+                              });
+                              SharedPreferences prefs = await SharedPreferences.getInstance();
+                              await prefs.setString('lastSyncDate', pickedDate.toIso8601String());
+
+                            }
+                          },
+                          child: Container(
+                            height: 48,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            alignment: Alignment.centerLeft,
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            child: Text(
+                              _startingDate != null
+                                  ? "${_startingDate!.day}-${_startingDate!.month}-${_startingDate!.year}"
+                                  : "Select Date".tr(),
+                              style: TextStyle(fontSize: 16, color: Colors.black87),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
+
+          // Flock List
+          Expanded(
+            child: ListView.builder(
+              itemCount: automaticFeedFlocks.length,
+              itemBuilder: (context, index) {
+                final flock = automaticFeedFlocks[index];
+                return Card(
+                  margin: EdgeInsets.all(8),
+                  elevation: 3,
+                  child: ExpansionTile(
+                    title: Text(
+                      flock.name,
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
+                    ),
+                    subtitle: Text(
+                      "Expand to customize feed".tr(),
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.grey),
+                    ),
+                    children: [
+                      // Toggle Between Once and Twice a Day
+                      SwitchListTile(
+                        title: Text("Enable Twice a Day Feed".tr()),
+                        value: flock.isTwiceADay,
+                        onChanged: isAutoFeedEnabled
+                            ? (value) {
+                          setState(() {
+                            flock.isTwiceADay = value;
+
+                            // Initialize morning and evening feed settings if switching to Twice a Day
+                            if (value) {
+                              flock.morningFeedSettings ??= List.from(flock.feedSettings);
+                              flock.eveningFeedSettings ??= _generateDefaultFeedSettings();
+                            }
+                          });
+                        }
+                            : null,
+                      ),
+                      // Show Tab View for Morning and Evening Feed Settings if Twice a Day is Enabled
+                      if (flock.isTwiceADay)
+                        DefaultTabController(
+                          length: 2,
+                          child: Column(
+                            children: [
+                              TabBar(
+                                labelColor: Utils.getThemeColorBlue(),
+                                unselectedLabelColor: Colors.grey,
+                                indicatorColor: Utils.getThemeColorBlue(),
+                                tabs: [
+                                  Tab(text: "Morning Feed".tr()),
+                                  Tab(text: "Evening Feed".tr()),
+                                ],
+                              ),
+                              Container(
+                                height: 420, // Adjust the height as needed
+                                child: TabBarView(
+                                  children: [
+                                    // Morning Feed Settings
+                                    Column(
+                                      children: [
+                                        _buildGlobalFeedControl(
+                                          context,
+                                          "Global",
+                                          flock.morningFeedSettings,
+                                              (index,feedName, qty) {
+                                            setState(() {
+
+
+                                              flock.morningFeedSettings =
+                                                  flock.morningFeedSettings.map((setting) {
+                                                    return setting.copyWith(
+                                                      feedName: feedName,
+                                                      dailyRequirement: qty,
+                                                    );
+                                                  }).toList();
+                                            });
+                                          }, // Pass function
+                                          index, // Pass index
+                                        ),
+                                        Expanded(
+                                          child: ListView.builder(
+                                            itemCount: flock.morningFeedSettings.length,
+                                            itemBuilder: (context, index) {
+                                              final setting = flock.morningFeedSettings[index];
+                                              return _buildFeedSettingRow(setting);
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    // Evening Feed Settings
+                                    Column(
+                                      children: [
+                                        _buildGlobalFeedControl(
+                                          context,
+                                          "Global",
+                                          flock.eveningFeedSettings,
+                                              (index,feedName, qty) {
+                                            setState(() {
+                                              // Update both evening and morning settings
+                                              flock.eveningFeedSettings =
+                                                  flock.eveningFeedSettings.map((setting) {
+                                                    return setting.copyWith(
+                                                      feedName: feedName,
+                                                      dailyRequirement: qty,
+                                                    );
+                                                  }).toList();
+
+                                            });
+                                          }, // Pass function
+                                          index, // Pass index
+                                        ),
+                                        Expanded(
+                                          child: ListView.builder(
+                                            itemCount: flock.eveningFeedSettings.length,
+                                            itemBuilder: (context, index) {
+                                              final setting = flock.eveningFeedSettings[index];
+                                              return _buildFeedSettingRow(setting);
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                      // Single Feed Setting for Once a Day
+                        Column(
+                          children: [
+                            _buildGlobalFeedControlForOnceADay(
+                              context,
+                              "Once a Day",
+                              flock.feedSettings,
+                                  (index,feedName, qty) {
+                                setState(() {
+                                  // Update both evening and morning settings
+                                  flock.feedSettings =
+                                      flock.feedSettings.map((setting) {
+                                        return setting.copyWith(
+                                          feedName: feedName,
+                                          dailyRequirement: qty,
+                                        );
+                                      }).toList();
+
+                                });
+                              }, // Pass function
+                              index, // Pass index
+                            ),
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: flock.feedSettings.length,
+                              itemBuilder: (context, index) {
+                                final setting = flock.feedSettings[index];
+                                return _buildFeedSettingRow(setting);
+                              },
+                            ),
+                          ],
+                        ),
+
+                    ],
+                  ),
+                );
+
+
+              },
+            ),
+          ),
+
+        ],
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ElevatedButton(
+          onPressed: () {
+            if(isAutoFeedEnabled){
+              _saveFlockSettings();
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            elevation: 5,
+            backgroundColor: isAutoFeedEnabled ? Utils.getThemeColorBlue() : Colors.grey.shade300,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.save,
+                color: isAutoFeedEnabled ? Colors.white : Colors.grey.shade600,
+                size: 20,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Save Settings'.tr(),
+                style: TextStyle(
+                  color: isAutoFeedEnabled ? Colors.white : Colors.grey.shade600,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+            ],
           ),
         ),
       ),

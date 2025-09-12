@@ -311,91 +311,94 @@ class _MedicineStockScreenState extends State<VaccineStockScreen> with RefreshMi
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(kToolbarHeight),
-          child: ClipRRect(
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(0.0), // Round bottom-left corner
-              bottomRight: Radius.circular(0.0), // Round bottom-right corner
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(0.0), // Round bottom-left corner
+            bottomRight: Radius.circular(0.0), // Round bottom-right corner
+          ),
+          child: AppBar(
+            title: Text(
+              "Vaccine Stock Summary".tr(),
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 20,
+                color: Colors.white,
+              ),
             ),
-            child: AppBar(
-              title: Text(
-                "Vaccine Stock Summary".tr(),
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
-              ),
-              centerTitle: true,
-              backgroundColor: Utils.getThemeColorBlue(), // Customize the color
-              elevation: 8, // Gives it a more elevated appearance
-              leading: IconButton(
-                icon: Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () {
-                  Navigator.pop(context); // Navigates back
-                },
-              ),
+            centerTitle: true,
+            backgroundColor: Colors.blue, // Customize the color
+            elevation: 8, // Gives it a more elevated appearance
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                Navigator.pop(context); // Navigates back
+              },
             ),
           ),
         ),
-        body: Column(children: [
-          Utils.showBannerAd(_bannerAd, _isBannerAdReady),
-      
-          _stockSummary!.isEmpty
-              ? Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey),
-                SizedBox(height: 10),
-                Text(
-                  "No vaccine stock available!".tr(),
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
-                ),
-                SizedBox(height: 5),
-                Text("Add stock to see details.".tr(), style: TextStyle(fontSize: 14, color: Colors.grey)),
-              ],
-            ),
-          )
-              :
-          Expanded(child:
-          AnimatedList(
-            key: _listKey,
-            initialItemCount: _stockSummary!.length,
-            itemBuilder: (context, index, animation) {
-              return InkWell(
-                onTap: () async {
-                  List<VaccineStockHistory> history = await DatabaseHelper.fetchVaccineStockHistory(_stockSummary![index].vaccineName, _stockSummary![index].unit);
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => VaccineStockDetailScreen(stock: _stockSummary![index], stockHistory: history),
-                    ),
-                  );
-                  fetchStockSummary();
-                },
-                child: _buildStockItem(_stockSummary![index], index, animation),
-              );
-            },
-          ),
-          ),
-      ],),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_health")){
-              Utils.showMissingPermissionDialog(context, "add_health");
-              return;
-            }
-
-            _showAddStockDialog();
-          },
-          child: Icon(Icons.add),
-        ),
-
       ),
+
+      body: SafeArea(
+        child: Container(
+          child: Column(children: [
+            Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+
+            _stockSummary!.isEmpty
+                ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey),
+                  SizedBox(height: 10),
+                  Text(
+                    "No vaccine stock available!".tr(),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+                  ),
+                  SizedBox(height: 5),
+                  Text("Add stock to see details.".tr(), style: TextStyle(fontSize: 14, color: Colors.grey)),
+                ],
+              ),
+            )
+                :
+            Expanded(child:
+            AnimatedList(
+              key: _listKey,
+              initialItemCount: _stockSummary!.length,
+              itemBuilder: (context, index, animation) {
+                return InkWell(
+                  onTap: () async {
+                    List<VaccineStockHistory> history = await DatabaseHelper.fetchVaccineStockHistory(_stockSummary![index].vaccineName, _stockSummary![index].unit);
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => VaccineStockDetailScreen(stock: _stockSummary![index], stockHistory: history),
+                      ),
+                    );
+                    fetchStockSummary();
+                  },
+                  child: _buildStockItem(_stockSummary![index], index, animation),
+                );
+              },
+            ),
+            ),
+              ],),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_health")){
+            Utils.showMissingPermissionDialog(context, "add_health");
+            return;
+          }
+
+          _showAddStockDialog();
+        },
+        child: Icon(Icons.add),
+      ),
+
     );
   }
 }

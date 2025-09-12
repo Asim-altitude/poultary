@@ -64,13 +64,13 @@ class _FlockNotificationScreenState extends State<FlockNotificationScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text(title.tr(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   const SizedBox(height: 4),
-                  Text(description),
+                  Text(description.tr()),
                   const SizedBox(height: 6),
                   Text("Scheduled on".tr()+": $scheduledDateText",
                       style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                  Text("Repeat".tr()+": $recurrenceText",
+                  Text("Repeat".tr()+": "+recurrenceText.tr(),
                       style: const TextStyle(fontSize: 12, color: Colors.blue)),
                 ],
               ),
@@ -107,14 +107,27 @@ class _FlockNotificationScreenState extends State<FlockNotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return
-      SafeArea(child:
-      Scaffold(
+    return Scaffold(
       appBar: AppBar(
-        title:  Text('Flock Notifications'.tr(), style: TextStyle(fontSize: 18),),
-        backgroundColor: Utils.getThemeColorBlue(),
-        foregroundColor: Colors.white,
+        title: Text(
+          "Flock Notifications".tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blue, // Customize the color
+        elevation: 8, // Gives it a more elevated appearance
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context); // Navigates back
+          },
+        ),
       ),
+
       bottomNavigationBar: Container(
         padding: EdgeInsets.all(10),
         child:  Expanded(
@@ -198,8 +211,7 @@ class _FlockNotificationScreenState extends State<FlockNotificationScreen> {
             ],
           ),
         ),
-      ),),
-    );
+      ),);
   }
 
   showDeleteConfirmation(BuildContext context, int id) {

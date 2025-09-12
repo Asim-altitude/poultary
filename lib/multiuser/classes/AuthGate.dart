@@ -41,6 +41,17 @@ class _AuthGateState extends State<AuthGate> {
 
     return Scaffold(
       backgroundColor: Colors.blue.shade50,
+      appBar: AppBar(
+        title: Text("Authentication".tr()), // your title
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context); // go back
+          },
+        ),
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+      ),
       body: Stack(
         children: [
           /*Positioned(
@@ -136,8 +147,8 @@ class _AuthGateState extends State<AuthGate> {
                         children: [
                           TextSpan(
                             text: isLogin
-                                ? "Don't have an account?"
-                                : "Already have an account?",
+                                ? "Don't have an account?".tr()
+                                : "Already have an account?".tr(),
                           ),
                           TextSpan(
                             text: isLogin ? "Sign Up".tr() : "Login".tr(),

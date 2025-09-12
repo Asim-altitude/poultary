@@ -123,7 +123,7 @@ class _UserEditScreenState extends State<UserEditScreen> {
       ),
       builder: (context) => Padding(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
+          bottom: 20,
           top: 20,
           left: 20,
           right: 20,
@@ -147,7 +147,7 @@ class _UserEditScreenState extends State<UserEditScreen> {
                         backgroundImage: selectedImage != null
                             ? FileImage(File(selectedImage!.path))
                             : (imageUrl != null && imageUrl!.isNotEmpty)
-                            ? NetworkImage(imageUrl!) as ImageProvider
+                            ? NetworkImage(Utils.ProxyAPI+imageUrl!) as ImageProvider
                             : null, // No image when we want to show the icon
                         child: (selectedImage == null && (imageUrl == null || imageUrl!.isEmpty))
                             ? Icon(Icons.person, size: 50, color: Colors.blue)
@@ -228,13 +228,13 @@ class _UserEditScreenState extends State<UserEditScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    icon: Icon(Icons.save_alt, color: Colors.white),
+                    icon: Icon(Icons.save, color: Colors.white),
                     label: Text(
                       "SAVE".tr(),
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.indigo,
+                      backgroundColor: Colors.blue,
                       padding: EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -352,7 +352,7 @@ class _UserEditScreenState extends State<UserEditScreen> {
                   radius: 40,
                   backgroundColor: Colors.blue.shade100,
                   backgroundImage: (widget.user.image != null && widget.user.image!.isNotEmpty)
-                      ? NetworkImage(widget.user.image!)
+                      ? NetworkImage(Utils.ProxyAPI+widget.user.image!)
                       : null,
                   child: (widget.user.image == null || widget.user.image!.isEmpty)
                       ? Icon(Icons.person, size: 40, color: Colors.blue)
@@ -379,7 +379,7 @@ class _UserEditScreenState extends State<UserEditScreen> {
                     children: [
                       Icon(Icons.share, size: 20, color: Colors.blue,),
                       const SizedBox(width: 8),
-                      Text('Share Credentials', style: TextStyle(fontSize: 14, color: Colors.black, ),)
+                      Text('Share Credentials'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, ),)
                     ],
 
                   ),
@@ -389,7 +389,7 @@ class _UserEditScreenState extends State<UserEditScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _infoTile("Last Sign In", userLog==null? "Unknown": userLog!.lastSigned.toString()),
+                    _infoTile("Last Sign In".tr(), userLog==null? "Unknown".tr(): userLog!.lastSigned.toString()),
                    // _infoTile("Records Modified", userLog==null? "NO" : userLog!.dataChanges),
                   ],
                 ),
@@ -433,7 +433,7 @@ class _UserEditScreenState extends State<UserEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("User Details")),
+      appBar: AppBar(title: Text("User Details".tr())),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: buildProfileCard(),

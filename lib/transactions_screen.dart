@@ -9,14 +9,22 @@ import 'package:intl/intl.dart';
 import 'package:poultary/add_expense.dart';
 import 'package:poultary/add_income.dart';
 import 'package:poultary/add_reduce_flock.dart';
+import 'package:poultary/model/feed_stock_history.dart';
+import 'package:poultary/model/medicine_stock_history.dart';
+import 'package:poultary/model/stock_expense.dart';
 import 'package:poultary/model/transaction_item.dart';
+import 'package:poultary/model/vaccine_stock_history.dart';
 import 'package:poultary/multiuser/model/egg_record.dart';
+import 'package:poultary/multiuser/model/feedstockfb.dart';
 import 'package:poultary/multiuser/model/financeItem.dart';
+import 'package:poultary/multiuser/model/medicinestockfb.dart';
+import 'package:poultary/multiuser/model/vaccinestockfb.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:poultary/view_transaction.dart';
+import 'package:sqflite/sqflite.dart';
 import 'database/databse_helper.dart';
 import 'model/egg_income.dart';
 import 'model/egg_item.dart';
@@ -175,7 +183,74 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
-    return SafeArea(child: Scaffold(
+    return Scaffold(
+
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(10.0), // Round bottom-left corner
+            bottomRight: Radius.circular(10.0), // Round bottom-right corner
+          ),
+          child: AppBar(
+            title: Text(
+              applied_filter_name.tr(),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            actions: [
+              InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () {
+                  openSortDialog(context, (selectedSort) {
+                    setState(() {
+                      sortOption = selectedSort == "date_desc" ? "Date (New)" : "Date (Old)";
+                      sortSelected = selectedSort == "date_desc" ? "DESC" : "ASC";
+                    });
+
+                    getFilteredTransactions(str_date, end_date);
+                  });
+                },
+                child: Container(
+                  height: 45,
+                  width: 130,
+                  margin: EdgeInsets.only(right: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  alignment: Alignment.center,
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          sortOption.tr(),
+                          style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Icon(Icons.sort, color: Colors.white, size: 22),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            backgroundColor: Colors.blue, // Customize the color
+            elevation: 8, // Gives it a more elevated appearance
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                Navigator.pop(context); // Navigates back
+              },
+            ),
+          ),
+        ),
+      ),
       bottomNavigationBar: BottomAppBar(
         color: Colors.transparent,
         child: Container(
@@ -296,7 +371,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
             children:  [
               Utils.getDistanceBar(),
 
-              ClipRRect(
+              /*ClipRRect(
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(10),
                   bottomRight: Radius.circular(10),
@@ -304,7 +379,8 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
+                      colors: [Colors.blue, Colors.blue],
+                     // colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -389,7 +465,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                     ],
                   ),
                 ),
-              ),
+              ),*/
               Center(
                 child: Container(
                   padding: EdgeInsets.only(top: 10),
@@ -472,7 +548,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                 height: heightScreen,
                 width: widthScreen,
                 child: Padding(
-                    padding: const EdgeInsets.only(bottom: 100), // Adjust this value as needed
+                    padding: const EdgeInsets.only(bottom: 370), // Adjust this value as needed
                 child: ListView.builder(
                     itemCount: transactionList.length,
                     scrollDirection: Axis.vertical,
@@ -667,6 +743,37 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                                   ),
                                 ],
                               ),
+
+                              /// **Sync Info Icon**
+                              if(Utils.isMultiUSer)
+                                GestureDetector(
+                                  onTap: () {
+                                    TransactionItem item = transactionList[index];
+                                    String updated_at = item.last_modified == null
+                                        ? "Unknown".tr()
+                                        : DateFormat("dd MMM yyyy hh:mm a").format(item.last_modified!);
+
+                                    String updated_by = item.modified_by == null || item.modified_by!.isEmpty
+                                        ? "System".tr()
+                                        : item.modified_by!;
+
+                                    Utils.showSyncInfo(context, updated_at, updated_by);
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.centerRight,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.info_outline, size: 16, color: Colors.blueGrey),
+                                        SizedBox(width: 4),
+                                        Text(
+                                          "Sync Info",
+                                          style: TextStyle(fontSize: 12, color: Colors.blueGrey),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -678,7 +785,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
 
 
                   ]
-      ),),),),),);
+      ),),),),);
   }
 
   /// Function to Build Filter Buttons
@@ -1144,6 +1251,13 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
               return;
             }
 
+            StockExpense? stockExpense = await DatabaseHelper.getByTransactionItemId(transactionList.elementAt(selected_index!).id!);
+
+            if(stockExpense != null){
+              showDeleteStockAlertDialog(context);
+              return;
+            }
+
             showAlertDialog(context);
           }
         }else {
@@ -1211,6 +1325,166 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
     return selected_id;
   }
 
+  showDeleteStockAlertDialog(BuildContext context) {
+
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: Text("CANCEL".tr()),
+      onPressed:  () {
+        Navigator.pop(context);
+      },
+    );
+    Widget continueButton = TextButton(
+      child: Text("DELETE".tr()),
+      onPressed:  () async {
+        TransactionItem item = transactionList.elementAt(selected_index!);
+        item.f_sync_id = getFlockSyncID(item.f_id!);
+
+        StockExpense? stockExpense = await DatabaseHelper.getByTransactionItemId(transactionList.elementAt(selected_index!).id!);
+
+        MedicineStockHistory? medicineStockHistory = await DatabaseHelper.getMedicineStockHistotyByID(stockExpense!.stockItemId.toString());
+        FeedStockHistory? feedStockHistory = await DatabaseHelper.getFeedStockHistotyByID(stockExpense.stockItemId.toString());
+        VaccineStockHistory? vaccineStockHistory = await DatabaseHelper.getVaccineStockHistotyByID(stockExpense.stockItemId.toString());
+
+
+        try {
+          if (Utils.isMultiUSer && Utils.hasFeaturePermission("delete_transaction")) {
+
+            item.modified_by = Utils.currentUser!.email;
+            item.last_modified = Utils.getTimeStamp();
+            item.farm_id = Utils.currentUser!.farmId;
+            item.sync_status = SyncStatus.DELETED;
+
+            if(medicineStockHistory!= null && item.expense_item.toLowerCase().contains("medicine")){
+
+              medicineStockHistory.modified_by = Utils.currentUser!.email;
+              medicineStockHistory.last_modified = Utils.getTimeStamp();
+              medicineStockHistory.farm_id = Utils.currentUser!.farmId;
+              medicineStockHistory.sync_status = SyncStatus.DELETED;
+
+              MedicineStockFB medicineStockFB = MedicineStockFB(stock: medicineStockHistory);
+              medicineStockFB.modified_by = Utils.currentUser!.email;
+              medicineStockFB.last_modified = Utils.getTimeStamp();
+              medicineStockFB.farm_id = Utils.currentUser!.farmId;
+              medicineStockFB.sync_id = medicineStockHistory.sync_id;
+              medicineStockFB.sync_status = SyncStatus.DELETED;
+
+              medicineStockFB.transaction = item;
+
+              await FireBaseUtils.updateMedicineStock(medicineStockFB);
+
+              print("MEDICINE DELETED");
+
+            }else if(vaccineStockHistory!= null && item.expense_item.toLowerCase().contains("vaccine")){
+
+              vaccineStockHistory.modified_by = Utils.currentUser!.email;
+              vaccineStockHistory.last_modified = Utils.getTimeStamp();
+              vaccineStockHistory.farm_id = Utils.currentUser!.farmId;
+              vaccineStockHistory.sync_status = SyncStatus.DELETED;
+
+              VaccineStockFB vaccineStockFB = VaccineStockFB(stock: vaccineStockHistory);
+              vaccineStockFB.modified_by = Utils.currentUser!.email;
+              vaccineStockFB.last_modified = Utils.getTimeStamp();
+              vaccineStockFB.farm_id = Utils.currentUser!.farmId;
+              vaccineStockFB.sync_id = vaccineStockHistory.sync_id;
+              vaccineStockFB.sync_status = SyncStatus.DELETED;
+
+              vaccineStockFB.transaction = item;
+
+              await FireBaseUtils.updateVaccineStock(vaccineStockFB);
+
+              print("VACCINE DELETED");
+
+            }else if(feedStockHistory!= null && item.expense_item.toLowerCase().contains("feed")){
+              feedStockHistory.modified_by = Utils.currentUser!.email;
+              feedStockHistory.last_modified = Utils.getTimeStamp();
+              feedStockHistory.farm_id = Utils.currentUser!.farmId;
+              feedStockHistory.sync_status = SyncStatus.DELETED;
+
+              FeedStockFB feedStockFB = FeedStockFB(stock: feedStockHistory);
+              feedStockFB.modified_by = Utils.currentUser!.email;
+              feedStockFB.last_modified = Utils.getTimeStamp();
+              feedStockFB.farm_id = Utils.currentUser!.farmId;
+              feedStockFB.sync_id = feedStockHistory.sync_id;
+              feedStockFB.sync_status = SyncStatus.DELETED;
+
+
+              feedStockFB.transaction = item;
+
+              await FireBaseUtils.updateFeedStockHistory(feedStockFB);
+
+              print("FEED DELETED");
+            }
+
+          }
+        }
+        catch(ex){
+          print(ex);
+        }
+
+        DatabaseHelper.deleteItem("Transactions", selected_id!);
+        transactionList.removeAt(selected_index!);
+
+
+        if(medicineStockHistory!= null && item.expense_item.toLowerCase().contains("medicine")){
+          await deleteMedicineStock(medicineStockHistory.id!);
+        }else if(vaccineStockHistory!= null && item.expense_item.toLowerCase().contains("vaccine")){
+          await deleteVaccineStock(vaccineStockHistory.id!);
+        }else if(feedStockHistory!= null && item.expense_item.toLowerCase().contains("feed")){
+          await DatabaseHelper.deleteFeedStock(feedStockHistory.id!);
+        }
+
+        Utils.showToast("DONE");
+        Navigator.pop(context);
+        setState(() {
+
+        });
+
+
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("CONFIRMATION".tr()),
+      content: Text("RU_SURE_STOCK_DELETE".tr()),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+
+  Future<int?> deleteVaccineStock(int id) async{
+
+    Database? _database = await DatabaseHelper.instance.database;
+    return await _database?.delete(
+      'VaccineStockHistory',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+  }
+
+  Future<int?> deleteMedicineStock(int id) async{
+
+    Database? _database = await DatabaseHelper.instance.database;
+    return await _database?.delete(
+      'MedicineStockHistory',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   showAlertDialog(BuildContext context) {
 
     // set up the buttons
@@ -1253,8 +1527,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
         }else{
 
           try {
-            if (Utils.isMultiUSer &&
-                Utils.hasFeaturePermission("delete_transaction")) {
+            if (Utils.isMultiUSer && Utils.hasFeaturePermission("delete_transaction")) {
 
               FinanceItem financeItem = FinanceItem(transaction: item);
               financeItem.sync_id = item.sync_id;
@@ -1269,6 +1542,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
             print(ex);
           }
         }
+
         DatabaseHelper.deleteItem("Transactions", selected_id!);
         transactionList.removeAt(selected_index!);
         Utils.showToast("DONE");

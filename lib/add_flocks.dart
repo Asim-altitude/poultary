@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
+import 'package:poultary/multiuser/utils/SyncManager.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/suggested_notifcations.dart';
 import 'package:poultary/utils/session_manager.dart';
@@ -255,266 +256,42 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height -
         (safeAreaHeight + safeAreaHeightBottom);
     child:
-    return SafeArea(
-      child: Scaffold(
-        bottomNavigationBar:
-          Container(
-            margin: EdgeInsets.all(15),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Show Previous Button only if activeStep > 0
-                if (activeStep > 0)
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          activeStep--;
-                        });
-                      },
-                      child: Container(
-                        height: 55,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade700,
-                          borderRadius: BorderRadius.circular(30), // More rounded
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.3),
-                              spreadRadius: 2,
-                              blurRadius: 6,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        margin: EdgeInsets.symmetric(horizontal: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
-                            SizedBox(width: 5),
-                            Text(
-                              "Previous".tr(),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-            
-                // Next or Finish Button
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(""), // your title
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context); // go back
+          },
+        ),
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+      ),
+      bottomNavigationBar:
+        Container(
+          margin: EdgeInsets.all(15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Show Previous Button only if activeStep > 0
+              if (activeStep > 0)
                 Expanded(
                   child: GestureDetector(
-                    onTap: () async {
-
-                      if(saving_images)
-                        return;
-
-                      bool validate = checkValidation();
-            
-                      if (activeStep == 0) {
-                        if (nameController.text.isNotEmpty && birdcountController.text.isNotEmpty) {
-                          setState(() {
-                            activeStep++;
-                          });
-                        } else {
-                          Utils.showToast("PROVIDE_ALL");
-                        }
-                      } else if (activeStep == 1) {
-                        if (!checkValidationOption()) {
-                          Utils.showToast("PROVIDE_ALL");
-                        } else {
-                          notesController.text = "${nameController.text} Added on ${Utils.getFormattedDate(date)} with ${birdcountController.text} BIRDS";
-                          setState(() {
-                            activeStep++;
-                          });
-                        }
-                      } else if (activeStep == 2) {
-                        if (validate) {
-                          print("Saving Data...");
-                          await DatabaseHelper.instance.database;
-                          Flock flock = Flock(
-                            f_id: 1,
-                            f_name: nameController.text,
-                            bird_count: int.parse(birdcountController.text),
-                            purpose: _purposeselectedValue,
-                            acqusition_type: _acqusitionselectedValue,
-                            acqusition_date: date,
-                            notes: notesController.text,
-                            icon: birds.elementAt(chosen_index).image,
-                            active_bird_count: int.parse(birdcountController.text),
-                            active: 1,
-                            flock_new: 1,
-                            sync_id: Utils.getUniueId(),
-                            sync_status: SyncStatus.SYNCED,
-                            last_modified: Utils.getTimeStamp(),
-                            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : ''
-
-                          );
-
-                          int? id = await DatabaseHelper.insertFlock(
-                            flock
-                          );
-
-                          /*// SET FLOCK ONLINE
-                          if(Utils.isMultiUSer) {
-                            flock.f_id = id!;
-                            bool synced = await FireBaseUtils.uploadFlock(flock);
-                            if (!synced) {
-                              flock.sync_status = SyncStatus.PENDING;
-                              await DatabaseHelper.updateFlockInfo(flock);
-                            }
-                          }
-            */
-                          if (isPurchase) {
-                            TransactionItem transaction = TransactionItem(
-                              flock_update_id: "-1",
-                              f_id: id!,
-                              date: date,
-                              expense_item: "Flock Purchase".tr(),
-                              type: "Expense",
-                              amount: amountController.text,
-                              payment_method: payment_method,
-                              payment_status: payment_status,
-                              sold_purchased_from: personController.text,
-                              short_note: notesController.text,
-                              how_many: birdcountController.text,
-                              f_name: nameController.text, sale_item: '', extra_cost: '', extra_cost_details: '',
-                              sync_id: Utils.getUniueId(),
-                              sync_status: SyncStatus.SYNCED,
-                              last_modified: Utils.getTimeStamp(),
-                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                              f_sync_id: flock.sync_id
-
-                            );
-
-                            int? tr_id = await DatabaseHelper.insertNewTransaction(transaction);
-            
-                            Flock_Detail flockDetail = Flock_Detail(
-                              f_id: id,
-                              item_type: 'Addition',
-                              item_count: int.parse(birdcountController.text),
-                              acqusition_type: _acqusitionselectedValue,
-                              acqusition_date: date,
-                              short_note: notesController.text,
-                              f_name: nameController.text,
-                              transaction_id: tr_id!.toString(), reason: '',
-
-                                sync_id: Utils.getUniueId(),
-                                sync_status: SyncStatus.SYNCED,
-                                last_modified: Utils.getTimeStamp(),
-                                modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                                farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                                f_sync_id: flock.sync_id
-                            );
-                            int? flock_detail_id = await DatabaseHelper.insertFlockDetail(flockDetail);
-            
-                            await DatabaseHelper.updateLinkedTransaction(tr_id.toString(), flock_detail_id.toString());
-
-                            if(Utils.isMultiUSer) {
-                              FlockFB flockFB = FlockFB(flock: flock,
-                                  transaction: transaction,
-                                  flockDetail: flockDetail);
-
-                              flockFB.farm_id = Utils.currentUser!.farmId;
-                              flockFB.modified_by = Utils.currentUser!.email;
-                             bool synced =  await FireBaseUtils.uploadFlock(flockFB);
-                             if(!synced){
-                               // Save to local for later sync
-                             }
-
-                            }
-                            // SET TRANSACTION AND FLOCK_DETAILS ONLINE
-                            /*if(Utils.isMultiUSer) {
-                              transaction.flock_update_id = flock_detail_id.toString();
-                              bool synced = await FireBaseUtils.uploadTransactions(transaction);
-                              if(!synced)
-                              {
-                                  transaction.sync_status = SyncStatus.PENDING;
-                                  await DatabaseHelper.updateTransaction(transaction);
-                              }
-
-                              flockDetail.transaction_id = tr_id.toString();
-                              synced = await FireBaseUtils.uploadFlockDetails(flockDetail);
-                              if(!synced)
-                              {
-                                flockDetail.sync_status = SyncStatus.PENDING;
-                                await DatabaseHelper.updateFlock(flockDetail);
-                              }
-
-                            }*/
-
-                          }
-                          else {
-                            Flock_Detail flockDetail = Flock_Detail(
-                              f_id: id!,
-                              item_type: 'Addition',
-                              item_count: int.parse(birdcountController.text),
-                              acqusition_type: _acqusitionselectedValue,
-                              acqusition_date: date,
-                              short_note: notesController.text,
-                              f_name: nameController.text,
-                              transaction_id: "-1", reason: '',
-                                sync_id: Utils.getUniueId(),
-                                sync_status: SyncStatus.SYNCED,
-                                last_modified: Utils.getTimeStamp(),
-                                modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                                farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                                f_sync_id: flock.sync_id
-                            );
-                            if(Utils.isMultiUSer) {
-                              FlockFB flockFB = FlockFB(flock: flock, flockDetail: flockDetail);
-                              flockFB.farm_id = Utils.currentUser!.farmId;
-                              flockFB.modified_by = Utils.currentUser!.email;
-                              bool synced =  await FireBaseUtils.uploadFlock(flockFB);
-                              if(!synced){
-                                // Save to local for later sync
-                              }
-
-                            }
-                           /* bool synced = await FireBaseUtils.uploadFlockDetails(flockDetail);
-                            if(!synced)
-                            {
-                              flockDetail.sync_status = SyncStatus.PENDING;
-                              await DatabaseHelper.insertFlockDetail(flockDetail);
-                            }*/
-
-                          }
-            
-                          if (base64Images.isNotEmpty) {
-                            insertFlockImages(id!, flock.sync_id);
-                          } else {
-                            Utils.showToast("FLOCK_CREATED");
-                            Navigator.pop(context);
-                            gotoNotificationsScreen(id);
-                          }
-                        } else {
-                          Utils.showToast("PROVIDE_ALL");
-                        }
-                      }
+                    onTap: () {
+                      setState(() {
+                        activeStep--;
+                      });
                     },
                     child: Container(
                       height: 55,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: activeStep == 2
-                              ? [Utils.getThemeColorBlue(), Colors.greenAccent] // Finish Button
-                              : [Utils.getThemeColorBlue(), Colors.blueAccent], // Next Button
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                        color: Colors.grey.shade700,
                         borderRadius: BorderRadius.circular(30), // More rounded
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.blue.withOpacity(0.5),
+                            color: Colors.grey.withOpacity(0.3),
                             spreadRadius: 2,
                             blurRadius: 6,
                             offset: Offset(0, 3),
@@ -525,240 +302,339 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
+                          SizedBox(width: 5),
                           Text(
-                            activeStep == 2 ? "Finish".tr() : "Next".tr(),
+                            "Previous".tr(),
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(width: 5),
-                          Icon(
-                            activeStep == 2 ? Icons.check_circle : Icons.arrow_forward_ios,
-                            color: Colors.white,
-                            size: 20,
-                          ),
                         ],
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
-        body: SafeArea(
-          top: false,
-          child: Container(
-            width: widthScreen,
-            height: heightScreen,
-            color: Utils.getScreenBackground(),
-            child: SingleChildScrollViewWithStickyFirstWidget(
-              child: Column(
-                children: [
-                  Utils.getDistanceBar(),
-                  Visibility(
-                    visible: false,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: Utils.getThemeColorBlue(), //(x,y)
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              alignment: Alignment.center,
-                              width: 50,
-                              height: 50,
-                              child: InkWell(
-                                child: Icon(Icons.arrow_back,
-                                    color: Utils.getThemeColorBlue(), size: 30),
-                                onTap: () {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            ),
-                            Container(
-                                margin: EdgeInsets.only(left: 10),
-                                child: Text(
-                                  "NEW_FLOCK".tr(),
-                                  textAlign: TextAlign.start,
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold),
-                                )),
 
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 50,),
-                  EasyStepper(
-                    activeStep: activeStep,
-                    activeStepTextColor: Colors.blue.shade900,
-                    finishedStepTextColor: Utils.getThemeColorBlue(),
-                    internalPadding: 20, // Reduce padding for better spacing
-                    stepShape: StepShape.circle,
-                    stepBorderRadius: 20,
-                    borderThickness: 3, // Balanced progress line thickness
-                    showLoadingAnimation: false,
-                    stepRadius: 15, // Reduced step size to fit screen
-                    showStepBorder: false,
-                    lineStyle: LineStyle(
-                      lineLength: 50,
-                      lineType: LineType.normal,
-                      defaultLineColor: Colors.grey.shade300,
-                      activeLineColor: Colors.blueAccent,
-                      finishedLineColor: Utils.getThemeColorBlue(),
-                    ),
-                    steps: [
-                      EasyStep(
-                        customStep: _buildStepIcon(Icons.info, 0),
-                        title: 'Flock Name'.tr(),
-                      ),
-                      EasyStep(
-                        customStep: _buildStepIcon(Icons.payment, 1),
-                        title: 'INCOME_EXPENSE'.tr(),
-                      ),
-                      EasyStep(
-                        customStep: _buildStepIcon(Icons.image, 2),
-                        title: 'IMAGES'.tr(),
-                      ),
-                    ],
-                    onStepReached: (index) => setState(() => activeStep = index),
-                  ),
+              // Next or Finish Button
+              Expanded(
+                child: GestureDetector(
+                  onTap: () async {
+
+                    if(saving_images)
+                      return;
+
+                    bool validate = checkValidation();
+
+                    if (activeStep == 0) {
+                      if (nameController.text.isNotEmpty && birdcountController.text.isNotEmpty) {
+                        setState(() {
+                          activeStep++;
+                        });
+                      } else {
+                        Utils.showToast("PROVIDE_ALL");
+                      }
+                    } else if (activeStep == 1) {
+                      if (!checkValidationOption()) {
+                        Utils.showToast("PROVIDE_ALL");
+                      } else {
+                        notesController.text = "${nameController.text} Added on ${Utils.getFormattedDate(date)} with ${birdcountController.text} BIRDS";
+                        setState(() {
+                          activeStep++;
+                        });
+                      }
+                    } else if (activeStep == 2) {
+                      if (validate) {
+                        print("Saving Data...");
+                        await DatabaseHelper.instance.database;
+                        Flock flock = Flock(
+                          f_id: 1,
+                          f_name: nameController.text,
+                          bird_count: int.parse(birdcountController.text),
+                          purpose: _purposeselectedValue,
+                          acqusition_type: _acqusitionselectedValue,
+                          acqusition_date: date,
+                          notes: notesController.text,
+                          icon: birds.elementAt(chosen_index).image,
+                          active_bird_count: int.parse(birdcountController.text),
+                          active: 1,
+                          flock_new: 1,
+                          sync_id: Utils.getUniueId(),
+                          sync_status: SyncStatus.SYNCED,
+                          last_modified: Utils.getTimeStamp(),
+                          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : ''
+
+                        );
+
+                        int? id = await DatabaseHelper.insertFlock(flock);
+
+                        print("FLOCK_ID $id");
+                        SyncManager().addModifiedId(flock.f_name);
+
+                        /*// SET FLOCK ONLINE
+                        if(Utils.isMultiUSer) {
+                          flock.f_id = id!;
+                          bool synced = await FireBaseUtils.uploadFlock(flock);
+                          if (!synced) {
+                            flock.sync_status = SyncStatus.PENDING;
+                            await DatabaseHelper.updateFlockInfo(flock);
+                          }
+                        }
+          */
+                        if (isPurchase) {
+                          TransactionItem transaction = TransactionItem(
+                            flock_update_id: "-1",
+                            f_id: id!,
+                            date: date,
+                            expense_item: "Flock Purchase".tr(),
+                            type: "Expense",
+                            amount: amountController.text,
+                            payment_method: payment_method,
+                            payment_status: payment_status,
+                            sold_purchased_from: personController.text,
+                            short_note: notesController.text,
+                            how_many: birdcountController.text,
+                            f_name: nameController.text, sale_item: '', extra_cost: '', extra_cost_details: '',
+                            sync_id: Utils.getUniueId(),
+                            sync_status: SyncStatus.SYNCED,
+                            last_modified: Utils.getTimeStamp(),
+                            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                            f_sync_id: flock.sync_id
+
+                          );
+
+                          int? tr_id = await DatabaseHelper.insertNewTransaction(transaction);
+
+                          Flock_Detail flockDetail = Flock_Detail(
+                            f_id: id,
+                            item_type: 'Addition',
+                            item_count: int.parse(birdcountController.text),
+                            acqusition_type: _acqusitionselectedValue,
+                            acqusition_date: date,
+                            short_note: notesController.text,
+                            f_name: nameController.text,
+                            transaction_id: tr_id!.toString(), reason: '',
+
+                              sync_id: Utils.getUniueId(),
+                              sync_status: SyncStatus.SYNCED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                              f_sync_id: flock.sync_id
+                          );
+                          int? flock_detail_id = await DatabaseHelper.insertFlockDetail(flockDetail);
+
+                          await DatabaseHelper.updateLinkedTransaction(tr_id.toString(), flock_detail_id.toString());
+
+                          if(Utils.isMultiUSer) {
+                            FlockFB flockFB = FlockFB(flock: flock,
+                                transaction: transaction,
+                                flockDetail: flockDetail);
+
+                            flockFB.farm_id = Utils.currentUser!.farmId;
+                            flockFB.modified_by = Utils.currentUser!.email;
+
+                           await FireBaseUtils.uploadFlock(flockFB);
 
 
-                  activeStep == 0?
-                  Container(
+                          }
+
+                        }
+                        else {
+                          Flock_Detail flockDetail = Flock_Detail(
+                            f_id: id!,
+                            item_type: 'Addition',
+                            item_count: int.parse(birdcountController.text),
+                            acqusition_type: _acqusitionselectedValue,
+                            acqusition_date: date,
+                            short_note: notesController.text,
+                            f_name: nameController.text,
+                            transaction_id: "-1", reason: '',
+                              sync_id: Utils.getUniueId(),
+                              sync_status: SyncStatus.SYNCED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                              f_sync_id: flock.sync_id
+                          );
+                          await DatabaseHelper.insertFlockDetail(flockDetail);
+
+                          if(Utils.isMultiUSer) {
+                            FlockFB flockFB = FlockFB(flock: flock, flockDetail: flockDetail);
+                            flockFB.farm_id = Utils.currentUser!.farmId;
+                            flockFB.modified_by = Utils.currentUser!.email;
+
+                            await FireBaseUtils.uploadFlock(flockFB);
+                          }
+
+                        }
+
+                        if (base64Images.isNotEmpty) {
+                          await insertFlockImages(id, flock.sync_id);
+                        } else {
+                          Utils.showToast("FLOCK_CREATED");
+                          Navigator.pop(context);
+                          gotoNotificationsScreen(id);
+                        }
+                      } else {
+                        Utils.showToast("PROVIDE_ALL");
+                      }
+                    }
+                  },
+                  child: Container(
+                    height: 55,
                     alignment: Alignment.center,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(height: 20),
-
-                        // Title
-                        Container(
-                          margin: EdgeInsets.only(left: 10, top: 16, bottom: 8),
-                          child: Text(
-                            "BIRD_TYPES".tr(),
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                              color: Utils.getThemeColorBlue(),
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-
-                        // Bird Type Selection
-                        Container(
-                          height: 200,
-                          width: widthScreen,
-                          margin: EdgeInsets.only(left: 15),
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: birds.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              bool isSelected = index == chosen_index;
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    chosen_index = index;
-                                    nameController.text = birds[index].name.tr() + " Flock".tr() + "${flocks.length + 1}";
-                                  });
-                                },
-                                child: AnimatedContainer(
-                                  duration: Duration(milliseconds: 300),
-                                  margin: EdgeInsets.symmetric(horizontal: 8),
-                                  padding: EdgeInsets.all(10),
-                                  width: 130,
-                                  decoration: BoxDecoration(
-                                    color: isSelected ? Colors.blue[100] : Colors.white,
-                                    borderRadius: BorderRadius.circular(15),
-
-                                    border: Border.all(
-                                      color: isSelected ? Colors.blue : Colors.grey,
-                                      width: isSelected ? 3 : 1,
-                                    ),
-                                  ),
-                                  child: Stack(
-                                    alignment: Alignment.topRight,
-                                    children: [
-                                      // Tick icon on the top-right corner
-                                      if (isSelected)
-                                        Positioned(
-                                          child: Icon(Icons.check_circle, color: Colors.blue, size: 28),
-                                        ),
-                                      Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Image.asset(birds[index].image.replaceAll("jpeg", "png"), height: 90, width: 90, fit: BoxFit.contain),
-                                          SizedBox(height: 10),
-                                          Text(
-                                            birds[index].name.tr(),
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-
-                        SizedBox(height: 20),
-
-                        // Flock Name Input
-                        Container(
-                            margin: EdgeInsets.only(left: 15, right: 15),
-                            child: _buildInputField("FLOCK_NAME".tr(), nameController, Icons.edit)),
-
-                        SizedBox(height: 15),
-
-                        // Number of Birds & Purpose Selection
-                        Container(
-                          margin: EdgeInsets.only(left: 15, right: 15),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              _buildInputField("NUMBER_BIRDS".tr(), birdcountController, Icons.numbers, width: 150, keyboardType: TextInputType.number, inputFormat: "number"),
-                              SizedBox(width: 10),
-                              Expanded(
-                                child: _buildDropdownField("PURPOSE1".tr(), _purposeList, _purposeselectedValue, (value) {
-                                  setState(() {
-                                    _purposeselectedValue = value!;
-                                  });
-                                }),
-                              ),
-                            ],
-                          ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: activeStep == 2
+                            ? [Utils.getThemeColorBlue(), Colors.greenAccent] // Finish Button
+                            : [Utils.getThemeColorBlue(), Colors.blueAccent], // Next Button
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(30), // More rounded
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 6,
+                          offset: Offset(0, 3),
                         ),
                       ],
                     ),
-                  ):SizedBox(width: 1,),
-
-                  activeStep==1?
-                  Container(
-                    margin: EdgeInsets.all(15),
-                    child: Column(
+                    margin: EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(height: 30),
-                    
-                        // Section Title
                         Text(
-                          "Financial Info".tr(),
+                          activeStep == 2 ? "Finish".tr() : "Next".tr(),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(width: 5),
+                        Icon(
+                          activeStep == 2 ? Icons.check_circle : Icons.arrow_forward_ios,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      body: SafeArea(
+        top: false,
+        child: Container(
+          width: widthScreen,
+          height: heightScreen,
+          color: Utils.getScreenBackground(),
+          child: SingleChildScrollViewWithStickyFirstWidget(
+            child: Column(
+              children: [
+                Utils.getDistanceBar(),
+                Visibility(
+                  visible: false,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Utils.getThemeColorBlue(), //(x,y)
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            alignment: Alignment.center,
+                            width: 50,
+                            height: 50,
+                            child: InkWell(
+                              child: Icon(Icons.arrow_back,
+                                  color: Utils.getThemeColorBlue(), size: 30),
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ),
+                          Container(
+                              margin: EdgeInsets.only(left: 10),
+                              child: Text(
+                                "NEW_FLOCK".tr(),
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold),
+                              )),
+
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 30,),
+                EasyStepper(
+                  activeStep: activeStep,
+                  activeStepTextColor: Colors.blue.shade900,
+                  finishedStepTextColor: Utils.getThemeColorBlue(),
+                  internalPadding: 20, // Reduce padding for better spacing
+                  stepShape: StepShape.circle,
+                  stepBorderRadius: 20,
+                  borderThickness: 3, // Balanced progress line thickness
+                  showLoadingAnimation: false,
+                  stepRadius: 15, // Reduced step size to fit screen
+                  showStepBorder: false,
+                  lineStyle: LineStyle(
+                    lineLength: 50,
+                    lineType: LineType.normal,
+                    defaultLineColor: Colors.grey.shade300,
+                    activeLineColor: Colors.blueAccent,
+                    finishedLineColor: Utils.getThemeColorBlue(),
+                  ),
+                  steps: [
+                    EasyStep(
+                      customStep: _buildStepIcon(Icons.info, 0),
+                      title: 'Flock Name'.tr(),
+                    ),
+                    EasyStep(
+                      customStep: _buildStepIcon(Icons.payment, 1),
+                      title: 'INCOME_EXPENSE'.tr(),
+                    ),
+                    EasyStep(
+                      customStep: _buildStepIcon(Icons.image, 2),
+                      title: 'IMAGES'.tr(),
+                    ),
+                  ],
+                  onStepReached: (index) => setState(() => activeStep = index),
+                ),
+
+
+                activeStep == 0?
+                Container(
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(height: 10),
+
+                      // Title
+                      Container(
+                        margin: EdgeInsets.only(left: 10, top: 16, bottom: 8),
+                        child: Text(
+                          "BIRD_TYPES".tr(),
                           textAlign: TextAlign.start,
                           style: TextStyle(
                             color: Utils.getThemeColorBlue(),
@@ -766,165 +642,271 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                    
-                        SizedBox(height: 30),
-                    
-                        // Acquisition Dropdown (Always Enabled)
-                        _buildSectionLabel("ACQUSITION".tr()),
-                        _buildDropdownField("ACQUSITION".tr(), acqusitionList, _acqusitionselectedValue, (value) {
-                          setState(() {
-                            _acqusitionselectedValue = value!;
-                            isPurchase = (_acqusitionselectedValue == "PURCHASED"); // Enable when PURCHASED is selected
+                      ),
 
-                          });
-                        }),
-                    
-                        SizedBox(height: 15),
-                    
-                        // Disable all other UI components when isPurchase is false
-                        AbsorbPointer(
-                          absorbing: !isPurchase, // Disables interaction when isPurchase is false
-                          child: Opacity(
-                            opacity: isPurchase ? 1.0 : 0.5, // Visually indicate the UI is disabled
-                            child: Column(
-                              children: [
-                                // Expense Amount
-                                _buildSectionLabel("EXPENSE_AMOUNT".tr()),
-                                _buildInputField("EXPENSE_AMOUNT".tr(), amountController, Icons.attach_money, keyboardType: TextInputType.number, inputFormat: "float"),
-                    
-                                SizedBox(height: 15),
-                    
-                                // Payment Method & Payment Status (Row)
-                                Row(
+                      // Bird Type Selection
+                      Container(
+                        height: 200,
+                        width: widthScreen,
+                        margin: EdgeInsets.only(left: 15),
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: birds.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            bool isSelected = index == chosen_index;
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  chosen_index = index;
+                                  nameController.text = birds[index].name.tr() + " Flock".tr() + "${flocks.length + 1}";
+                                });
+                              },
+                              child: AnimatedContainer(
+                                duration: Duration(milliseconds: 300),
+                                margin: EdgeInsets.symmetric(horizontal: 8),
+                                padding: EdgeInsets.all(10),
+                                width: 130,
+                                decoration: BoxDecoration(
+                                  color: isSelected ? Colors.blue[100] : Colors.white,
+                                  borderRadius: BorderRadius.circular(15),
+
+                                  border: Border.all(
+                                    color: isSelected ? Colors.blue : Colors.grey,
+                                    width: isSelected ? 3 : 1,
+                                  ),
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.topRight,
                                   children: [
+                                    // Tick icon on the top-right corner
+                                    if (isSelected)
+                                      Positioned(
+                                        child: Icon(Icons.check_circle, color: Colors.blue, size: 28),
+                                      ),
                                     Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Image.asset(birds[index].image.replaceAll("jpeg", "png"), height: 90, width: 90, fit: BoxFit.contain),
+                                        SizedBox(height: 10),
+                                        Text(
+                                          birds[index].name.tr(),
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+
+                      SizedBox(height: 20),
+
+                      // Flock Name Input
+                      Container(
+                          margin: EdgeInsets.only(left: 15, right: 15),
+                          child: _buildInputField("FLOCK_NAME".tr(), nameController, Icons.edit)),
+
+                      SizedBox(height: 15),
+
+                      // Number of Birds & Purpose Selection
+                      Container(
+                        margin: EdgeInsets.only(left: 15, right: 15),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            _buildInputField("NUMBER_BIRDS".tr(), birdcountController, Icons.numbers, width: 150, keyboardType: TextInputType.number, inputFormat: "number"),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: _buildDropdownField("PURPOSE1".tr(), _purposeList, _purposeselectedValue, (value) {
+                                setState(() {
+                                  _purposeselectedValue = value!;
+                                });
+                              }),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ):SizedBox(width: 1,),
+
+                activeStep==1?
+                Container(
+                  margin: EdgeInsets.all(15),
+                  child: Column(
+                    children: [
+                      // Section Title
+                      Text(
+                        "Financial Info".tr(),
+                        textAlign: TextAlign.start,
+                        style: TextStyle(
+                          color: Utils.getThemeColorBlue(),
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      SizedBox(height: 20),
+
+                      // Acquisition Dropdown (Always Enabled)
+                      _buildSectionLabel("ACQUSITION".tr()),
+                      _buildDropdownField("ACQUSITION".tr(), acqusitionList, _acqusitionselectedValue, (value) {
+                        setState(() {
+                          _acqusitionselectedValue = value!;
+                          isPurchase = (_acqusitionselectedValue == "PURCHASED"); // Enable when PURCHASED is selected
+
+                        });
+                      }),
+
+                      SizedBox(height: 15),
+
+                      // Disable all other UI components when isPurchase is false
+                      AbsorbPointer(
+                        absorbing: !isPurchase, // Disables interaction when isPurchase is false
+                        child: Opacity(
+                          opacity: isPurchase ? 1.0 : 0.5, // Visually indicate the UI is disabled
+                          child: Column(
+                            children: [
+                              // Expense Amount
+                              _buildSectionLabel("EXPENSE_AMOUNT".tr()),
+                              _buildInputField("EXPENSE_AMOUNT".tr(), amountController, Icons.attach_money, keyboardType: TextInputType.number, inputFormat: "float"),
+
+                              SizedBox(height: 15),
+
+                              // Payment Method & Payment Status (Row)
+                              Row(
+                                children: [
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      _buildSectionLabel("Payment Method".tr()),
+                                      _buildDropdownField("Payment Method".tr(), _visiblePaymentMethodList, payment_method, width: 200, (value) {
+                                        setState(() {
+                                          payment_method = value!;
+                                        });
+                                      }),
+                                    ],
+                                  ),
+                                  SizedBox(width: 5),
+                                  Expanded(
+                                    child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        _buildSectionLabel("Payment Method".tr()),
-                                        _buildDropdownField("Payment Method".tr(), _visiblePaymentMethodList, payment_method, width: 200, (value) {
+                                        _buildSectionLabel("Payment Status".tr()),
+                                        _buildDropdownField("Payment Status".tr(), paymentStatusList, payment_status, (value) {
                                           setState(() {
-                                            payment_method = value!;
+                                            payment_status = value!;
                                           });
                                         }),
                                       ],
                                     ),
-                                    SizedBox(width: 5),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          _buildSectionLabel("Payment Status".tr()),
-                                          _buildDropdownField("Payment Status".tr(), paymentStatusList, payment_status, (value) {
-                                            setState(() {
-                                              payment_status = value!;
-                                            });
-                                          }),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                    
-                                SizedBox(height: 15),
-                    
-                                // Paid To
-                                _buildSectionLabel("PAID_TO1".tr()),
-                                _buildInputField("PAID_TO_HINT".tr(), personController, Icons.person),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                  :SizedBox(width: 1,),
-
-
-                  activeStep==2?
-                  Stack(
-                    children: [
-                      IgnorePointer(
-                        ignoring: saving_images, // disables child when true
-                        child: Opacity(
-                          opacity: saving_images ? 0.5 : 1.0, // optional visual feedback
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(height: 30),
-                              Center(
-                                child: Text(
-                                  "Flock Images and Description".tr(),
-                                  style: TextStyle(
-                                    color: Utils.getThemeColorBlue(),
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
                                   ),
-                                ),
+                                ],
                               ),
-                              SizedBox(height: 25),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 20),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _buildSectionLabel("DATE".tr()),
-                                    GestureDetector(
-                                      onTap: () {
-                                        pickDate();
-                                      },
-                                      child: _buildDatePicker(Utils.getFormattedDate(date)),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 20),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _buildSectionLabel("FLOCK_IMAGES".tr()),
-                                    _buildImagePicker(),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(height: 30),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 20),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _buildSectionLabel("FLOCK_DESC".tr()),
-                                    _buildInputField(
-                                      "NOTES_HINT".tr(),
-                                      notesController,
-                                      Icons.notes,
-                                      keyboardType: TextInputType.multiline,
-                                      height: 100,
-                                    ),
-                                  ],
-                                ),
-                              ),
+
+                              SizedBox(height: 15),
+
+                              // Paid To
+                              _buildSectionLabel("PAID_TO1".tr()),
+                              _buildInputField("PAID_TO_HINT".tr(), personController, Icons.person),
                             ],
                           ),
                         ),
                       ),
+                    ],
+                  ),
+                )
+                :SizedBox(width: 1,),
 
-                      // Optional loading spinner when saving
-                      if (saving_images)
-                        Positioned.fill(
-                          child: Container(
-                            color: Colors.black45,
-                            child: Center(
-                              child: CircularProgressIndicator(),
+
+                activeStep==2?
+                Stack(
+                  children: [
+                    IgnorePointer(
+                      ignoring: saving_images, // disables child when true
+                      child: Opacity(
+                        opacity: saving_images ? 0.5 : 1.0, // optional visual feedback
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 20),
+                            Center(
+                              child: Text(
+                                "Flock Images and Description".tr(),
+                                style: TextStyle(
+                                  color: Utils.getThemeColorBlue(),
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
+                            SizedBox(height: 25),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildSectionLabel("DATE".tr()),
+                                  GestureDetector(
+                                    onTap: () {
+                                      pickDate();
+                                    },
+                                    child: _buildDatePicker(Utils.getFormattedDate(date)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildSectionLabel("FLOCK_IMAGES".tr()),
+                                  _buildImagePicker(),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 30),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildSectionLabel("FLOCK_DESC".tr()),
+                                  _buildInputField(
+                                    "NOTES_HINT".tr(),
+                                    notesController,
+                                    Icons.notes,
+                                    keyboardType: TextInputType.multiline,
+                                    height: 100,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Optional loading spinner when saving
+                    if (saving_images)
+                      Positioned.fill(
+                        child: Container(
+                          color: Colors.black45,
+                          child: Center(
+                            child: CircularProgressIndicator(),
                           ),
                         ),
-                    ],
-                  ) : SizedBox(width: 1,),
+                      ),
+                  ],
+                ) : SizedBox(width: 1,),
 
-                ],
-              ),
+              ],
             ),
           ),
         ),
@@ -1510,7 +1492,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
           print("Images Inserted");
           Utils.showToast("FLOCK_CREATED");
           Navigator.pop(context);
-          gotoNotificationsScreen(f_id!);
+          gotoNotificationsScreen(f_id);
         }
 
       }
@@ -1528,10 +1510,10 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
               f_id: f_id, image: base64Images.elementAt(i),
               sync_id: Utils.getUniueId(),
               sync_status: SyncStatus.SYNCED,
-    last_modified: Utils.getTimeStamp(),
-    modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-    farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : ''
-    );
+              last_modified: Utils.getTimeStamp(),
+              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : ''
+          );
 
           DatabaseHelper.insertFlockImages(image);
         }
@@ -1539,7 +1521,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
         print("Images Inserted");
         Utils.showToast("FLOCK_CREATED");
         Navigator.pop(context);
-        gotoNotificationsScreen(f_id!);
+        gotoNotificationsScreen(f_id);
       }
     }
 

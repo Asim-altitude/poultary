@@ -72,7 +72,7 @@ class _AboutAppPage extends State<AboutAppPage> {
              Text("• Multi-user Role Management".tr()),
              Text("• Data Backup and Sync".tr()),
             const SizedBox(height: 16),
-            const Text("Contact Us:",
+             Text("Contact Us:".tr(),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             InkWell(
               onTap: () => _launchUrl("mailto:zaheer6110@gmail.com"),

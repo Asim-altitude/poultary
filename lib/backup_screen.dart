@@ -4,7 +4,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
@@ -14,7 +13,6 @@ import 'home_screen.dart';
 import 'model/category_item.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
-import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -45,6 +43,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
     _rewardedAd?.dispose();
     super.dispose();
   }
+
   void _loadRewardedAd() {
     RewardedAd.load(
       adUnitId: Utils.rewardedAdUnitId, // Replace with your AdMob Rewarded Ad Unit ID
@@ -110,8 +109,8 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
         preferredSize: Size.fromHeight(kToolbarHeight),
         child: ClipRRect(
           borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(20.0), // Round bottom-left corner
-            bottomRight: Radius.circular(20.0), // Round bottom-right corner
+            bottomLeft: Radius.circular(10.0), // Round bottom-left corner
+            bottomRight: Radius.circular(10.0), // Round bottom-right corner
           ),
           child: AppBar(
             title: Text(
@@ -123,7 +122,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
               ),
             ),
             centerTitle: true,
-            backgroundColor: Utils.getThemeColorBlue(), // Customize the color
+            backgroundColor: Colors.blue, // Customize the color
             elevation: 8, // Gives it a more elevated appearance
             leading: IconButton(
               icon: Icon(Icons.arrow_back, color: Colors.white),
@@ -184,71 +183,147 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                   print(ex);
                 }*/
 
-                showRestoreOptionsDialog(context, () async {
-                  await DatabaseHelper.importDataBaseFile(context);
-                  try {
-                    await DatabaseHelper.addEggColorColumn();
-                    await DatabaseHelper.addFlockInfoColumn();
-                    await DatabaseHelper.addQuantityColumnMedicine();
-                    await DatabaseHelper.addUnitColumnMedicine();
-                    await DatabaseHelper.createFeedStockHistoryTable();
-                    await DatabaseHelper.createMedicineStockHistoryTable();
-                    await DatabaseHelper.createVaccineStockHistoryTable();
-                    await DatabaseHelper.createSaleContractorTable();
-                    await DatabaseHelper.createFeedIngridentTable();
-                    await DatabaseHelper.createFeedBatchTable();
-                    await DatabaseHelper.createFeedBatchItemTable();
-                    await DatabaseHelper.createWeightRecordTableIfNotExists();
-                    await DatabaseHelper.createScheduledNotificationsTable();
-                    await DatabaseHelper.createStockExpenseJunction();
-                    await DatabaseHelper.createEggTransactionJunction();
-                    await DatabaseHelper.createSyncFailedTable();
-                    await addNewColumn();
-                    await addMissingCategories();
-                  }
-                  catch(ex){
-                    print(ex);
-                  }
-                  try {
-                    List<String> tables = [
-                      'Flock',
-                      'Flock_Image',
-                      'Eggs',
-                      'Feeding',
-                      'Transactions',
-                      'Vaccination_Medication',
-                      'Category_Detail',
-                      'EggTransaction',
-                      'FeedBatch',
-                      'FeedBatchItem',
-                      'FeedIngredient',
-                      'FeedStockHistory',
-                      'Flock_Detail',
-                      'MedicineStockHistory',
-                      'SaleContractor',
-                      'ScheduledNotification',
-                      'VaccineStockHistory',
-                      'WeightRecord',
-                      'StockExpense',
-                      'CustomCategory',
-                      'CustomCategoryData',
+                if(Utils.isMultiUSer){
+                  showFarmRestoreWarningDialog(context, () {
+                    showRestoreOptionsDialog(context, () async {
+                      await DatabaseHelper.importDataBaseFile(context);
+                      try {
+                        await DatabaseHelper.addEggColorColumn();
+                        await DatabaseHelper.addFlockInfoColumn();
+                        await DatabaseHelper.addQuantityColumnMedicine();
+                        await DatabaseHelper.addUnitColumnMedicine();
+                        await DatabaseHelper.createFeedStockHistoryTable();
+                        await DatabaseHelper.createMedicineStockHistoryTable();
+                        await DatabaseHelper.createVaccineStockHistoryTable();
+                        await DatabaseHelper.createSaleContractorTable();
+                        await DatabaseHelper.createFeedIngridentTable();
+                        await DatabaseHelper.createFeedBatchTable();
+                        await DatabaseHelper.createFeedBatchItemTable();
+                        await DatabaseHelper.createWeightRecordTableIfNotExists();
+                        await DatabaseHelper.createScheduledNotificationsTable();
+                        await DatabaseHelper.createStockExpenseJunction();
+                        await DatabaseHelper.createEggTransactionJunction();
+                        await DatabaseHelper.createSyncFailedTable();
+                        await addNewColumn();
+                        await addMissingCategories();
+                      }
+                      catch (ex) {
+                        print(ex);
+                      }
+                      try {
+                        List<String> tables = [
+                          'Flock',
+                          'Flock_Image',
+                          'Eggs',
+                          'Feeding',
+                          'Transactions',
+                          'Vaccination_Medication',
+                          'Category_Detail',
+                          'EggTransaction',
+                          'FeedBatch',
+                          'FeedBatchItem',
+                          'FeedIngredient',
+                          'FeedStockHistory',
+                          'Flock_Detail',
+                          'MedicineStockHistory',
+                          'SaleContractor',
+                          'ScheduledNotification',
+                          'VaccineStockHistory',
+                          'WeightRecord',
+                          'StockExpense',
+                          'CustomCategory',
+                          'CustomCategoryData',
 
-                    ]; // Add your actual table names
+                        ]; // Add your actual table names
 
-                    for (final table in tables) {
-                      await DatabaseHelper.instance.addSyncColumnsToTable(table);
-                      await DatabaseHelper.instance.assignSyncIds(table);
+                        for (final table in tables) {
+                          await DatabaseHelper.instance.addSyncColumnsToTable(
+                              table);
+                          await DatabaseHelper.instance.assignSyncIds(table);
+                        }
+
+                        await DatabaseHelper.instance.database; // forces re-open
+                        await SessionManager.setBoolValue(SessionManager
+                            .table_created, true);
+                        print('TABLE CREATION DONE');
+                      }
+                      catch (ex) {
+                        print(ex);
+                      }
+                    }, () {
+                      restoreDatabaseFromDrive();
+                    });
+                  });
+                }else {
+                  showRestoreOptionsDialog(context, () async {
+                    await DatabaseHelper.importDataBaseFile(context);
+                    try {
+                      await DatabaseHelper.addEggColorColumn();
+                      await DatabaseHelper.addFlockInfoColumn();
+                      await DatabaseHelper.addQuantityColumnMedicine();
+                      await DatabaseHelper.addUnitColumnMedicine();
+                      await DatabaseHelper.createFeedStockHistoryTable();
+                      await DatabaseHelper.createMedicineStockHistoryTable();
+                      await DatabaseHelper.createVaccineStockHistoryTable();
+                      await DatabaseHelper.createSaleContractorTable();
+                      await DatabaseHelper.createFeedIngridentTable();
+                      await DatabaseHelper.createFeedBatchTable();
+                      await DatabaseHelper.createFeedBatchItemTable();
+                      await DatabaseHelper.createWeightRecordTableIfNotExists();
+                      await DatabaseHelper.createScheduledNotificationsTable();
+                      await DatabaseHelper.createStockExpenseJunction();
+                      await DatabaseHelper.createEggTransactionJunction();
+                      await DatabaseHelper.createSyncFailedTable();
+                      await addNewColumn();
+                      await addMissingCategories();
                     }
+                    catch (ex) {
+                      print(ex);
+                    }
+                    try {
+                      List<String> tables = [
+                        'Flock',
+                        'Flock_Image',
+                        'Eggs',
+                        'Feeding',
+                        'Transactions',
+                        'Vaccination_Medication',
+                        'Category_Detail',
+                        'EggTransaction',
+                        'FeedBatch',
+                        'FeedBatchItem',
+                        'FeedIngredient',
+                        'FeedStockHistory',
+                        'Flock_Detail',
+                        'MedicineStockHistory',
+                        'SaleContractor',
+                        'ScheduledNotification',
+                        'VaccineStockHistory',
+                        'WeightRecord',
+                        'StockExpense',
+                        'CustomCategory',
+                        'CustomCategoryData',
 
-                    await SessionManager.setBoolValue(SessionManager.table_created, true);
-                    print('TABLE CREATION DONE');
-                  }
-                  catch(ex){
-                    print(ex);
-                  }
-                }, () {
-                  restoreDatabaseFromDrive();
-                });
+                      ]; // Add your actual table names
+
+                      for (final table in tables) {
+                        await DatabaseHelper.instance.addSyncColumnsToTable(
+                            table);
+                        await DatabaseHelper.instance.assignSyncIds(table);
+                      }
+
+                      await DatabaseHelper.instance.database; // forces re-open
+                      await SessionManager.setBoolValue(SessionManager
+                          .table_created, true);
+                      print('TABLE CREATION DONE');
+                    }
+                    catch (ex) {
+                      print(ex);
+                    }
+                  }, () {
+                    restoreDatabaseFromDrive();
+                  });
+                }
 
               },
             ),
@@ -261,6 +336,96 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
       ),),
     );
   }
+
+
+  void showFarmRestoreWarningDialog(BuildContext context, VoidCallback onConfirm) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(22),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.warning_amber_rounded,
+                  size: 60, color: Colors.redAccent),
+              const SizedBox(height: 16),
+              Text(
+                "important_notice".tr(),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.redAccent,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                "farm_restore_warning_message".tr(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Cancel Button
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    "CANCEL".tr(),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Proceed Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    onConfirm();
+                  },
+                  child: Text(
+                    "i_understand_proceed".tr(),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
 
   /// **Show Restore Options Dialog**
   void showRestoreOptionsDialog(BuildContext context, VoidCallback onLocalRestore, VoidCallback onDriveRestore) {
@@ -934,6 +1099,9 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
           await sink.close();
           print("✅ Database restored from ${backupFile.name}");
           Utils.showToast("✅ Restored from".tr() +"${backupFile.name}");
+
+          await DatabaseHelper.instance.database; // forces re-open
+
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => HomeScreen()),
                 (route) => false,

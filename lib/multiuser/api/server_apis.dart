@@ -132,6 +132,7 @@ class FlockImageUploader {
           Utils.shouldBackup = false;
           await SessionManager.saveBackupTimestamp();
         } else {
+          print("BACKUP FAILED $json");
           Utils.showToast("❌ Could not Backup".tr());
 
           throw Exception("Server error: ${json['message']}");
@@ -149,7 +150,7 @@ class FlockImageUploader {
   Future<String?> downloadImageAsBase64(String imageUrl) async {
     try {
       print("DOWNLOADING "+imageUrl);
-      final response = await http.get(Uri.parse(imageUrl));
+      final response = await http.get(Uri.parse(Utils.ProxyAPI+imageUrl));
       if (response.statusCode == 200) {
         print("DONE");
         final bytes = response.bodyBytes;

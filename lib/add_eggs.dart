@@ -216,368 +216,42 @@ class _NewEggCollection extends State<NewEggCollection>
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height -
         (safeAreaHeight + safeAreaHeightBottom);
     child:
-    return SafeArea(
-      child: Scaffold(
-        bottomNavigationBar:  Container(
-          margin: EdgeInsets.all(15),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Show Previous Button only if activeStep > 0
-              if (activeStep > 0)
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        activeStep--;
-                      });
-                    },
-                    child: Container(
-                      height: 55,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade700,
-                        borderRadius: BorderRadius.circular(30), // More rounded
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.3),
-                            spreadRadius: 2,
-                            blurRadius: 6,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      margin: EdgeInsets.symmetric(horizontal: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
-                          SizedBox(width: 5),
-                          Text(
-                            "Previous".tr(),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-              // Next or Finish Button
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0, // removes the shadow
+        scrolledUnderElevation: 0, // removes shadow when scrolling (Flutter 3.7+)
+        surfaceTintColor: Colors.transparent, // removes Material3 tint
+        backgroundColor: Utils.getScreenBackground(), // Customize the color
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Utils.getThemeColorBlue()),
+          onPressed: () {
+            Navigator.pop(context); // Navigates back
+          },
+        ),
+      ),
+      bottomNavigationBar:  Container(
+        margin: EdgeInsets.all(15),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Show Previous Button only if activeStep > 0
+            if (activeStep > 0)
               Expanded(
                 child: GestureDetector(
-                  onTap: () async {
-                    good_eggs = int.tryParse(goodEggsController.text) ?? 0;
-                    bad_eggs = int.tryParse(badEggsController.text) ?? 0;
-
-                    checkEggsInTrays();
-
+                  onTap: () {
                     setState(() {
-                      activeStep++;
+                      activeStep--;
                     });
-
-                    if(activeStep==2) {
-                      await DatabaseHelper.instance.database;
-                      try {
-                        if (isCollection)
-                        {
-                          if (isEdit) {
-                            widget.eggs!.f_id = getFlockID();
-                            widget.eggs!.f_name =
-                                _purposeselectedValue;
-                            widget.eggs!.date = this.date;
-                            widget.eggs!.egg_color = selectedColor;
-                            widget.eggs!.good_eggs = good_eggs;
-                            widget.eggs!.bad_eggs = bad_eggs;
-                            widget.eggs!.total_eggs = good_eggs + bad_eggs;
-                            widget.eggs!.short_note = notesController.text;
-
-                            widget.eggs!.sync_id = widget.eggs!.sync_id;
-                    widget.eggs!.sync_status= SyncStatus.SYNCED;
-                    widget.eggs!.last_modified = Utils.getTimeStamp();
-                    widget.eggs!.modified_by = Utils.isMultiUSer ? Utils.currentUser!.email : '';
-                    widget.eggs!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
-                    widget.eggs!.f_sync_id = getFlockSyncID();
-
-                            await DatabaseHelper.updateEggCollection(
-                                widget.eggs!);
-
-                            Utils.showToast("SUCCESSFUL");
-
-
-                        if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_eggs")) {
-                          EggRecord eggRecord = EggRecord(
-                              eggs: widget.eggs!,
-                            sync_id: widget.eggs!.sync_id,
-                            sync_status: SyncStatus.UPDATED,
-                            last_modified: Utils.getTimeStamp(),
-                            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                          );
-
-                          bool synced = await FireBaseUtils
-                              .updateEggRecord(eggRecord);
-                          if (!synced) {
-
-                          }
-                        }
-
-                            Navigator.pop(context, "Egg ADDED");
-                          }
-                          else {
-                            Eggs eggs = Eggs(
-                                f_id: getFlockID(),
-                                f_name: _purposeselectedValue,
-                                image: '',
-                                good_eggs: good_eggs,
-                                bad_eggs: bad_eggs,
-                                total_eggs: good_eggs + bad_eggs,
-                                short_note: notesController.text,
-                                date: date,
-                                reduction_reason: '',
-                                isCollection: 1,
-                                egg_color: selectedColor,
-                                sync_id: Utils.getUniueId(),
-                                sync_status: SyncStatus.SYNCED,
-                                last_modified: Utils.getTimeStamp(),
-                                modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                                farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                                f_sync_id: getFlockSyncID());
-
-                            int? id = await DatabaseHelper.insertEggCollection(eggs);
-                            Utils.showToast("SUCCESSFUL");
-
-                        if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_eggs")) {
-                          EggRecord eggRecord = EggRecord(
-                              eggs: eggs,
-                              sync_id: eggs.sync_id,
-                              sync_status: SyncStatus.SYNCED,
-                              last_modified: Utils.getTimeStamp(),
-                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                          );
-
-                           await FireBaseUtils.uploadEggRecord(eggRecord);
-
-                        }
-
-                            Navigator.pop(context, "Egg ADDED");
-
-                          }
-                        }
-                        else {
-                          if (isEdit) {
-                            widget.eggs!.f_id = getFlockID();
-                            widget.eggs!.f_name =
-                                _purposeselectedValue;
-                            widget.eggs!.date = this.date;
-                            widget.eggs!.egg_color = selectedColor;
-                            widget.eggs!.good_eggs = good_eggs;
-                            widget.eggs!.bad_eggs = bad_eggs;
-                            widget.eggs!.reduction_reason =
-                                _reductionReasonValue;
-                            widget.eggs!.total_eggs = good_eggs + bad_eggs;
-                            widget.eggs!.short_note =
-                                notesController.text;
-
-                            widget.eggs!.sync_id = widget.eggs!.sync_id;
-                            widget.eggs!.sync_status= SyncStatus.SYNCED;
-                            widget.eggs!.last_modified = Utils.getTimeStamp();
-                            widget.eggs!.modified_by = Utils.isMultiUSer ? Utils.currentUser!.email : '';
-                            widget.eggs!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
-                            widget.eggs!.f_sync_id = getFlockSyncID();
-
-                            await DatabaseHelper.updateEggCollection(widget.eggs!);
-
-                            if(transactionItem != null)
-                            {
-
-                              transactionItem!.amount = amount.toString();
-                              transactionItem!.how_many = (good_eggs + bad_eggs).toString();
-                              transactionItem!.payment_status = payment_status;
-                              transactionItem!.payment_method = payment_method;
-                              transactionItem!.sold_purchased_from = contractorName;
-
-                              transactionItem!.sync_status = SyncStatus.UPDATED;
-                              transactionItem!.last_modified = Utils.getTimeStamp();
-                              transactionItem!.modified_by = Utils.isMultiUSer ? Utils.currentUser!.email : '';
-                              transactionItem!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
-                              transactionItem!.f_sync_id = getFlockSyncID();
-
-                              print("Contractor ${contractorName}");
-                              print("TR Contractor ${transactionItem!.sold_purchased_from}");
-
-                              await DatabaseHelper.updateTransaction(transactionItem!);
-
-                              if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_eggs")) {
-                                EggRecord eggRecord = EggRecord(
-                                    eggs: widget.eggs!, transaction: transactionItem,
-                                  sync_id: widget.eggs!.sync_id,
-                                  sync_status: SyncStatus.UPDATED,
-                                  last_modified: Utils.getTimeStamp(),
-                                  modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                                  farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-
-                                );
-
-                                bool synced = await FireBaseUtils
-                                    .updateEggRecord(eggRecord);
-                                if (!synced) {
-
-                                }
-                              }
-
-                            }
-                            else
-                            {
-                              print("NO Transaction");
-
-                              if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_eggs")) {
-                                EggRecord eggRecord = EggRecord(
-                                    eggs: widget.eggs!,
-                                  sync_id: widget.eggs!.sync_id,
-                                  sync_status: SyncStatus.UPDATED,
-                                  last_modified: Utils.getTimeStamp(),
-                                  modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                                  farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                                );
-
-                                bool synced = await FireBaseUtils
-                                    .updateEggRecord(eggRecord);
-                                if (!synced) {
-
-                                }
-                              }
-                            }
-
-                            Utils.showToast("SUCCESSFUL");
-                            Navigator.pop(context, "Egg ADDED");
-                          }
-                          else {
-                            Eggs eggs = Eggs(
-                                f_id: getFlockID(),
-                                f_name: _purposeselectedValue,
-                                image: '',
-                                good_eggs: good_eggs,
-                                bad_eggs: bad_eggs,
-                                total_eggs: good_eggs + bad_eggs,
-                                short_note: notesController.text,
-                                date: date,
-                                reduction_reason: _reductionReasonValue,
-                                isCollection: 0,
-                                egg_color: selectedColor,
-                                sync_id: Utils.getUniueId(),
-                                sync_status: SyncStatus.SYNCED,
-                                last_modified: Utils.getTimeStamp(),
-                                modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                                farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                                f_sync_id: getFlockSyncID()
-                            );
-
-                            int? eggs_id = await DatabaseHelper
-                                .insertEggCollection(eggs);
-
-                            if(isEggSale()){
-
-                              TransactionItem transaction_item = TransactionItem(
-                                  f_id: getFlockID(),
-                                  date: date,
-                                  sale_item: "Egg Sale",
-                                  expense_item: "",
-                                  type: "Income",
-                                  amount: amount.toString(),
-                                  payment_method: payment_method,
-                                  payment_status: payment_status,
-                                  sold_purchased_from: contractorName,
-                                  short_note: "Egg Sale".tr()+" on $date}",
-                                  how_many: (good_eggs + bad_eggs).toString(),
-                                  extra_cost: "",
-                                  extra_cost_details: "",
-                                  f_name: getFlockName(getFlockID()),
-                                  flock_update_id: '-1',
-                                  sync_id: Utils.getUniueId(),
-                                  sync_status: SyncStatus.SYNCED,
-                                  last_modified: Utils.getTimeStamp(),
-                                  modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                                  farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                                  f_sync_id: getFlockSyncID());
-
-                              int? transaction_id = await DatabaseHelper.insertNewTransaction(transaction_item);
-
-                              EggTransaction eggTransaction = EggTransaction(eggItemId: eggs_id!, transactionId: transaction_id!, syncId: Utils.getUniueId(), syncStatus: SyncStatus.SYNCED, lastModified: Utils.getTimeStamp(), modifiedBy: Utils.isMultiUSer ? Utils.currentUser!.email : '', farmId: Utils.isMultiUSer ? Utils.currentUser!.farmId:'');
-
-                              DatabaseHelper.insertEggJunction(eggTransaction);
-
-                              if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_eggs")) {
-                                EggRecord eggRecord = EggRecord(
-                                    eggs: eggs, transaction: transaction_item,
-                                  sync_id: eggs.sync_id,
-                                  sync_status: SyncStatus.SYNCED,
-                                  last_modified: Utils.getTimeStamp(),
-                                  modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                                  farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                                );
-
-                                bool synced = await FireBaseUtils
-                                    .uploadEggRecord(eggRecord);
-                                if (!synced) {
-
-                                }
-                              }
-
-                            }
-                            else
-                            {
-                              if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_eggs")) {
-                                EggRecord eggRecord = EggRecord(
-                                    eggs: eggs,
-                                  sync_id: eggs.sync_id,
-                                  sync_status: SyncStatus.SYNCED,
-                                  last_modified: Utils.getTimeStamp(),
-                                  modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                                  farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                                );
-
-
-
-                                bool synced = await FireBaseUtils
-                                    .uploadEggRecord(eggRecord);
-                                if (!synced) {
-
-                                }
-                              }
-                            }
-
-                            Utils.showToast("SUCCESSFUL");
-                            Navigator.pop(context, "Egg Reduced");
-                          }
-                        }
-                      }
-                      catch (ex) {
-                        activeStep = 2;
-                        Utils.showToast(ex.toString());
-                      }
-                    }
                   },
                   child: Container(
                     height: 55,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: activeStep == 1
-                            ? [Utils.getThemeColorBlue(), Colors.greenAccent] // Finish Button
-                            : [Utils.getThemeColorBlue(), Colors.blueAccent], // Next Button
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                      color: Colors.grey.shade700,
                       borderRadius: BorderRadius.circular(30), // More rounded
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.blue.withOpacity(0.5),
+                          color: Colors.grey.withOpacity(0.3),
                           spreadRadius: 2,
                           blurRadius: 6,
                           offset: Offset(0, 3),
@@ -588,544 +262,880 @@ class _NewEggCollection extends State<NewEggCollection>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
+                        SizedBox(width: 5),
                         Text(
-                          activeStep == 1 ? "SAVE".tr() : "Next".tr(),
+                          "Previous".tr(),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(width: 5),
-                        Icon(
-                          activeStep == 1 ? Icons.check_circle : Icons.arrow_forward_ios,
-                          color: Colors.white,
-                          size: 20,
-                        ),
                       ],
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
-        ),
-        body: SafeArea(
-          top: false,
-          child: Container(
-            width: widthScreen,
-            height: heightScreen,
-            color: Utils.getScreenBackground(),
-            child: SingleChildScrollViewWithStickyFirstWidget(
-              child: Column(
-                children: [
-                  Utils.getDistanceBar(),
 
-                  ClipRRect(
-                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color:  Utils.getScreenBackground(), //(x,y)
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            alignment: Alignment.center,
-                            width: 50,
-                            height: 50,
-                            child: InkWell(
-                              child: Icon(Icons.arrow_back,
-                                  color: Utils.getThemeColorBlue(), size: 30),
-                              onTap: () {
-                                Navigator.pop(context,"Egg ADDED");
-                              },
-                            ),
-                          ),
-                          Container(
-                              margin: EdgeInsets.only(left: 10),
-                              child: Text(
-                               "",
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold),
-                              )),
+            // Next or Finish Button
+            Expanded(
+              child: GestureDetector(
+                onTap: () async {
+                  good_eggs = int.tryParse(goodEggsController.text) ?? 0;
+                  bad_eggs = int.tryParse(badEggsController.text) ?? 0;
 
-                        ],
-                      ),
+                  checkEggsInTrays();
+
+                  setState(() {
+                    activeStep++;
+                  });
+
+                  if(activeStep==2) {
+                    await DatabaseHelper.instance.database;
+                    try {
+                      if (isCollection)
+                      {
+                        if (isEdit) {
+                          widget.eggs!.f_id = getFlockID();
+                          widget.eggs!.f_name =
+                              _purposeselectedValue;
+                          widget.eggs!.date = this.date;
+                          widget.eggs!.egg_color = selectedColor;
+                          widget.eggs!.good_eggs = good_eggs;
+                          widget.eggs!.bad_eggs = bad_eggs;
+                          widget.eggs!.total_eggs = good_eggs + bad_eggs;
+                          widget.eggs!.short_note = notesController.text;
+
+                          widget.eggs!.sync_id = widget.eggs!.sync_id;
+                  widget.eggs!.sync_status= SyncStatus.SYNCED;
+                  widget.eggs!.last_modified = Utils.getTimeStamp();
+                  widget.eggs!.modified_by = Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                  widget.eggs!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+                  widget.eggs!.f_sync_id = getFlockSyncID();
+
+                          await DatabaseHelper.updateEggCollection(
+                              widget.eggs!);
+
+                          Utils.showToast("SUCCESSFUL");
+
+
+                      if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_eggs")) {
+                        EggRecord eggRecord = EggRecord(
+                            eggs: widget.eggs!,
+                          sync_id: widget.eggs!.sync_id,
+                          sync_status: SyncStatus.UPDATED,
+                          last_modified: Utils.getTimeStamp(),
+                          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                        );
+
+                        bool synced = await FireBaseUtils
+                            .updateEggRecord(eggRecord);
+                        if (!synced) {
+
+                        }
+                      }
+
+                          Navigator.pop(context, "Egg ADDED");
+                        }
+                        else {
+                          Eggs eggs = Eggs(
+                              f_id: getFlockID(),
+                              f_name: _purposeselectedValue,
+                              image: '',
+                              good_eggs: good_eggs,
+                              bad_eggs: bad_eggs,
+                              total_eggs: good_eggs + bad_eggs,
+                              short_note: notesController.text,
+                              date: date,
+                              reduction_reason: '',
+                              isCollection: 1,
+                              egg_color: selectedColor,
+                              sync_id: Utils.getUniueId(),
+                              sync_status: SyncStatus.SYNCED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                              f_sync_id: getFlockSyncID());
+
+                          int? id = await DatabaseHelper.insertEggCollection(eggs);
+                          Utils.showToast("SUCCESSFUL");
+
+                      if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_eggs")) {
+                        EggRecord eggRecord = EggRecord(
+                            eggs: eggs,
+                            sync_id: eggs.sync_id,
+                            sync_status: SyncStatus.SYNCED,
+                            last_modified: Utils.getTimeStamp(),
+                            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                        );
+
+                         await FireBaseUtils.uploadEggRecord(eggRecord);
+
+                      }
+
+                          Navigator.pop(context, "Egg ADDED");
+
+                        }
+                      }
+                      else {
+                        if (isEdit) {
+                          widget.eggs!.f_id = getFlockID();
+                          widget.eggs!.f_name =
+                              _purposeselectedValue;
+                          widget.eggs!.date = this.date;
+                          widget.eggs!.egg_color = selectedColor;
+                          widget.eggs!.good_eggs = good_eggs;
+                          widget.eggs!.bad_eggs = bad_eggs;
+                          widget.eggs!.reduction_reason =
+                              _reductionReasonValue;
+                          widget.eggs!.total_eggs = good_eggs + bad_eggs;
+                          widget.eggs!.short_note =
+                              notesController.text;
+
+                          widget.eggs!.sync_id = widget.eggs!.sync_id;
+                          widget.eggs!.sync_status= SyncStatus.SYNCED;
+                          widget.eggs!.last_modified = Utils.getTimeStamp();
+                          widget.eggs!.modified_by = Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                          widget.eggs!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+                          widget.eggs!.f_sync_id = getFlockSyncID();
+
+                          await DatabaseHelper.updateEggCollection(widget.eggs!);
+
+                          if(transactionItem != null)
+                          {
+
+                            transactionItem!.amount = amount.toString();
+                            transactionItem!.how_many = (good_eggs + bad_eggs).toString();
+                            transactionItem!.payment_status = payment_status;
+                            transactionItem!.payment_method = payment_method;
+                            transactionItem!.sold_purchased_from = contractorName;
+
+                            transactionItem!.sync_status = SyncStatus.UPDATED;
+                            transactionItem!.last_modified = Utils.getTimeStamp();
+                            transactionItem!.modified_by = Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                            transactionItem!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+                            transactionItem!.f_sync_id = getFlockSyncID();
+
+                            print("Contractor ${contractorName}");
+                            print("TR Contractor ${transactionItem!.sold_purchased_from}");
+
+                            await DatabaseHelper.updateTransaction(transactionItem!);
+
+                            if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_eggs")) {
+                              EggRecord eggRecord = EggRecord(
+                                  eggs: widget.eggs!, transaction: transactionItem,
+                                sync_id: widget.eggs!.sync_id,
+                                sync_status: SyncStatus.UPDATED,
+                                last_modified: Utils.getTimeStamp(),
+                                modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                                farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+
+                              );
+
+                              bool synced = await FireBaseUtils
+                                  .updateEggRecord(eggRecord);
+                              if (!synced) {
+
+                              }
+                            }
+
+                          }
+                          else
+                          {
+                            print("NO Transaction");
+
+                            if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_eggs")) {
+                              EggRecord eggRecord = EggRecord(
+                                  eggs: widget.eggs!,
+                                sync_id: widget.eggs!.sync_id,
+                                sync_status: SyncStatus.UPDATED,
+                                last_modified: Utils.getTimeStamp(),
+                                modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                                farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                              );
+
+                              bool synced = await FireBaseUtils
+                                  .updateEggRecord(eggRecord);
+                              if (!synced) {
+
+                              }
+                            }
+                          }
+
+                          Utils.showToast("SUCCESSFUL");
+                          Navigator.pop(context, "Egg ADDED");
+                        }
+                        else {
+                          Eggs eggs = Eggs(
+                              f_id: getFlockID(),
+                              f_name: _purposeselectedValue,
+                              image: '',
+                              good_eggs: good_eggs,
+                              bad_eggs: bad_eggs,
+                              total_eggs: good_eggs + bad_eggs,
+                              short_note: notesController.text,
+                              date: date,
+                              reduction_reason: _reductionReasonValue,
+                              isCollection: 0,
+                              egg_color: selectedColor,
+                              sync_id: Utils.getUniueId(),
+                              sync_status: SyncStatus.SYNCED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                              f_sync_id: getFlockSyncID()
+                          );
+
+                          int? eggs_id = await DatabaseHelper
+                              .insertEggCollection(eggs);
+
+                          if(isEggSale()){
+
+                            TransactionItem transaction_item = TransactionItem(
+                                f_id: getFlockID(),
+                                date: date,
+                                sale_item: "Egg Sale",
+                                expense_item: "",
+                                type: "Income",
+                                amount: amount.toString(),
+                                payment_method: payment_method,
+                                payment_status: payment_status,
+                                sold_purchased_from: contractorName,
+                                short_note: "Egg Sale".tr()+" on $date}",
+                                how_many: (good_eggs + bad_eggs).toString(),
+                                extra_cost: "",
+                                extra_cost_details: "",
+                                f_name: getFlockName(getFlockID()),
+                                flock_update_id: '-1',
+                                sync_id: Utils.getUniueId(),
+                                sync_status: SyncStatus.SYNCED,
+                                last_modified: Utils.getTimeStamp(),
+                                modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                                farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                                f_sync_id: getFlockSyncID());
+
+                            int? transaction_id = await DatabaseHelper.insertNewTransaction(transaction_item);
+
+                            EggTransaction eggTransaction = EggTransaction(eggItemId: eggs_id!, transactionId: transaction_id!, syncId: Utils.getUniueId(), syncStatus: SyncStatus.SYNCED, lastModified: Utils.getTimeStamp(), modifiedBy: Utils.isMultiUSer ? Utils.currentUser!.email : '', farmId: Utils.isMultiUSer ? Utils.currentUser!.farmId:'');
+
+                            DatabaseHelper.insertEggJunction(eggTransaction);
+
+                            if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_eggs")) {
+                              EggRecord eggRecord = EggRecord(
+                                  eggs: eggs, transaction: transaction_item,
+                                sync_id: eggs.sync_id,
+                                sync_status: SyncStatus.SYNCED,
+                                last_modified: Utils.getTimeStamp(),
+                                modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                                farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                              );
+
+                              bool synced = await FireBaseUtils
+                                  .uploadEggRecord(eggRecord);
+                              if (!synced) {
+
+                              }
+                            }
+
+                          }
+                          else
+                          {
+                            if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_eggs")) {
+                              EggRecord eggRecord = EggRecord(
+                                  eggs: eggs,
+                                sync_id: eggs.sync_id,
+                                sync_status: SyncStatus.SYNCED,
+                                last_modified: Utils.getTimeStamp(),
+                                modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                                farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                              );
+
+
+
+                              bool synced = await FireBaseUtils
+                                  .uploadEggRecord(eggRecord);
+                              if (!synced) {
+
+                              }
+                            }
+                          }
+
+                          Utils.showToast("SUCCESSFUL");
+                          Navigator.pop(context, "Egg Reduced");
+                        }
+                      }
+                    }
+                    catch (ex) {
+                      activeStep = 2;
+                      Utils.showToast(ex.toString());
+                    }
+                  }
+                },
+                child: Container(
+                  height: 55,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: activeStep == 1
+                          ? [Utils.getThemeColorBlue(), Colors.greenAccent] // Finish Button
+                          : [Utils.getThemeColorBlue(), Colors.blueAccent], // Next Button
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  ),
-                  EasyStepper(
-                    activeStep: activeStep,
-                    activeStepTextColor: Colors.blue.shade900,
-                    finishedStepTextColor: Utils.getThemeColorBlue(),
-                    internalPadding: 20, // Reduce padding for better spacing
-                    stepShape: StepShape.circle,
-                    stepBorderRadius: 20,
-                    borderThickness: 3, // Balanced progress line thickness
-                    showLoadingAnimation: false,
-                    stepRadius: 15, // Reduced step size to fit screen
-                    showStepBorder: false,
-                    lineStyle: LineStyle(
-                      lineLength: 50,
-                      lineType: LineType.normal,
-                      defaultLineColor: Colors.grey.shade300,
-                      activeLineColor: Colors.blueAccent,
-                      finishedLineColor: Utils.getThemeColorBlue(),
-                    ),
-                    steps: [
-                      EasyStep(
-                        customStep: _buildStepIcon(Icons.egg, 0),
-                        title: 'Eggs'.tr(),
+                    borderRadius: BorderRadius.circular(30), // More rounded
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 6,
+                        offset: Offset(0, 3),
                       ),
-                      EasyStep(
-                        customStep: _buildStepIcon(Icons.color_lens, 1),
-                        title: 'DATE'.tr()+" & " +"Color".tr(),
-                      ),
-
                     ],
-                    onStepReached: (index) => setState(() => activeStep = index),
                   ),
-                  Container(
-                    child: Column(
-                         children: [
-                          activeStep == 0? Container(
-                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                            padding: EdgeInsets.all(18),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.15),
-                                  blurRadius: 10,
-                                  spreadRadius: 2,
-                                  offset: Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Title
-                                Center(
-                                  child: Text(
-                                    isCollection
-                                        ? isEdit
-                                        ? "EDIT".tr() + " " + "COLLECTION".tr()
-                                        : "NEW".tr() + " " + "Collection".tr()
-                                        : isEdit
-                                        ? "EDIT".tr() + " " + "Reduction".tr()
-                                        : "NEW".tr() + " " + "Reduction".tr(),
-                                    style: TextStyle(
-                                      color: Utils.getThemeColorBlue(),
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                  margin: EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        activeStep == 1 ? "SAVE".tr() : "Next".tr(),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      Icon(
+                        activeStep == 1 ? Icons.check_circle : Icons.arrow_forward_ios,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: SafeArea(
+        child: Container(
+          width: widthScreen,
+          height: heightScreen,
+          color: Utils.getScreenBackground(),
+          child: SingleChildScrollViewWithStickyFirstWidget(
+            child: Column(
+              children: [
+                Utils.getDistanceBar(),
+
+                SizedBox(height: 10,),
+                /*ClipRRect(
+                  borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color:  Utils.getScreenBackground(), //(x,y)
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          alignment: Alignment.center,
+                          width: 50,
+                          height: 50,
+                          child: InkWell(
+                            child: Icon(Icons.arrow_back,
+                                color: Utils.getThemeColorBlue(), size: 30),
+                            onTap: () {
+                              Navigator.pop(context,"Egg ADDED");
+                            },
+                          ),
+                        ),
+                        Container(
+                            margin: EdgeInsets.only(left: 10),
+                            child: Text(
+                             "",
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold),
+                            )),
+
+                      ],
+                    ),
+                  ),
+                ),*/
+                EasyStepper(
+                  activeStep: activeStep,
+                  activeStepTextColor: Colors.blue.shade900,
+                  finishedStepTextColor: Utils.getThemeColorBlue(),
+                  internalPadding: 20, // Reduce padding for better spacing
+                  stepShape: StepShape.circle,
+                  stepBorderRadius: 20,
+                  borderThickness: 3, // Balanced progress line thickness
+                  showLoadingAnimation: false,
+                  stepRadius: 15, // Reduced step size to fit screen
+                  showStepBorder: false,
+                  lineStyle: LineStyle(
+                    lineLength: 50,
+                    lineType: LineType.normal,
+                    defaultLineColor: Colors.grey.shade300,
+                    activeLineColor: Colors.blueAccent,
+                    finishedLineColor: Utils.getThemeColorBlue(),
+                  ),
+                  steps: [
+                    EasyStep(
+                      customStep: _buildStepIcon(Icons.egg, 0),
+                      title: 'Eggs'.tr(),
+                    ),
+                    EasyStep(
+                      customStep: _buildStepIcon(Icons.color_lens, 1),
+                      title: 'DATE'.tr()+" & " +"Color".tr(),
+                    ),
+
+                  ],
+                  onStepReached: (index) => setState(() => activeStep = index),
+                ),
+                Container(
+                  child: Column(
+                       children: [
+                        activeStep == 0? Container(
+                          margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                          padding: EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.15),
+                                blurRadius: 10,
+                                spreadRadius: 2,
+                                offset: Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Title
+                              Center(
+                                child: Text(
+                                  isCollection
+                                      ? isEdit
+                                      ? "EDIT".tr() + " " + "COLLECTION".tr()
+                                      : "NEW".tr() + " " + "Collection".tr()
+                                      : isEdit
+                                      ? "EDIT".tr() + " " + "Reduction".tr()
+                                      : "NEW".tr() + " " + "Reduction".tr(),
+                                  style: TextStyle(
+                                    color: Utils.getThemeColorBlue(),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                SizedBox(height: 20),
+                              ),
+                              SizedBox(height: 20),
 
-                                // Choose Flock
-                                _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.list_alt),
-                                SizedBox(height: 5),
-                                _buildDropdownField(getDropDownList()),
+                              // Choose Flock
+                              _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.list_alt),
+                              SizedBox(height: 5),
+                              _buildDropdownField(getDropDownList()),
 
-                                SizedBox(height: 10),
-                                Container(
-                                  margin: EdgeInsets.only(left: 10, right: 10),
-                                  child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text("Enter in Trays".tr(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                        Switch(
-                                          value: inTrays,
-                                          activeColor: Utils.getThemeColorBlue(),
-                                          onChanged: (value) {
-                                            setState(() {
-                                              inTrays = value;
-                                              SessionManager.setBool(inTrays);
-                                              calculateTotalEggs();
-                                            });
-                                          },
-                                        ),
-                                      ]
-                                  ),
+                              SizedBox(height: 10),
+                              Container(
+                                margin: EdgeInsets.only(left: 10, right: 10),
+                                child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text("Enter in Trays".tr(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                      Switch(
+                                        value: inTrays,
+                                        activeColor: Utils.getThemeColorBlue(),
+                                        onChanged: (value) {
+                                          setState(() {
+                                            inTrays = value;
+                                            SessionManager.setBool(inTrays);
+                                            calculateTotalEggs();
+                                          });
+                                        },
+                                      ),
+                                    ]
                                 ),
+                              ),
 
-                                inTrays? Container(
-                                 padding: EdgeInsets.all(10),
-                                 decoration: BoxDecoration(
-                                   color: Colors.grey.withOpacity(0.1),
-                                   borderRadius: BorderRadius.circular(14),
-                                   border: Border.all(color: Colors.grey.shade300, width: 1.2),
-                                 ),
-                                 child: Column(
-                                   children: [
+                              inTrays? Container(
+                               padding: EdgeInsets.all(10),
+                               decoration: BoxDecoration(
+                                 color: Colors.grey.withOpacity(0.1),
+                                 borderRadius: BorderRadius.circular(14),
+                                 border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                               ),
+                               child: Column(
+                                 children: [
 
-                                     if (inTrays)
-                                       Row(
-                                         children: [
-                                           Expanded(
-                                             child: Column(
-                                               crossAxisAlignment: CrossAxisAlignment.start,
-                                               children: [
-                                                 _buildInputLabelNoIcon("Good Trays".tr()),
-                                                 SizedBox(height: 5),
-                                                 _buildInputFieldTrays(
-                                                   traysGoodEggsController,
-                                                   "Trays count".tr(),
-                                                   Icons.check_circle,
-                                                   onChanged: (text) {
-                                                     calculateTotalEggs();
-                                                   },
-                                                   isFloat: false,
-                                                 ),
-                                               ],
-                                             ),
+                                   if (inTrays)
+                                     Row(
+                                       children: [
+                                         Expanded(
+                                           child: Column(
+                                             crossAxisAlignment: CrossAxisAlignment.start,
+                                             children: [
+                                               _buildInputLabelNoIcon("Good Trays".tr()),
+                                               SizedBox(height: 5),
+                                               _buildInputFieldTrays(
+                                                 traysGoodEggsController,
+                                                 "Trays count".tr(),
+                                                 Icons.check_circle,
+                                                 onChanged: (text) {
+                                                   calculateTotalEggs();
+                                                 },
+                                                 isFloat: false,
+                                               ),
+                                             ],
                                            ),
-                                           SizedBox(width: 16),
-                                           Expanded(
-                                             child: Column(
-                                               crossAxisAlignment: CrossAxisAlignment.start,
-                                               children: [
-                                                 _buildInputLabelNoIcon("Bad Trays".tr()),
-                                                 SizedBox(height: 5),
-                                                 _buildInputFieldTrays(
-                                                   traysBadEggsController,
-                                                   "Trays count".tr(),
-                                                   Icons.cancel,
-                                                   onChanged: (text) {
-                                                     calculateTotalEggs();
-                                                   },
-                                                   isFloat: false,
-                                                 ),
-                                               ],
-                                             ),
+                                         ),
+                                         SizedBox(width: 16),
+                                         Expanded(
+                                           child: Column(
+                                             crossAxisAlignment: CrossAxisAlignment.start,
+                                             children: [
+                                               _buildInputLabelNoIcon("Bad Trays".tr()),
+                                               SizedBox(height: 5),
+                                               _buildInputFieldTrays(
+                                                 traysBadEggsController,
+                                                 "Trays count".tr(),
+                                                 Icons.cancel,
+                                                 onChanged: (text) {
+                                                   calculateTotalEggs();
+                                                 },
+                                                 isFloat: false,
+                                               ),
+                                             ],
+                                           ),
+                                         ),
+                                       ],
+                                     ),
+
+                                   if (inTrays)
+                                     Container(
+                                       margin: EdgeInsets.only(left: 10, right: 10),
+                                       child: Row(
+                                         children: [
+                                           Text("Eggs per Tray".tr()+": " + "$eggsPerTray", style: TextStyle(fontSize: 16)),
+                                           Spacer(),
+                                           TextButton(
+                                             onPressed: () {
+                                               showChangeEggsPerTrayDialog(context);
+                                             },
+                                             child: Text("Change".tr(), style: TextStyle(color: Utils.getThemeColorBlue())),
                                            ),
                                          ],
                                        ),
+                                     ),
+                                 ],
+                               ),
+                             ) : SizedBox(width: 1,),
+                              SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        _buildInputLabel("Good Eggs".tr(), Icons.egg),
+                                        SizedBox(height: 5),
+                                        _buildInputFieldIntFLoat(
+                                          goodEggsController,
+                                          "Enter Good Eggs".tr(),
+                                          Icons.check_circle,
+                                          onChanged: (text) {
+                                            good_eggs = text.isEmpty ? 0 : int.parse(text);
+                                            calculateTotalEggs();
+                                          },
+                                          isFloat: false,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(width: 16), // Space between the two columns
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        _buildInputLabel("Bad Eggs".tr(), Icons.egg_outlined),
+                                        SizedBox(height: 5),
+                                        _buildInputFieldIntFLoat(
+                                          badEggsController,
+                                          "Enter Bad Eggs".tr(),
+                                          Icons.cancel,
+                                          onChanged: (text) {
+                                            bad_eggs = text.isEmpty ? 0 : int.parse(text);
+                                            calculateTotalEggs();
+                                          },
+                                          isFloat: false,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
 
-                                     if (inTrays)
-                                       Container(
-                                         margin: EdgeInsets.only(left: 10, right: 10),
-                                         child: Row(
-                                           children: [
-                                             Text("Eggs per Tray".tr()+": " + "$eggsPerTray", style: TextStyle(fontSize: 16)),
-                                             Spacer(),
-                                             TextButton(
-                                               onPressed: () {
-                                                 showChangeEggsPerTrayDialog(context);
-                                               },
-                                               child: Text("Change".tr(), style: TextStyle(color: Utils.getThemeColorBlue())),
-                                             ),
-                                           ],
-                                         ),
-                                       ),
-                                   ],
-                                 ),
-                               ) : SizedBox(width: 1,),
-                                SizedBox(height: 10),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          _buildInputLabel("Good Eggs".tr(), Icons.egg),
-                                          SizedBox(height: 5),
-                                          _buildInputFieldIntFLoat(
-                                            goodEggsController,
-                                            "Enter Good Eggs".tr(),
-                                            Icons.check_circle,
-                                            onChanged: (text) {
-                                              good_eggs = text.isEmpty ? 0 : int.parse(text);
-                                              calculateTotalEggs();
-                                            },
-                                            isFloat: false,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(width: 16), // Space between the two columns
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          _buildInputLabel("Bad Eggs".tr(), Icons.egg_outlined),
-                                          SizedBox(height: 5),
-                                          _buildInputFieldIntFLoat(
-                                            badEggsController,
-                                            "Enter Bad Eggs".tr(),
-                                            Icons.cancel,
-                                            onChanged: (text) {
-                                              bad_eggs = text.isEmpty ? 0 : int.parse(text);
-                                              calculateTotalEggs();
-                                            },
-                                            isFloat: false,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
+
+                              SizedBox(height: 20),
+
+                              // Total Eggs (Read-Only)
+                              _buildInputLabel("Total Eggs".tr(), Icons.shopping_basket),
+                              SizedBox(height: 8),
+                              _buildInputField(
+                                totalEggsController,
+                                "Total Eggs".tr(),
+                                Icons.numbers,
+                                readOnly: true,
+
+                              ),
+                              SizedBox(height: 10),
+
+                            ],
+                          ),
+                        ) :SizedBox(width: 1,),
+
+                        activeStep==1? Container(
+                          margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                          padding: EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.15),
+                                blurRadius: 10,
+                                spreadRadius: 2,
+                                offset: Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Title
+                              Center(
+                                child: Text(
+                                  "Choose date".tr()+" & "+"DESCRIPTION_1".tr(),
+                                  style: TextStyle(
+                                    color: Utils.getThemeColorBlue(),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
+                              ),
+                              SizedBox(height: 20),
 
+                              // Reduction List (Only if not Collection)
+                              if (!isCollection) ...[
+                                _buildInputLabel("REDUCTIONS_1".tr(), Icons.remove_circle_outline),
+                                SizedBox(height: 8),
+                                _buildDropdownField(getReductionList()),
 
-                                SizedBox(height: 20),
+                              ],
 
+                              SizedBox(height: 10),
+                              // Egg Color Selection
+                              _buildInputLabel("EGG".tr()+" "+ "Color".tr(), Icons.palette),
+                              SizedBox(height: 8),
+                              _buildDropdownField(
+                                DropdownButtonFormField<String>(
+                                  decoration: const InputDecoration.collapsed(hintText: null), // Disable default decoration
+                                  value: selectedColor,
+                                  hint: Text('Select Egg Color'.tr()),
+                                  items: eggColors.map((color) {
+                                    return DropdownMenuItem(
+                                      value: color,
+                                      child: Text(color.tr(), style: TextStyle(fontSize: 16)),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedColor = value;
+                                    });
+                                  },
+                                  icon: Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue()),
+                                  dropdownColor: Colors.white,
+                                ),
+                              ),
+
+                              if(!isCollection && isEggSale())...[
+                                SizedBox(height: 10),
+                                buildPaymentSummaryTile(context, amount: amount, paymentType: payment_method, status: payment_status, c_name: contractorName),
                                 // Total Eggs (Read-Only)
-                                _buildInputLabel("Total Eggs".tr(), Icons.shopping_basket),
-                                SizedBox(height: 8),
-                                _buildInputField(
-                                  totalEggsController,
-                                  "Total Eggs".tr(),
-                                  Icons.numbers,
-                                  readOnly: true,
-
-                                ),
-                                SizedBox(height: 10),
-
                               ],
-                            ),
-                          ) :SizedBox(width: 1,),
+                              SizedBox(height: 10),
+                              // Date Selection
+                              _buildInputLabel("DATE".tr(), Icons.calendar_today),
+                              SizedBox(height: 8),
+                              _buildDatePickerField(),
 
-                          activeStep==1? Container(
-                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                            padding: EdgeInsets.all(18),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.15),
-                                  blurRadius: 10,
-                                  spreadRadius: 2,
-                                  offset: Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Title
-                                Center(
-                                  child: Text(
-                                    "Choose date".tr()+" & "+"DESCRIPTION_1".tr(),
-                                    style: TextStyle(
-                                      color: Utils.getThemeColorBlue(),
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 20),
+                              SizedBox(height: 20),
 
-                                // Reduction List (Only if not Collection)
-                                if (!isCollection) ...[
-                                  _buildInputLabel("REDUCTIONS_1".tr(), Icons.remove_circle_outline),
-                                  SizedBox(height: 8),
-                                  _buildDropdownField(getReductionList()),
+                              // Description Field
+                              _buildInputLabel("DESCRIPTION_1".tr(), Icons.notes),
+                              SizedBox(height: 8),
+                              _buildTextAreaField(notesController, "NOTES_HINT".tr()),
 
-                                ],
-
-                                SizedBox(height: 10),
-                                // Egg Color Selection
-                                _buildInputLabel("EGG".tr()+" "+ "Color".tr(), Icons.palette),
-                                SizedBox(height: 8),
-                                _buildDropdownField(
-                                  DropdownButtonFormField<String>(
-                                    decoration: const InputDecoration.collapsed(hintText: null), // Disable default decoration
-                                    value: selectedColor,
-                                    hint: Text('Select Egg Color'.tr()),
-                                    items: eggColors.map((color) {
-                                      return DropdownMenuItem(
-                                        value: color,
-                                        child: Text(color.tr(), style: TextStyle(fontSize: 16)),
-                                      );
-                                    }).toList(),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        selectedColor = value;
-                                      });
-                                    },
-                                    icon: Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue()),
-                                    dropdownColor: Colors.white,
-                                  ),
-                                ),
-
-                                if(!isCollection && isEggSale())...[
-                                  SizedBox(height: 10),
-                                  buildPaymentSummaryTile(context, amount: amount, paymentType: payment_method, status: payment_status, c_name: contractorName),
-                                  // Total Eggs (Read-Only)
-                                ],
-                                SizedBox(height: 10),
-                                // Date Selection
-                                _buildInputLabel("DATE".tr(), Icons.calendar_today),
-                                SizedBox(height: 8),
-                                _buildDatePickerField(),
-
-                                SizedBox(height: 20),
-
-                                // Description Field
-                                _buildInputLabel("DESCRIPTION_1".tr(), Icons.notes),
-                                SizedBox(height: 8),
-                                _buildTextAreaField(notesController, "NOTES_HINT".tr()),
-
-                                SizedBox(height: 20),
-                              ],
-                            ),
-                          )
-                              :SizedBox(width: 1,),
+                              SizedBox(height: 20),
+                            ],
+                          ),
+                        )
+                            :SizedBox(width: 1,),
 
 
-                        /*  InkWell(
-                            onTap: () async {
+                      /*  InkWell(
+                          onTap: () async {
 
-                              good_eggs = int.parse(goodEggsController.text);
-                              bad_eggs = int.parse(badEggsController.text);
+                            good_eggs = int.parse(goodEggsController.text);
+                            bad_eggs = int.parse(badEggsController.text);
 
-                              activeStep++;
-                              if(activeStep==1) {
-                               bool emptyCheck = true;
-                                if(goodEggsController.text.toString().trim() == ""
-                                    || badEggsController.text.toString().trim() =="")
-                                {
-                                 activeStep--;
-                                 Utils.showToast("PROVIDE_ALL".tr());
+                            activeStep++;
+                            if(activeStep==1) {
+                             bool emptyCheck = true;
+                              if(goodEggsController.text.toString().trim() == ""
+                                  || badEggsController.text.toString().trim() =="")
+                              {
+                               activeStep--;
+                               Utils.showToast("PROVIDE_ALL".tr());
 
-                                }
-                               setState(() {
-
-                               });
                               }
+                             setState(() {
 
-                              if(activeStep==2) {
-                                await DatabaseHelper.instance.database;
-                                try {
-                                  if (isCollection) {
-                                    if (isEdit) {
-                                      widget.eggs!.f_id = getFlockID();
-                                      widget.eggs!.f_name =
-                                          _purposeselectedValue;
-                                      widget.eggs!.date = this.date;
-                                      widget.eggs!.egg_color = selectedColor;
-                                      widget.eggs!.good_eggs =
-                                          int.parse(goodEggsController.text);
-                                      widget.eggs!.bad_eggs =
-                                          int.parse(badEggsController.text);
-                                      widget.eggs!.total_eggs = int.parse(
-                                          totalEggsController.text);
-                                      widget.eggs!.short_note =
-                                          notesController.text;
-                                      await DatabaseHelper.updateEggCollection(
-                                          widget.eggs!);
+                             });
+                            }
 
-                                      Utils.showToast("SUCCESSFUL".tr());
-                                      Navigator.pop(context, "Egg ADDED");
-                                    }
-                                    else {
-                                      int? id = await DatabaseHelper
-                                          .insertEggCollection(Eggs(
-                                          f_id: getFlockID(),
-                                          f_name: _purposeselectedValue,
-                                          image: '',
-                                          good_eggs: this.good_eggs,
-                                          bad_eggs: bad_eggs,
-                                          total_eggs: int.parse(
-                                              totalEggsController.text),
-                                          short_note: notesController.text,
-                                          date: date,
-                                          reduction_reason: '',
-                                          isCollection: 1,
-                                          egg_color: selectedColor));
-                                      Utils.showToast("SUCCESSFUL".tr());
-                                      Navigator.pop(context, "Egg ADDED");
-                                    }
-                                  } else {
-                                    if (isEdit) {
-                                      widget.eggs!.f_id = getFlockID();
-                                      widget.eggs!.f_name =
-                                          _purposeselectedValue;
-                                      widget.eggs!.date = this.date;
-                                      widget.eggs!.egg_color = selectedColor;
-                                      widget.eggs!.good_eggs =
-                                          int.parse(goodEggsController.text);
-                                      widget.eggs!.bad_eggs =
-                                          int.parse(badEggsController.text);
-                                      widget.eggs!.reduction_reason =
-                                          _reductionReasonValue;
-                                      widget.eggs!.total_eggs = int.parse(
-                                          totalEggsController.text);
-                                      widget.eggs!.short_note =
-                                          notesController.text;
-                                      await DatabaseHelper.updateEggCollection(
-                                          widget.eggs!);
+                            if(activeStep==2) {
+                              await DatabaseHelper.instance.database;
+                              try {
+                                if (isCollection) {
+                                  if (isEdit) {
+                                    widget.eggs!.f_id = getFlockID();
+                                    widget.eggs!.f_name =
+                                        _purposeselectedValue;
+                                    widget.eggs!.date = this.date;
+                                    widget.eggs!.egg_color = selectedColor;
+                                    widget.eggs!.good_eggs =
+                                        int.parse(goodEggsController.text);
+                                    widget.eggs!.bad_eggs =
+                                        int.parse(badEggsController.text);
+                                    widget.eggs!.total_eggs = int.parse(
+                                        totalEggsController.text);
+                                    widget.eggs!.short_note =
+                                        notesController.text;
+                                    await DatabaseHelper.updateEggCollection(
+                                        widget.eggs!);
 
-                                      Utils.showToast("SUCCESSFUL".tr());
-                                      Navigator.pop(context, "Egg ADDED");
-                                    }
-                                    else {
-                                      int? id = await DatabaseHelper
-                                          .insertEggCollection(Eggs(
-                                          f_id: getFlockID(),
-                                          f_name: _purposeselectedValue,
-                                          image: '',
-                                          good_eggs: int.parse(
-                                              goodEggsController.text),
-                                          bad_eggs: int.parse(
-                                              badEggsController.text),
-                                          total_eggs: int.parse(
-                                              totalEggsController.text),
-                                          short_note: notesController.text,
-                                          date: date,
-                                          reduction_reason: _reductionReasonValue,
-                                          isCollection: 0,
-                                          egg_color: selectedColor));
-                                      Utils.showToast("SUCCESSFUL".tr());
-                                      Navigator.pop(context, "Egg Reduced");
-                                    }
+                                    Utils.showToast("SUCCESSFUL".tr());
+                                    Navigator.pop(context, "Egg ADDED");
+                                  }
+                                  else {
+                                    int? id = await DatabaseHelper
+                                        .insertEggCollection(Eggs(
+                                        f_id: getFlockID(),
+                                        f_name: _purposeselectedValue,
+                                        image: '',
+                                        good_eggs: this.good_eggs,
+                                        bad_eggs: bad_eggs,
+                                        total_eggs: int.parse(
+                                            totalEggsController.text),
+                                        short_note: notesController.text,
+                                        date: date,
+                                        reduction_reason: '',
+                                        isCollection: 1,
+                                        egg_color: selectedColor));
+                                    Utils.showToast("SUCCESSFUL".tr());
+                                    Navigator.pop(context, "Egg ADDED");
+                                  }
+                                } else {
+                                  if (isEdit) {
+                                    widget.eggs!.f_id = getFlockID();
+                                    widget.eggs!.f_name =
+                                        _purposeselectedValue;
+                                    widget.eggs!.date = this.date;
+                                    widget.eggs!.egg_color = selectedColor;
+                                    widget.eggs!.good_eggs =
+                                        int.parse(goodEggsController.text);
+                                    widget.eggs!.bad_eggs =
+                                        int.parse(badEggsController.text);
+                                    widget.eggs!.reduction_reason =
+                                        _reductionReasonValue;
+                                    widget.eggs!.total_eggs = int.parse(
+                                        totalEggsController.text);
+                                    widget.eggs!.short_note =
+                                        notesController.text;
+                                    await DatabaseHelper.updateEggCollection(
+                                        widget.eggs!);
+
+                                    Utils.showToast("SUCCESSFUL".tr());
+                                    Navigator.pop(context, "Egg ADDED");
+                                  }
+                                  else {
+                                    int? id = await DatabaseHelper
+                                        .insertEggCollection(Eggs(
+                                        f_id: getFlockID(),
+                                        f_name: _purposeselectedValue,
+                                        image: '',
+                                        good_eggs: int.parse(
+                                            goodEggsController.text),
+                                        bad_eggs: int.parse(
+                                            badEggsController.text),
+                                        total_eggs: int.parse(
+                                            totalEggsController.text),
+                                        short_note: notesController.text,
+                                        date: date,
+                                        reduction_reason: _reductionReasonValue,
+                                        isCollection: 0,
+                                        egg_color: selectedColor));
+                                    Utils.showToast("SUCCESSFUL".tr());
+                                    Navigator.pop(context, "Egg Reduced");
                                   }
                                 }
-                                catch(ex){
-                                  activeStep = 2;
-                                  Utils.showToast(ex.toString());
-                                }
                               }
-                            },
-                            child: Container(
-                              width: widthScreen,
-                              height: 60,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: Utils.getThemeColorBlue(),
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(10.0)),
-                                border: Border.all(
-                                  color:  Utils.getThemeColorBlue(),
-                                  width: 2.0,
-                                ),
-                              ),
-                              margin: EdgeInsets.all(20),
-                              child: Text(
-                                activeStep==0? "NEXT".tr() : "CONFIRM".tr(),
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold),
+                              catch(ex){
+                                activeStep = 2;
+                                Utils.showToast(ex.toString());
+                              }
+                            }
+                          },
+                          child: Container(
+                            width: widthScreen,
+                            height: 60,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Utils.getThemeColorBlue(),
+                              borderRadius: const BorderRadius.all(
+                                  Radius.circular(10.0)),
+                              border: Border.all(
+                                color:  Utils.getThemeColorBlue(),
+                                width: 2.0,
                               ),
                             ),
-                          )
-*/
-                        ]),
-                  ),
-                ],
-              ),
+                            margin: EdgeInsets.all(20),
+                            child: Text(
+                              activeStep==0? "NEXT".tr() : "CONFIRM".tr(),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        )
+    */
+                      ]),
+                ),
+              ],
             ),
           ),
         ),

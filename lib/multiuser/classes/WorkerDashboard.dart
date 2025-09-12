@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
@@ -52,6 +53,7 @@ import 'dart:io' as io;
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 
+import 'NetworkAcceessNotifier.dart';
 import 'all_flocks_screen.dart';
 
 class WorkerDashboardScreen extends StatefulWidget {
@@ -96,6 +98,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
   };
 
   ValueNotifier<double> downloadProgress = ValueNotifier(0.0);
+  final _networkNotifier = NetworkSnackNotifier();
 
 
   final supportedLanguages = [
@@ -134,6 +137,36 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
 
   }
 
+
+  Future<void> showLogoutConfirmationDialog(BuildContext context, VoidCallback onConfirmLogout) {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('logout_title'.tr()), // "Logout"
+        content: Text('logout_message'.tr()), // "Are you sure you want to logout?"
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('CANCEL'.tr()), // "Cancel"
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+              onConfirmLogout(); // Perform logout action
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+            ),
+            child: Text('logout'.tr()), // "Logout"
+          ),
+        ],
+      ),
+    );
+  }
+
+
   bool changes_made = true;
   Future<void> postUserLog(String farmId, String email) async {
     final firestore = FirebaseFirestore.instance;
@@ -164,6 +197,8 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
   }
 
   void logout() async {
+
+    await FirebaseAuth.instance.signOut();
 
     await Utils.logoutUser();
     // Navigate to login screen
@@ -376,7 +411,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                         backgroundImage: selectedImage != null
                             ? FileImage(io.File(selectedImage!.path))
                             : (imageUrl != null && imageUrl!.isNotEmpty)
-                            ? NetworkImage(imageUrl!) as ImageProvider
+                            ? NetworkImage(Utils.ProxyAPI+imageUrl!) as ImageProvider
                             : null, // No image when we want to show the icon
                         child: (selectedImage == null && (imageUrl == null || imageUrl!.isEmpty))
                             ? Icon(Icons.person, size: 50, color: Colors.blue)
@@ -571,6 +606,12 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
     loadLatestUser();
     getLanguage();
 
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _networkNotifier.initialize(context);
+
+    });
+
   }
 
   Future<void> getSyncQueueList() async {
@@ -668,7 +709,11 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
             padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
             child: InkWell(
               borderRadius: BorderRadius.circular(25),
-              onTap: logout,
+              onTap: () {
+                showLogoutConfirmationDialog(context, () {
+                  logout();
+                });
+              },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
@@ -677,10 +722,10 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                   border: Border.all(color: Colors.redAccent.withOpacity(0.2), width: 1),
                 ),
                 child: Row(
-                  children: const [
+                  children:  [
                     Icon(Icons.logout, color: Colors.white, size: 20),
                     SizedBox(width: 6),
-                    Text("Logout", style: TextStyle(color: Colors.white, fontSize: 14)),
+                    Text("logout".tr(), style: TextStyle(color: Colors.white, fontSize: 14)),
                   ],
                 ),
               ),
@@ -754,7 +799,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                         backgroundColor: Colors.white,
                         backgroundImage: (Utils.currentUser!.image != null &&
                             Utils.currentUser!.image!.isNotEmpty)
-                            ? NetworkImage(Utils.currentUser!.image!)
+                            ? NetworkImage(Utils.ProxyAPI+Utils.currentUser!.image!)
                             : null,
                         child: (Utils.currentUser!.image == null ||
                             Utils.currentUser!.image!.isEmpty)
@@ -945,7 +990,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            module,
+                            module.tr(),
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               color: Colors.white,
@@ -1179,10 +1224,9 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
         print("⚠️ No images found for flock: ${data['f_sync_id']}");
       }
     }
-
   }
 
-  void listenToFlocks(String farmId, DateTime? lastSyncTime) async {
+ /* void listenToFlocks(String farmId, DateTime? lastSyncTime) async {
 
     SyncManager().stopAllListening();
     // 🔹 Real-time listener (new changes only)
@@ -1200,8 +1244,8 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
     SyncManager().startMedicineStockFBListening(farmId, lastSyncTime);
     SyncManager().startVaccineStockFBListening(farmId, lastSyncTime);
 
-
   }
+*/
 
   List<SyncQueue>? pendingRecords = [];
   void sendPendingChangesToServer() async {
