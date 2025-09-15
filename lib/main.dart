@@ -194,14 +194,14 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      darkTheme: ThemeData(
-        fontFamily: 'Roboto',
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Utils.getThemeColorBlue(),
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
+      // darkTheme: ThemeData(
+      //   fontFamily: 'Roboto',
+      //   colorScheme: ColorScheme.fromSeed(
+      //     seedColor: Utils.getThemeColorBlue(),
+      //     brightness: Brightness.dark,
+      //   ),
+      //   useMaterial3: true,
+      // ),
       themeMode: ThemeMode.system, //
       home: Directionality(
         textDirection: direction ? ui.TextDirection.ltr : ui.TextDirection.rtl,
