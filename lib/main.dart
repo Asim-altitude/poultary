@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:poultary/database/databse_helper.dart';
@@ -36,9 +37,20 @@ Future<void> main() async {
   await MobileAds.instance.initialize();
   Utils.direction = await Utils.getDirection();
   MobileAds.instance.updateRequestConfiguration(
-      RequestConfiguration(testDeviceIds: ['C0B856BD630A2928BC9F472E0A5C870A','C1F82EF953946E2EACA6F014AFF27318']));
+      RequestConfiguration(testDeviceIds: ['C0B856BD630A2928BC9F472E0A5C870A','C1F82EF953946E2EACA6F014AFF27318','6A26B5F47A581E9DF187B0FAE54A685E']));
   await Hive.initFlutter();
   Hive.registerAdapter(BlogAdapter());
+
+/*  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.blue, // Your desired color
+      statusBarIconBrightness: Brightness.light, // light icons (for dark background)
+    ),
+  );*/
+
+  final themeColor = Colors.blue;
+  final isDark = WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark;
+
 
 }
 
@@ -176,9 +188,21 @@ class MyApp extends StatelessWidget {
       locale: context.locale,
       theme: ThemeData(
         fontFamily: 'Roboto',
-        colorScheme: ColorScheme.fromSeed(seedColor: Utils.getThemeColorBlue()),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Utils.getThemeColorBlue(),
+          brightness: Brightness.light,
+        ),
         useMaterial3: true,
       ),
+      darkTheme: ThemeData(
+        fontFamily: 'Roboto',
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Utils.getThemeColorBlue(),
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+      ),
+      themeMode: ThemeMode.system, //
       home: Directionality(
         textDirection: direction ? ui.TextDirection.ltr : ui.TextDirection.rtl,
         child: FutureBuilder<Widget>(

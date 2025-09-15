@@ -75,8 +75,10 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
       }
 
       final data = doc.data()!;
+
       FarmPlan farmPlan = FarmPlan.fromJson(data);
       _farmPlan = farmPlan;
+      print(_farmPlan!.toJson());
 
       if(!farmPlan.isActive){
         Utils.isMultiUSer = false;
@@ -91,7 +93,6 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
         _planStatus = farmPlan.isActive ? PlanStatus.active : PlanStatus.expired;
         loading = false;
       });
-
 
     } catch (e) {
       setState(() {
@@ -113,6 +114,13 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0, // removes the shadow
+        scrolledUnderElevation: 0, // removes shadow when scrolling (Flutter 3.7+)
+        surfaceTintColor: Colors.transparent, // removes Material3 tint
+        backgroundColor: const Color(0xFFF5F9FF), // Customize the color
+
+      ),
       backgroundColor: const Color(0xFFF5F9FF),
       body: SafeArea(
         child: Center(
@@ -123,7 +131,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
                 CircleAvatar(
                   radius: 50,
                   backgroundImage: (Utils.currentUser!.image != null && Utils.currentUser!.image.isNotEmpty)
-                      ? NetworkImage(Utils.currentUser!.image)
+                      ? NetworkImage(Utils.ProxyAPI+Utils.currentUser!.image)
                       : null,
                   child: (Utils.currentUser!.image == null || Utils.currentUser!.image.isEmpty)
                       ? Image.asset("assets/farm_icon.png", width: 120, height: 120,)
@@ -191,6 +199,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
                     ),
                   ),
                 ),
+
                 SizedBox(height: 5,),
 
                 const SizedBox(height: 24),
@@ -206,44 +215,75 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
                     color: Colors.blue.shade700,
                     onPressed: _navigateToNextScreen,)
                 else if (widget.multiUser.role.toLowerCase() == 'admin')
-                  Column(
-                    children: [
-                      SizedBox(height: 10),
-                      _buildPrimaryButton(
-                        label: (_planStatus == PlanStatus.notStarted && !Utils.isShowAdd) ? "Create Plan" : "Upgrade Plan to Continue",
-                        icon: Icons.payment,
-                        color: Colors.orange.shade800,
-                        onPressed: () {
-                         // _handlePlanUpgrade("Premium");
-                          if(_planStatus == PlanStatus.notStarted && !Utils.isShowAdd){
-                            _handlePlanUpgrade("Premium");
-                          }else {
-                            _showPremiumDialog(context);
-                          }
-                        },
-                      ),
-                      SizedBox(height: 10)
-                      ,(widget.multiUser.role.toLowerCase() == 'admin' && widget.isStart)? _buildPrimaryButton(
-                        label: "Continue Offline (1 Device)",
-                        icon: Icons.start,
-                        color: Colors.green,
-                        onPressed: () async {
-                          Utils.isMultiUSer = false;
-                          bool isConfirmed = await SessionManager.getBool(SessionManager.offlineConfirmation);
-                          if(!isConfirmed) {
-                            showOfflineModeDialog(context, (value) {
-                              SessionManager.setBoolValue(
-                                  SessionManager.offlineConfirmation, value);
-                            });
-                          }else{
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (_) => HomeScreen()),
-                            );
-                          }
-                        },
-                      ) : SizedBox.shrink(),
-                    ],
+                  Container(
+                    margin: EdgeInsets.only(left: 20, right: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 16),
+
+                        // Trial Button (highlighted)
+                        if (_planStatus == PlanStatus.notStarted)
+                          _buildPrimaryButton(
+                            label: "Activate 7-Day Trial",
+                            icon: Icons.flash_on,
+                            color: Colors.deepOrange,
+                            onPressed: () {
+                              if (_planStatus == PlanStatus.notStarted) {
+                                _handlePlanUpgrade("Trial");
+                              } else {
+                                _showPremiumDialog(context);
+                              }
+                            },
+                          ),
+
+                        const SizedBox(height: 12),
+
+                        // Upgrade Button
+                        _buildPrimaryButton(
+                          label: (_planStatus == PlanStatus.notStarted && !Utils.isShowAdd)
+                              ? "Create Plan"
+                              : "Upgrade to Premium",
+                          icon: Icons.workspace_premium,
+                          color: Colors.green.shade600,
+                          onPressed: () {
+                            if (_planStatus == PlanStatus.notStarted && !Utils.isShowAdd) {
+                              _handlePlanUpgrade("Premium");
+                            } else {
+                              _showPremiumDialog(context);
+                            }
+                          },
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        // Offline Button (only for Admin at start)
+                        if (widget.multiUser.role.toLowerCase() == 'admin' && widget.isStart)
+                          _buildPrimaryButton(
+                            label: "Continue in Offline Mode",
+                            icon: Icons.offline_pin,
+                            color: Colors.grey.shade700,
+                            onPressed: () async {
+                              Utils.isMultiUSer = false;
+                              bool isConfirmed =
+                              await SessionManager.getBool(SessionManager.offlineConfirmation);
+                              if (!isConfirmed) {
+                                showOfflineModeDialog(context, (value) {
+                                  SessionManager.setBoolValue(
+                                      SessionManager.offlineConfirmation, value);
+                                });
+                              } else {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => HomeScreen()),
+                                );
+                              }
+                            },
+                          ),
+
+                        const SizedBox(height: 16),
+                      ],
+                    ),
                   )
                 else
                   Padding(
@@ -306,6 +346,8 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
     await SessionManager.saveFarmPlan(_farmPlan!);
 
     if(!widget.isStart) {
+      Utils.isShowAdd = false;
+      Utils.isMultiUSer = true;
       Navigator.pop(context);
       return;
     }
@@ -377,7 +419,10 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
 
   Future<void> _handlePlanUpgrade(String type) async {
     DateTime planStartDate = DateTime.now();
-    DateTime planExpiryDate = DateTime(
+    DateTime planExpiryDate = type.toLowerCase() == "trial"? DateTime(
+      planStartDate.year,
+      planStartDate.month,
+      planStartDate.day + 7) : DateTime(
       planStartDate.year,
       planStartDate.month + 6,
       planStartDate.day,);
@@ -386,10 +431,10 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
       farmId: widget.multiUser.farmId,
       adminEmail: widget.multiUser.email,
       planName: "Basic",
-      planType: "Renewal",
+      planType: type,
       planStartDate: planStartDate,
       planExpiryDate: planExpiryDate,
-      userCapacity: 10,
+      userCapacity: type.toLowerCase() == "trial"? 2 : 10,
     );
 
     await FireBaseUtils.upgradeMultiUserPlan(farmPlan);
@@ -400,20 +445,23 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
     String statusText;
     Color statusColor;
 
-    switch (_planStatus) {
-      case PlanStatus.active:
-        final daysLeft = _expiryDate!.difference(DateTime.now()).inDays;
-        statusText = "✅ Active - $daysLeft day(s) left";
-        statusColor = Colors.green.shade700;
-        break;
-      case PlanStatus.expired:
-        statusText = "❌ Expired - Please upgrade";
-        statusColor = Colors.red.shade700;
-        break;
-      case PlanStatus.notStarted:
-      default:
-        statusText = "⚠️ No Plan Found - Please activate";
-        statusColor = Colors.orange.shade800;
+    if (_planStatus == PlanStatus.active && _farmPlan!.planType.toLowerCase()=="trial") {
+      final daysLeft = _expiryDate!.difference(DateTime.now()).inDays;
+      statusText =  "Trial Active".tr() + " - $daysLeft " + "day(s) left".tr();
+      statusColor = Colors.orange.shade700;
+    }else if (_planStatus == PlanStatus.active) {
+      final daysLeft = _expiryDate!.difference(DateTime.now()).inDays;
+      statusText = "✅" + "Active".tr() + " - $daysLeft " + "day(s) left".tr();
+      statusColor = Colors.green.shade700;
+    } else if (_planStatus == PlanStatus.expired) {
+      statusText = "❌ Expired - Please upgrade".tr();
+      statusColor = Colors.red.shade700;
+    } else if (_planStatus == PlanStatus.notStarted) {
+      statusText = "⚠️" + "No Plan Found - Please activate".tr();
+      statusColor = Colors.orange.shade800;
+    } else {
+      statusText = "⚠️" + "No Plan Found - Please activate".tr();
+      statusColor = Colors.orange.shade800;
     }
 
     return Container(
@@ -433,8 +481,8 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "📦 Your Farm Plan",
+           Text(
+            "📦"+"Your Farm Plan".tr(),
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -467,7 +515,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
     return Row(
       children: [
         Text(
-          "$label ",
+          label.tr(),
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         Text(value),
@@ -712,7 +760,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return FractionallySizedBox(
-              heightFactor: 0.65,
+              heightFactor: 0.85,
               child: Column(
                 children: [
                   /// **Header**
@@ -740,12 +788,12 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
                         Icon(Icons.workspace_premium, size: 70, color: Colors.white),
                         SizedBox(height: 8),
                         Text(
-                          "Upgrade Farm Plan",
+                          "Upgrade Farm Plan".tr(),
                           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                         SizedBox(height: 4),
                         Text(
-                          "Upgrade to unlock farm features",
+                          "Upgrade to unlock farm features".tr(),
                           style: TextStyle(fontSize: 14, color: Colors.white70),
                         ),
                       ],
@@ -760,6 +808,24 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
                       padding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                       children: [
+                        _buildFeatureItem(
+                            "No Ads".tr(),
+                            "Enjoy distraction-free experience".tr(),
+                            included: true,
+                            alwaysIncluded: true,
+                            duration: "Lifetime"),
+                        _buildFeatureItem(
+                            "Priority Support".tr(),
+                            "Get quick responses".tr(),
+                            included: true,
+                            alwaysIncluded: true,
+                            duration: "Lifetime"),
+                        _buildFeatureItem(
+                            "Reports".tr(),
+                            "Access detailed analytics".tr(),
+                            included: true,
+                            alwaysIncluded: true,
+                            duration: "Lifetime"),
                         _buildFeatureItem(
                             "Cloud Sync".tr(),
                             "Access your data anywhere".tr(),

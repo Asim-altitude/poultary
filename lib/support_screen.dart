@@ -14,8 +14,8 @@ class ContactSupportScreen extends StatelessWidget {
         preferredSize: Size.fromHeight(kToolbarHeight),
         child: ClipRRect(
           borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(20.0), // Round bottom-left corner
-            bottomRight: Radius.circular(20.0), // Round bottom-right corner
+            bottomLeft: Radius.circular(10.0), // Round bottom-left corner
+            bottomRight: Radius.circular(10.0), // Round bottom-right corner
           ),
           child: AppBar(
             title: Text(
@@ -27,7 +27,7 @@ class ContactSupportScreen extends StatelessWidget {
               ),
             ),
             centerTitle: true,
-            backgroundColor: Utils.getThemeColorBlue(), // Customize the color
+            backgroundColor: Colors.blue, // Customize the color
             elevation: 8, // Gives it a more elevated appearance
             leading: IconButton(
               icon: Icon(Icons.arrow_back, color: Colors.white),

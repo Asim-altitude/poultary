@@ -129,7 +129,73 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
-    return SafeArea(child: Scaffold(
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(10.0), // Round bottom-left corner
+            bottomRight: Radius.circular(10.0), // Round bottom-right corner
+          ),
+          child: AppBar(
+            title: Text(
+              applied_filter_name.tr(),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            actions: [
+              InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () {
+                  openSortDialog(context, (selectedSort) {
+                    setState(() {
+                      sortOption = selectedSort == "date_desc" ? "Date (New)" : "Date (Old)";
+                      sortSelected = selectedSort == "date_desc" ? "DESC" : "ASC";
+                    });
+
+                    getFilteredTransactions(str_date, end_date);
+                  });
+                },
+                child: Container(
+                  height: 45,
+                  width: 130,
+                  margin: EdgeInsets.only(right: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  alignment: Alignment.center,
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          sortOption.tr(),
+                          style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Icon(Icons.sort, color: Colors.white, size: 22),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            backgroundColor: Colors.blue, // Customize the color
+            elevation: 8, // Gives it a more elevated appearance
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                Navigator.pop(context); // Navigates back
+              },
+            ),
+          ),
+        ),
+      ),
       bottomNavigationBar: BottomAppBar(
         color: Colors.transparent,
         child: Container(
@@ -225,7 +291,6 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
         elevation: 0,
       ),
       body: SafeArea(
-        top: false,
           child:Container(
           width: widthScreen,
           height: heightScreen,
@@ -237,100 +302,6 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
             children:  [
               Utils.getDistanceBar(),
 
-              ClipRRect(
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10),
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 6,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                  child: Row(
-                    children: [
-                      /// Back Button
-                      InkWell(
-                        borderRadius: BorderRadius.circular(30),
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          width: 45,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.15),
-                          ),
-                          child: Icon(Icons.arrow_back, color: Colors.white, size: 28),
-                        ),
-                      ),
-
-                      /// Title
-                      Expanded(
-                        child: Container(
-                          margin: EdgeInsets.only(left: 12),
-                          child: Text(
-                            applied_filter_name.tr(),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      /// Sort Button
-                      InkWell(
-                        borderRadius: BorderRadius.circular(10),
-                        onTap: () {
-                          openSortDialog(context, (selectedSort) {
-                            setState(() {
-                              sortOption = selectedSort == "date_desc" ? "Date (New)" : "Date (Old)";
-                              sortSelected = selectedSort == "date_desc" ? "DESC" : "ASC";
-                            });
-
-                            getFilteredTransactions(str_date, end_date);
-                          });
-                        },
-                        child: Container(
-                          height: 45,
-                          width: 130,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  sortOption.tr(),
-                                  style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Icon(Icons.sort, color: Colors.white, size: 22),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
 
               Center(
                 child: Container(
@@ -405,11 +376,11 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
               ),
 
               eggs.length > 0 ? Container(
-                height: heightScreen - 250,
+                height: Utils.isShowAdd? heightScreen -  250 : heightScreen -  200,
                 width: widthScreen,
                 child:
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 60), // Adjust this value as needed
+                  padding: const EdgeInsets.only(bottom: 120), // Adjust this value as needed
                   child:
                   ListView.builder(
                     itemCount: eggs.length,
@@ -632,7 +603,39 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                                       ],
                                     ),
                                   ),
-                                )
+                                ),
+
+
+                              /// **Sync Info Icon**
+                              if(Utils.isMultiUSer)
+                                GestureDetector(
+                                  onTap: () {
+                                    Eggs item = eggs[index];
+                                    String updated_at = item.last_modified == null
+                                        ? "Unknown".tr()
+                                        : DateFormat("dd MMM yyyy hh:mm a").format(item.last_modified!);
+
+                                    String updated_by = item.modified_by == null || item.modified_by!.isEmpty
+                                        ? "System".tr()
+                                        : item.modified_by!;
+
+                                    Utils.showSyncInfo(context, updated_at, updated_by);
+                                  },
+                                  child: Container(
+                                    alignment: eggs[index].isCollection == 1? Alignment.centerLeft : Alignment.centerRight,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.info_outline, size: 16, color: Colors.blueGrey),
+                                        SizedBox(width: 4),
+                                        Text(
+                                          "Sync Info",
+                                          style: TextStyle(fontSize: 12, color: Colors.blueGrey),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
 
                             ],
                           ),
@@ -875,7 +878,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                     );*//*
                   }),*/
                   ]
-      ),),),),),);
+      ),),),),);
   }
 
   Widget _buildDropdownField(

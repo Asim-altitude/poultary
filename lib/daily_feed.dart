@@ -185,7 +185,73 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
-    return SafeArea(child: Scaffold(
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(10.0), // Round bottom-left corner
+            bottomRight: Radius.circular(10.0), // Round bottom-right corner
+          ),
+          child: AppBar(
+            title: Text(
+              applied_filter_name.tr(),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            actions: [
+              InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () {
+                  openSortDialog(context, (selectedSort) {
+                    setState(() {
+                      sortOption = selectedSort == "date_desc" ? "Date (New)" : "Date (Old)";
+                      sortSelected = selectedSort == "date_desc" ? "DESC" : "ASC";
+                    });
+
+                    getFilteredTransactions(str_date, end_date);
+                  });
+                },
+                child: Container(
+                  height: 45,
+                  width: 130,
+                  margin: EdgeInsets.only(right: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  alignment: Alignment.center,
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          sortOption.tr(),
+                          style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Icon(Icons.sort, color: Colors.white, size: 22),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            backgroundColor: Colors.blue, // Customize the color
+            elevation: 8, // Gives it a more elevated appearance
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                Navigator.pop(context); // Navigates back
+              },
+            ),
+          ),
+        ),
+      ),
       bottomNavigationBar: BottomAppBar(
         color: Colors.transparent,
         child: InkWell(
@@ -254,7 +320,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
             children:  [
               Utils.getDistanceBar(),
 
-              ClipRRect(
+              /*ClipRRect(
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(10),
                   bottomRight: Radius.circular(10),
@@ -262,7 +328,8 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
+                     // colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
+                      colors: [Colors.blue, Colors.blue],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -348,7 +415,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                   ),
                 ),
               ),
-
+    */
               Center(
                 child: Container(
                   padding: EdgeInsets.only(top: 10),
@@ -481,7 +548,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                 ],),
               )*/
               Visibility(
-                visible: !isAutoFeedEnabled,
+                visible: false,
                 child: InkWell(
                   onTap: () async {
                    await Navigator.push(
@@ -530,7 +597,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                 child: ListView.builder(
                     itemCount: feedings.length,
                     scrollDirection: Axis.vertical,
-                    padding: EdgeInsets.only(bottom: 250),
+                    padding: EdgeInsets.only(bottom: 240),
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
                         margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -656,8 +723,41 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                                     ),
                                   ),
                                 ),
+
+
                               ],
                             ),
+
+                            /// **Sync Info Icon**
+                            if(Utils.isMultiUSer)
+                              GestureDetector(
+                                onTap: () {
+                                  Feeding item = feedings[index];
+                                  String updated_at = item.last_modified == null
+                                      ? "Unknown".tr()
+                                      : DateFormat("dd MMM yyyy hh:mm a").format(item.last_modified!);
+
+                                  String updated_by = item.modified_by == null || item.modified_by!.isEmpty
+                                      ? "System".tr()
+                                      : item.modified_by!;
+
+                                  Utils.showSyncInfo(context, updated_at, updated_by);
+                                },
+                                child: Container(
+                                  alignment: Alignment.centerRight,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.info_outline, size: 16, color: Colors.blueGrey),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        "Sync Info",
+                                        style: TextStyle(fontSize: 12, color: Colors.blueGrey),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                       );
@@ -896,7 +996,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                     );*//*
                   }),*/
                   ]
-      ),),),),),);
+      ),),),),);
   }
 
   Widget _buildDropdownField(

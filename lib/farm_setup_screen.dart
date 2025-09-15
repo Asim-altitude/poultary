@@ -112,220 +112,178 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height -
         (safeAreaHeight + safeAreaHeightBottom);
     child:
-    return SafeArea(
-      child: Scaffold(
-        bottomNavigationBar: Container(
-          height: 60,
-          margin: EdgeInsets.only(bottom: 15),
-          child: ElevatedButton(
-            onPressed: () {
-              // Your button action here
-              if (checkValidation())
-              {
-                if(!nameController.text.isEmpty) {
-                  farmSetup!.name = nameController.text;
-                }
-                Utils.selected_unit = selectedUnit;
-                farmSetup!.date = date;
-                farmSetup!.modified = 1;
-                DatabaseHelper.updateFarmSetup(farmSetup);
-
-                Utils.showToast("SUCCESSFUL".tr());
-                // Save logic here
-                Navigator.pop(context);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("PROVIDE_ALL".tr())));
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "FARM_SETUP".tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blue, // Customize the color
+        elevation: 8, // Gives it a more elevated appearance
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context); // Navigates back
+          },
+        ),
+      ),
+      bottomNavigationBar: Container(
+        height: 60,
+        margin: EdgeInsets.only(bottom: 15),
+        child: ElevatedButton(
+          onPressed: () {
+            // Your button action here
+            if (checkValidation())
+            {
+              if(!nameController.text.isEmpty) {
+                farmSetup!.name = nameController.text;
               }
-            },
-            child: Ink(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.blueAccent, Utils.getThemeColorBlue()],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(12),
+              Utils.selected_unit = selectedUnit;
+              farmSetup!.date = date;
+              farmSetup!.modified = 1;
+              DatabaseHelper.updateFarmSetup(farmSetup);
+
+              Utils.showToast("SUCCESSFUL".tr());
+              // Save logic here
+              Navigator.pop(context);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("PROVIDE_ALL".tr())));
+            }
+          },
+          child: Ink(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blueAccent, Utils.getThemeColorBlue()],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              child: Container(
-                alignment: Alignment.center,
-                child: Text(
-                  "SAVE".tr(), // Replace with your button label
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Container(
+              alignment: Alignment.center,
+              child: Text(
+                "SAVE".tr(), // Replace with your button label
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ),
           ),
         ),
-        body: SafeArea(
-          top: false,
-          child: Container(
-            width: widthScreen,
-            height: heightScreen,
-            color: Utils.getScreenBackground(),
-            child: SingleChildScrollViewWithStickyFirstWidget(
-              child: Column(
-                children: [
-                  Utils.getDistanceBar(),
-                  ClipRRect(
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(10),
-                      bottomRight: Radius.circular(10),
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 6,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                      child: Row(
-                        children: [
-                          /// Back Button
-                          InkWell(
-                            borderRadius: BorderRadius.circular(30),
-                            onTap: () => Navigator.pop(context),
-                            child: Container(
-                              width: 45,
-                              height: 45,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.15),
-                              ),
-                              child: Icon(Icons.arrow_back, color: Colors.white, size: 28),
-                            ),
-                          ),
-
-                          /// Title
-                          Expanded(
-                            child: Container(
-                              margin: EdgeInsets.only(left: 12),
-                              child: Text(
-                                "FARM_SETUP".tr(),
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
+      ),
+      body: SafeArea(
+        child: Container(
+          width: widthScreen,
+          height: heightScreen,
+          color: Utils.getScreenBackground(),
+          child: SingleChildScrollViewWithStickyFirstWidget(
+            child: Column(
+              children: [
+                Utils.getDistanceBar(),
+                Container(
+                  margin: EdgeInsets.all(15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 🖼 Image Picker with Overlay
+                      Center(
+                        child: InkWell(
+                          onTap: selectImage,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Container(
+                                width: 140,
+                                height: 140,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade200,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: Colors.grey.shade400),
+                                  image: modified == 1 ? DecorationImage(
+                                      image: MemoryImage(Base64Decoder().convert(farmSetup!.image)),
+                                      fit: BoxFit.cover)
+                                      : DecorationImage(
+                                      image: AssetImage('assets/farm_icon.png'),
+                                      fit: BoxFit.contain),
                                 ),
                               ),
-                            ),
-                          ),
-
-
-                        ],
-                      ),
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.all(15),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 🖼 Image Picker with Overlay
-                        Center(
-                          child: InkWell(
-                            onTap: selectImage,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Container(
-                                  width: 140,
-                                  height: 140,
+                              // Overlay Icon & Text
+                              Positioned(
+                                bottom: 10,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
                                   decoration: BoxDecoration(
-                                    color: Colors.grey.shade200,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: Colors.grey.shade400),
-                                    image: modified == 1 ? DecorationImage(
-                                        image: MemoryImage(Base64Decoder().convert(farmSetup!.image)),
-                                        fit: BoxFit.cover)
-                                        : DecorationImage(
-                                        image: AssetImage('assets/farm_icon.png'),
-                                        fit: BoxFit.contain),
+                                    color: Colors.black.withOpacity(0.6),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.camera_alt, color: Colors.white, size: 12),
+                                      SizedBox(width: 6),
+                                      Text("Tap to change".tr(), style: TextStyle(color: Colors.white, fontSize: 10)),
+                                    ],
                                   ),
                                 ),
-                                // Overlay Icon & Text
-                                Positioned(
-                                  bottom: 10,
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.6),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.camera_alt, color: Colors.white, size: 12),
-                                        SizedBox(width: 6),
-                                        Text("Tap to change".tr(), style: TextStyle(color: Colors.white, fontSize: 10)),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
+                              )
+                            ],
                           ),
                         ),
-                        SizedBox(height: 10),
-                    
-                        // 📝 Farm Name Input Field
-                        _buildInputField(label: "FARM_NAME", controller: nameController, hint: "Enter farm name"),
-                    
-                        // 💰 Currency Selection
-                        _buildDropdownField(label: "CURRENCY", value: selectedCurrency, onTap: chooseCurrency),
-                    
-                        // 📅 Date Picker
-                        _buildDropdownField(label: "Farm Setup Date", value: date, onTap: pickDate),
+                      ),
+                      SizedBox(height: 10),
 
-                        Text(
-                          "Select Unit".tr(),
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      // 📝 Farm Name Input Field
+                      _buildInputField(label: "FARM_NAME", controller: nameController, hint: "Enter farm name"),
+
+                      // 💰 Currency Selection
+                      _buildDropdownField(label: "CURRENCY", value: selectedCurrency, onTap: chooseCurrency),
+
+                      // 📅 Date Picker
+                      _buildDropdownField(label: "Farm Setup Date", value: date, onTap: pickDate),
+
+                      Text(
+                        "Select Unit".tr(),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                      Container(
+                        height: 60,
+                        width: widthScreen,
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey.shade400),
                         ),
-                        Container(
-                          height: 60,
-                          width: widthScreen,
-                          padding: EdgeInsets.symmetric(horizontal: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey.shade400),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: selectedUnit,
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  selectedUnit = newValue!;
-                                  SessionManager.setUnit(selectedUnit);
-                                });
-                                // Optionally save to DB or preferences
-                              },
-                              items: <String>['KG', 'lbs'].map((String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value.tr(), style: TextStyle(fontSize: 16)),
-                                );
-                              }).toList(),
-                            ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: selectedUnit,
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                selectedUnit = newValue!;
+                                SessionManager.setUnit(selectedUnit);
+                              });
+                              // Optionally save to DB or preferences
+                            },
+                            items: <String>['KG', 'lbs'].map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value.tr(), style: TextStyle(fontSize: 16)),
+                              );
+                            }).toList(),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+                ),
 
-                ],
-              ),
+              ],
             ),
           ),
         ),

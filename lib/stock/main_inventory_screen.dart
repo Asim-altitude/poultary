@@ -64,32 +64,33 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(kToolbarHeight),
-          child: ClipRRect(
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(0.0),
-              bottomRight: Radius.circular(0.0),
-            ),
-            child: AppBar(
-              title: Text(
-                "Manage Inventory".tr(),
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 22,
-                  color: Colors.white,
-                ),
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(0.0),
+            bottomRight: Radius.circular(0.0),
+          ),
+          child: AppBar(
+            title: Text(
+              "Manage Inventory".tr(),
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 20,
+                color: Colors.white,
               ),
-              centerTitle: true,
-              backgroundColor: Utils.getThemeColorBlue(),
-              elevation: 8,
-              automaticallyImplyLeading: false,
             ),
+            centerTitle: true,
+            foregroundColor: Colors.white,
+            backgroundColor: Colors.blue,
+            elevation: 8,
+            automaticallyImplyLeading: (Utils.isMultiUSer && Utils.currentUser!.role.toLowerCase() != "admin")? true : false,
           ),
         ),
-        body: SingleChildScrollView(
+      ),
+      body: SingleChildScrollView(
+        child: SafeArea(
           child: Column(
             children: [
               Utils.showBannerAd(_bannerAd, _isBannerAdReady),
@@ -132,7 +133,7 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
                       onTap: () async {
                         CategoryItem item = CategoryItem(id: null, name: "Medicine");
                         int? medicineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);
-      
+              
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -148,7 +149,7 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
                       onTap: () async {
                         CategoryItem item = CategoryItem(id: null, name: "Vaccine");
                         int? vaccineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);
-      
+              
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -163,8 +164,8 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
             ],
           ),
         ),
-      
       ),
+    
     );
   }
 
@@ -174,49 +175,86 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
     required String description,
     required VoidCallback onTap,
   }) {
-    Color color= Colors.orange.shade500;
-    Color colorBG=  Colors.orange.shade900;
+    // Use cool theme colors
+    final Color accent = Colors.blue.shade600;
+    final Color accentDark = Colors.indigo.shade700;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: color.withOpacity(0.025),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: colorBG, width: 1.0),
+          gradient: LinearGradient(
+            colors: [
+              Colors.blue.shade50,
+              Colors.indigo.shade50.withOpacity(0.7),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: accent.withOpacity(0.3), width: 1),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.1),
-              offset: Offset(0, 4),
-              blurRadius: 6,
+              color: accent.withOpacity(0.12),
+              offset: const Offset(2, 4),
+              blurRadius: 10,
+              spreadRadius: 1,
             )
           ],
         ),
-        padding: EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: colorBG, size: 40),
-            SizedBox(height: 10),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [accent, accentDark],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: accent.withOpacity(0.25),
+                    blurRadius: 6,
+                    offset: const Offset(2, 3),
+                  )
+                ],
+              ),
+              padding: const EdgeInsets.all(10),
+              child: Icon(icon, color: Colors.white, size: 32),
+            ),
+            const SizedBox(height: 14),
             Text(
               title,
               style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: colorBG,
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
+                color: accentDark,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            SizedBox(height: 2),
-            Expanded(
-              child: Text(
-                description,
-                style: TextStyle(fontSize: 11, color: Colors.black54),
+            const SizedBox(height: 6),
+            Text(
+              description,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade700,
+                height: 1.3,
               ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              softWrap: true,
             ),
           ],
         ),
       ),
     );
   }
+
 
 
 }

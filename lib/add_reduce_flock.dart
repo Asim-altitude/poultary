@@ -153,7 +153,73 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
 
-    return SafeArea(child: Scaffold(
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(10.0), // Round bottom-left corner
+            bottomRight: Radius.circular(10.0), // Round bottom-right corner
+          ),
+          child: AppBar(
+            title: Text(
+              applied_filter_name.tr(),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            actions: [
+              InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () {
+                  openSortDialog(context, (selectedSort) {
+                    setState(() {
+                      sortOption = selectedSort == "date_desc" ? "Date (New)" : "Date (Old)";
+                      sortSelected = selectedSort == "date_desc" ? "DESC" : "ASC";
+                    });
+
+                    getFilteredTransactions(str_date, end_date);
+                  });
+                },
+                child: Container(
+                  height: 45,
+                  width: 130,
+                  margin: EdgeInsets.only(right: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  alignment: Alignment.center,
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          sortOption.tr(),
+                          style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Icon(Icons.sort, color: Colors.white, size: 22),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            backgroundColor: Colors.blue, // Customize the color
+            elevation: 8, // Gives it a more elevated appearance
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                Navigator.pop(context); // Navigates back
+              },
+            ),
+          ),
+        ),
+      ),
       bottomNavigationBar: BottomAppBar(
         color: Colors.transparent,
         child: Container(
@@ -257,7 +323,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
             children:  [
               Utils.getDistanceBar(),
 
-              ClipRRect(
+              /*ClipRRect(
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(10),
                   bottomRight: Radius.circular(10),
@@ -265,7 +331,8 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
+                     // colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
+                      colors: [Colors.blue, Colors.blue],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -351,7 +418,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                   ),
                 ),
               ),
-
+*/
               Center(
                 child: Container(
                   padding: EdgeInsets.only(top: 10),
@@ -428,7 +495,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
               ),
 
               list.length > 0 ? Container(
-                height: heightScreen - 290,
+                height: Utils.isShowAdd? heightScreen - 350 : heightScreen - 300,
                 width: widthScreen,
                 child: ListView.builder(
                   itemCount: list.length,
@@ -464,16 +531,19 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                                 ),
 
                                 /// **Menu Icon**
-                               !hasTransaction? GestureDetector(
+                                !hasTransaction
+                                    ? GestureDetector(
                                   onTapDown: (TapDownDetails details) {
                                     selected_id = item.f_detail_id;
                                     selected_index = index;
                                     showMemberMenu(details.globalPosition);
                                   },
                                   child: Icon(Icons.more_vert, color: Colors.black54),
-                                ):SizedBox(height: 1,),
+                                )
+                                    : SizedBox(height: 1),
                               ],
                             ),
+
                             SizedBox(height: 10),
 
                             /// **Bird Count with Addition/Reduction Label**
@@ -482,7 +552,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                                 Image.asset("assets/bird_icon.png", width: 30, height: 30),
                                 SizedBox(width: 6),
                                 Text(
-                                  "${item.item_count} "+"BIRDS".tr(),
+                                  "${item.item_count} " + "BIRDS".tr(),
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
@@ -511,7 +581,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                             ),
                             SizedBox(height: 10),
 
-                            /// **Date Positioned Properly Below Birds Count**
+                            /// **Date**
                             Row(
                               children: [
                                 Icon(Icons.calendar_today, size: 16, color: Colors.blueGrey),
@@ -526,7 +596,9 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
                             /// **Reason / Acquisition Type**
                             Text(
-                              item.item_type == 'Reduction' ? item.reason.toString().tr() : item.acqusition_type.toString().tr(),
+                              item.item_type == 'Reduction'
+                                  ? item.reason.toString().tr()
+                                  : item.acqusition_type.toString().tr(),
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -568,13 +640,13 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                                   onTap: () async {
                                     selected_id = item.f_detail_id;
                                     selected_index = index;
-                                    print("TRANSACTION_ID ${item.transaction_id}");
                                     await Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => ViewCompleteTransaction(
                                           transaction_id: item.transaction_id,
-                                          isTransaction: false, flock_detail_id: '$selected_id',
+                                          isTransaction: false,
+                                          flock_detail_id: '$selected_id',
                                         ),
                                       ),
                                     );
@@ -600,10 +672,40 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                                   ),
                                 ),
                               ),
+
+                            SizedBox(height: 6),
+
+                            /// **Sync Info Icon**
+                          if(Utils.isMultiUSer)
+                            GestureDetector(
+                              onTap: () {
+                                String updated_at = item.last_modified == null
+                                    ? "Unknown".tr()
+                                    : DateFormat("dd MMM yyyy hh:mm a").format(item.last_modified!);
+
+                                String updated_by = item.modified_by == null || item.modified_by!.isEmpty
+                                    ? "System".tr()
+                                    : item.modified_by!;
+
+                                Utils.showSyncInfo(context, updated_at, updated_by);
+                              },
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.info_outline, size: 16, color: Colors.blueGrey),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    "Sync Info",
+                                    style: TextStyle(fontSize: 12, color: Colors.blueGrey),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     );
+
                   },
                 ),
               )
@@ -841,7 +943,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                     );*//*
                   }),*/
                   ]
-      ),),),),),);
+      ),),),),);
   }
 
   Widget _buildDropdownField(

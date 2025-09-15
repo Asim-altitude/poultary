@@ -119,429 +119,399 @@ class _NewEventReminder extends State<NewEventReminder>
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height -
         (safeAreaHeight + safeAreaHeightBottom);
     child:
-    return SafeArea(
-      child: Scaffold(
-        bottomNavigationBar: InkWell(
-          onTap: () async {
-            activeStep++;
-            if(activeStep==1){
-              if(isOther){
-                if(nameController.text.isEmpty)
-                {
-                  activeStep--;
-                  Utils.showToast("PROVIDE_ALL");
-                }
-              }
-            }
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0, // removes the shadow
+        scrolledUnderElevation: 0, // removes shadow when scrolling (Flutter 3.7+)
+        surfaceTintColor: Colors.transparent, // removes Material3 tint
+        backgroundColor: Utils.getScreenBackground(), // Customize the color
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Utils.getThemeColorBlue()),
+          onPressed: () {
+            Navigator.pop(context); // Navigates back
+          },
+        ),
+      ),
 
-            if(activeStep==2)
-            {
-              if(notesController.text.isEmpty || !isDateChosen) {
+
+      bottomNavigationBar: InkWell(
+        onTap: () async {
+          activeStep++;
+          if(activeStep==1){
+            if(isOther){
+              if(nameController.text.isEmpty)
+              {
                 activeStep--;
                 Utils.showToast("PROVIDE_ALL");
               }
-              else
-              {
-                DateTime datetime = DateFormat("dd MMM yyyy - hh:mm a").parse(Utils.getReminderFormattedDate(date)); // DateTime.parse();
-                int notification_time = ((datetime.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch) / 1000).round();
-                print("TIME $notification_time");
+            }
+          }
 
-                if(isEdit){
-                  MyEvent myevent = MyEvent(widget.myEvent!.id, getFlockID(),
-                      _purposeselectedValue,
-                      isOther
-                          ? nameController.text
-                          : _reminderValue,
-                      notesController.text ,1, date, 1);
-                  await EventsDatabaseHelper.instance
-                      .database;
+          if(activeStep==2)
+          {
+            if(notesController.text.isEmpty || !isDateChosen) {
+              activeStep--;
+              Utils.showToast("PROVIDE_ALL");
+            }
+            else
+            {
+              DateTime datetime = DateFormat("dd MMM yyyy - hh:mm a").parse(Utils.getReminderFormattedDate(date)); // DateTime.parse();
+              int notification_time = ((datetime.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch) / 1000).round();
+              print("TIME $notification_time");
 
-                  EventsDatabaseHelper.updateEvent(myevent);
-                  Utils.showToast("Reminder Added");
-                  Navigator.pop(context);
+              if(isEdit){
+                MyEvent myevent = MyEvent(widget.myEvent!.id, getFlockID(),
+                    _purposeselectedValue,
+                    isOther
+                        ? nameController.text
+                        : _reminderValue,
+                    notesController.text ,1, date, 1);
+                await EventsDatabaseHelper.instance
+                    .database;
 
-                } else {
-                  MyEvent myevent = MyEvent(-1, getFlockID(),
-                      _purposeselectedValue,
-                      isOther
-                          ? nameController.text
-                          : _reminderValue,
-                      notesController.text, 1, date, 1);
-                  await EventsDatabaseHelper.instance
-                      .database;
+                EventsDatabaseHelper.updateEvent(myevent);
+                Utils.showToast("Reminder Added");
+                Navigator.pop(context);
 
-                  EventsDatabaseHelper.insertNewEvent(myevent);
-                  Utils.showNotification(Utils.generateRandomNumber(), myevent.event_name!, myevent.event_detail!, notification_time);
-                  Utils.showToast("Reminder Added");
-                  Navigator.pop(context);
-                }
+              } else {
+                MyEvent myevent = MyEvent(-1, getFlockID(),
+                    _purposeselectedValue,
+                    isOther
+                        ? nameController.text
+                        : _reminderValue,
+                    notesController.text, 1, date, 1);
+                await EventsDatabaseHelper.instance
+                    .database;
+
+                EventsDatabaseHelper.insertNewEvent(myevent);
+                Utils.showNotification(Utils.generateRandomNumber(), myevent.event_name!, myevent.event_detail!, notification_time);
+                Utils.showToast("Reminder Added");
+                Navigator.pop(context);
               }
             }
+          }
 
-            setState(() {
+          setState(() {
 
-            });
-          },
-          child: Container(
-            width: widthScreen,
-            height: 60,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Utils.getThemeColorBlue(),
-              borderRadius: BorderRadius.circular(30), // More rounded
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 2,
-                  blurRadius: 6,
-                  offset: Offset(0, 3),
-                ),
-              ],
-            ),
-            margin: EdgeInsets.all(20),
-            child: Text(
-              activeStep==0? "Next".tr() : "CONFIRM".tr(),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
-            ),
+          });
+        },
+        child: Container(
+          width: widthScreen,
+          height: 60,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Utils.getThemeColorBlue(),
+            borderRadius: BorderRadius.circular(30), // More rounded
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: 2,
+                blurRadius: 6,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          margin: EdgeInsets.all(20),
+          child: Text(
+            activeStep==0? "Next".tr() : "CONFIRM".tr(),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold),
           ),
         ),
-        body: SafeArea(
-          top: false,
-          child: Container(
-            width: widthScreen,
-            height: heightScreen,
-            color: Utils.getScreenBackground(),
-            child: SingleChildScrollViewWithStickyFirstWidget(
-              child: Column(
-                children: [
-                  Utils.getDistanceBar(),
+      ),
+      body: SafeArea(
+        child: Container(
+          width: widthScreen,
+          height: heightScreen,
+          color: Utils.getScreenBackground(),
+          child: SingleChildScrollViewWithStickyFirstWidget(
+            child: Column(
+              children: [
+                Utils.getDistanceBar(),
+                SizedBox(height: 30,width: widthScreen),
 
-                  ClipRRect(
-                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color:  Utils.getScreenBackground(), //(x,y)
-                          ),
-                        ],
+                EasyStepper(
+                  activeStep: activeStep,
+                  activeStepTextColor: Utils.getThemeColorBlue(),
+                  finishedStepTextColor: Utils.getThemeColorBlue(),
+                  internalPadding: 30,
+                  showLoadingAnimation: false,
+                  stepRadius: 12,
+                  showStepBorder: true,
+                  steps: [
+                    EasyStep(
+                      customStep: CircleAvatar(
+                        radius: 8,
+                        backgroundColor: Colors.white,
+                        child: CircleAvatar(
+                          radius: 7,
+                          backgroundColor:
+                          activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey,
+                        ),
                       ),
-                      child: Row(
-                        children: [
-                          Container(
-                            alignment: Alignment.center,
-                            width: 50,
-                            height: 50,
-                            child: InkWell(
-                              child: Icon(Icons.arrow_back,
-                                  color: Utils.getThemeColorBlue(), size: 30),
-                              onTap: () {
-                                Navigator.pop(context,"Reminder ADDED");
-                              },
-                            ),
-                          ),
-                          Container(
-                              margin: EdgeInsets.only(left: 10),
-                              child: Text(
-                               "",
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold),
-                              )),
-
-                        ],
-                      ),
+                      title: 'Step 1'.tr(),
                     ),
-                  ),
-                  EasyStepper(
-                    activeStep: activeStep,
-                    activeStepTextColor: Utils.getThemeColorBlue(),
-                    finishedStepTextColor: Utils.getThemeColorBlue(),
-                    internalPadding: 30,
-                    showLoadingAnimation: false,
-                    stepRadius: 12,
-                    showStepBorder: true,
-                    steps: [
-                      EasyStep(
-                        customStep: CircleAvatar(
-                          radius: 8,
-                          backgroundColor: Colors.white,
-                          child: CircleAvatar(
-                            radius: 7,
-                            backgroundColor:
-                            activeStep >= 0 ? Utils.getThemeColorBlue() : Colors.grey,
-                          ),
+                    EasyStep(
+                      customStep: CircleAvatar(
+                        radius: 8,
+                        backgroundColor: Colors.white,
+                        child: CircleAvatar(
+                          radius: 7,
+                          backgroundColor:
+                          activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
                         ),
-                        title: 'Step 1'.tr(),
                       ),
-                      EasyStep(
-                        customStep: CircleAvatar(
-                          radius: 8,
-                          backgroundColor: Colors.white,
-                          child: CircleAvatar(
-                            radius: 7,
-                            backgroundColor:
-                            activeStep >= 1 ? Utils.getThemeColorBlue() : Colors.grey,
+                      title: 'Step 2'.tr(),
+
+                    ),
+
+                  ],
+                  onStepReached: (index) =>
+                      setState(() => activeStep = index),
+                ),
+                Container(
+                  alignment: Alignment.center,
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 50,width: widthScreen),
+                        activeStep == 0? Container(
+                          margin: EdgeInsets.all(10),
+                          padding: EdgeInsets.all(15),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.15),
+                                blurRadius: 10,
+                                spreadRadius: 2,
+                                offset: Offset(0, 5),
+                              ),
+                            ],
                           ),
-                        ),
-                        title: 'Step 2'.tr(),
-
-                      ),
-
-                    ],
-                    onStepReached: (index) =>
-                        setState(() => activeStep = index),
-                  ),
-                  Container(
-                    alignment: Alignment.center,
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(height: 50,width: widthScreen),
-                          activeStep == 0? Container(
-                            margin: EdgeInsets.all(10),
-                            padding: EdgeInsets.all(15),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.15),
-                                  blurRadius: 10,
-                                  spreadRadius: 2,
-                                  offset: Offset(0, 5),
+                          child: Column(
+                            children: [
+                              Text(
+                                isEdit? "EDIT".tr() +" "+ "Reminder".tr(): "NEW".tr()+" "+ "Reminder",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 18,
+                                  color: Colors.blue,
                                 ),
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                Container(
-                                    margin: EdgeInsets.only(left: 10),
-                                    child: Text(
-                                      isEdit? "EDIT".tr() +" "+ "Reminder".tr(): "NEW".tr()+" "+ "Reminder",
-                                      textAlign: TextAlign.start,
-                                      style: TextStyle(
-                                          color: Utils.getThemeColorBlue(),
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold),
-                                    )),
+                              ),
+                              SizedBox(height: 50,width: widthScreen),
+                              /*Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('CHOOSE_FLOCK_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                              Container(
+                                width: widthScreen,
+                                height: 70,
+                                alignment: Alignment.centerRight,
+                                padding: EdgeInsets.all(10),
+                                margin: EdgeInsets.only(left: 20, right: 20),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.withAlpha(70),
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(20.0)),
+                                  border: Border.all(
+                                    color:  Colors.black,
+                                    width: 1.0,
+                                  ),
+                                ),
+                                child: getDropDownList(),
+                              ),*/
 
-                                SizedBox(height: 40,width: widthScreen),
-                                /*Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('CHOOSE_FLOCK_1'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-                                Container(
-                                  width: widthScreen,
-                                  height: 70,
-                                  alignment: Alignment.centerRight,
-                                  padding: EdgeInsets.all(10),
-                                  margin: EdgeInsets.only(left: 20, right: 20),
-                                  decoration: BoxDecoration(
+                              _buildInputLabel("CHOOSE_FLOCK_1", Icons.pets),
+                              _buildDropdownField(getDropDownList()),
+
+                              SizedBox(height: 20,width: widthScreen),
+                              /*Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Reminder Title'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                              if(_reminderValue!='')
+                              Container(
+                                width: widthScreen,
+                                height: 70,
+                                alignment: Alignment.centerRight,
+                                padding: EdgeInsets.all(10),
+                                margin: EdgeInsets.only(left: 20, right: 20),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.withAlpha(70),
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(20.0)),
+                                  border: Border.all(
+                                    color:  Colors.black,
+                                    width: 1.0,
+                                  ),
+                                ),
+                                child: getRzeminderDropDownList(),
+                              ),*/
+
+                              _buildInputLabel("Reminder Title", Icons.title),
+                              if(_reminderValue!='')
+                              _buildDropdownField(getRzeminderDropDownList()),
+
+                              SizedBox(height: 20,width: widthScreen),
+
+                              isOther? _buildInputLabel("Reminder Title", Icons.title) : SizedBox(width: 1,),
+                              isOther? _buildTextAreaField(nameController, "Reminder Title",1): SizedBox(width: 1,),
+
+                         /*     isOther? Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Reminder Title'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)): SizedBox(width: 1,),
+                             isOther? Container(
+                                width: widthScreen,
+                                height: 70,
+                                margin: EdgeInsets.only(left: 20, right: 20),
+                                decoration: BoxDecoration(
                                     color: Colors.grey.withAlpha(70),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(20.0)),
-                                    border: Border.all(
-                                      color:  Colors.black,
-                                      width: 1.0,
-                                    ),
-                                  ),
-                                  child: getDropDownList(),
-                                ),*/
-
-                                _buildInputLabel("CHOOSE_FLOCK_1", Icons.pets),
-                                _buildDropdownField(getDropDownList()),
-
-                                SizedBox(height: 20,width: widthScreen),
-                                /*Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Reminder Title'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-                                if(_reminderValue!='')
-                                Container(
-                                  width: widthScreen,
-                                  height: 70,
-                                  alignment: Alignment.centerRight,
-                                  padding: EdgeInsets.all(10),
-                                  margin: EdgeInsets.only(left: 20, right: 20),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.withAlpha(70),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(20.0)),
-                                    border: Border.all(
-                                      color:  Colors.black,
-                                      width: 1.0,
-                                    ),
-                                  ),
-                                  child: getRzeminderDropDownList(),
-                                ),*/
-
-                                _buildInputLabel("Reminder Title", Icons.title),
-                                if(_reminderValue!='')
-                                _buildDropdownField(getRzeminderDropDownList()),
-
-                                SizedBox(height: 20,width: widthScreen),
-
-                                isOther? _buildInputLabel("Reminder Title", Icons.title) : SizedBox(width: 1,),
-                                isOther? _buildTextAreaField(nameController, "Reminder Title",1): SizedBox(width: 1,),
-
-                           /*     isOther? Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('Reminder Title'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)): SizedBox(width: 1,),
-                               isOther? Container(
-                                  width: widthScreen,
-                                  height: 70,
-                                  margin: EdgeInsets.only(left: 20, right: 20),
-                                  decoration: BoxDecoration(
-                                      color: Colors.grey.withAlpha(70),
-                                      borderRadius:
-                                      BorderRadius.all(Radius.circular(10))),
-                                  child: Container(
-                                    child: SizedBox(
-                                      width: widthScreen,
-                                      height: 70,
-                                      child: TextFormField(
-                                        maxLines: 2,
-                                        controller: nameController,
-                                        keyboardType: TextInputType.multiline,
-                                        textAlign: TextAlign.start,
-                                        textInputAction: TextInputAction.done,
-                                        decoration:  InputDecoration(
-                                          border: OutlineInputBorder(
-                                              borderRadius:
-                                              BorderRadius.all(Radius.circular(10))),
-                                          hintText: 'Reminder Title'.tr(),
-                                          hintStyle: TextStyle(
-                                              color: Colors.black, fontSize: 16),
-                                          labelStyle: TextStyle(
-                                              color: Colors.black, fontSize: 16),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ) : SizedBox(width: 1,),
-*/
-                              ],
-                            ),
-                          ):SizedBox(width: 1,),
-
-                          activeStep==1? Container(
-                            margin: EdgeInsets.all(10),
-                            padding: EdgeInsets.all(15),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.15),
-                                  blurRadius: 10,
-                                  spreadRadius: 2,
-                                  offset: Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                Container(
-                                    margin: EdgeInsets.only(left: 10),
-                                    child: Text(
-                                      "Reminder date".tr() +" - "+"About Reminder".tr(),
+                                    borderRadius:
+                                    BorderRadius.all(Radius.circular(10))),
+                                child: Container(
+                                  child: SizedBox(
+                                    width: widthScreen,
+                                    height: 70,
+                                    child: TextFormField(
+                                      maxLines: 2,
+                                      controller: nameController,
+                                      keyboardType: TextInputType.multiline,
                                       textAlign: TextAlign.start,
-                                      style: TextStyle(
-                                          color: Utils.getThemeColorBlue(),
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold),
-                                    )),
-                                SizedBox(height: 20,width: widthScreen),
-
-                                _buildInputLabel("DATE", Icons.calendar_today),
-                                _buildDateField(date, pickDate),
-
-                               /* Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DATE'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-
-                                Container(
-                                  width: widthScreen,
-                                  height: 70,
-                                  margin: EdgeInsets.only(left: 20, right: 20),
-                                  decoration: BoxDecoration(
-                                      borderRadius:
-                                      BorderRadius.all(Radius.circular(20))),
-                                  child: InkWell(
-                                    onTap: () {
-                                      pickDate();
-                                    },
-                                    child: Container(
-                                      alignment: Alignment.centerLeft,
-                                      padding: EdgeInsets.only(left: 10),
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey.withAlpha(70),
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(20.0)),
-                                        border: Border.all(
-                                          width: 1.0,
-                                        ),
-                                      ),
-                                      child: Text(Utils.getReminderFormattedDate(date), style: TextStyle(
-                                          color: Colors.black, fontSize: 16),),
-                                    ),
-                                  ),
-                                ),*/
-                                SizedBox(height: 20,width: widthScreen),
-
-                                _buildInputLabel("About Reminder", Icons.calendar_today),
-                                _buildTextAreaField(notesController, "About Reminder".tr(),3),
-
-/*
-
-                                Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('About Reminder'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
-                                Container(
-                                  width: widthScreen,
-                                  height: 100,
-                                  margin: EdgeInsets.only(left: 20, right: 20),
-                                  decoration: BoxDecoration(
-                                      color: Colors.grey.withAlpha(70),
-                                      borderRadius:
-                                      BorderRadius.all(Radius.circular(10))),
-                                  child: Container(
-                                    child: SizedBox(
-                                      width: widthScreen,
-                                      height: 100,
-                                      child: TextFormField(
-                                        maxLines: 2,
-                                        controller: notesController,
-                                        keyboardType: TextInputType.multiline,
-                                        textAlign: TextAlign.start,
-                                        textInputAction: TextInputAction.done,
-                                        decoration:  InputDecoration(
-                                          border: OutlineInputBorder(
-                                              borderRadius:
-                                              BorderRadius.all(Radius.circular(10))),
-                                          hintText: 'About Reminder'.tr(),
-                                          hintStyle: TextStyle(
-                                              color: Colors.black, fontSize: 16),
-                                          labelStyle: TextStyle(
-                                              color: Colors.black, fontSize: 16),
-                                        ),
+                                      textInputAction: TextInputAction.done,
+                                      decoration:  InputDecoration(
+                                        border: OutlineInputBorder(
+                                            borderRadius:
+                                            BorderRadius.all(Radius.circular(10))),
+                                        hintText: 'Reminder Title'.tr(),
+                                        hintStyle: TextStyle(
+                                            color: Colors.black, fontSize: 16),
+                                        labelStyle: TextStyle(
+                                            color: Colors.black, fontSize: 16),
                                       ),
                                     ),
                                   ),
                                 ),
+                              ) : SizedBox(width: 1,),
+    */
+                            ],
+                          ),
+                        ):SizedBox(width: 1,),
 
-*/
+                        activeStep==1? Container(
+                          margin: EdgeInsets.all(10),
+                          padding: EdgeInsets.all(15),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.15),
+                                blurRadius: 10,
+                                spreadRadius: 2,
+                                offset: Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              Container(
+                                  margin: EdgeInsets.only(left: 10),
+                                  child: Text(
+                                    "Reminder date".tr() +" - "+"About Reminder".tr(),
+                                    textAlign: TextAlign.start,
+                                    style: TextStyle(
+                                        color: Utils.getThemeColorBlue(),
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  )),
+                              SizedBox(height: 20,width: widthScreen),
 
-                                SizedBox(height: 10,width: widthScreen),
+                              _buildInputLabel("DATE", Icons.calendar_today),
+                              _buildDateField(date, pickDate),
 
-                              ],
-                            ),
-                          ):SizedBox(width: 1,),
+                             /* Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('DATE'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
 
-                          SizedBox(height: 25,width: widthScreen),
+                              Container(
+                                width: widthScreen,
+                                height: 70,
+                                margin: EdgeInsets.only(left: 20, right: 20),
+                                decoration: BoxDecoration(
+                                    borderRadius:
+                                    BorderRadius.all(Radius.circular(20))),
+                                child: InkWell(
+                                  onTap: () {
+                                    pickDate();
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.centerLeft,
+                                    padding: EdgeInsets.only(left: 10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withAlpha(70),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(20.0)),
+                                      border: Border.all(
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                    child: Text(Utils.getReminderFormattedDate(date), style: TextStyle(
+                                        color: Colors.black, fontSize: 16),),
+                                  ),
+                                ),
+                              ),*/
+                              SizedBox(height: 20,width: widthScreen),
+
+                              _buildInputLabel("About Reminder", Icons.calendar_today),
+                              _buildTextAreaField(notesController, "About Reminder".tr(),3),
+
+    /*
+
+                              Container(alignment: Alignment.topLeft, margin: EdgeInsets.only(left: 25,bottom: 5),child: Text('About Reminder'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),)),
+                              Container(
+                                width: widthScreen,
+                                height: 100,
+                                margin: EdgeInsets.only(left: 20, right: 20),
+                                decoration: BoxDecoration(
+                                    color: Colors.grey.withAlpha(70),
+                                    borderRadius:
+                                    BorderRadius.all(Radius.circular(10))),
+                                child: Container(
+                                  child: SizedBox(
+                                    width: widthScreen,
+                                    height: 100,
+                                    child: TextFormField(
+                                      maxLines: 2,
+                                      controller: notesController,
+                                      keyboardType: TextInputType.multiline,
+                                      textAlign: TextAlign.start,
+                                      textInputAction: TextInputAction.done,
+                                      decoration:  InputDecoration(
+                                        border: OutlineInputBorder(
+                                            borderRadius:
+                                            BorderRadius.all(Radius.circular(10))),
+                                        hintText: 'About Reminder'.tr(),
+                                        hintStyle: TextStyle(
+                                            color: Colors.black, fontSize: 16),
+                                        labelStyle: TextStyle(
+                                            color: Colors.black, fontSize: 16),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+    */
+
+                              SizedBox(height: 10,width: widthScreen),
+
+                            ],
+                          ),
+                        ):SizedBox(width: 1,),
+
+                        SizedBox(height: 25,width: widthScreen),
 
 
 
-                        ]),
-                  ),
-                ],
-              ),
+                      ]),
+                ),
+              ],
             ),
           ),
         ),

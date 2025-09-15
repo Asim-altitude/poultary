@@ -209,7 +209,21 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
-    return SafeArea(child: Scaffold(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "Settings".tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blue,
+        elevation: 8,
+        automaticallyImplyLeading: (Utils.isMultiUSer && Utils.currentUser!.role.toLowerCase() != "admin")? true : false,
+      ),
       body:SafeArea(
         top: false,
         child:Container(
@@ -224,9 +238,6 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
             children:  [
 
               Utils.getDistanceBar(),
-
-                SizedBox(height: 10,),
-                _buildSectionTitle('Settings'.tr()),
 
               // Farm & Inventory Section
               // Farm & Inventory Section
@@ -939,7 +950,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
 
 
                     ],),),
-*/
+    */
 
 
                 /*Container(width: Utils.WIDTH_SCREEN,
@@ -1767,7 +1778,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
 
 
                     ],),),
-*//*
+    *//*
 
 
                     *//*Container(width: Utils.WIDTH_SCREEN,
@@ -2050,7 +2061,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
               ),),*/
 
 
-      ),),),),),);
+      ),),),),);
   }
 
  /* void _showPremiumDialog(BuildContext context) {
@@ -2275,12 +2286,12 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                           Icon(Icons.workspace_premium, size: 70, color: Colors.white),
                           SizedBox(height: 8),
                           Text(
-                            "Upgrade Your Plan",
+                            "Upgrade Your Plan".tr(),
                             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
                           SizedBox(height: 4),
                           Text(
-                            "Upgrade to unlock more features",
+                            "Upgrade to unlock more features".tr(),
                             style: TextStyle(fontSize: 14, color: Colors.white70),
                           ),
                         ],
@@ -2306,39 +2317,38 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                               "Get quick responses".tr(),
                               included: true,
                               alwaysIncluded: true,
-                              duration: "Lifetime"),
+                              duration: "Lifetime".tr()),
                           _buildFeatureItem(
                               "Reports".tr(),
                               "Access detailed analytics".tr(),
                               included: true,
                               alwaysIncluded: true,
-                              duration: "Lifetime"),
+                              duration: "Lifetime".tr()),
                           _buildFeatureItem(
                               "Cloud Sync".tr(),
                               "Access your data anywhere".tr(),
                               included: true,
                               alwaysIncluded: true,
-                              duration: "6 months"),
+                              duration: "6 months".tr()),
                           _buildFeatureItem(
                               "Multi-User Access".tr(),
                               "Add multiple users".tr(),
                               included: true,
                               alwaysIncluded: true,
-                              duration: "6 months"),
+                              duration: "6 months".tr()),
                           _buildFeatureItem(
                               "Role-Based Permissions".tr(),
                               "Control access levels".tr(),
                               included: true,
                               alwaysIncluded: true,
-                              duration: "6 months"),
+                              duration: "6 months".tr()),
           
                           _buildFeatureItem(
                               "Other Features".tr(),
                               "All other features are completely free".tr(),
                               included: true,
                               alwaysIncluded: true,
-                              duration: "Lifetime"),
-          
+                              duration: "Lifetime".tr()),
           
                         ],
                       ),
@@ -2417,7 +2427,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                               Navigator.pop(context);
                             },
                             child: Text(
-                              "Upgrade ".tr()+"(${_products[0].price})",
+                              "upgrade".tr()+"(${_products[0].price})",
                               style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.bold,
@@ -2436,7 +2446,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                         Navigator.pop(context);
                       },
                       child: Text(
-                        'Restore Ads Removal'.tr(),
+                        'Restore Premium'.tr(),
                         style: const TextStyle(fontSize: 14, color: Colors.grey),
                       ),
                     ),
@@ -2916,7 +2926,7 @@ _buildFeatureItem(Icons.cloud_upload, "Cloud Sync".tr(),
         
                       /// **Subtitle for Price**
                       Text(
-                        _products.isNotEmpty ? "Only".tr()+" ${_products[0].price}" : "Loading price...",
+                        _products.isNotEmpty ? "Only".tr()+" ${_products[0].price}" : "Loading Price".tr(),
                         style: TextStyle(fontSize: 14, color: Colors.white70),
                       ),
                     ],

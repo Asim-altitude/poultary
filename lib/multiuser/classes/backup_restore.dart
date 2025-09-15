@@ -13,6 +13,8 @@ import '../model/user.dart';
 import '../utils/FirebaseUtils.dart';
 import 'package:http/http.dart' as http;
 
+import 'initial_dbshare_screen.dart';
+
 class BackupFoundScreen extends StatefulWidget {
 
   final bool isAdmin;
@@ -42,83 +44,85 @@ class _BackupFoundScreenState extends State<BackupFoundScreen> {
     isRestoring = true;
     isBackupFound = false;
     isLooking = false;
-    setState(() {
-
-    });
+    setState(() {});
 
     print("BACKUP_URL $latestBackupUrl");
     final uri = Uri.parse(latestBackupUrl);
+
     final client = http.Client();
     final request = http.Request('GET', uri);
-    final response = await client.send(request);
 
-    if (response.statusCode != 200) {
-      print("Failed to download DB file");
+    try {
+      final response = await client.send(request).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode != 200) {
+        throw Exception("❌ Failed to download DB file, status: ${response.statusCode}");
+      }
+
+      File abcd = await DatabaseHelper.instance.dBToCopy();
+      String recoveryPath = "${abcd.absolute.path}/assets/poultary.db";
+
+      final file = File(recoveryPath);
+      final sink = file.openWrite();
+
+      final contentLength = response.contentLength ?? 0;
+      int bytesReceived = 0;
+
+      await response.stream.listen(
+            (chunk) {
+          bytesReceived += chunk.length;
+          sink.add(chunk);
+
+          if (contentLength > 0) {
+            // 🔄 update notifier for progress bar
+            downloadProgress.value = bytesReceived / contentLength;
+          }
+        },
+        onDone: () async {
+          await sink.close();
+          await DatabaseHelper.instance.database; // reopen DB
+          await SessionManager.setBoolValue('db_initialized_${user!.farmId}', true);
+
+          downloadProgress.value = 1.0;
+          print("✅ Database download complete.");
+          downloadingDB = false;
+          Utils.showToast("RESTORE_SUCCESSFUL".tr());
+
+          if (widget.isAdmin) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => HomeScreen()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => WorkerDashboardScreen(
+                  name: widget.user.name,
+                  email: widget.user.email,
+                  role: widget.user.role,
+                ),
+              ),
+            );
+          }
+        },
+        onError: (e) async {
+          await sink.close();
+          Utils.showToast("BACKUP_FAILED".tr());
+          isRestoring = false;
+          isErrorOccured = true;
+          setState(() {});
+          print("❌ Download failed: $e");
+        },
+        cancelOnError: true,
+      );
+    } catch (e) {
+      print("❌ Restore exception: $e");
+      Utils.showToast("BACKUP_FAILED".tr());
+      isRestoring = false;
+      isErrorOccured = true;
+      setState(() {});
     }
-
-    File abcd = await DatabaseHelper.instance.dBToCopy();
-
-    // Prepare file path
-    String recoveryPath =
-        "${abcd.absolute.path}/assets/poultary.db";
-
-    final file = File(recoveryPath);
-    final sink = file.openWrite();
-
-    final contentLength = response.contentLength ?? 0;
-    int bytesReceived = 0;
-
-    // Listen to stream and write to file while updating progress
-    await response.stream.listen(
-          (chunk) {
-        bytesReceived += chunk.length;
-        sink.add(chunk);
-        if (contentLength > 0) {
-          downloadProgress.value = bytesReceived / contentLength;
-        }
-      },
-      onDone: () async {
-        await sink.close();
-
-        // 🔑 Reset database connection
-        await DatabaseHelper.instance.database; // forces re-open
-
-        await SessionManager.setBoolValue('db_initialized_${user!.farmId}', true);
-        downloadProgress.value = 1.0;
-        print("Database download complete.");
-        downloadingDB = false;
-        Utils.showToast("RESTORE_SUCCESSFUL".tr());
-
-
-        if(widget.isAdmin) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => HomeScreen()),
-          );
-        }
-        else{
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => WorkerDashboardScreen(name: widget.user.name, email: widget.user.email, role: widget.user.role)),
-          );
-        }
-
-
-      },
-      onError: (e) {
-        sink.close();
-        Utils.showToast("BACKUP_FAILED".tr());
-
-        isRestoring = false;
-        isErrorOccured = true;
-        setState(() {
-
-        });
-        throw Exception("Download failed: $e");
-      },
-      cancelOnError: true,
-    );
-
   }
 
   MultiUser? user = null;
@@ -144,7 +148,9 @@ class _BackupFoundScreenState extends State<BackupFoundScreen> {
           isLooking = false;
           isBackupFound = false;
         }
+        setState(() {
 
+        });
         if(!isBackupFound){
           Navigator.pushReplacement(
             context,
@@ -156,9 +162,7 @@ class _BackupFoundScreenState extends State<BackupFoundScreen> {
           handleRestore();
 
         }
-        setState(() {
 
-        });
       }
     }
     catch(ex){
@@ -258,6 +262,24 @@ class _BackupFoundScreenState extends State<BackupFoundScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               CircularProgressIndicator(),
+              Container(
+                margin: EdgeInsets.only(left: 20, right: 20),
+                child: ValueListenableBuilder<double>(
+                  valueListenable: downloadProgress,
+                  builder: (context, value, _) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("${(value * 100).toStringAsFixed(0)}%"),
+                        LinearProgressIndicator(
+                          value: value, // between 0.0 and 1.0
+                          minHeight: 8,
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
               SizedBox(height: 20),
               Text(
                 'Restoring...'.tr(),
@@ -265,9 +287,9 @@ class _BackupFoundScreenState extends State<BackupFoundScreen> {
               ),
             ],
           ) : isErrorOccured?   Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CircularProgressIndicator(),
               SizedBox(height: 20),
               Text(
                 'Error Occured. Try Again.'.tr(),
@@ -284,15 +306,24 @@ class _BackupFoundScreenState extends State<BackupFoundScreen> {
                   });
                   checkMultiUSer();
                 },
-                child: Row(
-                  children: [
-                    Icon(Icons.restore, color: Colors.red, size: 30,),
-                    Text(
-                      'Try Again'.tr(),
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
-                    ),
-                  ],
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min, // keep row tight
+                    children: [
+                      Icon(Icons.restore, color: Colors.red, size: 30),
+                      SizedBox(width: 6),
+                      Text(
+                        'Try Again'.tr(),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+
               ),
             ],
           ) : SizedBox.shrink(),

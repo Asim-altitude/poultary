@@ -113,109 +113,109 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> with RefreshMixin {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(title:  Text('Feed Batches'.tr()), backgroundColor: Utils.getThemeColorBlue(), foregroundColor: Colors.white,),
-        bottomNavigationBar: Container(
-          color: Colors.white,
-          padding: EdgeInsets.all(10),
-          child: Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                  onTap: () => {
-      
-                    _openCreateBatchDialog(null)
-                  },
-                  borderRadius: BorderRadius.circular(10),
-                  child: AnimatedContainer(
-                    duration: Duration(milliseconds: 300),
-                    height: 55,
-                    margin: EdgeInsets.symmetric(horizontal: 6),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Utils.getThemeColorBlue(), Colors.blue],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+    return Scaffold(
+      appBar: AppBar(title:  Text('Feed Batches'.tr()), backgroundColor: Colors.blue, foregroundColor: Colors.white,),
+      bottomNavigationBar: Container(
+        color: Colors.white,
+        padding: EdgeInsets.all(10),
+        child: Row(
+          children: [
+            Expanded(
+              child: InkWell(
+                onTap: () => {
+    
+                  _openCreateBatchDialog(null)
+                },
+                borderRadius: BorderRadius.circular(10),
+                child: AnimatedContainer(
+                  duration: Duration(milliseconds: 300),
+                  height: 55,
+                  margin: EdgeInsets.symmetric(horizontal: 6),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Utils.getThemeColorBlue(), Colors.blue],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.4),
+                        blurRadius: 6,
+                        offset: Offset(0, 3),
                       ),
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.green.withOpacity(0.4),
-                          blurRadius: 6,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.add_circle_outline_sharp, color: Colors.white, size: 28),
-                        SizedBox(width: 6),
-                        Text(
-                          'New Batch'.tr(),
-                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add_circle_outline_sharp, color: Colors.white, size: 28),
+                      SizedBox(width: 6),
+                      Text(
+                        'New Batch'.tr(),
+                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              Expanded(
-                child: InkWell(
-                  onTap: () => {
-                  Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                  builder: (context) =>  FeedIngredientScreen()),
-                  )
-                  },
-                  borderRadius: BorderRadius.circular(10),
-                  child: AnimatedContainer(
-                    duration: Duration(milliseconds: 300),
-                    height: 55,
-                    margin: EdgeInsets.symmetric(horizontal: 6),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.green.shade500, Colors.blue],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+            ),
+            Expanded(
+              child: InkWell(
+                onTap: () => {
+                Navigator.push(
+                context,
+                MaterialPageRoute(
+                builder: (context) =>  FeedIngredientScreen()),
+                )
+                },
+                borderRadius: BorderRadius.circular(10),
+                child: AnimatedContainer(
+                  duration: Duration(milliseconds: 300),
+                  height: 55,
+                  margin: EdgeInsets.symmetric(horizontal: 6),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.green.shade500, Colors.blue],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.4),
+                        blurRadius: 6,
+                        offset: Offset(0, 3),
                       ),
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.green.withOpacity(0.4),
-                          blurRadius: 6,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Ingredients'.tr(),
-                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-                        ),
-      
-                        Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 28),
-      
-                      ],
-                    ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Ingredients'.tr(),
+                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                      ),
+    
+                      Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 28),
+    
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        body: _batches.isEmpty
-            ?  Center(child: Text('No feed batches created yet.'.tr()))
-            : SingleChildScrollView(
+      ),
+      body: _batches.isEmpty
+          ?  Center(child: Text('No feed batches created yet.'.tr()))
+          : SingleChildScrollView(
+            child: SafeArea(
               child: Column(
                 children:
                 [
                   Utils.showBannerAd(_bannerAd, _isBannerAdReady),
-      
+                  
                   Container(
                     margin: EdgeInsets.all(15),
                     child: Column(
@@ -227,7 +227,7 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> with RefreshMixin {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>  FeedStockScreen()),
-      
+                  
                             );
                           },
                           child: Container(
@@ -277,7 +277,7 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> with RefreshMixin {
                                                    Utils.showMissingPermissionDialog(context, "edit_feed");
                                                    return;
                                                  }
-      
+                  
                                                  _openCreateBatchDialog(batch);
                                                },
                                              ),
@@ -289,7 +289,7 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> with RefreshMixin {
                                                    Utils.showMissingPermissionDialog(context, "delete_feed");
                                                    return;
                                                  }
-      
+                  
                                                  _confirmDeleteBatch(batch.id!, batch.transaction_id);
                                                },
                                              ),
@@ -297,9 +297,9 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> with RefreshMixin {
                                          ),
                                        ],
                                      ),
-      
+                  
                                      const SizedBox(height: 8),
-      
+                  
                                      /// Weight and Price
                                      Row(
                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -310,16 +310,16 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> with RefreshMixin {
                                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
                                        ],
                                      ),
-      
+                  
                                      const SizedBox(height: 12),
-      
+                  
                                      /// Ingredients title
                                       Text(
                                        "Ingredients".tr(),
                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black54),
                                      ),
                                      const SizedBox(height: 6),
-      
+                  
                                      /// Ingredient chips
                                      Wrap(
                                        spacing: 8,
@@ -336,15 +336,15 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> with RefreshMixin {
                                  ),
                                ),
                              );
-      
+                  
                             },
                           ),
                   ),
                 ],
               ),
             ),
-      
-      ),
+          ),
+    
     );
   }
 

@@ -44,8 +44,20 @@ class SessionManager {
   static Future<void> clearPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
-
   }
+
+
+  static Future<void> setValue(String key, String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, value); // use key parameter
+  }
+
+  static Future<String?> getValue(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    final value = prefs.getString(key); // use key parameter
+    return value;
+  }
+
 
   static Future<DateTime?> getLastBackupTime() async {
     final prefs = await SharedPreferences.getInstance();

@@ -71,28 +71,28 @@ class _StockDetailScreen extends State<StockDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(title: Text("Stock Details".tr())),
-        body: Padding(
+    return Scaffold(
+      appBar: AppBar(title: Text("Stock Details".tr())),
+      body: SafeArea(
+        child: Padding(
           padding: const EdgeInsets.all(5.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // **Stock Summary Section**
               Utils.showBannerAd(_bannerAd, _isBannerAdReady),
-      
+            
               _buildStockItem(widget.stock, 0, kAlwaysCompleteAnimation),
-      
+            
               SizedBox(height: 16),
-      
+            
               // **Stock History Title**
               Container(
                   margin: EdgeInsets.only(left: 10),
                   child: Text("Stock History".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-      
+            
               SizedBox(height: 8),
-      
+            
               // **Stock History List**
               Expanded(
                 child: Container(
@@ -101,7 +101,7 @@ class _StockDetailScreen extends State<StockDetailScreen> {
                     itemCount: widget.stockHistory.length,
                     itemBuilder: (context, index) {
                       final entry = widget.stockHistory[index];
-      
+            
                       return Card(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         elevation: 3,
@@ -119,14 +119,14 @@ class _StockDetailScreen extends State<StockDetailScreen> {
                           trailing: IconButton(
                             icon: Icon(Icons.delete, color: Colors.red),
                             onPressed: () async {
-
-
+            
+            
                               if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_feed")){
                                 Utils.showMissingPermissionDialog(context, "delete_feed");
                                 return;
                               }
-
-
+            
+            
                               return await showDialog(
                                 context: context,
                                 builder: (context) => AlertDialog(
@@ -147,29 +147,29 @@ class _StockDetailScreen extends State<StockDetailScreen> {
                                           await DatabaseHelper.deleteByStockItemId(entry.id!);
                                           await DatabaseHelper.deleteItem("Transactions", stockExpense.transactionId);
                                         }
-      
+            
                                         DatabaseHelper.deleteFeedStock(entry.id!);
                                         Utils.showToast("SUCCESSFUL".tr());
-      
+            
                                         if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_feed")) {
                                           feedStockFB.sync_id = entry.sync_id;
                                           feedStockFB.sync_status = SyncStatus.DELETED;
                                           feedStockFB.last_modified = Utils.getTimeStamp();
                                           feedStockFB.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
                                           feedStockFB.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
-      
+            
                                           await FireBaseUtils.updateFeedStockHistory(feedStockFB);
                                         }
-      
+            
                                         setState(() {
                                           widget.stockHistory.remove(entry);
                                         });
-      
+            
                                         if(widget.stockHistory.isEmpty) {
                                           Navigator.pop(context);
                                         }
-      
-      
+            
+            
                                         Navigator.of(context).pop(true);
                                       },
                                       child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
@@ -185,7 +185,7 @@ class _StockDetailScreen extends State<StockDetailScreen> {
                   ),
                 ),
               ),
-      
+            
             ],
           ),
         ),

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:googleapis/servicemanagement/v1.dart';
 import 'package:poultary/dashboard.dart';
 import 'package:poultary/product_screen.dart';
@@ -112,7 +113,7 @@ class _HomeScreen extends State<HomeScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       onPressed: () => Navigator.of(context).pop(),
-                      child: Text("later".tr()), // "Later"
+                      child: Text("Later".tr()), // "Later"
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -492,8 +493,9 @@ class _HomeScreen extends State<HomeScreen> {
     heightScreen = MediaQuery.of(context).size.height;
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
-      child:
-       return SafeArea(child: Scaffold(
+
+
+       return Scaffold(
          // Circular Floating Action Button
           /* floatingActionButton: FloatingActionButton(
              onPressed: () {
@@ -506,7 +508,7 @@ class _HomeScreen extends State<HomeScreen> {
              shape: CircleBorder(), // Ensures it's always circular
            ),
            floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-*/
+       */
            bottomNavigationBar: ClipRRect(
              borderRadius: BorderRadius.only(
                topLeft: Radius.circular(12),
@@ -529,7 +531,7 @@ class _HomeScreen extends State<HomeScreen> {
                ],
              ),
            ),
-      body: _pages[_selectedTab])); /*SafeArea(
+             body: _pages[_selectedTab]); /*SafeArea(
         top: false,
 
           child:Container(

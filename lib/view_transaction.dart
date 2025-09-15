@@ -93,7 +93,7 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
 
       }
 
-    }else{
+    } else {
       Utils.showToast("No Transaction found");
       DatabaseHelper.updateLinkedFlockDetail(widget.flock_detail_id, "-1");
       Flock_Detail? flock_detail = await DatabaseHelper.getSingleFlockDetails(int.parse(widget.flock_detail_id));
@@ -138,401 +138,410 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height -
         (safeAreaHeight + safeAreaHeightBottom);
-    return SafeArea(
-      child: Scaffold(
-        bottomNavigationBar: Container(
-          margin: EdgeInsets.all(15),
-          padding: EdgeInsets.symmetric(horizontal: 10),
-          child: Row(
-            children: [
-              // Edit Button
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    editRecord();
-                  },
-                  borderRadius: BorderRadius.circular(25),
-                  splashColor: Colors.blue.withOpacity(0.3),
-                  child: AnimatedContainer(
-                    duration: Duration(milliseconds: 300),
-                    height: 55,
-                    margin: EdgeInsets.all(5),
+    return Scaffold(
+      bottomNavigationBar: Container(
+        margin: EdgeInsets.all(15),
+        padding: EdgeInsets.symmetric(horizontal: 10),
+        child: Row(
+          children: [
+            // Edit Button
+            Expanded(
+              child: InkWell(
+                onTap: () {
+
+                  if(Utils.isMultiUSer && (!Utils.hasFeaturePermission("edit_transaction") ||  !Utils.hasFeaturePermission("edit_birds")))
+                  {
+                    Utils.showMissingPermissionDialog(context, "edit_transaction,edit_birds");
+                    return;
+                  }
+
+                  editRecord();
+                },
+                borderRadius: BorderRadius.circular(25),
+                splashColor: Colors.blue.withOpacity(0.3),
+                child: AnimatedContainer(
+                  duration: Duration(milliseconds: 300),
+                  height: 55,
+                  margin: EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.blue.shade600, Colors.blueAccent],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withOpacity(0.4),
+                        spreadRadius: 2,
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AnimatedContainer(
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        transform: Matrix4.translationValues(0, 0, 0),
+                        child: Icon(Icons.edit, color: Colors.white, size: 24),
+                      ),
+                      SizedBox(width: 6),
+                      Text(
+                        'EDIT_RECORD'.tr(),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Delete Button
+            Expanded(
+              child: InkWell(
+                onTap: () {
+                  if(Utils.isMultiUSer && (!Utils.hasFeaturePermission("delete_transaction") ||  !Utils.hasFeaturePermission("delete_birds")))
+                  {
+                    Utils.showMissingPermissionDialog(context, "delete_transaction,delete_birds");
+                    return;
+                  }
+                    showAlertDialog(context);
+                },
+                borderRadius: BorderRadius.circular(25),
+                splashColor: Colors.red.withOpacity(0.3),
+                child: AnimatedContainer(
+                  duration: Duration(milliseconds: 300),
+                  height: 55,
+                  margin: EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.red.shade600, Colors.redAccent],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.red.withOpacity(0.4),
+                        spreadRadius: 2,
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AnimatedContainer(
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        transform: Matrix4.translationValues(0, 0, 0),
+                        child: Icon(Icons.delete, color: Colors.white, size: 24),
+                      ),
+                      SizedBox(width: 6),
+                      Text(
+                        'DELETE_RECORD'.tr(),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: SafeArea(
+        child: Container(
+          width: widthScreen,
+          height: heightScreen,
+          color: Colors.blue,
+          child: SingleChildScrollViewWithStickyFirstWidget(
+            child: Column(
+              children: [
+                Utils.getDistanceBar(),
+                ClipRRect(
+                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(15)), // Smooth bottom corners
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Colors.blue.shade600, Colors.blueAccent],
+                        colors: [Colors.blue, Colors.blue],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(25),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.blue.withOpacity(0.4),
                           spreadRadius: 2,
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
+                          blurRadius: 6,
+                          offset: Offset(0, 3),
                         ),
                       ],
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        AnimatedContainer(
-                          duration: Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          transform: Matrix4.translationValues(0, 0, 0),
-                          child: Icon(Icons.edit, color: Colors.white, size: 24),
-                        ),
-                        SizedBox(width: 6),
-                        Text(
-                          'EDIT_RECORD'.tr(),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
+                        // Back Button with Ripple Effect
+                        InkWell(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          borderRadius: BorderRadius.circular(25),
+                          splashColor: Colors.white.withOpacity(0.3),
+                          child: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withOpacity(0.2),
+                            ),
+                            child: Icon(Icons.arrow_back, color: Colors.white, size: 28),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+                        SizedBox(width: 15),
 
-              // Delete Button
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    showAlertDialog(context);
-                  },
-                  borderRadius: BorderRadius.circular(25),
-                  splashColor: Colors.red.withOpacity(0.3),
-                  child: AnimatedContainer(
-                    duration: Duration(milliseconds: 300),
-                    height: 55,
-                    margin: EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.red.shade600, Colors.redAccent],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.red.withOpacity(0.4),
-                          spreadRadius: 2,
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AnimatedContainer(
-                          duration: Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          transform: Matrix4.translationValues(0, 0, 0),
-                          child: Icon(Icons.delete, color: Colors.white, size: 24),
-                        ),
-                        SizedBox(width: 6),
-                        Text(
-                          'DELETE_RECORD'.tr(),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
+                        // Title Text
+                        Expanded(
+                          child: Text(
+                            "View Complete Transaction".tr(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        body: SafeArea(
-          top: false,
-          child: Container(
-            width: widthScreen,
-            height: heightScreen,
-            color: Utils.getThemeColorBlue(),
-            child: SingleChildScrollViewWithStickyFirstWidget(
-              child: Column(
-                children: [
-                  Utils.getDistanceBar(),
-                  ClipRRect(
-                    borderRadius: BorderRadius.vertical(bottom: Radius.circular(15)), // Smooth bottom corners
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Utils.getThemeColorBlue(), Utils.getThemeColorBlue()],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.blue.withOpacity(0.4),
-                            spreadRadius: 2,
-                            blurRadius: 6,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
+                transactionItem!= null? Container(
+                  margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15), // Semi-transparent effect
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.3), // Light border for glass effect
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.white.withOpacity(0.05),
+                        blurRadius: 10,
+                        spreadRadius: 2,
                       ),
-                      child: Row(
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Transaction Title
+                      Text(
+                        transactionItem!.type == 'Income'
+                            ? transactionItem!.sale_item.tr()
+                            : transactionItem!.expense_item.tr(),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+
+                      // Amount & Type
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Back Button with Ripple Effect
-                          InkWell(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            borderRadius: BorderRadius.circular(25),
-                            splashColor: Colors.white.withOpacity(0.3),
-                            child: Container(
-                              padding: EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.2),
-                              ),
-                              child: Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                          Text(
+                            "${Utils.currency}${transactionItem!.amount}",
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: transactionItem!.type == "Income"
+                                  ? Colors.greenAccent
+                                  : Colors.redAccent,
                             ),
                           ),
-                          SizedBox(width: 15),
-
-                          // Title Text
-                          Expanded(
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: transactionItem!.type == "Income"
+                                  ? Colors.greenAccent.withOpacity(0.2)
+                                  : Colors.redAccent.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                             child: Text(
-                              "View Complete Transaction".tr(),
+                              transactionItem!.type.tr(),
                               style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  transactionItem!= null? Container(
-                    margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    padding: EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15), // Semi-transparent effect
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3), // Light border for glass effect
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.white.withOpacity(0.05),
-                          blurRadius: 10,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Transaction Title
-                        Text(
-                          transactionItem!.type == 'Income'
-                              ? transactionItem!.sale_item.tr()
-                              : transactionItem!.expense_item.tr(),
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-
-                        // Amount & Type
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "${Utils.currency}${transactionItem!.amount}",
-                              style: TextStyle(
-                                fontSize: 22,
+                                fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 color: transactionItem!.type == "Income"
                                     ? Colors.greenAccent
                                     : Colors.redAccent,
                               ),
                             ),
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: transactionItem!.type == "Income"
-                                    ? Colors.greenAccent.withOpacity(0.2)
-                                    : Colors.redAccent.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                transactionItem!.type.tr(),
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: transactionItem!.type == "Income"
-                                      ? Colors.greenAccent
-                                      : Colors.redAccent,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Divider(thickness: 1, color: Colors.white.withOpacity(0.2), height: 20),
-
-                        // Transaction Details
-                        _buildDetailRow(Icons.calendar_today, Utils.getFormattedDate(transactionItem!.date)),
-                        _buildDetailRow(Icons.payment, "${transactionItem!.payment_method.tr()} (${transactionItem!.payment_status.tr()})"),
-                        _buildDetailRow(Icons.swap_horiz,
-                            transactionItem!.type.toLowerCase() == 'income'
-                                ? 'From'.tr() + ": " + transactionItem!.sold_purchased_from
-                                : 'To'.tr() + ": " + transactionItem!.sold_purchased_from,
-                            isBold: true
-                        ),
-
-                        // Notes (if available)
-                        if (transactionItem!.short_note.isNotEmpty) ...[
-                          SizedBox(height: 10),
-                          _buildDetailRow(Icons.notes, transactionItem!.short_note, isItalic: true),
+                          ),
                         ],
+                      ),
+                      Divider(thickness: 1, color: Colors.white.withOpacity(0.2), height: 20),
+
+                      // Transaction Details
+                      _buildDetailRow(Icons.calendar_today, Utils.getFormattedDate(transactionItem!.date)),
+                      _buildDetailRow(Icons.payment, "${transactionItem!.payment_method.tr()} (${transactionItem!.payment_status.tr()})"),
+                      _buildDetailRow(Icons.swap_horiz,
+                          transactionItem!.type.toLowerCase() == 'income'
+                              ? 'From'.tr() + ": " + transactionItem!.sold_purchased_from
+                              : 'To'.tr() + ": " + transactionItem!.sold_purchased_from,
+                          isBold: true
+                      ),
+
+                      // Notes (if available)
+                      if (transactionItem!.short_note.isNotEmpty) ...[
+                        SizedBox(height: 10),
+                        _buildDetailRow(Icons.notes, transactionItem!.short_note, isItalic: true),
                       ],
-                    ),
-                  )
-                      : SizedBox(width: 1,),
-                  Container(
-                    margin: EdgeInsets.only(top: 50),
-                    height: heightScreen,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-                      color: Utils.getScreenBackground(),
-                    ),
-                    child: Column(
-                      children: [
-                        // Title
-                        Container(
-                          margin: EdgeInsets.only(left: 20, right: 20, top: 10),
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              transactionItem!.type == "Income" ? "Reductions".tr() : "Additions".tr(),
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
+                    ],
+                  ),
+                )
+                    : SizedBox(width: 1,),
+                Container(
+                  margin: EdgeInsets.only(top: 50),
+                  height: heightScreen,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+                    color: Utils.getScreenBackground(),
+                  ),
+                  child: Column(
+                    children: [
+                      // Title
+                      Container(
+                        margin: EdgeInsets.only(left: 20, right: 20, top: 10),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            transactionItem!.type == "Income" ? "Reductions".tr() : "Additions".tr(),
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
                             ),
                           ),
                         ),
+                      ),
 
-                        SizedBox(height: 12),
+                      SizedBox(height: 12),
 
-                        // List of Flock Details
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: flock_details.length,
-                            padding: EdgeInsets.symmetric(horizontal: 15),
-                            itemBuilder: (BuildContext context, int index) {
-                              return Container(
-                                margin: EdgeInsets.only(bottom: 12),
-                                padding: EdgeInsets.all(15),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.9),
-                                  borderRadius: BorderRadius.circular(15),
-                                  border: Border.all(color: Colors.white.withOpacity(0.2)),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.2),
-                                      blurRadius: 6,
-                                      spreadRadius: 2,
-                                      offset: Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    // Left Section: Flock Name & Type
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Image.asset("assets/bird_icon.png", width: 30, height: 30,),
-                                            SizedBox(width: 6),
-                                            Text(
-                                              flock_details.elementAt(index).f_name,
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black87,
-                                              ),
+                      // List of Flock Details
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: flock_details.length,
+                          padding: EdgeInsets.symmetric(horizontal: 15),
+                          itemBuilder: (BuildContext context, int index) {
+                            return Container(
+                              margin: EdgeInsets.only(bottom: 12),
+                              padding: EdgeInsets.all(15),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.9),
+                                borderRadius: BorderRadius.circular(15),
+                                border: Border.all(color: Colors.white.withOpacity(0.2)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.2),
+                                    blurRadius: 6,
+                                    spreadRadius: 2,
+                                    offset: Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  // Left Section: Flock Name & Type
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Image.asset("assets/bird_icon.png", width: 30, height: 30,),
+                                          SizedBox(width: 6),
+                                          Text(
+                                            flock_details.elementAt(index).f_name,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black87,
                                             ),
-                                          ],
-                                        ),
-                                        SizedBox(height: 5),
-                                        Row(
-                                          children: [
-                                            Icon(Icons.merge_type_outlined, color: Colors.grey, size: 25),
-                                            SizedBox(width: 6),
-                                            Text(
-                                              transactionItem!.type == "Expense"
-                                                  ? flock_details.elementAt(index).acqusition_type.tr()
-                                                  : flock_details.elementAt(index).reason.toString().tr(),
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color: Utils.getThemeColorBlue(),
-                                              ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 5),
+                                      Row(
+                                        children: [
+                                          Icon(Icons.merge_type_outlined, color: Colors.grey, size: 25),
+                                          SizedBox(width: 6),
+                                          Text(
+                                            transactionItem!.type == "Expense"
+                                                ? flock_details.elementAt(index).acqusition_type.tr()
+                                                : flock_details.elementAt(index).reason.toString().tr(),
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
+                                              color: Utils.getThemeColorBlue(),
                                             ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
 
-                                    // Right Section: Bird Count
-                                    Row(
-                                      children: [
-                                        Icon(Icons.tag, color: Colors.black87, size: 20),
-                                        SizedBox(width: 6),
-                                        Text(
-                                          flock_details.elementAt(index).item_count.toString(),
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: Utils.getThemeColorBlue(),
-                                          ),
+                                  // Right Section: Bird Count
+                                  Row(
+                                    children: [
+                                      Icon(Icons.tag, color: Colors.black87, size: 20),
+                                      SizedBox(width: 6),
+                                      Text(
+                                        flock_details.elementAt(index).item_count.toString(),
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Utils.getThemeColorBlue(),
                                         ),
-                                        SizedBox(width: 4),
-                                        Text(
-                                          "Birds".tr(),
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            color: Colors.black87,
-                                          ),
+                                      ),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        "Birds".tr(),
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: Colors.black87,
                                         ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+                ),
 
-                ],
-              ),
+              ],
             ),
           ),
         ),
@@ -655,24 +664,6 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
 
         financeItem.flockDetails = [];
 
-      /*  if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_transaction")) {
-
-          if (!widget.isTransaction) {
-            flock_details.elementAt(0).sync_status = SyncStatus.DELETED;
-            transactionItem!.sync_status = SyncStatus.DELETED;
-
-            BirdsModification birdsmodify = BirdsModification(
-                flockDetail: flock_details.elementAt(0),
-                transaction: transactionItem);
-
-            birdsmodify.farm_id = Utils.currentUser!.farmId;
-            birdsmodify.modified_by = Utils.currentUser!.email;
-            birdsmodify.last_modified = Utils.getTimeStamp();
-
-            await FireBaseUtils.deleteBirdsDetails(birdsmodify);
-          }
-        }
-*/
 
         try {
           if (transactionItem!.type == "Income") {
@@ -687,12 +678,11 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
               print("F_ID ${flock_details
                   .elementAt(i)
                   .f_id}");
-              Flock? flock = await DatabaseHelper
-                  .getSingleFlock(flock_details
-                  .elementAt(i)
-                  .f_id);
+              Flock? flock = await DatabaseHelper.getSingleFlock(flock_details.elementAt(i).f_id);
               if (flock == null) {
                 print("FLOCK NULL");
+
+                print("DETAIL_ID ${flock_details.elementAt(i).f_detail_id!}");
                 await DatabaseHelper.deleteItemWithFlockID(
                     "Flock_Detail", flock_details
                     .elementAt(i)
@@ -714,6 +704,8 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
                     .elementAt(i)
                     .f_id);
                 print("BIRD UPDATED");
+
+                print("DETAIL_ID ${flock_details.elementAt(i).f_detail_id!}");
 
                 await DatabaseHelper.deleteItemWithFlockID(
                     "Flock_Detail", flock_details
@@ -744,6 +736,8 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
 
               if (flock == null) {
                 print("FLOCK NULL");
+
+                print("DETAIL_ID ${flock_details.elementAt(i).f_detail_id!}");
                 await DatabaseHelper.deleteItemWithFlockID(
                     "Flock_Detail", flock_details
                     .elementAt(i)
@@ -767,6 +761,7 @@ class _ViewCompleteTransaction extends State<ViewCompleteTransaction>
                     .f_id);
                 print("BIRD UPDATED");
 
+                print("DETAIL_ID ${flock_details.elementAt(i).f_detail_id!}");
                 await DatabaseHelper.deleteItemWithFlockID(
                     "Flock_Detail", flock_details
                     .elementAt(i)

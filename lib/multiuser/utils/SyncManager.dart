@@ -142,17 +142,17 @@ class SyncManager {
             Utils.backup_changes += snapshot.docChanges.length;
             startSync();
             FlockFB? flockFB = FlockFB.fromJson(data);
-            print("🟢 New/Updated FLOCK: ${flockFB.flock.f_name}");
+            print("🟢 New/Updated FLOCK: ${flockFB.flock.f_name} ${flockFB.flock.f_id} ${flockFB.flock.active_bird_count}");
 
             // Track latest timestamp for sync update
             if (flockFB.last_modified!.isAfter(lastSyncTime!)) {
               lastSyncTime = flockFB.last_modified;
             }
 
-            if (_localWriteIds.contains(flockFB.flock.f_id)) {
+            if (_localWriteIds.contains(flockFB.flock.f_name)) {
               // 👇 Skip your own recent local write
               print("SELF MODIFICATION SKIPPED");
-              _localWriteIds.remove(flockFB.flock.f_id); // Remove after skip (one-time)
+              _localWriteIds.remove(flockFB.flock.f_name); // Remove after skip (one-time)
               continue;
             }
 
@@ -167,7 +167,7 @@ class SyncManager {
               if(flockFB.flock.sync_status == SyncStatus.UPDATED || flockFB.flock.sync_status == SyncStatus.SYNCED) {
                 await DatabaseHelper.updateFlockInfoBySyncID(flockFB.flock);
                 Flock? flock = await DatabaseHelper.getFlockBySyncId(flockFB.flock.sync_id!);
-                await listenToFlockImages(flock!, flock.farm_id ?? "");
+                await listenToFlockImagesUntilFound(flock!, flock.farm_id ?? "");
               }else if (flockFB.flock.sync_status == SyncStatus.DELETED) {
                 //Delete Entire Flock and related Data
                 Flock? flock = await DatabaseHelper.getFlockBySyncId(flockFB.flock.sync_id!);
@@ -197,7 +197,8 @@ class SyncManager {
                 }
 
                 Flock? insertedFlock = await DatabaseHelper.getFlockBySyncId(flockFB.flock.sync_id!);
-                await listenToFlockImages(insertedFlock!, flockFB.flock.farm_id ?? "");
+                print("FLOCK INSERTED ${insertedFlock!.toJson()}");
+                await listenToFlockImagesUntilFound(insertedFlock, flockFB.flock.farm_id ?? "");
 
               }else{
                 print(flockFB.flock.sync_status);
@@ -224,53 +225,79 @@ class SyncManager {
     }
   }
 
-  Future<void> listenToFlockImages(Flock flock, String farmId) async {
+  Future<void> listenToFlockImagesUntilFound(Flock flock, String farmId,
+      {Duration timeout = const Duration(seconds: 120)}) async
+  {
+    final String farm_id = farmId;
+    final String? f_sync_id = flock.sync_id;
+
+    print("⏳ Waiting for IMAGES $farm_id ${farm_id.length} $f_sync_id ${f_sync_id!.length}");
+
     final query = FirebaseFirestore.instance
         .collection(FireBaseUtils.FLOCK_IMAGES)
-        .where('farm_id', isEqualTo: farmId)
-        .where('f_sync_id', isEqualTo: flock.sync_id); // Use correct field name
+        .where('farm_id', isEqualTo: farm_id)
+        .where('f_sync_id', isEqualTo: f_sync_id);
 
-    final snapshot = await query.get();
+    final completer = Completer<void>();
 
-    if(!snapshot.docs.isEmpty){
-      List<Flock_Image> images = await DatabaseHelper.getFlockImage(flock!.f_id);
-      for(var image in images){
-        int result =  await DatabaseHelper.deleteItem("Flock_Image", image.id!);
-        print("DELETED $result");
-      }
-    }
+    late final StreamSubscription sub;
+    sub = query.snapshots().listen((snapshot) async {
+      if (snapshot.docs.isNotEmpty) {
+        print("✅ IMAGE FLOCKS FOUND ${snapshot.docs.length}");
 
-    for (var doc in snapshot.docs) {
-      final data = doc.data();
-      final List<dynamic>? imageUrls = data['image_urls'];
+        // Delete old images
+        final oldImages = await DatabaseHelper.getFlockImage(flock.f_id);
+        for (var img in oldImages) {
+          final result = await DatabaseHelper.deleteItem("Flock_Image", img.id!);
+          print("🗑️ DELETED $result");
+        }
 
-      if (imageUrls != null && imageUrls.isNotEmpty) {
-        List<String> urls = imageUrls.cast<String>();
+        // Save new images
+        for (var doc in snapshot.docs) {
+          final data = doc.data();
+          final List<dynamic>? imageUrls = data['image_urls'];
 
-        print("🖼️ Flock Image URLs: $urls");
-        if (imageUrls != null) {
-          for (String url in urls) {
-            final base64 = await FlockImageUploader().downloadImageAsBase64(url);
-            if (base64 != null) {
-              Flock_Image image = Flock_Image(
-                  f_id: flock.f_id, image: base64,
+          if (imageUrls != null && imageUrls.isNotEmpty) {
+            final urls = imageUrls.cast<String>();
+            print("🖼️ Flock Image URLs: $urls");
+
+            for (final url in urls) {
+              final base64 = await FlockImageUploader().downloadImageAsBase64(url);
+              if (base64 != null) {
+                final flockImage = Flock_Image(
+                  f_id: flock.f_id,
+                  image: base64,
                   sync_id: Utils.getUniueId(),
                   sync_status: SyncStatus.SYNCED,
                   last_modified: flock.last_modified,
                   modified_by: flock.modified_by,
-                  farm_id: flock.farm_id);
+                  farm_id: flock.farm_id,
+                );
 
-              await DatabaseHelper.insertFlockImages(image);
+                await DatabaseHelper.insertFlockImages(flockImage);
+              }
             }
           }
         }
 
-        // TODO: Save URLs to SQLite or use them as needed
+        // ✅ Cancel listener once processed
+        await sub.cancel();
+        if (!completer.isCompleted) completer.complete();
       } else {
-        print("⚠️ No images found for flock: ${data['f_sync_id']}");
+        print("⚠️ Still waiting for images...");
       }
-    }
+    });
 
+    // Stop waiting after timeout (dispose listener)
+    Future.delayed(timeout, () async {
+      if (!completer.isCompleted) {
+        print("⏱️ Timeout reached, no images found. Disposing listener.");
+        await sub.cancel();
+        completer.complete();
+      }
+    });
+
+    return completer.future;
   }
 
   /// 🐣 BirdsModification listener
@@ -1211,6 +1238,8 @@ class SyncManager {
           final TransactionItem? txn = item.transaction;
 
           print("🔄 MEDICINE STOCK SYNC: ${stock.medicineName} (${stock.quantity} ${stock.unit})");
+          print("MEDICINE ${stock.toLocalFBJson()}");
+          print("STOCK ${item.stock.toLocalFBJson()}");
           Utils.backup_changes += snapshot.docChanges.length;
           if (item.last_modified!.isAfter(lastSyncTime!)) {
             lastSyncTime = item.last_modified;

@@ -170,9 +170,12 @@ class DatabaseHelper  {
     print("Colums ADDED");
   }
 
-  Future<void> assignSyncIds( String tableName) async {
+  Future<void> assignSyncIds(String tableName) async {
     final uuid = Uuid();
 
+    String idColumn = (tableName.toLowerCase() == "flock" || tableName.toLowerCase() == "flock_detail") ? "f_id" : "id";
+
+    print("SYNC_TABLE $tableName ID $idColumn");
     try {
       final List<Map<String, Object?>>? rows = await _database?.query(
         tableName,
@@ -180,12 +183,12 @@ class DatabaseHelper  {
       );
 
       for (final row in rows!) {
-        final id = row['id']; // assuming each row has an `id` column
+        final id = row[idColumn]; // assuming each row has an `id` column
         final newSyncId = uuid.v4();
         await _database?.update(
           tableName,
           {'sync_id': newSyncId},
-          where: 'id = ?',
+          where: '$idColumn = ?',
           whereArgs: [id],
         );
       }
@@ -544,6 +547,22 @@ class DatabaseHelper  {
     }
   }
 
+
+  static Future<VaccineStockHistory?> getVaccineStockHistotyByID(String id) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'VaccineStockHistory',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return VaccineStockHistory.fromMap(result.first);
+    } else {
+      return null;
+    }
+  }
+
   static Future<VaccineStockHistory?> getVaccineStockHistotyBySyncID(String syncId) async {
     final List<Map<String, dynamic>>? result = await _database?.query(
       'VaccineStockHistory',
@@ -559,6 +578,22 @@ class DatabaseHelper  {
     }
   }
 
+
+  static Future<MedicineStockHistory?> getMedicineStockHistotyByID(String id) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'MedicineStockHistory',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return MedicineStockHistory.fromJson(result.first);
+    } else {
+      return null;
+    }
+  }
+
   static Future<MedicineStockHistory?> getMedicineStockHistotyBySyncID(String syncId) async {
     final List<Map<String, dynamic>>? result = await _database?.query(
       'MedicineStockHistory',
@@ -569,6 +604,21 @@ class DatabaseHelper  {
 
     if (result != null && result.isNotEmpty) {
       return MedicineStockHistory.fromJson(result.first);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<FeedStockHistory?> getFeedStockHistotyByID(String id) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'FeedStockHistory',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return FeedStockHistory.fromJson(result.first);
     } else {
       return null;
     }
@@ -695,7 +745,6 @@ class DatabaseHelper  {
       return null;
     }
   }
-
 
   static Future<Vaccination_Medication?> getVaccinationBySyncId(String syncId) async {
     final List<Map<String, dynamic>>? result = await _database?.query(
@@ -3510,6 +3559,22 @@ class DatabaseHelper  {
     return maps!.map((map) => StockExpense.fromMap(map)).toList();
   }
 
+
+  /// Get a stock expense by stock_item_id
+  static Future<StockExpense?> getByTransactionItemId(int transaction_id) async {
+    final List<Map<String, Object?>>? maps = await _database?.query(
+      'StockExpense',
+      where: 'transaction_id = ?',
+      whereArgs: [transaction_id],
+    );
+
+    if (maps!.isNotEmpty) {
+      return StockExpense.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
   /// Get a stock expense by stock_item_id
   static Future<StockExpense?> getByStockItemId(int stockItemId) async {
     final List<Map<String, Object?>>? maps = await _database?.query(
@@ -4174,6 +4239,17 @@ class DatabaseHelper  {
     return List.generate(maps!.length, (i) => FeedStockHistory.fromMap(maps[i]));
   }
 
+  static Future<List<String>?> getDistinctDoctorNames() async {
+    final List<Map<String, Object?>>? results = await _database?.rawQuery('''
+    SELECT DISTINCT doctor_name 
+    FROM Vaccination_Medication 
+    WHERE doctor_name IS NOT NULL AND doctor_name != ''
+    ORDER BY doctor_name COLLATE NOCASE
+  ''');
+
+    return results!.map((row) => row['doctor_name'] as String).toList();
+  }
+
 
   static Future<void> deleteFlockAndRelatedInfoSyncID(String sync_id, int f_id) async {
 
@@ -4260,13 +4336,27 @@ class DatabaseHelper  {
     return 1;
   }
 
-  static Future<int>  updateFarmSetup (FarmSetup? farmSetup) async {
-    var result = await _database?.rawUpdate("UPDATE FarmSetup SET name = '${farmSetup!.name}'"
-        ",image = '${farmSetup!.image}'"
-        ",modified = 1,date = '${farmSetup!.date}',location = '${farmSetup!.location}'"
-        "  WHERE id = 1");
-    return 1;
+  static Future<int> updateFarmSetup(FarmSetup? farmSetup) async {
+    final result = await _database?.rawUpdate(
+      '''
+    UPDATE FarmSetup 
+    SET name = ?, 
+        image = ?, 
+        modified = 1, 
+        date = ?, 
+        location = ?
+    WHERE id = 1
+    ''',
+      [
+        farmSetup?.name,
+        farmSetup?.image,
+        farmSetup?.date,
+        farmSetup?.location,
+      ],
+    );
+    return result ?? 0; // return number of rows updated
   }
+
 
   static Future<Flock> findFlock(int id) async {
 

@@ -146,7 +146,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
                 radius: 40,
                 backgroundColor: Colors.blue.shade100,
                 backgroundImage: (user.image != null && user.image!.isNotEmpty)
-                    ? NetworkImage(user.image!)
+                    ? NetworkImage(Utils.ProxyAPI+user.image!)
                     : null,
                 child: (user.image == null || user.image!.isEmpty)
                     ? Icon(Icons.person, size: 40, color: Colors.blue)
@@ -174,7 +174,15 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: (farmPlan!.isActive && farmPlan!.userCapacity > users.length)?  showAddUserDialog : showUserLimitFull,
+        onPressed: () {
+          if(farmPlan!.isActive && farmPlan!.userCapacity > users.length)
+          {
+            showAddUserDialog();
+          }
+          else{
+            showUserLimitFull();
+          }
+        },
         icon: Icon(Icons.person_add),
         label: Text("Add New User".tr()),
         backgroundColor: Utils.getThemeColorBlue(),
@@ -317,7 +325,7 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
         'image': '',
         'created_at': user.createdAt,
         'farm_id': user.farmId,
-        'password': "", // ⚠️ Ideally hash before saving
+        'password': user.password, // ⚠️ Ideally hash before saving
       });
 
       // --- Step 3: Save to Local DB ---
@@ -409,8 +417,8 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.teal,
-              Colors.teal.shade700,
+              Colors.blue,
+              Colors.green,
             ],
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,

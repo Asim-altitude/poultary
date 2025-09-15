@@ -73,137 +73,150 @@ class _SaleContractorScreenState extends State<SaleContractorScreen> with Refres
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height -
         (safeAreaHeight + safeAreaHeightBottom);
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title:  Text('Sale Contractors'.tr()),
-          foregroundColor: Colors.white,
-          backgroundColor: Utils.getThemeColorBlue(),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "Sale Contractors".tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.white,
+          ),
         ),
-        body: Column(
-          children: [
-            // Search bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Container(
-                width: widthScreen - 20,
-                margin: EdgeInsets.only(top: 10),
-                child: TextField(
-                  controller: searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search by name or type...'.tr(),
-                    hintStyle: TextStyle(color: Colors.grey),
-                    prefixIcon: Icon(Icons.search, color: Colors.blue),
-                    filled: true,
-                    fillColor: Colors.grey.withOpacity(0.2),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide.none,
-                    ),
+        centerTitle: true,
+        backgroundColor: Colors.blue, // Customize the color
+        elevation: 8, // Gives it a more elevated appearance
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context); // Navigates back
+          },
+        ),
+      ),
+
+      body: Column(
+        children: [
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Container(
+              width: widthScreen - 20,
+              margin: EdgeInsets.only(top: 10),
+              child: TextField(
+                controller: searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search by name or type...'.tr(),
+                  hintStyle: TextStyle(color: Colors.grey),
+                  prefixIcon: Icon(Icons.search, color: Colors.blue),
+                  filled: true,
+                  fillColor: Colors.grey.withOpacity(0.2),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
                   ),
                 ),
               ),
             ),
-            // ListView displaying contractors
-            Expanded(
-              child: filteredContractors.isEmpty
-                  ? Center(
-                child: Text(
-                  'No Sale Contractor Added'.tr(),
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
-                ),
-              ) : ListView.builder(
-                padding: const EdgeInsets.all(12),
-                itemCount: filteredContractors.length,
-                itemBuilder: (context, index) {
-                  final contractor = filteredContractors[index];
-                  return Card(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                    elevation: 6,
-                    margin: const EdgeInsets.symmetric(
-                        vertical: 4, horizontal: 10),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.grey.shade100,
-                              Colors.white
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // ListTile for name and type
-                            ListTile(
-                              contentPadding: EdgeInsets.symmetric(
-                                  vertical: 5, horizontal: 16),
-                              title: Text(
-                                contractor.name,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              subtitle: Text(
-                                'Type'.tr()+': ${contractor.type.tr()}',
-                                style: TextStyle(
-                                    fontSize: 14, color: Colors.grey),
-                              ),
-                              trailing: Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                size: 18,
-                                color: Colors.grey,
-                              ),
-                              onTap: () async {
-                                // Navigate to contractor details if needed
-
-                                try {
-                                  if (Utils.isMultiUSer &&
-                                      Utils.currentUser!.role.toLowerCase() != "admin") {
-                                    Utils.showMissingPermissionDialog(context, "Admin");
-                                    return;
-                                  }
-                                }catch(ex){
-                                  print(ex);
-                                }
-
-                               await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>  ContractorProfileScreen(contractor: contractor,)),
-                                );
-
-                               getAllContractors();
-                              },
-                            ),
-                            // Divider for separation
-
-                            // Phone and Email row
-
+          ),
+          // ListView displaying contractors
+          Expanded(
+            child: filteredContractors.isEmpty
+                ? Center(
+              child: Text(
+                'No Sale Contractor Added'.tr(),
+                style: TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+            ) : ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: filteredContractors.length,
+              itemBuilder: (context, index) {
+                final contractor = filteredContractors[index];
+                return Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  elevation: 6,
+                  margin: const EdgeInsets.symmetric(
+                      vertical: 4, horizontal: 10),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.grey.shade100,
+                            Colors.white
                           ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
                       ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // ListTile for name and type
+                          ListTile(
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 5, horizontal: 16),
+                            title: Text(
+                              contractor.name,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                color: Colors.black,
+                              ),
+                            ),
+                            subtitle: Text(
+                              'Type'.tr()+': ${contractor.type.tr()}',
+                              style: TextStyle(
+                                  fontSize: 14, color: Colors.grey),
+                            ),
+                            trailing: Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 18,
+                              color: Colors.grey,
+                            ),
+                            onTap: () async {
+                              // Navigate to contractor details if needed
+
+                              try {
+                                if (Utils.isMultiUSer &&
+                                    Utils.currentUser!.role.toLowerCase() != "admin") {
+                                  Utils.showMissingPermissionDialog(context, "Admin");
+                                  return;
+                                }
+                              }catch(ex){
+                                print(ex);
+                              }
+
+                             await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>  ContractorProfileScreen(contractor: contractor,)),
+                              );
+
+                             getAllContractors();
+                            },
+                          ),
+                          // Divider for separation
+
+                          // Phone and Email row
+
+                        ],
+                      ),
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => _showAddContractorDialog(context),
-          label: Text("Add".tr()),
-          icon: Icon(Icons.add),
-          foregroundColor: Colors.white,
-          backgroundColor: Utils.getThemeColorBlue(),
-        ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showAddContractorDialog(context),
+        label: Text("Add".tr()),
+        icon: Icon(Icons.add),
+        foregroundColor: Colors.white,
+        backgroundColor: Utils.getThemeColorBlue(),
       ),
     );
   }

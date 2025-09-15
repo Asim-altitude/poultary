@@ -11,6 +11,7 @@ import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/stock/medicine_stock_screen.dart';
 import 'package:poultary/stock/vaccine_stock_screen.dart';
+import 'package:poultary/sub_category_screen.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
@@ -46,6 +47,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
   String _acqusitionselectedValue = "";
   String _selectedUnit = "";
 
+  List<String> doctorList = [];
   List<String> _purposeList = [];
   List<String> _diseaseList = [], medicineList = [];
   List<SubItem> _subItemList = [], medSubItem = [];
@@ -121,6 +123,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
     _stockSummary = await DatabaseHelper.getMedicineStockSummary();
     _vaccineStockSummary = await DatabaseHelper.getVaccineStockSummary();
 
+    doctorList = (await DatabaseHelper.getDistinctDoctorNames())!;
 
     String type = "Vaccine";
     if( Utils.vaccine_medicine.toLowerCase().contains("medi"))
@@ -247,6 +250,8 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
     _subItemList = await DatabaseHelper.getSubCategoryList(4);
 
+    _diseaseList = [];
+
     for(int i=0;i<_subItemList.length;i++){
       _diseaseList.add(_subItemList.elementAt(i).name!);
     }
@@ -284,166 +289,42 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height -
         (safeAreaHeight + safeAreaHeightBottom);
     child:
-    return SafeArea(
-      child: Scaffold(
-        bottomNavigationBar: Container(
-          margin: EdgeInsets.all(15),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Show Previous Button only if activeStep > 0
-              if (activeStep > 0)
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        activeStep--;
-                      });
-                    },
-                    child: Container(
-                      height: 55,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade700,
-                        borderRadius: BorderRadius.circular(30), // More rounded
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.3),
-                            spreadRadius: 2,
-                            blurRadius: 6,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      margin: EdgeInsets.symmetric(horizontal: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
-                          SizedBox(width: 5),
-                          Text(
-                            "Previous".tr(),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-              // Next or Finish Button
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0, // removes the shadow
+        scrolledUnderElevation: 0, // removes shadow when scrolling (Flutter 3.7+)
+        surfaceTintColor: Colors.transparent, // removes Material3 tint
+        backgroundColor: Utils.getScreenBackground(), // Customize the color
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Utils.getThemeColorBlue()),
+          onPressed: () {
+            Navigator.pop(context); // Navigates back
+          },
+        ),
+      ),
+      bottomNavigationBar: Container(
+        margin: EdgeInsets.all(15),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Show Previous Button only if activeStep > 0
+            if (activeStep > 0)
               Expanded(
                 child: GestureDetector(
-                  onTap: () async {
-
-
-                    activeStep++;
-
-                    if(activeStep==1){
-
-                      if(qtycountController.text.trim().length==0)
-                      {
-                        activeStep--;
-                        Utils.showToast("PROVIDE_ALL");
-                      }else{
-                        setState(() {
-
-                        });
-                      }
-
-                    }
-
-                    if(activeStep==2){
-
-                      if(doctorController.text.trim().length==0 || qtycountController.text.isEmpty || bird_countController.text.isEmpty){
-                        activeStep--;
-                        Utils.showToast("PROVIDE_ALL");
-                      }else{
-                        if(isEdit) {
-                          Vaccination_Medication med_vacc = Vaccination_Medication(
-                            f_id: getFlockID(),
-                            disease: _diseaseelectedValue,
-                            medicine: _medselectedValue,
-                            date: date,
-                            type: Utils.vaccine_medicine.toLowerCase()
-                                .contains("medi")
-                                ? 'Medication'
-                                : 'Vaccination',
-                            short_note: notesController.text,
-                            bird_count: int.parse(
-                                bird_countController.text),
-                            doctor_name: doctorController.text,
-                            f_name: _purposeselectedValue, quantity: qtycountController.text, unit: _selectedUnit,
-                              sync_id: widget.vaccination_medication!.sync_id,
-                              sync_status: SyncStatus.UPDATED,
-                              last_modified: Utils.getTimeStamp(),
-                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                              f_sync_id: getFlockSyncID());
-
-                          med_vacc.id = widget.vaccination_medication!.id!;
-                          int? id = await DatabaseHelper.updateHealth(
-                              med_vacc);
-                          Utils.showToast("SUCCESSFUL");
-
-                          if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_health")){
-                            await FireBaseUtils.updateHealthRecord(med_vacc);
-                          }
-
-                          Navigator.pop(context);
-                        } else {
-                          Vaccination_Medication med_vacc = Vaccination_Medication(
-                            f_id: getFlockID(),
-                            disease: _diseaseelectedValue,
-                            medicine: _medselectedValue,
-                            date: date,
-                            type: Utils.vaccine_medicine.toLowerCase()
-                                .contains("medi")
-                                ? 'Medication'
-                                : 'Vaccination',
-                            short_note: notesController.text,
-                            bird_count: int.parse(
-                                bird_countController.text),
-                            doctor_name: doctorController.text,
-                            f_name: _purposeselectedValue, quantity: qtycountController.text, unit: _selectedUnit,
-                              sync_id: Utils.getUniueId(),
-                              sync_status: SyncStatus.SYNCED,
-                              last_modified: Utils.getTimeStamp(),
-                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                              f_sync_id: getFlockSyncID());
-                          int? id = await DatabaseHelper.insertMedVac(
-                              med_vacc);
-                          Utils.showToast("SUCCESSFUL");
-
-                          if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_health")){
-                            await FireBaseUtils.uploadHealthRecord(med_vacc);
-                          }
-                          Navigator.pop(context);
-                        }
-                      }
-                    }
-
+                  onTap: () {
+                    setState(() {
+                      activeStep--;
+                    });
                   },
                   child: Container(
                     height: 55,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: activeStep == 1
-                            ? [Utils.getThemeColorBlue(), Colors.greenAccent] // Finish Button
-                            : [Utils.getThemeColorBlue(), Colors.blueAccent], // Next Button
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                      color: Colors.grey.shade700,
                       borderRadius: BorderRadius.circular(30), // More rounded
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.blue.withOpacity(0.5),
+                          color: Colors.grey.withOpacity(0.3),
                           spreadRadius: 2,
                           blurRadius: 6,
                           offset: Offset(0, 3),
@@ -454,310 +335,549 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
+                        SizedBox(width: 5),
                         Text(
-                          activeStep == 1 ? "SAVE".tr() : "Next".tr(),
+                          "Previous".tr(),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(width: 5),
-                        Icon(
-                          activeStep == 1 ? Icons.check_circle : Icons.arrow_forward_ios,
-                          color: Colors.white,
-                          size: 20,
-                        ),
                       ],
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
-        ),
-        body: SafeArea(
-          top: false,
-          child: Container(
-            width: widthScreen,
-            height: heightScreen,
-            color: Utils.getScreenBackground(),
-            child: SingleChildScrollViewWithStickyFirstWidget(
-              child: Column(
-                children: [
-                  Utils.getDistanceBar(),
 
-                  ClipRRect(
-                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: Utils.getScreenBackground(), //(x,y)
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            alignment: Alignment.center,
-                            width: 50,
-                            height: 50,
-                            child: InkWell(
-                              child: Icon(Icons.arrow_back,
-                                  color: Utils.getThemeColorBlue(), size: 30),
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ),
+            // Next or Finish Button
+            Expanded(
+              child: GestureDetector(
+                onTap: () async {
 
 
-                        ],
-                      ),
+                  activeStep++;
+
+                  if(activeStep==1){
+
+                    if(qtycountController.text.trim().length==0)
+                    {
+                      activeStep--;
+                      Utils.showToast("PROVIDE_ALL");
+                    }else{
+                      setState(() {
+
+                      });
+                    }
+
+                  }
+
+                  if(activeStep==2){
+
+                    if(doctorController.text.trim().length==0 || qtycountController.text.isEmpty || bird_countController.text.isEmpty){
+                      activeStep--;
+                      Utils.showToast("PROVIDE_ALL");
+                    }else{
+                      if(isEdit) {
+                        Vaccination_Medication med_vacc = Vaccination_Medication(
+                          f_id: getFlockID(),
+                          disease: _diseaseelectedValue,
+                          medicine: _medselectedValue,
+                          date: date,
+                          type: Utils.vaccine_medicine.toLowerCase()
+                              .contains("medi")
+                              ? 'Medication'
+                              : 'Vaccination',
+                          short_note: notesController.text,
+                          bird_count: int.parse(
+                              bird_countController.text),
+                          doctor_name: doctorController.text,
+                          f_name: _purposeselectedValue, quantity: qtycountController.text, unit: _selectedUnit,
+                            sync_id: widget.vaccination_medication!.sync_id,
+                            sync_status: SyncStatus.UPDATED,
+                            last_modified: Utils.getTimeStamp(),
+                            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                            f_sync_id: getFlockSyncID());
+
+                        med_vacc.id = widget.vaccination_medication!.id!;
+                        int? id = await DatabaseHelper.updateHealth(
+                            med_vacc);
+                        Utils.showToast("SUCCESSFUL");
+
+                        if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_health")){
+                          await FireBaseUtils.updateHealthRecord(med_vacc);
+                        }
+
+                        Navigator.pop(context);
+                      } else {
+                        Vaccination_Medication med_vacc = Vaccination_Medication(
+                          f_id: getFlockID(),
+                          disease: _diseaseelectedValue,
+                          medicine: _medselectedValue,
+                          date: date,
+                          type: Utils.vaccine_medicine.toLowerCase()
+                              .contains("medi")
+                              ? 'Medication'
+                              : 'Vaccination',
+                          short_note: notesController.text,
+                          bird_count: int.parse(
+                              bird_countController.text),
+                          doctor_name: doctorController.text,
+                          f_name: _purposeselectedValue, quantity: qtycountController.text, unit: _selectedUnit,
+                            sync_id: Utils.getUniueId(),
+                            sync_status: SyncStatus.SYNCED,
+                            last_modified: Utils.getTimeStamp(),
+                            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                            f_sync_id: getFlockSyncID());
+                        int? id = await DatabaseHelper.insertMedVac(
+                            med_vacc);
+                        Utils.showToast("SUCCESSFUL");
+
+                        if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_health")){
+                          await FireBaseUtils.uploadHealthRecord(med_vacc);
+                        }
+                        Navigator.pop(context);
+                      }
+                    }
+                  }
+
+                },
+                child: Container(
+                  height: 55,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: activeStep == 1
+                          ? [Utils.getThemeColorBlue(), Colors.greenAccent] // Finish Button
+                          : [Utils.getThemeColorBlue(), Colors.blueAccent], // Next Button
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  ),
-
-                  SizedBox(height: 10,),
-                  EasyStepper(
-                    activeStep: activeStep,
-                    activeStepTextColor: Colors.blue.shade900,
-                    finishedStepTextColor: Utils.getThemeColorBlue(),
-                    internalPadding: 20, // Reduce padding for better spacing
-                    stepShape: StepShape.circle,
-                    stepBorderRadius: 20,
-                    borderThickness: 3, // Balanced progress line thickness
-                    showLoadingAnimation: false,
-                    stepRadius: 15, // Reduced step size to fit screen
-                    showStepBorder: false,
-                    lineStyle: LineStyle(
-                      lineLength: 50,
-                      lineType: LineType.normal,
-                      defaultLineColor: Colors.grey.shade300,
-                      activeLineColor: Colors.blueAccent,
-                      finishedLineColor: Utils.getThemeColorBlue(),
-                    ),
-                    steps: [
-                      EasyStep(
-                        customStep: _buildStepIcon(Icons.medical_information, 0),
-                        title: 'Medicine'.tr(),
+                    borderRadius: BorderRadius.circular(30), // More rounded
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 6,
+                        offset: Offset(0, 3),
                       ),
-                      EasyStep(
-                        customStep: _buildStepIcon(Icons.date_range, 1),
-                        title: 'DATE'.tr(),
-                      ),
-
                     ],
-                    onStepReached: (index) => setState(() => activeStep = index),
                   ),
+                  margin: EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        activeStep == 1 ? "SAVE".tr() : "Next".tr(),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      Icon(
+                        activeStep == 1 ? Icons.check_circle : Icons.arrow_forward_ios,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: SafeArea(
+        top: false,
+        child: Container(
+          width: widthScreen,
+          height: heightScreen,
+          color: Utils.getScreenBackground(),
+          child: SingleChildScrollViewWithStickyFirstWidget(
+            child: Column(
+              children: [
+                Utils.getDistanceBar(),
 
-                  Container(
-                    height: heightScreen - 150,
-                    alignment: Alignment.center,
-                    child: Column(
-                        children: [
-                        activeStep==0? Container(
-                          margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                          padding: EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.15),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                                offset: Offset(0, 5),
-                              ),
-                            ],
+                /*ClipRRect(
+                  borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Utils.getScreenBackground(), //(x,y)
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          alignment: Alignment.center,
+                          width: 50,
+                          height: 50,
+                          child: InkWell(
+                            child: Icon(Icons.arrow_back,
+                                color: Utils.getThemeColorBlue(), size: 30),
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Title
-                              Center(
-                                child: Text(
-                                  Utils.vaccine_medicine.toLowerCase().contains("medi")
-                                      ? (isEdit ? 'EDIT'.tr() + " " + 'Medication'.tr() : 'NEW_MEDICATION'.tr())
-                                      : (isEdit ? 'EDIT'.tr() + " " + 'Vaccination'.tr() : 'NEW_VACCINATION'.tr()),
-                                  style: TextStyle(
-                                    color: Utils.getThemeColorBlue(),
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                        ),
+
+
+                      ],
+                    ),
+                  ),
+                ),
+    */
+
+                EasyStepper(
+                  activeStep: activeStep,
+                  activeStepTextColor: Colors.blue.shade900,
+                  finishedStepTextColor: Utils.getThemeColorBlue(),
+                  internalPadding: 20, // Reduce padding for better spacing
+                  stepShape: StepShape.circle,
+                  stepBorderRadius: 20,
+                  borderThickness: 3, // Balanced progress line thickness
+                  showLoadingAnimation: false,
+                  stepRadius: 15, // Reduced step size to fit screen
+                  showStepBorder: false,
+                  lineStyle: LineStyle(
+                    lineLength: 50,
+                    lineType: LineType.normal,
+                    defaultLineColor: Colors.grey.shade300,
+                    activeLineColor: Colors.blueAccent,
+                    finishedLineColor: Utils.getThemeColorBlue(),
+                  ),
+                  steps: [
+                    EasyStep(
+                      customStep: _buildStepIcon(Icons.medical_information, 0),
+                      title: 'Medicine'.tr(),
+                    ),
+                    EasyStep(
+                      customStep: _buildStepIcon(Icons.date_range, 1),
+                      title: 'DATE'.tr(),
+                    ),
+
+                  ],
+                  onStepReached: (index) => setState(() => activeStep = index),
+                ),
+
+                Container(
+                  height: heightScreen - 140,
+                  alignment: Alignment.center,
+                  child: Column(
+                      children: [
+                      activeStep==0? Container(
+                        margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                        padding: EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.15),
+                              blurRadius: 10,
+                              spreadRadius: 2,
+                              offset: Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Title
+                            Center(
+                              child: Text(
+                                Utils.vaccine_medicine.toLowerCase().contains("medi")
+                                    ? (isEdit ? 'EDIT'.tr() + " " + 'Medication'.tr() : 'NEW_MEDICATION'.tr())
+                                    : (isEdit ? 'EDIT'.tr() + " " + 'Vaccination'.tr() : 'NEW_VACCINATION'.tr()),
+                                style: TextStyle(
+                                  color: Utils.getThemeColorBlue(),
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              SizedBox(height: 20),
+                            ),
+                            SizedBox(height: 20),
 
-                              // Choose Flock
-                              _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
-                              SizedBox(height: 5),
-                              _buildDropdownField(getDropDownList()),
+                            // Choose Flock
+                            _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
+                            SizedBox(height: 5),
+                            _buildDropdownField(getDropDownList()),
 
-                              SizedBox(height: 15),
+                            SizedBox(height: 15),
 
-                              // Choose Disease
-                              _buildInputLabel("Choose Disease".tr(), Icons.sick),
-                              SizedBox(height: 5),
-                              _buildDropdownField(getDiseaseTypeList()),
+                            // Choose Disease
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _buildInputLabel("Choose Disease".tr(), Icons.sick),
+                                InkWell(
+                                    onTap: () async {
+                                      Utils.selected_category = 4;
+                                      Utils.selected_category_name = "Disease";
+                                      await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              SubCategoryScreen(),
+                                        ),
+                                      );
+                                      getDiseaseList();
+                                      setState(() {
 
-                              SizedBox(height: 15),
-                              // Choose Medicine
-                              _buildInputLabel(Utils.vaccine_medicine.toLowerCase().contains("medi")? "Medicine name".tr() : "Vaccine name".tr(), Icons.medical_information),
-                              SizedBox(height: 5),
-                              _buildDropdownField(getMedicineTypeList()),
-                              SizedBox(height: 15),
+                                      });
+                                    },
+                                    child: Icon(Icons.add_circle, size: 27, color: Colors.blue,)),
+                              ],
+                            ),
+                            SizedBox(height: 5),
+                            _buildDropdownField(getDiseaseTypeList()),
 
+                            SizedBox(height: 15),
+                            // Choose Medicine
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _buildInputLabel(Utils.vaccine_medicine.toLowerCase().contains("medi")? "Medicine name".tr() : "Vaccine name".tr(), Icons.medical_information),
+                                InkWell(
+                                    onTap: () async {
+                                      if(Utils.vaccine_medicine.toLowerCase().contains("medi")) {
+                                        Utils.selected_category = medicineCategoryID!;
+                                        Utils.selected_category_name = "Medicine";
+                                      }else{
+                                        Utils.selected_category = medicineCategoryID!;
+                                        Utils.selected_category_name = "Vaccine";
+                                      }
+                                      await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              SubCategoryScreen(),
+                                        ),
+                                      );
+                                      getDiseaseList();
+                                      setState(() {
+
+                                      });
+                                    },
+                                    child: Icon(Icons.add_circle, size: 27, color: Colors.blue,)),
+                              ],
+                            ),
+                            SizedBox(height: 5),
+                            _buildDropdownField(getMedicineTypeList()),
+                            SizedBox(height: 15),
+
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    child: Column(
+                                      children: [
+                                        _buildInputLabel("Quantity".tr(), Icons.numbers),
+                                        SizedBox(height: 8),
+                                        _buildFLoatField(qtycountController, "Quantity".tr()),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 5),
+                                Expanded(
+                                  child: Container(
+                                    child: Column(
+                                      children: [
+                                        _buildInputLabel("Select Unit".tr(), Icons.accessibility_sharp),
+                                        SizedBox(height: 8),
+                                        _buildDropdownField(getUnitTypeList()),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            if(!_medselectedValue.isEmpty)
                               Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Expanded(
+                                  Container(
+                                    margin: EdgeInsets.only(right: 10),
+                                    alignment: Alignment.centerRight,
+                                    child: Text('Stock'.tr()+': ${getAvailableStock()}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: getAvailableStock()=="0.0"? Colors.red :Colors.green),),),
+                                  getAvailableStock()=="0.0"? InkWell(
+                                    onTap: () async{
+                                      if(Utils.vaccine_medicine.toLowerCase().contains("medi")) {
+                                        await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                MedicineStockScreen(id: medicineCategoryID!),
+                                          ),);
+                                        reloadStocks();
+
+                                      }else{
+                                        await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                VaccineStockScreen(id: medicineCategoryID!),
+                                          ),
+                                        );
+
+                                        reloadStocks();
+                                      }
+
+                                    },
                                     child: Container(
-                                      child: Column(
-                                        children: [
-                                          _buildInputLabel("Quantity".tr(), Icons.numbers),
-                                          SizedBox(height: 8),
-                                          _buildFLoatField(qtycountController, "Quantity".tr()),
-                                        ],
+                                      alignment: Alignment.center,
+                                      width: 100,
+                                      padding: EdgeInsets.all(5),
+                                      margin: EdgeInsets.only(top: 5),
+                                      decoration: BoxDecoration(
+                                        color: Utils.getThemeColorBlue(),
+                                        borderRadius: BorderRadius.circular(10),
+                                        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
                                       ),
+                                      child: Text('Add Stock'.tr(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),),
                                     ),
-                                  ),
-                                  SizedBox(width: 5),
-                                  Expanded(
-                                    child: Container(
-                                      child: Column(
-                                        children: [
-                                          _buildInputLabel("Select Unit".tr(), Icons.accessibility_sharp),
-                                          SizedBox(height: 8),
-                                          _buildDropdownField(getUnitTypeList()),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
+                                  ): SizedBox(width: 1,)
                                 ],
                               ),
 
-                              if(!_medselectedValue.isEmpty)
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      margin: EdgeInsets.only(right: 10),
-                                      alignment: Alignment.centerRight,
-                                      child: Text('Stock'.tr()+': ${getAvailableStock()}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: getAvailableStock()=="0.0"? Colors.red :Colors.green),),),
-                                    getAvailableStock()=="0.0"? InkWell(
-                                      onTap: () async{
-                                        if(Utils.vaccine_medicine.toLowerCase().contains("medi")) {
-                                          await Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  MedicineStockScreen(id: medicineCategoryID!),
-                                            ),);
-                                          reloadStocks();
-
-                                        }else{
-                                          await Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  VaccineStockScreen(id: medicineCategoryID!),
-                                            ),
-                                          );
-
-                                          reloadStocks();
-                                        }
-
-                                      },
-                                      child: Container(
-                                        alignment: Alignment.center,
-                                        width: 100,
-                                        padding: EdgeInsets.all(5),
-                                        margin: EdgeInsets.only(top: 5),
-                                        decoration: BoxDecoration(
-                                          color: Utils.getThemeColorBlue(),
-                                          borderRadius: BorderRadius.circular(10),
-                                          boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
-                                        ),
-                                        child: Text('Add Stock'.tr(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),),
-                                      ),
-                                    ): SizedBox(width: 1,)
-                                  ],
-                                ),
-
-                            ],
-                          ),
-                        )
-                            : SizedBox(width: 1,),
-                        activeStep==1? Container(
-                          margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                          padding: EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.15),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                                offset: Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Title
-                              Center(
-                                child: Text(
-                                  "DATE".tr() + " & " + "Doctor_Name".tr(),
-                                  style: TextStyle(
-                                    color: Utils.getThemeColorBlue(),
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                          ],
+                        ),
+                      )
+                          : SizedBox(width: 1,),
+                      activeStep==1? Container(
+                        margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                        padding: EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.15),
+                              blurRadius: 10,
+                              spreadRadius: 2,
+                              offset: Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Title
+                            Center(
+                              child: Text(
+                                "DATE".tr() + " & " + "Doctor_Name".tr(),
+                                style: TextStyle(
+                                  color: Utils.getThemeColorBlue(),
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              SizedBox(height: 15),
-// Bird Count
-                              _buildInputLabel("BIRDS_COUNT".tr(), Icons.numbers),
-                              SizedBox(height: 5),
-                              _buildNumberField(bird_countController, "BIRDS_COUNT".tr()),
-                              SizedBox(height: 15),
-                              // Date Picker
-                              _buildInputLabel("DATE".tr(), Icons.calendar_today),
-                              SizedBox(height: 5),
-                              _buildDatePickerField(),
+                            ),
+                            SizedBox(height: 15),
+    // Bird Count
+                            _buildInputLabel("BIRDS_COUNT".tr(), Icons.numbers),
+                            SizedBox(height: 5),
+                            _buildNumberField(bird_countController, "BIRDS_COUNT".tr()),
+                            SizedBox(height: 15),
+                            // Date Picker
+                            _buildInputLabel("DATE".tr(), Icons.calendar_today),
+                            SizedBox(height: 5),
+                            _buildDatePickerField(),
 
-                              SizedBox(height: 15),
+                            SizedBox(height: 15),
 
-                              // Doctor Name
-                              _buildInputLabel("Doctor_Name".tr(), Icons.person),
-                              SizedBox(height: 5),
-                              _buildTextField(doctorController, "Doctor_Name".tr()),
+                            // Doctor Name
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _buildInputLabel("Doctor_Name".tr(), Icons.person),
+                               doctorList.length >0? InkWell(
+                                   onTap: () {
+                                     showDoctorNameDialog(context, doctorList, (value) {
+                                       doctorController.text = value;
+                                       setState(() {
 
-                              SizedBox(height: 15),
+                                       });
+                                     });
+                                   },
+                                   child: Icon(Icons.list_alt, color: Colors.blue, size: 25,)) : SizedBox.shrink()
+                              ],
+                            ),
+                            SizedBox(height: 5),
+                            _buildTextField(doctorController, "Doctor_Name".tr()),
 
-                              // Description
-                              _buildInputLabel("DESCRIPTION_1".tr(), Icons.description),
-                              SizedBox(height: 8),
-                              _buildMultilineTextField(notesController, "NOTES_HINT".tr()),
-                            ],
-                          ),
-                        )
-                            : SizedBox(width: 1,),
+                            SizedBox(height: 15),
 
+                            // Description
+                            _buildInputLabel("DESCRIPTION_1".tr(), Icons.description),
+                            SizedBox(height: 8),
+                            _buildMultilineTextField(notesController, "NOTES_HINT".tr()),
+                          ],
+                        ),
+                      ) : SizedBox(width: 1,),
 
-
-                        ]),
-                  ),
-                ],
-              ),
+                      ]),
+                ),
+              ],
             ),
           ),
         ),
       ),
     );
   }
+
+
+  Future<void> showDoctorNameDialog(BuildContext context, List<String> doctorNames, Function(String) onSelected) async {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Select Doctor",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: doctorNames.length,
+                  itemBuilder: (context, index) {
+                    final name = doctorNames[index];
+                    return ListTile(
+                      leading: Icon(Icons.person, color: Colors.blue),
+                      title: Text(name),
+                      onTap: () {
+                        Navigator.pop(context); // close dialog
+                        onSelected(name); // return selected name
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
 
   Widget _buildStepIcon(IconData icon, int step) {
     bool isActive = activeStep == step; // Current step

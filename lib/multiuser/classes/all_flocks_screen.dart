@@ -24,7 +24,7 @@ class _AllFlocksScreen extends State<AllFlocksScreen> with RefreshMixin {
   void onRefreshEvent(String event)
   {
     try {
-      if (event == FireBaseUtils.FLOCKS)
+      if (event == FireBaseUtils.FLOCKS || event == FireBaseUtils.BIRDS)
       {
         init();
       }
@@ -44,6 +44,10 @@ class _AllFlocksScreen extends State<AllFlocksScreen> with RefreshMixin {
 
   Future<void> init() async {
     flocks = await DatabaseHelper.getFlocks();
+    for(int i=0; i < flocks.length;i++)
+    {
+      print(flocks.elementAt(i).toJson());
+    }
     setState(() {
 
     });
@@ -115,6 +119,8 @@ class _AllFlocksScreen extends State<AllFlocksScreen> with RefreshMixin {
                                 context,
                                 CupertinoPageRoute(builder: (
                                     context) => const ADDFlockScreen()),);
+
+                              init();
                             }else{
                               Utils.showMissingPermissionDialog(context, "add_flock");
 
@@ -161,9 +167,9 @@ class _AllFlocksScreen extends State<AllFlocksScreen> with RefreshMixin {
                       Utils.selected_flock = flock;
                       await Navigator.push(
                         context,
-                        CupertinoPageRoute(builder: (context) => const SingleFlockScreen()),
-                      );
+                        CupertinoPageRoute(builder: (context) => const SingleFlockScreen()),);
                       // Refresh
+                      init();
                     },
                     child: Container(
                       margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),

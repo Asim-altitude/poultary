@@ -54,16 +54,27 @@ class NetworkSnackNotifier {
               color: Colors.orange,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+            child: Column(
               children: [
-                const Icon(Icons.wifi_off, color: Colors.white),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'no_internet_message'.tr(), // Make sure to add this key in your localization
-                    style: const TextStyle(color: Colors.white),
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.wifi_off, color: Colors.white),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'no_internet_message'.tr(), // Make sure to add this key in your localization
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    InkWell(
+                        onTap: () {
+                          _removeOverlay();
+                        },
+                        child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Text("Close".tr(), style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14),))),
+                  ],
                 ),
               ],
             ),
@@ -72,7 +83,7 @@ class NetworkSnackNotifier {
       ),
     );
 
-    Overlay.of(context)?.insert(_overlayEntry!);
+    Overlay.of(context).insert(_overlayEntry!);
   }
 
   void _removeOverlay() {

@@ -69,13 +69,13 @@ class _CategoryScreen extends State<CategoryScreen> with SingleTickerProviderSta
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
-    return SafeArea(child: Scaffold(
+    return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight),
         child: ClipRRect(
           borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(20.0), // Round bottom-left corner
-            bottomRight: Radius.circular(20.0), // Round bottom-right corner
+            bottomLeft: Radius.circular(10.0), // Round bottom-left corner
+            bottomRight: Radius.circular(10.0), // Round bottom-right corner
           ),
           child: AppBar(
             title: Text(
@@ -87,7 +87,7 @@ class _CategoryScreen extends State<CategoryScreen> with SingleTickerProviderSta
               ),
             ),
             centerTitle: true,
-            backgroundColor: Utils.getThemeColorBlue(), // Customize the color
+            backgroundColor: Colors.blue, // Customize the color
             elevation: 8, // Gives it a more elevated appearance
             leading: IconButton(
               icon: Icon(Icons.arrow_back, color: Colors.white),
@@ -190,7 +190,7 @@ class _CategoryScreen extends State<CategoryScreen> with SingleTickerProviderSta
                                   margin: EdgeInsets.all(10),
                                   child: Column( children: [
                                     Container(margin: EdgeInsets.all(0), child: Text(categoryList.elementAt(index).name!, style: TextStyle( fontWeight: FontWeight.bold, fontSize: 18, color: Utils.getThemeColorBlue()),)),
-   // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+       // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
                                   ],),
                                 ),
                               ),
@@ -204,7 +204,7 @@ class _CategoryScreen extends State<CategoryScreen> with SingleTickerProviderSta
               )
 
                   ]
-      ),),),),),);
+      ),),),),);
   }
 
 

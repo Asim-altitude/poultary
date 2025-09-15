@@ -77,33 +77,24 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
-    return SafeArea(child: Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),
-        child: ClipRRect(
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(20.0), // Round bottom-left corner
-            bottomRight: Radius.circular(20.0), // Round bottom-right corner
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "All Reminders".tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+            color: Colors.white,
           ),
-          child: AppBar(
-            title: Text(
-              "All Reminders".tr(),
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: Colors.white,
-              ),
-            ),
-            centerTitle: true,
-            backgroundColor: Utils.getThemeColorBlue(), // Customize the color
-            elevation: 8, // Gives it a more elevated appearance
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () {
-                Navigator.pop(context); // Navigates back
-              },
-            ),
-          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blue, // Customize the color
+        elevation: 8, // Gives it a more elevated appearance
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context); // Navigates back
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -576,7 +567,7 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
                     );*//*
                   }),*/
                   ]
-      ),),),),),);
+      ),),),),);
   }
 
   Future<void> addNewEvent() async {

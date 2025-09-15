@@ -60,7 +60,6 @@ class _SignupFormState extends State<SignupForm> {
     setState(() => isLoading = false);
   }
 
-
   Future<void> handleSignup() async {
     final name = nameController.text.trim();
     final email = emailController.text.trim();

@@ -181,75 +181,69 @@ class _FeedIngredientScreenState extends State<FeedIngredientScreen> with Refres
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(title: Text('Feed Ingredients'.tr()), backgroundColor: Utils.getThemeColorBlue(), foregroundColor: Colors.white,),
-        bottomNavigationBar: Container(
-          padding: EdgeInsets.all(10),
-          color: Colors.white,
-          child: Expanded(
-            child: InkWell(
-              onTap: () => {
-      
-                if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_feed"))
-                  {
-                    Utils.showMissingPermissionDialog(context, "add_feed")
-      
-                  }else{
-      
-                  _showIngredientDialog()
-                }
-      
-              },
-              borderRadius: BorderRadius.circular(10),
-              child: AnimatedContainer(
-                duration: Duration(milliseconds: 300),
-                height: 55,
-                margin: EdgeInsets.symmetric(horizontal: 6),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Utils.getThemeColorBlue(), Colors.blue],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.green.withOpacity(0.4),
-                      blurRadius: 6,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add_circle_outline_sharp, color: Colors.white, size: 28),
-                    SizedBox(width: 6),
-                    Text(
-                      'New Ingredient'.tr(),
-                      style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                ),
+    return Scaffold(
+      appBar: AppBar(title: Text('Feed Ingredients'.tr()), backgroundColor: Colors.blue, foregroundColor: Colors.white,),
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.all(10),
+        color: Colors.white,
+        child: InkWell(
+          onTap: () {
+            if (Utils.isMultiUSer && !Utils.hasFeaturePermission("add_feed")) {
+              Utils.showMissingPermissionDialog(context, "add_feed");
+            } else {
+              _showIngredientDialog();
+            }
+          },
+          borderRadius: BorderRadius.circular(10),
+          child: AnimatedContainer(
+            duration: Duration(milliseconds: 300),
+            height: 55,
+            margin: EdgeInsets.symmetric(horizontal: 6),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Utils.getThemeColorBlue(), Colors.blue],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.green.withOpacity(0.4),
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.add_circle_outline_sharp, color: Colors.white, size: 28),
+                SizedBox(width: 6),
+                Text(
+                  'New Ingredient'.tr(),
+                  style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+              ],
             ),
           ),
         ),
+      ),
         body: ingredients.isEmpty
-            ? Center(child: Text('No ingredients yet.'.tr()))
-            : ListView.builder(
-          itemCount: ingredients.length,
-          itemBuilder: (_, index) {
+          ? Center(child: Text('No ingredients yet.'.tr()))
+          : SafeArea(
+            child: ListView.builder(
+                    itemCount: ingredients.length,
+                    itemBuilder: (_, index) {
             final ingredient = ingredients[index];
-           return Card(
+                     return Card(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
               elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Container(
+                padding: EdgeInsets.all(10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -277,7 +271,7 @@ class _FeedIngredientScreenState extends State<FeedIngredientScreen> with Refres
                         ],
                       ),
                     ),
-      
+                  
                     /// Action buttons
                     Row(
                       mainAxisSize: MainAxisSize.min,
@@ -296,11 +290,11 @@ class _FeedIngredientScreenState extends State<FeedIngredientScreen> with Refres
                 ),
               ),
             );
-      
-          },
-        ),
-      
-      ),
+                
+                    },
+                  ),
+          ),
+    
     );
   }
 }

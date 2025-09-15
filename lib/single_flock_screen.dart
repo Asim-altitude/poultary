@@ -193,21 +193,64 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
 
-    return SafeArea(child: Scaffold(
-      body:SafeArea(
-        top: false,
-
-          child:Container(
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Utils.getThemeColorBlue(), // Customize the color
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context); // Navigates back
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_active, color: Colors.orangeAccent,),
+            tooltip: 'Notification',
+            onPressed: () async {
+              // Handle search action
+              List<ScheduledNotification> notifications = await DatabaseHelper.getScheduledNotificationsByFlockId(Utils.selected_flock!.f_id);
+              if(notifications.length > 0){
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FlockNotificationScreen(allNotifications: notifications,),
+                  ),
+                );
+              }else{
+                print(Utils.selected_flock!.icon.split(".")[0].replaceAll("assets/", ""));
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SuggestedNotificationScreen(birdType: Utils.selected_flock!.icon.split(".")[0].replaceAll("assets/", ""), flockId: Utils.selected_flock!.f_id, flockAgeInDays: Utils.getAgeIndays(Utils.selected_flock!.acqusition_date),),
+                  ),
+                );
+              }
+            },
+          ),
+          GestureDetector(
+            onTapDown: (TapDownDetails details) {
+              showMemberMenu(details.globalPosition);
+            },
+            child: Container(
+              width: 40,
+              height: 40,
+              padding: EdgeInsets.all(5),
+              child: Image.asset('assets/menu_dots.png', color: Colors.white,),
+            ),
+          ),
+        ],
+      ),
+      body: SafeArea(
+         child:Container(
           width: widthScreen,
           height: heightScreen,
-            color: Utils.getThemeColorBlue(),
+            color: Utils.getThemeColorBlue(), // Customize the color
             child: SingleChildScrollViewWithStickyFirstWidget(
-
             child: Column(
              children:  [
               Utils.getDistanceBar(),
 
-              ClipRRect(
+              /*ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
@@ -237,25 +280,9 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                         child:  Row(
                           children: [
                             GestureDetector(
-                              onTap: () 
+                              onTap: ()
                               async {
-                                 List<ScheduledNotification> notifications = await DatabaseHelper.getScheduledNotificationsByFlockId(Utils.selected_flock!.f_id);
-                                 if(notifications.length > 0){
-                                   await Navigator.push(
-                                     context,
-                                     MaterialPageRoute(
-                                       builder: (context) => FlockNotificationScreen(allNotifications: notifications,),
-                                     ),
-                                   );
-                                 }else{
-                                   print(Utils.selected_flock!.icon.split(".")[0].replaceAll("assets/", ""));
-                                   await Navigator.push(
-                                     context,
-                                     MaterialPageRoute(
-                                       builder: (context) => SuggestedNotificationScreen(birdType: Utils.selected_flock!.icon.split(".")[0].replaceAll("assets/", ""), flockId: Utils.selected_flock!.f_id, flockAgeInDays: Utils.getAgeIndays(Utils.selected_flock!.acqusition_date),),
-                                     ),
-                                   );
-                                 }
+
                               },
                               child: Container(
                                 width: 40,
@@ -281,7 +308,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                     ],
                   ),
                 ),
-              ),
+              ),*/
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                 child: Column(
@@ -1450,7 +1477,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                     );*//*
                   }),*/
                   ]
-      ),),),),),);
+      ),),),),);
   }
 
 
@@ -1732,6 +1759,8 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
               flock.sync_status = SyncStatus.UPDATED;
               flock.modified_by = Utils.currentUser!.email;
               flock.last_modified = Utils.getTimeStamp();
+              flock.farm_id = Utils.currentUser!.farmId;
+
               await FireBaseUtils.updateFlock(flock);
             }
             setState(() {
@@ -2092,6 +2121,9 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                       // UPDATE FLOCK
                       Flock? flock = Utils.selected_flock;
                       flock!.active_bird_count = active_birds;
+                      flock.farm_id = Utils.currentUser!.farmId;
+                      flock.last_modified = Utils.getTimeStamp();
+                      flock.modified_by = Utils.currentUser!.email;
                       FireBaseUtils.updateFlock(flock);
 
                     }
@@ -2340,6 +2372,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
         if(Utils.isMultiUSer) {
           Utils.selected_flock!.sync_status = SyncStatus.DELETED;
+
           bool deleted = await FireBaseUtils.updateFlock(Utils.selected_flock!);
           if (deleted) {
             await DatabaseHelper.deleteFlockAndRelatedInfo(
@@ -2528,10 +2561,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
   }) {
     TextEditingController nameController = TextEditingController(text: flock.f_name);
     TextEditingController descController = TextEditingController(text: flock.notes);
-
-    TextEditingController dateController = TextEditingController(
-        text: flock.acqusition_date.isNotEmpty ? flock.acqusition_date : ""
-    );
+    TextEditingController dateController = TextEditingController(text: flock.acqusition_date.isNotEmpty ? flock.acqusition_date : "");
 
     List<String> _purposeList = ['EGG', 'MEAT', 'EGG_MEAT', 'OTHER'];
     List<String> _acquisitionList = ['PURCHASED', 'HATCHED', 'GIFT', 'OTHER'];

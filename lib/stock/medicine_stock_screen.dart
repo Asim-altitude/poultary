@@ -305,39 +305,39 @@ class _MedicineStockScreenState extends State<MedicineStockScreen> with RefreshM
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(kToolbarHeight),
-          child: ClipRRect(
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(0.0), // Round bottom-left corner
-              bottomRight: Radius.circular(0.0), // Round bottom-right corner
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(0.0), // Round bottom-left corner
+            bottomRight: Radius.circular(0.0), // Round bottom-right corner
+          ),
+          child: AppBar(
+            title: Text(
+              "Medicine Stock Summary".tr(),
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 20,
+                color: Colors.white,
+              ),
             ),
-            child: AppBar(
-              title: Text(
-                "Medicine Stock Summary".tr(),
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
-              ),
-              centerTitle: true,
-              backgroundColor: Utils.getThemeColorBlue(), // Customize the color
-              elevation: 8, // Gives it a more elevated appearance
-              leading: IconButton(
-                icon: Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () {
-                  Navigator.pop(context); // Navigates back
-                },
-              ),
+            centerTitle: true,
+            backgroundColor: Colors.blue, // Customize the color
+            elevation: 8, // Gives it a more elevated appearance
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                Navigator.pop(context); // Navigates back
+              },
             ),
           ),
         ),
-        body:Column(children: [
+      ),
+      body:SafeArea(
+        child: Column(children: [
           Utils.showBannerAd(_bannerAd, _isBannerAdReady),
-      
+
           _stockSummary!.isEmpty ? Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -374,18 +374,18 @@ class _MedicineStockScreenState extends State<MedicineStockScreen> with RefreshM
             },
           ),),
         ],),
-      
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_health")){
-              Utils.showMissingPermissionDialog(context, "add_health");
-              return;
-            }
+      ),
 
-            _showAddStockDialog();
-        },
-          child: Icon(Icons.add),
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_health")){
+            Utils.showMissingPermissionDialog(context, "add_health");
+            return;
+          }
+
+          _showAddStockDialog();
+      },
+        child: Icon(Icons.add),
       ),
     );
   }

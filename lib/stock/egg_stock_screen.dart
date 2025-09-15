@@ -76,99 +76,115 @@ class _EggStockScreenState extends State<EggStockScreen> {
   @override
   Widget build(BuildContext context) {
     
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(title: Text("Egg Stock".tr())),
-        body: Padding(
-          padding: const EdgeInsets.all(5.0),
-          child:
-          Column(children: [
-            Utils.showBannerAd(_bannerAd, _isBannerAdReady),
-      
-            Expanded(
-              child:SingleChildScrollView(
-              child:Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-      
-                  FutureBuilder<Map<String, int>>(
-                    future: stockSummary,
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
-      
-                      final data = snapshot.data!;
-                      return _buildStockSummary(data['totalCollected']!, data['totalUsed']!, data['availableStock']!);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "Egg Stock".tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blue, // Customize the color
+        elevation: 8, // Gives it a more elevated appearance
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context); // Navigates back
+          },
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(5.0),
+        child:
+        Column(children: [
+          Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+
+          Expanded(
+            child:SingleChildScrollView(
+            child:Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+
+                FutureBuilder<Map<String, int>>(
+                  future: stockSummary,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+
+                    final data = snapshot.data!;
+                    return _buildStockSummary(data['totalCollected']!, data['totalUsed']!, data['availableStock']!);
+                  },
+                ),
+                SizedBox(height: 16),
+                Container(
+                  margin: EdgeInsets.only(left: 10),
+                  child: Text("Stock History".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                ),
+                SizedBox(height: 8),
+                Container(
+                  margin: EdgeInsets.all(10),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+
+                    itemCount: stockHistory.length,
+                    itemBuilder: (context, index) {
+                      final entry = stockHistory[index];
+
+                      return Dismissible(
+                        key: Key(entry.id.toString()),
+                        background: Container(
+                          color: Colors.red,
+                          alignment: Alignment.centerRight,
+                          padding: EdgeInsets.only(right: 20),
+                          child: Icon(Icons.delete, color: Colors.white),
+                        ),
+                        direction: DismissDirection.endToStart,
+                        confirmDismiss: (direction) async {
+                          return await showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text("Delete Entry".tr()),
+                              content: Text("Are you sure you want to delete this stock entry?".tr()),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(false),
+                                  child: Text("CANCEL".tr()),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    DatabaseHelper.deleteItem("Eggs",entry.id!);
+                                    Navigator.of(context).pop(true);
+                                  },
+                                  child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        child: Card(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 3,
+                          margin: EdgeInsets.symmetric(vertical: 6),
+                          child: ListTile(
+                            leading: Icon(Icons.egg, color: Colors.orange),
+                            title: Text(
+                              "${entry.total_eggs} "+ "eggs collected".tr(),
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            subtitle: Text("DATE".tr()+": ${entry.date}"),
+                          ),
+                        ),
+                      );
                     },
                   ),
-                  SizedBox(height: 16),
-                  Container(
-                    margin: EdgeInsets.only(left: 10),
-                    child: Text("Stock History".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  ),
-                  SizedBox(height: 8),
-                  Container(
-                    margin: EdgeInsets.all(10),
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-      
-                      itemCount: stockHistory.length,
-                      itemBuilder: (context, index) {
-                        final entry = stockHistory[index];
-      
-                        return Dismissible(
-                          key: Key(entry.id.toString()),
-                          background: Container(
-                            color: Colors.red,
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.only(right: 20),
-                            child: Icon(Icons.delete, color: Colors.white),
-                          ),
-                          direction: DismissDirection.endToStart,
-                          confirmDismiss: (direction) async {
-                            return await showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text("Delete Entry".tr()),
-                                content: Text("Are you sure you want to delete this stock entry?".tr()),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.of(context).pop(false),
-                                    child: Text("CANCEL".tr()),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      DatabaseHelper.deleteItem("Eggs",entry.id!);
-                                      Navigator.of(context).pop(true);
-                                    },
-                                    child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                          child: Card(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            elevation: 3,
-                            margin: EdgeInsets.symmetric(vertical: 6),
-                            child: ListTile(
-                              leading: Icon(Icons.egg, color: Colors.orange),
-                              title: Text(
-                                "${entry.total_eggs} "+ "eggs collected".tr(),
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              subtitle: Text("DATE".tr()+": ${entry.date}"),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-      
-                ],
-              ),),),
-          ],),
-        ),
+                ),
+
+              ],
+            ),),),
+        ],),
       ),
     );
   }

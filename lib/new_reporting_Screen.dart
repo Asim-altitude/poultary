@@ -97,51 +97,24 @@ class _ReportListScreen extends State<ReportListScreen> {
   Widget build(BuildContext context)
   {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "All Reports".tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.blue,
+        elevation: 8,
+        automaticallyImplyLeading: (Utils.isMultiUSer && Utils.currentUser!.role.toLowerCase() != "admin")? true : false,
+      ),
       body: Column(
         children: [
-          // Top Gradient Header
-          ClipRRect(
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(0),
-              bottomRight: Radius.circular(0),
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 6,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.only(left: 12),
-                      child: Center(
-                        child: Text(
-                          "All Reports".tr(),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+
           Utils.showBannerAd(_bannerAd, _isBannerAdReady),
 
           // ListView inside Expanded
@@ -155,23 +128,25 @@ class _ReportListScreen extends State<ReportListScreen> {
               itemCount: items.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2, // Two items per row
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
+                crossAxisSpacing: 6,
+                mainAxisSpacing: 6,
                 childAspectRatio: 1.1, // Adjust height/width ratio
               ),
               itemBuilder: (context, index) {
                 final item = items[index];
                 return Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  elevation: 0,
-                  margin: EdgeInsets.symmetric(vertical: 0),
-                  child:
-                  InkWell(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  elevation: 3,
+                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
                     onTap: () async {
                       if (index == 0) {
                         await Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) =>  ProductionReportScreen()),
+                          MaterialPageRoute(builder: (context) => ProductionReportScreen()),
                         );
                       } else if (index == 1) {
                         await Navigator.push(
@@ -209,64 +184,72 @@ class _ReportListScreen extends State<ReportListScreen> {
                         );
                       }
                     },
-                 child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      border: Border.all(color: Colors.blue.shade300, width: 1),
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
-                          blurRadius: 6,
-                          offset: const Offset(2, 4),
-                        ),
-                      ],
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.blue.shade100, width: 1),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blueGrey.withOpacity(0.08),
+                            blurRadius: 10,
+                            offset: const Offset(2, 4),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade50,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            padding: const EdgeInsets.all(10),
+                            child: item.image != ""
+                                ? Image.asset(
+                              item.image,
+                              width: 30,
+                              height: 30,
+                              fit: BoxFit.contain,
+                              color: Utils.getThemeColorBlue(),
+                            )
+                                : Icon(
+                              item.icon,
+                              size: 30,
+                              color: Utils.getThemeColorBlue(),
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            item.title,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                              color: Utils.getThemeColorBlue(),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis, // ✅ title never goes out
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            item.subtitle,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[700],
+                            ),
+                            maxLines: 2, // ✅ desc max 2 lines
+                            overflow: TextOverflow.ellipsis, // ✅ cut gracefully if longer
+                            softWrap: true,
+                          ),
+                        ],
+                      ),
                     ),
-                   padding: const EdgeInsets.all(12),
-
-                   child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-
-                      children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: item.image != ""
-                            ? Image.asset(
-                          item.image,
-                          width: 45,
-                          height: 45,
-                          fit: BoxFit.cover,
-                          color: Utils.getThemeColorBlue(),
-                        )
-                            : Icon(
-                          item.icon,
-                          size: 45,
-                          color: Utils.getThemeColorBlue(),
-                        ),
-                      ),
-                      SizedBox(height: 7,),
-                      Text(
-                        item.title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Utils.getThemeColorBlue(),
-                        ),
-                      ),
-                        SizedBox(height: 1,),
-
-                        Text(
-                        item.subtitle,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],),
-
-
-                  ),),
+                  ),
                 );
+
               },
             ),
           ),),

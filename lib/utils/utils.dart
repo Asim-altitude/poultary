@@ -67,11 +67,13 @@ class Utils {
   static double HEIGHT_SCREEN = 0;
   static double _standardWidth = 414;
   static double _standardheight = 736;
-  static final bool ISTESTACCOUNT = false;
+  static final bool ISTESTACCOUNT = true;
   static late bool isShowAdd = true;
   static late bool iShowInterStitial = false;
 
   static bool shouldBackup = false;
+
+  static final String ProxyAPI = "https://photogallerytv.com/Api/proxy.php?url=";
 
   static final String appIdIOS     = "ca-app-pub-2367135251513556~6965974738";
   static final String appIdAndroid = "ca-app-pub-2367135251513556~8724531818";
@@ -172,18 +174,167 @@ class Utils {
   }
 
 
-  static DateTime getTimeStamp() {
+  static void showSyncInfo(BuildContext context, String updatedAt, String updatedBy) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// **Header Row (Icon + Title)**
+              Row(
+                children: [
+                  Icon(Icons.sync, size: 28, color: Colors.blue),
+                  const SizedBox(width: 10),
+                  Text(
+                    "Sync Information".tr(),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
 
+              /// **Updated At Row**
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.access_time, size: 20, color: Colors.grey[600]),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "${"Updated At".tr()}: ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                          TextSpan(
+                            text: updatedAt,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              /// **Updated By Row**
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.person, size: 20, color: Colors.grey[600]),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "${"Updated By".tr()}: ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                          TextSpan(
+                            text: updatedBy,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              /// **Close Button**
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  icon: const Icon(Icons.close, size: 18, color: Colors.white),
+                  label: Text(
+                    "Close".tr(),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+
+  static DateTime getTimeStamp() {
     return DateTime.now();
   }
 
-  static void showLoading()  {
-    EasyLoading.show(status: 'Saving...'.tr());
+  static void showLoading() {
+    EasyLoading.show(status: 'Saving...'.tr(),
+      dismissOnTap: true,);
   }
 
-  static void hideLoading(){
-    EasyLoading.showSuccess('DONE'.tr()+" ✅");
+ /* static void showLoading() {
+    EasyLoading.show(
+      status: 'Saving...'.tr(),
+      dismissOnTap: false,
+    );
 
+    Future.delayed(Duration(seconds: 10), () {
+      EasyLoading.instance.indicatorWidget = Stack(
+        alignment: Alignment.center,
+        children: [
+          CircularProgressIndicator(),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: GestureDetector(
+              onTap: () => EasyLoading.dismiss(),
+              child: Icon(Icons.close, color: Colors.red, size: 20),
+            ),
+          ),
+        ],
+      );
+
+      // refresh loading with new widget
+      EasyLoading.show(status: 'Saving...'.tr());
+    });
+  }*/
+
+
+  static void hideLoading() {
+    EasyLoading.showSuccess('DONE'.tr()+" ✅");
   }
 
   static void showError(){
@@ -212,12 +363,14 @@ class Utils {
 
 
   static Future<void> logoutUser() async {
-    await SessionManager.setBoolValue(SessionManager.loggedIn, false);
+   /* await SessionManager.setBoolValue(SessionManager.loggedIn, false);
     await SessionManager.setBoolValue(SessionManager.isAdmin, false);
-    await SessionManager.setBoolValue('db_initialized_${Utils.currentUser!.farmId}', false);
+    await SessionManager.setBoolValue('db_initialized_${Utils.currentUser!.farmId}', false);*/
+    await SessionManager.clearPrefs();
+    await SessionManager.setValue("farmID", Utils.currentUser!.farmId);
     await SessionManager.setBoolValue(SessionManager.loggedOut, true);
-   // await SessionManager.clearPrefs();
-/*    await SessionManager.clearUserObject();
+    await SessionManager.setupComplete();
+    /*  await SessionManager.clearUserObject();
     await SessionManager.setLastSyncTime(FireBaseUtils.USERS, null);
     await SessionManager.setLastSyncTime(FireBaseUtils.FEEDING, null);
     await SessionManager.setLastSyncTime(FireBaseUtils.HEALTH, null);
@@ -1332,6 +1485,8 @@ $storeLink
       Utils.isShowAdd = true;
       inititalize();
     }
+    Utils.isShowAdd = false;
+
   }
 
 
@@ -1913,36 +2068,41 @@ $storeLink
     var uuid = Uuid();
     return "$appDocPath/resumeapp-${uuid.v1()}.jpg";
   }
-  static Future<File> convertToJPGFileIfRequiredWithCompression(
-      File file) async {
-    print(file.path);
-    print("converting file");
+  static Future<File> convertToJPGFileIfRequiredWithCompression(File file,
+      {int maxSizeKB = 500}) async {
+    print("Original file path: ${file.path}");
 
-    int fileSize = await file.length();
-    int quality = 10;
+    int originalSize = await file.length();
+    print("Original size: ${originalSize / 1024} KB");
 
+    int quality = 95; // start high
+    Uint8List? imageBytes;
+    File? compressedFile;
 
-    print( "convertToJPGFileIfRequiredWithCompression => ${quality}");
+    do {
+      imageBytes = await FlutterImageCompress.compressWithFile(
+        file.path,
+        format: CompressFormat.jpeg,
+        quality: quality,
+        minWidth: 1920,   // optional resize for huge images
+        minHeight: 1920,
+      );
 
-    Uint8List? image = await FlutterImageCompress.compressWithFile(file.path,
-        format: CompressFormat.jpeg, quality: quality);
-    String newfilePath = file.path.toLowerCase();
-    newfilePath = await generateRandomFileName();
-    print("path is now => ${newfilePath}");
-    final fileToWrite = File(newfilePath);
+      String newFilePath = await generateRandomFileName();
+      compressedFile = await File(newFilePath).writeAsBytes(imageBytes!,
+          flush: true, mode: FileMode.write);
 
-    print("going to write file");
+      int newSize = await compressedFile.length();
+      print("Compressed with quality=$quality => ${newSize / 1024} KB");
 
-    int length = await file.length();
+      // reduce quality gradually if still larger than target
+      quality -= 5;
 
-    print("file lenght before conversion = ${length}");
+      if (quality < 30) break; // avoid going too low (bad quality)
 
-    File fileToReturn = await fileToWrite.writeAsBytes(image!,
-        flush: true, mode: FileMode.write);
+    } while ((await compressedFile.length()) > maxSizeKB * 1024);
 
-    length = await fileToReturn.length();
-
-    return fileToReturn;
+    return compressedFile!;
   }
 
 
