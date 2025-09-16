@@ -1475,8 +1475,9 @@ $storeLink
 
 
   static Future<void> setupAds() async {
+
     bool isInApp = await SessionManager.getInApp();
-    if(isInApp){
+    if(isInApp || Utils.isMultiUSer){
       Utils.isShowAdd = false;
       hideBanner();
     }
@@ -1485,6 +1486,7 @@ $storeLink
       Utils.isShowAdd = true;
       inititalize();
     }
+
   }
 
 

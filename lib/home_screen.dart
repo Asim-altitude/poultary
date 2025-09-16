@@ -4,7 +4,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:googleapis/servicemanagement/v1.dart';
 import 'package:poultary/dashboard.dart';
 import 'package:poultary/product_screen.dart';
 import 'package:poultary/settings_screen.dart';
@@ -965,17 +964,22 @@ class _HomeScreen extends State<HomeScreen> {
         try {
           final DateTime now = DateTime.now();
           final Duration difference = now.difference(lastBackupDate);
-          if (difference.inDays >= 3) {
+          if (difference.inDays >= 2) {
             print("BACKUP NEEDED");
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              Future.delayed(const Duration(seconds: 15), () {
+              Future.delayed(const Duration(seconds: 30), () async {
                 // final ctx = navigatorKey.currentState?.overlay?.context;
-                if (true) {
-                  _showGlobalBackupPrompt(context);
-                } else {
-                  print("Context still not available, retrying...");
-                  _retryShowBackupPrompt();
-                }
+               DateTime? bckupTime = (await SessionManager.getLastBackupTime())!;
+               if(bckupTime == null){
+                 _showGlobalBackupPrompt(context);
+               }
+               else {
+                 final DateTime now = DateTime.now();
+                 final Duration difference = now.difference(bckupTime);
+                 if(difference.inDays >= 2){
+                   _showGlobalBackupPrompt(context);
+                 }
+               }
               });
             });
           }

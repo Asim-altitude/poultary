@@ -49,6 +49,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
     super.initState();
     _loadBackupInfo();
     _loadPlanInfo();
+   // Utils.setupAds();
   }
 
   Future<void> _loadBackupInfo() async {
@@ -105,6 +106,19 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
     }
   }
 
+  bool isTrial() {
+
+    bool isExpired = false;
+    print("CHECKING");
+    if(_farmPlan!.planType.toLowerCase() == "trial"){
+      isExpired = true;
+      print("TRIAL");
+    }
+    print("DONE");
+    return isExpired;
+
+  }
+
   @override
   Widget build(BuildContext context) {
     if (loading) {
@@ -135,8 +149,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
                       : null,
                   child: (Utils.currentUser!.image == null || Utils.currentUser!.image.isEmpty)
                       ? Image.asset("assets/farm_icon.png", width: 120, height: 120,)
-                      : null,
-                ),
+                      : null,),
 
                 /* Text(
                   "Easy Poultry Manager".tr(),
@@ -247,9 +260,17 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
                           icon: Icons.workspace_premium,
                           color: Colors.green.shade600,
                           onPressed: () {
-                            if (_planStatus == PlanStatus.notStarted && !Utils.isShowAdd) {
+                            if(Utils.isShowAdd)
+                                print("TRUE");
+                              else
+                                print("FALSE");
+
+                            if ((_planStatus == PlanStatus.notStarted || isTrial()) && !Utils.isShowAdd)
+                            {
                               _handlePlanUpgrade("Premium");
-                            } else {
+                            }
+                            else
+                            {
                               _showPremiumDialog(context);
                             }
                           },
@@ -364,6 +385,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
 
     Utils.isShowAdd = false;
     Utils.isMultiUSer = true;
+    Utils.setupAds();
     if (initialized) {
       if (widget.multiUser.role.toLowerCase() == 'admin') {
         Navigator.pushAndRemoveUntil(context,

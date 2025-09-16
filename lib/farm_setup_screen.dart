@@ -236,44 +236,93 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
                           ),
                         ),
                       ),
-                      SizedBox(height: 10),
+                      SizedBox(height: 30),
 
-                      // 📝 Farm Name Input Field
-                      _buildInputField(label: "FARM_NAME", controller: nameController, hint: "Enter farm name"),
+                      // 📝 Farm Name
+                      _buildCardField(
+                        icon: Icons.home,
+                        label: "FARM_NAME".tr(),
+                        child: TextField(
+                          controller: nameController,
+                          decoration: InputDecoration(
+                            hintText: "Enter farm name".tr(),
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
 
-                      // 💰 Currency Selection
-                      _buildDropdownField(label: "CURRENCY", value: selectedCurrency, onTap: chooseCurrency),
+                      const SizedBox(height: 16),
+
+                      _buildCardField(
+                        icon: Icons.attach_money,
+                        label: "CURRENCY".tr(),
+                        onTap: chooseCurrency, // 👈 pass tap handler here
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              selectedCurrency ?? "Select Currency".tr(),
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const Icon(Icons.arrow_drop_down),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
 
                       // 📅 Date Picker
-                      _buildDropdownField(label: "Farm Setup Date", value: date, onTap: pickDate),
-
-                      Text(
-                        "Select Unit".tr(),
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      _buildCardField(
+                        icon: Icons.calendar_today,
+                        label: "Farm Setup Date".tr(),
+                        onTap: pickDate,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              date ?? "Select Date".tr(),
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const Icon(Icons.calendar_month),
+                          ],
+                        ),
                       ),
+
+                      const SizedBox(height: 16),
+
+                      // ⚖️ Select Unit
+                      Text("Select Unit".tr(),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 8),
                       Container(
                         height: 60,
                         width: widthScreen,
-                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade400),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade300),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.shade200,
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            )
+                          ],
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: selectedUnit,
+                            icon: const Icon(Icons.arrow_drop_down),
                             onChanged: (String? newValue) {
                               setState(() {
                                 selectedUnit = newValue!;
-                                SessionManager.setUnit(selectedUnit);
                               });
-                              // Optionally save to DB or preferences
                             },
                             items: <String>['KG', 'lbs'].map((String value) {
                               return DropdownMenuItem<String>(
                                 value: value,
-                                child: Text(value.tr(), style: TextStyle(fontSize: 16)),
+                                child: Text(value.tr(), style: const TextStyle(fontSize: 16)),
                               );
                             }).toList(),
                           ),
@@ -291,7 +340,49 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
     );
   }
 
-
+  Widget _buildCardField({
+    required IconData icon,
+    required String label,
+    required Widget child,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap, // 👈 Whole card becomes tappable if onTap is provided
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.shade200,
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            )
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: Colors.teal),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
   /*if (checkValidation()) {
   // Save logic here
   Navigator.pop(context);
