@@ -2921,6 +2921,22 @@ class DatabaseHelper  {
     )).toList();
   }
 
+  static Future<List<TransactionItem>> getEggSaleTransactions() async {
+    final result = await _database?.rawQuery(
+        "SELECT * FROM Transactions WHERE type = 'Income' AND sale_item = 'Egg Sale' ORDER BY date DESC"
+    );
+
+    List<TransactionItem> eggSales = [];
+
+    if (result != null && result.isNotEmpty) {
+      for (var row in result) {
+        eggSales.add(TransactionItem.fromJson(row));
+      }
+    }
+
+    return eggSales;
+  }
+
 
   static Future<List<TransactionItem>>  getFilteredTransactionsWithSort(int f_id,String type,String str_date, String end_date,String sort) async {
 
@@ -4122,6 +4138,21 @@ class DatabaseHelper  {
 
     return List.generate(maps!.length, (i) => Eggs.fromJson(maps[i]));
   }
+
+  static Future<List<Eggs>> getStockHistoryPaginated({int page = 0, int pageSize = 20}) async {
+    // Calculate offset based on page number
+    final int offset = page * pageSize;
+
+    final List<Map<String, Object?>>? maps = await _database?.query(
+      'Eggs',
+      orderBy: 'collection_date DESC',
+      limit: pageSize, // Limit to 20 records (or whatever you pass)
+      offset: offset,  // Skip records for previous pages
+    );
+
+    return List.generate(maps?.length ?? 0, (i) => Eggs.fromJson(maps![i]));
+  }
+
 
   static Future<Map<String, int>> getEggStockSummary() async {
     if (_database == null) {

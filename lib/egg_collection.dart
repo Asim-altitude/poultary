@@ -1141,6 +1141,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
       MaterialPageRoute(
           builder: (context) =>  NewEggCollection(isCollection: true,eggs: null, reason: null,)),
     );
+
     print(result);
     getData(date_filter_name);
 
@@ -1163,7 +1164,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
   }
 
 
-  void showModifyCollectedEggsDialog(BuildContext context) {
+  /*void showModifyCollectedEggsDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1285,7 +1286,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
       },
     );
   }
-
+*/
 
 
   //FILTER WORK

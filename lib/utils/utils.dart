@@ -67,7 +67,7 @@ class Utils {
   static double HEIGHT_SCREEN = 0;
   static double _standardWidth = 414;
   static double _standardheight = 736;
-  static final bool ISTESTACCOUNT = false;
+  static final bool ISTESTACCOUNT = true;
   static late bool isShowAdd = true;
   static late bool iShowInterStitial = false;
 
@@ -1474,18 +1474,18 @@ $storeLink
   }
 
 
-  static Future<void> setupAds() async {
+  static Future<void> setupAds() async
+  {
 
     bool isInApp = await SessionManager.getInApp();
-    if((isInApp || Utils.isMultiUSer) && !Utils.isTrialActive){
+    if (isInApp || (Utils.isMultiUSer && !Utils.isTrialActive)) {
       Utils.isShowAdd = false;
       hideBanner();
-    }
-    else
-    {
+    } else {
       Utils.isShowAdd = true;
       inititalize();
     }
+    Utils.isShowAdd = false;
 
   }
 

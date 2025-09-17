@@ -103,6 +103,7 @@ class _NewEggCollection extends State<NewEggCollection>
 
     }
     else if(widget.reason != null){
+      _reductionReasons = [widget.reason!];
       _reductionReasonValue = widget.reason!;
       totalEggsController.text = "0";
       goodEggsController.text ="0";

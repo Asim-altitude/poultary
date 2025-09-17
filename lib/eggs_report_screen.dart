@@ -12,9 +12,11 @@ import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+import 'model/egg_income.dart';
 import 'model/egg_item.dart';
 import 'model/eggs_chart_data.dart';
 import 'model/flock.dart';
+import 'model/transaction_item.dart';
 
 class EggsReportsScreen extends StatefulWidget {
   const EggsReportsScreen({Key? key}) : super(key: key);
@@ -86,6 +88,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
     eggs = [];
   }
 
+  List<TransactionItem> eggSales = [];
   void getAllData() async {
     await DatabaseHelper.instance.database;
 
@@ -97,7 +100,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
     total_eggs_reduced =
     await DatabaseHelper.getEggCalculations(f_id, 0, str_date, end_date);
 
-    total_eggs = total_eggs_collected - total_eggs_reduced;
+    eggSales = await DatabaseHelper.getEggSaleTransactions();
 
     collectionList =
     await DatabaseHelper.getEggsReportData(str_date, end_date, 1,f_id);
@@ -105,7 +108,28 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
     reductionList =
     await DatabaseHelper.getEggsReportData(str_date, end_date, 0,f_id);
 
+    int reduced_eggs = 0;
+    for(int i=0;i<eggSales.length;i++){
+      TransactionItem item = eggSales[i];
+     // print(item.toLocalFBJson());
+      //print(item.date);
+      EggTransaction? eggTransaction = await DatabaseHelper.getEggsByTransactionItemId(item.id!);
+      if(eggTransaction == null) {
+        reduced_eggs += int.parse(item.how_many);
+        int index_e = isSameDateExists(reductionList,item.date);
+        if(index_e != -1){
+          reductionList[index_e].total = reductionList[index_e].total! + int.parse(item.how_many);
+        }else {
+          Eggs_Chart_Item eggs_chart_item = Eggs_Chart_Item(
+              date: item.date, total: int.parse(item.how_many));
+          reductionList.add(eggs_chart_item);
+        }
+      }
+    }
+
     for (int i = 0; i < reductionList.length; i++) {
+      print(reductionList.elementAt(i).date);
+
       reductionList
           .elementAt(i)
           .date = Utils.getFormattedDate(reductionList
@@ -129,8 +153,11 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
           .length - 4);
     }
 
+    total_eggs_reduced += reduced_eggs;
+    total_eggs = total_eggs_collected - total_eggs_reduced;
 
-    getFilteredEggsCollections(str_date, end_date);
+
+    getFilteredEggsCollections(str_date, end_date, reduced_eggs, eggSales);
 
     setState(() {
 
@@ -143,7 +170,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
   int good_eggs = 0,
       bad_eggs = 0;
 
-  void getFilteredEggsCollections(String st, String end) async {
+  void getFilteredEggsCollections(String st, String end, int reduced_eggs, List<TransactionItem> eggSales) async {
     await DatabaseHelper.instance.database;
 
     eggs = await DatabaseHelper.getFilteredEggs(f_id, "All", st, end);
@@ -159,6 +186,12 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
     flockEggSummary = getFlockWiseEggSummary(eggs, str_date, end_date);
     eggReductionSummary = getEggReductionSummary(eggs, str_date, end_date);
 
+    if(reduced_eggs > 0)
+      updateReductionSummary(reduced_eggs);
+
+    /*if(eggSales.length > 0)
+      updateFlockSummary(eggSales);
+*/
     Utils.eggReductionSummary = eggReductionSummary;
 
     setState(() {
@@ -929,6 +962,10 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
             .elementAt(i)
             .f_id, 0, str_date, end_date);
 
+        reduced += getFromSales(flocks
+            .elementAt(i)
+            .f_id);
+
         t_good_eggs =
         await DatabaseHelper.getUniqueEggCalculationsGoodBad(flocks
             .elementAt(i)
@@ -958,6 +995,9 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
           f_id, 1, str_date, end_date);
       t_bad_eggs = await DatabaseHelper.getUniqueEggCalculationsGoodBad(
           f_id, 0, str_date, end_date);
+
+      reduced += getFromSales(f_id);
+
       reserve = collected - reduced;
 
       Flock? flock = await getSelectedFlock();
@@ -1036,6 +1076,60 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
           .map((entry) =>
           EggReductionSummary(reason: entry.key, totalReduced: entry.value))
           .toList();
+  }
+
+  int isSameDateExists(List<Eggs_Chart_Item> reductionList, String date) {
+    int index = -1;
+    for(int i=0;i<reductionList.length;i++){
+      if(reductionList[i].date == date){
+        index = i;
+        break;
+      }
+    }
+    return index;
+  }
+
+  void updateReductionSummary(int reduced_eggs) {
+    for(int i=0;i<eggReductionSummary.length;i++){
+      if(eggReductionSummary[i].reason.toLowerCase() == "egg sale" || eggReductionSummary[i].reason.toLowerCase() == "sold"){
+        eggReductionSummary[i].totalReduced = eggReductionSummary[i].totalReduced + reduced_eggs;
+        break;
+      }else{
+        EggReductionSummary eggSummaryItem = EggReductionSummary(reason: "Egg Sale", totalReduced: reduced_eggs);
+        eggReductionSummary.add(eggSummaryItem);
+        break;
+      }
+    }
+  }
+
+  void updateFlockSummary(List<TransactionItem> eggSales) {
+
+    for(int i=0;i<flockEggSummary.length;i++)
+    {
+      String f_name = flockEggSummary[i].fName;
+
+      for(int j=0; j<eggSales.length; j++){
+        if(eggSales[j].f_name == f_name)
+        {
+          flockEggSummary[i].totalEggs += int.parse(eggSales[j].how_many);
+          flockEggSummary[i].goodEggs += int.parse(eggSales[j].how_many);
+          break;
+        }
+      }
+
+    }
+  }
+
+  int getFromSales(int f_id) {
+    int n = 0;
+    for(int i=0;i<eggSales.length;i++)
+      {
+        if(eggSales[i].f_id==f_id)
+        {
+          n = n + int.parse(eggSales[i].how_many);
+        }
+      }
+    return n;
   }
 
 }

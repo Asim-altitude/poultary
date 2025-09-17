@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:poultary/model/egg_income.dart';
+import 'package:poultary/model/transaction_item.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../database/databse_helper.dart';
@@ -18,15 +20,20 @@ class _EggStockScreenState extends State<EggStockScreen> {
    BannerAd? _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
+
+  int pageCount = 0;
+
   @override
   void initState() {
     super.initState();
     stockSummary = getEggStockSummary();
-     getEggStockHistory();
+     getEggStockHistory(page: pageCount);
     if(Utils.isShowAdd){
       _loadBannerAd();
     }
   }
+
+
   _loadBannerAd(){
     // TODO: Initialize _bannerAd
     _bannerAd = BannerAd(
@@ -62,16 +69,62 @@ class _EggStockScreenState extends State<EggStockScreen> {
     }
     super.dispose();
   }
+
   Future<Map<String, int>> getEggStockSummary() async {
      return await DatabaseHelper.getEggStockSummary();
   }
 
-  void getEggStockHistory() async {
-    stockHistory = await DatabaseHelper.getStockHistory();
-    setState(() {
+  void getEggStockHistory({int page = 0, int pageSize = 2000}) async {
+    stockHistory = await DatabaseHelper.getStockHistoryPaginated(page: page, pageSize: pageSize);
+    var eggSales = await DatabaseHelper.getEggSaleTransactions();
 
+    int reduced_eggs = 0;
+    for(int i=0;i<eggSales.length;i++){
+      TransactionItem item = eggSales[i];
+      EggTransaction? eggTransaction = await DatabaseHelper.getEggsByTransactionItemId(item.id!);
+      if(eggTransaction == null) {
+        reduced_eggs += int.parse(item.how_many);
+        Eggs eggs = Eggs(f_id: item.f_id!,
+            f_name: item.f_name,
+            image: "image",
+            good_eggs: int.parse(item.how_many),
+            bad_eggs: 0,
+            egg_color: "white",
+            total_eggs: int.parse(item.how_many),
+            date: item.date,
+            short_note: item.short_note,
+            isCollection: 0,
+            reduction_reason: "Sold");
+        stockHistory.add(eggs);
+      }
+    }
+
+    var map = await stockSummary;
+    int? available = map['availableStock'];
+    int? totalUsed = map['totalUsed'];
+    int? totalCollected = map['totalCollected'];
+
+    totalUsed = totalUsed! + reduced_eggs;
+    available = totalCollected! - totalUsed;
+
+    // ✅ Update your map dynamically
+    map = {
+      'totalCollected': totalCollected,
+      'totalUsed': totalUsed,
+      'availableStock': available
+    };
+
+    stockSummary = Future.value(map);
+    // ✅ Sort by date (newest first)
+    stockHistory.sort((a, b) {
+      // Convert string to DateTime if needed
+      final dateA = DateTime.parse(a.date!);
+      final dateB = DateTime.parse(b.date!);
+      return dateB.compareTo(dateA); // descending order
     });
+    setState(() {});
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -101,89 +154,93 @@ class _EggStockScreenState extends State<EggStockScreen> {
         child:
         Column(children: [
           Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+          Expanded(child: SingleChildScrollView(
+   child:Column(
+     crossAxisAlignment: CrossAxisAlignment.start,
+     children: [
 
-          Expanded(
-            child:SingleChildScrollView(
-            child:Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+       FutureBuilder<Map<String, int>>(
+         future: stockSummary,
+         builder: (context, snapshot) {
+           if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
 
-                FutureBuilder<Map<String, int>>(
-                  future: stockSummary,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+           final data = snapshot.data!;
+           return _buildStockSummary(data['totalCollected']!, data['totalUsed']!, data['availableStock']!);
+         },
+       ),
+       SizedBox(height: 16),
+       Container(
+         margin: EdgeInsets.only(left: 10),
+         child: Row(
+           children: [
+             Text("Stock History".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+             Text(" (${stockHistory.length}) ", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey)),
+           ],
+         ),
+       ),
+       SizedBox(height: 8),
+       Container(
+         margin: EdgeInsets.all(10),
+         child: ListView.builder(
+           shrinkWrap: true,
+           physics: NeverScrollableScrollPhysics(),
 
-                    final data = snapshot.data!;
-                    return _buildStockSummary(data['totalCollected']!, data['totalUsed']!, data['availableStock']!);
-                  },
-                ),
-                SizedBox(height: 16),
-                Container(
-                  margin: EdgeInsets.only(left: 10),
-                  child: Text("Stock History".tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ),
-                SizedBox(height: 8),
-                Container(
-                  margin: EdgeInsets.all(10),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
+           itemCount: stockHistory.length,
+           itemBuilder: (context, index) {
+             final entry = stockHistory[index];
 
-                    itemCount: stockHistory.length,
-                    itemBuilder: (context, index) {
-                      final entry = stockHistory[index];
+             return Dismissible(
+               key: Key(entry.id.toString()),
+               background: Container(
+                 color: Colors.red,
+                 alignment: Alignment.centerRight,
+                 padding: EdgeInsets.only(right: 20),
+                 child: Icon(Icons.delete, color: Colors.white),
+               ),
+               direction: DismissDirection.endToStart,
+               confirmDismiss: (direction) async {
+                 return await showDialog(
+                   context: context,
+                   builder: (context) => AlertDialog(
+                     title: Text("Delete Entry".tr()),
+                     content: Text("Are you sure you want to delete this stock entry?".tr()),
+                     actions: [
+                       TextButton(
+                         onPressed: () => Navigator.of(context).pop(false),
+                         child: Text("CANCEL".tr()),
+                       ),
+                       TextButton(
+                         onPressed: () {
+                           DatabaseHelper.deleteItem("Eggs",entry.id!);
+                           Navigator.of(context).pop(true);
+                         },
+                         child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
+                       ),
+                     ],
+                   ),
+                 );
+               },
+               child: Card(
+                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                 elevation: 3,
+                 margin: EdgeInsets.symmetric(vertical: 6),
+                 child: ListTile(
+                   leading: Icon(Icons.egg, color: entry.isCollection == 1? Colors.green : Colors.orange),
+                   title: Text(
+                     entry.isCollection == 1? "${entry.total_eggs} "+ "eggs collected".tr() : "${entry.total_eggs} "+ "Reduced Eggs".tr(),
+                     style: TextStyle(fontSize: 16),
+                   ),
+                   subtitle: Text("DATE".tr()+": ${Utils.getFormattedDate(entry.date!)}"),
+                 ),
+               ),
+             );
+           },
+         ),
+       ),
 
-                      return Dismissible(
-                        key: Key(entry.id.toString()),
-                        background: Container(
-                          color: Colors.red,
-                          alignment: Alignment.centerRight,
-                          padding: EdgeInsets.only(right: 20),
-                          child: Icon(Icons.delete, color: Colors.white),
-                        ),
-                        direction: DismissDirection.endToStart,
-                        confirmDismiss: (direction) async {
-                          return await showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text("Delete Entry".tr()),
-                              content: Text("Are you sure you want to delete this stock entry?".tr()),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(false),
-                                  child: Text("CANCEL".tr()),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    DatabaseHelper.deleteItem("Eggs",entry.id!);
-                                    Navigator.of(context).pop(true);
-                                  },
-                                  child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: Card(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          elevation: 3,
-                          margin: EdgeInsets.symmetric(vertical: 6),
-                          child: ListTile(
-                            leading: Icon(Icons.egg, color: Colors.orange),
-                            title: Text(
-                              "${entry.total_eggs} "+ "eggs collected".tr(),
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            subtitle: Text("DATE".tr()+": ${entry.date}"),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-              ],
-            ),),),
+     ],
+   ),))
+          ,
         ],),
       ),
     );
@@ -226,9 +283,21 @@ class _EggStockScreenState extends State<EggStockScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Total Eggs".tr()+": $total", style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+                    Row(
+                      children: [
+                        Icon(Icons.egg, color:  Colors.green),
+                        SizedBox(width: 10,),
+                        Text("Total Eggs".tr()+": $total", style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+                      ],
+                    ),
                     SizedBox(height: 4),
-                    Text("Used Eggs".tr()+": $used", style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+                    Row(
+                      children: [
+                        Icon(Icons.egg, color:  Colors.orange),
+                        SizedBox(width: 10,),
+                        Text("Used Eggs".tr()+": $used", style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+                      ],
+                    ),
                   ],
                 ),
 

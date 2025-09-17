@@ -25,6 +25,7 @@ import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:poultary/view_transaction.dart';
 import 'package:sqflite/sqflite.dart';
+import 'add_eggs.dart';
 import 'database/databse_helper.dart';
 import 'model/egg_income.dart';
 import 'model/egg_item.dart';
@@ -269,7 +270,8 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                       return;
                     }
 
-                    addNewIncome();
+                    showIncomeTypeSelector(context);
+                   // addNewIncome();
                   },
                   borderRadius: BorderRadius.circular(10), // Smooth rounded ripple effect
                   child: Container(
@@ -548,7 +550,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                 height: heightScreen,
                 width: widthScreen,
                 child: Padding(
-                    padding: const EdgeInsets.only(bottom: 370), // Adjust this value as needed
+                    padding: Utils.isShowAdd? const EdgeInsets.only(bottom: 370) : const EdgeInsets.only(bottom: 300), // Adjust this value as needed
                 child: ListView.builder(
                     itemCount: transactionList.length,
                     scrollDirection: Axis.vertical,
@@ -851,6 +853,55 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
           ),
         ),
       ),
+    );
+  }
+
+  void showIncomeTypeSelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.egg, color: Colors.orange),
+                title:  Text("Egg Sale".tr()),
+                onTap: () async {
+
+                  Navigator.pop(context); // close bottom sheet
+                  // ✅ Redirect to Egg Collection -> Reduce screen
+
+                  if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_eggs"))
+                  {
+                    Utils.showMissingPermissionDialog(context, "add_eggs");
+                    return;
+                  }
+
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>  NewEggCollection(isCollection: false, eggs: null, reason: "SOLD",)),);
+                },
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.attach_money, color: Colors.green),
+                title:  Text("Other Income".tr()),
+                onTap: () {
+                  Navigator.pop(context);
+                  // ✅ Redirect to your existing Add Income screen
+                  addNewIncome();
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
