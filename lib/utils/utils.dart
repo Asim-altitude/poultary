@@ -67,7 +67,7 @@ class Utils {
   static double HEIGHT_SCREEN = 0;
   static double _standardWidth = 414;
   static double _standardheight = 736;
-  static final bool ISTESTACCOUNT = true;
+  static final bool ISTESTACCOUNT = false;
   static late bool isShowAdd = true;
   static late bool iShowInterStitial = false;
 
