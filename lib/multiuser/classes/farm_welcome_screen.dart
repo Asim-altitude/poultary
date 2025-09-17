@@ -108,14 +108,14 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
 
   bool isTrial() {
 
-    bool isExpired = false;
+    bool isTrial = false;
     print("CHECKING");
     if(_farmPlan!.planType.toLowerCase() == "trial"){
-      isExpired = true;
+      isTrial = true;
       print("TRIAL");
     }
     print("DONE");
-    return isExpired;
+    return isTrial;
 
   }
 
@@ -385,6 +385,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
 
     Utils.isShowAdd = false;
     Utils.isMultiUSer = true;
+    Utils.isTrialActive = isTrial();
     Utils.setupAds();
     if (initialized) {
       if (widget.multiUser.role.toLowerCase() == 'admin') {

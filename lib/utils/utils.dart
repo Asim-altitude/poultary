@@ -155,7 +155,7 @@ class Utils {
 
   static bool isMultiUSer = false;
   static bool isSyncDone = false;
-
+  static bool isTrialActive = false;
   // static MediationManager? manager;
   // static CASBannerView? view;
 
@@ -1477,7 +1477,7 @@ $storeLink
   static Future<void> setupAds() async {
 
     bool isInApp = await SessionManager.getInApp();
-    if(isInApp || Utils.isMultiUSer){
+    if((isInApp || Utils.isMultiUSer) && !Utils.isTrialActive){
       Utils.isShowAdd = false;
       hideBanner();
     }
