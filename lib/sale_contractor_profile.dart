@@ -87,6 +87,7 @@ class _ContractorProfileScreenState extends State<ContractorProfileScreen> with 
       ),
     );
   }
+
   Widget _saleSummaryCard({required String title, required String value, Color? color}) {
     return Container(
       height: 110,
@@ -335,7 +336,7 @@ class _ContractorProfileScreenState extends State<ContractorProfileScreen> with 
         }
         else if(value == 1){
           _confirmDelete(context);
-        }else {
+        } else {
           print(value);
         }
       }

@@ -122,6 +122,30 @@ class Eggs {
     };
   }
 
+
+  Map<String, dynamic> toLocalJson() {
+    return {
+      'id': id,
+      'f_id': f_id,
+      'image': image,
+      'f_name': f_name,
+      'good_eggs': good_eggs,
+      'spoilt_eggs': bad_eggs,
+      'total_eggs': total_eggs,
+      'egg_color': egg_color,
+      'collection_date': date,
+      'isCollection': isCollection,
+      'reduction_reason': reduction_reason,
+      'short_note': short_note,
+      'sync_id': sync_id,
+      'sync_status': sync_status,
+      'last_modified': last_modified?.toIso8601String(),
+      'modified_by': modified_by,
+      'farm_id': farm_id,
+    };
+  }
+
+
 }
 
 

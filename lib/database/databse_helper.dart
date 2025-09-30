@@ -4145,12 +4145,24 @@ class DatabaseHelper  {
 
     final List<Map<String, Object?>>? maps = await _database?.query(
       'Eggs',
+      where: 'id IS NOT NULL', // ✅ Only fetch rows with valid IDs
       orderBy: 'collection_date DESC',
-      limit: pageSize, // Limit to 20 records (or whatever you pass)
-      offset: offset,  // Skip records for previous pages
+      limit: pageSize,
+      offset: offset,
     );
 
     return List.generate(maps?.length ?? 0, (i) => Eggs.fromJson(maps![i]));
+  }
+
+
+  static Future<void> deleteInvalidEggRecords() async {
+    try
+    {
+      final count = await _database?.rawDelete('DELETE FROM Eggs WHERE id IS NULL');
+      print("Deleted $count invalid egg records.");
+    } catch (e) {
+      print("Error while deleting invalid egg records: $e");
+    }
   }
 
 

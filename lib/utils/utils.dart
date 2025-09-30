@@ -1438,7 +1438,7 @@ $storeLink
   static List<CustomCategory> getDefaultFlockCatgories() {
    List<CustomCategory> defaultCategories = [];
    CustomCategory modifyBirds = CustomCategory(name:"Modify Birds", itemtype: "Default", cat_type: "Birds FLock", unit: "num", enabled: 1, icon: Icons.add);
-   modifyBirds.cIcon = "assets/birds.png";
+   modifyBirds.cIcon = "assets/flock_icon.png";
 
    CustomCategory eggCollection = CustomCategory(name:"EGG_COLLECTION", itemtype: "Default", cat_type: "EGG_COLLECTION".tr(), unit: "num", enabled: 1, icon: Icons.add);
    eggCollection.cIcon = "assets/egg.png";
@@ -1450,7 +1450,7 @@ $storeLink
    health.cIcon = "assets/health.png";
 
    CustomCategory finance = CustomCategory(name:"INCOME_EXPENSE", itemtype: "Default", cat_type: "Finance".tr(), unit: "currency", enabled: 1, icon: Icons.add);
-   finance.cIcon = "assets/income.png";
+   finance.cIcon = "assets/finance_icon.png";
 
    defaultCategories.add(modifyBirds);
    defaultCategories.add(eggCollection);
@@ -1478,13 +1478,17 @@ $storeLink
   {
 
     bool isInApp = await SessionManager.getInApp();
-    if (isInApp || (Utils.isMultiUSer && !Utils.isTrialActive)) {
+    if (isInApp || (Utils.isMultiUSer && !Utils.isTrialActive))
+    {
       Utils.isShowAdd = false;
       hideBanner();
-    } else {
+    }
+    else
+    {
       Utils.isShowAdd = true;
       inititalize();
     }
+
   }
 
 

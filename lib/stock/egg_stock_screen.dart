@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:poultary/model/egg_income.dart';
 import 'package:poultary/model/transaction_item.dart';
+import 'package:poultary/multiuser/model/financeItem.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../database/databse_helper.dart';
 import '../model/egg_item.dart';
+import '../multiuser/model/egg_record.dart';
+import '../multiuser/utils/FirebaseUtils.dart';
+import '../multiuser/utils/SyncStatus.dart';
 import '../utils/utils.dart';
 
 class EggStockScreen extends StatefulWidget {
@@ -32,7 +36,6 @@ class _EggStockScreenState extends State<EggStockScreen> {
       _loadBannerAd();
     }
   }
-
 
   _loadBannerAd(){
     // TODO: Initialize _bannerAd
@@ -78,13 +81,18 @@ class _EggStockScreenState extends State<EggStockScreen> {
     stockHistory = await DatabaseHelper.getStockHistoryPaginated(page: page, pageSize: pageSize);
     var eggSales = await DatabaseHelper.getEggSaleTransactions();
 
+    print("EGGS RECORDS ${stockHistory.length}");
+    print("EGGS SALES ${eggSales.length}");
     int reduced_eggs = 0;
-    for(int i=0;i<eggSales.length;i++){
+    for(int i=0;i<eggSales.length;i++)
+    {
       TransactionItem item = eggSales[i];
       EggTransaction? eggTransaction = await DatabaseHelper.getEggsByTransactionItemId(item.id!);
       if(eggTransaction == null) {
         reduced_eggs += int.parse(item.how_many);
-        Eggs eggs = Eggs(f_id: item.f_id!,
+        Eggs eggs = Eggs(
+            id: item.id,
+            f_id: item.f_id!,
             f_name: item.f_name,
             image: "image",
             good_eggs: int.parse(item.how_many),
@@ -92,7 +100,7 @@ class _EggStockScreenState extends State<EggStockScreen> {
             egg_color: "white",
             total_eggs: int.parse(item.how_many),
             date: item.date,
-            short_note: item.short_note,
+            short_note: "TRANS_"+item.short_note,
             isCollection: 0,
             reduction_reason: "Sold");
         stockHistory.add(eggs);
@@ -199,6 +207,13 @@ class _EggStockScreenState extends State<EggStockScreen> {
                ),
                direction: DismissDirection.endToStart,
                confirmDismiss: (direction) async {
+
+                 print("SELECTED_ENTRY ${entry.toLocalJson()}");
+                 int? selected_id = entry.id;
+                 int selected_index = index;
+
+                 print("SELECTED_ID $selected_id INDEX $selected_index");
+
                  return await showDialog(
                    context: context,
                    builder: (context) => AlertDialog(
@@ -210,15 +225,101 @@ class _EggStockScreenState extends State<EggStockScreen> {
                          child: Text("CANCEL".tr()),
                        ),
                        TextButton(
-                         onPressed: () {
-                           DatabaseHelper.deleteItem("Eggs",entry.id!);
-                           Navigator.of(context).pop(true);
+                         onPressed: () async {
+
+
+                           if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_eggs"))
+                           {
+                             Utils.showMissingPermissionDialog(context, "delete_eggs");
+                             return;
+                           }
+
+                           if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_eggs")){
+
+                             if(entry.short_note!.startsWith("TRANS_")){
+                               TransactionItem? transItem = await DatabaseHelper.getSingleTransaction(entry.id!.toString());
+                               FinanceItem financeItem = FinanceItem(transaction: transItem!);
+                               financeItem.sync_id = transItem.sync_id;
+                               financeItem.sync_status = SyncStatus.DELETED;
+                               financeItem.farm_id = Utils.currentUser!.farmId;
+                               financeItem.last_modified = Utils.getTimeStamp();
+
+                               await FireBaseUtils.deleteFinanceRecord(financeItem);
+                             }else {
+                               EggTransaction? eggTransaction = await DatabaseHelper
+                                   .getByEggItemId(entry.id!);
+
+                               if (eggTransaction != null) {
+                                 TransactionItem? transactionItem = await DatabaseHelper
+                                     .getSingleTransaction(
+                                     eggTransaction.transactionId.toString());
+
+                                 transactionItem!.sync_status =
+                                     SyncStatus.DELETED;
+                                 EggRecord eggRecord = EggRecord(eggs: entry,
+                                   transaction: transactionItem,
+                                   sync_id: entry.sync_id,
+                                   sync_status: SyncStatus.DELETED,
+                                   last_modified: Utils.getTimeStamp(),
+                                   modified_by: Utils.isMultiUSer ? Utils
+                                       .currentUser!.email : '',
+                                   farm_id: Utils.isMultiUSer ? Utils
+                                       .currentUser!.farmId : '',
+                                 );
+
+                                 eggRecord.sync_status = SyncStatus.DELETED;
+                                 eggRecord.eggs.sync_status =
+                                     SyncStatus.DELETED;
+
+
+                                 await FireBaseUtils.updateEggRecord(eggRecord);
+                               }
+                               else {
+                                 EggRecord eggRecord = EggRecord(eggs: entry,
+                                   sync_id: entry.sync_id,
+                                   sync_status: SyncStatus.DELETED,
+                                   last_modified: Utils.getTimeStamp(),
+                                   modified_by: Utils.isMultiUSer ? Utils
+                                       .currentUser!.email : '',
+                                   farm_id: Utils.isMultiUSer ? Utils
+                                       .currentUser!.farmId : '',);
+                                 eggRecord.sync_status = SyncStatus.DELETED;
+                                 eggRecord.eggs.sync_status =
+                                     SyncStatus.DELETED;
+
+                                 await FireBaseUtils.updateEggRecord(eggRecord);
+                               }
+                             }
+
+                           }
+
+                           if(entry.short_note!.startsWith("TRANS_")) {
+                             await DatabaseHelper.deleteItem("Transactions", entry.id!);
+                             stockHistory.removeAt(selected_index);
+                           }else {
+                             EggTransaction? eggTransaction = await DatabaseHelper
+                                 .getByEggItemId(selected_id!);
+                             if (eggTransaction != null) {
+                               DatabaseHelper.deleteItem("Transactions",
+                                   eggTransaction.transactionId);
+                               DatabaseHelper.deleteByEggItemId(selected_id);
+                             }
+
+                             DatabaseHelper.deleteItem("Eggs", selected_id);
+                             stockHistory.removeAt(selected_index);
+                             Utils.showToast("DONE");
+                           }
+
+                           Navigator.pop(context);
+                           setState(() {
+
+                           });
                          },
                          child: Text("DELETE".tr(), style: TextStyle(color: Colors.red)),
                        ),
                      ],
-                   ),
-                 );
+                   ),);
+
                },
                child: Card(
                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

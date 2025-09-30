@@ -1658,7 +1658,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
           EggTransaction? eggTransaction = await DatabaseHelper.getByEggItemId(eggs.elementAt(selected_index!).id!);
           if(eggTransaction!= null) {
            TransactionItem? transactionItem = await DatabaseHelper.getSingleTransaction(
-                eggTransaction!.transactionId.toString());
+                eggTransaction.transactionId.toString());
 
             transactionItem!.sync_status = SyncStatus.DELETED;
             EggRecord eggRecord = EggRecord(eggs: eggs.elementAt(selected_index!), transaction: transactionItem,
@@ -1687,8 +1687,6 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
             await FireBaseUtils.updateEggRecord(eggRecord);
           }
-
-
 
         }
 

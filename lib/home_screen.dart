@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:poultary/dashboard.dart';
+import 'package:poultary/multiuser/utils/SyncStatus.dart';
 import 'package:poultary/product_screen.dart';
 import 'package:poultary/settings_screen.dart';
 import 'package:poultary/utils/session_manager.dart';
@@ -13,6 +14,9 @@ import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 import 'database/databse_helper.dart';
 import 'model/category_item.dart';
+import 'model/egg_income.dart';
+import 'model/egg_item.dart';
+import 'model/transaction_item.dart';
 import 'multiuser/classes/AdminProfile.dart';
 import 'multiuser/classes/NetworkAcceessNotifier.dart';
 import 'multiuser/utils/FirebaseUtils.dart';
@@ -231,6 +235,7 @@ class _HomeScreen extends State<HomeScreen> {
      await DatabaseHelper.createSyncFailedTable();
      await addNewColumn();
      await addMissingCategories();
+    // await createMissingEggsRecords();
    }
    catch(ex){
      print(ex);
@@ -1028,6 +1033,60 @@ class _HomeScreen extends State<HomeScreen> {
 
   }
 
+  Future<void> createMissingEggsRecords() async {
+    var eggSales = await DatabaseHelper.getEggSaleTransactions();
+    print("EGG_SALES ${eggSales.length}");
+    for(int i=0;i<eggSales.length;i++)
+    {
+      try {
+        print("INDEX $i");
+        TransactionItem item = eggSales[i];
+        print("TRANSACTION_ID ${item.id}");
+        EggTransaction? eggTransaction = await DatabaseHelper
+            .getEggsByTransactionItemId(item.id!);
+        if (eggTransaction == null) {
+          print("NO_EGG_RECORD ${item.how_many} ${item.date} ${item.f_name}");
+          Eggs eggs = Eggs(
+              f_id: item.f_id!,
+              f_name: item.f_name,
+              image: "image",
+              good_eggs: int.parse(item.how_many),
+              bad_eggs: 0,
+              egg_color: "white",
+              total_eggs: int.parse(item.how_many),
+              date: item.date,
+              short_note: item.short_note,
+              isCollection: 0,
+              reduction_reason: "Sold",
+              sync_id: Utils.getUniueId(),
+              sync_status: SyncStatus.PENDING,
+              modified_by: Utils.isMultiUSer? Utils.currentUser!.email : '',
+              last_modified: Utils.getTimeStamp(),
+            farm_id: Utils.isMultiUSer? Utils.currentUser!.farmId : ''
+          );
+          int? egg_id = await DatabaseHelper.insertEggCollection(eggs);
+          EggTransaction eggTransaction1 = EggTransaction(eggItemId: egg_id!,
+              transactionId: item.id!,
+              syncId: Utils.getUniueId(),
+              syncStatus: eggs.sync_status!,
+              lastModified: eggs.last_modified!,
+              modifiedBy: eggs.modified_by!,
+              farmId: Utils.isMultiUSer? Utils.currentUser!.farmId : '');
+          await DatabaseHelper.insertEggJunction(eggTransaction1);
+          print("EggTransaction ${eggTransaction1.eggItemId} ${eggTransaction1
+              .transactionId}");
+        } else {
+          print("FOUND_EGG_RECORD ${eggTransaction.eggItemId} ${item
+              .how_many} ${item.date} ${item.f_name}");
+          print("EggTransaction ${eggTransaction.eggItemId} ${eggTransaction
+              .transactionId}");
+        }
+      }
+      catch(ex){
+        print("ERROR $ex");
+      }
+    }
+  }
 }
 
 class _PieData {

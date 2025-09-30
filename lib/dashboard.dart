@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:language_picker/language_picker_dropdown.dart';
 import 'package:language_picker/languages.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:poultary/eggs_report_screen.dart';
@@ -15,17 +14,23 @@ import 'package:poultary/health_report_screen.dart';
 import 'package:poultary/multiuser/classes/AdminProfile.dart';
 import 'package:poultary/settings_screen.dart';
 import 'package:poultary/single_flock_screen.dart';
+import 'package:poultary/transactions_screen.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'add_flocks.dart';
+import 'add_reduce_flock.dart';
+import 'daily_feed.dart';
 import 'database/databse_helper.dart';
+import 'egg_collection.dart';
 import 'financial_report_screen.dart';
+import 'medication_vaccination.dart';
 import 'model/flock.dart';
 import 'model/flock_image.dart';
 import 'multiuser/api/server_apis.dart';
 import 'multiuser/classes/AuthGate.dart';
+import 'multiuser/classes/all_flocks_screen.dart';
 import 'multiuser/model/flockfb.dart';
 import 'multiuser/model/user.dart';
 import 'multiuser/utils/FirebaseUtils.dart';
@@ -154,6 +159,7 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
   Map<String, double> dataMap = {"Income".tr(): 0,
     "Expense".tr(): 0};
 
+  bool isMenuEnabled = false;
 
 
   @override
@@ -640,6 +646,159 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
     );
   }
 
+  final List<String> modules = [
+    "ALL_FLOCKS",
+    "Birds",
+    "Eggs",
+    "Feed",
+    "Health",
+    "Finance",
+
+  ];
+  /// Helper function to map module names to icons
+  IconData _getModuleIcon(String module) {
+    switch (module.toLowerCase()) {
+      case "flocks":
+        return Icons.pets;
+      case "eggs":
+        return Icons.egg;
+      case "birds":
+        return Icons.air_rounded;
+      case "finance":
+        return Icons.attach_money;
+      case "feed":
+        return Icons.local_dining;
+      case "health":
+        return Icons.medical_information;
+      case "stock":
+        return Icons.inventory;
+      case "reports":
+        return Icons.bar_chart;
+      case "settings":
+        return Icons.settings;
+      default:
+        return Icons.apps;
+    }
+  }
+
+  String _getModuleIconAsset(String module) {
+    switch (module.toLowerCase()) {
+      case "all_flocks":
+        return "assets/flock_icon.png";
+      case "eggs":
+        return "assets/egg.png";
+      case "birds":
+        return "assets/chicken_icon.png";
+      case "finance":
+        return "assets/finance_icon.png";
+      case "feed":
+        return "assets/feed.png";
+      case "health":
+        return "assets/health.png";
+      default:
+        return "assets/dot_menu.png";
+    }
+  }
+
+  Future<void> _navigateToModule(String module) async {
+    if (module.toLowerCase().contains("flocks")) {
+      await Navigator.push(context, MaterialPageRoute(builder: (_) => AllFlocksScreen()));
+    } else if (module.toLowerCase() == "eggs") {
+      await Navigator.push(context, MaterialPageRoute(builder: (_) => EggCollectionScreen()));
+    } else if (module.toLowerCase() == "birds") {
+     await Navigator.push(context, MaterialPageRoute(builder: (_) => AddReduceFlockScreen()));
+    } else if (module.toLowerCase() == "finance") {
+      await Navigator.push(context, MaterialPageRoute(builder: (_) => TransactionsScreen()));
+    } else if (module.toLowerCase() == "feed") {
+      await Navigator.push(context, MaterialPageRoute(builder: (_) => DailyFeedScreen()));
+    } else if (module.toLowerCase() == "health") {
+      await Navigator.push(context, MaterialPageRoute(builder: (_) => MedicationVaccinationScreen()));
+    }
+
+    getList();
+    getFilteredData(date_filter_name);
+  }
+
+  Widget _buildModuleGrid() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8),
+      child: GridView.count(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisCount: 3,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 1.0,
+        children: modules.map((module) {
+
+          IconData moduleIcon = _getModuleIcon(module); // Map module to icon
+
+          String icon_asset = _getModuleIconAsset(module);
+
+          return GestureDetector(
+            onTap: () {
+
+              _navigateToModule(module);
+            },
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 300),
+              opacity:  1.0,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blue.shade400, Colors.blue.shade700],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 8,
+                      offset: const Offset(2, 4),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () => _navigateToModule(module),
+                    splashColor: Colors.white24,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircleAvatar(
+                            radius: 28,
+                            backgroundColor: Colors.white.withOpacity(0.2),
+                            child: Image.asset(icon_asset, width: 30, height: 30, color: Colors.white,),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            module.tr(),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
 
   void openDatePicker() {
     showDialog(
@@ -905,15 +1064,15 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
       print("NO_FLOCKS".tr());
       Utils.showToast("Please add new flock to continue.".tr());
 
-    }/*else{
-      bool isShow = await SessionManager.isShowWhatsNewDialog();
-      if(isShow &)
-        _showFeatureDialog();
-    }*/
+    }else{
+     Utils.selected_flock = flocks[0];
+    }
 
     flock_total = flocks.length;
 
     getFilteredData(date_filter_name);
+
+    isMenuEnabled = await SessionManager.getBool("dashboard_menu");
 
     setState(() {
 
@@ -1322,7 +1481,49 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                       },
                     ),
                   ),*/
-                  Container(
+
+                 isMenuEnabled?
+                 Container(
+                   margin: EdgeInsets.only(top: 10),
+                   child: Column(
+                     children: [
+                       Align(
+                         alignment: Alignment.center,
+                         child: Stack(
+                           children: [
+                             InkWell(
+                                 onTap: ()
+                                 async {
+                                   await SessionManager.setBoolValue("dashboard_menu", false);
+                                   setState(() {
+                                     isMenuEnabled = false;
+                                   });
+                                 },
+                                 child: Align(
+                                     alignment: Alignment.centerRight,
+                                     child: Container(
+                                         margin: EdgeInsets.only(right: 20),
+                                         child: Icon(Icons.cancel_sharp, size: 30, color: Colors.blue,)))),
+                             Center(
+                               child: Text(
+                                 "Quick Menu".tr(),
+                                 style: TextStyle(
+                                   fontSize: 18,
+                                   fontWeight: FontWeight.bold,
+                                   color: primaryTextColor,
+                                 ),
+                               ),
+                             ),
+                           ],
+                         ),
+                       ),
+                       Container(
+                           margin: EdgeInsets.only(top: 20),
+                           child: _buildModuleGrid()),
+                     ],
+                   ),
+                 ) :
+                 Container(
                     margin: EdgeInsets.only(top: 0),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.only(
@@ -1338,6 +1539,19 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                           margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                           child: Stack(
                             children: [
+                              InkWell(
+                                  onTap: () async {
+                                    await SessionManager.setBoolValue("dashboard_menu", true);
+
+                                    setState(() {
+                                      isMenuEnabled = true;
+                                    });
+                                  },
+                                  child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Container(
+                                          margin: EdgeInsets.only(top: 15),
+                                          child: Image.asset("assets/dot_menu.png", width: 20, height: 20, color: Colors.blue,)))),
                               Align(
                                 alignment: Alignment.center,
                                 child: Row(

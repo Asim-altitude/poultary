@@ -114,17 +114,18 @@ class _AllFlocksScreen extends State<AllFlocksScreen> with RefreshMixin {
                           borderRadius: BorderRadius.circular(30),
                           onTap: () async {
 
-                            if(Utils.hasFeaturePermission("add_flocks")) {
-                              await Navigator.push(
-                                context,
-                                CupertinoPageRoute(builder: (
-                                    context) => const ADDFlockScreen()),);
-
-                              init();
-                            }else{
-                              Utils.showMissingPermissionDialog(context, "add_flock");
-
+                            if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_flocks")) {
+                              Utils.showMissingPermissionDialog(context, "add_flocks");
+                              return;
                             }
+
+                            await Navigator.push(
+                              context,
+                              CupertinoPageRoute(builder: (
+                                  context) => const ADDFlockScreen()),);
+
+                            init();
+
                             // Refresh logic
                           },
                           child: Padding(
@@ -343,15 +344,17 @@ class _AllFlocksScreen extends State<AllFlocksScreen> with RefreshMixin {
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
             onTap: () async {
-              if (Utils.hasFeaturePermission("add_flocks")) {
-                await Navigator.push(
-                  context,
-                  CupertinoPageRoute(
-                      builder: (context) => const ADDFlockScreen()),
-                );
-              } else {
-                Utils.showMissingPermissionDialog(context, "add_flock");
+              if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_flocks")) {
+                Utils.showMissingPermissionDialog(context, "add_flocks");
+                return;
               }
+
+              await Navigator.push(
+                context,
+                CupertinoPageRoute(builder: (
+                    context) => const ADDFlockScreen()),);
+
+              init();
               // Refresh logic
             },
             child: Padding(

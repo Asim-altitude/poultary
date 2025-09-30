@@ -235,7 +235,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
                       children: [
                         const SizedBox(height: 16),
 
-                        // Trial Button (highlighted)
+                        /*// Trial Button (highlighted)
                         if (_planStatus == PlanStatus.notStarted)
                           _buildPrimaryButton(
                             label: "Activate 7-Day Trial",
@@ -248,9 +248,9 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
                                 _showPremiumDialog(context);
                               }
                             },
-                          ),
+                          ),*/
 
-                        const SizedBox(height: 12),
+                       // const SizedBox(height: 12),
 
                         // Upgrade Button
                         _buildPrimaryButton(
@@ -267,7 +267,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
 
                             if ((_planStatus == PlanStatus.notStarted || isTrial()) && !Utils.isShowAdd)
                             {
-                              _handlePlanUpgrade("Premium");
+                              _handlePlanUpgrade("Premium", "Basic");
                             }
                             else
                             {
@@ -440,7 +440,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
     }
   }
 
-  Future<void> _handlePlanUpgrade(String type) async {
+  Future<void> _handlePlanUpgrade(String type, String planName) async {
     DateTime planStartDate = DateTime.now();
     DateTime planExpiryDate = type.toLowerCase() == "trial"? DateTime(
       planStartDate.year,
@@ -453,12 +453,11 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
     FarmPlan farmPlan = FarmPlan(
       farmId: widget.multiUser.farmId,
       adminEmail: widget.multiUser.email,
-      planName: "Basic",
+      planName: planName,
       planType: type,
       planStartDate: planStartDate,
       planExpiryDate: planExpiryDate,
-      userCapacity: type.toLowerCase() == "trial"? 2 : 10,
-    );
+      userCapacity: type.toLowerCase() == "trial"? 2 : 10,);
 
     await FireBaseUtils.upgradeMultiUserPlan(farmPlan);
     _loadPlanInfo();
@@ -601,7 +600,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
       await SessionManager.setInApp(true);
       Utils.isShowAdd = false;
       Utils.setupAds();
-      await _handlePlanUpgrade("Premium");
+      await _handlePlanUpgrade("Premium","Upgrade");
       setState(() {
         _purchasePending = false;
         _consumables = consumables;
