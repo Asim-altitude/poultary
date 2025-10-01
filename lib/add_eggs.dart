@@ -109,6 +109,8 @@ class _NewEggCollection extends State<NewEggCollection>
       goodEggsController.text ="0";
       badEggsController.text =  "0";
       selectedColor = eggColors[0];
+      DateTime dateTime = DateTime.now();
+      date = DateFormat('yyyy-MM-dd').format(dateTime);
     }
     else
     {

@@ -728,7 +728,7 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
         crossAxisCount: 3,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio: 1.0,
+        childAspectRatio: 0.875,
         children: modules.map((module) {
 
           IconData moduleIcon = _getModuleIcon(module); // Map module to icon
