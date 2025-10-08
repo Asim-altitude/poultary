@@ -33,7 +33,8 @@ Future<Uint8List> generateProductionReportPdf({
   required num totalFeedUsed,
   required Map<String, Map<String, dynamic>> dailyBreakdown,
   required List<MonthlyBreakdownData> monthlyBreakdown,
-}) async {
+}) async
+{
 
   final pdf = pw.Document();
 

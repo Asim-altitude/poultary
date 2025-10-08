@@ -1,16 +1,22 @@
 import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:excel/excel.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/model/egg_report_item.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 import 'model/egg_income.dart';
 import 'model/egg_item.dart';
@@ -100,7 +106,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
     total_eggs_reduced =
     await DatabaseHelper.getEggCalculations(f_id, 0, str_date, end_date);
 
-    eggSales = await DatabaseHelper.getEggSaleTransactions();
+    eggSales = await DatabaseHelper.getEggSaleTransactionsFiltered(str_date, end_date, f_id);
 
     collectionList =
     await DatabaseHelper.getEggsReportData(str_date, end_date, 1,f_id);
@@ -271,12 +277,27 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                                 margin: EdgeInsets.only(left: 5),
                                 child: Text(
                                   "EGGS_REPORT".tr(),
+                                  overflow: TextOverflow.ellipsis,
                                   textAlign: TextAlign.start,
                                   style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold),
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w600),
                                 )),
+                          ),
+                          InkWell(
+                            onTap: () async {
+                              Utils.setupInvoiceInitials("EGGS_REPORT".tr(), pdf_formatted_date_filter);
+                              await prepareListData();
+
+                              generateEggSummaryExcel(Utils.egg_report_list, Utils.eggReductionSummary!);
+                            },
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              margin: EdgeInsets.only(right: 10),
+                              child: Image.asset('assets/excel_icon.png'),
+                            ),
                           ),
                           InkWell(
                             onTap: () {
@@ -291,8 +312,8 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                               );
                             },
                             child: Container(
-                              width: 30,
-                              height: 30,
+                              width: 22,
+                              height: 22,
                               margin: EdgeInsets.only(right: 10),
                               child: Image.asset('assets/pdf_icon.png'),
                             ),
@@ -317,10 +338,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                               end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Utils.getThemeColorBlue(),
-                              width: 1.2,
-                            ),
+
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black12,
@@ -348,10 +366,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                               end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Utils.getThemeColorBlue(),
-                              width: 1.2,
-                            ),
+
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black12,
@@ -938,7 +953,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
     return f_id;
   }
 
-  void prepareListData() async {
+  Future<void> prepareListData() async {
     int collected = 0,
         reduced = 0,
         reserve = 0,
@@ -1012,6 +1027,315 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
     }
   }
 
+
+// Call this function after you have all summary values & lists
+ /* Future<void> generateEggSummaryExcel(
+      List<Egg_Report_Item> flockReport,
+      List<EggReductionSummary> reductions) async
+  {
+
+    var excel = Excel.createExcel();
+
+    /// ---- Sheet 1: Overall Summary ----
+    Sheet summarySheet = excel['Egg Summary'];
+    summarySheet.appendRow(
+        [TextCellValue("Total Collected"), TextCellValue("Total Reduced"), TextCellValue("Egg Reserve"),TextCellValue("Good Eggs"), TextCellValue("Bad Eggs")]);
+    summarySheet.appendRow(
+        [TextCellValue(Utils.TOTAL_EGG_COLLECTED), TextCellValue(Utils.TOTAL_EGG_REDUCED), TextCellValue(Utils.EGG_RESERVE), TextCellValue(Utils.GOOD_EGGS), TextCellValue(Utils.BAD_EGGS)]);
+
+    /// ---- Sheet 2: Flock Report ----
+    Sheet flockSheet = excel['Flock Report'];
+    flockSheet.appendRow(
+        [
+          TextCellValue("Flock Name"),
+          TextCellValue("Collected"),
+          TextCellValue("Reduced"),
+          TextCellValue("Reserve"),
+          TextCellValue("Good Eggs"),
+          TextCellValue("Bad Eggs"),
+        ]
+    );
+
+    for (var item in flockReport) {
+      flockSheet.appendRow([
+        TextCellValue(item.f_name),
+        IntCellValue(item.collected ?? 0),
+        IntCellValue(item.reduced ?? 0),
+        IntCellValue(item.reserve ?? 0),
+        IntCellValue(item.good_eggs ?? 0),
+        IntCellValue(item.bad_eggs),
+      ]);
+
+    }
+
+    /// ---- Sheet 3: Reduction Reasons ----
+    Sheet reductionSheet = excel['Reduction Reasons'];
+    reductionSheet.appendRow([
+      TextCellValue("Reason"),
+      TextCellValue("Total Reduced"),
+    ]);
+
+
+    for (var reason in reductions) {
+      reductionSheet.appendRow([TextCellValue(reason.reason), IntCellValue(reason.totalReduced)]);
+    }
+
+    /// ---- Save File ----
+    final directory = await getApplicationDocumentsDirectory();
+    String formattedDate = DateFormat('yyyyMMdd_HHmm').format(DateTime.now());
+// Example: 20251006_1345
+    String filePath = "${directory.path}/egg_report_$formattedDate.xlsx";
+
+    final downloadsDir = Directory("/storage/emulated/0/Download");
+    String path = "${downloadsDir.path}/egg_report_${DateFormat('yyyyMMdd_HHmm').format(DateTime.now())}.xlsx";
+    File(path)..createSync(recursive: true)..writeAsBytesSync(excel.encode()!);
+
+    Utils.showToast("Saved in Downloads");
+   *//* File(filePath)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(excel.encode()!);*//*
+
+    print("Excel report saved: $filePath");
+  }*/
+  Future<void> generateEggSummaryExcel(
+      List<Egg_Report_Item> flockReport,
+      List<EggReductionSummary> reductions) async
+  {
+    var excel = Excel.createExcel();
+    var sheet = excel['Egg Report'.tr()];
+
+    // ==== Define Styles ====
+    var headerStyle = CellStyle(
+      bold: true,
+      fontSize: 12,
+      fontColorHex: ExcelColor.black,
+      backgroundColorHex: ExcelColor.fromHexString("#B7DEE8"),
+      // light blue header
+      horizontalAlign: HorizontalAlign.Center,
+      verticalAlign: VerticalAlign.Center,
+    );
+
+    var titleStyle = CellStyle(
+      bold: true,
+      fontSize: 16,
+      fontColorHex: ExcelColor.white,
+      backgroundColorHex: ExcelColor.fromHexString("#1F4E78"),
+      // dark blue title bar
+      horizontalAlign: HorizontalAlign.Center,
+      verticalAlign: VerticalAlign.Center,
+    );
+
+    var sectionTitleStyle = CellStyle(
+      bold: true,
+      fontSize: 14,
+      fontColorHex: ExcelColor.black,
+      backgroundColorHex: ExcelColor.fromHexString("#BDD7EE"),
+      // section background
+      horizontalAlign: HorizontalAlign.Center,
+      verticalAlign: VerticalAlign.Center,
+    );
+
+    int row = 0;
+
+    // ==== Report Title ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("EGGS_REPORT".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = titleStyle;
+
+    // Merge title across columns (0–5)
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 5, rowIndex: row));
+
+    row += 2;
+
+    // ==== Summary Section ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("SUMMARY".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = sectionTitleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: row));
+
+    row++;
+
+    // Header Row
+    List<String> summaryHeaders = [
+      "Total Collected".tr(),
+      "Total Reduced".tr(),
+      "Reserve Eggs".tr(),
+      "Good Eggs".tr(),
+      "Bad Eggs".tr(),
+    ];
+    for (int i = 0; i < summaryHeaders.length; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .value = TextCellValue(summaryHeaders[i]);
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = headerStyle;
+    }
+
+    row++;
+
+    // Data Row
+    List<String> summaryValues = [
+      Utils.TOTAL_EGG_COLLECTED,
+      Utils.TOTAL_EGG_REDUCED,
+      Utils.EGG_RESERVE,
+      Utils.GOOD_EGGS,
+      Utils.BAD_EGGS,
+    ];
+    for (int i = 0; i < summaryValues.length; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .value = TextCellValue(summaryValues[i]);
+    }
+
+    row += 2;
+
+    // ==== Flock Report ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("FLOCK_REPORT".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = sectionTitleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 5, rowIndex: row));
+
+    row++;
+
+    List<String> flockHeaders = [
+      "Flock Name".tr(),
+      "Total Collected".tr(),
+      "TOTAL_REDUCED".tr(),
+      "Reserve Eggs".tr(),
+      "Good Eggs".tr(),
+      "Bad Eggs".tr(),
+    ];
+    for (int i = 0; i < flockHeaders.length; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .value = TextCellValue(flockHeaders[i]);
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = headerStyle;
+    }
+
+    row++;
+
+    for (var item in flockReport) {
+      sheet.appendRow([
+        TextCellValue(item.f_name),
+        IntCellValue(item.collected ?? 0),
+        IntCellValue(item.reduced ?? 0),
+        IntCellValue(item.reserve ?? 0),
+        IntCellValue(item.good_eggs ?? 0),
+        IntCellValue(item.bad_eggs),
+      ]);
+    }
+
+    row += flockReport.length + 2;
+
+    // ==== Reduction Summary ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("REDUCTIONS_1".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = sectionTitleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: row));
+
+    row++;
+
+    List<String> reductionHeaders = [
+      "REDUCTIONS_1".tr(),
+      "Total Reduced".tr(),
+    ];
+    for (int i = 0; i < reductionHeaders.length; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .value = TextCellValue(reductionHeaders[i]);
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = headerStyle;
+    }
+
+    row++;
+
+    for (var r in reductions) {
+      sheet.appendRow([
+        TextCellValue(r.reason.tr()),
+        IntCellValue(r.totalReduced),
+      ]);
+    }
+
+
+    // === Auto-adjust column widths ===
+    for (var table in excel.tables.keys) {
+      var sheet = excel[table];
+      for (int col = 0; col < sheet.maxColumns; col++) {
+        double maxLength = 0;
+        for (int row = 0; row < sheet.maxRows; row++) {
+          var cellValue = sheet
+              .cell(CellIndex.indexByColumnRow(columnIndex: col, rowIndex: row))
+              .value;
+          if (cellValue != null) {
+            var text = cellValue.toString();
+            if (text.length > maxLength) {
+              maxLength = text.length.toDouble();
+            }
+          }
+        }
+        // adjust column width based on max text length
+        sheet.setColumnWidth(
+            col, (maxLength * 1.2).clamp(12, 35)); // min 12, max 35
+      }
+    }
+
+    saveAndShareExcel(excel);
+  }
+
+
+  Future<void> saveAndShareExcel(Excel excel) async {
+    final downloadsDir = Directory("/storage/emulated/0/Download");
+    String formattedDate = DateFormat('dd_MMM_yyyy_HH_mm').format(DateTime.now());
+    String filePath = "${downloadsDir.path}/egg_report_$formattedDate.xlsx";
+
+    final file = File(filePath)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(excel.encode()!);
+
+    Utils.showToast("Saved to Downloads: egg_report_$formattedDate.xlsx");
+
+    // ✅ Share/Open the file safely
+    await Share.shareXFiles(
+      [XFile(file.path)],
+      text: "Egg report exported successfully!",
+    );
+  }
+
+
+/*
+  Future<void> saveEggReportMobile(List<int> bytes) async {
+    final params = SaveFileDialogParams(
+      data: bytes,
+      fileName: "egg_report_${DateFormat('yyyyMMdd_HHmm').format(DateTime.now())}.xlsx",
+    );
+
+    final filePath = await FlutterFileDialog.saveFile(params: params);
+    if (filePath != null) {
+      print("Excel report saved at: $filePath");
+    } else {
+      print("User canceled saving.");
+    }
+  }*/
   Future<Flock?> getSelectedFlock() async {
     Flock? flock = null;
 

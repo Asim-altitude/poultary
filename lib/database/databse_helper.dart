@@ -2921,6 +2921,30 @@ class DatabaseHelper  {
     )).toList();
   }
 
+
+  static Future<List<TransactionItem>> getEggSaleTransactionsFiltered(String str, String end, int f_id) async {
+
+    String query = '';
+    if(f_id==-1){
+      query = "SELECT * FROM Transactions WHERE type = 'Income' AND sale_item = 'Egg Sale' AND date BETWEEN '$str' and '$end' ORDER BY date DESC";
+    }else{
+      query = "SELECT * FROM Transactions WHERE f_id = $f_id and type = 'Income' AND sale_item = 'Egg Sale' AND date BETWEEN '$str' and '$end' ORDER BY date DESC";
+    }
+
+    final result = await _database?.rawQuery(query);
+
+    List<TransactionItem> eggSales = [];
+
+    if (result != null && result.isNotEmpty) {
+      for (var row in result) {
+        eggSales.add(TransactionItem.fromJson(row));
+      }
+    }
+
+    return eggSales;
+  }
+
+
   static Future<List<TransactionItem>> getEggSaleTransactions() async {
     final result = await _database?.rawQuery(
         "SELECT * FROM Transactions WHERE type = 'Income' AND sale_item = 'Egg Sale' ORDER BY date DESC"

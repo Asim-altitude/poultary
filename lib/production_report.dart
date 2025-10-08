@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:csv/csv.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -15,6 +16,7 @@ import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/pdf/pdf_viewer_screen.dart';
 import 'package:poultary/pdf/production_pdf.dart';
 import 'package:poultary/utils/utils.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import 'database/databse_helper.dart';
@@ -371,7 +373,8 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
     required List<Feeding> feedings,
     required List<Eggs> eggsList,
     required List<Flock_Detail> flockDetails,
-  }) {
+  })
+  {
     Map<String, Map<String, dynamic>> breakdown = {};
 
     void addToDate(String date, String key, num value) {
@@ -437,48 +440,100 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        title:  Text('Production Report'.tr()),
-        centerTitle: true,
-        backgroundColor: Utils.getThemeColorBlue(),
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
-            tooltip: 'Export PDF',
-            onPressed: () async {
-
-              Utils.setupInvoiceInitials("Production Report".tr(),DateFormat("yyyy MMM dd").format(startDate)+" - "+DateFormat("yyyy MMM dd").format(endDate));
-
-              final pdfBytes = await generateProductionReportPdf(
-                flockName: 'My Flock',
-                totalBirdsAdded: total_birds_added,
-                totalBirdsReduced: total_birds_reduced,
-                mortality: mortality,
-                culling: culling,
-                totalEggsCollected: total_eggs_collected,
-                totalEggsReduced: total_eggs_reduced,
-                grossIncome: gross_income,
-                totalExpense: total_expense,
-                profit: profit,
-                totalFeedUsed: total_feed_consumption,
-                dailyBreakdown: dailyBreakDown ?? {},
-                monthlyBreakdown: monthlyBreakDown!,
-              );
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ProductionReportViewer(pdfData: pdfBytes),
+        appBar: AppBar(
+          title: Text('Production Report'.tr(),
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.start,
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600),),
+          backgroundColor: Utils.getThemeColorBlue(),
+          foregroundColor: Colors.white, // keeps title and back button white
+          actions: [
+            // Excel Icon (keeps its own color)
+            Theme(
+              data: Theme.of(context).copyWith(
+                iconTheme: const IconThemeData(color: null), // reset inherited white
+              ),
+              child: IconButton(
+                icon: Image.asset(
+                  'assets/excel_icon.png',
+                  width: 26,
+                  height: 26,
                 ),
-              );
-            },
-          ),
+                tooltip: 'Export Excel',
+                onPressed: () async {
+                  Utils.setupInvoiceInitials(
+                    "Production Report".tr(),
+                    DateFormat("yyyy MMM dd").format(startDate) +
+                        " - " +
+                        DateFormat("yyyy MMM dd").format(endDate),
+                  );
 
-        ],
-      ),
+                  await generateProductionReportExcel(
+                    flockName: 'My Flock',
+                    totalBirdsAdded: total_birds_added,
+                    totalBirdsReduced: total_birds_reduced,
+                    mortality: mortality,
+                    culling: culling,
+                    totalEggsCollected: total_eggs_collected,
+                    totalEggsReduced: total_eggs_reduced,
+                    grossIncome: gross_income,
+                    totalExpense: total_expense,
+                    profit: profit,
+                    totalFeedUsed: total_feed_consumption,
+                    dailyBreakdown: dailyBreakDown ?? {},
+                    monthlyBreakdown: monthlyBreakDown!,
+                  );
+                },
+              ),
+            ),
 
-      body: Column(children: [
+            // PDF icon (white)
+            IconButton(
+              icon: Image.asset(
+            'assets/pdf_icon.png',
+            width: 20,
+            height: 20,
+            ),
+              tooltip: 'Export PDF',
+              onPressed: () async {
+                Utils.setupInvoiceInitials(
+                  "Production Report".tr(),
+                  DateFormat("yyyy MMM dd").format(startDate) +
+                      " - " +
+                      DateFormat("yyyy MMM dd").format(endDate),
+                );
+
+                final pdfBytes = await generateProductionReportPdf(
+                  flockName: 'My Flock',
+                  totalBirdsAdded: total_birds_added,
+                  totalBirdsReduced: total_birds_reduced,
+                  mortality: mortality,
+                  culling: culling,
+                  totalEggsCollected: total_eggs_collected,
+                  totalEggsReduced: total_eggs_reduced,
+                  grossIncome: gross_income,
+                  totalExpense: total_expense,
+                  profit: profit,
+                  totalFeedUsed: total_feed_consumption,
+                  dailyBreakdown: dailyBreakDown ?? {},
+                  monthlyBreakdown: monthlyBreakDown!,
+                );
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ProductionReportViewer(pdfData: pdfBytes),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+
+        body: Column(children: [
         Utils.showBannerAd(_bannerAd, _isBannerAdReady),
 
         Expanded(child:
@@ -941,6 +996,350 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
       );
     });
   }
+
+
+
+  Future<void> generateProductionReportExcel({
+    required String flockName,
+    required int totalBirdsAdded,
+    required int totalBirdsReduced,
+    required int mortality,
+    required int culling,
+    required int totalEggsCollected,
+    required int totalEggsReduced,
+    required num grossIncome,
+    required num totalExpense,
+    required num profit,
+    required num totalFeedUsed,
+    required Map<String, Map<String, dynamic>> dailyBreakdown,
+    required List<MonthlyBreakdownData> monthlyBreakdown,
+  }) async {
+    var excel = Excel.createExcel();
+    var sheet = excel['Production Report'.tr()];
+
+    // ==== Define Styles ====
+    var titleStyle = CellStyle(
+      bold: true,
+      fontSize: 16,
+      fontColorHex: ExcelColor.white,
+      backgroundColorHex: ExcelColor.fromHexString("#1F4E78"),
+      horizontalAlign: HorizontalAlign.Center,
+      verticalAlign: VerticalAlign.Center,
+    );
+
+    var sectionTitleStyle = CellStyle(
+      bold: true,
+      fontSize: 14,
+      fontColorHex: ExcelColor.black,
+      backgroundColorHex: ExcelColor.fromHexString("#BDD7EE"),
+      horizontalAlign: HorizontalAlign.Center,
+      verticalAlign: VerticalAlign.Center,
+    );
+
+    var headerStyle = CellStyle(
+      bold: true,
+      fontSize: 12,
+      fontColorHex: ExcelColor.black,
+      backgroundColorHex: ExcelColor.fromHexString("#B7DEE8"),
+      horizontalAlign: HorizontalAlign.Center,
+      verticalAlign: VerticalAlign.Center,
+    );
+
+    var numberStyle = CellStyle(horizontalAlign: HorizontalAlign.Right);
+
+    int row = 0;
+
+    // ==== Report Title ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("Production Report".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = titleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 8, rowIndex: row));
+
+    row += 2;
+
+    // ==== Summary Section ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("SUMMARY".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = sectionTitleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 8, rowIndex: row));
+    row++;
+
+    // Birds Summary
+    sheet.appendRow([
+      TextCellValue("Birds Added".tr()),
+      TextCellValue("Birds Reduced".tr()),
+      TextCellValue("MORTALITY".tr()),
+      TextCellValue("CULLING".tr()),
+    ]);
+    for (int i = 0; i < 4; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = headerStyle;
+    }
+    row++;
+
+    sheet.appendRow([
+      TextCellValue(totalBirdsAdded.toString()),
+      TextCellValue(totalBirdsReduced.toString()),
+      TextCellValue(mortality.toString()),
+      TextCellValue(culling.toString()),
+    ]);
+    for (int i = 0; i < 4; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = numberStyle;
+    }
+
+    row += 2;
+
+    // Eggs Summary
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("EGGS_SUMMARY".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = sectionTitleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: row));
+    row++;
+
+    sheet.appendRow([
+      TextCellValue("TOTAL_ADDED".tr()),
+      TextCellValue("TOTAL_REDUCED".tr()),
+    ]);
+    for (int i = 0; i < 2; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = headerStyle;
+    }
+    row++;
+
+    sheet.appendRow([
+      TextCellValue(totalEggsCollected.toString()),
+      TextCellValue(totalEggsReduced.toString()),
+    ]);
+    for (int i = 0; i < 2; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = numberStyle;
+    }
+
+    row += 2;
+
+    // Feed Summary
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("Feed Stock Summary".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = sectionTitleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: row));
+    row++;
+
+    sheet.appendRow([
+      TextCellValue("Total Feed Used".tr()),
+    ]);
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = headerStyle;
+    row++;
+
+    sheet.appendRow([
+      TextCellValue(totalFeedUsed.toString()),
+    ]);
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = numberStyle;
+
+    row += 2;
+
+    // Finance Summary
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("HEADING_DASHBOARD".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = sectionTitleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: row));
+    row++;
+
+    sheet.appendRow([
+      TextCellValue("Income".tr()+"(${Utils.currency})"),
+      TextCellValue("Expense".tr()+"(${Utils.currency})"),
+      TextCellValue("Profit".tr()+"(${Utils.currency})"),
+    ]);
+    for (int i = 0; i < 3; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = headerStyle;
+    }
+    row++;
+
+    sheet.appendRow([
+      TextCellValue(grossIncome.toString()),
+      TextCellValue(totalExpense.toString()),
+      TextCellValue(profit.toString()),
+    ]);
+    for (int i = 0; i < 3; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = numberStyle;
+    }
+
+    row += 2;
+
+    // ==== Daily Breakdown ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("Daily Breakdown".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = sectionTitleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 8, rowIndex: row));
+    row++;
+
+    // Dynamic Daily Headers
+    List<String> dailyHeaders = [
+      "Date".tr(),
+      "Birds Added".tr(),
+      "Birds Reduced".tr(),
+      "MORTALITY".tr(),
+      "CULLING".tr(),
+      "Eggs".tr(),
+      "FEED_CONSUMPTION".tr(),
+      "Income".tr()+"(${Utils.currency})",
+      "Expense".tr()+"(${Utils.currency})",
+    ];
+
+    for (int i = 0; i < dailyHeaders.length; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .value = TextCellValue(dailyHeaders[i]);
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = headerStyle;
+    }
+
+    row++;
+
+    dailyBreakdown.forEach((date, data) {
+      sheet.appendRow([
+        TextCellValue(date),
+        TextCellValue(data["birdsAdded"].toString()),
+        TextCellValue(data["birdsReduced"].toString()),
+        TextCellValue(data["mortality"].toString()),
+        TextCellValue(data["culling"].toString()),
+        TextCellValue(data["eggs"].toString()),
+        TextCellValue(data["feedUsed"].toString()),
+        TextCellValue(data["income"].toString()),
+        TextCellValue(data["expense"].toString()),
+      ]);
+      row++;
+    });
+
+    row += 2;
+
+    // ==== Monthly Breakdown ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("Monthly Breakdown".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = sectionTitleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 8, rowIndex: row));
+    row++;
+
+    List<String> monthlyHeaders =
+    [
+      "Month".tr(),
+      "Birds Added".tr(),
+      "Birds Reduced".tr(),
+      "MORTALITY".tr(),
+      "CULLING".tr(),
+      "Total Eggs".tr(),
+      "Feed (kg)".tr(),
+      "Income".tr()+"(${Utils.currency})",
+      "Expense".tr()+"(${Utils.currency})",
+    ];
+
+    for(int i = 0; i < monthlyHeaders.length; i++)
+    {
+      sheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row)).value = TextCellValue(monthlyHeaders[i]);
+      sheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row)).cellStyle = headerStyle;
+    }
+
+    row++;
+
+    for (var m in monthlyBreakdown)
+    {
+      sheet.appendRow([
+        TextCellValue(m.month),
+        TextCellValue(m.birdsAdded.toString()),
+        TextCellValue(m.birdsReduced.toString()),
+        TextCellValue(m.mortality.toString()),
+        TextCellValue(m.culling.toString()),
+        TextCellValue(m.totalEggs.toString()),
+        TextCellValue(m.totalFeedKg.toString()),
+        TextCellValue(m.income.toString()),
+        TextCellValue(m.expense.toString()),
+      ]);
+      row++;
+    }
+
+    // === Auto-adjust column widths ===
+    for (var table in excel.tables.keys)
+    {
+      var sheet = excel[table];
+      for (int col = 0; col < sheet.maxColumns; col++) {
+        double maxLength = 0;
+        for (int row = 0; row < sheet.maxRows; row++) {
+          var cellValue = sheet
+              .cell(CellIndex.indexByColumnRow(columnIndex: col, rowIndex: row))
+              .value;
+          if (cellValue != null) {
+            var text = cellValue.toString();
+            if (text.length > maxLength) {
+              maxLength = text.length.toDouble();
+            }
+          }
+        }
+        sheet.setColumnWidth(col, (maxLength * 1.2).clamp(12, 35));
+      }
+    }
+
+    saveAndShareExcel(excel);
+  }
+
+  Future<void> saveAndShareExcel(Excel excel) async {
+    final downloadsDir = Directory("/storage/emulated/0/Download");
+    String formattedDate = DateFormat('dd_MMM_yyyy_HH_mm').format(DateTime.now());
+    String filePath = "${downloadsDir.path}/production_report_$formattedDate.xlsx";
+
+    final file = File(filePath)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(excel.encode()!);
+
+    Utils.showToast("Saved to Downloads: egg_report_$formattedDate.xlsx");
+
+    // ✅ Share/Open the file safely
+    await Share.shareXFiles(
+      [XFile(file.path)],
+      text: "Production report exported successfully!",
+    );
+  }
+
 
 }
 

@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:excel/excel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +12,7 @@ import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'model/flock.dart';
 import 'model/flock_detail.dart';
@@ -198,12 +201,31 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                             margin: EdgeInsets.only(left: 5),
                             child: Text(
                               "BIRDS".tr() +" "+"REPORT".tr(),
+                              overflow: TextOverflow.ellipsis,
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold),
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w600),
                             )),
+                      ),
+                      InkWell(
+                        onTap: () async {
+                          Utils.setupInvoiceInitials("FLOCK_REPORT".tr(),pdf_formatted_date_filter);
+                          Utils.flock_details = list;
+                          await prepareListData();
+
+                          Utils.TOTAL_BIRDS_ADDED = total_birds_added.toString();
+                          Utils.TOTAL_BIRDS_REDUCED = total_birds_reduced.toString();
+
+                          generateBirdsReportExcel(Utils.TOTAL_BIRDS_ADDED, Utils.TOTAL_BIRDS_REDUCED, Utils.TOTAL_ACTIVE_BIRDS, Utils.flock_report_list, Utils.flock_details!, Utils.reductionByReason!);
+                        },
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          margin: EdgeInsets.only(right: 10),
+                          child: Image.asset('assets/excel_icon.png'),
+                        ),
                       ),
                       InkWell(
                         onTap: (){
@@ -220,8 +242,8 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                           );
                         },
                         child: Container(
-                          width: 30,
-                          height: 30,
+                          width: 22,
+                          height: 22,
                           margin: EdgeInsets.only(right: 10),
                           child: Image.asset('assets/pdf_icon.png'),
                         ),
@@ -246,10 +268,10 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
+                       /* border: Border.all(
                           color: Utils.getThemeColorBlue(),
                           width: 1.2,
-                        ),
+                        ),*/
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black12,
@@ -277,10 +299,10 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
+                       /* border: Border.all(
                           color: Utils.getThemeColorBlue(),
                           width: 1.2,
-                        ),
+                        ),*/
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black12,
@@ -874,7 +896,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
     return f_id;
   }
 
-  void prepareListData() async{
+  Future<void> prepareListData() async{
 
 
     List<Flock_Report_Item> list = [];
@@ -1135,6 +1157,269 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       ),
     );
   }
+
+  Future<void> generateBirdsReportExcel(
+      String totalAdded,
+      String totalReduced,
+      String totalActive,
+      List<Flock_Report_Item> flockReportList,
+      List<Flock_Detail> flockDetailsByDate,
+      List<ReductionByReason> reductionReasons,
+      ) async {
+    var excel = Excel.createExcel();
+    var sheet = excel['Birds Report'.tr()];
+
+    // ==== Define Styles ====
+    var titleStyle = CellStyle(
+      bold: true,
+      fontSize: 16,
+      fontColorHex: ExcelColor.white,
+      backgroundColorHex: ExcelColor.fromHexString("#1F4E78"), // dark blue
+      horizontalAlign: HorizontalAlign.Center,
+      verticalAlign: VerticalAlign.Center,
+    );
+
+    var sectionTitleStyle = CellStyle(
+      bold: true,
+      fontSize: 14,
+      fontColorHex: ExcelColor.black,
+      backgroundColorHex: ExcelColor.fromHexString("#BDD7EE"), // light section
+      horizontalAlign: HorizontalAlign.Center,
+      verticalAlign: VerticalAlign.Center,
+    );
+
+    var headerStyle = CellStyle(
+      bold: true,
+      fontSize: 12,
+      fontColorHex: ExcelColor.black,
+      backgroundColorHex: ExcelColor.fromHexString("#B7DEE8"), // header
+      horizontalAlign: HorizontalAlign.Center,
+      verticalAlign: VerticalAlign.Center,
+    );
+
+    var numberStyle = CellStyle(
+      horizontalAlign: HorizontalAlign.Right,
+    );
+
+    int row = 0;
+
+    // ==== Report Title ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("Flock Inventory Report".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = titleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: row));
+    row += 2;
+
+    // ==== Section 1: Summary ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("SUMMARY".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = sectionTitleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: row));
+    row++;
+
+    List<String> summaryHeaders = [
+      "Birds Added".tr(),
+      "Birds Reduced".tr(),
+      "Active Birds".tr(),
+    ];
+
+    for (int i = 0; i < summaryHeaders.length; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .value = TextCellValue(summaryHeaders[i]);
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = headerStyle;
+    }
+    row++;
+
+    sheet.appendRow([
+      TextCellValue(totalAdded),
+      TextCellValue(totalReduced),
+      TextCellValue(totalActive),
+    ]);
+    for (int i = 0; i < 3; i++) {
+      sheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = numberStyle;
+    }
+    row += 2;
+
+    // ==== Section 2: By Flock ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("By Flock".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = sectionTitleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: row));
+    row++;
+
+    List<String> flockHeaders = [
+      "Flock Name".tr(),
+      "Date Created".tr(),
+      "Addition".tr(),
+      "Reduction".tr(),
+      "Active Birds".tr(),
+    ];
+    for (int i = 0; i < flockHeaders.length; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .value = TextCellValue(flockHeaders[i]);
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = headerStyle;
+    }
+    row++;
+
+    for (var item in flockReportList) {
+      sheet.appendRow([
+        TextCellValue(item.f_name),
+        TextCellValue(item.date ?? ""),
+        IntCellValue(item.addition ?? 0),
+        IntCellValue(item.reduction ?? 0),
+        IntCellValue(item.active_bird_count ?? 0),
+      ]);
+      for (int i = 2; i < 5; i++) {
+        sheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+            .cellStyle = numberStyle;
+      }
+      row++;
+    }
+
+    row += 2;
+
+    // ==== Section 3: By Date ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("By Date".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = sectionTitleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: row));
+    row++;
+
+    List<String> dateHeaders = [
+      "Flock Name".tr(),
+      "ACQUSITION".tr(),
+      "ACQUSITION".tr()+" "+"DATE".tr(),
+      "Item Type".tr(),
+      "Item Count".tr(),
+    ];
+    for (int i = 0; i < dateHeaders.length; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .value = TextCellValue(dateHeaders[i]);
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = headerStyle;
+    }
+    row++;
+
+    for (var fd in flockDetailsByDate) {
+      sheet.appendRow([
+        TextCellValue(fd.f_name),
+        TextCellValue(fd.acqusition_type),
+        TextCellValue(fd.acqusition_date),
+        TextCellValue(fd.item_type),
+        IntCellValue(fd.item_count),
+      ]);
+      sheet.cell(CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: row))
+          .cellStyle = numberStyle;
+      row++;
+    }
+
+    row += 2;
+
+    // ==== Section 4: Reductions by Reason ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("Reduction By Reason".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = sectionTitleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row));
+    row++;
+
+    List<String> reductionHeaders = [
+      "Reduction Reason".tr(),
+      "Total Reduced".tr(),
+    ];
+    for (int i = 0; i < reductionHeaders.length; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .value = TextCellValue(reductionHeaders[i]);
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = headerStyle;
+    }
+    row++;
+
+    for (var r in reductionReasons) {
+      sheet.appendRow([
+        TextCellValue(r.reason.tr()),
+        IntCellValue(r.totalCount),
+      ]);
+      sheet.cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row))
+          .cellStyle = numberStyle;
+      row++;
+    }
+
+    // === Auto-adjust column widths ===
+    for (var table in excel.tables.keys) {
+      var sheet = excel[table];
+      for (int col = 0; col < sheet.maxColumns; col++) {
+        double maxLength = 0;
+        for (int row = 0; row < sheet.maxRows; row++) {
+          var cellValue = sheet
+              .cell(CellIndex.indexByColumnRow(columnIndex: col, rowIndex: row))
+              .value;
+          if (cellValue != null) {
+            var text = cellValue.toString();
+            if (text.length > maxLength) {
+              maxLength = text.length.toDouble();
+            }
+          }
+        }
+        sheet.setColumnWidth(col, (maxLength * 1.2).clamp(12, 35));
+      }
+    }
+
+    await saveAndShareExcel(excel);
+  }
+
+
+
+  Future<void> saveAndShareExcel(Excel excel) async {
+    final downloadsDir = Directory("/storage/emulated/0/Download");
+    String formattedDate = DateFormat('dd_MMM_yyyy_HH_mm').format(DateTime.now());
+    String filePath = "${downloadsDir.path}/birds_report_$formattedDate.xlsx";
+
+    final file = File(filePath)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(excel.encode()!);
+
+    Utils.showToast("Saved to Downloads: egg_report_$formattedDate.xlsx");
+
+    // ✅ Share/Open the file safely
+    await Share.shareXFiles(
+      [XFile(file.path)],
+      text: "Birds report exported successfully!",
+    );
+  }
+
+
+
 }
 
 /// 📌 Helper Model for Chart Data

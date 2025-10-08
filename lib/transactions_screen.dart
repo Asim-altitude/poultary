@@ -1268,11 +1268,42 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
           }
 
           if(transactionList.elementAt(selected_index!).type == "Income") {
-            var txt = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>  NewIncome(transactionItem: transactionList.elementAt(selected_index!), selectedIncomeType: null, selectedExpenseType: null,)),
-            );
+
+            if(transactionList.elementAt(selected_index!).sale_item == "Egg Sale"){
+              EggTransaction? eggTransaction = await DatabaseHelper.getEggsByTransactionItemId(transactionList.elementAt(selected_index!).id!);
+              if(eggTransaction != null) {
+                Eggs? eggs = await DatabaseHelper.getSingleEggsByID(
+                    eggTransaction.eggItemId);
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          NewEggCollection(isCollection: false,
+                            eggs: eggs,
+                            reason: null,)),
+                );
+              }else{
+                var txt = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          NewIncome(transactionItem: transactionList.elementAt(
+                              selected_index!),
+                            selectedIncomeType: null,
+                            selectedExpenseType: null,)),
+                );
+              }
+            }else {
+              var txt = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        NewIncome(transactionItem: transactionList.elementAt(
+                            selected_index!),
+                          selectedIncomeType: null,
+                          selectedExpenseType: null,)),
+              );
+            }
 
             getAllTransactions();
           }else{

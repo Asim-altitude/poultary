@@ -347,157 +347,213 @@ class _ContractorProfileScreenState extends State<ContractorProfileScreen> with 
   final List<String> contractorTypes = ['Eggs', 'Meat', 'Manure', 'Other'];
 
   void _showContractorDialog(BuildContext context, {bool isEdit = false}) {
+
+    if(isEdit)
+      {
+        if(!Utils.checkIfContains(contractorTypes, contractor.type)){
+          contractorTypes.add(contractor.type);
+        }
+      }
+
     final nameController = TextEditingController(text: isEdit ? contractor.name : '');
+    final otherController = TextEditingController();
     final phoneController = TextEditingController(text: isEdit ? contractor.phone : '');
     final emailController = TextEditingController(text: isEdit ? contractor.email : '');
     final addressController = TextEditingController(text: isEdit ? contractor.address : '');
     final notesController = TextEditingController(text: isEdit ? contractor.notes : '');
     String selectedType = isEdit ? contractor.type : contractorTypes[0];
 
+    bool isOther = false;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            top: 16,
-            left: 16,
-            right: 16,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Container(
-                  width: 50,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(10),
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+
+            return SafeArea(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery
+                      .of(context)
+                      .viewInsets
+                      .bottom,
+                  top: 16,
+                  left: 16,
+                  right: 16,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        isEdit ? 'Update'.tr() : 'New Sale Contractor',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 16),
+
+                      TextField(
+                        controller: nameController,
+                        decoration: InputDecoration(
+                          labelText: 'Enter Name'.tr(),
+                          border: OutlineInputBorder(borderRadius: BorderRadius
+                              .circular(12)),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      DropdownButtonFormField<String>(
+                        value: selectedType,
+                        items: contractorTypes.map((type) {
+                          return DropdownMenuItem(value: type, child: Text(type));
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            selectedType = val;
+                            setModalState(() {
+                              isOther = val.toLowerCase() == "other";
+                            });
+                          }
+                        },
+                        decoration: InputDecoration(
+                          labelText: 'Type'.tr(),
+                          border: OutlineInputBorder(borderRadius: BorderRadius
+                              .circular(12)),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      if (isOther)
+                        Column(
+                          children: [
+                            TextField(
+                              controller: otherController,
+                              decoration: InputDecoration(
+                                labelText: 'Enter Type'.tr(),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                        ),
+
+                      TextField(
+                        controller: phoneController,
+                        decoration: InputDecoration(
+                          labelText: 'Phone'.tr(),
+                          border: OutlineInputBorder(borderRadius: BorderRadius
+                              .circular(12)),
+                        ),
+                        keyboardType: TextInputType.phone,
+                      ),
+                      const SizedBox(height: 12),
+
+                      TextField(
+                        controller: emailController,
+                        decoration: InputDecoration(
+                          labelText: 'Email'.tr(),
+                          border: OutlineInputBorder(borderRadius: BorderRadius
+                              .circular(12)),
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: 12),
+
+                      TextField(
+                        controller: addressController,
+                        decoration: InputDecoration(
+                          labelText: 'Address'.tr(),
+                          border: OutlineInputBorder(borderRadius: BorderRadius
+                              .circular(12)),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      TextField(
+                        controller: notesController,
+                        decoration: InputDecoration(
+                          labelText: 'Notes'.tr(),
+                          border: OutlineInputBorder(borderRadius: BorderRadius
+                              .circular(12)),
+                        ),
+                        maxLines: 2,
+                      ),
+                      const SizedBox(height: 20),
+
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          final updatedContractor = SaleContractor(
+                              id: isEdit ? contractor.id : null,
+                              name: nameController.text,
+                              type: isOther? otherController.text : selectedType,
+                              address: addressController.text,
+                              phone: phoneController.text,
+                              email: emailController.text,
+                              notes: notesController.text,
+                              sync_id: contractor.sync_id,
+                              sync_status: SyncStatus.UPDATED,
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!
+                                  .farmId : '',
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!
+                                  .email : '',
+                              last_modified: Utils.getTimeStamp());
+
+                          if (isEdit) {
+                            await DatabaseHelper.updateSaleContractor(updatedContractor);
+
+                            if (Utils.isMultiUSer &&
+                                Utils.hasFeaturePermission("edit_contractors")) {
+                              await FireBaseUtils.updateSaleContractor(
+                                  updatedContractor);
+                            }
+
+                            setState(() => contractor = updatedContractor);
+                          } else {
+                            await DatabaseHelper.insertSaleContractor(
+                                updatedContractor);
+
+                            if (Utils.isMultiUSer &&
+                                Utils.hasFeaturePermission("add_contractors")) {
+                              updatedContractor.sync_status = SyncStatus.SYNCED;
+                              updatedContractor.sync_id = Utils.getUniueId();
+                              updatedContractor.last_modified =
+                                  Utils.getTimeStamp();
+                              await FireBaseUtils.addSaleContractor(
+                                  updatedContractor);
+                            }
+                          }
+
+                          Navigator.pop(context);
+                        },
+                        icon: Icon(Icons.save, color: Colors.white),
+                        label: Text(isEdit ? 'Update'.tr() : 'SAVE'.tr(),
+                            style: TextStyle(color: Colors.white)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Utils.getThemeColorBlue(),
+                          minimumSize: Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius
+                              .circular(12)),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  isEdit ? 'Update'.tr() : 'New Sale Contractor',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-
-                TextField(
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    labelText: 'Enter Name'.tr(),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                DropdownButtonFormField<String>(
-                  value: selectedType,
-                  items: contractorTypes.map((type) {
-                    return DropdownMenuItem(value: type, child: Text(type));
-                  }).toList(),
-                  onChanged: (val) {
-                    if (val != null) selectedType = val;
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'Type'.tr(),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                TextField(
-                  controller: phoneController,
-                  decoration: InputDecoration(
-                    labelText: 'Phone'.tr(),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  keyboardType: TextInputType.phone,
-                ),
-                const SizedBox(height: 12),
-
-                TextField(
-                  controller: emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email'.tr(),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: 12),
-
-                TextField(
-                  controller: addressController,
-                  decoration: InputDecoration(
-                    labelText: 'Address'.tr(),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                TextField(
-                  controller: notesController,
-                  decoration: InputDecoration(
-                    labelText: 'Notes'.tr(),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  maxLines: 2,
-                ),
-                const SizedBox(height: 20),
-
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    final updatedContractor = SaleContractor(
-                      id: isEdit ? contractor.id : null,
-                      name: nameController.text,
-                      type: selectedType,
-                      address: addressController.text,
-                      phone: phoneController.text,
-                      email: emailController.text,
-                      notes: notesController.text,
-                      sync_id: contractor.sync_id,
-                      sync_status: SyncStatus.UPDATED,
-                      farm_id: Utils.isMultiUSer? Utils.currentUser!.farmId : '',
-                      modified_by: Utils.isMultiUSer? Utils.currentUser!.email : '',
-                      last_modified: Utils.getTimeStamp()
-                    );
-
-                    if (isEdit) {
-                      await DatabaseHelper.updateSaleContractor(updatedContractor);
-
-                      if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_contractors")){
-                        await FireBaseUtils.updateSaleContractor(updatedContractor);
-                      }
-
-                      setState(() => contractor = updatedContractor);
-                    } else {
-                      await DatabaseHelper.insertSaleContractor(updatedContractor);
-
-                      if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_contractors")){
-                        updatedContractor.sync_status = SyncStatus.SYNCED;
-                        updatedContractor.sync_id = Utils.getUniueId();
-                        updatedContractor.last_modified = Utils.getTimeStamp();
-                        await FireBaseUtils.addSaleContractor(updatedContractor);
-                      }
-
-                    }
-
-                    Navigator.pop(context);
-                  },
-                  icon: Icon(Icons.save, color: Colors.white),
-                  label: Text(isEdit ? 'Update'.tr() : 'SAVE'.tr(), style: TextStyle(color: Colors.white)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Utils.getThemeColorBlue(),
-                    minimumSize: Size(double.infinity, 48),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
+              ),
+            );
+          }
         );
       },
     );

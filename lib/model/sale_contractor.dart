@@ -10,6 +10,10 @@ class SaleContractor {
   String? notes;
   String? createdAt;
 
+  num? saleAmount = 0;
+  num? pendingAmount = 0;
+  num? clearedAmount = 0;
+
   // 🔄 Sync-related metadata (optional if needed separately)
   String? farm_id;
   String? sync_id;

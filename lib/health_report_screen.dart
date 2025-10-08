@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
+import 'package:excel/excel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +12,7 @@ import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'model/flock.dart';
 import 'model/health_chart_data.dart';
@@ -149,6 +153,235 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
     return groupedMap.entries.map((entry) => VaccinationGrouped(flockName: entry.key, records: entry.value)).toList();
   }
 
+
+
+  Future<void> generateHealthReportExcel(
+      String totalVaccinations,
+      String totalMedications,
+      List<Health_Report_Item> medicationReportList,
+      List<Health_Report_Item> vaccinationReportList,
+      ) async
+  {
+    var excel = Excel.createExcel();
+    var sheet = excel['Health Report'.tr()];
+
+    // ==== Define Styles ====
+    var titleStyle = CellStyle(
+      bold: true,
+      fontSize: 16,
+      fontColorHex: ExcelColor.white,
+      backgroundColorHex: ExcelColor.fromHexString("#1F4E78"), // dark blue
+      horizontalAlign: HorizontalAlign.Center,
+      verticalAlign: VerticalAlign.Center,
+    );
+
+    var sectionTitleStyle = CellStyle(
+      bold: true,
+      fontSize: 14,
+      fontColorHex: ExcelColor.black,
+      backgroundColorHex: ExcelColor.fromHexString("#BDD7EE"), // light section
+      horizontalAlign: HorizontalAlign.Center,
+      verticalAlign: VerticalAlign.Center,
+    );
+
+    var headerStyle = CellStyle(
+      bold: true,
+      fontSize: 12,
+      fontColorHex: ExcelColor.black,
+      backgroundColorHex: ExcelColor.fromHexString("#B7DEE8"), // header
+      horizontalAlign: HorizontalAlign.Center,
+      verticalAlign: VerticalAlign.Center,
+    );
+
+    var numberStyle = CellStyle(
+      horizontalAlign: HorizontalAlign.Right,
+    );
+
+    int row = 0;
+
+    // ==== Report Title ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("Birds Health Report".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = titleStyle;
+
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: row));
+
+    row += 2;
+
+    // ==== Summary ====
+    /*sheet.appendRow([
+      TextCellValue("Total Vaccinations".tr()),
+      TextCellValue("Total Medications".tr()),
+    ]);*/
+
+    List<String> totalListHeaders = ["Total Vaccinations".tr(),
+      "Total Medications".tr()];
+
+// Apply header style to the header row
+    for (int i = 0; i < totalListHeaders.length; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .value = TextCellValue(totalListHeaders[i]);
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = headerStyle;
+
+    }
+
+    row++; // Move to the totals row
+
+// Totals row
+    sheet.appendRow([
+      TextCellValue(totalVaccinations),
+      TextCellValue(totalMedications),
+    ]);
+
+// Apply number style to totals row
+    for (int i = 0; i < 2; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = numberStyle;
+    }
+
+    row += 2; // Add spacing before next section
+
+    // ==== Section 1: Medication Report ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("Medication Report".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = sectionTitleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: row));
+
+    row++;
+
+    List<String> medHeaders = [
+      "Medicine name".tr(),
+      "Diseaese Name".tr(),
+      "Flock Name".tr(),
+      "Date".tr(),
+      "Birds".tr(),
+    ];
+
+    for (int i = 0; i < medHeaders.length; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .value = TextCellValue(medHeaders[i]);
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = headerStyle;
+    }
+
+    row++;
+
+    for (var item in medicationReportList) {
+      sheet.appendRow([
+        TextCellValue(item.medicine_name),
+        TextCellValue(item.disease_name),
+        TextCellValue(item.f_name),
+        TextCellValue(item.date),
+        TextCellValue(item.birds),
+      ]);
+      sheet.cell(CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: row))
+          .cellStyle = numberStyle;
+      row++;
+    }
+
+    row += 2;
+
+    // ==== Section 2: Vaccination Report ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("Vaccination Report".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = sectionTitleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: row));
+
+    row++;
+
+    List<String> vaccHeaders = [
+      "Vaccine name".tr(),
+      "Diseaese Name".tr(),
+      "Flock Name".tr(),
+      "Date".tr(),
+      "BIRDS".tr(),
+    ];
+
+    for (int i = 0; i < vaccHeaders.length; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .value = TextCellValue(vaccHeaders[i]);
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = headerStyle;
+    }
+
+    row++;
+
+    for (var v in vaccinationReportList) {
+      sheet.appendRow([
+        TextCellValue(v.medicine_name),
+        TextCellValue(v.disease_name),
+        TextCellValue(v.f_name),
+        TextCellValue(v.date),
+        TextCellValue(v.birds),
+      ]);
+      sheet.cell(CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: row))
+          .cellStyle = numberStyle;
+      row++;
+    }
+
+    // === Auto-adjust column widths ===
+    for (var table in excel.tables.keys) {
+      var sheet = excel[table];
+      for (int col = 0; col < sheet.maxColumns; col++) {
+        double maxLength = 0;
+        for (int row = 0; row < sheet.maxRows; row++) {
+          var cellValue = sheet
+              .cell(CellIndex.indexByColumnRow(columnIndex: col, rowIndex: row))
+              .value;
+          if (cellValue != null) {
+            var text = cellValue.toString();
+            if (text.length > maxLength) {
+              maxLength = text.length.toDouble();
+            }
+          }
+        }
+        sheet.setColumnWidth(col, (maxLength * 1.2).clamp(12, 35));
+      }
+    }
+
+    saveAndShareExcel(excel);
+  }
+
+
+  Future<void> saveAndShareExcel(Excel excel) async {
+    final downloadsDir = Directory("/storage/emulated/0/Download");
+    String formattedDate = DateFormat('dd_MMM_yyyy_HH_mm').format(DateTime.now());
+    String filePath = "${downloadsDir.path}/health_report_$formattedDate.xlsx";
+
+    final file = File(filePath)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(excel.encode()!);
+
+    Utils.showToast("Saved to Downloads: egg_report_$formattedDate.xlsx");
+
+    // ✅ Share/Open the file safely
+    await Share.shareXFiles(
+      [XFile(file.path)],
+      text: "Health report exported successfully!",
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
 
@@ -204,12 +437,29 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                             margin: EdgeInsets.only(left: 5),
                             child: Text(
                               "Birds Health Report".tr(),
+                              overflow: TextOverflow.ellipsis,
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold),
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w600),
                             )),
+                      ),
+                      InkWell(
+                        onTap: () {
+
+                          Utils.setupInvoiceInitials("Birds Health Report".tr(),pdf_formatted_date_filter);
+                          prepareListData();
+
+                          generateHealthReportExcel(Utils.vaccine_report_list.length.toString(), Utils.medication_report_list.length.toString(), Utils.medication_report_list, Utils.vaccine_report_list);
+
+                        },
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          margin: EdgeInsets.only(right: 10),
+                          child: Image.asset('assets/excel_icon.png'),
+                        ),
                       ),
                       InkWell(
                         onTap: () {
@@ -223,8 +473,8 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                           );
                         },
                         child: Container(
-                          width: 30,
-                          height: 30,
+                          width: 22,
+                          height: 22,
                           margin: EdgeInsets.only(right: 10),
                           child: Image.asset('assets/pdf_icon.png'),
                         ),
@@ -249,10 +499,10 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
+                        /*border: Border.all(
                           color: Utils.getThemeColorBlue(),
                           width: 1.2,
-                        ),
+                        ),*/
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black12,
@@ -280,10 +530,10 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
+                       /* border: Border.all(
                           color: Utils.getThemeColorBlue(),
                           width: 1.2,
-                        ),
+                        ),*/
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black12,
@@ -573,7 +823,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: color, width: 1),
+                    /*border: Border.all(color: color, width: 1),*/
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,

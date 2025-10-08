@@ -1,5 +1,8 @@
 
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
+import 'package:excel/excel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +15,7 @@ import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'model/feed_item.dart';
 import 'model/feed_summary.dart';
@@ -105,6 +109,186 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
   }
 
 
+  Future<void> generateFeedReportExcel(
+      List<Feed_Report_Item> feedReportList,
+      List<FeedFlock_Report_Item> feedFlockReportList,
+      ) async
+  {
+    var excel = Excel.createExcel();
+    var sheet = excel['Feeding Report'.tr()];
+
+    // ==== Define Styles ====
+    var titleStyle = CellStyle(
+      bold: true,
+      fontSize: 16,
+      fontColorHex: ExcelColor.white,
+      backgroundColorHex: ExcelColor.fromHexString("#1F4E78"), // dark blue
+      horizontalAlign: HorizontalAlign.Center,
+      verticalAlign: VerticalAlign.Center,
+    );
+
+    var sectionTitleStyle = CellStyle(
+      bold: true,
+      fontSize: 14,
+      fontColorHex: ExcelColor.black,
+      backgroundColorHex: ExcelColor.fromHexString("#BDD7EE"), // light section
+      horizontalAlign: HorizontalAlign.Center,
+      verticalAlign: VerticalAlign.Center,
+    );
+
+    var headerStyle = CellStyle(
+      bold: true,
+      fontSize: 12,
+      fontColorHex: ExcelColor.black,
+      backgroundColorHex: ExcelColor.fromHexString("#B7DEE8"), // header
+      horizontalAlign: HorizontalAlign.Center,
+      verticalAlign: VerticalAlign.Center,
+    );
+
+    var numberStyle = CellStyle(
+      horizontalAlign: HorizontalAlign.Right,
+    );
+
+    int row = 0;
+
+    // ==== Report Title ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("Feeding Report".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = titleStyle;
+
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: row));
+
+    row += 2;
+
+    // ==== Section 1: By Feed Type ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("By Feed Type".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = sectionTitleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row));
+
+    row++;
+
+    List<String> feedHeaders = [
+      "Feed Name".tr(),
+      "Consumption".tr() +"(${Utils.selected_unit.tr()})",
+    ];
+
+    for (int i = 0; i < feedHeaders.length; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .value = TextCellValue(feedHeaders[i]);
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = headerStyle;
+    }
+
+    row++;
+
+    for (var item in feedReportList) {
+      sheet.appendRow([
+        TextCellValue(item.feed_name),
+        DoubleCellValue(double.parse(item.consumption.toString()) ?? 0),
+      ]);
+
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row))
+          .cellStyle = numberStyle;
+      row++;
+    }
+
+    row += 2;
+
+    // ==== Section 2: By Flock ====
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .value = TextCellValue("By Flock".tr());
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
+        .cellStyle = sectionTitleStyle;
+    sheet.merge(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row),
+        CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row));
+
+    row++;
+
+    List<String> flockHeaders = [
+      "Flock Name".tr(),
+      "Consumption".tr()+"(${Utils.selected_unit.tr()})",
+    ];
+
+    for (int i = 0; i < flockHeaders.length; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .value = TextCellValue(flockHeaders[i]);
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row))
+          .cellStyle = headerStyle;
+    }
+
+    row++;
+
+    for (var flockItem in feedFlockReportList) {
+      sheet.appendRow([
+        TextCellValue(flockItem.f_name),
+        DoubleCellValue(double.parse(flockItem.consumption.toString()) ?? 0),
+      ]);
+
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row))
+          .cellStyle = numberStyle;
+      row++;
+    }
+
+    // === Auto-adjust column widths ===
+    for (var table in excel.tables.keys) {
+      var sheet = excel[table];
+      for (int col = 0; col < sheet.maxColumns; col++) {
+        double maxLength = 0;
+        for (int row = 0; row < sheet.maxRows; row++) {
+          var cellValue = sheet
+              .cell(CellIndex.indexByColumnRow(columnIndex: col, rowIndex: row))
+              .value;
+          if (cellValue != null) {
+            var text = cellValue.toString();
+            if (text.length > maxLength) {
+              maxLength = text.length.toDouble();
+            }
+          }
+        }
+        sheet.setColumnWidth(col, (maxLength * 1.2).clamp(12, 35));
+      }
+    }
+
+    saveAndShareExcel(excel);
+  }
+
+
+  Future<void> saveAndShareExcel(Excel excel) async {
+    final downloadsDir = Directory("/storage/emulated/0/Download");
+    String formattedDate = DateFormat('dd_MMM_yyyy_HH_mm').format(DateTime.now());
+    String filePath = "${downloadsDir.path}/feed_report_$formattedDate.xlsx";
+
+    final file = File(filePath)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(excel.encode()!);
+
+    Utils.showToast("Saved to Downloads: egg_report_$formattedDate.xlsx");
+
+    // ✅ Share/Open the file safely
+    await Share.shareXFiles(
+      [XFile(file.path)],
+      text: "Egg report exported successfully!",
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
 
@@ -161,12 +345,28 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                             margin: EdgeInsets.only(left: 5),
                             child: Text(
                               "Feeding Report".tr(),
+                              overflow: TextOverflow.ellipsis,
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold),
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w600),
                             )),
+                      ),
+                      InkWell(
+                        onTap: () {
+
+                          Utils.setupInvoiceInitials("Feeding Report".tr(),pdf_formatted_date_filter);
+                          prepareListData();
+                          generateFeedReportExcel(Utils.feed_report_list, Utils.feed_flock_report_list);
+
+                        },
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          margin: EdgeInsets.only(right: 10),
+                          child: Image.asset('assets/excel_icon.png'),
+                        ),
                       ),
                       InkWell(
                         onTap: (){
@@ -180,8 +380,8 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                           );
                         },
                         child: Container(
-                          width: 30,
-                          height: 30,
+                          width: 22,
+                          height: 22,
                           margin: EdgeInsets.only(right: 10),
                           child: Image.asset('assets/pdf_icon.png'),
                         ),
@@ -206,10 +406,10 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
+                        /*border: Border.all(
                           color: Utils.getThemeColorBlue(),
                           width: 1.2,
-                        ),
+                        ),*/
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black12,
@@ -237,10 +437,10 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
+                        /*border: Border.all(
                           color: Utils.getThemeColorBlue(),
                           width: 1.2,
-                        ),
+                        ),*/
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black12,

@@ -572,6 +572,8 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
       });
     }
   }
+  String selectedPaymentMethod = "Cash";
+  String selectedStatus = "CLEARED";
 
   void _saveStock() async {
     if (_selectedFeed == null || _quantityController.text.isEmpty || _selectedSource == null) {
@@ -580,7 +582,6 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
       });
       return;
     }
-
 
     String finalSource = _selectedSource == "OTHER" ? _otherSourceController.text : _selectedSource!;
     double? amount = _selectedSource == "PURCHASED" && _amountController.text.isNotEmpty
@@ -600,11 +601,12 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
       modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
       farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '');
 
-   int? stock_item_id =  await DatabaseHelper.insertFeedStock(stock);
+    int? stock_item_id =  await DatabaseHelper.insertFeedStock(stock);
 
     FeedStockFB feedStockFB = FeedStockFB(stock: stock);
 
-    if(!_amountController.text.isEmpty){
+    if(!_amountController.text.isEmpty)
+    {
       TransactionItem transaction_item = TransactionItem(
           f_id: -1,
           date: DateFormat('yyyy-MM-dd').format(_selectedDate),
@@ -612,8 +614,8 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
           expense_item: "Feed Purchase",
           type: "Expense",
           amount: _amountController.text,
-          payment_method: "Cash",
-          payment_status: "CLEARED",
+          payment_method: selectedPaymentMethod,
+          payment_status: selectedStatus,
           sold_purchased_from: "Unknown",
           short_note: "$_selectedFeed Purchase made on ${DateFormat('yyyy-MM-dd').format(_selectedDate)}",
           how_many: _quantityController.text,
@@ -630,7 +632,6 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
       int? transaction_id = await DatabaseHelper.insertNewTransaction(transaction_item);
       StockExpense stockExpense = StockExpense(stockItemId: stock_item_id!, transactionId: transaction_id!);
       await DatabaseHelper.insertStockJunction(stockExpense);
-
       feedStockFB.transaction = transaction_item;
     }
 
@@ -772,11 +773,51 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
                 ),
       
               if (_selectedSource == "PURCHASED")
-                _buildTextField(
-                  controller: _amountController,
-                  label: "Amount".tr(),
-                  icon: Icons.attach_money,
-                  keyboardType: TextInputType.number,
+                Column(
+                  children: [
+                    _buildTextField(
+                      controller: _amountController,
+                      label: "Amount".tr(),
+                      icon: Icons.attach_money,
+                      keyboardType: TextInputType.number,
+                    ),
+                    SizedBox(height: 12),
+
+                    DropdownButtonFormField<String>(
+                      value: selectedPaymentMethod,
+                      items: ["Cash", "Bank Transfer"].map((method) {
+                        return DropdownMenuItem(
+                          value: method,
+                          child: Text(method.tr()),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        selectedPaymentMethod = value!;
+                      },
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.payment),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+
+                    DropdownButtonFormField<String>(
+                      value: selectedStatus,
+                      items: ["CLEARED", "UNCLEAR"].map((status) {
+                        return DropdownMenuItem(
+                          value: status,
+                          child: Text(status.tr()),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        selectedStatus = value!;
+                      },
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.verified),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+                  ],
                 ),
               SizedBox(height: 20),
       

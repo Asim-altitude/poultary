@@ -12,7 +12,6 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:googleapis/androidpublisher/v3.dart' as android_publisher;
 import 'package:intl/intl.dart';
 import 'package:language_picker/languages.dart';
 import 'package:path_provider/path_provider.dart';
@@ -172,6 +171,7 @@ class Utils {
     final String link = Platform.isAndroid ? androidLink : iosLink;
     Share.share("Easy Poultry & Chicken manager: $link");
   }
+
 
 
   static void showSyncInfo(BuildContext context, String updatedAt, String updatedBy) {
@@ -1488,6 +1488,7 @@ $storeLink
       Utils.isShowAdd = true;
       inititalize();
     }
+    Utils.isShowAdd = false;
 
   }
 

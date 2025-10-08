@@ -138,10 +138,13 @@ class _NewEggCollection extends State<NewEggCollection>
 
     await DatabaseHelper.instance.database;
 
-    contractors = await DatabaseHelper.getContractors();
+    contractors = await DatabaseHelper.getContractors(type: "Eggs");
     if(contractors.length > 0) {
       selectedContractor = contractors[0];
       contractorName = selectedContractor!.name;
+      print("CONTRACTORS ${contractors.length} $contractorName");
+    }else{
+      print("NO CONTRACTORS");
     }
 
     if(isEdit){
@@ -295,6 +298,25 @@ class _NewEggCollection extends State<NewEggCollection>
                   });
 
                   if(activeStep==2) {
+
+                    if(totalEggsController.text.isEmpty || totalEggsController.text == "0") {
+                      Utils.showToast("Provide eggs count");
+                      setState(() {
+                        activeStep--;
+                      });
+                      return;
+                    }
+
+                    if(isEggSale() && amount ==0)
+                      {
+                        Utils.showToast("Provide payment details");
+                        setState(() {
+                          activeStep--;
+                        });
+                        return;
+                      }
+
+
                     await DatabaseHelper.instance.database;
                     try {
                       if (isCollection)

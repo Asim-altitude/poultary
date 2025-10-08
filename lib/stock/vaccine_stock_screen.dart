@@ -498,8 +498,8 @@ class _AddMedicineStockBottomSheetState extends State<AddMedicineStockBottomShee
           expense_item: "Vaccine Purchase",
           type: "Expense",
           amount: _amountController.text,
-          payment_method: "Cash",
-          payment_status: "CLEARED",
+          payment_method: selectedPaymentMethod,
+          payment_status: selectedStatus,
           sold_purchased_from: "Unknown",
           short_note: "$_selectedMedicine Purchase made on ${DateFormat('yyyy-MM-dd').format(_selectedDate)}",
           how_many: _quantityController.text,
@@ -537,7 +537,8 @@ class _AddMedicineStockBottomSheetState extends State<AddMedicineStockBottomShee
   bool isRequired = false;
   List<String> _sourceList = ["PURCHASED", "GIFT", "OTHER"];
   List<String> _unitList = ["Tab","Cap","mg","g","kg","Vial","ml","L","Dust"];
-
+  String selectedPaymentMethod = "Cash";
+  String selectedStatus = "CLEARED";
 
   int getMedicineIdbyName() {
     return _subItems.firstWhere((med) => med.name == _selectedMedicine).id!;
@@ -661,11 +662,51 @@ class _AddMedicineStockBottomSheetState extends State<AddMedicineStockBottomShee
       
               // Purchase Amount Input (Only visible if "Purchased" is selected)
               if (_selectedSource == "PURCHASED")
-                _buildTextField(
-                  controller: _amountController,
-                  label: "Amount".tr(),
-                  icon: Icons.attach_money,
-                  keyboardType: TextInputType.number,
+                Column(
+                  children: [
+                    _buildTextField(
+                      controller: _amountController,
+                      label: "Amount".tr(),
+                      icon: Icons.attach_money,
+                      keyboardType: TextInputType.number,
+                    ),
+                    SizedBox(height: 12),
+
+                    DropdownButtonFormField<String>(
+                      value: selectedPaymentMethod,
+                      items: ["Cash", "Bank Transfer"].map((method) {
+                        return DropdownMenuItem(
+                          value: method,
+                          child: Text(method.tr()),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        selectedPaymentMethod = value!;
+                      },
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.payment),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+
+                    DropdownButtonFormField<String>(
+                      value: selectedStatus,
+                      items: ["CLEARED", "UNCLEAR"].map((status) {
+                        return DropdownMenuItem(
+                          value: status,
+                          child: Text(status.tr()),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        selectedStatus = value!;
+                      },
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.verified),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+                  ],
                 ),
               SizedBox(height: 20),
       

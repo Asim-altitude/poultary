@@ -78,17 +78,18 @@ class _EggStockScreenState extends State<EggStockScreen> {
   }
 
   void getEggStockHistory({int page = 0, int pageSize = 2000}) async {
-    stockHistory = await DatabaseHelper.getStockHistoryPaginated(page: page, pageSize: pageSize);
+    stockHistory = await DatabaseHelper.getStockHistoryPaginated(
+        page: page, pageSize: pageSize);
     var eggSales = await DatabaseHelper.getEggSaleTransactions();
 
     print("EGGS RECORDS ${stockHistory.length}");
     print("EGGS SALES ${eggSales.length}");
     int reduced_eggs = 0;
-    for(int i=0;i<eggSales.length;i++)
-    {
+    for (int i = 0; i < eggSales.length; i++) {
       TransactionItem item = eggSales[i];
-      EggTransaction? eggTransaction = await DatabaseHelper.getEggsByTransactionItemId(item.id!);
-      if(eggTransaction == null) {
+      EggTransaction? eggTransaction = await DatabaseHelper
+          .getEggsByTransactionItemId(item.id!);
+      if (eggTransaction == null) {
         reduced_eggs += int.parse(item.how_many);
         Eggs eggs = Eggs(
             id: item.id,
@@ -100,7 +101,7 @@ class _EggStockScreenState extends State<EggStockScreen> {
             egg_color: "white",
             total_eggs: int.parse(item.how_many),
             date: item.date,
-            short_note: "TRANS_"+item.short_note,
+            short_note: "TRANS_" + item.short_note,
             isCollection: 0,
             reduction_reason: "Sold");
         stockHistory.add(eggs);
@@ -125,16 +126,21 @@ class _EggStockScreenState extends State<EggStockScreen> {
     stockSummary = Future.value(map);
     // ✅ Sort by date (newest first)
     stockHistory.sort((a, b) {
-      // Convert string to DateTime if needed
-      final dateA = DateTime.parse(a.date!);
-      final dateB = DateTime.parse(b.date!);
+      DateTime? dateA = DateTime.tryParse(a.date ?? "");
+      DateTime? dateB = DateTime.tryParse(b.date ?? "");
+
+      // Fallback if parsing fails
+      if (dateA == null && dateB == null) return 0;
+      if (dateA == null) return 1; // put invalid/empty dates at the end
+      if (dateB == null) return -1;
+
       return dateB.compareTo(dateA); // descending order
     });
-    setState(() {});
   }
 
 
-  @override
+
+    @override
   Widget build(BuildContext context) {
     
     return Scaffold(
