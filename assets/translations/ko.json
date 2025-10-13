@@ -1021,7 +1021,12 @@
  "Vaccinate for respiratory diseases": "호흡기 질환 예방 접종",
  "Check for signs of stress or disease": "스트레스 나 질병의 징후를 확인하십시오",
  "Provide calcium supplements": "칼슘 보충제를 제공하십시오",
- "Provide protein supplements": "단백질 보충제를 제공하십시오"
+ "Provide protein supplements": "단백질 보충제를 제공하십시오",
+
+ "Quick Menu": "퀵메뉴",
+ "Enter Type": "유형을 입력하세요",
+ "Provide eggs count": "계란 수 제공",
+ "UNIT_PRICE": "단가"
 
 
 }

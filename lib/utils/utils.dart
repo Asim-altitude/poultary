@@ -28,6 +28,7 @@ import '../eggs_report_screen.dart';
 import '../financial_report_screen.dart';
 import '../health_report_screen.dart';
 import '../model/bird_model.dart';
+import '../model/category_item.dart';
 import '../model/custom_category.dart';
 import '../model/egg_item.dart';
 import '../model/egg_report_item.dart';
@@ -172,6 +173,119 @@ class Utils {
     Share.share("Easy Poultry & Chicken manager: $link");
   }
 
+
+  static Future<void> generateDatabaseTables() async {
+    try
+    {
+      await DatabaseHelper.addEggColorColumn();
+      await DatabaseHelper.addFlockInfoColumn();
+      await DatabaseHelper.addQuantityColumnMedicine();
+      await DatabaseHelper.addUnitColumnMedicine();
+      await DatabaseHelper.createFeedStockHistoryTable();
+      await DatabaseHelper.createMedicineStockHistoryTable();
+      await DatabaseHelper.createVaccineStockHistoryTable();
+      await DatabaseHelper.createSaleContractorTable();
+      await DatabaseHelper.createFeedIngridentTable();
+      await DatabaseHelper.createFeedBatchTable();
+      await DatabaseHelper.createFeedBatchItemTable();
+      await DatabaseHelper.createWeightRecordTableIfNotExists();
+      await DatabaseHelper.createScheduledNotificationsTable();
+      await DatabaseHelper.createStockExpenseJunction();
+      await DatabaseHelper.createEggTransactionJunction();
+      await DatabaseHelper.createSyncFailedTable();
+      await DatabaseHelper.addColumnIfNotExists("Transactions", "unit_price", "REAL", 0);
+      await addNewColumn();
+      await addMissingCategories();
+      // await createMissingEggsRecords();
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
+
+  static Future<void> addMissingCategories() async{
+
+    //Medicine Category
+    CategoryItem categoryItem = CategoryItem(id: null, name: "Medicine");
+    CategoryItem categoryItem1 = CategoryItem(id: null, name: "Vaccine");
+
+    List<String> commonMedicines = [
+      "Amprolium",
+      "Tylosin",
+      "Doxycycline",
+      "Enrofloxacin",
+      "Neomycin",
+      "Sulfaquinoxaline",
+      "Furazolidone",
+      "Flubendazole",
+      "Ivermectin",
+      "Gentamycin",
+      "Ketoprofen",
+      "Multivitamins",
+      "Lincomycin",
+      "Oxytetracycline",
+      "Copper Sulfate",
+      "Probiotics",
+    ];
+
+    List<String> commonVaccines = [
+      "Newcastle",
+      "Gumboro",
+      "Marek’s",
+      "Fowl Pox",
+      "Avian Influenza",
+      "Salmonella",
+      "Bronchitis",
+      "Fowl Cholera",
+      "Mycoplasma",
+      "EDS",
+      "Coryza",
+      "Reovirus",
+      "E. coli",
+      "Coccidiosis",
+    ];
+    int? medicineCategoryID = await DatabaseHelper.addCategoryIfNotExists(categoryItem);
+
+    for(int i=0;i<commonMedicines.length;i++){
+      await DatabaseHelper.addSubcategoryIfNotExists(medicineCategoryID!, commonMedicines[i]);
+      print(commonMedicines[i]);
+    }
+
+    int? vaccineCategoryID  = await DatabaseHelper.addCategoryIfNotExists(categoryItem1);
+
+    for(int i=0;i<commonVaccines.length;i++){
+      await DatabaseHelper.addSubcategoryIfNotExists(vaccineCategoryID!, commonVaccines[i]);
+      print(commonVaccines[i]);
+    }
+
+  }
+
+
+  static Future<void> addNewColumn() async {
+    try{
+      int c = await DatabaseHelper.addColumnInFlockDetail();
+      print("Column Info $c");
+    }catch(ex){
+      print(ex);
+    }
+
+    try{
+      int c = await DatabaseHelper.addColumnInFTransactions();
+      print("Column Info $c");
+    }catch(ex){
+      print(ex);
+    }
+
+    try{
+      int? c = await DatabaseHelper.updateLinkedFlocketailNullValue();
+      print("Flock Details Update Info $c");
+
+      int? t = await DatabaseHelper.updateLinkedTransactionNullValue();
+      print("Transactions Update Info $t");
+    }catch(ex){
+      print(ex);
+    }
+  }
 
 
   static void showSyncInfo(BuildContext context, String updatedAt, String updatedBy) {

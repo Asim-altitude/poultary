@@ -1020,6 +1020,11 @@
  "Vaccinate for respiratory diseases": "تطعيم لأمراض الجهاز التنفسي",
  "Check for signs of stress or disease": "تحقق من وجود علامات التوتر أو المرض",
  "Provide calcium supplements": "توفير مكملات الكالسيوم",
- "Provide protein supplements": "توفير مكملات البروتين"
+ "Provide protein supplements": "توفير مكملات البروتين",
+
+ "Quick Menu": "القائمة السريعة",
+ "Enter Type": "أدخل النوع",
+ "Provide eggs count": "توفير عدد البيض",
+ "UNIT_PRICE": "سعر الوحدة"
 
 }

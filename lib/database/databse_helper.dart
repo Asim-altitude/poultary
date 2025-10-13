@@ -1159,6 +1159,24 @@ class DatabaseHelper  {
     );
   }
 
+  static Future<void> addColumnIfNotExists(String tableName, String columnName, String columnType, dynamic defaultValue) async {
+    // Check if column already exists
+    final List<Map<String, Object?>>? columns = await _database?.rawQuery('PRAGMA table_info($tableName)');
+    final bool columnExists = columns!.any((col) => col['name'] == columnName);
+
+    if (!columnExists) {
+      // Add new column
+      await _database?.execute('ALTER TABLE $tableName ADD COLUMN $columnName $columnType');
+
+      // Update all existing rows with default value
+      await _database?.rawUpdate('UPDATE $tableName SET $columnName = ?', [defaultValue]);
+
+      print('✅ Column "$columnName" added to "$tableName" with default value $defaultValue');
+    } else {
+      print('ℹ️ Column "$columnName" already exists in "$tableName"');
+    }
+  }
+
   static Future<void> addEggColorColumn() async {
     try {
       // Check if the 'egg_color' column exists

@@ -1006,5 +1006,11 @@
   "Vaccinate for respiratory diseases": "Vaccinare per malattie respiratorie",
   "Check for signs of stress or disease": "Verificare la presenza di segni di stress o malattia",
   "Provide calcium supplements": "Fornire integratori di calcio",
-  "Provide protein supplements": "Fornire integratori proteici"
+  "Provide protein supplements": "Fornire integratori proteici",
+
+
+  "Quick Menu": "Menù rapido",
+  "Enter Type": "Inserisci Tipo",
+  "Provide eggs count": "Fornire il conteggio delle uova",
+  "UNIT_PRICE": "Prezzo unitario"
 }

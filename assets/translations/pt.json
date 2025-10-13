@@ -1023,6 +1023,11 @@
  "Vaccinate for respiratory diseases": "Vacinar para doenças respiratórias",
  "Check for signs of stress or disease": "Verifique se há sinais de estresse ou doença",
  "Provide calcium supplements": "Fornecer suplementos de cálcio",
- "Provide protein supplements": "Fornecer suplementos de proteína"
+ "Provide protein supplements": "Fornecer suplementos de proteína",
+
+ "Quick Menu": "Menu rápido",
+ "Enter Type": "Insira o tipo",
+ "Provide eggs count": "Fornece contagem de ovos",
+ "UNIT_PRICE": "Preço unitário"
 
 }

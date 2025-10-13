@@ -1023,6 +1023,11 @@
   "Vaccinate for respiratory diseases": "Zaszczepić choroby układu oddechowego",
   "Check for signs of stress or disease": "Sprawdź objawy stresu lub choroby",
   "Provide calcium supplements": "Zapewnij suplementy wapnia",
-  "Provide protein supplements": "Zapewnij suplementy białkowe"
+  "Provide protein supplements": "Zapewnij suplementy białkowe",
+
+  "Quick Menu": "Szybkie menu",
+  "Enter Type": "Wpisz typ",
+  "Provide eggs count": "Podaj liczbę jaj",
+  "UNIT_PRICE": "Cena jednostkowa"
 
 }

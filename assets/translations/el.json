@@ -1021,5 +1021,11 @@
   "Vaccinate for respiratory diseases": "Εμβολιασμός για αναπνευστικές παθήσεις",
   "Check for signs of stress or disease": "Ελέγξτε για σημάδια άγχους ή ασθένειας",
   "Provide calcium supplements": "Παρέχετε συμπληρώματα ασβεστίου",
-  "Provide protein supplements": "Παρέχετε συμπληρώματα πρωτεϊνών"
+  "Provide protein supplements": "Παρέχετε συμπληρώματα πρωτεϊνών",
+
+
+  "Quick Menu": "Μενού γρήγορου μενού",
+  "Enter Type": "Εισάγετε τον τύπο",
+  "Provide eggs count": "Παρέχετε μετράνε αυγά",
+  "UNIT_PRICE": "Τιμή μονάδας"
 }

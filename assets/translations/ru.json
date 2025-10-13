@@ -1023,6 +1023,11 @@
  "Vaccinate for respiratory diseases": "Вакцинация при респираторных заболеваниях",
  "Check for signs of stress or disease": "Проверьте признаки стресса или заболевания",
  "Provide calcium supplements": "Обеспечить добавки кальция",
- "Provide protein supplements": "Обеспечить белковые добавки"
+ "Provide protein supplements": "Обеспечить белковые добавки",
+
+ "Quick Menu": "Быстрое меню",
+ "Enter Type": "Введите тип",
+ "Provide eggs count": "Укажите количество яиц",
+ "UNIT_PRICE": "Цена за единицу товара"
 
 }

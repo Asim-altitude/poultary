@@ -1022,7 +1022,12 @@
  "Vaccinate for respiratory diseases": "واکسینات برای بیماری های تنفسی",
  "Check for signs of stress or disease": "علائم استرس یا بیماری را بررسی کنید",
  "Provide calcium supplements": "مکمل های کلسیم را تهیه کنید",
- "Provide protein supplements": "مکمل های پروتئینی را تهیه کنید"
+ "Provide protein supplements": "مکمل های پروتئینی را تهیه کنید",
+
+ "Quick Menu": "منوی سریع",
+ "Enter Type": "نوع را وارد کنید",
+ "Provide eggs count": "تعداد تخم مرغ را تهیه کنید",
+ "UNIT_PRICE": "قیمت واحد"
 
 
 }

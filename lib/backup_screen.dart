@@ -187,7 +187,11 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                   showFarmRestoreWarningDialog(context, () {
                     showRestoreOptionsDialog(context, () async {
                       await DatabaseHelper.importDataBaseFile(context);
-                      try {
+
+                      await DatabaseHelper.instance.database;
+                      await Utils.generateDatabaseTables();
+
+            /*          try {
                         await DatabaseHelper.addEggColorColumn();
                         await DatabaseHelper.addFlockInfoColumn();
                         await DatabaseHelper.addQuantityColumnMedicine();
@@ -209,7 +213,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                       }
                       catch (ex) {
                         print(ex);
-                      }
+                      }*/
                       try {
                         List<String> tables = [
                           'Flock',
@@ -257,7 +261,9 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                 }else {
                   showRestoreOptionsDialog(context, () async {
                     await DatabaseHelper.importDataBaseFile(context);
-                    try {
+                    await DatabaseHelper.instance.database;
+                    await Utils.generateDatabaseTables();
+                /*    try {
                       await DatabaseHelper.addEggColorColumn();
                       await DatabaseHelper.addFlockInfoColumn();
                       await DatabaseHelper.addQuantityColumnMedicine();
@@ -279,7 +285,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                     }
                     catch (ex) {
                       print(ex);
-                    }
+                    }*/
                     try {
                       List<String> tables = [
                         'Flock',

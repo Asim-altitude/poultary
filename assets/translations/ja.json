@@ -1022,6 +1022,11 @@
  "Vaccinate for respiratory diseases": "呼吸器疾患の予防接種",
  "Check for signs of stress or disease": "ストレスや病気の兆候を確認してください",
  "Provide calcium supplements": "カルシウムサプリメントを提供します",
- "Provide protein supplements": "タンパク質サプリメントを提供します"
+ "Provide protein supplements": "タンパク質サプリメントを提供します",
+
+ "Quick Menu": "クイックメニュー",
+ "Enter Type": "タイプを入力してください",
+ "Provide eggs count": "卵の数を提供する",
+ "UNIT_PRICE": "単価"
 
 }

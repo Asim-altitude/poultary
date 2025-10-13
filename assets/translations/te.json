@@ -1025,6 +1025,11 @@
   "Vaccinate for respiratory diseases": "శ్వాసకోశ వ్యాధుల కోసం టీకాలు వేయండి",
   "Check for signs of stress or disease": "ఒత్తిడి లేదా వ్యాధి సంకేతాల కోసం తనిఖీ చేయండి",
   "Provide calcium supplements": "కాల్షియం సప్లిమెంట్లను అందించండి",
-  "Provide protein supplements": "ప్రోటీన్ సప్లిమెంట్లను అందించండి"
+  "Provide protein supplements": "ప్రోటీన్ సప్లిమెంట్లను అందించండి",
+
+  "Quick Menu": "శీఘ్ర మెను",
+  "Enter Type": "రకాన్ని నమోదు చేయండి",
+  "Provide eggs count": "గుడ్ల సంఖ్యను అందించండి",
+  "UNIT_PRICE": "యూనిట్ ధర"
 
 }

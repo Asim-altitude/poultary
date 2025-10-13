@@ -1023,6 +1023,11 @@
   "Vaccinate for respiratory diseases": "சுவாச நோய்களுக்கு தடுப்பூசி போடு",
   "Check for signs of stress or disease": "மன அழுத்தம் அல்லது நோயின் அறிகுறிகளை சரிபார்க்கவும்",
   "Provide calcium supplements": "கால்சியம் சப்ளிமெண்ட்ஸ் வழங்கவும்",
-  "Provide protein supplements": "புரத சப்ளிமெண்ட்ஸ் வழங்குதல்"
+  "Provide protein supplements": "புரத சப்ளிமெண்ட்ஸ் வழங்குதல்",
+
+  "Quick Menu": "விரைவான மெனு",
+  "Enter Type": "வகையை உள்ளிடவும்",
+  "Provide eggs count": "முட்டை எண்ணிக்கையை வழங்கவும்",
+  "UNIT_PRICE": "அலகு விலை"
 
 }

@@ -632,8 +632,91 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                                   ),
                                   SizedBox(width: 6),
                                   Text(
-                                    "(${transactionList.elementAt(index).how_many} Items)",
+                                    "(${transactionList.elementAt(index).how_many} "+"ITEMS".tr()+")",
                                     style: TextStyle(fontSize: 14, color: Colors.black54),
+                                  ),
+                                ],
+                              ),
+
+                              SizedBox(height: 6),
+                              /// **Quantity & Unit Price (Second Line)**
+                              Row(
+                                children: [
+                                  Text(
+                                    "${transactionList[index].how_many ?? 0} " + "ITEMS".tr(),
+                                    style: TextStyle(fontSize: 14, color: Colors.black),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Text("•", style: TextStyle(color: Colors.grey, fontSize: 15)),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    "${"UNIT_PRICE".tr()}: ${(transactionList[index].unitPrice ?? 0).toStringAsFixed(2)} ${Utils.currency}",
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: (transactionList[index].unitPrice ?? 0) == 0
+                                          ? Colors.grey // dim if unit price is still 0
+                                          : Colors.blueGrey.shade700,
+                                      fontStyle: (transactionList[index].unitPrice ?? 0) == 0
+                                          ? FontStyle.italic
+                                          : FontStyle.normal,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+
+                              SizedBox(height: 6),
+
+                              /// **Transaction Amount & Payment Status**
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  /// **Income/Expense Label**
+                                  Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                    decoration: BoxDecoration(
+                                      color: transactionList.elementAt(index).type.toLowerCase() == 'income'
+                                          ? Colors.green.shade100
+                                          : Colors.red.shade100,
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: Text(
+                                      transactionList.elementAt(index).type.tr(),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: transactionList.elementAt(index).type.toLowerCase() == 'income'
+                                            ? Colors.green
+                                            : Colors.red,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+
+                                  /// **Amount**
+                                  Row(
+                                    children: [
+                                      Text(
+                                        transactionList.elementAt(index).amount.toString(),
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
+                                      ),
+                                      SizedBox(width: 4),
+                                      Text(Utils.currency, style: TextStyle(color: Colors.black, fontSize: 14)),
+                                    ],
+                                  ),
+
+                                  /// **Payment Status (Colored Tag)**
+                                  Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    child: Text(
+                                      transactionList.elementAt(index).payment_status.toUpperCase().tr(),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: transactionList.elementAt(index).payment_status.toLowerCase() == "cleared"
+                                            ? Colors.green
+                                            : Colors.orange,
+                                        fontSize: 12,
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -644,7 +727,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                               Row(
                                 children: [
                                   Icon(
-                                    transactionList.elementAt(index).type!.toLowerCase() == 'income'
+                                    transactionList.elementAt(index).type.toLowerCase() == 'income'
                                         ? Icons.trending_up
                                         : Icons.trending_down,
                                     size: 16,
@@ -672,61 +755,6 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                                 ],
                               ),
 
-                              SizedBox(height: 6),
-
-                              /// **Transaction Amount & Payment Status**
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  /// **Income/Expense Label**
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                    decoration: BoxDecoration(
-                                      color: transactionList.elementAt(index).type!.toLowerCase() == 'income'
-                                          ? Colors.green.shade100
-                                          : Colors.red.shade100,
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-                                    child: Text(
-                                      transactionList.elementAt(index).type!.tr(),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: transactionList.elementAt(index).type!.toLowerCase() == 'income'
-                                            ? Colors.green
-                                            : Colors.red,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ),
-
-                                  /// **Amount**
-                                  Row(
-                                    children: [
-                                       Text(
-                                        transactionList.elementAt(index).amount.toString(),
-                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
-                                      ),
-                                      SizedBox(width: 4),
-                                      Text(Utils.currency, style: TextStyle(color: Colors.black, fontSize: 14)),
-                                    ],
-                                  ),
-
-                                  /// **Payment Status (Colored Tag)**
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    child: Text(
-                                      transactionList.elementAt(index).payment_status.toUpperCase().tr(),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: transactionList.elementAt(index).payment_status.toLowerCase() == "cleared"
-                                            ? Colors.green
-                                            : Colors.orange,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
 
                               SizedBox(height: 6),
 

@@ -1039,6 +1039,11 @@
   "Vaccinate for respiratory diseases": "Вакцинація для дихальних захворювань",
   "Check for signs of stress or disease": "Перевірте наявність ознак стресу або захворювання",
   "Provide calcium supplements": "Забезпечте добавки кальцію",
-  "Provide protein supplements": "Забезпечте білкові добавки"
+  "Provide protein supplements": "Забезпечте білкові добавки",
+
+  "Quick Menu": "Швидке меню",
+  "Enter Type": "Введіть тип",
+  "Provide eggs count": "Забезпечте кількість яєць",
+  "UNIT_PRICE": "Ціна на одиницю"
 
 }

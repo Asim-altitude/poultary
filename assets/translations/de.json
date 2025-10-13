@@ -1017,5 +1017,11 @@
  "Vaccinate for respiratory diseases": "Impfungen für Atemwegserkrankungen",
  "Check for signs of stress or disease": "Überprüfen Sie nach Anzeichen von Stress oder Krankheit",
  "Provide calcium supplements": "Kalziumpräparate bereitstellen",
- "Provide protein supplements": "Proteinpräparate bereitstellen"
+ "Provide protein supplements": "Proteinpräparate bereitstellen",
+
+
+ "Quick Menu": "Schnellmenü",
+ "Enter Type": "Geben Sie Typ ein",
+ "Provide eggs count": "Geben Sie die Anzahl der Eier an",
+ "UNIT_PRICE": "Stückpreis"
 }

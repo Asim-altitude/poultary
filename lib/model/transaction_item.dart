@@ -20,6 +20,7 @@ class TransactionItem {
   String extra_cost = "";
   String extra_cost_details = "";
   String flock_update_id = "-1";
+  double? unitPrice;
 
   // 🔄 Sync-related fields
   String? sync_id;
@@ -45,6 +46,7 @@ class TransactionItem {
     required this.extra_cost,
     required this.extra_cost_details,
     required this.flock_update_id,
+    this.unitPrice,
     this.sync_id,
     this.sync_status,
     this.last_modified,
@@ -80,6 +82,7 @@ class TransactionItem {
       extra_cost: json['extra_cost'] ?? '',
       extra_cost_details: json['extra_cost_details'] ?? '',
       flock_update_id: json['flock_update_id'] ?? '-1',
+      unitPrice: json['unit_price'] ?? 0,
       sync_id: json['sync_id'],
       sync_status: json['sync_status'],
       last_modified: lastModified,
@@ -111,6 +114,7 @@ class TransactionItem {
       'last_modified': last_modified?.toIso8601String(),
       'modified_by': modified_by,
       'farm_id': farm_id,
+      'unit_price': unitPrice ?? 0,
     };
   }
 
@@ -138,6 +142,7 @@ class TransactionItem {
       'last_modified': FieldValue.serverTimestamp(),
       'modified_by': modified_by,
       'farm_id': farm_id,
+      'unit_price': unitPrice ?? 0,
     };
   }
 
@@ -165,6 +170,7 @@ class TransactionItem {
       'last_modified': last_modified?.toIso8601String(),
       'modified_by': modified_by,
       'farm_id': farm_id,
+      'unit_price': unitPrice ?? 0,
     };
   }
 
@@ -194,6 +200,7 @@ class TransactionItem {
     DateTime? last_modified,
     String? modified_by,
     String? farm_id,
+    double? unitPrice,
   }) {
     return TransactionItem(
       f_id: f_id ?? this.f_id,
@@ -216,6 +223,7 @@ class TransactionItem {
       last_modified: last_modified ?? this.last_modified,
       modified_by: modified_by ?? this.modified_by,
       farm_id: farm_id ?? this.farm_id,
+      unitPrice: unitPrice ?? this.unitPrice,
     )..id = id ?? this.id;
   }
 }

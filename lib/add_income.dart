@@ -41,6 +41,11 @@ class _NewIncome extends State<NewIncome>
 
   @override
   void dispose() {
+    howmanyController.removeListener(_updateAmount);
+    unitPriceController.removeListener(_updateAmount);
+    howmanyController.dispose();
+    unitPriceController.dispose();
+    amountController.dispose();
     super.dispose();
   }
 
@@ -77,6 +82,7 @@ class _NewIncome extends State<NewIncome>
   final quantityController = TextEditingController();
   final notesController = TextEditingController();
   final amountController = TextEditingController();
+  final unitPriceController = TextEditingController();
   final howmanyController = TextEditingController();
   final soldtoController = TextEditingController();
 
@@ -97,6 +103,7 @@ class _NewIncome extends State<NewIncome>
       howmanyController.text = widget.transactionItem!.how_many;
       soldtoController.text = widget.transactionItem!.sold_purchased_from;
       amountController.text = widget.transactionItem!.amount;
+      unitPriceController.text = widget.transactionItem!.unitPrice!.toString();
 
       print(payment_status);
       print(payment_method);
@@ -107,12 +114,17 @@ class _NewIncome extends State<NewIncome>
       _saleselectedValue = widget.selectedIncomeType!;
     }
 
+    howmanyController.addListener(_updateAmount);
+    unitPriceController.addListener(_updateAmount);
+
     getList();
     getIncomeCategoryList();
     getPayMethodList();
     Utils.setupAds();
 
   }
+
+
 
   List<String> contractorNames = [];
    List<Flock> flocks = [];
@@ -142,7 +154,8 @@ class _NewIncome extends State<NewIncome>
          is_specific_flock = false;
        }*/
 
-       for (int i = 0; i < flocks.length; i++) {
+       for (int i = 0; i < flocks.length; i++)
+       {
          _purposeList.add(flocks.elementAt(i).f_name);
          total_birds += flocks
              .elementAt(i)
@@ -154,8 +167,9 @@ class _NewIncome extends State<NewIncome>
        DateTime dateTime = DateTime.now();
        date = DateFormat('yyyy-MM-dd').format(dateTime);
 
-
-     }else{
+     }
+     else
+     {
 
        _purposeselectedValue = widget.transactionItem!.f_name;
        _purposeList.add(_purposeselectedValue);
@@ -166,7 +180,7 @@ class _NewIncome extends State<NewIncome>
          Flock? flock = await DatabaseHelper.getSingleFlock(widget.transactionItem!.f_id!);
          flocks.add(flock!);
          is_specific_flock = true;
-       }else{
+       } else{
          flocks.add(Flock(f_id: -1,
              f_name: 'Farm Wide'.tr(),
              bird_count: 0,
@@ -390,6 +404,24 @@ class _NewIncome extends State<NewIncome>
   }
 
 
+  void _updateAmount() {
+    try {
+      final howMany = double.tryParse(howmanyController.text) ?? 0;
+      final unitPrice = double.tryParse(unitPriceController.text) ?? 0;
+      final total = howMany * unitPrice;
+
+      // Update amount field (without triggering rebuilds or loops)
+      amountController.text = total.toStringAsFixed(2);
+      setState(() {
+
+      });
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
+
+
   int activeStep = 0;
 
   bool imagesAdded = false;
@@ -518,6 +550,7 @@ class _NewIncome extends State<NewIncome>
                               .text,
                           short_note: notesController.text,
                           how_many: howmanyController.text,
+                          unitPrice: double.parse(unitPriceController.text),
                           extra_cost: "",
                           extra_cost_details: "",
                           f_name: _purposeselectedValue, flock_update_id: '-1',
@@ -562,6 +595,7 @@ class _NewIncome extends State<NewIncome>
                               .text,
                           short_note: notesController.text,
                           how_many: howmanyController.text,
+                          unitPrice: double.parse(unitPriceController.text),
                           extra_cost: "",
                           extra_cost_details: "",
                           f_name: _purposeselectedValue, flock_update_id: '-1',
@@ -759,12 +793,12 @@ class _NewIncome extends State<NewIncome>
                               ),
                             ),
 
-                            SizedBox(height: 20),
+                            SizedBox(height: 15),
                             // Flock Selection
                             _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
                             SizedBox(height: 8),
                             _buildDropdownField(getDropDownList()),
-                            SizedBox(height: 20),
+                            SizedBox(height: 15),
                             // Purpose Selection
                             _buildInputLabel("PURPOSE1".tr(), Icons.assignment),
                             SizedBox(height: 8),
@@ -784,7 +818,7 @@ class _NewIncome extends State<NewIncome>
 
                             // Income Categories
                             if (choose_option) ...[
-                              SizedBox(height: 20),
+                              SizedBox(height: 10),
                               _buildInputLabel("Income Categories".tr(), Icons.category),
                               SizedBox(height: 8),
                               Row(
@@ -796,7 +830,7 @@ class _NewIncome extends State<NewIncome>
                               ),
                             ],
 
-                            SizedBox(height: 20),
+                            SizedBox(height: 15),
 
                             // How Many & Sale Amount
                             Row(
@@ -813,18 +847,31 @@ class _NewIncome extends State<NewIncome>
                                     ],
                                   ),
                                 ),
-                                SizedBox(width: 10),
+                                SizedBox(width: 5),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      _buildInputLabel("SALE_AMOUNT".tr(), Icons.attach_money),
+                                      _buildInputLabel("UNIT_PRICE".tr(), Icons.attach_money),
                                       SizedBox(height: 8),
-                                      _buildNumberField(amountController, "SALE_AMOUNT".tr(), allowFloat: true),
+                                      _buildNumberField(unitPriceController, "UNIT_PRICE".tr(), allowFloat: true),
                                     ],
                                   ),
                                 ),
                               ],
+                            ),
+
+                            SizedBox(height: 15),
+
+                            Container(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildInputLabel("SALE_AMOUNT".tr(), Icons.attach_money),
+                                  SizedBox(height: 8),
+                                  _buildNumberField(amountController, "SALE_AMOUNT".tr(), allowFloat: true),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -1332,8 +1379,8 @@ class _NewIncome extends State<NewIncome>
       ),
       child: Row(
         children: [
-          Icon(Icons.numbers, color: Utils.getThemeColorBlue(), size: 24), // Icon added for better UI
-          SizedBox(width: 10),
+          Icon(Icons.numbers, color: Utils.getThemeColorBlue(), size: 15), // Icon added for better UI
+          SizedBox(width: 5),
           Expanded(
             child: TextFormField(
               controller: controller,

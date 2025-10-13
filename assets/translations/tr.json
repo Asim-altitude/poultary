@@ -1020,6 +1020,11 @@
  "Vaccinate for respiratory diseases": "Solunum hastalıkları için aşı",
  "Check for signs of stress or disease": "Stres veya hastalık belirtilerini kontrol edin",
  "Provide calcium supplements": "Kalsiyum takviyeleri sağlayın",
- "Provide protein supplements": "Protein takviyeleri sağlayın"
+ "Provide protein supplements": "Protein takviyeleri sağlayın",
+
+ "Quick Menu": "Hızlı Menü",
+ "Enter Type": "Türü Girin",
+ "Provide eggs count": "Yumurta sayısını sağlayın",
+ "UNIT_PRICE": "Birim Fiyatı"
 
 }

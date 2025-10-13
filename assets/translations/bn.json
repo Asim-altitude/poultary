@@ -1020,6 +1020,11 @@
   "Vaccinate for respiratory diseases": "শ্বাসযন্ত্রের রোগের জন্য টিকা দিন",
   "Check for signs of stress or disease": "চাপ বা রোগের লক্ষণগুলির জন্য পরীক্ষা করুন",
   "Provide calcium supplements": "ক্যালসিয়াম পরিপূরক সরবরাহ করুন",
-  "Provide protein supplements": "প্রোটিন পরিপূরক সরবরাহ করুন"
+  "Provide protein supplements": "প্রোটিন পরিপূরক সরবরাহ করুন",
+
+  "Quick Menu": "দ্রুত মেনু",
+  "Enter Type": "প্রকার প্রবেশ করান",
+  "Provide eggs count": "ডিম গণনা সরবরাহ করুন",
+  "UNIT_PRICE": "ইউনিট মূল্য"
 
 }

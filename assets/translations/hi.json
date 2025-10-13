@@ -1021,6 +1021,12 @@
   "Vaccinate for respiratory diseases": "श्वसन रोगों के लिए टीकाकरण",
   "Check for signs of stress or disease": "तनाव या बीमारी के संकेतों की जाँच करें",
   "Provide calcium supplements": "कैल्शियम की खुराक प्रदान करें",
-  "Provide protein supplements": "प्रोटीन की खुराक प्रदान करें"
+  "Provide protein supplements": "प्रोटीन की खुराक प्रदान करें",
+
+
+  "Quick Menu": "जल्दी तैयार होने वाला मेनू",
+  "Enter Type": "प्रकार दर्ज करें",
+  "Provide eggs count": "अंडों की गिनती बताएं",
+  "UNIT_PRICE": "यूनिट मूल्य"
 
 }

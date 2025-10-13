@@ -1017,6 +1017,11 @@
   "Vaccinate for respiratory diseases": "疫苗接种呼吸道疾病",
   "Check for signs of stress or disease": "检查压力或疾病的迹象",
   "Provide calcium supplements": "提供钙补充剂",
-  "Provide protein supplements": "提供蛋白质补充剂"
+  "Provide protein supplements": "提供蛋白质补充剂",
+
+  "Quick Menu": "快捷菜单",
+  "Enter Type": "输入类型",
+  "Provide eggs count": "提供鸡蛋计数",
+  "UNIT_PRICE": "单价"
 
 }
