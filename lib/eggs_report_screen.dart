@@ -285,7 +285,9 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                                       fontWeight: FontWeight.w600),
                                 )),
                           ),
-                          InkWell(
+                          if(!Platform.isIOS)
+
+                            InkWell(
                             onTap: () async {
                               Utils.setupInvoiceInitials("EGGS_REPORT".tr(), pdf_formatted_date_filter);
                               await prepareListData();

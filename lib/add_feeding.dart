@@ -463,7 +463,7 @@ class _NewFeeding extends State<NewFeeding>
                   onStepReached: (index) => setState(() => activeStep = index),
                 ),
                 Container(
-                  height: heightScreen - 250,
+                  // height: heightScreen - 250,
                   margin: EdgeInsets.only(top: 10),
                   child: Column(
 

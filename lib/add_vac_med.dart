@@ -568,7 +568,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                 ),
 
                 Container(
-                  height: heightScreen - 140,
+                  // height: heightScreen - 140,
                   alignment: Alignment.center,
                   child: Column(
                       children: [

@@ -209,7 +209,9 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                                   fontWeight: FontWeight.w600),
                             )),
                       ),
-                      InkWell(
+                      if(!Platform.isIOS)
+
+                        InkWell(
                         onTap: () async {
                           Utils.setupInvoiceInitials("FLOCK_REPORT".tr(),pdf_formatted_date_filter);
                           Utils.flock_details = list;

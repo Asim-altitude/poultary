@@ -353,7 +353,9 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                                   fontWeight: FontWeight.w600),
                             )),
                       ),
-                      InkWell(
+                      if(!Platform.isIOS)
+
+                        InkWell(
                         onTap: () {
 
                           Utils.setupInvoiceInitials("Feeding Report".tr(),pdf_formatted_date_filter);
