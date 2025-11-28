@@ -319,7 +319,8 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                       print("Everything Okay");
                       await DatabaseHelper.instance.database;
 
-                      if (isCollection) {
+                      if (isCollection)
+                      {
                         if (isEdit)
                         {
 

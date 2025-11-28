@@ -120,6 +120,187 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
   }
 
+
+  Future<void> _showFlockBatchesBottomSheet(BuildContext context) async {
+    List<Flock_Detail> additionList =
+    await DatabaseHelper.getFlockDetailsByFlock(Utils.selected_flock!.f_id);
+
+    print("${additionList.length} ADDED FOUND");
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: 16,
+              left: 16,
+              right: 16,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Handle bar
+                Center(
+                  child: Container(
+                    width: 60,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade400,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // 🔹 Quick Action Buttons
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue.shade600,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    ),
+                    icon: const Icon(Icons.change_circle_outlined, color: Colors.white),
+                    label: Text("Modify Birds".tr(),
+                        style: const TextStyle(color: Colors.white)),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      // 👉 Navigate or show your add birds logic here
+                      moveToAddReduceFlock();
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Empty state
+                if (additionList.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Center(
+                      child: Text(
+                        "No batches found for this flock.",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  )
+                else
+                  SizedBox(
+                    height: 400,
+                    child: ListView.builder(
+                      itemCount: additionList.length,
+                      itemBuilder: (context, index) {
+                        final detail = additionList[index];
+                        final recordDate =
+                        DateTime.tryParse(detail.acqusition_date);
+                        final ageDays = recordDate != null
+                            ? DateTime.now().difference(recordDate).inDays
+                            : 0;
+                        final ageText = recordDate == null
+                            ? "Unknown"
+                            : (ageDays < 30
+                            ? "$ageDays days"
+                            : "${(ageDays / 30).floor()} months ${ageDays % 30} days");
+
+                        return Card(
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          margin: const EdgeInsets.symmetric(vertical: 6),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 12),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                CircleAvatar(
+                                  radius: 25,
+                                  backgroundColor: Colors.blue.shade100,
+                                  child: Icon(
+                                    Icons.group_work,
+                                    size: 28,
+                                    color: Colors.blue.shade700,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        "Birds".tr() +
+                                            ":" +
+                                            " ${detail.item_count}",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: detail.item_type
+                                                .toLowerCase() ==
+                                                "addition"
+                                                ? Colors.green
+                                                : Colors.red),
+                                      ),
+                                      Text(
+                                        detail.item_type.toLowerCase() ==
+                                            "addition"
+                                            ? "Added".tr() +
+                                            " " +
+                                            "ON".tr() +
+                                            ":" +
+                                            " ${Utils.getFormattedDate(detail.acqusition_date)}"
+                                            : "Reduced".tr() +
+                                            " " +
+                                            "ON".tr() +
+                                            ":" +
+                                            " ${Utils.getFormattedDate(detail.acqusition_date)}",
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      Text(
+                                        Utils.getAnimalAgeWeeks(
+                                            detail.acqusition_date) +
+                                            " ",
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.grey,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+
+
   Future<List<Flock_Image>> getSavedImages() async {
 
     await DatabaseHelper.instance.database;
@@ -382,25 +563,38 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               /// 🔢 Bird Count
-                              Row(
-                                children: [
-                                  Text(
-                                    Utils.selected_flock!.active_bird_count.toString(),
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
+
+                              InkWell(
+                                onTap: () async {
+                                  await _showFlockBatchesBottomSheet(context);
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.all(5.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white12,
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    "BIRDS".tr(),
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white70,
-                                    ),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        Utils.selected_flock!.active_bird_count.toString(),
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        "BIRDS".tr(),
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white70,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
 
                               const SizedBox(height: 8),
@@ -2109,6 +2303,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                       farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
                       f_sync_id: Utils.selected_flock!.sync_id
                     );
+
                     DatabaseHelper.insertFlockDetail(reductionObject);
 
                     if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_birds")){
@@ -2124,7 +2319,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                       flock.farm_id = Utils.currentUser!.farmId;
                       flock.last_modified = Utils.getTimeStamp();
                       flock.modified_by = Utils.currentUser!.email;
-                      FireBaseUtils.updateFlock(flock);
+                      await FireBaseUtils.updateFlock(flock);
 
                     }
 

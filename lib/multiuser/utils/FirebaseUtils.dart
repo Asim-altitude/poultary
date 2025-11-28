@@ -118,10 +118,14 @@ class FireBaseUtils{
     try {
       Utils.showLoading();
 
+      print('FLOCK ID ${flock.toJson()}');
       final docRef = firestore.collection(FLOCKS).doc(flock.sync_id);
       final docSnap = await docRef.get();
 
       if (docSnap.exists) {
+        print("EXISTS");
+        print(docSnap.data());
+        print(flock.toJson());
         // ✅ Update existing flock
         await docRef.update({
           'last_modified': FieldValue.serverTimestamp(),
@@ -129,7 +133,9 @@ class FireBaseUtils{
           'flock': flock.toFBJson(),
         });
         return true;
-      } else {
+      } else
+      {
+        print("CREATE NEW");
         // ✅ Create new flock if not exists
         flock.sync_status = SyncStatus.UPDATED;
         FlockFB flockFB = FlockFB(flock: flock)
@@ -138,6 +144,7 @@ class FireBaseUtils{
           ..last_modified = flock.last_modified;
 
         await docRef.set(flockFB.toJson());
+        print("CREATED");
         return true; // treat as success
       }
     } catch (e) {

@@ -979,7 +979,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
       ..createSync(recursive: true)
       ..writeAsBytesSync(excel.encode()!);
 
-    Utils.showToast("Saved to Downloads: egg_report_$formattedDate.xlsx");
+    Utils.showToast("Saved to Downloads: financial_report_$formattedDate.xlsx");
 
     // ✅ Share/Open the file safely
     await Share.shareXFiles(
@@ -993,7 +993,8 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
       List<FlockIncomeExpense> flockIncomeExpenseList,
       List<FinancialItem> topIncomeSources,
       List<FinancialItem> topExpenses,
-      ) async {
+      ) async
+  {
     var excel = Excel.createExcel();
     var sheet = excel['Financial Report'.tr()];
 

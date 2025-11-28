@@ -1491,6 +1491,12 @@ $storeLink
       case RecurrenceType.monthly:
         interval = const Duration(days: 30);
         break;
+      case RecurrenceType.every3months:
+        interval = const Duration(days: 90);
+        break;
+      case RecurrenceType.every6months:
+        interval = const Duration(days: 180);
+        break;
     }
 
     for (int i = 0; i < (recurrence == RecurrenceType.once ? 1 : 6); i++) {

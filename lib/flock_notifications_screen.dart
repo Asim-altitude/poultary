@@ -18,6 +18,7 @@ class FlockNotificationScreen extends StatefulWidget {
 
 class _FlockNotificationScreenState extends State<FlockNotificationScreen> {
    List<ScheduledNotification> upcomingNotifications = [];
+
   void filterNotifications() {
     final now = DateTime.now();
 
@@ -491,8 +492,7 @@ class _FlockNotificationScreenState extends State<FlockNotificationScreen> {
         title: notification.title + "(${Utils.selected_flock!.f_name})",
         body: notification.description,
         scheduledDate: notification.scheduledAt,
-        payload: '${notification.flockId}_${notification.birdType}',
-      );
+        payload: '${notification.flockId}_${notification.birdType}',);
 
       index++;
       print("SCHEDULED_" +notification.title+" "+notification.description+" "+notification.scheduledAt.toIso8601String()+" "+notification.recurrence.toString());

@@ -3,4 +3,6 @@ enum RecurrenceType {
   weekly,
   every15Days,
   monthly,
+  every3months,
+  every6months
 }

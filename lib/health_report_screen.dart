@@ -394,7 +394,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
 
-    return SafeArea(child: Scaffold(
+    return Scaffold(
       body:SafeArea(
         top: false,
          child:Container(
@@ -774,7 +774,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
               )
 
             ]
-      ),),),),),);
+      ),),),),);
   }
 
   Widget _buildTopItemsGrid<T>(String title, List<T> items, IconData icon, Color color) {
