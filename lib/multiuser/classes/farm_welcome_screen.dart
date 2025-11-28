@@ -137,7 +137,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
       ),
       backgroundColor: const Color(0xFFF5F9FF),
       body: SafeArea(
-        child: Center(
+        child: SingleChildScrollView(
           child: Container(
             child: Column(
               children: [

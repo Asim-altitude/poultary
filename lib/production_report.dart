@@ -452,6 +452,7 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
           foregroundColor: Colors.white, // keeps title and back button white
           actions: [
             // Excel Icon (keeps its own color)
+            if(!Platform.isIOS)
             Theme(
               data: Theme.of(context).copyWith(
                 iconTheme: const IconThemeData(color: null), // reset inherited white

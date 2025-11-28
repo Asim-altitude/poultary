@@ -300,7 +300,9 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                                   fontWeight: FontWeight.w600),
                             )),
                       ),
-                      InkWell(
+                      if(!Platform.isIOS)
+
+                        InkWell(
                         onTap: () {
 
                           Utils.setupInvoiceInitials("Financial Report".tr(),pdf_formatted_date_filter);

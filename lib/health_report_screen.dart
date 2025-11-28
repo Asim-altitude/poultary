@@ -445,7 +445,9 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                                   fontWeight: FontWeight.w600),
                             )),
                       ),
-                      InkWell(
+                      if(!Platform.isIOS)
+
+                        InkWell(
                         onTap: () {
 
                           Utils.setupInvoiceInitials("Birds Health Report".tr(),pdf_formatted_date_filter);

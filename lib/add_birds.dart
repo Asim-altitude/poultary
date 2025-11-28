@@ -852,7 +852,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
 
                 SizedBox(height: 10,),
                 Container(
-                  height: !is_transaction ? heightScreen-250 : heightScreen - 134,
+                  // height: !is_transaction ? heightScreen-250 : heightScreen - 134,
                   child: Column(
                       children: [
 
