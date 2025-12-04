@@ -243,6 +243,7 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
   Future<void> _savePendingRecords() async {
     await DatabaseHelper.instance.database;
 
+    Utils.showLoading();
     for (var feeding in pendingFeedRecords) {
       print("Feeding Record $feeding");
       await DatabaseHelper.insertNewFeeding(feeding);
@@ -267,10 +268,12 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
     print("LAST_SYNC $now");
     await prefs.setString('lastSyncDate', now.toIso8601String());
 
+    Utils.hideLoading();
     // Show a confirmation message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Pending feed records saved successfully!'.tr())),
     );
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const HomeScreen()),

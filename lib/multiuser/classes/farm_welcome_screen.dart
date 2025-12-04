@@ -5,11 +5,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:poultary/auto_add_feed_screen.dart';
 import 'package:poultary/home_screen.dart';
 import 'package:poultary/multiuser/classes/backup_restore.dart';
 import 'package:poultary/multiuser/model/user.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../consume_store.dart';
 import '../../settings_screen.dart';
 import '../../utils/session_manager.dart';
@@ -382,6 +384,8 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
     setState(() {
       initializingSync = false;
     });*/
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isAutoFeedEnabled = prefs.getBool('isAutoFeedEnabled') ?? false;
 
     Utils.isShowAdd = false;
     Utils.isMultiUSer = true;
@@ -389,11 +393,18 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
     Utils.setupAds();
     if (initialized) {
       if (widget.multiUser.role.toLowerCase() == 'admin') {
-        Navigator.pushAndRemoveUntil(context,
-          MaterialPageRoute(builder: (_) =>
-              HomeScreen(),)
-          ,(route) => false,);
-
+        if(isAutoFeedEnabled){
+          Navigator.pushAndRemoveUntil(context,
+            MaterialPageRoute(builder: (_) =>
+                AutoFeedSyncScreen(),)
+            , (route) => false,);
+        }else
+        {
+          Navigator.pushAndRemoveUntil(context,
+            MaterialPageRoute(builder: (_) =>
+                HomeScreen(),)
+            , (route) => false,);
+        }
        /* Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => HomeScreen()),
@@ -1127,14 +1138,24 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
                   ),
                   textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   Utils.isShowAdd = false;
                   Utils.isMultiUSer = false;
                   onContinue(dontShowAgain);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => HomeScreen()),
-                  );
+                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  bool isAutoFeedEnabled = prefs.getBool('isAutoFeedEnabled') ?? false;
+
+                  if(isAutoFeedEnabled){
+                    Navigator.pushAndRemoveUntil(context,
+                      MaterialPageRoute(builder: (_) =>
+                          AutoFeedSyncScreen(),)
+                      , (route) => false,);
+                  }else {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => HomeScreen()),
+                    );
+                  }
                    // Pass checkbox state
                 },
               ),

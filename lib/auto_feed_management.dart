@@ -338,7 +338,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                                                   }).toList();
                                             });
                                           }, // Pass function
-                                          index, // Pass index
+                                          0//index, // Pass index
                                         ),
                                         Expanded(
                                           child: ListView.builder(
@@ -371,7 +371,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
 
                                             });
                                           }, // Pass function
-                                          index, // Pass index
+                                          0//index, // Pass index
                                         ),
                                         Expanded(
                                           child: ListView.builder(
@@ -411,7 +411,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
 
                                 });
                               }, // Pass function
-                              index, // Pass index
+                              0//index, // Pass index
                             ),
                             ListView.builder(
                               shrinkWrap: true,

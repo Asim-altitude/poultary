@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:poultary/home_screen.dart';
 import 'package:poultary/multiuser/classes/WorkerDashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../auto_add_feed_screen.dart';
 import '../../database/databse_helper.dart';
 import '../../utils/session_manager.dart';
 import '../../utils/utils.dart';
@@ -87,12 +88,21 @@ class _BackupFoundScreenState extends State<BackupFoundScreen> {
           print("✅ Database download complete.");
           downloadingDB = false;
           Utils.showToast("RESTORE_SUCCESSFUL".tr());
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          bool isAutoFeedEnabled = prefs.getBool('isAutoFeedEnabled') ?? false;
 
           if (widget.isAdmin) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => HomeScreen()),
-            );
+            if(isAutoFeedEnabled){
+              Navigator.pushAndRemoveUntil(context,
+                MaterialPageRoute(builder: (_) =>
+                    AutoFeedSyncScreen(),)
+                , (route) => false,);
+            }else {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => HomeScreen()),
+              );
+            }
           } else {
             Navigator.pushReplacement(
               context,
