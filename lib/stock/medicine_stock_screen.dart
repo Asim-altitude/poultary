@@ -533,7 +533,8 @@ class _AddMedicineStockBottomSheetState extends State<AddMedicineStockBottomShee
 
   bool isRequired = false;
   List<String> _sourceList = ["PURCHASED", "GIFT", "OTHER"];
-  List<String> _unitList = ["Tab","Cap","mg","g","kg","Vial","ml","L","Dust"];
+  List<String> _unitList = ["Tab","Cap","mg","g","kg","Vial","ml","L","Dust","Drop","Dose","Strip","Packet","Piece","Dozen","Carton","Spoon","Cup","Biscuit"];
+
 
   String selectedPaymentMethod = "Cash";
   String selectedStatus = "CLEARED";

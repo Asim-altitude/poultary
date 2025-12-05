@@ -17,21 +17,22 @@ import 'package:poultary/utils/utils.dart';
 import 'database/databse_helper.dart';
 import 'model/category_item.dart';
 import 'model/flock.dart';
+import 'model/health/multi_medicine.dart';
 import 'model/medicine_stock_summary.dart';
 import 'model/vaccine_stock_summary.dart';
 import 'multiuser/utils/SyncStatus.dart';
 
-class NewVaccineMedicine extends StatefulWidget {
+class NewMultiVaccineMedicine extends StatefulWidget {
   Vaccination_Medication? vaccination_medication;
-  NewVaccineMedicine({Key? key, this.vaccination_medication}) : super(key: key);
+  NewMultiVaccineMedicine({Key? key, this.vaccination_medication}) : super(key: key);
 
   @override
-  _NewVaccineMedicine createState() => _NewVaccineMedicine();
+  _NewMultiVaccineMedicine createState() => _NewMultiVaccineMedicine();
 }
 
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
-class _NewVaccineMedicine extends State<NewVaccineMedicine>
+class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
     with SingleTickerProviderStateMixin {
   double widthScreen = 0;
   double heightScreen = 0;
@@ -87,10 +88,11 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
       qtycountController.text = widget.vaccination_medication!.quantity;
       _selectedUnit = widget.vaccination_medication!.unit;
       _selectedunitList.add(_selectedUnit);
+      getUsageItems();
     }
 
+   // getDiseaseList();
     getList();
-    getDiseaseList();
     Utils.setupAds();
 
   }
@@ -139,15 +141,25 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
       medicineList.add(medSubItem.elementAt(i).name!);
     }
 
+
+    CategoryItem disease = CategoryItem(id: null, name: "Disease");
+    medicineCategoryID = await DatabaseHelper.addCategoryIfNotExists(disease);
+
+    _subItemList = await DatabaseHelper.getSubCategoryList(medicineCategoryID!);
+
+    for(int i=0;i<_subItemList.length;i++){
+      _diseaseList.add(_subItemList.elementAt(i).name!);
+    }
+
       if(!isEdit) {
         _medselectedValue = medicineList[0];
+        _diseaseelectedValue = _diseaseList[0];
         print(_medselectedValue);
         populateAvailableUnits();
+        TreatmentEntry treatmentEntry = TreatmentEntry(medicineName: _medselectedValue, diseaseName: _diseaseelectedValue, unit: "Tab", quantity: 1);
+        multiMedicineList.add(treatmentEntry);
       }
-      else{
-        medicineList.clear();
-        medicineList.add(_medselectedValue);
-      }
+
 
     setState(() {
 
@@ -269,6 +281,59 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
   }
 
+  Future<void> updateMultiRecords(int usageId) async {
+    for (var entry in multiMedicineList) {
+      if (entry.id == null) {
+        MedicineUsageItem item = MedicineUsageItem(
+          usageId: usageId,
+          medicineName: entry.medicineName!,
+          diseaseName: entry.diseaseName!,
+          unit: entry.unit!,
+          quantity: entry.quantity ?? 0.0,
+          sync_id: Utils.getUniueId(),
+          last_modified: Utils.getTimeStamp(),
+          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+        );
+
+        await DatabaseHelper.insertMedicineUsageItem(item);
+      } else {
+        MedicineUsageItem item = MedicineUsageItem(
+          id: entry.id,
+          usageId: usageId,
+          medicineName: entry.medicineName!,
+          diseaseName: entry.diseaseName!,
+          unit: entry.unit!,
+          quantity: entry.quantity ?? 0.0,
+          last_modified: Utils.getTimeStamp(),
+          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+        );
+
+        await DatabaseHelper.updateMedicineUsageItem(item);
+      }
+    }
+  }
+
+  Future<void> addMultiRecords(int usageId) async {
+    for (var entry in multiMedicineList) {
+      MedicineUsageItem item = MedicineUsageItem(
+        usageId: usageId,
+        medicineName: entry.medicineName!,
+        diseaseName: entry.diseaseName!,
+        unit: entry.unit!,
+        quantity: entry.quantity ?? 0.0,
+        sync_id: Utils.getUniueId(),
+        last_modified: Utils.getTimeStamp(),
+        modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+        farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+      );
+
+      await DatabaseHelper.insertMedicineUsageItem(item);
+    }
+  }
+
+
   Flock? currentFlock = null;
 
   bool _validate = false;
@@ -360,9 +425,10 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
 
                   activeStep++;
 
-                  if(activeStep==1){
+                  if(activeStep==1)
+                  {
 
-                    if(qtycountController.text.trim().length==0)
+                   /* if(qtycountController.text.trim().length==0)
                     {
                       activeStep--;
                       Utils.showToast("PROVIDE_ALL");
@@ -370,21 +436,24 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                       setState(() {
 
                       });
-                    }
+                    }*/
+                    setState(() {
 
+                    });
                   }
 
                   if(activeStep==2){
 
-                    if(doctorController.text.trim().length==0 || qtycountController.text.isEmpty || bird_countController.text.isEmpty){
+                    if(doctorController.text.trim().length==0 /*|| qtycountController.text.isEmpty */|| bird_countController.text.isEmpty){
                       activeStep--;
                       Utils.showToast("PROVIDE_ALL");
                     }else{
-                      if(isEdit) {
+                      if(isEdit)
+                      {
                         Vaccination_Medication med_vacc = Vaccination_Medication(
                           f_id: getFlockID(),
-                          disease: _diseaseelectedValue,
-                          medicine: _medselectedValue,
+                          disease: "",
+                          medicine: "",
                           date: date,
                           type: Utils.vaccine_medicine.toLowerCase()
                               .contains("medi")
@@ -403,8 +472,8 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                             f_sync_id: getFlockSyncID());
 
                         med_vacc.id = widget.vaccination_medication!.id!;
-                        int? id = await DatabaseHelper.updateHealth(
-                            med_vacc);
+                        int? id = await DatabaseHelper.updateHealth(med_vacc);
+                        await updateMultiRecords(med_vacc.id!);
                         Utils.showToast("SUCCESSFUL");
 
                         if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_health")){
@@ -412,11 +481,13 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                         }
 
                         Navigator.pop(context);
-                      } else {
+                      }
+                      else
+                      {
                         Vaccination_Medication med_vacc = Vaccination_Medication(
                           f_id: getFlockID(),
-                          disease: _diseaseelectedValue,
-                          medicine: _medselectedValue,
+                          disease: "",
+                          medicine: "",
                           date: date,
                           type: Utils.vaccine_medicine.toLowerCase()
                               .contains("medi")
@@ -433,8 +504,8 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                             modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
                             farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
                             f_sync_id: getFlockSyncID());
-                        int? id = await DatabaseHelper.insertMedVac(
-                            med_vacc);
+                        int? id = await DatabaseHelper.insertMedVac(med_vacc);
+                        await addMultiRecords(id!);
                         Utils.showToast("SUCCESSFUL");
 
                         if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_health")){
@@ -609,12 +680,12 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                             // Choose Flock
                             _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
                             SizedBox(height: 5),
-                            _buildDropdownField(getDropDownList()),
+                            _buildSimpleDropdownField(getDropDownList()),
 
                             SizedBox(height: 15),
 
                             // Choose Disease
-                            Row(
+                            /*Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 _buildInputLabel("Choose Disease".tr(), Icons.sick),
@@ -636,13 +707,13 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                     },
                                     child: Icon(Icons.add_circle, size: 27, color: Colors.blue,)),
                               ],
-                            ),
-                            SizedBox(height: 5),
+                            ),*/
+                            /*SizedBox(height: 5),
                             _buildDropdownField(getDiseaseTypeList()),
-
+*/
                             SizedBox(height: 15),
                             // Choose Medicine
-                            Row(
+                          /*  Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 _buildInputLabel(Utils.vaccine_medicine.toLowerCase().contains("medi")? "Medicine name".tr() : "Vaccine name".tr(), Icons.medical_information),
@@ -748,7 +819,52 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                     ),
                                   ): SizedBox(width: 1,)
                                 ],
-                              ),
+                              ),*/
+
+                            Column(
+                              children: [
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: multiMedicineList.length,
+                                  itemBuilder: (context, i) => buildMultiMedicineItem(i),
+                                ),
+
+                                SizedBox(height: 10),
+
+                                /// ➕ Add New Entry Button
+                                AnimatedSwitcher(
+                                  duration: Duration(milliseconds: 300),
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        TreatmentEntry treatmentEntry = TreatmentEntry(medicineName: _medselectedValue, diseaseName: _diseaseelectedValue, unit: "Tab", quantity: 1);
+                                        multiMedicineList.add(treatmentEntry);
+                                      });
+                                    },
+                                    child: Visibility(
+                                      visible: isEdit? false : true,
+                                      child: Container(
+                                        padding: EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Utils.getThemeColorBlue(),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.add, color: Colors.white),
+                                            SizedBox(width: 6),
+                                            Text("Add Another Treatment".tr(), style: TextStyle(color: Colors.white)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                              ],
+                            )
 
                           ],
                         ),
@@ -833,6 +949,229 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
           ),
         ),
       ),
+    );
+  }
+
+
+  Widget buildMultiMedicineItem(int index) {
+    final entry = multiMedicineList[index];
+
+    return Card(
+      elevation: 3,
+      shadowColor: Colors.black26,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
+      margin: EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Treatment".tr()+" ${index + 1}",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.blueGrey)),
+                if (index > 0 && !isEdit)
+                  InkWell(
+                      onTap: () => setState(() => multiMedicineList.removeAt(index)),
+                      child: Icon(Icons.close, color: Colors.red, size: 22)),
+              ],
+            ),
+
+            SizedBox(height: 10),
+
+            // Disease Dropdown
+            _titleWithIcon("Disease".tr(), Icons.sick, () async {
+              /*int? catID = await DatabaseHelper.addCategoryIfNotExists(
+                CategoryItem(id: null, ca: "Disease", category_type: '', name: ''),
+              );
+              await addNewItem(catID!, 0);*/
+            }),
+
+            SizedBox(height: 6),
+
+            _buildDropdownField(
+              _diseaseList,
+              value: entry.diseaseName,
+              onChanged: (value) {
+                setState(() {
+                  entry.diseaseName = value;
+                });
+              },
+            ),
+
+            SizedBox(height: 12),
+
+            // Medicine Dropdown
+            _titleWithIcon(
+              Utils.vaccine_medicine.toLowerCase().contains("medi") ? "Medicine" : "Vaccine",
+              Icons.medication_rounded,
+                  () async {
+                String type = Utils.vaccine_medicine.toLowerCase().contains("medi")
+                    ? "Medicine"
+                    : "Vaccine";
+
+               /* int? catID = await DatabaseHelper.addCategoryIfNotExists(
+                  CategoryItem(id: null, category_name: type, category_type: ''),
+                );
+                await addNewItem(catID!, 1);*/
+              },
+            ),
+
+            SizedBox(height: 6),
+
+            _buildDropdownField(
+              medicineList,
+              value: entry.medicineName,
+              onChanged: (value) {
+                setState(() {
+                  entry.medicineName = value;
+                });
+              },
+            ),
+
+            SizedBox(height: 12),
+
+            Row(
+              children: [
+                // Qty Field
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Quantity".tr(), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                      SizedBox(height: 6),
+                      _buildFloatField(
+                        value: entry.quantity,
+                        onChanged: (v) {
+                          setState(() {
+                            entry.quantity = v ?? 0.0;
+                          });
+                        },
+                      )
+
+                    ],
+                  ),
+                ),
+                SizedBox(width: 10),
+                // Unit Dropdown
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Unit".tr(), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                      SizedBox(height: 6),
+                      _buildDropdownField(
+                        _unitList,
+                        value: entry.unit,
+                        onChanged: (value) {
+                          setState(() => entry.unit = value);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            // STOCK DISPLAY
+            if (entry.medicineId != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: _buildStockWidget(entry, index),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _titleWithIcon(String text, IconData icon, VoidCallback onAdd) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 18, color: Colors.blueGrey),
+            SizedBox(width: 6),
+            Text(text, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          ],
+        ),
+        InkWell(onTap: onAdd, child: Icon(Icons.add_circle, size: 20, color: Utils.getThemeColorBlue())),
+      ],
+    );
+  }
+
+  Widget _buildStockWidget(TreatmentEntry entry, int index) {
+    bool outOfStock = entry.availableStock <= 0;
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: outOfStock ? Colors.red.withOpacity(0.15) : Colors.green.withOpacity(0.15),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "Stock: ${entry.availableStock}",
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: outOfStock ? Colors.red : Colors.green,
+            ),
+          ),
+          if (outOfStock)
+            InkWell(
+              onTap: () async {
+                // Implement your stock add logic here
+              },
+              child: Text("Add Stock",
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue())),
+            )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDropdownField(
+      List<String> items, {
+        required String? value,
+        required Function(String?) onChanged,
+        String hint = "Select",
+      }) {
+    return DropdownButtonFormField<String>(
+      isExpanded: true,
+      value: value,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      ),
+      items: items.map((item) {
+        return DropdownMenuItem<String>(
+          value: item,
+          child: Text(item),
+        );
+      }).toList(),
+      onChanged: onChanged,
+    );
+  }
+
+  // Custom Dropdown Field
+  Widget _buildSimpleDropdownField(Widget dropdown) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade300, width: 1.2),
+      ),
+      child: dropdown,
     );
   }
 
@@ -998,6 +1337,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
   }
 
 
+/*
 // Custom Dropdown Field
   Widget _buildDropdownField(Widget dropdown) {
     return Container(
@@ -1010,6 +1350,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
       child: dropdown,
     );
   }
+*/
 
 // Custom Number Field
   Widget _buildNumberField(TextEditingController controller, String hint) {
@@ -1087,7 +1428,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
     );
   }
 
-  // Custom Number Field
+  /*// Custom Number Field
   Widget _buildFloatField(TextEditingController controller, String hint) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -1114,7 +1455,47 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
       ),
     );
   }
-
+*/
+  Widget _buildFloatField({
+    required double? value,
+    required Function(double?) onChanged,
+    String hint = "Qty",
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
+      ),
+      child: TextFormField(
+        initialValue: value != null && value != 0.0 ? value.toString() : "",
+        keyboardType: TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}$')),
+          TextInputFormatter.withFunction((oldValue, newValue) {
+            final text = newValue.text;
+            if (text.isEmpty) return newValue;
+            if (text.contains('..')) return oldValue;
+            if (text == ".") return oldValue;
+            return double.tryParse(text) == null ? oldValue : newValue;
+          }),
+        ],
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: hint,
+          hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+        ),
+        onChanged: (txt) {
+          if (txt.isEmpty) {
+            onChanged(null);
+          } else {
+            onChanged(double.tryParse(txt));
+          }
+        },
+      ),
+    );
+  }
 
   Widget getDropDownList() {
     return Container(
@@ -1377,7 +1758,49 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
   }
 
 
+  List<TreatmentEntry> multiMedicineList = [];
+
+  Future<void> getUsageItems() async {
+    var mMedicineList = await DatabaseHelper.getMedicineItemsByUsage(widget.vaccination_medication!.id!);
+
+    for(int i=0;i<mMedicineList.length;i++){
+      MedicineUsageItem medicineUsageItem = mMedicineList[i];
+      TreatmentEntry treatmentEntry = TreatmentEntry(id: medicineUsageItem.id,diseaseName: medicineUsageItem.diseaseName, medicineName: medicineUsageItem.medicineName, quantity: medicineUsageItem.quantity, unit: medicineUsageItem.unit);
+      multiMedicineList.add(treatmentEntry);
+    }
+
+    setState(() {
+
+    });
+
+  }
 
 
 
+}
+
+
+class TreatmentEntry {
+  int? id;
+  int? diseaseId;
+  String? diseaseName;
+
+  int? medicineId;
+  String? medicineName;
+
+  String? unit;
+  double quantity;
+
+  double availableStock; // optional stored to avoid recalculation
+
+  TreatmentEntry({
+    this.id,
+    this.diseaseId,
+    this.diseaseName,
+    this.medicineId,
+    this.medicineName,
+    this.unit,
+    this.quantity = 0,
+    this.availableStock = 0,
+  });
 }

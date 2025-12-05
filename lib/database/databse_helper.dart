@@ -36,6 +36,7 @@ import '../model/finance_chart_data.dart';
 import '../model/finance_summary_flock.dart';
 import '../model/flock_detail.dart';
 import '../model/flock_image.dart';
+import '../model/health/multi_medicine.dart';
 import '../model/health_chart_data.dart';
 import '../model/medicine_stock_summary.dart';
 import '../model/sale_contractor.dart';
@@ -302,6 +303,19 @@ class DatabaseHelper  {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
 
+  }
+
+  static Future<void> createMultiMedicineTable() async {
+    await _database?.execute('''
+    CREATE TABLE IF NOT EXISTS MedicineUsageItems (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  usage_id INTEGER NOT NULL,
+  medicine_name TEXT NOT NULL,
+  disease_name TEXT NOT NULL,
+  unit TEXT NOT NULL,
+  quantity REAL NOT NULL
+  )
+  ''');
   }
 
   static Future<void> createSyncFailedTable() async {
@@ -3946,6 +3960,43 @@ class DatabaseHelper  {
       whereArgs: [name],
     );
     return result!.isNotEmpty ? result.first : null;
+  }
+
+
+  static Future<List<MedicineUsageItem>> getMedicineItemsByUsage(int usageId) async {
+
+    final List<Map<String, Object?>>? result = await _database?.query(
+      "MedicineUsageItems",
+      where: "usage_id = ?",
+      whereArgs: [usageId],
+    );
+
+    return result!.map((json) => MedicineUsageItem.fromMap(json)).toList();
+  }
+
+  static Future<int> insertMedicineUsageItem(MedicineUsageItem item) async {
+    final db = _database;
+    return await db!.insert(
+      'MedicineUsageItems',
+      item.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  static Future<int> updateMedicineUsageItem(MedicineUsageItem item) async {
+    final db = _database;
+
+    if (item.id == null) {
+      throw Exception("Cannot update MedicineUsageItem without an ID");
+    }
+
+    return await db!.update(
+      'MedicineUsageItems',
+      item.toMap(),
+      where: 'id = ?',
+      whereArgs: [item.id],
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
 

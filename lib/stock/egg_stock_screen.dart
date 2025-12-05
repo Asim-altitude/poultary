@@ -136,6 +136,10 @@ class _EggStockScreenState extends State<EggStockScreen> {
 
       return dateB.compareTo(dateA); // descending order
     });
+
+    setState(() {
+
+    });
   }
 
 

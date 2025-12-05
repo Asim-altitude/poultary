@@ -193,6 +193,7 @@ class Utils {
       await DatabaseHelper.createStockExpenseJunction();
       await DatabaseHelper.createEggTransactionJunction();
       await DatabaseHelper.createSyncFailedTable();
+      await DatabaseHelper.createMultiMedicineTable();
       await DatabaseHelper.addColumnIfNotExists("Transactions", "unit_price", "REAL", 0);
       await addNewColumn();
       await addMissingCategories();

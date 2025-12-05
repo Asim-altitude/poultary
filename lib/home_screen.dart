@@ -241,6 +241,7 @@ class _HomeScreen extends State<HomeScreen> {
        'StockExpense',
        'CustomCategory',
        'CustomCategoryData',
+       'MedicineUsageItems'
 
      ]; // Add your actual table names
 

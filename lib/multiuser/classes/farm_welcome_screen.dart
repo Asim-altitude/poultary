@@ -1153,8 +1153,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
                   }else {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (_) => HomeScreen()),
-                    );
+                      MaterialPageRoute(builder: (_) => HomeScreen()),);
                   }
                    // Pass checkbox state
                 },

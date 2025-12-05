@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:poultary/add_vac_med.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
+import 'add_multi_vac_med.dart';
 import 'database/databse_helper.dart';
 import 'model/flock.dart';
 import 'model/med_vac_item.dart';
@@ -239,6 +240,13 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
 
                     Utils.vaccine_medicine = "Vaccination";
                     addNewVacMad();
+
+                   /* showTreatmentTypeBottomSheet(context, onSingleMedicineTap: () {
+                      addNewVacMad();
+                    }, onMultiMedicineTap: () {
+                      addMultiNewVacMad();
+                    });*/
+
                   },
                   borderRadius: BorderRadius.circular(10), // Rounded ripple effect
                   child: Container(
@@ -290,6 +298,12 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
 
                     Utils.vaccine_medicine = "Medication";
                     addNewVacMad();
+
+                   /* showTreatmentTypeBottomSheet(context, onSingleMedicineTap: () {
+                      addNewVacMad();
+                    }, onMultiMedicineTap: () {
+                      addMultiNewVacMad();
+                    });*/
                   },
 
                   borderRadius: BorderRadius.circular(10),
@@ -552,7 +566,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                                             text: TextSpan(
                                               children: [
                                                 TextSpan(
-                                                  text: "${vac_med_list[index].medicine!.tr()} ",
+                                                  text:  vac_med_list[index].medicine == ""? "Multi-Medicine Treatment" : "${vac_med_list[index].medicine!.tr()} ",
                                                   style: TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 18,
@@ -568,7 +582,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                                                   ),
                                                 ),
                                                 TextSpan(
-                                                  text: " - ${vac_med_list[index].quantity} ${vac_med_list[index].unit}".tr(),
+                                                  text: vac_med_list[index].medicine == ""? "" : " - ${vac_med_list[index].quantity} ${vac_med_list[index].unit}".tr(),
                                                   style: TextStyle(
                                                     fontWeight: FontWeight.normal,
                                                     fontSize: 16,
@@ -631,7 +645,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                                     SizedBox(height: 6),
 
                                     /// 🦠 Disease
-                                    Row(
+                                    vac_med_list[index].medicine == ""? SizedBox.shrink() : Row(
                                       children: [
                                         Icon(Icons.coronavirus, size: 16, color: Colors.red),
                                         SizedBox(width: 5),
@@ -681,6 +695,9 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                                         ),
                                       ),
 
+                                    vac_med_list[index].medicine == "" ? viewAllTreatmentsButton(() {
+                                      showMedicineDetailsBottomSheet(vac_med_list[index].id!);
+                                    }) : SizedBox.shrink(),
 
                                     /// **Sync Info Icon**
                                     if(Utils.isMultiUSer)
@@ -712,10 +729,11 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                                           ),
                                         ),
                                       ),
+
                                   ],
                                 ),
                               );
-                              ;
+
 
                             }),
                       ) :  Utils.getCustomEmptyMessage("assets/p_health.png", "No vaccination/medication added")
@@ -725,6 +743,154 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
               ),
             ],)),),);
   }
+
+  Widget viewAllTreatmentsButton(VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        margin: EdgeInsets.only(top: 10),
+        padding: EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: Utils.getThemeColorBlue(), // Your app theme color
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26.withOpacity(0.10),
+              blurRadius: 6,
+              offset: Offset(0, 3),
+            )
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.medical_services_outlined,
+                color: Colors.white, size: 22),
+            SizedBox(width: 8),
+            Text(
+              "View All Treatments".tr(),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void showMedicineDetailsBottomSheet(int usageId) async {
+    final items = await DatabaseHelper.getMedicineItemsByUsage(usageId);
+
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (_) {
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Top Handle
+                Container(
+                  width: 40,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+
+                SizedBox(height: 12),
+                Text(
+                  "Treatment Medicine Details".tr(),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 14),
+
+                items.isEmpty
+                    ? Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Text("No Medicines Found".tr(),
+                      style: TextStyle(fontSize: 15)),
+                )
+                    : ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    final med = items[index];
+                    return Container(
+                      margin: EdgeInsets.only(bottom: 10),
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                            color: Utils.getThemeColorBlue(), width: 0.7),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.medication_rounded,
+                              size: 26, color: Utils.getThemeColorBlue()),
+                          SizedBox(width: 10),
+
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  med.medicineName,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  "Disease".tr()+": ${med.diseaseName}",
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Qty + Unit
+                          Text(
+                            "${med.quantity} ${med.unit}",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black87,
+                            ),
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                ),
+
+                SizedBox(height: 10),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
 
   /// Function to Build Filter Buttons
   Widget buildFilterButton(String label, int index, Color color) {
@@ -792,6 +958,60 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
     );
   }
 
+  void showTreatmentTypeBottomSheet(
+      BuildContext context, {
+        required VoidCallback onSingleMedicineTap,
+        required VoidCallback onMultiMedicineTap,
+      })
+  {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  height: 4,
+                  width: 40,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.medical_services_outlined, color: Colors.blue,),
+                  title:  Text("Single Medicine Treatment".tr(), style: TextStyle(fontWeight: FontWeight.w600),),
+                  subtitle:  Text("Record a treatment with one medicine only".tr()),
+                  onTap: () {
+                    Navigator.pop(context);
+                    onSingleMedicineTap();
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.medication_liquid_outlined, color: Colors.blue,),
+                  title:  Text("Multi-Medicine Treatment".tr(), style: TextStyle(fontWeight: FontWeight.w600),),
+                  subtitle:  Text("Record treatment with multiple medicines".tr()),
+                  onTap: () {
+                    Navigator.pop(context);
+                    onMultiMedicineTap();
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   Widget _buildDropdownField(
       String label,
@@ -842,6 +1062,15 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
     );
   }
 
+  Future<void> addMultiNewVacMad() async {
+    var str = await Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => NewMultiVaccineMedicine()),
+    );
+
+    getFilteredTransactions(str_date, end_date);
+  }
   Future<void> addNewVacMad() async {
    var str = await Navigator.push(
       context,
@@ -1174,27 +1403,48 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
 
           if(vac_med_list.elementAt(selected_index!).type == 'Medication') {
             Utils.vaccine_medicine = "Medication";
-            var str = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      NewVaccineMedicine(
-                        vaccination_medication: vac_med_list.elementAt(
-                            selected_index!),)),
-            );
+            if(vac_med_list.elementAt(selected_index!).disease==""){
+              var str = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        NewMultiVaccineMedicine(
+                          vaccination_medication: vac_med_list.elementAt(
+                              selected_index!),)),
+              );
+            }else {
+              var str = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        NewVaccineMedicine(
+                          vaccination_medication: vac_med_list.elementAt(
+                              selected_index!),)),
+              );
+            }
 
             getFilteredTransactions(str_date, end_date);
           }else{
             Utils.vaccine_medicine = "Vaccination";
-            var str = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      NewVaccineMedicine(
-                        vaccination_medication: vac_med_list.elementAt(
-                            selected_index!),)),
-            );
-
+            if(vac_med_list.elementAt(selected_index!).disease==""){
+              var str = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        NewMultiVaccineMedicine(
+                          vaccination_medication: vac_med_list.elementAt(
+                              selected_index!),)),
+              );
+            }else {
+              var str = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        NewVaccineMedicine(
+                          vaccination_medication: vac_med_list.elementAt(
+                              selected_index!),)),
+              );
+            }
             getFilteredTransactions(str_date, end_date);
           }
         }

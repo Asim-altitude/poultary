@@ -281,6 +281,33 @@ class FireBaseUtils{
     }
   }
 
+  static Future<bool> uploadMultiHealthRecord(Vaccination_Medication health) async {
+    try {
+      Utils.showLoading();
+      final firestore = FirebaseFirestore.instance;
+
+      await firestore
+          .collection(HEALTH)
+          .doc(health.sync_id!)
+          .set(health.toFBJson());
+
+      Utils.hideLoading();
+      return true;
+    } catch (e) {
+      Utils.showError();
+      print("❌ Failed to upload: $e");
+      await DatabaseHelper.saveToSyncQueue(
+        type: HEALTH,
+        syncId: Utils.currentUser!.email,
+        opType: 'add',
+        payload: jsonEncode(health.toLocalFBJson()),
+        lastError: e.toString(),
+      );
+      return false;
+    }
+  }
+
+
   static Future<bool> updateHealthRecord(Vaccination_Medication health) async {
     try {
       Utils.showLoading();
