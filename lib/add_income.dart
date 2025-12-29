@@ -103,10 +103,25 @@ class _NewIncome extends State<NewIncome>
       howmanyController.text = widget.transactionItem!.how_many;
       soldtoController.text = widget.transactionItem!.sold_purchased_from;
       amountController.text = widget.transactionItem!.amount;
+
+      try {
+        double unitPrice = widget.transactionItem!.unitPrice ?? 0;
+        if (unitPrice == 0) {
+          double totalPrice = double.tryParse(widget.transactionItem!.amount) ??
+              0;
+          int how_many = int.tryParse(widget.transactionItem!.how_many) ?? 0;
+          if (how_many > 0) {
+            unitPrice = totalPrice / how_many;
+            widget.transactionItem!.unitPrice = unitPrice;
+          }
+        }
+      }catch(ex){
+        print(ex);
+      }
+
       unitPriceController.text = widget.transactionItem!.unitPrice!.toString();
 
-      print(payment_status);
-      print(payment_method);
+
 
     }else if(widget.selectedIncomeType != null){
       _saleselectedValue = widget.selectedIncomeType!;

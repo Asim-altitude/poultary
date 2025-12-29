@@ -8,6 +8,7 @@ import 'package:poultary/model/flock.dart';
 import 'package:poultary/model/med_vac_item.dart';
 import 'package:poultary/model/medicine_stock_history.dart';
 import 'package:poultary/model/sub_category_item.dart';
+import 'package:poultary/stock/model/general_stock.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:io';
@@ -52,6 +53,10 @@ import '../multiuser/model/role.dart';
 import '../multiuser/model/sync_queue.dart';
 import '../multiuser/model/user.dart';
 import '../multiuser/utils/SyncStatus.dart';
+import '../stock/model/stock_transactions.dart';
+import '../stock/tools_assets/model/tool_asset.dart';
+import '../stock/tools_assets/model/tool_asset_maintenance.dart';
+import '../stock/tools_assets/model/tool_asset_unit.dart';
 import '../utils/utils.dart';
 import 'package:uuid/uuid.dart';
 
@@ -305,6 +310,45 @@ class DatabaseHelper  {
 
   }
 
+  static Future<void> createGeneralStockTable() async {
+    await _database?.execute('''
+    CREATE TABLE IF NOT EXISTS GeneralStockItems (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  category TEXT NOT NULL,
+  unit TEXT NOT NULL,
+  current_quantity REAL NOT NULL DEFAULT 0,
+  min_quantity REAL NOT NULL DEFAULT 0,
+  image TEXT,
+  notes TEXT,
+  created_at TEXT NOT NULL)
+  ''');
+  }
+
+  static Future<void> createGeneralStockTransactions() async {
+    await _database?.execute('''
+   CREATE TABLE IF NOT EXISTS GeneralStockTransactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  item_id INTEGER NOT NULL,
+  type TEXT NOT NULL,                 -- 'IN' or 'OUT'
+  quantity REAL NOT NULL,
+  cost_per_unit REAL,
+  total_cost REAL,
+  date TEXT NOT NULL,
+  tr_id INTEGER,
+  notes TEXT)
+  ''');
+  }
+
+  static Future<void> createGeneralStockCategories() async {
+    await _database?.execute('''
+   CREATE TABLE IF NOT EXISTS StockCategories (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  description TEXT)
+  ''');
+  }
+
   static Future<void> createMultiMedicineTable() async {
     await _database?.execute('''
     CREATE TABLE IF NOT EXISTS MedicineUsageItems (
@@ -438,6 +482,501 @@ class DatabaseHelper  {
     )
   ''');
   }
+
+  static Future<void> createToolAssetMasterTable() async {
+
+    await _database?.execute('''
+    CREATE TABLE IF NOT EXISTS ToolAssetMaster (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+      name TEXT NOT NULL,
+      category TEXT NOT NULL,
+      type TEXT NOT NULL,              -- Tool | Asset
+      unit TEXT DEFAULT 'pcs',
+
+      description TEXT,
+      image TEXT,
+
+      created_at TEXT NOT NULL,
+      updated_at TEXT
+    )
+  ''');
+  }
+
+
+  static Future<void> createToolAssetUnitTable() async {
+    await _database?.execute('''
+    CREATE TABLE IF NOT EXISTS ToolAssetUnit (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+      master_id INTEGER NOT NULL,
+
+      asset_code TEXT,
+      condition TEXT NOT NULL,          -- Good | Fair | Needs Repair | Damaged
+      status TEXT NOT NULL,             -- Active | In Repair | Lost | Disposed
+
+      location TEXT,
+      assigned_to TEXT,
+
+      purchase_date TEXT,
+      purchase_price REAL DEFAULT 0,
+
+      notes TEXT,
+
+      created_at TEXT NOT NULL,
+      updated_at TEXT,
+      tr_id TEXT,
+      
+      FOREIGN KEY (master_id)
+        REFERENCES ToolAssetMaster (id)
+        ON DELETE CASCADE
+    )
+  ''');
+  }
+
+
+  static Future<void> createToolAssetMaintenanceTable() async {
+    await _database?.execute('''
+    CREATE TABLE IF NOT EXISTS TooAssetMaintenance (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+      asset_unit_id INTEGER NOT NULL,
+
+      maintenance_type TEXT NOT NULL,     -- Repair | Service | Inspection | Replacement
+      description TEXT,
+
+      cost REAL DEFAULT 0,
+      performed_by TEXT,
+
+      maintenance_date TEXT NOT NULL,
+      next_due_date TEXT,
+
+      status TEXT DEFAULT 'Completed',    -- Completed | Pending
+
+      created_at TEXT NOT NULL,
+      
+      tr_id TEXT,
+
+      FOREIGN KEY (asset_unit_id)
+        REFERENCES ToolAssetUnit (id)
+        ON DELETE CASCADE
+    )
+  ''');
+  }
+
+
+  // INSERT
+  static Future<int> insertToolAssetMaster(ToolAssetMaster item) async {
+    final db = _database;
+    return await db!.insert(
+      'ToolAssetMaster',
+      item.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+// UPDATE
+  static Future<int> updateToolAssetMaster(ToolAssetMaster item) async {
+    return await _database!.update(
+      'ToolAssetMaster',
+      item.toMap(),
+      where: 'id = ?',
+      whereArgs: [item.id],
+    );
+  }
+
+// DELETE
+  static Future<int> deleteToolAssetMaster(int id) async {
+    return await _database!.delete(
+      'ToolAssetMaster',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+// GET ALL
+  static Future<List<ToolAssetMaster>> getAllToolAssetMasters() async {
+    final res = await _database!.query(
+      'ToolAssetMaster',
+      orderBy: 'created_at DESC',
+    );
+    return res.map((e) => ToolAssetMaster.fromMap(e)).toList();
+  }
+
+
+  // INSERT SINGLE UNIT
+  static Future<int> insertToolAssetUnit(ToolAssetUnit unit) async {
+    return await _database!.insert(
+      'ToolAssetUnit',
+      unit.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+// BULK INSERT (WHEN USER ADDS QUANTITY)
+  static Future<void> insertMultipleToolAssetUnitsWithPurchase(
+      int masterId,
+      int quantity, {
+        required double unitPrice,
+        required String purchaseDate,
+        String condition = "Good",
+        String status = "Active",
+        String? location,
+        String? assignedTo,
+        String? notes,
+        int? trId
+      }) async
+  {
+    final db = _database!;
+    final batch = db.batch();
+    final now = DateTime.now().toIso8601String();
+
+    for (int i = 0; i < quantity; i++) {
+      batch.insert(
+        'ToolAssetUnit',
+        {
+          'master_id': masterId,
+          'condition': condition,
+          'status': status,
+          'purchase_price': unitPrice,
+          'purchase_date': purchaseDate,
+          'location': location,
+          'assigned_to': assignedTo,
+          'notes': notes,
+          'created_at': now,
+          'tr_id' : trId
+        },
+      );
+    }
+
+    await batch.commit(noResult: true);
+  }
+
+
+// UPDATE UNIT
+  static Future<int> updateToolAssetUnit(ToolAssetUnit unit) async {
+    return await _database!.update(
+      'ToolAssetUnit',
+      unit.toMap(),
+      where: 'id = ?',
+      whereArgs: [unit.id],
+    );
+  }
+
+// DELETE UNIT
+  static Future<int> deleteToolAssetUnit(int id) async {
+    return await _database!.delete(
+      'ToolAssetUnit',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+// GET UNITS BY MASTER
+  static Future<List<ToolAssetUnit>> getUnitsByMaster(int masterId) async {
+    final res = await _database!.query(
+      'ToolAssetUnit',
+      where: 'master_id = ?',
+      whereArgs: [masterId],
+      orderBy: 'created_at DESC',
+    );
+
+    for (final row in res) {
+      print(row); // 👈 check if tr_id exists here
+    }
+
+    return res.map((e) => ToolAssetUnit.fromMap(e)).toList();
+  }
+
+  // INSERT
+  static Future<int> insertMaintenanceLog(
+      ToolAssetMaintenance log,
+      ) async {
+    return await _database!.insert(
+      'TooAssetMaintenance',
+      log.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+// UPDATE
+  static Future<int> updateMaintenanceLog(
+      ToolAssetMaintenance log,
+      ) async {
+    return await _database!.update(
+      'TooAssetMaintenance',
+      log.toMap(),
+      where: 'id = ?',
+      whereArgs: [log.id],
+    );
+  }
+
+// DELETE
+  static Future<int> deleteMaintenanceLog(int id) async {
+    return await _database!.delete(
+      'TooAssetMaintenance',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  static Future<int> updateMaintenanceStatus(
+      int id,
+      String status,
+      String completedDate,
+      ) async
+  {
+    final db = _database;
+    return await db!.update(
+      'TooAssetMaintenance',
+      {
+        'status': status,
+        'maintenance_date': completedDate,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+
+// GET MAINTENANCE BY UNIT
+  static Future<List<ToolAssetMaintenance>> getMaintenanceByUnit(
+      int assetUnitId,
+      ) async
+  {
+    final res = await _database!.query(
+      'TooAssetMaintenance',
+      where: 'asset_unit_id = ?',
+      whereArgs: [assetUnitId],
+      orderBy: 'maintenance_date DESC',
+    );
+    return res.map((e) => ToolAssetMaintenance.fromMap(e)).toList();
+  }
+
+  static Future<double> getTotalMaintenanceCostByUnit(
+      int assetUnitId) async
+  {
+    final db = _database!;
+
+    final res = await db.rawQuery(
+      '''
+    SELECT SUM(cost) as total
+    FROM TooAssetMaintenance
+    WHERE asset_unit_id = ?
+    ''',
+      [assetUnitId],
+    );
+
+    final total = res.first['total'];
+
+    if (total == null) return 0.0;
+
+    return (total as num).toDouble();
+  }
+
+
+  static Future<int> insertGeneralStockItem(GeneralStockItem item) async {
+    final db = _database;
+    return await db!.insert(
+      'GeneralStockItems',
+      item.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  static Future<int> updateGeneralStockItem(GeneralStockItem item) async {
+    final db = _database;
+    return await db!.update(
+      'GeneralStockItems',
+      item.toMap(),
+      where: 'id = ?',
+      whereArgs: [item.id],
+    );
+  }
+
+  static Future<int> deleteGeneralStockItem(int id) async {
+    final db = _database;
+    return await db!.delete(
+      'GeneralStockItems',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  static Future<List<GeneralStockItem>> getAllGeneralStockItems() async {
+    final db = _database;
+    final result = await db!.query(
+      'GeneralStockItems',
+      orderBy: 'created_at DESC',
+    );
+
+    return result.map((e) => GeneralStockItem.fromMap(e)).toList();
+  }
+
+  static Future<double> getTotalInForItem(int itemId) async {
+    final db = _database;
+    final result = await db!.rawQuery(
+        "SELECT SUM(quantity) as total FROM GeneralStockTransactions WHERE item_id = ? AND type = 'IN'",
+        [itemId]);
+    return (result.first["total"] ?? 0.0) as double;
+  }
+
+  static Future<double> getTotalOutForItem(int itemId) async {
+    final db = _database;
+    final result = await db!.rawQuery(
+        "SELECT SUM(quantity) as total FROM GeneralStockTransactions WHERE item_id = ? AND type = 'OUT'",
+        [itemId]);
+    return (result.first["total"] ?? 0.0) as double;
+  }
+
+
+  static Future<GeneralStockItem?> getGenStockItemById(int id) async {
+    final db = _database;
+    final result = await db!.query(
+      'GeneralStockItems',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (result.isNotEmpty) {
+      return GeneralStockItem.fromMap(result.first);
+    }
+    return null;
+  }
+
+
+  static Future<int> insertStockTransaction(GeneralStockTransaction tx) async {
+    final db = _database;
+    return await db!.insert(
+      'GeneralStockTransactions',
+      tx.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  static Future<int> updateStockTransaction(GeneralStockTransaction tx) async {
+    final db = _database;
+    return await db!.update(
+      'GeneralStockTransactions',
+      tx.toMap(),
+      where: 'id = ?',
+      whereArgs: [tx.id],
+    );
+  }
+
+  static Future<int> deleteStockTransaction(int id) async {
+    final db = _database;
+    return await db!.delete(
+      'GeneralStockTransactions',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+
+  static Future<int> deleteStockTransactionByItemID(int item_id) async {
+    final db = _database;
+    return await db!.delete(
+      'GeneralStockTransactions',
+      where: 'item_id = ?',
+      whereArgs: [item_id],
+    );
+  }
+
+  static Future<List<GeneralStockTransaction>> getStockTransactionsForItem(int itemId) async {
+    final db = _database;
+    final result = await db!.query(
+      'GeneralStockTransactions',
+      where: 'item_id = ?',
+      whereArgs: [itemId],
+      orderBy: 'date DESC',
+    );
+
+    return result.map((e) => GeneralStockTransaction.fromMap(e)).toList();
+  }
+
+  static Future<List<GeneralStockTransaction>> getAllStockTransactions() async {
+    final db = _database;
+    final result = await db!.query(
+      'GeneralStockTransactions',
+      orderBy: 'date DESC',
+    );
+
+    return result.map((e) => GeneralStockTransaction.fromMap(e)).toList();
+  }
+
+  static Future<GeneralStockTransaction?> getStockTransactionById(int id) async {
+    final db = _database;
+    final result = await db!.query(
+      'GeneralStockTransactions',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (result.isNotEmpty) {
+      return GeneralStockTransaction.fromMap(result.first);
+    }
+    return null;
+  }
+
+
+/*
+  static Future<int> insertStockCategory(StockCategory category) async {
+    final db = _database;
+    return await db!.insert(
+      'StockCategories',
+      category.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  static Future<int> updateStockCategory(StockCategory category) async {
+    final db = _database;
+    return await db!.update(
+      'StockCategories',
+      category.toMap(),
+      where: 'id = ?',
+      whereArgs: [category.id],
+    );
+  }
+
+  static Future<int> deleteStockCategory(int id) async {
+    final db = _database;
+    return await db!.delete(
+      'StockCategories',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  static Future<List<StockCategory>> getAllStockCategories() async {
+    final db = _database;
+    final result = await db!.query(
+      'StockCategories',
+      orderBy: 'name ASC',
+    );
+
+    return result.map((e) => StockCategory.fromMap(e)).toList();
+  }
+
+  static Future<StockCategory?> getStockCategoryById(int id) async {
+    final db = _database;
+    final result = await db!.query(
+      'StockCategories',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (result.isNotEmpty) {
+      return StockCategory.fromMap(result.first);
+    }
+    return null;
+  }
+*/
+
 
   static Future<void> saveToSyncQueue({
     required String type,
@@ -774,6 +1313,69 @@ class DatabaseHelper  {
       return null;
     }
   }
+
+
+  static Future<GeneralStockItem?> getGenStockBySyncId(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'GeneralStockItems',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return GeneralStockItem.fromJson(result.first);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<ToolAssetMaster?> getToolAssetStockBySyncId(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'ToolAssetMaster',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return ToolAssetMaster.fromMap(result.first);
+    } else {
+      return null;
+    }
+  }
+
+
+  static Future<GeneralStockTransaction?> getGenStockTransBySyncId(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'GeneralStockTransactions',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return GeneralStockTransaction.fromJson(result.first);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<ToolAssetUnit?> getToolAssetUnitBySyncId(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'ToolAssetUnit',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return ToolAssetUnit.fromMap(result.first);
+    } else {
+      return null;
+    }
+  }
+
 
   static Future<Flock?> getFlockBySyncId(String? syncId) async {
 
@@ -3995,6 +4597,33 @@ class DatabaseHelper  {
       item.toMap(),
       where: 'id = ?',
       whereArgs: [item.id],
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  static Future<int> deleteMedicineUsageItemsByUsageId(int usageId) async {
+    final db = _database;
+
+    return await db!.delete(
+      'MedicineUsageItems',
+      where: 'usage_id = ?',
+      whereArgs: [usageId],
+    );
+  }
+
+
+  static Future<int> updateMedicineUsageItemBySyncID(MedicineUsageItem item) async {
+    final db = _database;
+
+    if (item.id == null) {
+      throw Exception("Cannot update MedicineUsageItem without an ID");
+    }
+
+    return await db!.update(
+      'MedicineUsageItems',
+      item.toMap(),
+      where: 'sync_id = ?',
+      whereArgs: [item.sync_id],
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/add_vac_med.dart';
+import 'package:poultary/multiuser/model/multi_health_record.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'add_multi_vac_med.dart';
@@ -239,13 +240,13 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                     }
 
                     Utils.vaccine_medicine = "Vaccination";
-                    addNewVacMad();
+                   // addNewVacMad();
 
-                   /* showTreatmentTypeBottomSheet(context, onSingleMedicineTap: () {
+                    showTreatmentTypeBottomSheet(context, onSingleMedicineTap: () {
                       addNewVacMad();
                     }, onMultiMedicineTap: () {
                       addMultiNewVacMad();
-                    });*/
+                    });
 
                   },
                   borderRadius: BorderRadius.circular(10), // Rounded ripple effect
@@ -297,13 +298,13 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
                     }
 
                     Utils.vaccine_medicine = "Medication";
-                    addNewVacMad();
+                   // addNewVacMad();
 
-                   /* showTreatmentTypeBottomSheet(context, onSingleMedicineTap: () {
+                    showTreatmentTypeBottomSheet(context, onSingleMedicineTap: () {
                       addNewVacMad();
                     }, onMultiMedicineTap: () {
                       addMultiNewVacMad();
-                    });*/
+                    });
                   },
 
                   borderRadius: BorderRadius.circular(10),
@@ -1476,7 +1477,16 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
       child: Text("DELETE".tr()),
       onPressed:  () async {
         if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_health")){
-          await FireBaseUtils.deleteHealthRecord(vac_med_list.elementAt(selected_index!));
+          if(vac_med_list.elementAt(selected_index!).medicine== ""){
+            MultiHealthRecord multiHealthRecord = MultiHealthRecord();
+            Vaccination_Medication vaccination_medication = vac_med_list.elementAt(selected_index!);
+            vaccination_medication.f_sync_id = getFlockSyncID(vaccination_medication.f_id!);
+            multiHealthRecord.record = vaccination_medication;
+            multiHealthRecord.usageItems = await DatabaseHelper.getMedicineItemsByUsage(vac_med_list.elementAt(selected_index!).id!);
+            await FireBaseUtils.deleteMultiHealthRecord(multiHealthRecord);
+          }else {
+            await FireBaseUtils.deleteHealthRecord(vac_med_list.elementAt(selected_index!));
+          }
         }
 
         DatabaseHelper.deleteItem("Vaccination_Medication", selected_id!);
@@ -1509,6 +1519,18 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
     );
   }
 
+  String? getFlockSyncID(int f_id) {
+
+    String? selected_id = "unknown";
+    for(int i=0;i<flocks.length;i++){
+      if(f_id == flocks.elementAt(i).f_id){
+        selected_id = flocks.elementAt(i).sync_id;
+        break;
+      }
+    }
+
+    return selected_id;
+  }
 
   String sortSelected = "DESC"; // Default label
   String sortOption = "Date (new)";

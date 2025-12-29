@@ -173,6 +173,37 @@ class Utils {
     Share.share("Easy Poultry & Chicken manager: $link");
   }
 
+  static List<String> getTAllables(){
+    return [
+      'Flock',
+      'Flock_Image',
+      'Eggs',
+      'Feeding',
+      'Transactions',
+      'Vaccination_Medication',
+      'Category_Detail',
+      'EggTransaction',
+      'FeedBatch',
+      'FeedBatchItem',
+      'FeedIngredient',
+      'FeedStockHistory',
+      'Flock_Detail',
+      'MedicineStockHistory',
+      'SaleContractor',
+      'ScheduledNotification',
+      'VaccineStockHistory',
+      'WeightRecord',
+      'StockExpense',
+      'CustomCategory',
+      'CustomCategoryData',
+      'MedicineUsageItems',
+      'GeneralStockItems',
+      'GeneralStockTransactions',
+      'ToolAssetMaster',
+      'ToolAssetUnit',
+      'TooAssetMaintenance'
+    ];
+  }
 
   static Future<void> generateDatabaseTables() async {
     try
@@ -194,6 +225,11 @@ class Utils {
       await DatabaseHelper.createEggTransactionJunction();
       await DatabaseHelper.createSyncFailedTable();
       await DatabaseHelper.createMultiMedicineTable();
+      await DatabaseHelper.createGeneralStockTable();
+      await DatabaseHelper.createGeneralStockTransactions();
+      await DatabaseHelper.createToolAssetMasterTable();
+      await DatabaseHelper.createToolAssetUnitTable();
+      await DatabaseHelper.createToolAssetMaintenanceTable();
       await DatabaseHelper.addColumnIfNotExists("Transactions", "unit_price", "REAL", 0);
       await addNewColumn();
       await addMissingCategories();
@@ -1609,7 +1645,7 @@ $storeLink
       Utils.isShowAdd = true;
       inititalize();
     }
-
+    Utils.isShowAdd = false;
   }
 
 

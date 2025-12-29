@@ -12,10 +12,10 @@ class MultiHealthRecord {
   String? farm_id;
 
   // 🟦 Nested main record (Vaccination + Medication)
-  Vaccination_Medication record;
+  Vaccination_Medication? record;
 
   // 🟦 Nested list of usage items
-  List<MedicineUsageItem> usageItems;
+  List<MedicineUsageItem>? usageItems;
 
   MultiHealthRecord({
     this.sync_id,
@@ -23,8 +23,8 @@ class MultiHealthRecord {
     this.last_modified,
     this.modified_by,
     this.farm_id,
-    required this.record,
-    required this.usageItems,
+    this.record,
+    this.usageItems,
   });
 
   // ----------------------------
@@ -64,8 +64,8 @@ class MultiHealthRecord {
       "modified_by": modified_by,
       "farm_id": farm_id,
 
-      "record": record.toJson(),
-      "usage_items": usageItems.map((x) => x.toJson()).toList(),
+      "record": record!.toJson(),
+      "usage_items": usageItems!.map((x) => x.toJson()).toList(),
     };
   }
 
@@ -81,8 +81,8 @@ class MultiHealthRecord {
 
       "last_modified": FieldValue.serverTimestamp(),
 
-      "record": record.toFBJson(),
-      "usage_items": usageItems.map((x) => x.toJson()).toList(),
+      "record": record!.toFBJson(),
+      "usage_items": usageItems!.map((x) => x.toJson()).toList(),
     };
   }
 }

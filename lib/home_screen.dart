@@ -219,31 +219,7 @@ class _HomeScreen extends State<HomeScreen> {
     await Utils.generateDatabaseTables();
 
    try {
-     List<String> tables = [
-       'Flock',
-       'Flock_Image',
-       'Eggs',
-       'Feeding',
-       'Transactions',
-       'Vaccination_Medication',
-       'Category_Detail',
-       'EggTransaction',
-       'FeedBatch',
-       'FeedBatchItem',
-       'FeedIngredient',
-       'FeedStockHistory',
-       'Flock_Detail',
-       'MedicineStockHistory',
-       'SaleContractor',
-       'ScheduledNotification',
-       'VaccineStockHistory',
-       'WeightRecord',
-       'StockExpense',
-       'CustomCategory',
-       'CustomCategoryData',
-       'MedicineUsageItems'
-
-     ]; // Add your actual table names
+     List<String> tables = Utils.getTAllables(); // Add your actual table names
 
      for (final table in tables) {
        await DatabaseHelper.instance.addSyncColumnsToTable(table);
@@ -921,6 +897,7 @@ class _HomeScreen extends State<HomeScreen> {
     SyncManager().startCustomCategoryListening(farmId, lastSyncTime);
     SyncManager().startFeedIngredientListening(farmId, lastSyncTime);
     SyncManager().startHealthListening(farmId, lastSyncTime);
+    SyncManager().startMultiHealthListening(farmId, lastSyncTime);
     SyncManager().startCustomCategoryDataListening(farmId, lastSyncTime);
     SyncManager().startFeedBatchFBListening(farmId, lastSyncTime);
     SyncManager().startFeedStockFBListening(farmId, lastSyncTime);
