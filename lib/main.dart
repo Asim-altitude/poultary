@@ -7,7 +7,6 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/home_screen.dart';
-import 'package:poultary/multiuser/classes/WorkerDashboard.dart';
 import 'package:poultary/multiuser/model/user.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';

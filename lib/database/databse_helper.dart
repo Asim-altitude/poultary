@@ -1376,6 +1376,21 @@ class DatabaseHelper  {
     }
   }
 
+  static Future<ToolAssetMaintenance?> getAssetUnitMaintenanceBySyncId(String syncId) async {
+    final List<Map<String, dynamic>>? result = await _database?.query(
+      'TooAssetMaintenance',
+      where: 'sync_id = ?',
+      whereArgs: [syncId],
+      limit: 1,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      return ToolAssetMaintenance.fromMap(result.first);
+    } else {
+      return null;
+    }
+  }
+
 
   static Future<Flock?> getFlockBySyncId(String? syncId) async {
 
@@ -4918,7 +4933,8 @@ class DatabaseHelper  {
     };
   }
 
-  static Future<int> getFlockMortalityCount( int flockId) async {
+  static Future<int> getFlockMortalityCount(int flockId) async
+  {
      List<Map<String, Object?>>? result = null;
 
     if(flockId==-1){
@@ -4945,6 +4961,7 @@ class DatabaseHelper  {
       return 0;
     }
   }
+
   static Future<int> getFlockCullingCount( int flockId) async {
      List<Map<String, Object?>>? result = null;
     if(flockId==-1){
@@ -4972,6 +4989,93 @@ class DatabaseHelper  {
       return 0;
     }
   }
+
+  static Future<int> getFlockReductionCount({
+    required int flockId,
+    required String reason,     // 'MORTALITY' or 'CULLING'
+    required String str_date,   // yyyy-MM-dd
+    required String end_date,   // yyyy-MM-dd
+  }) async {
+    List<Map<String, Object?>>? result;
+
+    if (flockId == -1) {
+      result = await _database?.rawQuery(
+        '''
+      SELECT SUM(item_count) AS total
+      FROM flock_detail
+      WHERE item_type = 'Reduction'
+        AND reason = ?
+        AND acqusition_date BETWEEN ? AND ?
+      ''',
+        [reason, str_date, end_date],
+      );
+    } else {
+      result = await _database?.rawQuery(
+        '''
+      SELECT SUM(item_count) AS total
+      FROM flock_detail
+      WHERE f_id = ?
+        AND item_type = 'Reduction'
+        AND reason = ?
+        AND acqusition_date BETWEEN ? AND ?
+      ''',
+        [flockId, reason, str_date, end_date],
+      );
+    }
+
+    if (result != null &&
+        result.isNotEmpty &&
+        result.first['total'] != null) {
+      return (result.first['total'] as num).toInt();
+    }
+
+    return 0;
+  }
+
+
+
+  /*static Future<int> getFlockReductionCount({
+    required int flockId,
+    required String startDate, // format: yyyy-MM-dd
+    required String endDate,   // format: yyyy-MM-dd
+  }) async
+  {
+    List<Map<String, Object?>>? result;
+
+    if (flockId == -1) {
+      result = await _database?.rawQuery(
+        '''
+      SELECT SUM(item_count) AS reduction
+      FROM flock_detail
+      WHERE item_type = 'Reduction'
+        AND reason IN ('MORTALITY', 'CULLING')
+        AND acquisition_date BETWEEN ? AND ?
+      ''',
+        [startDate, endDate],
+      );
+    } else {
+      result = await _database?.rawQuery(
+        '''
+      SELECT SUM(item_count) AS reduction
+      FROM flock_detail
+      WHERE f_id = ?
+        AND item_type = 'Reduction'
+        AND reason IN ('MORTALITY', 'CULLING')
+        AND acquisition_date BETWEEN ? AND ?
+      ''',
+        [flockId, startDate, endDate],
+      );
+    }
+
+    if (result != null &&
+        result.isNotEmpty &&
+        result.first['reduction'] != null) {
+      return (result.first['reduction'] as num).toInt();
+    }
+
+    return 0;
+  }*/
+
 
   static Future<int?> updateFlockInfoBySyncID(Flock flock) async {
     return await _database?.update(

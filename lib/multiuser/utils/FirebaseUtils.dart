@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:poultary/multiuser/model/general%20stock_transactions_fb.dart';
+import 'package:poultary/multiuser/model/unit_maintenance_fb.dart';
 import 'package:poultary/multiuser/utils/SyncStatus.dart';
 import 'package:poultary/stock/model/stock_transactions.dart';
 
@@ -54,6 +55,7 @@ class FireBaseUtils{
   static final String GENERAL_STOCK_TRANS = "general_stock_transactions";
   static final String ASSET_TOOL_STOCK = "asset_tool_stock";
   static final String ASSET_UNIT_STOCK = "asset_unit_stock";
+  static final String ASSET_UNIT_MAINTENANCE_STOCK = "asset_unit_maintenance_stock";
   static final String BIRDS = "birds";
   static final String EGGS = "eggs";
   static final String FINANCE = "finance";
@@ -666,6 +668,37 @@ class FireBaseUtils{
       await DatabaseHelper.saveToSyncQueue(
         type: ASSET_UNIT_STOCK,
         syncId: Utils.currentUser!.email,
+        opType: 'delete',
+        payload: jsonEncode(assetUnitModel.toLocalJson()),
+        lastError: e.toString(),
+      );
+      return false;
+    }
+  }
+
+  static Future<bool> uploadAssetUnitMaintenanceStockRecord(AssetUnitMaintenanceFBModel assetUnitModel) async {
+    try {
+      Utils.showLoading();
+      final firestore = FirebaseFirestore.instance;
+
+      assetUnitModel.sync_status = SyncStatus.SYNCED;
+      assetUnitModel.last_modified = Utils.getTimeStamp();
+      assetUnitModel.modified_by = Utils.currentUser!.email;
+      assetUnitModel.sync_id = assetUnitModel.maintenance.sync_id;
+      assetUnitModel.farm_id = Utils.currentUser!.farmId;
+      await firestore
+          .collection(ASSET_UNIT_MAINTENANCE_STOCK)
+          .doc(assetUnitModel.sync_id!)
+          .set(assetUnitModel.toJson());
+
+      Utils.hideLoading();
+      return true;
+    } catch (e) {
+      Utils.showError();
+      print("❌ Failed to upload: $e");
+      await DatabaseHelper.saveToSyncQueue(
+        type: ASSET_UNIT_MAINTENANCE_STOCK,
+        syncId: Utils.currentUser!.email,
         opType: 'add',
         payload: jsonEncode(assetUnitModel.toLocalJson()),
         lastError: e.toString(),
@@ -673,6 +706,39 @@ class FireBaseUtils{
       return false;
     }
   }
+
+  static Future<bool> deleteAssetUnitMaintenanceStockTransRecord(AssetUnitMaintenanceFBModel assetUnitModel) async {
+    try {
+      Utils.showLoading();
+      final firestore = FirebaseFirestore.instance;
+
+      assetUnitModel.sync_status = SyncStatus.DELETED;
+      assetUnitModel.last_modified = Utils.getTimeStamp();
+      assetUnitModel.modified_by = Utils.currentUser!.email;
+      assetUnitModel.sync_id = assetUnitModel.maintenance.sync_id;
+      assetUnitModel.farm_id = Utils.currentUser!.farmId;
+      await firestore
+          .collection(ASSET_UNIT_MAINTENANCE_STOCK)
+          .doc(assetUnitModel.sync_id!)
+          .update(assetUnitModel.toJson());
+
+      Utils.hideLoading();
+      return true;
+    } catch (e) {
+      Utils.showError();
+      print("❌ Failed to upload: $e");
+      await DatabaseHelper.saveToSyncQueue(
+        type: ASSET_UNIT_MAINTENANCE_STOCK,
+        syncId: Utils.currentUser!.email,
+        opType: 'delete',
+        payload: jsonEncode(assetUnitModel.toLocalJson()),
+        lastError: e.toString(),
+      );
+      return false;
+    }
+  }
+
+
 
   static Future<bool> updateHealthRecord(Vaccination_Medication health) async {
     try {

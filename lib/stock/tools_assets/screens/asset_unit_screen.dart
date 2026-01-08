@@ -406,7 +406,8 @@ class _AssetUnitScreenState extends State<AssetUnitScreen> with RefreshMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("${widget.master.name}"+"Units".tr())),
+        title: Text("${widget.master.name}"+"Units".tr(),
+            style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),)),
       body: units.isEmpty
           ?  Center(child: Text("No units added yet".tr()))
           : ListView.builder(
@@ -469,12 +470,12 @@ class _AssetUnitScreenState extends State<AssetUnitScreen> with RefreshMixin {
       // 🔥 OPEN MAINTENANCE LOG SCREEN
       onTap: () {
        u.assetCode = u.assetCode ?? "Unit".tr()+" ${index + 1}";
-        /*Navigator.push(
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => AssetMaintenanceScreen(unit: u),
           ),
-        );*/
+        );
       },
 
       child: Card(

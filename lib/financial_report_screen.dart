@@ -97,6 +97,8 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
   }
 
   List<FlockIncomeExpense> flockFinanceList = [];
+
+  var sortedFlocks = [];
   void getAllData() async{
 
     await DatabaseHelper.instance.database;
@@ -117,6 +119,27 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
     net_income = num.parse(net_income.toStringAsFixed(2));
 
     getFilteredEggsCollections(str_date, end_date);
+
+
+    // Sort flocks: profitable first, then loss-making
+    final sortedFlocks = [...flockFinanceList];
+
+    sortedFlocks.sort((a, b) {
+      final profitA = a.totalIncome - a.totalExpense;
+      final profitB = b.totalIncome - b.totalExpense;
+
+      // Profitable first
+      final aProfitable = profitA >= 0;
+      final bProfitable = profitB >= 0;
+
+      if (aProfitable != bProfitable) {
+        return aProfitable ? -1 : 1;
+      }
+
+      // If both same category, sort by profit amount descending
+      return profitB.compareTo(profitA);
+    });
+
 
     setState(() {
 
@@ -470,8 +493,17 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
                            if(f_id==-1)
                              Column(
-                              children: flockFinanceList.map((flock) => _buildFlockRow(flock)).toList(),
-                            ),
+                               children: [
+                                 ...flockFinanceList.map((flock) => _buildFlockRow(
+                                   flock,
+                                   double.parse(gross_income.toString()),
+                                   double.parse(total_expense.toString()),
+                                 )).toList(),
+
+                               ],
+                             ),
+
+
                             SizedBox(height: 10),
 
                             // 📊 Top Income Items
@@ -595,85 +627,320 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
     );
   }
 
-  // 🔸 Flock-wise Row UI
+  /*// 🔸 Flock-wise Row UI
   Widget _buildFlockRow(FlockIncomeExpense flock) {
     double netProfit = flock.totalIncome - flock.totalExpense;
-    double profitMargin = flock.totalIncome == 0 ? 0 : (netProfit / flock.totalIncome) * 100;
+    double profitMargin =
+    flock.totalIncome == 0 ? 0 : (netProfit / flock.totalIncome) * 100;
+
     bool isProfitable = netProfit >= 0;
+
+    final double progressValue =
+        (profitMargin.clamp(0, 100)) / 100;
+
+    final Color progressColor =
+    isProfitable ? Colors.green.shade400 : Colors.red.shade400;
 
     return Card(
       elevation: 4,
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Container(
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blueGrey[50]!, Colors.white],
+            colors: [Colors.blueGrey.shade50, Colors.white],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(15),
         ),
-        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 🐔 Flock Name & Growth Icon
+            // 🐔 Flock Name & Profit %
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  flock.fName,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                // Flock Name (prevents overflow)
+                Expanded(
+                  child: Text(
+                    flock.fName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
                 ),
+
+                const SizedBox(width: 8),
+
+                // Profit Indicator
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      isProfitable ? Icons.trending_up : Icons.trending_down,
-                      color: isProfitable ? Colors.green : Colors.red,
-                      size: 22,
+                      isProfitable
+                          ? Icons.trending_up
+                          : Icons.trending_down,
+                      color: progressColor,
+                      size: 20,
                     ),
-                    SizedBox(width: 6),
+                    const SizedBox(width: 4),
                     Text(
                       '${profitMargin.toStringAsFixed(1)}%',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: isProfitable ? Colors.green : Colors.red,
+                        color: progressColor,
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-            SizedBox(height: 8),
 
-            // 🔹 Income & Expense Row
+            const SizedBox(height: 10),
+
+            // 🔹 Income / Expense / Net
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildFlockDetail(Icons.arrow_upward, 'Income', flock.totalIncome, Colors.green),
-                _buildFlockDetail(Icons.arrow_downward, 'Expense', flock.totalExpense, Colors.red),
-                _buildFlockDetail(Icons.account_balance_wallet, 'NET_INCOME', netProfit, isProfitable ? Colors.blue : Colors.red),
+                _buildFlockDetail(
+                  Icons.arrow_upward,
+                  'Income',
+                  flock.totalIncome,
+                  Colors.green,
+                ),
+                _buildFlockDetail(
+                  Icons.arrow_downward,
+                  'Expense',
+                  flock.totalExpense,
+                  Colors.red,
+                ),
+                _buildFlockDetail(
+                  Icons.account_balance_wallet,
+                  'NET_INCOME',
+                  netProfit,
+                  isProfitable ? Colors.blue : Colors.red,
+                ),
               ],
             ),
 
-            SizedBox(height: 10),
+            const SizedBox(height: 12),
 
-            // 📊 Profitability Progress Bar
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: LinearProgressIndicator(
-                value: (profitMargin.clamp(0, 100)) / 100,
-                backgroundColor: Colors.grey[300],
-                valueColor: AlwaysStoppedAnimation<Color>(isProfitable ? Colors.green : Colors.red),
-                minHeight: 6,
-              ),
+            // 📊 Animated Profit Progress Bar (consistent with feed & eggs)
+            TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0, end: progressValue),
+              duration: const Duration(milliseconds: 900),
+              builder: (context, value, child) {
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: value,
+                    minHeight: 6,
+                    backgroundColor: Colors.grey.shade200,
+                    valueColor:
+                    AlwaysStoppedAnimation<Color>(progressColor),
+                  ),
+                );
+              },
             ),
           ],
         ),
       ),
     );
   }
+*/
+  Widget _buildFlockRow(
+      FlockIncomeExpense flock,
+      double totalIncome,
+      double totalExpense,
+      ) {
+    final double netProfit = flock.totalIncome - flock.totalExpense;
+    final bool isProfitable = netProfit >= 0;
+
+    final double incomePercent =
+    totalIncome == 0 ? 0 : (flock.totalIncome / totalIncome);
+
+    final double expensePercent =
+    totalExpense == 0 ? 0 : (flock.totalExpense / totalExpense);
+
+    final int incomePercentValue = (incomePercent * 100).round();
+    final int expensePercentValue = (expensePercent * 100).round();
+
+    return Card(
+      elevation: 5,
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blueGrey.shade50, Colors.white],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.shade300,
+              blurRadius: 6,
+              offset: const Offset(2, 2),
+            )
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 🐔 Header: Flock Name + Profit Icon
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    flock.fName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+                Icon(
+                  isProfitable ? Icons.trending_up : Icons.trending_down,
+                  color: isProfitable ? Colors.green : Colors.red,
+                  size: 20,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  "${Utils.currency}$netProfit",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: isProfitable ? Colors.green : Colors.red,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // 💰 Income Bar
+            _buildFinanceBar(
+              label: "Income",
+              amount: flock.totalIncome,
+              percent: incomePercent,
+              percentValue: incomePercentValue,
+              color: Colors.green.shade400,
+            ),
+
+            const SizedBox(height: 8),
+
+            // 💸 Expense Bar
+            _buildFinanceBar(
+              label: "Expense",
+              amount: flock.totalExpense,
+              percent: expensePercent,
+              percentValue: expensePercentValue,
+              color: Colors.red.shade400,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+
+  Widget _buildFinanceBar({
+    required String label,
+    required double amount,
+    required double percent,
+    required int percentValue,
+    required Color color,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                "$label: ${Utils.currency}$amount",
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+            Text(
+              "$percentValue%",
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0, end: percent),
+          duration: const Duration(milliseconds: 900),
+          builder: (context, value, _) {
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                value: value,
+                minHeight: 8,
+                backgroundColor: Colors.grey.shade200,
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+
+
+  Widget _sectionHeader({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required int count,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 6),
+          Text(
+            "$title ($count)",
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const Spacer(),
+          Container(
+            height: 1,
+            width: 60,
+            color: color.withOpacity(0.4),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   // 🔹 Flock Detail (Income, Expense, Net Profit)
   Widget _buildFlockDetail(IconData icon, String label, double amount, Color color) {
@@ -760,6 +1027,14 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
   }
 
 
+
+  // 📝 Example Data
+  List<FinancialItem> topIncomeItems = [
+  ];
+
+  List<FinancialItem> topExpenseItems = [
+  ];
+
   void openDatePicker() {
     showDialog(
         context: context,
@@ -798,13 +1073,6 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
       ),
     );
   }
-
-  // 📝 Example Data
-  List<FinancialItem> topIncomeItems = [
-  ];
-
-  List<FinancialItem> topExpenseItems = [
-  ];
 
 
   List<String> filterList = ['TODAY','YESTERDAY','THIS_MONTH', 'LAST_MONTH','LAST3_MONTHS', 'LAST6_MONTHS','THIS_YEAR',

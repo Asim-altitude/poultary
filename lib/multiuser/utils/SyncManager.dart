@@ -31,6 +31,7 @@ import '../../model/vaccine_stock_history.dart';
 import '../../model/weight_record.dart';
 import '../../stock/model/stock_transactions.dart';
 import '../../stock/tools_assets/model/tool_asset.dart';
+import '../../stock/tools_assets/model/tool_asset_maintenance.dart';
 import '../../utils/session_manager.dart';
 import '../../utils/utils.dart';
 import '../model/assetunitfb.dart';
@@ -43,6 +44,7 @@ import '../model/flockfb.dart';
 import '../model/general stock_transactions_fb.dart';
 import '../model/ingridientfb.dart';
 import '../model/medicinestockfb.dart';
+import '../model/unit_maintenance_fb.dart';
 import '../model/vaccinestockfb.dart';
 import 'Deduplicator.dart';
 import 'FirebaseUtils.dart';
@@ -97,6 +99,7 @@ class SyncManager {
 
     startToolAssetStockListening(farmId, lastSyncTime);
     startAssetUnitListening(farmId, lastSyncTime);
+    startAssetUnitMaintenanceListening(farmId, lastSyncTime);
 
   }
 
@@ -1207,6 +1210,116 @@ class SyncManager {
     } catch (e) {
       completeSync();
       print("❌ General Stock sync error: $e");
+    }
+  }
+
+  Future<void> startAssetUnitMaintenanceListening(String farmId, DateTime? lastSyncTime) async {
+
+    final lastTime = await SessionManager.getLastSyncTime(FireBaseUtils.ASSET_UNIT_MAINTENANCE_STOCK);
+    if (lastTime != null) {
+      lastSyncTime = lastTime;
+    }
+    bool firstSnapshotHandled = false; // 👈 flag to only count once
+
+    try {
+      Query query = FirebaseFirestore.instance
+          .collection(FireBaseUtils.ASSET_UNIT_MAINTENANCE_STOCK) // Replace with your actual collection constant
+          .where('farm_id', isEqualTo: farmId);
+
+      if (lastSyncTime != null) {
+        query = query.where('last_modified', isGreaterThan: Timestamp.fromDate(lastSyncTime));
+      }
+
+      final sub = query.snapshots().listen((snapshot) async {
+        if (!firstSnapshotHandled) {
+          SyncManager().listenerCompleted(); // progress +1
+          firstSnapshotHandled = true;
+        }
+
+
+        for (var change in snapshot.docChanges) {
+          final data = change.doc.data() as Map<String, dynamic>;
+          print("ASSET_UNIT_MAINTENANCE_STOCK stock ID ${data['stock_sync_id']}");
+          startSync();
+          final assetUnitFBModel = AssetUnitMaintenanceFBModel.fromJson(data);
+
+          print("🔄 ASSET_UNIT_MAINTENANCE_STOCK SYNC: ${assetUnitFBModel.sync_status}, ${assetUnitFBModel.toLocalJson()}");
+          Utils.backup_changes += snapshot.docChanges.length;
+          if (assetUnitFBModel.last_modified!.isAfter(lastSyncTime!)) {
+            lastSyncTime = assetUnitFBModel.last_modified;
+          }
+
+          /*if(vaccination.modified_by == Utils.currentUser!.email)
+            return;
+*/
+          /*if(!deduplicator.shouldProcessUpdate(FireBaseUtils.HEALTH, vaccination.sync_id!, vaccination.last_modified!))
+            return;*/
+
+          bool exists = await DatabaseHelper.checkIfRecordExistsSyncID(
+            'TooAssetMaintenance', assetUnitFBModel.maintenance.sync_id!,
+          );
+
+          Flock? flock = await DatabaseHelper.getFlockBySyncId(null);
+          ToolAssetMaintenance? old = await DatabaseHelper.getAssetUnitMaintenanceBySyncId(assetUnitFBModel.maintenance.sync_id!);
+
+          if (exists) {
+            print("EXISTS");
+            if (assetUnitFBModel.sync_status == SyncStatus.DELETED) {
+              print("DELETING ASSET_UNIT_MAINTENANCE_STOCK");
+              if(old!.trId != null) {
+                await DatabaseHelper.deleteItem("Transactions", old.trId!);
+              }
+              await DatabaseHelper.deleteMaintenanceLog(old.id!);
+              print("DELETED ASSET_UNIT_MAINTENANCE_STOCK");
+            } /*else if(assetUnitFBModel.sync_status == SyncStatus.UPDATED){
+              print("UPDATING...");
+              ToolAssetMaster? toolAssetMaster = await DatabaseHelper.getToolAssetStockBySyncId(assetUnitFBModel.unit.master_sync_id!);
+              TransactionItem? transactionItem = await DatabaseHelper.getSingleTransaction(old!.trId!.toString());
+              transactionItem!.amount = assetUnitFBModel.transaction!.amount;
+              transactionItem.unitPrice = assetUnitFBModel.transaction!.unitPrice;
+
+              await DatabaseHelper.updateTransaction(transactionItem);
+              print("Transaction UPdated");
+
+              assetUnitFBModel.unit.masterId = toolAssetMaster!.id!;
+              assetUnitFBModel.unit.trId = old.trId!;
+              assetUnitFBModel.unit.id = old.id;
+              await DatabaseHelper.updateToolAssetUnit(assetUnitFBModel.unit);
+              print("ASSET_UNIT_STOCK Updated");
+
+            }*/
+
+            SessionManager.setLastSyncTime(FireBaseUtils.ASSET_UNIT_MAINTENANCE_STOCK, lastSyncTime!);
+
+          } else {
+            print("NOT EXISTS ELSE CASE");
+            if(assetUnitFBModel.sync_status != SyncStatus.DELETED) {
+              int? trId = null;
+              if(assetUnitFBModel.transaction != null){
+                print("Transaction Added");
+                trId = await DatabaseHelper.insertNewTransaction(assetUnitFBModel.transaction!);
+              }
+              ToolAssetUnit? toolAssetUnit = await DatabaseHelper.getToolAssetUnitBySyncId(assetUnitFBModel.maintenance.asset_sync_id!);
+              print(toolAssetUnit!.toMap());
+              assetUnitFBModel.maintenance.assetUnitId = toolAssetUnit.id!;
+              assetUnitFBModel.maintenance.trId = trId;
+              print(assetUnitFBModel.maintenance.toMap());
+              int? id = await DatabaseHelper.insertMaintenanceLog(assetUnitFBModel.maintenance);
+            }
+
+            SessionManager.setLastSyncTime(FireBaseUtils.ASSET_UNIT_MAINTENANCE_STOCK, lastSyncTime!);
+          }
+          RefreshEventBus().emit(FireBaseUtils.ASSET_UNIT_MAINTENANCE_STOCK);
+          completeSync();
+        }
+      });
+
+      _subscriptions.add(sub);
+
+      print("ASSET_UNIT_MAINTENANCE_STOCK SYNC STARTED");
+    } catch (e) {
+      completeSync();
+      print("❌ ASSET_UNIT_MAINTENANCE_STOCK error: $e");
     }
   }
 

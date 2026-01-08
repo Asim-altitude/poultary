@@ -15,6 +15,7 @@ import 'package:poultary/model/flock_detail.dart';
 import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/pdf/pdf_viewer_screen.dart';
 import 'package:poultary/pdf/production_pdf.dart';
+import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -89,6 +90,7 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
     }
     super.dispose();
   }
+
   Widget _buildWhiteCardVertical(String label, String value) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -162,11 +164,20 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getAllData();
+    getFilters();
     if(Utils.isShowAdd){
       _loadBannerAd();
     }
   }
+
+  int _reports_filter = 2;
+  void getFilters() async {
+
+    _reports_filter = (await SessionManager.getReportFilter())!;
+    date_filter_name = filterList.elementAt(_reports_filter);
+    getData(date_filter_name);
+  }
+
   _loadBannerAd(){
     // TODO: Initialize _bannerAd
     _bannerAd = BannerAd(
@@ -199,7 +210,7 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
 
   num gross_income=0,total_expense=0,profit=0,total_feed_consumption=0;
   int total_eggs_collected = 0, total_eggs_reduced = 0,total_eggs =0
-  ,total_birds_added=0,total_birds_reduced=0,mortality=0,culling=0;
+  ,total_birds_added=0,total_birds_reduced=0,mortality=0,culling=0,mortality_culling=0;
 
   List<TransactionItem> transactions =[];
   List<Eggs> eggsList = [];
@@ -209,235 +220,329 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
   Map<String, Map<String, dynamic>>? dailyBreakDown;
   List<MonthlyBreakdownData>? monthlyBreakDown;
 
+  bool isLoading = false;
   Future<void> getAllData() async {
+    if (!mounted) return;
 
-    totalDays = endDate.difference(startDate).inDays + 1;
-
-    gross_income = await DatabaseHelper.getTransactionsTotal(-1, "Income", getDateString(startDate), getDateString(endDate));
-    total_expense = await DatabaseHelper.getTransactionsTotal(-1, "Expense", getDateString(startDate), getDateString(endDate));
-    profit = gross_income - total_expense;
-
-    total_eggs_collected =
-    await DatabaseHelper.getEggCalculations(-1, 1, getDateString(startDate), getDateString(endDate));
-
-    total_eggs_reduced =
-    await DatabaseHelper.getEggCalculations(-1, 0, getDateString(startDate), getDateString(endDate));
-
-    total_eggs = total_eggs_collected - total_eggs_reduced;
-
-
-    total_birds_added = await DatabaseHelper.getBirdsCalculations(-1, "Addition", getDateString(startDate), getDateString(endDate));
-
-    total_birds_reduced = await DatabaseHelper.getBirdsCalculations(-1, "Reduction", getDateString(startDate), getDateString(endDate));
-
-    mortality = await DatabaseHelper.getFlockMortalityCount(-1);
-    culling = await DatabaseHelper.getFlockCullingCount(-1);
-
-    total_feed_consumption = await DatabaseHelper.getTotalFeedConsumption(-1, getDateString(startDate), getDateString(endDate));
-    total_feed_consumption = num.parse(total_feed_consumption.toStringAsFixed(2));
-
-    birdsInfoList = await DatabaseHelper.getFilteredFlockDetails(-1,"All",getDateString(startDate), getDateString(endDate));
-    eggsList = await DatabaseHelper.getFilteredEggs(-1, "All", getDateString(startDate), getDateString(endDate));
-    transactions = await DatabaseHelper.getReportFilteredTransactions(-1,"All",getDateString(startDate), getDateString(endDate));
-    feedList = await DatabaseHelper.getFilteredFeedingWithSort(-1,"All",getDateString(startDate), getDateString(endDate),"DESC");
-
-    dailyBreakDown = generateDailyBreakdown(transactions: transactions, feedings: feedList, eggsList: eggsList, flockDetails: birdsInfoList);
-    monthlyBreakDown = generateMonthlyBreakdown(flockDetails: birdsInfoList, eggs: eggsList, feedings: feedList, transactions: transactions);
-    _dailyExpanded = List.generate(totalDays, (index) => index == 0);
-    _monthlyExpanded = List.generate(monthlyBreakDown!.length , (index) => index == 0);
     setState(() {
-
+      isLoading = true;
+      totalDays = calculateTotalDays(str_date, end_date);
     });
+
+    try {
+      gross_income = await DatabaseHelper.getTransactionsTotal(
+          -1, "Income", str_date, end_date);
+
+      total_expense = await DatabaseHelper.getTransactionsTotal(
+          -1, "Expense", str_date, end_date);
+
+      profit = gross_income - total_expense;
+
+      total_eggs_collected =
+      await DatabaseHelper.getEggCalculations(-1, 1, str_date, end_date);
+
+      total_eggs_reduced =
+      await DatabaseHelper.getEggCalculations(-1, 0, str_date, end_date);
+
+      total_eggs = total_eggs_collected - total_eggs_reduced;
+
+      total_birds_added = await DatabaseHelper.getBirdsCalculations(
+          -1, "Addition", str_date, end_date);
+
+      total_birds_reduced = await DatabaseHelper.getBirdsCalculations(
+          -1, "Reduction", str_date, end_date);
+
+      /*mortality = await DatabaseHelper.getFlockMortalityCount(-1);
+      culling = await DatabaseHelper.getFlockCullingCount(-1);
+*/
+     try {
+       mortality =
+       await DatabaseHelper.getFlockReductionCount(flockId: -1, reason: "MORTALITY", str_date: str_date, end_date: end_date);
+       culling =
+       await DatabaseHelper.getFlockReductionCount(flockId: -1, reason: "CULLING", str_date: str_date, end_date: end_date);
+
+     }
+     catch(ex){
+       print(ex);
+     }
+
+      total_feed_consumption =
+      await DatabaseHelper.getTotalFeedConsumption(
+          -1, str_date, end_date);
+
+      total_feed_consumption =
+          num.parse(total_feed_consumption.toStringAsFixed(2));
+
+      birdsInfoList =
+      await DatabaseHelper.getFilteredFlockDetails(
+          -1, "All", str_date, end_date);
+
+      eggsList =
+      await DatabaseHelper.getFilteredEggs(
+          -1, "All", str_date, end_date);
+
+      transactions =
+      await DatabaseHelper.getReportFilteredTransactions(
+          -1, "All", str_date, end_date);
+
+      feedList =
+      await DatabaseHelper.getFilteredFeedingWithSort(
+          -1, "All", str_date, end_date, "DESC");
+
+      dailyBreakDown = generateDailyBreakdown(
+        startDate: str_date,
+        endDate: end_date,
+        transactions: transactions,
+        feedings: feedList,
+        eggsList: eggsList,
+        flockDetails: birdsInfoList,
+      );
+
+
+      monthlyBreakDown = generateMonthlyBreakdown(
+        flockDetails: birdsInfoList,
+        eggs: eggsList,
+        feedings: feedList,
+        transactions: transactions,
+      );
+
+      _dailyExpanded =
+          List.generate(dailyBreakDown!.length, (index) => index == 0);
+
+      _monthlyExpanded =
+          List.generate(monthlyBreakDown!.length, (index) => index == 0);
+
+    } finally {
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
+
+  int calculateTotalDays(String str_date, String end_date) {
+    final DateTime start = DateTime.parse(str_date);
+    final DateTime end = DateTime.parse(end_date);
+
+    return end.difference(start).inDays + 1; // +1 to include both dates
+  }
+
 
   List<MonthlyBreakdownData> generateMonthlyBreakdown({
     required List<Flock_Detail> flockDetails,
     required List<Eggs> eggs,
     required List<Feeding> feedings,
     required List<TransactionItem> transactions,
-  }) {
+  })
+  {
     final Map<String, MonthlyBreakdownData> monthlyData = {};
 
-    // Helper to format month
-    String getMonth(DateTime date) => "${date.year}-${date.month.toString().padLeft(2, '0')}";
+    String getMonth(DateTime d) =>
+        "${d.year}-${d.month.toString().padLeft(2, '0')}";
 
-    for (var f in flockDetails) {
+    // ---------------- FLOCK DETAILS ----------------
+    for (final f in flockDetails) {
       final date = DateTime.tryParse(f.acqusition_date);
-      if (date != null) {
-        final key = getMonth(date);
-        monthlyData.putIfAbsent(key, () => MonthlyBreakdownData(
-          month: key,
-          birdsAdded: 0,
-          birdsReduced: 0,
-          mortality: 0,
-          culling: 0,
-          totalEggs: 0,
-          totalFeedKg: 0.0,
-          income: 0.0,
-          expense: 0.0,
-        ));
+      if (date == null) continue;
 
-        final data = monthlyData[key]!;
-        if (f.acqusition_type == "Addition") {
-          data.birdsAdded += f.item_count;
-        } else if (f.acqusition_type == "Reduction") {
-          data.birdsReduced += f.item_count;
-          if (f.reason.toLowerCase() == "mortality") data.mortality += f.item_count;
-          if (f.reason.toLowerCase() == "culling") data.culling += f.item_count;
+      final key = getMonth(date);
+      final data = monthlyData.putIfAbsent(key, () => _emptyMonth(key));
+
+      // ✅ FIX: use item_type
+      if (f.item_type == 'Addition') {
+        data.birdsAdded += f.item_count;
+      } else if (f.item_type == 'Reduction') {
+        data.birdsReduced += f.item_count;
+
+        // ✅ FIX: uppercase comparison
+        if (f.reason == 'MORTALITY') {
+          data.mortality += f.item_count;
+        } else if (f.reason == 'CULLING') {
+          data.culling += f.item_count;
         }
       }
     }
 
-    for (var e in eggs) {
-      final date = DateTime.tryParse(e.date ?? "");
-      if (date != null) {
-        final key = getMonth(date);
-        monthlyData.putIfAbsent(key, () => MonthlyBreakdownData(
-          month: key,
-          birdsAdded: 0,
-          birdsReduced: 0,
-          mortality: 0,
-          culling: 0,
-          totalEggs: 0,
-          totalFeedKg: 0.0,
-          income: 0.0,
-          expense: 0.0,
-        ));
+    // ---------------- EGGS ----------------
+    for (final e in eggs) {
+      final date = DateTime.tryParse(e.date ?? '');
+      if (date == null) continue;
 
-        final data = monthlyData[key]!;
-        if (e.isCollection == 1) {
-          data.totalEggs += e.total_eggs;
-        } else if (e.isCollection == 0) {
-          data.totalEggs -= e.total_eggs;
-        }
+      final key = getMonth(date);
+      final data = monthlyData.putIfAbsent(key, () => _emptyMonth(key));
+
+      if (e.isCollection == 1) {
+        data.totalEggs += e.total_eggs;
+      } else {
+        data.totalEggs -= e.total_eggs;
       }
     }
 
-    for (var f in feedings) {
-      final date = DateTime.tryParse(f.date ?? "");
-      if (date != null) {
-        final key = getMonth(date);
-        monthlyData.putIfAbsent(key, () => MonthlyBreakdownData(
-          month: key,
-          birdsAdded: 0,
-          birdsReduced: 0,
-          mortality: 0,
-          culling: 0,
-          totalEggs: 0,
-          totalFeedKg: 0.0,
-          income: 0.0,
-          expense: 0.0,
-        ));
+    // ---------------- FEED ----------------
+    for (final f in feedings) {
+      final date = DateTime.tryParse(f.date ?? '');
+      if (date == null) continue;
 
-        final data = monthlyData[key]!;
-        final quantity = double.tryParse(f.quantity ?? "0") ?? 0;
-        data.totalFeedKg += quantity;
-      }
+      final key = getMonth(date);
+      final data = monthlyData.putIfAbsent(key, () => _emptyMonth(key));
+
+      data.totalFeedKg += double.tryParse(f.quantity ?? '0') ?? 0;
     }
 
-    for (var t in transactions) {
+    // ---------------- TRANSACTIONS ----------------
+    for (final t in transactions) {
       final date = DateTime.tryParse(t.date);
-      if (date != null) {
-        final key = getMonth(date);
-        monthlyData.putIfAbsent(key, () => MonthlyBreakdownData(
-          month: key,
-          birdsAdded: 0,
-          birdsReduced: 0,
-          mortality: 0,
-          culling: 0,
-          totalEggs: 0,
-          totalFeedKg: 0.0,
-          income: 0.0,
-          expense: 0.0,
-        ));
+      if (date == null) continue;
 
-        final data = monthlyData[key]!;
-        final amount = double.tryParse(t.amount) ?? 0;
-        if (t.type == "Income") {
-          data.income += amount;
-        } else if (t.type == "Expense") {
-          data.expense += amount;
-        }
+      final key = getMonth(date);
+      final data = monthlyData.putIfAbsent(key, () => _emptyMonth(key));
+
+      final amount = double.tryParse(t.amount) ?? 0;
+      if (t.type == 'Income') {
+        data.income += amount;
+      } else if (t.type == 'Expense') {
+        data.expense += amount;
       }
     }
 
+    // ---------------- SORT ----------------
     final result = monthlyData.entries.toList()
-      ..sort((a, b) => a.key.compareTo(b.key)); // sort by month
+      ..sort((a, b) => a.key.compareTo(b.key));
 
     return result.map((e) => e.value).toList();
   }
 
+  MonthlyBreakdownData _emptyMonth(String key) {
+    return MonthlyBreakdownData(
+      month: key,
+      birdsAdded: 0,
+      birdsReduced: 0,
+      mortality: 0,
+      culling: 0,
+      totalEggs: 0,
+      totalFeedKg: 0.0,
+      income: 0.0,
+      expense: 0.0,
+    );
+  }
+
 
   Map<String, Map<String, dynamic>> generateDailyBreakdown({
+    required String startDate, // yyyy-MM-dd
+    required String endDate,   // yyyy-MM-dd
     required List<TransactionItem> transactions,
     required List<Feeding> feedings,
     required List<Eggs> eggsList,
     required List<Flock_Detail> flockDetails,
   })
   {
-    Map<String, Map<String, dynamic>> breakdown = {};
+    final Map<String, Map<String, dynamic>> breakdown = {};
 
-    void addToDate(String date, String key, num value) {
-      if (!breakdown.containsKey(date)) {
-        breakdown[date] = {
-          'birdsAdded': 0,
-          'birdsReduced': 0,
-          'mortality': 0,
-          'culling': 0,
-          'eggs': 0,
-          'feed': 0.0,
-          'income': 0.0,
-          'expense': 0.0,
-        };
-      }
+    // ---------- helpers ----------
+    String normalize(String? date) {
+      if (date == null) return "";
+      final parsed = DateTime.tryParse(date);
+      if (parsed == null) return "";
+      return "${parsed.year}-${parsed.month.toString().padLeft(2, '0')}-${parsed.day.toString().padLeft(2, '0')}";
+    }
+
+    void ensureDate(String date) {
+      breakdown.putIfAbsent(date, () => {
+        'birdsAdded': 0,
+        'birdsReduced': 0,
+        'mortality': 0,
+        'culling': 0,
+        'eggs': 0,
+        'feed': 0.0,
+        'income': 0.0,
+        'expense': 0.0,
+      });
+    }
+
+    void add(String date, String key, num value) {
+      if (date.isEmpty) return;
+      ensureDate(date);
       breakdown[date]![key] += value;
     }
 
+    // ---------- 1️⃣ Pre-fill full date range ----------
+    final start = DateTime.parse(startDate);
+    final end = DateTime.parse(endDate);
+
+    for (int i = 0; i <= end.difference(start).inDays; i++) {
+      final d = start.add(Duration(days: i));
+      final key =
+          "${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}";
+      ensureDate(key);
+    }
+
+    // ---------- 2️⃣ Flock details ----------
     for (var f in flockDetails) {
-      final date = f.acqusition_date;
-      if (f.acqusition_type == "Addition") {
-        addToDate(date, 'birdsAdded', f.item_count);
-      } else if (f.acqusition_type == "Reduction") {
-        if (f.reason.toUpperCase() == "MORTALITY") {
-          addToDate(date, 'mortality', f.item_count);
-        } else if (f.reason.toUpperCase() == "CULLING") {
-          addToDate(date, 'culling', f.item_count);
-        } else {
-          addToDate(date, 'birdsReduced', f.item_count);
+      final date = normalize(f.acqusition_date);
+
+      if (f.item_type == "Addition") {
+        add(date, 'birdsAdded', f.item_count);
+      } else if (f.item_type == "Reduction") {
+        add(date, 'birdsReduced', f.item_count);
+
+        if (f.reason == "MORTALITY") {
+          add(date, 'mortality', f.item_count);
+        } else if (f.reason == "CULLING") {
+          add(date, 'culling', f.item_count);
         }
       }
     }
 
+    // ---------- 3️⃣ Eggs ----------
     for (var e in eggsList) {
-      final date = e.date;
+      final date = normalize(e.date);
+
       if (e.isCollection == 1) {
-        addToDate(date!, 'eggs', e.total_eggs);
+        add(date, 'eggs', e.total_eggs);
+      } else if (e.isCollection == 0) {
+        add(date, 'eggs', -e.total_eggs);
       }
     }
 
+    // ---------- 4️⃣ Feed ----------
     for (var f in feedings) {
-      final date = f.date;
-      final qty = double.tryParse(f.quantity ?? '0') ?? 0;
-      addToDate(date!, 'feed', qty);
+      final date = normalize(f.date);
+      final qty = double.tryParse(f.quantity ?? "0") ?? 0;
+      add(date, 'feed', qty);
     }
 
+    // ---------- 5️⃣ Transactions ----------
     for (var t in transactions) {
-      final date = t.date;
+      final date = normalize(t.date);
       final amt = double.tryParse(t.amount) ?? 0;
+
       if (t.type == "Income") {
-        addToDate(date, 'income', amt);
+        add(date, 'income', amt);
       } else if (t.type == "Expense") {
-        addToDate(date, 'expense', amt);
+        add(date, 'expense', amt);
       }
     }
 
-    return breakdown;
+    // ---------- 6️⃣ Sort by date ----------
+    final sortedKeys = breakdown.keys.toList()..sort();
+
+    return {
+      for (final k in sortedKeys) k: breakdown[k]!,
+    };
   }
+
+
 
 
 
   @override
   Widget build(BuildContext context) {
+
+    widthScreen =
+        MediaQuery.of(context).size.width; // because of default padding
+    heightScreen = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
         appBar: AppBar(
@@ -543,7 +648,7 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
+             /* Center(
                 child: GestureDetector(
                   onTap: _pickDateRange,
                   child: Container(
@@ -565,11 +670,54 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
                     ),
                   ),
                 ),
+              ),*/
+              InkWell(
+                onTap: () {
+                  openDatePicker();
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  height: 45,
+                  margin: EdgeInsets.only(right: 10, top: 10, bottom: 10),
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.calendar_today, color: Utils.getThemeColorBlue(), size: 18),
+                      SizedBox(width: 8),
+                      Text(
+                        date_filter_name.tr(),
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+                      ),
+                      SizedBox(width: 8),
+                      Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(), size: 20),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 10,),
+            if (isLoading)
+              Center(
+                child: CircularProgressIndicator(),
               ),
 
-              SizedBox(height: 10,),
-
-              GestureDetector(
+        GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
@@ -597,7 +745,7 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
                         ],
                       ),
 
-                      _buildWhiteCard('MORTALITY'.tr()+ "/"+ "CULLING".tr(), '${mortality + culling}', Icons.warning_amber, iconColor: Colors.red),
+                      _buildWhiteCard('MORTALITY'.tr()+ "/"+ "CULLING".tr(), '${mortality+culling}', Icons.warning_amber, iconColor: Colors.red),
                       const SizedBox(height: 10),
 
                       Container(
@@ -804,27 +952,193 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
       ),
     );
   }
+  double widthScreen = 0;
+  double heightScreen = 0;
+  void openDatePicker() {
+    showDialog(
+        context: context,
+        builder: (BuildContext bcontext) {
+          return AlertDialog(
+            title: Text('DATE_FILTER'.tr()),
+            content: setupAlertDialoadContainer(bcontext,widthScreen - 40, widthScreen),
+          );
+        });
+  }
 
+  Widget setupAlertDialoadContainer(BuildContext bcontext,double width, double height) {
+
+    return Container(
+      height: filterList.length * 55, // Change as per your requirement
+      width: width, // Change as per your requirement
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: filterList.length,
+        itemBuilder: (BuildContext context, int index) {
+          return InkWell(
+            onTap: () {
+
+              setState(() {
+                date_filter_name = filterList.elementAt(index);
+              });
+              Navigator.pop(bcontext);
+              getData(date_filter_name);
+
+            },
+            child: ListTile(
+              title: Text(filterList.elementAt(index).tr()),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+
+  List<String> filterList = ['TODAY','YESTERDAY','THIS_MONTH', 'LAST_MONTH','LAST3_MONTHS', 'LAST6_MONTHS','THIS_YEAR',
+    'LAST_YEAR','ALL_TIME','DATE_RANGE'];
+
+  String date_filter_name = 'THIS_MONTH';
+  String pdf_formatted_date_filter = 'THIS_MONTH';
+  String str_date = '',end_date = '';
+  void getData(String filter){
+    int index = 0;
+
+    if (filter == 'TODAY'){
+      index = 0;
+      DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date = inputFormat.format(today);
+      end_date = inputFormat.format(today);
+      print(str_date+" "+end_date);
+
+      pdf_formatted_date_filter = 'TODAY'.tr()+" ("+Utils.getFormattedDate(str_date)+")";
+      getAllData();
+    }
+    else if (filter == 'YESTERDAY'){
+      index = 1;
+      DateTime today = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day -1);
+
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date = inputFormat.format(today);
+      end_date = inputFormat.format(today);
+      print(str_date+" "+end_date);
+
+      pdf_formatted_date_filter = "YESTERDAY".tr() + " ("+Utils.getFormattedDate(str_date)+")";
+      getAllData();
+    }
+    else if (filter == 'THIS_MONTH'){
+      index = 2;
+      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month, 1);
+
+      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month + 1).subtract(Duration(days: 1));
+
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date = inputFormat.format(firstDayCurrentMonth);
+      end_date = inputFormat.format(lastDayCurrentMonth);
+      print(str_date+" "+end_date);
+
+
+      pdf_formatted_date_filter = 'THIS_MONTH'.tr()+" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
+      getAllData();
+    }else if (filter == 'LAST_MONTH'){
+      index = 3;
+      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -1, 1);
+
+      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month  -1,30);
+
+
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date = inputFormat.format(firstDayCurrentMonth);
+      end_date = inputFormat.format(lastDayCurrentMonth);
+      print(str_date+" "+end_date);
+
+
+      pdf_formatted_date_filter = 'LAST_MONTH'.tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
+      getAllData();
+    }else if (filter == 'LAST3_MONTHS'){
+      index = 4;
+      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -2, 1);
+
+      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
+
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date = inputFormat.format(firstDayCurrentMonth);
+      end_date = inputFormat.format(lastDayCurrentMonth);
+      print(str_date+" "+end_date);
+
+
+      pdf_formatted_date_filter = "LAST3_MONTHS".tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
+      getAllData();
+    }else if (filter == 'LAST6_MONTHS'){
+      index = 5;
+      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month -5, 1);
+
+      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
+
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date = inputFormat.format(firstDayCurrentMonth);
+      end_date = inputFormat.format(lastDayCurrentMonth);
+      print(str_date+" "+end_date);
+
+
+      pdf_formatted_date_filter = "LAST6_MONTHS".tr()+" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
+      getAllData();
+    }else if (filter == 'THIS_YEAR'){
+      index = 6;
+      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year,1,1);
+      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year, DateTime.now().month,DateTime.now().day);
+
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date = inputFormat.format(firstDayCurrentMonth);
+      end_date = inputFormat.format(lastDayCurrentMonth);
+      print(str_date+" "+end_date);
+
+      pdf_formatted_date_filter = 'THIS_YEAR'.tr()+ " ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
+      getAllData();
+    }else if (filter == 'LAST_YEAR'){
+      index = 7;
+      DateTime firstDayCurrentMonth = DateTime.utc(DateTime.now().year-1,1,1);
+      DateTime lastDayCurrentMonth = DateTime.utc(DateTime.now().year-1, 12,31);
+
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date = inputFormat.format(firstDayCurrentMonth);
+      end_date = inputFormat.format(lastDayCurrentMonth);
+      print(str_date+" "+end_date);
+
+
+      pdf_formatted_date_filter = 'LAST_YEAR'.tr() +" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
+      getAllData();
+    }else if (filter == 'ALL_TIME'){
+      index = 8;
+      var inputFormat = DateFormat('yyyy-MM-dd');
+      str_date ="1950-01-01";
+      end_date = inputFormat.format(DateTime.now());;
+      print(str_date+" "+end_date);
+
+      pdf_formatted_date_filter = 'ALL_TIME'.tr();
+      getAllData();
+    }else if (filter == 'DATE_RANGE'){
+      _pickDateRange();
+    }
+
+
+  }
 
   List<Widget> buildDailyBreakdownList() {
-    return List.generate(totalDays, (index) {
-      final date = startDate.add(Duration(days: index));
-      final dateKey = DateFormat('yyyy-MM-dd').format(date);
-      bool isExpanded = false;
-      if (_dailyExpanded != null && _dailyExpanded!.isNotEmpty) {
-        isExpanded = _dailyExpanded![index];
-      }
+    if (dailyBreakDown == null || dailyBreakDown!.isEmpty) {
+      return [];
+    }
 
-      final data = dailyBreakDown?[dateKey] ?? {
-        'birdsAdded': 0,
-        'birdsReduced': 0,
-        'mortality': 0,
-        'culling': 0,
-        'eggs': 0,
-        'feed': 0.0,
-        'income': 0.0,
-        'expense': 0.0,
-      };
+    final dates = dailyBreakDown!.keys.toList()..sort();
+
+    return List.generate(dates.length, (index) {
+      final dateKey = dates[index];
+      final date = DateTime.parse(dateKey);
+
+      bool isExpanded = _dailyExpanded?[index] ?? false;
+
+      final data = dailyBreakDown![dateKey]!;
 
       return Column(
         children: [
@@ -854,8 +1168,8 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       Text(
-                       " (${DateFormat.EEEE().format(date).tr()})",
-                        style: const TextStyle(fontSize: 15, color: Colors.grey,fontWeight: FontWeight.normal),
+                        " (${DateFormat.EEEE().format(date).tr()})",
+                        style: const TextStyle(fontSize: 15, color: Colors.grey),
                       ),
                     ],
                   ),
@@ -882,25 +1196,28 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildWhiteCard('Birds Added', '${data['birdsAdded']}', Icons.add_circle, iconColor: Colors.green),
-                  _buildWhiteCard('Birds Reduced', '${data['birdsReduced'] + data['culling']}', Icons.remove_circle, iconColor: Colors.orange),
-                  _buildWhiteCard('Mortality', '${data['mortality']}', Icons.warning_amber, iconColor: Colors.red),
+                  _buildWhiteCard(
+                    'Birds Reduced',
+                    '${data['birdsReduced']}',
+                    Icons.remove_circle,
+                    iconColor: Colors.orange,
+                  ),
+                  _buildWhiteCard('MORTALITY'.tr()+ "/"+ "CULLING".tr(), '${data['mortality']+data['culling']}', Icons.warning_amber, iconColor: Colors.red),
 
                   Row(
                     children: [
                       Expanded(child: _buildWhiteCardVertical('Eggs', '${data['eggs']}')),
                       const SizedBox(width: 5),
-                      Expanded(child: _buildWhiteCardVertical('Feed', '${data['feed']} '+Utils.selected_unit.tr())),
+                      Expanded(child: _buildWhiteCardVertical('Feed', '${data['feed']} ${Utils.selected_unit.tr()}')),
                     ],
                   ),
                   Row(
                     children: [
-                      Expanded(child: _buildWhiteCard('Income', Utils.currency+'${data['income']}', Icons.trending_up, iconColor: Colors.green)),
+                      Expanded(child: _buildWhiteCard('Income', Utils.currency + '${data['income']}', Icons.trending_up, iconColor: Colors.green)),
                       const SizedBox(width: 5),
-                     
-                      Expanded(child: _buildWhiteCard('Expense', Utils.currency+'${data['expense']}', Icons.trending_down, iconColor: Colors.red)),
+                      Expanded(child: _buildWhiteCard('Expense', Utils.currency + '${data['expense']}', Icons.trending_down, iconColor: Colors.red)),
                     ],
                   ),
-
                 ],
               ),
             ),
@@ -908,6 +1225,7 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
       );
     });
   }
+
   List<Widget> buildMonthlyBreakdownList(List<MonthlyBreakdownData> monthlySummary) {
     return List.generate(monthlySummary.length, (index) {
       final data = monthlySummary[index];

@@ -11,9 +11,6 @@ import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/utils/session_manager.dart';
 
 import '../../database/databse_helper.dart';
-import 'dart:io';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
 import '../../utils/utils.dart';
@@ -56,7 +53,8 @@ class FlockImageUploader {
   Future<String> uploadProfilePicture({
     required String userId,
     required String base64Image,
-  }) async {
+  }) async
+  {
     final response = await http.post(
       Uri.parse(uploadProfilePicUrl), // your profile upload PHP API endpoint
       headers: {'Content-Type': 'application/json'},

@@ -86,6 +86,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
   int total_eggs_collected = 0;
   int total_eggs_reduced = 0;
   int total_eggs = 0;
+  int remainingEggs = 0;
 
   void clearValues() {
     total_eggs_collected = 0;
@@ -105,6 +106,8 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
 
     total_eggs_reduced =
     await DatabaseHelper.getEggCalculations(f_id, 0, str_date, end_date);
+
+    remainingEggs = total_eggs_collected - total_eggs_reduced;
 
     eggSales = await DatabaseHelper.getEggSaleTransactionsFiltered(str_date, end_date, f_id);
 
@@ -480,47 +483,56 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                                 Divider(),
                                 SizedBox(height: 8),
 
-                                // 🥚 Statistics Section
-                                Column(
-                                  children: [
-                                    SummaryRow(
-                                      title: 'Total Collected'.tr(),
-                                      value: '$total_eggs_collected',
-                                      icon: Icons.egg,
-                                      color: Colors.green,
-                                    ),
-                                    SummaryRow(
-                                      title: 'Good Eggs'.tr(),
-                                      value: '$good_eggs',
-                                      icon: Icons.check_circle,
-                                      color: Colors.blue,
-                                    ),
-                                    SummaryRow(
-                                      title: 'Bad Eggs'.tr(),
-                                      value: '$bad_eggs',
-                                      icon: Icons.warning_amber_rounded,
-                                      color: Colors.orange,
-                                    ),
-                                    Divider(),
-                                    SummaryRow(
-                                      title: 'Total Used'.tr(),
-                                      value: '-$total_eggs_reduced',
-                                      icon: Icons.remove_circle,
-                                      color: Colors.red,
-                                    ),
-                                    SummaryRow(
-                                      title: 'Remaining Eggs'.tr(),
-                                      value: '${total_eggs_collected -
-                                          total_eggs_reduced}',
-                                      icon: Icons.egg_alt,
-                                      color: (total_eggs_collected -
-                                          total_eggs_reduced) >= 0 ? Colors
-                                          .black : Colors.red,
-                                      isBold: true,
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 16),
+
+                          Column(
+                          children: [
+                          SummaryRow(
+                          title: 'Total Collected'.tr(),
+                          value: '$total_eggs_collected',
+                          icon: Icons.egg,
+                          color: Colors.green,
+                          percentage: "100%",
+                          isBold: true,
+                        ),
+
+                        SummaryRow(
+                          title: 'Good Eggs'.tr(),
+                          value: '$good_eggs',
+                          icon: Icons.check_circle,
+                          color: Colors.blue,
+                          percentage: percent(good_eggs, total_eggs_collected),
+                        ),
+
+                        SummaryRow(
+                          title: 'Bad Eggs'.tr(),
+                          value: '$bad_eggs',
+                          icon: Icons.warning_amber_rounded,
+                          color: Colors.orange,
+                          percentage: percent(bad_eggs, total_eggs_collected),
+                        ),
+
+                        const Divider(),
+
+                        SummaryRow(
+                          title: 'Total Used'.tr(),
+                          value: '-$total_eggs_reduced',
+                          icon: Icons.remove_circle,
+                          color: Colors.red,
+                          percentage: percent(total_eggs_reduced, total_eggs_collected),
+                        ),
+
+                        SummaryRow(
+                          title: 'Remaining Eggs'.tr(),
+                          value: '${total_eggs_collected - total_eggs_reduced}',
+                          icon: Icons.egg_alt,
+                          color: (total_eggs_collected - total_eggs_reduced) >= 0 ? Colors.black : Colors.red,
+                          percentage: percent((total_eggs_collected - total_eggs_reduced), total_eggs_collected),
+                          isBold: true,
+                        ),
+                      ],
+                    ),
+
+                      SizedBox(height: 16),
                                 Divider(),
 
                                 // 🐔 Flock-wise Summary Section
@@ -534,7 +546,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                                 // 🏷️ Flock List
                                 Column(
                                   children: flockEggSummary.map((flock) =>
-                                      _buildFlockRow(flock)).toList(),
+                                      _buildFlockRow(flock, total_eggs_collected)).toList(),
                                 ),
                                 SizedBox(height: 8),
                                 buildEggReductionList(eggReductionSummary)
@@ -547,9 +559,13 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                     ),
                   )
 
-
                 ]
             ),),),),),);
+  }
+
+  String percent(num part, num total) {
+    if (total <= 0) return "0%";
+    return "${((part / total) * 100).toStringAsFixed(1)}%";
   }
 
 
@@ -582,53 +598,129 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
   }
 
 
-  Widget _buildFlockRow(FlockEggSummary flock) {
+  Widget _buildFlockRow(
+      FlockEggSummary flock,
+      int totalEggsCollected,
+      ) {
+    final double percent = totalEggsCollected == 0
+        ? 0
+        : (flock.totalEggs / totalEggsCollected);
+    final int percentValue = (percent * 100).round();
+
+    // Dynamic color
+    Color progressColor;
+    if (percent >= 0.7) {
+      progressColor = Colors.green.shade400;
+    } else if (percent >= 0.4) {
+      progressColor = Colors.orange.shade400;
+    } else {
+      progressColor = Colors.red.shade400;
+    }
+
     return Card(
-      elevation: 3,
-      margin: EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 4,
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       child: Container(
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           gradient: LinearGradient(
             colors: [Colors.blue.shade50, Colors.white],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         ),
-        child: Row(
+        child: Column(
           children: [
-            // 🟡 Flock Icon
-            CircleAvatar(
-              radius: 15,
-              backgroundColor: Colors.blue.shade200,
-              child: Icon(Icons.egg, color: Colors.white, size: 20),
-            ),
-            SizedBox(width: 6),
+            Row(
+              children: [
+                // Egg Icon
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [Colors.blue.shade300, Colors.blue.shade600],
+                    ),
+                  ),
+                  child: const Icon(Icons.egg, color: Colors.white, size: 18),
+                ),
+                const SizedBox(width: 10),
 
-            // 📋 Flock Details
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
+                // Flock Name
+                Expanded(
+                  child: Text(
                     flock.fName,
-                    style: TextStyle(fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                  SizedBox(height: 4),
-                  Row(
-                    children: [
-                      _buildEggInfo("Good", flock.goodEggs, Colors.green),
-                      SizedBox(width: 10),
-                      _buildEggInfo("Bad", flock.badEggs, Colors.orange),
-                      SizedBox(width: 10),
-                      _buildEggInfo("Total", flock.totalEggs, Colors.blue),
-                    ],
+                ),
+
+                // Percentage Badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: progressColor.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                ],
+                  child: Text(
+                    "$percentValue%",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: progressColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            // Egg Stats
+            Row(
+              children: [
+                _buildEggInfo("Good", flock.goodEggs, Colors.green),
+                const SizedBox(width: 10),
+                _buildEggInfo("Bad", flock.badEggs, Colors.orange),
+                const SizedBox(width: 10),
+                _buildEggInfo("Total", flock.totalEggs, Colors.blue),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            // Animated Progress Bar
+            TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0, end: percent),
+              duration: const Duration(seconds: 1),
+              builder: (context, value, child) {
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: LinearProgressIndicator(
+                    value: value,
+                    minHeight: 8,
+                    backgroundColor: Colors.grey.shade200,
+                    valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 4),
+
+            // Subtitle
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                "$percentValue% of total collected eggs",
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.grey.shade600,
+                ),
               ),
             ),
           ],
@@ -636,6 +728,8 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       ),
     );
   }
+
+
 
 // 🎨 Helper for Colored Egg Info
   Widget _buildEggInfo(String label, int count, Color color) {
@@ -1477,13 +1571,16 @@ class SummaryRow extends StatelessWidget {
   final IconData icon;
   final Color color;
   final bool isBold;
+  final String? percentage; // 👈 new
 
-  SummaryRow({
+  const SummaryRow({
+    super.key,
     required this.title,
     required this.value,
     required this.icon,
     required this.color,
     this.isBold = false,
+    this.percentage,
   });
 
   @override
@@ -1493,20 +1590,35 @@ class SummaryRow extends StatelessWidget {
       child: Row(
         children: [
           Icon(icon, color: color, size: 24),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
+
           Expanded(
             child: Text(
               title,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
           ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              color: color,
-            ),
+
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+                  color: color,
+                ),
+              ),
+              if (percentage != null)
+                Text(
+                  percentage!,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                ),
+            ],
           ),
         ],
       ),

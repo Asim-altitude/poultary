@@ -69,7 +69,6 @@ class ToolAssetMaintenance {
       'status': status,
       'tr_id': trId,
       'created_at': createdAt,
-      'updated_at': updatedAt,
 
       // Sync
       'sync_id': sync_id,
@@ -93,7 +92,6 @@ class ToolAssetMaintenance {
       nextDueDate: map['next_due_date'],
       status: map['status'] ?? "Completed",
       createdAt: map['created_at'],
-      updatedAt: map['updated_at'],
 
       trId: map['tr_id'] == null
           ? null

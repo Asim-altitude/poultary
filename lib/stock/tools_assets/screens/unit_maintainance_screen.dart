@@ -1,9 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 
 import '../../../database/databse_helper.dart';
 import '../../../model/transaction_item.dart';
+import '../../../multiuser/model/unit_maintenance_fb.dart';
+import '../../../multiuser/utils/SyncStatus.dart';
+import '../../../utils/utils.dart';
 import '../model/tool_asset_maintenance.dart';
 import '../model/tool_asset_unit.dart';
 
@@ -38,6 +42,7 @@ class _AssetMaintenanceScreenState extends State<AssetMaintenanceScreen> {
       appBar: AppBar(
         title: Text(
           "Maintenance".tr()+" • ${widget.unit.assetCode ?? 'Unit'.tr()}",
+          style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
         ),
       ),
 
@@ -52,7 +57,15 @@ class _AssetMaintenanceScreenState extends State<AssetMaintenanceScreen> {
       ),
 
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddMaintenanceDialog(),
+        onPressed: () => {
+          if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_stock")){
+            Utils.showMissingPermissionDialog(context, "add_stock")
+            }
+          else
+            {
+              _showAddMaintenanceDialog()
+            }
+        },
         icon: const Icon(Icons.build),
         label:  Text("Add Maintenance".tr()),
       ),
@@ -115,7 +128,21 @@ class _AssetMaintenanceScreenState extends State<AssetMaintenanceScreen> {
 
       // ---------- DELETE ACTION ----------
       onDismissed: (_) async {
+
+        if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_stock")){
+          Utils.showMissingPermissionDialog(context, "delete_stock");
+          return;
+        }
+
+        TransactionItem? trItem = await DatabaseHelper.getSingleTransaction(m.trId.toString());
         await DatabaseHelper.deleteMaintenanceLog(m.id!);
+
+        AssetUnitMaintenanceFBModel assetUnitMaintenanceFBModel = AssetUnitMaintenanceFBModel(maintenance: m);
+        assetUnitMaintenanceFBModel.transaction = trItem!;
+        if(Utils.isMultiUSer && Utils.hasFeaturePermission("delete_stock")){
+          await FireBaseUtils.deleteAssetUnitMaintenanceStockTransRecord(assetUnitMaintenanceFBModel);
+        }
+
         _loadLogs(); // reload list
       },
 
@@ -482,6 +509,9 @@ class _AssetMaintenanceScreenState extends State<AssetMaintenanceScreen> {
                           backgroundColor: Colors.blue.shade600,
                         ),
                         onPressed: () async {
+
+                          AssetUnitMaintenanceFBModel unitMaintenanceFB;
+
                           final maintenanceTypeToSave = selectedType == "Other"
                               ? otherTypeCtrl.text.trim()
                               : selectedType;
@@ -499,19 +529,33 @@ class _AssetMaintenanceScreenState extends State<AssetMaintenanceScreen> {
                           TransactionItem trItem = TransactionItem(f_id: -1, date: date, f_name: "Farm Wide", sale_item: "", expense_item:  widget.unit.assetCode!+" "+"Maintenance", type: "Expense", amount: maintenance_cost, payment_method: "Cash", payment_status: "CLEARED", sold_purchased_from: byCtrl.text.trim().isEmpty ? "Unknown" : byCtrl.text.trim(), short_note: widget.unit.assetCode!+" "+"Maintenance cost", how_many: "1", extra_cost: "extra_cost", extra_cost_details: "extra_cost_details", flock_update_id: "-1", unitPrice: double.tryParse(maintenance_cost) ?? 0);
                           int? trId = await DatabaseHelper.insertNewTransaction(trItem);
 
-                          await DatabaseHelper.insertMaintenanceLog(
-                            ToolAssetMaintenance(
-                                assetUnitId: widget.unit.id!,
-                                maintenanceType: maintenanceTypeToSave,
-                                description: descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
-                                cost: double.tryParse(costCtrl.text) ?? 0,
-                                performedBy: byCtrl.text.trim().isEmpty ? null : byCtrl.text.trim(),
-                                maintenanceDate: date,
-                                status: status,
-                                createdAt: DateTime.now().toIso8601String(),
-                                trId: trId
-                            ),
+                          var maintenance = ToolAssetMaintenance(
+                            assetUnitId: widget.unit.id!,
+                            maintenanceType: maintenanceTypeToSave,
+                            description: descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
+                            cost: double.tryParse(costCtrl.text) ?? 0,
+                            performedBy: byCtrl.text.trim().isEmpty ? null : byCtrl.text.trim(),
+                            maintenanceDate: date,
+                            status: status,
+                            createdAt: DateTime.now().toIso8601String(),
+                            trId: trId,
+                            asset_sync_id: widget.unit.sync_id,
+                            sync_id: Utils.getUniueId(),
+                            sync_status: SyncStatus.SYNCED,
+                            last_modified: Utils.getTimeStamp(),
+                            modified_by: Utils.currentUser == null ? '' : Utils.currentUser!.email,
+                            farm_id: Utils.currentUser == null ? '' : Utils.currentUser!.farmId,
                           );
+                          await DatabaseHelper.insertMaintenanceLog(
+                            maintenance,
+                          );
+
+                          unitMaintenanceFB = AssetUnitMaintenanceFBModel(maintenance: maintenance);
+                          unitMaintenanceFB.transaction = trItem;
+
+                          if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_stock")){
+                            await FireBaseUtils.uploadAssetUnitMaintenanceStockRecord(unitMaintenanceFB);
+                          }
 
                           Navigator.pop(context);
                           _loadLogs();

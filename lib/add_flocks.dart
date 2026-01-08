@@ -1337,10 +1337,11 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
 
 
 
-    final ImagePicker imagePicker = ImagePicker();
+
     List<XFile>? imageFileList = [];
 
     void selectImages() async {
+      final ImagePicker imagePicker = ImagePicker();
       final List<XFile>? selectedImages = await imagePicker.pickMultiImage();
 
       if (selectedImages != null && selectedImages.isNotEmpty) {
