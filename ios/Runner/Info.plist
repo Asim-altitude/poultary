@@ -248,13 +248,11 @@
 		<true/>
 	</dict>
 	<key>NSPhotoLibraryUsageDescription</key>
-    <string>This app needs access to your photo library.</string>
-
-    <key>NSCameraUsageDescription</key>
-    <string>This app needs access to your camera.</string>
-
-    <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>This app needs permission to save photos.</string>
+	<string>This app needs access to your photo library.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs access to your camera.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app needs permission to save photos.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -272,11 +270,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.5.0</string>
+	<string>2.6.0</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>20</string>
+	<string>21</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
