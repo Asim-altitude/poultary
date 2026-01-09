@@ -724,39 +724,91 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                               SizedBox(height: 8),
 
                               /// **Transaction Details**
-                              Row(
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.grey.withOpacity(0.25),
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Icon(
-                                    transactionList.elementAt(index).type.toLowerCase() == 'income'
+                                    transactionList[index].type!.toLowerCase() == 'income'
                                         ? Icons.trending_up
                                         : Icons.trending_down,
-                                    size: 16,
-                                    color: transactionList.elementAt(index).type!.toLowerCase() == 'income'
+                                    size: 18,
+                                    color: transactionList[index].type!.toLowerCase() == 'income'
                                         ? Colors.green
                                         : Colors.red,
                                   ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    transactionList.elementAt(index).type!.toLowerCase() == 'income' ? 'Sold To'.tr() : 'Paid To'.tr(),
-                                    style: TextStyle(fontSize: 14, color: Colors.black),
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    transactionList.elementAt(index).sold_purchased_from,
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
-                                  ),
-                                  SizedBox(width: 6),
-                                  Text("On".tr(), style: TextStyle(color: Colors.black, fontSize: 14)),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    Utils.getFormattedDate(transactionList.elementAt(index).date.toString()),
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
+
+                                  const SizedBox(width: 10),
+
+                                  /// Two columns evenly spaced
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        /// Left column
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              transactionList[index].type!.toLowerCase() == 'income'
+                                                  ? 'Sold To'.tr()
+                                                  : 'Paid To'.tr(),
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                color: Colors.black54,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              transactionList[index].sold_purchased_from,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 14,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+
+                                        /// Right column
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              "On".tr(),
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                color: Colors.black54,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              Utils.getFormattedDate(
+                                                transactionList[index].date.toString(),
+                                              ),
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 14,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
+                            ),
 
-
-                              SizedBox(height: 6),
+                            SizedBox(height: 6),
 
                               /// **Notes Section**
                               Row(

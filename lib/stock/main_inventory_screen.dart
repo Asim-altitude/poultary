@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/model/category_item.dart';
+import 'package:poultary/stock/screens/general_stock_screen.dart';
+import 'package:poultary/stock/tools_assets/screens/tools_assets_screen.dart';
 import 'package:poultary/stock/vaccine_stock_screen.dart';
 import 'package:poultary/utils/utils.dart';
 
@@ -94,7 +96,177 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
           child: Column(
             children: [
               Utils.showBannerAd(_bannerAd, _isBannerAdReady),
-              Padding(
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const GeneralStockScreen()),
+                );
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeOut,
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Row(
+                  children: [
+                    // -------- ICON ----------
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Icon(
+                        Icons.inventory_2_rounded,
+                        size: 32,
+                        color: Colors.blue,
+                      ),
+                    ),
+
+                    const SizedBox(width: 16),
+
+                    // -------- WRAP TEXT IN EXPANDED ----------
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "General Stock".tr(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+
+                          const SizedBox(height: 4),
+
+                          Text(
+                            "Manage supplies, cartons, materials".tr(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(width: 8),
+
+                    // -------- ARROW ----------
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 18,
+                      color: Colors.grey.shade500,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+             GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ToolsAssetsScreen()),
+                  );
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeOut,
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      // -------- ICON ----------
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(
+                          Icons.inventory_2_outlined,
+                          size: 32,
+                          color: Colors.blue,
+                        ),
+                      ),
+
+                      const SizedBox(width: 16),
+
+                      // -------- WRAP TEXT IN EXPANDED ----------
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Tools and Assets".tr(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+
+                            const SizedBox(height: 4),
+
+                            Text(
+                              "Add farm tools, machinery or assets to track condition & maintenance".tr(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(width: 8),
+
+                      // -------- ARROW ----------
+                      Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 18,
+                        color: Colors.grey.shade500,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            Padding(
                 padding: EdgeInsets.all(16.0),
                 child: GridView.count(
                   shrinkWrap: true,
@@ -104,6 +276,7 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
                   mainAxisSpacing: 16,
                   childAspectRatio: 0.9,
                   children: [
+
                     _buildInventoryItem(
                       icon: Icons.fastfood,
                       title: "Feed Stock".tr(),
@@ -174,7 +347,8 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
     required String title,
     required String description,
     required VoidCallback onTap,
-  }) {
+  })
+  {
     // Use cool theme colors
     final Color accent = Colors.blue.shade600;
     final Color accentDark = Colors.indigo.shade700;

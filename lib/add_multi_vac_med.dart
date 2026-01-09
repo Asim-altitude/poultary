@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/model/med_vac_item.dart';
 import 'package:poultary/model/sub_category_item.dart';
+import 'package:poultary/multiuser/model/multi_health_record.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/stock/medicine_stock_screen.dart';
@@ -282,6 +283,7 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
   }
 
   Future<void> updateMultiRecords(int usageId) async {
+    List<MedicineUsageItem> medList = [];
     for (var entry in multiMedicineList) {
       if (entry.id == null) {
         MedicineUsageItem item = MedicineUsageItem(
@@ -297,6 +299,7 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
         );
 
         await DatabaseHelper.insertMedicineUsageItem(item);
+        medList.add(item);
       } else {
         MedicineUsageItem item = MedicineUsageItem(
           id: entry.id,
@@ -305,17 +308,22 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
           diseaseName: entry.diseaseName!,
           unit: entry.unit!,
           quantity: entry.quantity ?? 0.0,
+          sync_id: entry.sync_id,
           last_modified: Utils.getTimeStamp(),
           modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
           farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
         );
 
         await DatabaseHelper.updateMedicineUsageItem(item);
+        medList.add(item);
       }
     }
+
+    multiHealthRecord!.usageItems = medList;
   }
 
   Future<void> addMultiRecords(int usageId) async {
+    List<MedicineUsageItem> medList = [];
     for (var entry in multiMedicineList) {
       MedicineUsageItem item = MedicineUsageItem(
         usageId: usageId,
@@ -330,10 +338,13 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
       );
 
       await DatabaseHelper.insertMedicineUsageItem(item);
+      medList.add(item);
     }
+
+    multiHealthRecord!.usageItems = medList;
   }
 
-
+  MultiHealthRecord? multiHealthRecord;
   Flock? currentFlock = null;
 
   bool _validate = false;
@@ -448,6 +459,7 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
                       activeStep--;
                       Utils.showToast("PROVIDE_ALL");
                     }else{
+                      multiHealthRecord = MultiHealthRecord();
                       if(isEdit)
                       {
                         Vaccination_Medication med_vacc = Vaccination_Medication(
@@ -473,11 +485,14 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
 
                         med_vacc.id = widget.vaccination_medication!.id!;
                         int? id = await DatabaseHelper.updateHealth(med_vacc);
+
+                        multiHealthRecord!.record = med_vacc;
+
                         await updateMultiRecords(med_vacc.id!);
                         Utils.showToast("SUCCESSFUL");
 
                         if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_health")){
-                          await FireBaseUtils.updateHealthRecord(med_vacc);
+                          await FireBaseUtils.updateMultiHealthRecord(multiHealthRecord!);
                         }
 
                         Navigator.pop(context);
@@ -505,11 +520,12 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
                             farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
                             f_sync_id: getFlockSyncID());
                         int? id = await DatabaseHelper.insertMedVac(med_vacc);
+                        multiHealthRecord!.record = med_vacc;
                         await addMultiRecords(id!);
                         Utils.showToast("SUCCESSFUL");
 
                         if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_health")){
-                          await FireBaseUtils.uploadHealthRecord(med_vacc);
+                          await FireBaseUtils.uploadMultiHealthRecord(multiHealthRecord!);
                         }
                         Navigator.pop(context);
                       }
@@ -1765,7 +1781,7 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
 
     for(int i=0;i<mMedicineList.length;i++){
       MedicineUsageItem medicineUsageItem = mMedicineList[i];
-      TreatmentEntry treatmentEntry = TreatmentEntry(id: medicineUsageItem.id,diseaseName: medicineUsageItem.diseaseName, medicineName: medicineUsageItem.medicineName, quantity: medicineUsageItem.quantity, unit: medicineUsageItem.unit);
+      TreatmentEntry treatmentEntry = TreatmentEntry(id: medicineUsageItem.id,diseaseName: medicineUsageItem.diseaseName, medicineName: medicineUsageItem.medicineName, sync_id: medicineUsageItem.sync_id, quantity: medicineUsageItem.quantity, unit: medicineUsageItem.unit);
       multiMedicineList.add(treatmentEntry);
     }
 
@@ -1791,6 +1807,8 @@ class TreatmentEntry {
   String? unit;
   double quantity;
 
+  String? sync_id;
+
   double availableStock; // optional stored to avoid recalculation
 
   TreatmentEntry({
@@ -1800,6 +1818,7 @@ class TreatmentEntry {
     this.medicineId,
     this.medicineName,
     this.unit,
+    this.sync_id,
     this.quantity = 0,
     this.availableStock = 0,
   });

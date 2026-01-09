@@ -2,15 +2,15 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:googleapis/securitycenter/v1.dart';
-import 'package:poultary/home_screen.dart';
 import 'package:poultary/model/egg_income.dart';
 import 'package:poultary/model/flock_detail.dart';
 import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/multiuser/api/server_apis.dart';
+import 'package:poultary/multiuser/model/multi_health_record.dart';
 import 'package:poultary/multiuser/utils/SyncStatus.dart';
-
+import 'package:poultary/stock/model/general_stock.dart';
+import 'package:poultary/stock/tools_assets/model/tool_asset_unit.dart';
 import '../../database/databse_helper.dart';
 import '../../model/custom_category.dart';
 import '../../model/custom_category_data.dart';
@@ -22,22 +22,29 @@ import '../../model/feed_item.dart';
 import '../../model/feed_stock_history.dart';
 import '../../model/flock.dart';
 import '../../model/flock_image.dart';
+import '../../model/health/multi_medicine.dart';
 import '../../model/med_vac_item.dart';
 import '../../model/medicine_stock_history.dart';
 import '../../model/sale_contractor.dart';
 import '../../model/stock_expense.dart';
 import '../../model/vaccine_stock_history.dart';
 import '../../model/weight_record.dart';
+import '../../stock/model/stock_transactions.dart';
+import '../../stock/tools_assets/model/tool_asset.dart';
+import '../../stock/tools_assets/model/tool_asset_maintenance.dart';
 import '../../utils/session_manager.dart';
 import '../../utils/utils.dart';
+import '../model/assetunitfb.dart';
 import '../model/birds_modification.dart';
 import '../model/egg_record.dart';
 import '../model/feedbatchfb.dart';
 import '../model/feedstockfb.dart';
 import '../model/financeItem.dart';
 import '../model/flockfb.dart';
+import '../model/general stock_transactions_fb.dart';
 import '../model/ingridientfb.dart';
 import '../model/medicinestockfb.dart';
+import '../model/unit_maintenance_fb.dart';
 import '../model/vaccinestockfb.dart';
 import 'Deduplicator.dart';
 import 'FirebaseUtils.dart';
@@ -78,6 +85,7 @@ class SyncManager {
     startCustomCategoryListening(farmId, lastSyncTime);
     startFeedIngredientListening(farmId, lastSyncTime);
     startHealthListening(farmId, lastSyncTime);
+    startMultiHealthListening(farmId, lastSyncTime);
     startCustomCategoryDataListening(farmId, lastSyncTime);
     startFeedBatchFBListening(farmId, lastSyncTime);
     startFeedStockFBListening(farmId, lastSyncTime);
@@ -86,6 +94,12 @@ class SyncManager {
     startSubCategoryListening(farmId, lastSyncTime);
     startWeightRecordsListening(farmId, lastSyncTime);
     startSaleContractorListening(farmId, lastSyncTime);
+    startGenStockListening(farmId, lastSyncTime);
+    startGenStockTransListening(farmId, lastSyncTime);
+
+    startToolAssetStockListening(farmId, lastSyncTime);
+    startAssetUnitListening(farmId, lastSyncTime);
+    startAssetUnitMaintenanceListening(farmId, lastSyncTime);
 
   }
 
@@ -729,6 +743,586 @@ class SyncManager {
       print("❌ Vaccination sync error: $e");
     }
   }
+
+  /// 💉 Vaccination/Medication listener
+  Future<void> startMultiHealthListening(String farmId, DateTime? lastSyncTime) async {
+
+    final lastTime = await SessionManager.getLastSyncTime(FireBaseUtils.MULTI_HEALTH);
+    if (lastTime != null) {
+      lastSyncTime = lastTime;
+    }
+    bool firstSnapshotHandled = false; // 👈 flag to only count once
+
+    try {
+      Query query = FirebaseFirestore.instance
+          .collection(FireBaseUtils.MULTI_HEALTH) // Replace with your actual collection constant
+          .where('farm_id', isEqualTo: farmId);
+
+      if (lastSyncTime != null) {
+        query = query.where('last_modified', isGreaterThan: Timestamp.fromDate(lastSyncTime));
+      }
+
+      final sub = query.snapshots().listen((snapshot) async {
+        if (!firstSnapshotHandled) {
+          SyncManager().listenerCompleted(); // progress +1
+          firstSnapshotHandled = true;
+        }
+
+
+        for (var change in snapshot.docChanges) {
+          final data = change.doc.data() as Map<String, dynamic>;
+          print("MULTI_HEALTH $data");
+          startSync();
+          final multiHealthRecord = MultiHealthRecord.fromJson(data);
+
+          print("🔄 MULTI_HEALTH SYNC: ${multiHealthRecord.record!.medicine}, ${multiHealthRecord.record!.bird_count}");
+          Utils.backup_changes += snapshot.docChanges.length;
+          if (multiHealthRecord.last_modified!.isAfter(lastSyncTime!)) {
+            lastSyncTime = multiHealthRecord.last_modified;
+          }
+
+          /*if(vaccination.modified_by == Utils.currentUser!.email)
+            return;
+*/
+          /*if(!deduplicator.shouldProcessUpdate(FireBaseUtils.HEALTH, vaccination.sync_id!, vaccination.last_modified!))
+            return;*/
+
+          bool exists = await DatabaseHelper.checkIfRecordExistsSyncID(
+            'Vaccination_Medication', multiHealthRecord.sync_id!,
+          );
+
+          Flock? flock = await DatabaseHelper.getFlockBySyncId(multiHealthRecord.record!.f_sync_id!);
+          Vaccination_Medication? old = await DatabaseHelper.getVaccinationBySyncId(multiHealthRecord.record!.sync_id!);
+
+          if (exists) {
+            if (multiHealthRecord.sync_status == SyncStatus.UPDATED) {
+              if (old != null) {
+                multiHealthRecord.record!.id = old.id;
+                multiHealthRecord.record!.f_id = old.f_id;
+                await DatabaseHelper.updateHealth(multiHealthRecord.record!);
+                await DatabaseHelper.deleteMedicineUsageItemsByUsageId(old.id!);
+
+                for(int i=0;i<multiHealthRecord.usageItems!.length;i++) {
+
+                  MedicineUsageItem item = multiHealthRecord.usageItems!.elementAt(i);
+                  MedicineUsageItem object = MedicineUsageItem(usageId: old.id!, medicineName: item.medicineName, diseaseName: item.diseaseName, unit: item.unit, quantity: item.quantity, sync_id: item.sync_id, sync_status: SyncStatus.SYNCED);
+                  await DatabaseHelper.insertMedicineUsageItem(object);
+                }
+              }
+            } else if (multiHealthRecord.sync_status == SyncStatus.DELETED) {
+              print("DELETING HEALTH");
+              await DatabaseHelper.deleteItem("Vaccination_Medication", old!.id!);
+              print("DELETED HEALTH");
+            }
+
+            SessionManager.setLastSyncTime(FireBaseUtils.MULTI_HEALTH, lastSyncTime!);
+
+          } else {
+            if(multiHealthRecord.sync_status != SyncStatus.DELETED) {
+              multiHealthRecord.record!.f_id = flock!.f_id;
+             int? id = await DatabaseHelper.insertMedVac(multiHealthRecord.record!);
+
+              for(int i=0;i<multiHealthRecord.usageItems!.length;i++) {
+
+                MedicineUsageItem item = multiHealthRecord.usageItems!.elementAt(i);
+                MedicineUsageItem object = MedicineUsageItem(usageId: id!, medicineName: item.medicineName, diseaseName: item.diseaseName, unit: item.unit, quantity: item.quantity, sync_id: item.sync_id, sync_status: SyncStatus.SYNCED);
+                await DatabaseHelper.insertMedicineUsageItem(object);
+              }
+
+            }
+
+            SessionManager.setLastSyncTime(FireBaseUtils.MULTI_HEALTH, lastSyncTime!);
+          }
+          RefreshEventBus().emit(FireBaseUtils.HEALTH);
+          completeSync();
+        }
+      });
+
+      _subscriptions.add(sub);
+
+      print("HEALTH SYNC STARTED");
+    } catch (e) {
+      completeSync();
+      print("❌ Vaccination sync error: $e");
+    }
+  }
+
+  //
+  Future<void> startGenStockListening(String farmId, DateTime? lastSyncTime) async {
+
+    final lastTime = await SessionManager.getLastSyncTime(FireBaseUtils.GENERAL_STOCK);
+    if (lastTime != null) {
+      lastSyncTime = lastTime;
+    }
+    bool firstSnapshotHandled = false; // 👈 flag to only count once
+
+    try {
+      Query query = FirebaseFirestore.instance
+          .collection(FireBaseUtils.GENERAL_STOCK) // Replace with your actual collection constant
+          .where('farm_id', isEqualTo: farmId);
+
+      if (lastSyncTime != null) {
+        query = query.where('last_modified', isGreaterThan: Timestamp.fromDate(lastSyncTime));
+      }
+
+      final sub = query.snapshots().listen((snapshot) async {
+        if (!firstSnapshotHandled) {
+          SyncManager().listenerCompleted(); // progress +1
+          firstSnapshotHandled = true;
+        }
+
+
+        for (var change in snapshot.docChanges) {
+          final data = change.doc.data() as Map<String, dynamic>;
+          print("GENERAL_STOCK $data");
+          startSync();
+          final genStockRecord = GeneralStockItem.fromJson(data);
+
+          print("🔄 GENERAL_STOCK SYNC: ${genStockRecord.sync_id}, ${genStockRecord.name}");
+          Utils.backup_changes += snapshot.docChanges.length;
+          if (genStockRecord.last_modified!.isAfter(lastSyncTime!)) {
+            lastSyncTime = genStockRecord.last_modified;
+          }
+
+          /*if(vaccination.modified_by == Utils.currentUser!.email)
+            return;
+*/
+          /*if(!deduplicator.shouldProcessUpdate(FireBaseUtils.HEALTH, vaccination.sync_id!, vaccination.last_modified!))
+            return;*/
+
+          bool exists = await DatabaseHelper.checkIfRecordExistsSyncID(
+            'GeneralStockItems', genStockRecord.sync_id!,
+          );
+
+          Flock? flock = await DatabaseHelper.getFlockBySyncId(null);
+          GeneralStockItem? old = await DatabaseHelper.getGenStockBySyncId(genStockRecord.sync_id!);
+
+          if (exists) {
+            if (genStockRecord.sync_status == SyncStatus.DELETED) {
+              print("DELETING GENERAL_STOCK");
+              await DatabaseHelper.deleteGeneralStockItem(old!.id!);
+              await DatabaseHelper.deleteStockTransactionByItemID(old.id!);
+              print("DELETED GENERAL_STOCK");
+            }
+
+            SessionManager.setLastSyncTime(FireBaseUtils.GENERAL_STOCK, lastSyncTime!);
+
+          } else {
+            if(genStockRecord.sync_status != SyncStatus.DELETED) {
+              int? id = await DatabaseHelper.insertGeneralStockItem(genStockRecord);
+            }
+
+            SessionManager.setLastSyncTime(FireBaseUtils.GENERAL_STOCK, lastSyncTime!);
+          }
+          RefreshEventBus().emit(FireBaseUtils.GENERAL_STOCK);
+          completeSync();
+        }
+      });
+
+      _subscriptions.add(sub);
+
+      print("GENERAL_STOCK SYNC STARTED");
+    } catch (e) {
+      completeSync();
+      print("❌ General Stock sync error: $e");
+    }
+  }
+
+  Future<void> startGenStockTransListening(String farmId, DateTime? lastSyncTime) async {
+
+    final lastTime = await SessionManager.getLastSyncTime(FireBaseUtils.GENERAL_STOCK_TRANS);
+    if (lastTime != null) {
+      lastSyncTime = lastTime;
+    }
+    bool firstSnapshotHandled = false; // 👈 flag to only count once
+
+    try {
+      Query query = FirebaseFirestore.instance
+          .collection(FireBaseUtils.GENERAL_STOCK_TRANS) // Replace with your actual collection constant
+          .where('farm_id', isEqualTo: farmId);
+
+      if (lastSyncTime != null) {
+        query = query.where('last_modified', isGreaterThan: Timestamp.fromDate(lastSyncTime));
+      }
+
+      final sub = query.snapshots().listen((snapshot) async {
+        if (!firstSnapshotHandled) {
+          SyncManager().listenerCompleted(); // progress +1
+          firstSnapshotHandled = true;
+        }
+
+
+        for (var change in snapshot.docChanges) {
+          final data = change.doc.data() as Map<String, dynamic>;
+          print("GENERAL_STOCK_TRANS stock ID ${data['stock_sync_id']}");
+          startSync();
+          final genStockRecord = GeneralStockTransactionFB.fromJson(data);
+
+          print("🔄 GENERAL_STOCK_TRANS SYNC: ${genStockRecord.sync_status}, ${genStockRecord.stockTransaction.toJson()}");
+          Utils.backup_changes += snapshot.docChanges.length;
+          if (genStockRecord.last_modified!.isAfter(lastSyncTime!)) {
+            lastSyncTime = genStockRecord.last_modified;
+          }
+
+          /*if(vaccination.modified_by == Utils.currentUser!.email)
+            return;
+*/
+          /*if(!deduplicator.shouldProcessUpdate(FireBaseUtils.HEALTH, vaccination.sync_id!, vaccination.last_modified!))
+            return;*/
+
+          bool exists = await DatabaseHelper.checkIfRecordExistsSyncID(
+            'GeneralStockTransactions', genStockRecord.stockTransaction.sync_id!,
+          );
+
+          Flock? flock = await DatabaseHelper.getFlockBySyncId(null);
+          GeneralStockTransaction? old = await DatabaseHelper.getGenStockTransBySyncId(genStockRecord.stockTransaction.sync_id!);
+
+          if (exists) {
+            print("EXISTS");
+            if (genStockRecord.sync_status == SyncStatus.DELETED) {
+              print("DELETING GENERAL_STOCK_TRANS");
+              if(old!.trId != null) {
+                await DatabaseHelper.deleteItem("Transactions", old.trId!);
+              }
+              await DatabaseHelper.deleteStockTransaction(old.id!);
+              print("DELETED GENERAL_STOCK_TRANS");
+            }
+
+            SessionManager.setLastSyncTime(FireBaseUtils.GENERAL_STOCK_TRANS, lastSyncTime!);
+
+          } else {
+            print("NOT EXISTS ELSE CASE");
+            if(genStockRecord.sync_status != SyncStatus.DELETED) {
+              int? trId = null;
+              if(genStockRecord.transactionItem != null){
+                print("Transaction Added");
+                trId = await DatabaseHelper.insertNewTransaction(genStockRecord.transactionItem!);
+              }
+              GeneralStockItem? generalStockItem = await DatabaseHelper.getGenStockBySyncId(genStockRecord.stock_sync_id);
+              print(generalStockItem!.toJson());
+              genStockRecord.stockTransaction.trId = trId;
+              genStockRecord.stockTransaction.itemId = generalStockItem.id!;
+              print(genStockRecord.stockTransaction.toJson());
+              int? id = await DatabaseHelper.insertStockTransaction(genStockRecord.stockTransaction);
+
+            }
+
+            SessionManager.setLastSyncTime(FireBaseUtils.GENERAL_STOCK_TRANS, lastSyncTime!);
+          }
+          RefreshEventBus().emit(FireBaseUtils.GENERAL_STOCK_TRANS);
+          completeSync();
+        }
+      });
+
+      _subscriptions.add(sub);
+
+      print("GENERAL_STOCK SYNC STARTED");
+    } catch (e) {
+      completeSync();
+      print("❌ General Stock sync error: $e");
+    }
+  }
+
+
+  Future<void> startToolAssetStockListening(String farmId, DateTime? lastSyncTime) async {
+
+    final lastTime = await SessionManager.getLastSyncTime(FireBaseUtils.ASSET_TOOL_STOCK);
+    if (lastTime != null) {
+      lastSyncTime = lastTime;
+    }
+    bool firstSnapshotHandled = false; // 👈 flag to only count once
+
+    try {
+      Query query = FirebaseFirestore.instance
+          .collection(FireBaseUtils.ASSET_TOOL_STOCK) // Replace with your actual collection constant
+          .where('farm_id', isEqualTo: farmId);
+
+      if (lastSyncTime != null) {
+        query = query.where('last_modified', isGreaterThan: Timestamp.fromDate(lastSyncTime));
+      }
+
+      final sub = query.snapshots().listen((snapshot) async {
+        if (!firstSnapshotHandled) {
+          SyncManager().listenerCompleted(); // progress +1
+          firstSnapshotHandled = true;
+        }
+
+
+        for (var change in snapshot.docChanges) {
+          final data = change.doc.data() as Map<String, dynamic>;
+          print("ASSET_TOOL_STOCK $data");
+          startSync();
+          final toolAssetMaster = ToolAssetMaster.fromMap(data);
+
+          print("🔄 ASSET_TOOL_STOCK SYNC: ${toolAssetMaster.sync_id}, ${toolAssetMaster.name}");
+          Utils.backup_changes += snapshot.docChanges.length;
+          if (toolAssetMaster.last_modified!.isAfter(lastSyncTime!)) {
+            lastSyncTime = toolAssetMaster.last_modified;
+          }
+
+          /*if(vaccination.modified_by == Utils.currentUser!.email)
+            return;
+*/
+          /*if(!deduplicator.shouldProcessUpdate(FireBaseUtils.HEALTH, vaccination.sync_id!, vaccination.last_modified!))
+            return;*/
+
+          bool exists = await DatabaseHelper.checkIfRecordExistsSyncID(
+            'ToolAssetMaster', toolAssetMaster.sync_id!,
+          );
+
+          Flock? flock = await DatabaseHelper.getFlockBySyncId(null);
+          ToolAssetMaster? old = await DatabaseHelper.getToolAssetStockBySyncId(toolAssetMaster.sync_id!);
+
+          if (exists) {
+            if (toolAssetMaster.sync_status == SyncStatus.DELETED) {
+              print("DELETING ASSET_TOOL_STOCK");
+              await DatabaseHelper.deleteToolAssetMaster(old!.id!);
+              print("DELETED ASSET_TOOL_STOCK");
+            }
+
+            SessionManager.setLastSyncTime(FireBaseUtils.ASSET_TOOL_STOCK, lastSyncTime!);
+
+          } else {
+            if(toolAssetMaster.sync_status != SyncStatus.DELETED) {
+              int? id = await DatabaseHelper.insertToolAssetMaster(toolAssetMaster);
+            }
+
+            SessionManager.setLastSyncTime(FireBaseUtils.ASSET_TOOL_STOCK, lastSyncTime!);
+          }
+          RefreshEventBus().emit(FireBaseUtils.ASSET_TOOL_STOCK);
+          completeSync();
+        }
+      });
+
+      _subscriptions.add(sub);
+
+      print("GENERAL_STOCK SYNC STARTED");
+    } catch (e) {
+      completeSync();
+      print("❌ General Stock sync error: $e");
+    }
+  }
+
+  Future<void> startAssetUnitListening(String farmId, DateTime? lastSyncTime) async {
+
+    final lastTime = await SessionManager.getLastSyncTime(FireBaseUtils.ASSET_UNIT_STOCK);
+    if (lastTime != null) {
+      lastSyncTime = lastTime;
+    }
+    bool firstSnapshotHandled = false; // 👈 flag to only count once
+
+    try {
+      Query query = FirebaseFirestore.instance
+          .collection(FireBaseUtils.ASSET_UNIT_STOCK) // Replace with your actual collection constant
+          .where('farm_id', isEqualTo: farmId);
+
+      if (lastSyncTime != null) {
+        query = query.where('last_modified', isGreaterThan: Timestamp.fromDate(lastSyncTime));
+      }
+
+      final sub = query.snapshots().listen((snapshot) async {
+        if (!firstSnapshotHandled) {
+          SyncManager().listenerCompleted(); // progress +1
+          firstSnapshotHandled = true;
+        }
+
+
+        for (var change in snapshot.docChanges) {
+          final data = change.doc.data() as Map<String, dynamic>;
+          print("ASSET_UNIT_STOCK stock ID ${data['stock_sync_id']}");
+          startSync();
+          final assetUnitFBModel = AssetUnitFBModel.fromJson(data);
+
+          print("🔄 ASSET_UNIT_STOCK SYNC: ${assetUnitFBModel.sync_status}, ${assetUnitFBModel.toLocalJson()}");
+          Utils.backup_changes += snapshot.docChanges.length;
+          if (assetUnitFBModel.last_modified!.isAfter(lastSyncTime!)) {
+            lastSyncTime = assetUnitFBModel.last_modified;
+          }
+
+          /*if(vaccination.modified_by == Utils.currentUser!.email)
+            return;
+*/
+          /*if(!deduplicator.shouldProcessUpdate(FireBaseUtils.HEALTH, vaccination.sync_id!, vaccination.last_modified!))
+            return;*/
+
+          bool exists = await DatabaseHelper.checkIfRecordExistsSyncID(
+            'ToolAssetUnit', assetUnitFBModel.unit.sync_id!,
+          );
+
+          Flock? flock = await DatabaseHelper.getFlockBySyncId(null);
+          ToolAssetUnit? old = await DatabaseHelper.getToolAssetUnitBySyncId(assetUnitFBModel.unit.sync_id!);
+
+          if (exists) {
+            print("EXISTS");
+            if (assetUnitFBModel.sync_status == SyncStatus.DELETED) {
+              print("DELETING ASSET_UNIT_STOCK");
+              if(old!.trId != null) {
+                await DatabaseHelper.deleteItem("Transactions", old.trId!);
+              }
+              await DatabaseHelper.deleteToolAssetUnit(old.id!);
+              print("DELETED ASSET_UNIT_STOCK");
+            } else if(assetUnitFBModel.sync_status == SyncStatus.UPDATED){
+              print("UPDATING...");
+              ToolAssetMaster? toolAssetMaster = await DatabaseHelper.getToolAssetStockBySyncId(assetUnitFBModel.unit.master_sync_id!);
+              TransactionItem? transactionItem = await DatabaseHelper.getSingleTransaction(old!.trId!.toString());
+              transactionItem!.amount = assetUnitFBModel.transaction!.amount;
+              transactionItem.unitPrice = assetUnitFBModel.transaction!.unitPrice;
+
+              await DatabaseHelper.updateTransaction(transactionItem);
+              print("Transaction UPdated");
+
+              assetUnitFBModel.unit.masterId = toolAssetMaster!.id!;
+              assetUnitFBModel.unit.trId = old.trId!;
+              assetUnitFBModel.unit.id = old.id;
+              await DatabaseHelper.updateToolAssetUnit(assetUnitFBModel.unit);
+              print("ASSET_UNIT_STOCK Updated");
+
+            }
+
+            SessionManager.setLastSyncTime(FireBaseUtils.ASSET_UNIT_STOCK, lastSyncTime!);
+
+          } else {
+            print("NOT EXISTS ELSE CASE");
+            if(assetUnitFBModel.sync_status != SyncStatus.DELETED) {
+              int? trId = null;
+              if(assetUnitFBModel.transaction != null){
+                print("Transaction Added");
+                trId = await DatabaseHelper.insertNewTransaction(assetUnitFBModel.transaction!);
+              }
+              ToolAssetMaster? toolAssetMaster = await DatabaseHelper.getToolAssetStockBySyncId(assetUnitFBModel.unit.master_sync_id!);
+              print(toolAssetMaster!.toMap());
+              assetUnitFBModel.unit.masterId = toolAssetMaster.id!;
+              assetUnitFBModel.unit.trId = trId;
+              print(assetUnitFBModel.unit.toMap());
+              int? id = await DatabaseHelper.insertToolAssetUnit(assetUnitFBModel.unit);
+            }
+
+            SessionManager.setLastSyncTime(FireBaseUtils.ASSET_UNIT_STOCK, lastSyncTime!);
+          }
+          RefreshEventBus().emit(FireBaseUtils.ASSET_UNIT_STOCK);
+          completeSync();
+        }
+      });
+
+      _subscriptions.add(sub);
+
+      print("GENERAL_STOCK SYNC STARTED");
+    } catch (e) {
+      completeSync();
+      print("❌ General Stock sync error: $e");
+    }
+  }
+
+  Future<void> startAssetUnitMaintenanceListening(String farmId, DateTime? lastSyncTime) async {
+
+    final lastTime = await SessionManager.getLastSyncTime(FireBaseUtils.ASSET_UNIT_MAINTENANCE_STOCK);
+    if (lastTime != null) {
+      lastSyncTime = lastTime;
+    }
+    bool firstSnapshotHandled = false; // 👈 flag to only count once
+
+    try {
+      Query query = FirebaseFirestore.instance
+          .collection(FireBaseUtils.ASSET_UNIT_MAINTENANCE_STOCK) // Replace with your actual collection constant
+          .where('farm_id', isEqualTo: farmId);
+
+      if (lastSyncTime != null) {
+        query = query.where('last_modified', isGreaterThan: Timestamp.fromDate(lastSyncTime));
+      }
+
+      final sub = query.snapshots().listen((snapshot) async {
+        if (!firstSnapshotHandled) {
+          SyncManager().listenerCompleted(); // progress +1
+          firstSnapshotHandled = true;
+        }
+
+
+        for (var change in snapshot.docChanges) {
+          final data = change.doc.data() as Map<String, dynamic>;
+          print("ASSET_UNIT_MAINTENANCE_STOCK stock ID ${data['stock_sync_id']}");
+          startSync();
+          final assetUnitFBModel = AssetUnitMaintenanceFBModel.fromJson(data);
+
+          print("🔄 ASSET_UNIT_MAINTENANCE_STOCK SYNC: ${assetUnitFBModel.sync_status}, ${assetUnitFBModel.toLocalJson()}");
+          Utils.backup_changes += snapshot.docChanges.length;
+          if (assetUnitFBModel.last_modified!.isAfter(lastSyncTime!)) {
+            lastSyncTime = assetUnitFBModel.last_modified;
+          }
+
+          /*if(vaccination.modified_by == Utils.currentUser!.email)
+            return;
+*/
+          /*if(!deduplicator.shouldProcessUpdate(FireBaseUtils.HEALTH, vaccination.sync_id!, vaccination.last_modified!))
+            return;*/
+
+          bool exists = await DatabaseHelper.checkIfRecordExistsSyncID(
+            'TooAssetMaintenance', assetUnitFBModel.maintenance.sync_id!,
+          );
+
+          Flock? flock = await DatabaseHelper.getFlockBySyncId(null);
+          ToolAssetMaintenance? old = await DatabaseHelper.getAssetUnitMaintenanceBySyncId(assetUnitFBModel.maintenance.sync_id!);
+
+          if (exists) {
+            print("EXISTS");
+            if (assetUnitFBModel.sync_status == SyncStatus.DELETED) {
+              print("DELETING ASSET_UNIT_MAINTENANCE_STOCK");
+              if(old!.trId != null) {
+                await DatabaseHelper.deleteItem("Transactions", old.trId!);
+              }
+              await DatabaseHelper.deleteMaintenanceLog(old.id!);
+              print("DELETED ASSET_UNIT_MAINTENANCE_STOCK");
+            } /*else if(assetUnitFBModel.sync_status == SyncStatus.UPDATED){
+              print("UPDATING...");
+              ToolAssetMaster? toolAssetMaster = await DatabaseHelper.getToolAssetStockBySyncId(assetUnitFBModel.unit.master_sync_id!);
+              TransactionItem? transactionItem = await DatabaseHelper.getSingleTransaction(old!.trId!.toString());
+              transactionItem!.amount = assetUnitFBModel.transaction!.amount;
+              transactionItem.unitPrice = assetUnitFBModel.transaction!.unitPrice;
+
+              await DatabaseHelper.updateTransaction(transactionItem);
+              print("Transaction UPdated");
+
+              assetUnitFBModel.unit.masterId = toolAssetMaster!.id!;
+              assetUnitFBModel.unit.trId = old.trId!;
+              assetUnitFBModel.unit.id = old.id;
+              await DatabaseHelper.updateToolAssetUnit(assetUnitFBModel.unit);
+              print("ASSET_UNIT_STOCK Updated");
+
+            }*/
+
+            SessionManager.setLastSyncTime(FireBaseUtils.ASSET_UNIT_MAINTENANCE_STOCK, lastSyncTime!);
+
+          } else {
+            print("NOT EXISTS ELSE CASE");
+            if(assetUnitFBModel.sync_status != SyncStatus.DELETED) {
+              int? trId = null;
+              if(assetUnitFBModel.transaction != null){
+                print("Transaction Added");
+                trId = await DatabaseHelper.insertNewTransaction(assetUnitFBModel.transaction!);
+              }
+              ToolAssetUnit? toolAssetUnit = await DatabaseHelper.getToolAssetUnitBySyncId(assetUnitFBModel.maintenance.asset_sync_id!);
+              print(toolAssetUnit!.toMap());
+              assetUnitFBModel.maintenance.assetUnitId = toolAssetUnit.id!;
+              assetUnitFBModel.maintenance.trId = trId;
+              print(assetUnitFBModel.maintenance.toMap());
+              int? id = await DatabaseHelper.insertMaintenanceLog(assetUnitFBModel.maintenance);
+            }
+
+            SessionManager.setLastSyncTime(FireBaseUtils.ASSET_UNIT_MAINTENANCE_STOCK, lastSyncTime!);
+          }
+          RefreshEventBus().emit(FireBaseUtils.ASSET_UNIT_MAINTENANCE_STOCK);
+          completeSync();
+        }
+      });
+
+      _subscriptions.add(sub);
+
+      print("ASSET_UNIT_MAINTENANCE_STOCK SYNC STARTED");
+    } catch (e) {
+      completeSync();
+      print("❌ ASSET_UNIT_MAINTENANCE_STOCK error: $e");
+    }
+  }
+
 
   /// 💵 FinanceItem listener (with f_id sync fix)
   Future<void> startFinanceListening(String farmId, DateTime? lastSyncTime) async {

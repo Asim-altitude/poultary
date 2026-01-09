@@ -38,6 +38,11 @@ class _NewExpense extends State<NewExpense>
 
   @override
   void dispose() {
+    howmanyController.removeListener(_updateAmount);
+    unitPriceController.removeListener(_updateAmount);
+    howmanyController.dispose();
+    unitPriceController.dispose();
+    amountController.dispose();
     super.dispose();
   }
 
@@ -68,6 +73,7 @@ class _NewExpense extends State<NewExpense>
   final howmanyController = TextEditingController();
   final soldtoController = TextEditingController();
 
+  final unitPriceController = TextEditingController();
 
   @override
   void initState() {
@@ -86,8 +92,29 @@ class _NewExpense extends State<NewExpense>
       soldtoController.text = widget.transactionItem!.sold_purchased_from;
       amountController.text = widget.transactionItem!.amount;
 
+      try {
+        double unitPrice = widget.transactionItem!.unitPrice ?? 0;
+        if (unitPrice == 0) {
+          double totalPrice = double.tryParse(widget.transactionItem!.amount) ??
+              0;
+          int how_many = int.tryParse(widget.transactionItem!.how_many) ?? 0;
+          if (how_many > 0) {
+            unitPrice = totalPrice / how_many;
+            widget.transactionItem!.unitPrice = unitPrice;
+          }
+        }
+      }catch(ex){
+        print(ex);
+      }
+
+      unitPriceController.text = widget.transactionItem!.unitPrice!.toString();
+
+
 
     }
+
+    howmanyController.addListener(_updateAmount);
+    unitPriceController.addListener(_updateAmount);
 
     getList();
     getExpenseCategoryList();
@@ -96,6 +123,24 @@ class _NewExpense extends State<NewExpense>
     Utils.setupAds();
 
   }
+
+  void _updateAmount() {
+    try {
+      final howMany = double.tryParse(howmanyController.text) ?? 0;
+      final unitPrice = double.tryParse(unitPriceController.text) ?? 0;
+      final total = howMany * unitPrice;
+
+      // Update amount field (without triggering rebuilds or loops)
+      amountController.text = total.toStringAsFixed(2);
+      setState(() {
+
+      });
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
+
 
   FinanceItem? financeItem = null;
   int total_brids = 0;
@@ -490,6 +535,7 @@ class _NewExpense extends State<NewExpense>
                             how_many: howmanyController.text,
                             extra_cost: "",
                             extra_cost_details: "",
+                            unitPrice: double.parse(unitPriceController.text),
                             f_name: _purposeselectedValue,
                             flock_update_id: '-1',
                             sync_id: widget.transactionItem!.sync_id,
@@ -530,6 +576,7 @@ class _NewExpense extends State<NewExpense>
                                 .text,
                             short_note: notesController.text,
                             how_many: howmanyController.text,
+                            unitPrice: double.parse(unitPriceController.text),
                             extra_cost: "",
                             extra_cost_details: "",
                             f_name: _purposeselectedValue,
@@ -647,7 +694,6 @@ class _NewExpense extends State<NewExpense>
                   ),
                 ),
     */
-                SizedBox(height: 20,),
                 EasyStepper(
                   activeStep: activeStep,
                   activeStepTextColor: Colors.blue.shade900,
@@ -684,7 +730,6 @@ class _NewExpense extends State<NewExpense>
                   onStepReached: (index) => setState(() => activeStep = index),
                 ),
 
-                SizedBox(height: 30,),
                 Container(
                   alignment: Alignment.center,
 
@@ -785,12 +830,22 @@ class _NewExpense extends State<NewExpense>
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        _buildInputLabel("Amount".tr(), Icons.attach_money),
+                                        _buildInputLabel("UNIT_PRICE".tr(), Icons.attach_money),
                                         SizedBox(height: 8),
-                                        _buildNumberField(amountController, "Amount".tr(), allowFloat: true),
+                                        _buildNumberField(unitPriceController, "UNIT_PRICE".tr(), allowFloat: true),
                                       ],
                                     ),
                                   ),
+
+                                ],
+                              ),
+                              SizedBox(height: 10),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildInputLabel("Amount".tr(), Icons.attach_money),
+                                  SizedBox(height: 8),
+                                  _buildNumberField(amountController, "Amount".tr(), allowFloat: true),
                                 ],
                               ),
                             ],

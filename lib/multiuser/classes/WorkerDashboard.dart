@@ -614,7 +614,27 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
 
   }
 
+  Future<void> initSettings() async {
+    await Utils.generateDatabaseTables();
+
+    try {
+      List<String> tables = Utils.getTAllables(); // Add your actual table names
+
+      for (final table in tables) {
+        await DatabaseHelper.instance.addSyncColumnsToTable(table);
+        await DatabaseHelper.instance.assignSyncIds(table);
+      }
+
+      await SessionManager.setBoolValue(SessionManager.table_created, true);
+      print('TABLE CREATION DONE');
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
+
   Future<void> getSyncQueueList() async {
+    await initSettings();
     try {
       pendingRecords = await DatabaseHelper.getAllSyncQueueItems(Utils.currentUser!.email);
 

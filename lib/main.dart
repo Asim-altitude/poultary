@@ -1,11 +1,12 @@
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/home_screen.dart';
-import 'package:poultary/multiuser/classes/WorkerDashboard.dart';
 import 'package:poultary/multiuser/model/user.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
@@ -18,13 +19,22 @@ import 'auto_add_feed_screen.dart';
 import 'model/blog.dart';
 import 'multiuser/classes/AuthGate.dart';
 import 'multiuser/classes/farm_welcome_screen.dart';
-import 'multiuser/classes/welcome_screen.dart';
 
 bool direction = true;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
-  await Firebase.initializeApp(); // This is important!
+  await Firebase.initializeApp();
+
+  // 🔐 Add App Check here
+  await FirebaseAppCheck.instance.activate(
+    androidProvider: kDebugMode
+        ? AndroidProvider.debug
+        : AndroidProvider.playIntegrity,
+    appleProvider: kDebugMode
+        ? AppleProvider.debug
+        : AppleProvider.appAttest,
+  );
 
   runApp(EasyLocalization(
           supportedLocales: [Locale('en'), Locale('ar'),Locale('de'),Locale('ru'),Locale('fa'),Locale('it'),Locale('ja'),Locale('ko'),Locale('pt'),Locale('tr'),Locale('fr'),Locale('id'),Locale('hi'),Locale('es'),Locale('zh'),Locale('uk'),Locale('pl'),Locale('bn'),Locale('te'),Locale('ta'),Locale('el')],

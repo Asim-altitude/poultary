@@ -215,30 +215,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                         print(ex);
                       }*/
                       try {
-                        List<String> tables = [
-                          'Flock',
-                          'Flock_Image',
-                          'Eggs',
-                          'Feeding',
-                          'Transactions',
-                          'Vaccination_Medication',
-                          'Category_Detail',
-                          'EggTransaction',
-                          'FeedBatch',
-                          'FeedBatchItem',
-                          'FeedIngredient',
-                          'FeedStockHistory',
-                          'Flock_Detail',
-                          'MedicineStockHistory',
-                          'SaleContractor',
-                          'ScheduledNotification',
-                          'VaccineStockHistory',
-                          'WeightRecord',
-                          'StockExpense',
-                          'CustomCategory',
-                          'CustomCategoryData',
-
-                        ]; // Add your actual table names
+                        List<String> tables = Utils.getTAllables(); // Add your actual table names
 
                         for (final table in tables) {
                           await DatabaseHelper.instance.addSyncColumnsToTable(

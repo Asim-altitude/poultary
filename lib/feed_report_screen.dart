@@ -304,7 +304,6 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
     return SafeArea(child: Scaffold(
       body:SafeArea(
         top: false,
-
          child: Container(
           width: widthScreen,
           height: heightScreen,
@@ -561,18 +560,99 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                             Divider(thickness: 1, color: Colors.black26),
                             Column(
                               children: feedingSummary.map((feed) {
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 3),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                final double percent =
+                                total_feed_consumption == 0 ? 0 : (feed.totalQuantity / total_feed_consumption);
+                                final int percentValue = (percent * 100).round();
+
+                                Color progressColor;
+                                if (percent >= 0.5) {
+                                  progressColor = Colors.green.shade400;
+                                } else if (percent >= 0.25) {
+                                  progressColor = Colors.orange.shade400;
+                                } else {
+                                  progressColor = Colors.red.shade400;
+                                }
+
+                                return Container(
+                                  margin: const EdgeInsets.symmetric(vertical: 6),
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.05),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 3),
+                                      )
+                                    ],
+                                  ),
+                                  child: Column(
                                     children: [
-                                      Text(
-                                        feed.feedName.tr(),
-                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black),
+                                      // 🔝 Top Row
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          // Feed Name
+                                          Expanded(
+                                            child: Text(
+                                              feed.feedName.tr(),
+                                              style: const TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+
+                                          // Quantity
+                                          Text(
+                                            "${Utils.roundTo2Decimal(feed.totalQuantity)} ${Utils.selected_unit.tr()}",
+                                            style: const TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+
+                                          const SizedBox(width: 8),
+
+                                          // Percentage Badge
+                                          Container(
+                                            padding:
+                                            const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: progressColor.withOpacity(0.15),
+                                              borderRadius: BorderRadius.circular(20),
+                                            ),
+                                            child: Text(
+                                              "$percentValue%",
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                color: progressColor,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      Text(
-                                        "${Utils.roundTo2Decimal(feed.totalQuantity)}"+" "+Utils.selected_unit.tr(),
-                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+
+                                      const SizedBox(height: 6),
+
+                                      // 📊 Animated Progress Bar
+                                      TweenAnimationBuilder<double>(
+                                        tween: Tween<double>(begin: 0, end: percent),
+                                        duration: const Duration(milliseconds: 900),
+                                        builder: (context, value, child) {
+                                          return ClipRRect(
+                                            borderRadius: BorderRadius.circular(6),
+                                            child: LinearProgressIndicator(
+                                              value: value,
+                                              minHeight: 6,
+                                              backgroundColor: Colors.grey.shade200,
+                                              valueColor:
+                                              AlwaysStoppedAnimation<Color>(progressColor),
+                                            ),
+                                          );
+                                        },
                                       ),
                                     ],
                                   ),
@@ -590,18 +670,114 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                             Divider(thickness: 1, color: Colors.black26),
                             Column(
                               children: flockFeedSummary.map((flock) {
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 3),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        flock.f_name.tr(),
-                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black),
+                                final double percent =
+                                total_feed_consumption == 0 ? 0 : (flock.totalQuantity / total_feed_consumption);
+                                final int percentValue = (percent * 100).round();
+
+                                // Dynamic color based on usage
+                                Color progressColor;
+                                if (percent >= 0.45) {
+                                  progressColor = Colors.green.shade400;
+                                } else if (percent >= 0.25) {
+                                  progressColor = Colors.orange.shade400;
+                                } else {
+                                  progressColor = Colors.red.shade400;
+                                }
+
+                                return Container(
+                                  margin: const EdgeInsets.symmetric(vertical: 6),
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.05),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 3),
                                       ),
-                                      Text(
-                                        "${Utils.roundTo2Decimal(flock.totalQuantity)}" + " "+Utils.selected_unit.tr(),
-                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      // 🔝 Top Row
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          // 🐔 Flock Name
+                                          Expanded(
+                                            child: Text(
+                                              flock.f_name.tr(),
+                                              style: const TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+
+                                          // 🍽 Feed Quantity
+                                          Text(
+                                            "${Utils.roundTo2Decimal(flock.totalQuantity)} ${Utils.selected_unit.tr()}",
+                                            style: const TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+
+                                          const SizedBox(width: 8),
+
+                                          // 📊 Percentage Badge
+                                          Container(
+                                            padding:
+                                            const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: progressColor.withOpacity(0.15),
+                                              borderRadius: BorderRadius.circular(20),
+                                            ),
+                                            child: Text(
+                                              "$percentValue%",
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                color: progressColor,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+
+                                      const SizedBox(height: 6),
+
+                                      // 📈 Animated Progress Bar
+                                      TweenAnimationBuilder<double>(
+                                        tween: Tween<double>(begin: 0, end: percent),
+                                        duration: const Duration(milliseconds: 900),
+                                        builder: (context, value, child) {
+                                          return ClipRRect(
+                                            borderRadius: BorderRadius.circular(6),
+                                            child: LinearProgressIndicator(
+                                              value: value,
+                                              minHeight: 6,
+                                              backgroundColor: Colors.grey.shade200,
+                                              valueColor:
+                                              AlwaysStoppedAnimation<Color>(progressColor),
+                                            ),
+                                          );
+                                        },
+                                      ),
+
+                                      const SizedBox(height: 4),
+
+                                      // 📝 Subtitle (optional but nice)
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Text(
+                                          "$percentValue% of total feed consumed",
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.grey.shade600,
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),
