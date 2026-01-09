@@ -2,8 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-<key>FirebaseAppDelegateProxyEnabled</key>
-<true/>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<true/>
 	<key>GIDClientID</key>
 	<string>647617333104-nnus87v25dcpbvojdou5e40e45ecpo08.apps.googleusercontent.com</string>
 	<key>NSUserTrackingUsageDescription</key>
@@ -266,11 +266,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.4.0</string>
+	<string>2.5.0</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>12</string>
+	<string>20</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
@@ -280,7 +280,7 @@
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>SKStoreReviewController</key>
-    <string>In-App Review</string>
+	<string>In-App Review</string>
 	<key>UIStatusBarHidden</key>
 	<false/>
 	<key>UISupportedInterfaceOrientations</key>
