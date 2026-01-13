@@ -1645,7 +1645,6 @@ $storeLink
       Utils.isShowAdd = true;
       inititalize();
     }
-    Utils.isShowAdd = false;
   }
 
 
