@@ -2021,26 +2021,35 @@ class DatabaseHelper  {
   }
 
   static Future<List<FarmSetup>>  getFarmInfo() async {
-    var result = await _database?.rawQuery("SELECT * FROM FarmSetup");
+
     List<FarmSetup> _birdList = [];
-    FarmSetup bird;
-    if(result!=null){
-      if(result.isNotEmpty){
-        if(result.isNotEmpty){
-          for(int i = 0 ; i < result.length ; i ++){
-            Map<String, dynamic> json = result[i];
+    try {
+      var result = await _database?.rawQuery("SELECT * FROM FarmSetup");
 
-            bird = FarmSetup.fromJson(json);
-            _birdList.add(bird);
-            print(_birdList);
+      FarmSetup bird;
+      if (result != null) {
+        if (result.isNotEmpty) {
+          if (result.isNotEmpty) {
+            for (int i = 0; i < result.length; i ++) {
+              Map<String, dynamic> json = result[i];
+
+              bird = FarmSetup.fromJson(json);
+              _birdList.add(bird);
+              print(_birdList);
+            }
           }
-        }
 
-        Map<String, dynamic> json = result[0];
-        bird = FarmSetup.fromJson(json);
+          Map<String, dynamic> json = result[0];
+          bird = FarmSetup.fromJson(json);
+        }
       }
+      return _birdList;
     }
-    return _birdList;
+    catch(ex){
+      FarmSetup farmSetup = FarmSetup(id: 1, name: "Easy Poultry", currency: "\$", location: "location", date: "date", image: "");
+      _birdList.add(farmSetup);
+      return _birdList;
+    }
   }
 
   static Future<List<Bird>>  getBirds() async {

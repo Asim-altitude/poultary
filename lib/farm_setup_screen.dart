@@ -74,6 +74,7 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
     }else{
       modified = 1;
     }
+
     locationController.text = farmSetup!.location;
     nameController.text = farmSetup!.name;
     date = farmSetup!.date;
@@ -518,7 +519,9 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
         ),
       ],
     );
-    final bytes = File(croppedFile!.path).readAsBytesSync();
+    File file = await Utils.convertToJPGFileIfRequiredWithCompression(File(croppedFile!.path));
+
+    final bytes = File(file!.path).readAsBytesSync();
     String base64Image =  base64Encode(bytes);
     farmSetup!.image = base64Image;
     modified = 1;
