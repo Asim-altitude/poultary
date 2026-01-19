@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:poultary/birds_report_screen.dart';
 import 'package:poultary/eggs_report_screen.dart';
 import 'package:poultary/financial_report_screen.dart';
+import 'package:poultary/model/farm_item.dart';
 import 'package:poultary/model/feed_item.dart';
 import 'package:poultary/model/flock_detail.dart';
 import 'package:poultary/model/transaction_item.dart';
@@ -229,6 +230,11 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
       totalDays = calculateTotalDays(str_date, end_date);
     });
 
+    if(str_date.startsWith("1950")){
+      str_date = "";
+      end_date = "";
+    }
+
     try {
       gross_income = await DatabaseHelper.getTransactionsTotal(
           -1, "Income", str_date, end_date);
@@ -289,14 +295,20 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
       await DatabaseHelper.getFilteredFeedingWithSort(
           -1, "All", str_date, end_date, "DESC");
 
-      dailyBreakDown = generateDailyBreakdown(
-        startDate: str_date,
-        endDate: end_date,
-        transactions: transactions,
-        feedings: feedList,
-        eggsList: eggsList,
-        flockDetails: birdsInfoList,
-      );
+      try {
+
+        dailyBreakDown = generateDailyBreakdown(
+          startDate: str_date,
+          endDate: end_date,
+          transactions: transactions,
+          feedings: feedList,
+          eggsList: eggsList,
+          flockDetails: birdsInfoList,
+        );
+      }
+      catch(ex){
+        print(ex);
+      }
 
 
       monthlyBreakDown = generateMonthlyBreakdown(
@@ -439,6 +451,7 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
   {
     final Map<String, Map<String, dynamic>> breakdown = {};
 
+
     // ---------- helpers ----------
     String normalize(String? date) {
       if (date == null) return "";
@@ -533,6 +546,74 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
   }
 
 
+  void showFarmSetupDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                size: 50,
+                color: Colors.orange,
+              ),
+              SizedBox(height: 15),
+              Text(
+                "Farm Setup Date Missing",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text("The daily and monthly production breakdowns depend on this date, ",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[700],
+                ),
+              ),
+              SizedBox(height: 25),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    Navigator.pop(context); // Close the dialog
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>  FinanceReportsScreen()),);
+
+                    pdf_formatted_date_filter = 'ALL_TIME'.tr();
+                    getAllData();// Navigate to Farm Setup Screen
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    "Set Up Farm Now",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
 
 
@@ -1000,7 +1081,7 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
   String date_filter_name = 'THIS_MONTH';
   String pdf_formatted_date_filter = 'THIS_MONTH';
   String str_date = '',end_date = '';
-  void getData(String filter){
+  Future<void> getData(String filter) async {
     int index = 0;
 
     if (filter == 'TODAY'){
@@ -1110,10 +1191,19 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
       pdf_formatted_date_filter = 'LAST_YEAR'.tr() +" ("+Utils.getFormattedDate(str_date)+"-"+Utils.getFormattedDate(end_date)+")";
       getAllData();
     }else if (filter == 'ALL_TIME'){
+
+      List<FarmSetup> farmSetup = await DatabaseHelper.getFarmInfo();
+      FarmSetup farmInfo = farmSetup[0];
+      if(farmInfo.date.toLowerCase() == "date"){
+        showFarmSetupDialog(context);
+        return;
+      }else{
+        str_date = farmInfo.date;
+      }
+
       index = 8;
       var inputFormat = DateFormat('yyyy-MM-dd');
-      str_date ="1950-01-01";
-      end_date = inputFormat.format(DateTime.now());;
+      end_date = inputFormat.format(DateTime.now());
       print(str_date+" "+end_date);
 
       pdf_formatted_date_filter = 'ALL_TIME'.tr();

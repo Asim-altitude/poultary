@@ -752,32 +752,38 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        /// Left column
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              transactionList[index].type!.toLowerCase() == 'income'
-                                                  ? 'Sold To'.tr()
-                                                  : 'Paid To'.tr(),
-                                              style: const TextStyle(
-                                                fontSize: 13,
-                                                color: Colors.black54,
+                                        /// Left column (constrained)
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                transactionList[index].type!.toLowerCase() == 'income'
+                                                    ? 'Sold To'.tr()
+                                                    : 'Paid To'.tr(),
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.black54,
+                                                ),
                                               ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              transactionList[index].sold_purchased_from,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 14,
-                                                color: Colors.black,
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                transactionList[index].sold_purchased_from,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 14,
+                                                  color: Colors.black,
+                                                ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
 
-                                        /// Right column
+                                        const SizedBox(width: 12),
+
+                                        /// Right column (fixed width naturally)
                                         Column(
                                           crossAxisAlignment: CrossAxisAlignment.end,
                                           children: [

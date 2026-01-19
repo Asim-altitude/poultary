@@ -890,7 +890,7 @@ class _NewFeeding extends State<NewFeeding>
     );
   }
 
-// Custom Number Input Field
+  // Custom Number Input Field
   Widget _buildNumberInputField(TextEditingController controller, String hint) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
@@ -906,6 +906,44 @@ class _NewFeeding extends State<NewFeeding>
           FilteringTextInputFormatter.allow(
             RegExp(r"^\d*\.?\d*$"),
           ), // Allows only numbers or float based on flag
+        ],
+        decoration: InputDecoration(
+          hintText: hint,
+          border: InputBorder.none,
+          hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 16),
+        ),
+      ),
+    );
+  }
+
+
+// Custom Number Input Field
+  Widget _buildFloatInputField(TextEditingController controller, String hint) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade300, width: 1.2),
+      ),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}$')), // Allows digits and up to 2 decimal places
+          TextInputFormatter.withFunction((oldValue, newValue) {
+            final text = newValue.text;
+
+            // Allow empty input
+            if (text.isEmpty) return newValue;
+
+            // Prevent multiple decimal points
+            if (text == ".") return oldValue; // Disallow single dot input at start
+            if (text.contains('..')) return oldValue; // Prevent multiple decimal points
+
+            // Ensure valid float
+            return double.tryParse(text) == null ? oldValue : newValue;
+          }),
         ],
         decoration: InputDecoration(
           hintText: hint,

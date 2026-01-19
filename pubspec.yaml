@@ -82,6 +82,8 @@ dependencies:
   http: ^1.4.0
   firebase_core: ^3.7.0
   firebase_auth: ^5.3.0
+  firebase_analytics: ^11.4.0
+
   cloud_firestore: ^5.4.0
   firebase_app_check: ^0.3.1
   crypto: ^3.0.3

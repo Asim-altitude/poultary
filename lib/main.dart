@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
@@ -19,6 +20,7 @@ import 'auto_add_feed_screen.dart';
 import 'model/blog.dart';
 import 'multiuser/classes/AuthGate.dart';
 import 'multiuser/classes/farm_welcome_screen.dart';
+
 
 bool direction = true;
 Future<void> main() async {
@@ -183,6 +185,7 @@ void loadForm() {
   );
 }
 
+final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -192,6 +195,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       builder: EasyLoading.init(),
       title: 'Easy Poultry Manager',
+      navigatorObservers: [
+        FirebaseAnalyticsObserver(analytics: analytics),
+      ],
       debugShowCheckedModeBanner: false,
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,

@@ -557,7 +557,7 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
 
               const SizedBox(height: 10),
               Visibility(
-                visible: (pendingRecords == null || pendingRecords!.length==0) ? false : true,
+                visible: false, //(pendingRecords == null || pendingRecords!.length==0) ? false : true,
                 child: Center(
                   child: ElevatedButton.icon(
                     onPressed: (pendingRecords == null || pendingRecords!.length==0)

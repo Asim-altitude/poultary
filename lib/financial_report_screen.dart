@@ -50,6 +50,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
     _reports_filter = (await SessionManager.getReportFilter())!;
     date_filter_name = filterList.elementAt(_reports_filter);
     getData(date_filter_name);
+
   }
 
   @override
@@ -593,13 +594,13 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                 SizedBox(width: 8),
                 Text(
                   item.name.tr(),
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
               ],
             ),
             Text(
               Utils.currency + item.amount.toStringAsFixed(2),
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: color),
             ),
           ],
         ),
@@ -804,7 +805,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 17,
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
                     ),
@@ -819,8 +820,8 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                 Text(
                   "${Utils.currency}$netProfit",
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
                     color: isProfitable ? Colors.green : Colors.red,
                   ),
                 ),

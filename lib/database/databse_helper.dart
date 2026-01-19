@@ -2979,6 +2979,42 @@ class DatabaseHelper  {
     return result?.map((map) => FlockIncomeExpense.fromMap(map)).toList();
   }
 
+  static Future<List<FlockIncomeExpense>?> getFlockWiseFinanceWithFarmWide(
+      String start,
+      String end,
+      ) async {
+    String query = '''
+  -- Flock-wise data
+  SELECT 
+      t.f_id,
+      f.f_name,
+      SUM(CASE WHEN t.type = 'Income' THEN t.amount ELSE 0 END) AS total_income,
+      SUM(CASE WHEN t.type = 'Expense' THEN t.amount ELSE 0 END) AS total_expense
+  FROM Transactions t
+  JOIN Flock f ON t.f_id = f.f_id
+  WHERE t.date >= '$start' AND t.date <= '$end'
+  GROUP BY t.f_id
+
+  UNION ALL
+
+  -- Farm-wide data (f_id = -1)
+  SELECT 
+      -1 AS f_id,
+      'Farm Wide' AS f_name,
+      SUM(CASE WHEN type = 'Income' THEN amount ELSE 0 END) AS total_income,
+      SUM(CASE WHEN type = 'Expense' THEN amount ELSE 0 END) AS total_expense
+  FROM Transactions
+  WHERE f_id = -1
+    AND date >= '$start'
+    AND date <= '$end'
+
+  ORDER BY f_name;
+  ''';
+
+    final result = await _database?.rawQuery(query);
+    return result?.map((e) => FlockIncomeExpense.fromMap(e)).toList();
+  }
+
 
 
   static Future<List<FlockFeedSummary>> getMyMostUsedFeedsByFlock(int f_id, String str_date, String end_date) async {
@@ -3217,23 +3253,55 @@ class DatabaseHelper  {
 
   }
 
+
+  Future<String?> getEarliestDateAsString({
+    required String tableName,
+    required String dateColumn,
+  }) async {
+    final result = await _database?.rawQuery(
+      'SELECT MIN($dateColumn) as minDate FROM $tableName',
+    );
+
+    if (result!.isNotEmpty && result.first['minDate'] != null) {
+      final minDateStr = result.first['minDate'] as String;
+      return minDateStr;
+    }
+
+    // Table empty
+    return null;
+  }
+
+
   // INCOME/EXPENSE
 
   static Future<double> getTransactionsTotal(int f_id, String type, String str_date, String end_date) async {
 
     var result;
 
+
     if(type.isEmpty){
       type = "type = 'Income' or type='Expense'";
     }else{
       type = "type = '$type'";
     }
-    if(f_id == -1) {
-      result = await _database?.rawQuery(
-          "SELECT sum(CAST(REPLACE(amount,',','.') as REAL)) FROM Transactions where $type and date BETWEEN '$str_date'and '$end_date'");
-    }else if(f_id != -1) {
-      result = await _database?.rawQuery(
-          "SELECT sum(CAST(REPLACE(amount,',','.') as REAL)) FROM Transactions where $type and f_id = $f_id and date BETWEEN '$str_date'and '$end_date' ");
+
+    if(str_date.isEmpty){
+      if(f_id == -1) {
+        result = await _database?.rawQuery(
+            "SELECT sum(CAST(REPLACE(amount,',','.') as REAL)) FROM Transactions where $type");
+      }else{
+        result = await _database?.rawQuery(
+            "SELECT sum(CAST(REPLACE(amount,',','.') as REAL)) FROM Transactions where $type and f_id = $f_id");
+
+      }
+    }else {
+      if (f_id == -1) {
+        result = await _database?.rawQuery(
+            "SELECT sum(CAST(REPLACE(amount,',','.') as REAL)) FROM Transactions where $type and date BETWEEN '$str_date'and '$end_date'");
+      } else if (f_id != -1) {
+        result = await _database?.rawQuery(
+            "SELECT sum(CAST(REPLACE(amount,',','.') as REAL)) FROM Transactions where $type and f_id = $f_id and date BETWEEN '$str_date'and '$end_date' ");
+      }
     }
 
     Map<String,dynamic> map = result![0];
@@ -3374,14 +3442,28 @@ class DatabaseHelper  {
 
     var result;
 
-    if(f_id==-1) {
-      result = await _database?.rawQuery(
-          "SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and acqusition_date BETWEEN '$str_date' and '$end_date'");
-      print("SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and acqusition_date BETWEEN '$str_date' and '$end_date'");
-    }else if (f_id!=-1){
-      result = await _database?.rawQuery(
-          "SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and f_id = $f_id and acqusition_date BETWEEN '$str_date' and '$end_date'");
-      print("SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and f_id = $f_id and acqusition_date BETWEEN '$str_date' and '$end_date'");
+    if(str_date.isEmpty){
+      if(f_id==-1) {
+        result = await _database?.rawQuery(
+            "SELECT sum(item_count) FROM Flock_Detail where item_type = '$type'");
+        print("SELECT sum(item_count) FROM Flock_Detail where item_type = '$type'");
+      }else if (f_id!=-1){
+        result = await _database?.rawQuery(
+            "SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and f_id = $f_id");
+        print("SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and f_id = $f_id");
+      }
+    }else {
+      if (f_id == -1) {
+        result = await _database?.rawQuery(
+            "SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and acqusition_date BETWEEN '$str_date' and '$end_date'");
+        print(
+            "SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and acqusition_date BETWEEN '$str_date' and '$end_date'");
+      } else if (f_id != -1) {
+        result = await _database?.rawQuery(
+            "SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and f_id = $f_id and acqusition_date BETWEEN '$str_date' and '$end_date'");
+        print(
+            "SELECT sum(item_count) FROM Flock_Detail where item_type = '$type' and f_id = $f_id and acqusition_date BETWEEN '$str_date' and '$end_date'");
+      }
     }
 
     Map<String,dynamic> map = result![0];
@@ -3439,14 +3521,28 @@ class DatabaseHelper  {
 
     var result;
 
-    if(f_id==-1) {
-      result = await _database?.rawQuery(
-          "SELECT sum(total_eggs) FROM Eggs where isCollection = $type and collection_date BETWEEN '$str_date'and '$end_date'");
-      print("SELECT sum(total_eggs) FROM Eggs where isCollection = $type and collection_date BETWEEN '$str_date'and '$end_date'");
-    }else if (f_id!=-1){
-      result = await _database?.rawQuery(
-          "SELECT sum(total_eggs) FROM Eggs where isCollection = $type and f_id = $f_id and collection_date BETWEEN '$str_date'and '$end_date'");
-      print("SELECT sum(total_eggs) FROM Eggs where isCollection = $type and f_id = $f_id and collection_date BETWEEN '$str_date'and '$end_date'");
+    if(str_date.isEmpty){
+      if(f_id==-1) {
+        result = await _database?.rawQuery(
+            "SELECT sum(total_eggs) FROM Eggs where isCollection = $type");
+        print("SELECT sum(total_eggs) FROM Eggs where isCollection = $type");
+      }else if (f_id!=-1){
+        result = await _database?.rawQuery(
+            "SELECT sum(total_eggs) FROM Eggs where isCollection = $type and f_id = $f_id");
+        print("SELECT sum(total_eggs) FROM Eggs where isCollection = $type and f_id = $f_id");
+      }
+    }else {
+      if (f_id == -1) {
+        result = await _database?.rawQuery(
+            "SELECT sum(total_eggs) FROM Eggs where isCollection = $type and collection_date BETWEEN '$str_date'and '$end_date'");
+        print(
+            "SELECT sum(total_eggs) FROM Eggs where isCollection = $type and collection_date BETWEEN '$str_date'and '$end_date'");
+      } else if (f_id != -1) {
+        result = await _database?.rawQuery(
+            "SELECT sum(total_eggs) FROM Eggs where isCollection = $type and f_id = $f_id and collection_date BETWEEN '$str_date'and '$end_date'");
+        print(
+            "SELECT sum(total_eggs) FROM Eggs where isCollection = $type and f_id = $f_id and collection_date BETWEEN '$str_date'and '$end_date'");
+      }
     }
 
     Map<String,dynamic> map = result![0];
@@ -3507,12 +3603,22 @@ class DatabaseHelper  {
 
     var result = null;
 
-    if (f_id == -1) {
-      result = await _database?.rawQuery(
-          "SELECT * FROM Transactions where date BETWEEN '$str_date' and '$end_date'");
-    } else if(f_id!= -1) {
-      result = await _database?.rawQuery(
-          "SELECT * FROM Transactions where f_id = $f_id and date BETWEEN  '$str_date' and '$end_date'");
+    if(str_date.isEmpty){
+      if (f_id == -1) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Transactions");
+      } else if(f_id!= -1) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Transactions where f_id = $f_id");
+      }
+    }else {
+      if (f_id == -1) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Transactions where date BETWEEN '$str_date' and '$end_date'");
+      } else if (f_id != -1) {
+        result = await _database?.rawQuery(
+            "SELECT * FROM Transactions where f_id = $f_id and date BETWEEN  '$str_date' and '$end_date'");
+      }
     }
 
     print(result);
@@ -5007,20 +5113,47 @@ class DatabaseHelper  {
   }) async {
     List<Map<String, Object?>>? result;
 
-    if (flockId == -1) {
-      result = await _database?.rawQuery(
-        '''
+    if(str_date.isEmpty){
+      if (flockId == -1) {
+        result = await _database?.rawQuery(
+          '''
+      SELECT SUM(item_count) AS total
+      FROM flock_detail
+      WHERE item_type = 'Reduction'
+        AND reason = ?
+        
+      ''',
+          [reason],
+        );
+      } else {
+        result = await _database?.rawQuery(
+          '''
+      SELECT SUM(item_count) AS total
+      FROM flock_detail
+      WHERE f_id = ?
+        AND item_type = 'Reduction'
+        AND reason = ?
+        
+      ''',
+          [flockId, reason],
+        );
+      }
+
+    }else {
+      if (flockId == -1) {
+        result = await _database?.rawQuery(
+          '''
       SELECT SUM(item_count) AS total
       FROM flock_detail
       WHERE item_type = 'Reduction'
         AND reason = ?
         AND acqusition_date BETWEEN ? AND ?
       ''',
-        [reason, str_date, end_date],
-      );
-    } else {
-      result = await _database?.rawQuery(
-        '''
+          [reason, str_date, end_date],
+        );
+      } else {
+        result = await _database?.rawQuery(
+          '''
       SELECT SUM(item_count) AS total
       FROM flock_detail
       WHERE f_id = ?
@@ -5028,8 +5161,9 @@ class DatabaseHelper  {
         AND reason = ?
         AND acqusition_date BETWEEN ? AND ?
       ''',
-        [flockId, reason, str_date, end_date],
-      );
+          [flockId, reason, str_date, end_date],
+        );
+      }
     }
 
     if (result != null &&
