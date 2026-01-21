@@ -13,6 +13,7 @@ import '../multiuser/model/medicinestockfb.dart';
 import '../multiuser/utils/FirebaseUtils.dart';
 import '../multiuser/utils/RefreshMixin.dart';
 import '../multiuser/utils/SyncStatus.dart';
+import '../utils/fb_analytics.dart';
 import '../utils/utils.dart';
 import 'medicine_stock_details.dart';
 
@@ -53,6 +54,9 @@ class _MedicineStockScreenState extends State<MedicineStockScreen> with RefreshM
     if(Utils.isShowAdd){
       _loadBannerAd();
     }
+
+
+    AnalyticsUtil.logScreenView(screenName: "medicine_stock_screen");
   }
   @override
   void dispose() {

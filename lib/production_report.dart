@@ -9,6 +9,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/birds_report_screen.dart';
 import 'package:poultary/eggs_report_screen.dart';
+import 'package:poultary/farm_setup_screen.dart';
 import 'package:poultary/financial_report_screen.dart';
 import 'package:poultary/model/farm_item.dart';
 import 'package:poultary/model/feed_item.dart';
@@ -16,6 +17,7 @@ import 'package:poultary/model/flock_detail.dart';
 import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/pdf/pdf_viewer_screen.dart';
 import 'package:poultary/pdf/production_pdf.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
@@ -169,6 +171,8 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
     if(Utils.isShowAdd){
       _loadBannerAd();
     }
+
+    AnalyticsUtil.logScreenView(screenName: "production_report_screen");
   }
 
   int _reports_filter = 2;
@@ -589,7 +593,13 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>  FinanceReportsScreen()),);
+                          builder: (context) =>  FarmSetupScreen()),);
+
+                    var inputFormat = DateFormat('yyyy-MM-dd');
+                    List<FarmSetup> farmSetup = await DatabaseHelper.getFarmInfo();
+                    FarmSetup farmInfo = farmSetup[0];
+                    str_date = farmInfo.date;
+                    end_date = inputFormat.format(DateTime.now());
 
                     pdf_formatted_date_filter = 'ALL_TIME'.tr();
                     getAllData();// Navigate to Farm Setup Screen
@@ -686,6 +696,9 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
             ),
               tooltip: 'Export PDF',
               onPressed: () async {
+                AnalyticsUtil.logButtonClick(buttonName: "pdf", screen: "production_report");
+
+
                 Utils.setupInvoiceInitials(
                   "Production Report".tr(),
                   DateFormat("yyyy MMM dd").format(startDate) +

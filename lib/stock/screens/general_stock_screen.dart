@@ -6,6 +6,7 @@ import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/multiuser/utils/RefreshMixin.dart';
 
 import '../../multiuser/utils/SyncStatus.dart';
+import '../../utils/fb_analytics.dart';
 import '../../utils/utils.dart';
 import '../model/general_stock.dart';
 import 'general_stock_transactions.dart';
@@ -38,6 +39,8 @@ class _GeneralStockScreenState extends State<GeneralStockScreen> with RefreshMix
   void initState() {
     super.initState();
     _loadItems();
+
+    AnalyticsUtil.logScreenView(screenName: "gen_stock_screen");
   }
 
   Future<void> _loadItems() async {
@@ -59,6 +62,9 @@ class _GeneralStockScreenState extends State<GeneralStockScreen> with RefreshMix
       items = updated;
     });
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {

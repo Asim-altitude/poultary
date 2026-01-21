@@ -12,6 +12,7 @@ import 'package:poultary/inventory.dart';
 import 'package:poultary/model/event_item.dart';
 import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'add_flocks.dart';
@@ -50,6 +51,8 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
     getAllEvents();
     checkPermissions();
     Utils.setupAds();
+
+    AnalyticsUtil.logScreenView(screenName: "add_events");
   }
 
   void checkPermissions() async {

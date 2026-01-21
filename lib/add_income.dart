@@ -11,6 +11,7 @@ import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/sale_contractor_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/sub_category_screen.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/utils.dart';
 import 'database/databse_helper.dart';
 import 'model/finance_flock_item.dart';
@@ -137,6 +138,7 @@ class _NewIncome extends State<NewIncome>
     getPayMethodList();
     Utils.setupAds();
 
+    AnalyticsUtil.logScreenView(screenName: "add_income");
   }
 
 
@@ -548,9 +550,11 @@ class _NewIncome extends State<NewIncome>
                     }
                   }
 
-                  if(activeStep==3){
+                  if(activeStep==3)
+                  {
 
-                    if(isEdit){
+                    if(isEdit)
+                    {
                       await DatabaseHelper.instance.database;
                       TransactionItem transaction_item = TransactionItem(
                           f_id: getFlockID(),
@@ -593,7 +597,8 @@ class _NewIncome extends State<NewIncome>
                       Utils.showToast("SUCCESSFUL");
                       Navigator.pop(context);
                     }
-                    else {
+                    else
+                    {
 
                       print("Everything Okay");
                       await DatabaseHelper.instance.database;
@@ -643,8 +648,9 @@ class _NewIncome extends State<NewIncome>
                       Utils.showToast("SUCCESSFUL");
                       Navigator.pop(context);
                     }
-                  }
 
+                    AnalyticsUtil.logAddTransaction(type: "Income", amount: double.parse(amountController.text));
+                  }
                 },
                 child: Container(
                   height: 55,

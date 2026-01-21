@@ -13,6 +13,7 @@ import 'package:poultary/model/feed_summary_flock.dart';
 import 'package:poultary/model/feedflock_report_item.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
@@ -73,6 +74,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
      }
     Utils.setupAds();
 
+    AnalyticsUtil.logScreenView(screenName: "feed_report_screen");
   }
 
   List<Feeding> list = [];
@@ -302,6 +304,63 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
       child:
 
     return SafeArea(child: Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "Feeding Report".tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+            color: Colors.white,
+          ),
+        ),
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.blue,
+        elevation: 8,
+        automaticallyImplyLeading: true,
+        actions: [
+          if(!Platform.isIOS)
+
+            InkWell(
+              onTap: () {
+
+                AnalyticsUtil.logButtonClick(buttonName: "excel", screen: "feed_report");
+
+
+                Utils.setupInvoiceInitials("Feeding Report".tr(),pdf_formatted_date_filter);
+                prepareListData();
+                generateFeedReportExcel(Utils.feed_report_list, Utils.feed_flock_report_list);
+
+              },
+              child: Container(
+                width: 30,
+                height: 30,
+                margin: EdgeInsets.only(right: 10),
+                child: Image.asset('assets/excel_icon.png'),
+              ),
+            ),
+          InkWell(
+            onTap: (){
+              AnalyticsUtil.logButtonClick(buttonName: "pdf", screen: "feed_report");
+
+
+              Utils.setupInvoiceInitials("Feeding Report".tr(),pdf_formatted_date_filter);
+              prepareListData();
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>  PDFScreen(item: 2)),
+              );
+            },
+            child: Container(
+              width: 22,
+              height: 22,
+              margin: EdgeInsets.only(right: 10),
+              child: Image.asset('assets/pdf_icon.png'),
+            ),
+          )
+        ],
+      ),
       body:SafeArea(
         top: false,
          child: Container(
@@ -315,7 +374,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
             children:  [
               Utils.getDistanceBar(),
 
-              ClipRRect(
+              /*ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
@@ -391,7 +450,7 @@ class _FeedReportsScreen extends State<FeedReportsScreen> with SingleTickerProvi
                   ),
                 ),
               ),
-
+*/
               Row(
                 children: [
                   Expanded(

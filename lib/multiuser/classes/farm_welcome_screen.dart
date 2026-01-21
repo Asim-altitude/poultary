@@ -14,6 +14,7 @@ import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../consume_store.dart';
 import '../../settings_screen.dart';
+import '../../utils/fb_analytics.dart';
 import '../../utils/session_manager.dart';
 import '../../utils/utils.dart';
 import '../model/farm_plan.dart';
@@ -52,6 +53,8 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
     _loadBackupInfo();
     _loadPlanInfo();
    // Utils.setupAds();
+
+    AnalyticsUtil.logScreenView(screenName: "farm_welcome_screen");
   }
 
   Future<void> _loadBackupInfo() async {
@@ -365,6 +368,14 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
 
 
   void _navigateToNextScreen() async {
+
+    try {
+      AnalyticsUtil.setUser(
+          userId: widget.multiUser.email, role: widget.multiUser.role);
+    }
+    catch(ex){
+      print(ex);
+    }
 
     await SessionManager.saveFarmPlan(_farmPlan!);
 

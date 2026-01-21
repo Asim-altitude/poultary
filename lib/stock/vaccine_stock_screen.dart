@@ -15,6 +15,7 @@ import '../multiuser/model/vaccinestockfb.dart';
 import '../multiuser/utils/FirebaseUtils.dart';
 import '../multiuser/utils/RefreshMixin.dart';
 import '../multiuser/utils/SyncStatus.dart';
+import '../utils/fb_analytics.dart';
 import '../utils/utils.dart';
 import 'medicine_stock_details.dart';
 
@@ -54,6 +55,8 @@ class _MedicineStockScreenState extends State<VaccineStockScreen> with RefreshMi
     if(Utils.isShowAdd){
       _loadBannerAd();
     }
+
+    AnalyticsUtil.logScreenView(screenName: "vaccine_screen");
   }
   @override
   void dispose() {

@@ -12,6 +12,7 @@ import 'package:poultary/sticky.dart';
 import 'package:poultary/stock/medicine_stock_screen.dart';
 import 'package:poultary/stock/vaccine_stock_screen.dart';
 import 'package:poultary/sub_category_screen.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
@@ -93,6 +94,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
     getDiseaseList();
     Utils.setupAds();
 
+    AnalyticsUtil.logScreenView(screenName: "add_health");
   }
 
   int? medicineCategoryID = -1;

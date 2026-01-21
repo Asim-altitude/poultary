@@ -9,6 +9,7 @@ import 'package:poultary/stock/vaccine_stock_screen.dart';
 import 'package:poultary/utils/utils.dart';
 
 import '../stock/stock_screen.dart';
+import '../utils/fb_analytics.dart';
 import 'egg_stock_screen.dart';
 import 'medicine_stock_screen.dart';
 
@@ -28,6 +29,8 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
     if(Utils.isShowAdd){
       _loadBannerAd();
     }
+
+    AnalyticsUtil.logScreenView(screenName: "main_stock_screen");
   }
   _loadBannerAd(){
     // TODO: Initialize _bannerAd

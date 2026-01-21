@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:poultary/home_screen.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auto_feed_management.dart';
@@ -28,6 +29,8 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
   void initState() {
     super.initState();
     _checkAutoFeedSettings();
+
+    AnalyticsUtil.logScreenView(screenName: "add_auto_feed");
   }
 
   Future<DateTime?> getLastSyncDate() async {

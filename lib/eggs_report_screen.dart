@@ -11,6 +11,7 @@ import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/model/egg_report_item.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
@@ -73,6 +74,8 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
       print(ex);
     }
     Utils.setupAds();
+
+    AnalyticsUtil.logScreenView(screenName: "egg_report_screen");
   }
 
   List<Eggs_Chart_Item> collectionList = [],
@@ -235,6 +238,62 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
         .height - (safeAreaHeight + safeAreaHeightBottom);
 
     return SafeArea(child: Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "EGGS_REPORT".tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+            color: Colors.white,
+          ),
+        ),
+
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.blue,
+        elevation: 8,
+        automaticallyImplyLeading: true,
+        actions: [
+          if(!Platform.isIOS)
+
+            InkWell(
+              onTap: () async {
+                AnalyticsUtil.logButtonClick(buttonName: "excel", screen: "eggs_report");
+
+                Utils.setupInvoiceInitials("EGGS_REPORT".tr(), pdf_formatted_date_filter);
+                await prepareListData();
+
+                generateEggSummaryExcel(Utils.egg_report_list, Utils.eggReductionSummary!);
+              },
+              child: Container(
+                width: 30,
+                height: 30,
+                margin: EdgeInsets.only(right: 10),
+                child: Image.asset('assets/excel_icon.png'),
+              ),
+            ),
+          InkWell(
+            onTap: () {
+              AnalyticsUtil.logButtonClick(buttonName: "pdf", screen: "eggs_report");
+
+              Utils.setupInvoiceInitials("EGGS_REPORT".tr(),
+                  pdf_formatted_date_filter);
+              prepareListData();
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => PDFScreen(item: 1,)),
+              );
+            },
+            child: Container(
+              width: 22,
+              height: 22,
+              margin: EdgeInsets.only(right: 10),
+              child: Image.asset('assets/pdf_icon.png'),
+            ),
+          )
+        ],
+      ),
       body: SafeArea(
         top: false,
 
@@ -249,7 +308,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                 children: [
                   Utils.getDistanceBar(),
 
-                  ClipRRect(
+                  /*ClipRRect(
                     borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(0),
                         bottomRight: Radius.circular(0)),
@@ -326,7 +385,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                         ],
                       ),
                     ),
-                  ),
+                  ),*/
 
                   Row(
                     children: [

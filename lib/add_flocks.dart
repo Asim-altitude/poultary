@@ -13,6 +13,7 @@ import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/multiuser/utils/SyncManager.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/suggested_notifcations.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 
@@ -88,6 +89,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
     Utils.showInterstitial();
     Utils.setupAds();
 
+    AnalyticsUtil.logScreenView(screenName: "add_flocks");
   }
 
 
@@ -480,6 +482,8 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                           Navigator.pop(context);
                           gotoNotificationsScreen(id);
                         }
+
+                        AnalyticsUtil.logAddFlock();
                       } else {
                         Utils.showToast("PROVIDE_ALL");
                       }

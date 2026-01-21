@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
@@ -37,6 +38,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
       _loadRewardedAd();
     }
 
+    AnalyticsUtil.logScreenView(screenName: "backup_screen");
   }
   @override
   void dispose() {

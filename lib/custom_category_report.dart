@@ -9,6 +9,7 @@ import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
@@ -54,6 +55,9 @@ class _CategoryChartScreenState extends State<CategoryChartScreen> {
     selectedType = widget.customCategory!.cat_type;
     getList();
     getFilters();
+
+
+    AnalyticsUtil.logScreenView(screenName: "custom_report_screen");
   }
 
 

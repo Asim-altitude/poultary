@@ -21,6 +21,7 @@ import 'package:poultary/multiuser/model/medicinestockfb.dart';
 import 'package:poultary/multiuser/model/vaccinestockfb.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:poultary/view_transaction.dart';
@@ -127,6 +128,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
     getFilters();
     Utils.setupAds();
 
+    AnalyticsUtil.logScreenView(screenName: "transaction_screen");
   }
 
   bool no_colection = true;

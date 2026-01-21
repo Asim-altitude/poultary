@@ -15,6 +15,7 @@ import 'package:poultary/multiuser/utils/SyncManager.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/suggested_notifcations.dart';
 import 'package:poultary/transactions_screen.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:poultary/weight_record_screen.dart';
@@ -322,6 +323,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     getAllCategories();
     Utils.setupAds();
 
+    AnalyticsUtil.logScreenView(screenName: "single_flock_screen");
   }
 
   int mortalityCount = 0,cullingCount = 0;

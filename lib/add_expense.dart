@@ -11,6 +11,7 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
@@ -122,6 +123,7 @@ class _NewExpense extends State<NewExpense>
     Utils.showInterstitial();
     Utils.setupAds();
 
+    AnalyticsUtil.logScreenView(screenName: "add_expense");
   }
 
   void _updateAmount() {
@@ -561,7 +563,8 @@ class _NewExpense extends State<NewExpense>
                         await addBirds(widget.transactionItem!.id!);
                         Navigator.pop(context);
                       }
-                      else {
+                      else
+                      {
                         await DatabaseHelper.instance.database;
                         TransactionItem transaction_item = TransactionItem(
                             f_id: getFlockID(),
@@ -601,6 +604,8 @@ class _NewExpense extends State<NewExpense>
                         await addBirds(id!);
                         Navigator.pop(context);
                       }
+
+                      AnalyticsUtil.logAddTransaction(type: "Expense", amount: double.parse(amountController.text));
                     }
                   }
 

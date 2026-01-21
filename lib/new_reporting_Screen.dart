@@ -6,6 +6,7 @@ import 'package:poultary/eggs_report_screen.dart';
 import 'package:poultary/feed_report_screen.dart';
 import 'package:poultary/financial_report_screen.dart';
 import 'package:poultary/production_report.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'custom_category_report.dart';
@@ -43,6 +44,8 @@ class _ReportListScreen extends State<ReportListScreen> {
     if(Utils.isShowAdd){
       _loadBannerAd();
     }
+
+    AnalyticsUtil.logScreenView(screenName: "all_report_screen");
   }
   _loadBannerAd(){
     // TODO: Initialize _bannerAd

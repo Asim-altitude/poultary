@@ -10,6 +10,7 @@ import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/model/med_vac_item.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
@@ -44,6 +45,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
     date_filter_name = filterList.elementAt(_reports_filter);
     getData(date_filter_name);
   }
+
   late ZoomPanBehavior _zoomPanBehavior;
   @override
   void initState() {
@@ -70,6 +72,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
      }
     Utils.setupAds();
 
+    AnalyticsUtil.logScreenView(screenName: "health_screen");
   }
 
   List<Vaccination_Medication> list = [];
@@ -395,7 +398,60 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
       child:
 
     return Scaffold(
-      body:SafeArea(
+      appBar: AppBar(
+        title: Text(
+          "Birds Health Report".tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+            color: Colors.white,
+          ),
+        ),
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.blue,
+        elevation: 8,
+        automaticallyImplyLeading: true,
+
+        actions: [
+          if(!Platform.isIOS)
+
+            InkWell(
+              onTap: () {
+
+                Utils.setupInvoiceInitials("Birds Health Report".tr(),pdf_formatted_date_filter);
+                prepareListData();
+
+                generateHealthReportExcel(Utils.vaccine_report_list.length.toString(), Utils.medication_report_list.length.toString(), Utils.medication_report_list, Utils.vaccine_report_list);
+
+              },
+              child: Container(
+                width: 30,
+                height: 30,
+                margin: EdgeInsets.only(right: 10),
+                child: Image.asset('assets/excel_icon.png'),
+              ),
+            ),
+          InkWell(
+            onTap: () {
+              Utils.setupInvoiceInitials("Birds Health Report".tr(),pdf_formatted_date_filter);
+              prepareListData();
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>  PDFScreen(item: 4,)),
+              );
+            },
+            child: Container(
+              width: 22,
+              height: 22,
+              margin: EdgeInsets.only(right: 10),
+              child: Image.asset('assets/pdf_icon.png'),
+            ),
+          )
+        ],
+      ),
+      body: SafeArea(
         top: false,
          child:Container(
           width: widthScreen,
@@ -408,7 +464,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
             children:  [
               Utils.getDistanceBar(),
 
-              ClipRRect(
+              /*ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
@@ -485,7 +541,7 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                   ),
                 ),
               ),
-
+*/
               Row(
                 children: [
                   Expanded(

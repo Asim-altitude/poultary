@@ -13,6 +13,7 @@ import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/stock/stock_screen.dart';
 import 'package:poultary/sub_category_screen.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/utils.dart';
 import 'database/databse_helper.dart';
 import 'feed_batch_screen.dart';
@@ -82,6 +83,7 @@ class _NewFeeding extends State<NewFeeding>
     Utils.showInterstitial();
     Utils.setupAds();
 
+    AnalyticsUtil.logScreenView(screenName: "add_feed");
   }
 
 
@@ -285,7 +287,8 @@ class _NewFeeding extends State<NewFeeding>
 
                   if(activeStep==2){
 
-                    if(isEdit){
+                    if(isEdit)
+                    {
                       await DatabaseHelper.instance.database;
 
                       Feeding feeding = Feeding(
@@ -313,7 +316,8 @@ class _NewFeeding extends State<NewFeeding>
 
                       Utils.showToast("SUCCESSFUL");
                       Navigator.pop(context);
-                    } else {
+                    } else
+                    {
                       Feeding feeding = Feeding(
                           f_id: getFlockID(),
                           short_note: notesController.text,
@@ -340,6 +344,8 @@ class _NewFeeding extends State<NewFeeding>
 
                       Navigator.pop(context);
                     }
+
+                    AnalyticsUtil.logAddFeed(unit: Utils.selected_unit, quantity: double.parse(quantityController.text));
 
                   }
                 },

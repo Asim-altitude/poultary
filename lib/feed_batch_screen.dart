@@ -7,6 +7,7 @@ import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/stock/stock_screen.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'feed_ingridient_screen.dart';
@@ -50,6 +51,9 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> with RefreshMixin {
     if(Utils.isShowAdd){
       _loadBannerAd();
     }
+
+
+    AnalyticsUtil.logScreenView(screenName: "feed_batch_screen");
   }
   _loadBannerAd(){
     // TODO: Initialize _bannerAd

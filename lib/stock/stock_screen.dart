@@ -15,6 +15,7 @@ import '../model/transaction_item.dart';
 import '../multiuser/model/feedstockfb.dart';
 import '../multiuser/utils/RefreshMixin.dart';
 import '../multiuser/utils/SyncStatus.dart';
+import '../utils/fb_analytics.dart';
 
 class FeedStockScreen extends StatefulWidget {
   @override
@@ -48,6 +49,8 @@ class _FeedStockScreenState extends State<FeedStockScreen> with RefreshMixin {
     if(Utils.isShowAdd){
       _loadBannerAd();
     }
+
+    AnalyticsUtil.logScreenView(screenName: "feed_stock_screen");
   }
   _loadBannerAd(){
     // TODO: Initialize _bannerAd

@@ -8,6 +8,7 @@ import 'package:poultary/add_feeding.dart';
 import 'package:poultary/model/feed_item.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -151,6 +152,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
 
     Utils.setupAds();
 
+    AnalyticsUtil.logScreenView(screenName: "daily_feed_screen");
   }
 
   bool no_colection = true;

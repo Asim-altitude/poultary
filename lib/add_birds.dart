@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:poultary/model/flock_detail.dart';
 import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/utils.dart';
 import 'database/databse_helper.dart';
 import 'model/flock.dart';
@@ -123,6 +124,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
     Utils.showInterstitial();
     Utils.setupAds();
 
+    AnalyticsUtil.logScreenView(screenName: "add_birds");
   }
 
   List<SubItem> _paymentMethodList = [];
@@ -740,6 +742,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                               }
                             }*/
 
+                            AnalyticsUtil.logAddBirds(quantity: totalBirdsController.text, event: isCollection? _acqusitionselectedValue : _reductionReasonValue );
                             Navigator.pop(context);
                           } else {
                             activeStep--;

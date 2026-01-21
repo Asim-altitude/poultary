@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/add_birds.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:poultary/view_transaction.dart';
@@ -112,6 +113,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
     Utils.setupAds();
 
+    AnalyticsUtil.logScreenView(screenName: "add_reduce_flock");
   }
 
   List<Flock> flocks = [];

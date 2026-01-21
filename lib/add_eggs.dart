@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/stock/model/general_stock.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 
@@ -127,8 +129,14 @@ class _NewEggCollection extends State<NewEggCollection>
     getList();
     Utils.showInterstitial();
     Utils.setupAds();
+    //_loadItems();
 
+    AnalyticsUtil.logScreenView(screenName: "add_eggs");
   }
+
+  bool consumeStock = false;
+  String? selectedStockItem;
+  final TextEditingController qtyController = TextEditingController();
 
   List<SaleContractor> contractors = [];
   SaleContractor? selectedContractor;
@@ -191,6 +199,43 @@ class _NewEggCollection extends State<NewEggCollection>
 
   }
 
+  Future<void> _loadItems() async {
+    final result = await DatabaseHelper.getAllGeneralStockItems();
+    List<GeneralStockItem> updated = [];
+
+    for (var item in result) {
+      double totalIn = await DatabaseHelper.getTotalInForItem(item.id!);
+      double totalOut = await DatabaseHelper.getTotalOutForItem(item.id!);
+
+      item.totalIn = totalIn;
+      item.totalOut = totalOut;
+
+      genStockItems.add(item.name);
+      updated.add(item);
+    }
+
+    setState(() {
+      selectedStockItem = updated[0].name;
+      genStockitemsList = updated;
+    });
+  }
+
+
+  Future<GeneralStockItem> getSelectedGeneralItem() async {
+    GeneralStockItem selectedItem = genStockitemsList[0];
+
+    for(var item in genStockitemsList){
+      if(item.name.toLowerCase() == selectedStockItem!.toLowerCase()){
+        selectedItem = item;
+        break;
+      }
+    }
+
+    return selectedItem;
+  }
+
+  List<GeneralStockItem> genStockitemsList = [];
+  List<String> genStockItems = [];
   Flock? currentFlock = null;
 
   bool _validate = false;
@@ -405,8 +450,10 @@ class _NewEggCollection extends State<NewEggCollection>
 
                         }
                       }
-                      else {
-                        if (isEdit) {
+                      else
+                      {
+                        if (isEdit)
+                        {
                           widget.eggs!.f_id = getFlockID();
                           widget.eggs!.f_name =
                               _purposeselectedValue;
@@ -493,7 +540,8 @@ class _NewEggCollection extends State<NewEggCollection>
                           Utils.showToast("SUCCESSFUL");
                           Navigator.pop(context, "Egg ADDED");
                         }
-                        else {
+                        else
+                        {
                           Eggs eggs = Eggs(
                               f_id: getFlockID(),
                               f_name: _purposeselectedValue,
@@ -592,6 +640,9 @@ class _NewEggCollection extends State<NewEggCollection>
                           Navigator.pop(context, "Egg Reduced");
                         }
                       }
+
+                      AnalyticsUtil.logAddEgg(quantity: totalEggsController.text, event: isCollection? _acqusitionselectedValue : _reductionReasonValue );
+
                     }
                     catch (ex) {
                       activeStep = 2;
@@ -993,9 +1044,122 @@ class _NewEggCollection extends State<NewEggCollection>
                                   dropdownColor: Colors.white,
                                 ),
                               ),
-
+                              SizedBox(height: 10),
                               if(!isCollection && isEggSale())...[
-                                SizedBox(height: 10),
+                                /*Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+
+                                    /// Checkbox
+                                    if (genStockitemsList.isNotEmpty)
+                                      Card(
+                                        elevation: 1.5,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+
+                                              /// Checkbox Header
+                                              Row(
+                                                children: [
+                                                  Checkbox(
+                                                    value: consumeStock,
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        consumeStock = value ?? false;
+                                                        if (!consumeStock) {
+                                                          selectedStockItem = null;
+                                                          qtyController.clear();
+                                                        }
+                                                      });
+                                                    },
+                                                  ),
+                                                  const SizedBox(width: 4),
+                                                  Expanded(
+                                                    child: Text(
+                                                      'Consume General Stock'.tr(),
+                                                      style: Theme.of(context).textTheme.titleSmall,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+
+                                              /// Animated Expand Section
+                                              AnimatedSize(
+                                                duration: const Duration(milliseconds: 250),
+                                                curve: Curves.easeInOut,
+                                                child: consumeStock
+                                                    ? Padding(
+                                                  padding: const EdgeInsets.only(top: 12),
+                                                  child: Row(
+                                                    children: [
+
+                                                      /// Dropdown
+                                                      Expanded(
+                                                        flex: 2,
+                                                        child: DropdownButtonFormField<String>(
+                                                          value: selectedStockItem,
+                                                          isExpanded: true,
+                                                          decoration: InputDecoration(
+                                                            labelText: 'Stock Item'.tr(),
+                                                            filled: true,
+                                                            fillColor:
+                                                            Theme.of(context).colorScheme.surfaceVariant,
+                                                            border: OutlineInputBorder(
+                                                              borderRadius: BorderRadius.circular(10),
+                                                            ),
+                                                          ),
+                                                          items: genStockItems.map((item) {
+                                                            return DropdownMenuItem(
+                                                              value: item,
+                                                              child: Text(item),
+                                                            );
+                                                          }).toList(),
+                                                          onChanged: (value) {
+                                                            setState(() {
+                                                              selectedStockItem = value;
+                                                            });
+                                                          },
+                                                        ),
+                                                      ),
+
+                                                      const SizedBox(width: 12),
+
+                                                      /// Qty
+                                                      Expanded(
+                                                        child: TextFormField(
+                                                          controller: qtyController,
+                                                          keyboardType: const TextInputType.numberWithOptions(
+                                                              decimal: true),
+                                                          decoration: InputDecoration(
+                                                            labelText: 'Qty'.tr(),
+                                                            filled: true,
+                                                            fillColor:
+                                                            Theme.of(context).colorScheme.surfaceVariant,
+                                                            border: OutlineInputBorder(
+                                                              borderRadius: BorderRadius.circular(10),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                )
+                                                    : const SizedBox.shrink(),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+
+                                  ],
+                                ),*/
+
+                               /// SizedBox(height: 5),
                                 buildPaymentSummaryTile(context, amount: amount, paymentType: payment_method, status: payment_status, c_name: contractorName),
                                 // Total Eggs (Read-Only)
                               ],

@@ -7,6 +7,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/add_vac_med.dart';
 import 'package:poultary/multiuser/model/multi_health_record.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'add_multi_vac_med.dart';
@@ -120,6 +121,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
       _loadBannerAd();
     }
 
+    AnalyticsUtil.logScreenView(screenName: "all_health_screen");
   }
 
   bool no_colection = true;

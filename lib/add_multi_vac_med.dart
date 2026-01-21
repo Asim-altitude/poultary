@@ -10,9 +10,7 @@ import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/multiuser/model/multi_health_record.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
-import 'package:poultary/stock/medicine_stock_screen.dart';
-import 'package:poultary/stock/vaccine_stock_screen.dart';
-import 'package:poultary/sub_category_screen.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
@@ -96,6 +94,7 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
     getList();
     Utils.setupAds();
 
+    AnalyticsUtil.logScreenView(screenName: "add_health");
   }
 
   int? medicineCategoryID = -1;

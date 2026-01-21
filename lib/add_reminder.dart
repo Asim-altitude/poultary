@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/database/events_databse_helper.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
@@ -65,6 +66,9 @@ class _NewEventReminder extends State<NewEventReminder>
 
     getList();
     Utils.setupAds();
+
+
+    AnalyticsUtil.logScreenView(screenName: "add_reminder");
   }
 
   List<Flock> flocks = [];

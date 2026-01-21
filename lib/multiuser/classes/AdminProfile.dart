@@ -19,6 +19,7 @@ import '../../model/feed_item.dart';
 import '../../model/flock_detail.dart';
 import '../../model/med_vac_item.dart';
 import '../../model/sub_category_item.dart';
+import '../../utils/fb_analytics.dart';
 import '../../utils/utils.dart';
 import '../api/server_apis.dart';
 import '../model/birds_modification.dart';
@@ -309,6 +310,8 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
     init();
     getSyncQueueList();
     fetchRoles();
+
+    AnalyticsUtil.logScreenView(screenName: "admin_screen");
   }
 
   FarmPlan? farmPlan = null;
@@ -321,8 +324,10 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
     latestBackupTime = await SessionManager.getLastBackupTime();
 
     if(farmPlan!= null) {
-      if (farmPlan!.isActive)
-        await checkAndBackupIfNeeded(adminUser!.farmId);
+      if (farmPlan!.isActive){
+        // await checkAndBackupIfNeeded(adminUser!.farmId);
+      }
+
     }
     else
     {
@@ -377,8 +382,8 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
         isUploading = true;
       });
       await FlockImageUploader().uploadDatabaseFile(farmId);
-
     }
+
   }
 
   /// Function to check if a backup already exists today, and if not, perform it

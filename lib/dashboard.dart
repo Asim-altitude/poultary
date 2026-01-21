@@ -15,6 +15,7 @@ import 'package:poultary/multiuser/classes/AdminProfile.dart';
 import 'package:poultary/settings_screen.dart';
 import 'package:poultary/single_flock_screen.dart';
 import 'package:poultary/transactions_screen.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -173,6 +174,7 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
 
     checkMultiUSer();
 
+    AnalyticsUtil.logScreenView(screenName: "dashboard_screen");
     // Utils.showInterstitial();
   }
 

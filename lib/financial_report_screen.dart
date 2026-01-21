@@ -11,6 +11,7 @@ import 'package:poultary/model/finance_report_item.dart';
 import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
@@ -77,6 +78,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
      }
     Utils.setupAds();
 
+    AnalyticsUtil.logScreenView(screenName: "financial_screen");
   }
 
   List<TransactionItem> list = [];
@@ -274,7 +276,62 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
       child:
 
     return SafeArea(child: Scaffold(
-      body:SafeArea(
+      appBar: AppBar(
+        title: Text(
+          "Financial Report".tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+            color: Colors.white,
+          ),
+        ),
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.blue,
+        elevation: 8,
+        automaticallyImplyLeading: true,
+        actions: [if(!Platform.isIOS)
+
+          InkWell(
+            onTap: () {
+
+              AnalyticsUtil.logButtonClick(buttonName: "excel", screen: "financial_report");
+
+
+              Utils.setupInvoiceInitials("Financial Report".tr(),pdf_formatted_date_filter);
+              prepareListData();
+              generateFinanceSummaryExcel(Utils.flockfinanceList!, Utils.incomeItems!, Utils.expenseItems!);
+
+            },
+            child: Container(
+              width: 30,
+              height: 30,
+              margin: EdgeInsets.only(right: 10),
+              child: Image.asset('assets/excel_icon.png'),
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              AnalyticsUtil.logButtonClick(buttonName: "pdf", screen: "financial_report");
+
+
+              Utils.setupInvoiceInitials("Financial Report".tr(),pdf_formatted_date_filter);
+              prepareListData();
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>  PDFScreen(item: 3,)),
+              );
+            },
+            child: Container(
+              width: 22,
+              height: 22,
+              margin: EdgeInsets.only(right: 10),
+              child: Image.asset('assets/pdf_icon.png'),
+            ),
+          )],
+      ),
+      body: SafeArea(
         top: false,
          child:Container(
           width: widthScreen,
@@ -287,7 +344,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
             children:  [
               Utils.getDistanceBar(),
 
-              ClipRRect(
+              /*ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
@@ -363,7 +420,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                   ),
                 ),
               ),
-
+*/
               Row(
                 children: [
                   Expanded(

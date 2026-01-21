@@ -15,6 +15,7 @@ import 'package:poultary/sale_contractor_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/support_screen.dart';
 import 'package:poultary/utils/about.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/premium_subscription_screen.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
@@ -153,6 +154,9 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
     setUpInitial();
     Utils.setupAds();
     getLanguage();
+
+
+    AnalyticsUtil.logScreenView(screenName: "settings_screen");
   }
 
   MultiUser? admin = null;

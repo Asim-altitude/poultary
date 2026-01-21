@@ -7,6 +7,7 @@ import 'package:poultary/multiuser/utils/SyncStatus.dart';
 import '../../../database/databse_helper.dart';
 import '../../../model/transaction_item.dart';
 import '../../../multiuser/utils/RefreshMixin.dart';
+import '../../../utils/fb_analytics.dart';
 import '../../../utils/utils.dart';
 import '../model/tool_asset.dart';
 import '../model/tool_asset_unit.dart';
@@ -61,6 +62,8 @@ class _ToolsAssetsScreenState extends State<ToolsAssetsScreen> with RefreshMixin
   void initState() {
     super.initState();
     _loadAssets();
+
+    AnalyticsUtil.logScreenView(screenName: "tool_asset_screen");
   }
 
   Future<void> _loadAssets() async {

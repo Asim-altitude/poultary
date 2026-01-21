@@ -12,6 +12,7 @@ import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/multiuser/model/egg_record.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'database/databse_helper.dart';
@@ -91,6 +92,8 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
     getFilters();
     Utils.setupAds();
 
+
+    AnalyticsUtil.logScreenView(screenName: "eggs_screen");
   }
 
   bool no_colection = true;

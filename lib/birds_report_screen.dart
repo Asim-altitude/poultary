@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
@@ -61,7 +62,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
        print(ex);
      }
     Utils.setupAds();
-
+    AnalyticsUtil.logScreenView(screenName: "birds_screen");
   }
 
   List<Flock_Detail> list = [];
@@ -158,6 +159,67 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
       child:
 
     return SafeArea(child: Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "BIRDS".tr() +" "+"REPORT".tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+            color: Colors.white,
+          ),
+        ),
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.blue,
+        elevation: 8,
+        automaticallyImplyLeading: true,
+        actions: [
+          if(!Platform.isIOS)
+
+            InkWell(
+              onTap: () async {
+                AnalyticsUtil.logButtonClick(buttonName: "excel", screen: "birds_report");
+
+                Utils.setupInvoiceInitials("FLOCK_REPORT".tr(),pdf_formatted_date_filter);
+                Utils.flock_details = list;
+                await prepareListData();
+
+                Utils.TOTAL_BIRDS_ADDED = total_birds_added.toString();
+                Utils.TOTAL_BIRDS_REDUCED = total_birds_reduced.toString();
+
+                generateBirdsReportExcel(Utils.TOTAL_BIRDS_ADDED, Utils.TOTAL_BIRDS_REDUCED, Utils.TOTAL_ACTIVE_BIRDS, Utils.flock_report_list, Utils.flock_details!, Utils.reductionByReason!);
+              },
+              child: Container(
+                width: 30,
+                height: 30,
+                margin: EdgeInsets.only(right: 10),
+                child: Image.asset('assets/excel_icon.png'),
+              ),
+            ),
+          InkWell(
+            onTap: (){
+              AnalyticsUtil.logButtonClick(buttonName: "pdf", screen: "birds_report");
+
+              Utils.setupInvoiceInitials("FLOCK_REPORT".tr(),pdf_formatted_date_filter);
+              Utils.flock_details = list;
+              prepareListData();
+
+              Utils.TOTAL_BIRDS_ADDED = total_birds_added.toString();
+              Utils.TOTAL_BIRDS_REDUCED = total_birds_reduced.toString();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>  PDFScreen(item: 0,)),
+              );
+            },
+            child: Container(
+              width: 22,
+              height: 22,
+              margin: EdgeInsets.only(right: 10),
+              child: Image.asset('assets/pdf_icon.png'),
+            ),
+          )
+        ],
+      ),
       body:SafeArea(
         top: false,
 
@@ -172,7 +234,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
             children:  [
               Utils.getDistanceBar(),
 
-              ClipRRect(
+              /*ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
@@ -253,7 +315,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                     ],
                   ),
                 ),
-              ),
+              ),*/
 
               Row(
                 children: [

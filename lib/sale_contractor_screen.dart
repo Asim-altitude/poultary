@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/multiuser/utils/SyncStatus.dart';
 import 'package:poultary/sale_contractor_profile.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
@@ -41,6 +42,8 @@ class _SaleContractorScreenState extends State<SaleContractorScreen> with Refres
     super.initState();
     getAllContractors();
     // Listen for search changes
+
+    AnalyticsUtil.logScreenView(screenName: "sale_contractor_screen");
   }
 
   Future<void> getAllContractors() async {

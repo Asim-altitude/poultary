@@ -8,6 +8,7 @@ import 'package:poultary/dashboard.dart';
 import 'package:poultary/multiuser/utils/SyncStatus.dart';
 import 'package:poultary/product_screen.dart';
 import 'package:poultary/settings_screen.dart';
+import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:sqflite/sqflite.dart';
@@ -172,7 +173,8 @@ class _HomeScreen extends State<HomeScreen> {
     getCurrency();
    // addEggColorColumn();
 
-    if(Utils.isMultiUSer){
+    if(Utils.isMultiUSer)
+    {
       // Delay to ensure context is available
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _networkNotifier.initialize(context);
@@ -182,6 +184,9 @@ class _HomeScreen extends State<HomeScreen> {
         });*/
       });
     }
+
+    AnalyticsUtil.logScreenView(screenName: "home_screen");
+    AnalyticsUtil.logAppOpen();
   }
 
 
