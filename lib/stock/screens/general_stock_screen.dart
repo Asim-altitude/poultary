@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
@@ -21,6 +22,8 @@ class GeneralStockScreen extends StatefulWidget {
 class _GeneralStockScreenState extends State<GeneralStockScreen> with RefreshMixin {
   List<GeneralStockItem> items = [];
   bool loading = true;
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
 
 
   @override
@@ -41,8 +44,41 @@ class _GeneralStockScreenState extends State<GeneralStockScreen> with RefreshMix
     _loadItems();
 
     AnalyticsUtil.logScreenView(screenName: "gen_stock_screen");
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+    }
   }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
 
+    _bannerAd.load();
+  }
+  @override
+  void dispose() {
+    super.dispose();
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
+
+    }
+  }
   Future<void> _loadItems() async {
     final result = await DatabaseHelper.getAllGeneralStockItems();
     List<GeneralStockItem> updated = [];
@@ -112,21 +148,45 @@ class _GeneralStockScreenState extends State<GeneralStockScreen> with RefreshMix
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
         ),
       )
-          : ListView.builder(
+          : Stack(
+        children: [
+
+          ListView.builder(
+            padding: const EdgeInsets.only(top: 60),
             itemCount: items.length,
             itemBuilder: (context, index) {
-    final item = items[index];
-    return InkWell(
-      onTap: ()  async {
-       await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) =>  GeneralStockTransactionsScreen(generalStockItem: item,)),);
+              final item = items[index];
+              return InkWell(
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => GeneralStockTransactionsScreen(
+                        generalStockItem: item,
+                      ),
+                    ),
+                  );
+                  await _loadItems();
+                },
+                child: buildStockCard(item),
+              );
+            },
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 0,
+            child: Container(
+              height: 60,
+              color: Colors.white,
+              child: Utils.showBannerAd(_bannerAd, _isBannerAdReady), // your banner here
+            ),
+          ),
+          // Sticky Banner
 
-       await _loadItems();
-      },
-        child: buildStockCard(item));
-    }
-        ),
+        ],
+      ),
+
     );
   }
 

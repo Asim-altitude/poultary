@@ -94,253 +94,255 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: SafeArea(
-          child: Column(
-            children: [
-              Utils.showBannerAd(_bannerAd, _isBannerAdReady),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const GeneralStockScreen()),
-                );
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                curve: Curves.easeOut,
-                padding: const EdgeInsets.all(16),
-                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
+      body: Column(children: [
+        Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+        Expanded(child: SingleChildScrollView(
+          child: SafeArea(
+            child: Column(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const GeneralStockScreen()),
+                    );
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOut,
+                    padding: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                      border: Border.all(color: Colors.grey.shade200),
                     ),
-                  ],
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: Row(
-                  children: [
-                    // -------- ICON ----------
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Icon(
-                        Icons.inventory_2_rounded,
-                        size: 32,
-                        color: Colors.blue,
-                      ),
-                    ),
-
-                    const SizedBox(width: 16),
-
-                    // -------- WRAP TEXT IN EXPANDED ----------
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "General Stock".tr(),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                            ),
+                    child: Row(
+                      children: [
+                        // -------- ICON ----------
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(14),
                           ),
-
-                          const SizedBox(height: 4),
-
-                          Text(
-                            "Manage supplies, cartons, materials".tr(),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                              fontWeight: FontWeight.w500,
-                            ),
+                          child: const Icon(
+                            Icons.inventory_2_rounded,
+                            size: 32,
+                            color: Colors.blue,
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
 
-                    const SizedBox(width: 8),
+                        const SizedBox(width: 16),
 
-                    // -------- ARROW ----------
-                    Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 18,
-                      color: Colors.grey.shade500,
+                        // -------- WRAP TEXT IN EXPANDED ----------
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "General Stock".tr(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              Text(
+                                "Manage supplies, cartons, materials".tr(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(width: 8),
+
+                        // -------- ARROW ----------
+                        Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 18,
+                          color: Colors.grey.shade500,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            ),
-             GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ToolsAssetsScreen()),
-                  );
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  curve: Curves.easeOut,
-                  padding: const EdgeInsets.all(16),
-                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                    border: Border.all(color: Colors.grey.shade200),
                   ),
-                  child: Row(
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ToolsAssetsScreen()),
+                    );
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOut,
+                    padding: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        // -------- ICON ----------
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: const Icon(
+                            Icons.inventory_2_outlined,
+                            size: 32,
+                            color: Colors.blue,
+                          ),
+                        ),
+
+                        const SizedBox(width: 16),
+
+                        // -------- WRAP TEXT IN EXPANDED ----------
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Tools and Assets".tr(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              Text(
+                                "Add farm tools, machinery or assets to track condition & maintenance".tr(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(width: 8),
+
+                        // -------- ARROW ----------
+                        Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 18,
+                          color: Colors.grey.shade500,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: GridView.count(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.9,
                     children: [
-                      // -------- ICON ----------
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: const Icon(
-                          Icons.inventory_2_outlined,
-                          size: 32,
-                          color: Colors.blue,
-                        ),
+
+                      _buildInventoryItem(
+                        icon: Icons.fastfood,
+                        title: "Feed Stock".tr(),
+                        description: "Manage available feed quantity and types".tr(),
+                        onTap: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => FeedStockScreen()),
+                          );
+                        },
                       ),
-
-                      const SizedBox(width: 16),
-
-                      // -------- WRAP TEXT IN EXPANDED ----------
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Tools and Assets".tr(),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-
-                            const SizedBox(height: 4),
-
-                            Text(
-                              "Add farm tools, machinery or assets to track condition & maintenance".tr(),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey.shade600,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
+                      _buildInventoryItem(
+                        icon: Icons.egg,
+                        title: "Egg Stock".tr(),
+                        description: "Manage collected eggs and storage".tr(),
+                        onTap: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => EggStockScreen()),
+                          );
+                        },
                       ),
+                      _buildInventoryItem(
+                        icon: Icons.medical_services,
+                        title: "Medicine Stock".tr(),
+                        description: "Track medicines and expiration dates".tr(),
+                        onTap: () async {
+                          CategoryItem item = CategoryItem(id: null, name: "Medicine");
+                          int? medicineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);
 
-                      const SizedBox(width: 8),
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MedicineStockScreen(id: medicineCategoryID!),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildInventoryItem(
+                        icon: Icons.vaccines,
+                        title: "Vaccine Stock".tr(),
+                        description: "Manage vaccination schedules and stock".tr(),
+                        onTap: () async {
+                          CategoryItem item = CategoryItem(id: null, name: "Vaccine");
+                          int? vaccineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);
 
-                      // -------- ARROW ----------
-                      Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        size: 18,
-                        color: Colors.grey.shade500,
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => VaccineStockScreen(id: vaccineCategoryID!),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
                 ),
-              ),
-            Padding(
-                padding: EdgeInsets.all(16.0),
-                child: GridView.count(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 0.9,
-                  children: [
-
-                    _buildInventoryItem(
-                      icon: Icons.fastfood,
-                      title: "Feed Stock".tr(),
-                      description: "Manage available feed quantity and types".tr(),
-                      onTap: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => FeedStockScreen()),
-                        );
-                      },
-                    ),
-                    _buildInventoryItem(
-                      icon: Icons.egg,
-                      title: "Egg Stock".tr(),
-                      description: "Manage collected eggs and storage".tr(),
-                      onTap: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => EggStockScreen()),
-                        );
-                      },
-                    ),
-                    _buildInventoryItem(
-                      icon: Icons.medical_services,
-                      title: "Medicine Stock".tr(),
-                      description: "Track medicines and expiration dates".tr(),
-                      onTap: () async {
-                        CategoryItem item = CategoryItem(id: null, name: "Medicine");
-                        int? medicineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);
-              
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MedicineStockScreen(id: medicineCategoryID!),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildInventoryItem(
-                      icon: Icons.vaccines,
-                      title: "Vaccine Stock".tr(),
-                      description: "Manage vaccination schedules and stock".tr(),
-                      onTap: () async {
-                        CategoryItem item = CategoryItem(id: null, name: "Vaccine");
-                        int? vaccineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);
-              
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => VaccineStockScreen(id: vaccineCategoryID!),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
+        ))
+      ],),
     
     );
   }

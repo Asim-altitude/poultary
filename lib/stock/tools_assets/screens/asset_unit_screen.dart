@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/multiuser/utils/RefreshMixin.dart';
 import 'package:poultary/stock/tools_assets/screens/unit_maintainance_screen.dart';
@@ -23,6 +24,8 @@ class AssetUnitScreen extends StatefulWidget {
 }
 
 class _AssetUnitScreenState extends State<AssetUnitScreen> with RefreshMixin {
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
 
   @override
   void onRefreshEvent(String event) {
@@ -36,6 +39,40 @@ class _AssetUnitScreenState extends State<AssetUnitScreen> with RefreshMixin {
       print(ex);
     }
   }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
+  }
+
+
+
+  @override
+  void dispose() {
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
+
+    }
+    super.dispose();
+  }
 
   List<ToolAssetUnit> units = [];
 
@@ -43,11 +80,15 @@ class _AssetUnitScreenState extends State<AssetUnitScreen> with RefreshMixin {
   void initState() {
     super.initState();
     _loadUnits();
+
   }
 
   Future<void> _loadUnits() async {
     final data = await DatabaseHelper.getUnitsByMaster(widget.master.id!);
     setState(() => units = data);
+    if(Utils.isShowAdd && units.length>0){
+      _loadBannerAd();
+    }
   }
 
   void _showAddEditUnitDialog({ToolAssetUnit? unit}) {
@@ -410,14 +451,26 @@ class _AssetUnitScreenState extends State<AssetUnitScreen> with RefreshMixin {
             style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),)),
       body: units.isEmpty
           ?  Center(child: Text("No units added yet".tr()))
-          : ListView.builder(
-        padding: const EdgeInsets.all(12),
-        itemCount: units.length,
-        itemBuilder: (context, index) {
-          final u = units[index];
-          return buildAssetUnitCard(u, index);
-        },
-      ),
+          : Stack(children: [
+        ListView.builder(
+          padding:  EdgeInsets.only(left: 12,right: 12,top: 60),
+          itemCount: units.length,
+          itemBuilder: (context, index) {
+            final u = units[index];
+            return buildAssetUnitCard(u, index);
+          },
+        ),
+        Positioned(
+          left: 0,
+          right: 0,
+          top: 0,
+          child: Container(
+            height: 60,
+            color: Colors.white,
+            child: Utils.showBannerAd(_bannerAd, _isBannerAdReady), // your banner here
+          ),
+        ),
+      ],),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddEditUnitDialog(),
         child: const Icon(Icons.add),

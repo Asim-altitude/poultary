@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 
 import '../../../database/databse_helper.dart';
@@ -24,6 +25,8 @@ class AssetMaintenanceScreen extends StatefulWidget {
 class _AssetMaintenanceScreenState extends State<AssetMaintenanceScreen> {
   List<ToolAssetMaintenance> logs = [];
   bool loading = true;
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
 
   @override
   void initState() {
@@ -34,6 +37,43 @@ class _AssetMaintenanceScreenState extends State<AssetMaintenanceScreen> {
   Future<void> _loadLogs() async {
     logs = await DatabaseHelper.getMaintenanceByUnit(widget.unit.id!);
     setState(() => loading = false);
+    if(Utils.isShowAdd && logs.length>0){
+      _loadBannerAd();
+    }
+  }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
+  }
+
+
+
+  @override
+  void dispose() {
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
+
+    }
+    super.dispose();
   }
 
   @override
@@ -50,11 +90,23 @@ class _AssetMaintenanceScreenState extends State<AssetMaintenanceScreen> {
           ? const Center(child: CircularProgressIndicator())
           : logs.isEmpty
           ? _emptyState()
-          : ListView.builder(
-        padding: const EdgeInsets.all(12),
-        itemCount: logs.length,
-        itemBuilder: (_, i) => _maintenanceCard(logs[i]),
-      ),
+          : Stack(children: [
+        ListView.builder(
+          padding: const EdgeInsets.only(left: 12,right: 12,top: 60),
+          itemCount: logs.length,
+          itemBuilder: (_, i) => _maintenanceCard(logs[i]),
+        ),
+        Positioned(
+          left: 0,
+          right: 0,
+          top: 0,
+          child: Container(
+            height: 60,
+            color: Colors.white,
+            child: Utils.showBannerAd(_bannerAd, _isBannerAdReady), // your banner here
+          ),
+        ),
+      ],),
 
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => {

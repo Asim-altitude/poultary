@@ -100,7 +100,8 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
     Languages.bengali,
     Languages.telugu,
     Languages.tamil,
-    Languages.greek
+    Languages.greek,
+    Languages.swahili
   ];
   double widthScreen = 0;
   double heightScreen = 0;

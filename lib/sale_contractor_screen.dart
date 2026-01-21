@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/multiuser/utils/SyncStatus.dart';
 import 'package:poultary/sale_contractor_profile.dart';
@@ -18,7 +19,8 @@ class SaleContractorScreen extends StatefulWidget {
 }
 
 class _SaleContractorScreenState extends State<SaleContractorScreen> with RefreshMixin {
-
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
   @override
   void onRefreshEvent(String event) {
     try {
@@ -44,6 +46,43 @@ class _SaleContractorScreenState extends State<SaleContractorScreen> with Refres
     // Listen for search changes
 
     AnalyticsUtil.logScreenView(screenName: "sale_contractor_screen");
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+    }
+  }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
+  }
+
+
+
+  @override
+  void dispose() {
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
+
+    }
+    super.dispose();
   }
 
   Future<void> getAllContractors() async {
@@ -107,6 +146,7 @@ class _SaleContractorScreenState extends State<SaleContractorScreen> with Refres
       body: Column(
         children: [
           // Search bar
+          Utils.showBannerAd(_bannerAd, _isBannerAdReady),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Container(

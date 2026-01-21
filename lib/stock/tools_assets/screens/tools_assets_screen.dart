@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/multiuser/utils/SyncStatus.dart';
 
@@ -22,6 +23,8 @@ class ToolsAssetsScreen extends StatefulWidget {
 
 class _ToolsAssetsScreenState extends State<ToolsAssetsScreen> with RefreshMixin {
 
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
   @override
   void onRefreshEvent(String event) {
     try {
@@ -64,6 +67,41 @@ class _ToolsAssetsScreenState extends State<ToolsAssetsScreen> with RefreshMixin
     _loadAssets();
 
     AnalyticsUtil.logScreenView(screenName: "tool_asset_screen");
+
+  }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
+  }
+
+
+
+  @override
+  void dispose() {
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
+
+    }
+    super.dispose();
   }
 
   Future<void> _loadAssets() async {
@@ -72,6 +110,9 @@ class _ToolsAssetsScreenState extends State<ToolsAssetsScreen> with RefreshMixin
       assets = data;
       isLoading = false;
     });
+    if(Utils.isShowAdd&& assets.length>0){
+      _loadBannerAd();
+    }
   }
 
   @override
@@ -102,12 +143,24 @@ class _ToolsAssetsScreenState extends State<ToolsAssetsScreen> with RefreshMixin
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : assets.isEmpty
-          ? _emptyState()
-          : ListView.builder(
-        padding: const EdgeInsets.only(bottom: 80),
-        itemCount: assets.length,
-        itemBuilder: (_, i) => _assetCard(assets[i]),
-      ),
+          ? Padding(child: _emptyState(),padding: EdgeInsets.only(left: 8,right: 8),)
+          : Stack(children: [
+        ListView.builder(
+          padding: const EdgeInsets.only(bottom: 80,top: 60),
+          itemCount: assets.length,
+          itemBuilder: (_, i) => _assetCard(assets[i]),
+        ),
+        Positioned(
+          left: 0,
+          right: 0,
+          top: 0,
+          child: Container(
+            height: 60,
+            color: Colors.white,
+            child: Utils.showBannerAd(_bannerAd, _isBannerAdReady), // your banner here
+          ),
+        ),
+      ],),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddAssetDialog,
         icon: const Icon(Icons.add),

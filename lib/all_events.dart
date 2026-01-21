@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/add_eggs.dart';
 import 'package:poultary/inventory.dart';
@@ -34,11 +35,15 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
 
   double widthScreen = 0;
   double heightScreen = 0;
-
-  @override
+  late NativeAd _myNativeAd;
+  bool _isNativeAdLoaded = false;
   void dispose() {
-    super.dispose();
+    try{
+      _myNativeAd.dispose();
+    }catch(ex){
 
+    }
+    super.dispose();
   }
 
 
@@ -50,10 +55,48 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
     getList();
     getAllEvents();
     checkPermissions();
-    Utils.setupAds();
 
     AnalyticsUtil.logScreenView(screenName: "add_events");
+    if(Utils.isShowAdd){
+      _loadNativeAds();
+    }
   }
+  _loadNativeAds(){
+    _myNativeAd = NativeAd(
+      adUnitId: Utils.NativeAdUnitId,
+      request: const AdRequest(),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.small, // or medium
+        mainBackgroundColor: Colors.white,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white,
+          backgroundColor: Colors.blue,
+          style: NativeTemplateFontStyle.bold,
+          size: 14,
+        ),
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          size: 14,
+        ),
+        secondaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white70,
+          size: 12,
+        ),
+      ),
+      listener: NativeAdListener(
+        onAdLoaded: (_) => setState(() => _isNativeAdLoaded = true),
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          debugPrint('Native ad failed: $error');
+        },
+      ),
+    );
+
+
+    _myNativeAd.load();
+
+  }
+
 
   void checkPermissions() async {
     Utils.initNotification();
@@ -150,196 +193,206 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
           width: widthScreen,
           height: heightScreen,
             color: Utils.getScreenBackground(),
-            child:SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children:  [
-              Utils.getDistanceBar(),
-
-
-              Visibility(
-                visible: false,
-                child: Container(
-                  height: 50,
-                  width: widthScreen ,
-                  margin: EdgeInsets.only(left: 10,right: 10,bottom: 5),
-                  child: Row(children: [
-
-                    Expanded(
-                      child: InkWell(
-                        onTap: () {
-                          selected = 1;
-                          filter_name ='All';
-                          active = -1;
-                          getAllEvents();
-                        },
-                        child: Container(
-                          height: 40,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: selected == 1 ? Utils.getThemeColorBlue() : Colors.white,
-                            borderRadius: BorderRadius.only(topLeft: Radius.circular(10)
-                                ,bottomLeft: Radius.circular(10)),
-                            border: Border.all(
-                              color:  Utils.getThemeColorBlue(),
-                              width: 1.0,
-                            ),
-                          ),
-                          child: Text('All'.tr(), style: TextStyle(
-                              color: selected==1 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () {
-                          selected = 2;
-                          isCollection = 1;
-                          filter_name ='1';
-                          active = 1;
-                          getAllEvents();
-                        },
-                        child: Container(
-                          height: 40,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: selected==2 ? Utils.getThemeColorBlue() : Colors.white,
-
-
-                            border: Border.all(
-                              color: Utils.getThemeColorBlue(),
-                              width: 1.0,
-                            ),
-                          ),
-                          child: Text('ACTIVE'.tr(), style: TextStyle(
-                              color: selected==2 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () {
-                          selected = 3;
-                          filter_name ='0';
-                          isCollection = 0;
-                          active = 0;
-                          getAllEvents();
-
-                        },
-                        child: Container(
-                          height: 40,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: selected==3 ? Utils.getThemeColorBlue() : Colors.white,
-                            borderRadius: BorderRadius.only(topRight: Radius.circular(10)
-                                ,bottomRight: Radius.circular(10)),
-                            border: Border.all(
-                              color:  Utils.getThemeColorBlue(),
-                              width: 1.0,
-                            ),
-                          ),
-                          child: Text('EXPIRED'.tr(), style: TextStyle(
-                              color: selected==3 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
-                        ),
-                      ),
-                    ),
-                  ],),
+            child:Column(children: [
+              if (_isNativeAdLoaded && _myNativeAd != null)
+                Container(
+                  height: 90,
+                  margin: const EdgeInsets.only(bottom: 0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: AdWidget(ad: _myNativeAd),
                 ),
-              ),
+              Expanded(child:SingleChildScrollView(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children:  [
 
-              events.length > 0 ? Container(
-                height: heightScreen - 100,
-                width: widthScreen,
-                child: ListView.builder(
-                    itemCount: events.length,
-                    scrollDirection: Axis.vertical,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        margin: EdgeInsets.only(left: 8,right: 8,top: 8,bottom: 0),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(3)),
 
-                         color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 2,
-                              blurRadius: 2,
-                              offset: Offset(0, 1), // changes position of shadow
-                            ),
-                          ],
-                        ),
+                      Visibility(
+                        visible: false,
                         child: Container(
-                          color: Colors.white,
-                          child: Row( children: [
+                          height: 50,
+                          width: widthScreen ,
+                          margin: EdgeInsets.only(left: 10,right: 10,bottom: 5),
+                          child: Row(children: [
+
                             Expanded(
-                              child: Container(
-                                alignment: Alignment.topLeft,
-                                margin: EdgeInsets.only(left: 10,right: 10,top: 4,bottom: 10),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Align(
-                                      alignment: Alignment.topRight,
-                                      child:
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        children: [
-                                          GestureDetector(
-                                            onTapDown: (TapDownDetails details) {
-                                              selected_id = events.elementAt(index).id;
-                                              selected_index = index;
-                                              showMemberMenu(details.globalPosition);
-                                            },
-                                            child: Container(
-                                              width: 30,
-                                              height: 30,
-                                              padding: EdgeInsets.all(5),
-                                              child: Image.asset('assets/options.png'),
-                                            ),
-                                          ),
-
-                                        ],
-                                      ),),
-                                    Row(
-                                      children: [
-                                        Container(margin: EdgeInsets.all(0), child: Text(events.elementAt(index).event_name!.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
-                                        Container(margin: EdgeInsets.all(0), child: Text(" ("+ events.elementAt(index).flock_name!.tr()+") ", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.grey),)),
-
-                                      ],
+                              child: InkWell(
+                                onTap: () {
+                                  selected = 1;
+                                  filter_name ='All';
+                                  active = -1;
+                                  getAllEvents();
+                                },
+                                child: Container(
+                                  height: 40,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: selected == 1 ? Utils.getThemeColorBlue() : Colors.white,
+                                    borderRadius: BorderRadius.only(topLeft: Radius.circular(10)
+                                        ,bottomLeft: Radius.circular(10)),
+                                    border: Border.all(
+                                      color:  Utils.getThemeColorBlue(),
+                                      width: 1.0,
                                     ),
-                                    Container(margin: EdgeInsets.all(0), child: Text(events.elementAt(index).event_detail!, style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+                                  ),
+                                  child: Text('All'.tr(), style: TextStyle(
+                                      color: selected==1 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: InkWell(
+                                onTap: () {
+                                  selected = 2;
+                                  isCollection = 1;
+                                  filter_name ='1';
+                                  active = 1;
+                                  getAllEvents();
+                                },
+                                child: Container(
+                                  height: 40,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: selected==2 ? Utils.getThemeColorBlue() : Colors.white,
 
-                                    Container(
-                                      margin: EdgeInsets.only(right: 10),
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.notifications_active, size: 25, color: Utils.getThemeColorBlue(),),
-                                          Text("".tr(), style: TextStyle(color: Colors.black, fontSize: 12),),
-                                          Text(" On".tr(), style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14),),
-                                          Container(margin: EdgeInsets.all(5), child: Text(Utils.getReminderFormattedDate(events.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
-                                        ],
+
+                                    border: Border.all(
+                                      color: Utils.getThemeColorBlue(),
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: Text('ACTIVE'.tr(), style: TextStyle(
+                                      color: selected==2 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: InkWell(
+                                onTap: () {
+                                  selected = 3;
+                                  filter_name ='0';
+                                  isCollection = 0;
+                                  active = 0;
+                                  getAllEvents();
+
+                                },
+                                child: Container(
+                                  height: 40,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: selected==3 ? Utils.getThemeColorBlue() : Colors.white,
+                                    borderRadius: BorderRadius.only(topRight: Radius.circular(10)
+                                        ,bottomRight: Radius.circular(10)),
+                                    border: Border.all(
+                                      color:  Utils.getThemeColorBlue(),
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: Text('EXPIRED'.tr(), style: TextStyle(
+                                      color: selected==3 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
+                                ),
+                              ),
+                            ),
+                          ],),
+                        ),
+                      ),
+
+                      events.length > 0 ? Container(
+                        height: heightScreen - 100,
+                        width: widthScreen,
+                        child: ListView.builder(
+                            itemCount: events.length,
+                            scrollDirection: Axis.vertical,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Container(
+                                margin: EdgeInsets.only(left: 8,right: 8,top: 8,bottom: 0),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(3)),
+
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.5),
+                                      spreadRadius: 2,
+                                      blurRadius: 2,
+                                      offset: Offset(0, 1), // changes position of shadow
+                                    ),
+                                  ],
+                                ),
+                                child: Container(
+                                  color: Colors.white,
+                                  child: Row( children: [
+                                    Expanded(
+                                      child: Container(
+                                        alignment: Alignment.topLeft,
+                                        margin: EdgeInsets.only(left: 10,right: 10,top: 4,bottom: 10),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Align(
+                                              alignment: Alignment.topRight,
+                                              child:
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                children: [
+                                                  GestureDetector(
+                                                    onTapDown: (TapDownDetails details) {
+                                                      selected_id = events.elementAt(index).id;
+                                                      selected_index = index;
+                                                      showMemberMenu(details.globalPosition);
+                                                    },
+                                                    child: Container(
+                                                      width: 30,
+                                                      height: 30,
+                                                      padding: EdgeInsets.all(5),
+                                                      child: Image.asset('assets/options.png'),
+                                                    ),
+                                                  ),
+
+                                                ],
+                                              ),),
+                                            Row(
+                                              children: [
+                                                Container(margin: EdgeInsets.all(0), child: Text(events.elementAt(index).event_name!.tr(), style: TextStyle( fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),)),
+                                                Container(margin: EdgeInsets.all(0), child: Text(" ("+ events.elementAt(index).flock_name!.tr()+") ", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.grey),)),
+
+                                              ],
+                                            ),
+                                            Container(margin: EdgeInsets.all(0), child: Text(events.elementAt(index).event_detail!, style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+
+                                            Container(
+                                              margin: EdgeInsets.only(right: 10),
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.notifications_active, size: 25, color: Utils.getThemeColorBlue(),),
+                                                  Text("".tr(), style: TextStyle(color: Colors.black, fontSize: 12),),
+                                                  Text(" On".tr(), style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14),),
+                                                  Container(margin: EdgeInsets.all(5), child: Text(Utils.getReminderFormattedDate(events.elementAt(index).date.toString()), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 14, color: Colors.black),)),
+                                                ],
+                                              ),
+                                            ),
+
+                                            Container(
+                                                alignment: Alignment.centerRight,
+                                                margin: EdgeInsets.all(0), child: Text(events.elementAt(index).type == 0 ?"EXPIRED".tr():"ACTIVE".tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: events.elementAt(index).type == 0 ? Colors.red: Colors.green),)),
+
+                                            // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+                                          ],),
                                       ),
                                     ),
 
-                                    Container(
-                                        alignment: Alignment.centerRight,
-                                        margin: EdgeInsets.all(0), child: Text(events.elementAt(index).type == 0 ?"EXPIRED".tr():"ACTIVE".tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: events.elementAt(index).type == 0 ? Colors.red: Colors.green),)),
+                                  ]),
+                                ),
+                              );
 
-                                    // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                                  ],),
-                              ),
-                            ),
+                            }),
+                      ) : Utils.getCustomEmptyMessage("assets/reminder.png", "No Reminders Added")
 
-                          ]),
-                        ),
-                      );
-
-                    }),
-              ) : Utils.getCustomEmptyMessage("assets/reminder.png", "No Reminders Added")
-
-                   /* Text(
+                      /* Text(
               "Main Menu",
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -569,8 +622,10 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
                           builder: (context) => const EmojiTemplateScreen()),
                     );*//*
                   }),*/
-                  ]
-      ),),),),);
+                    ]
+                ),)
+              )
+            ],),),),);
   }
 
   Future<void> addNewEvent() async {

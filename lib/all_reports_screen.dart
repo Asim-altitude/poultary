@@ -48,7 +48,7 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
      catch(ex){
        print(ex);
      }
-    Utils.setupAds();
+    // Utils.setupAds();
 
   }
 
@@ -194,12 +194,11 @@ class _ReportsScreen extends State<ReportsScreen> with SingleTickerProviderState
        width: widthScreen,
        height: heightScreen,
         color: Colors.white,
-         child: SingleChildScrollViewWithStickyFirstWidget(
+         child: SingleChildScrollView(
          child: Column(
          mainAxisAlignment: MainAxisAlignment.center,
          crossAxisAlignment: CrossAxisAlignment.center,
          children:  [
-           Utils.getDistanceBar(),
 
           /* ClipRRect(
              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),

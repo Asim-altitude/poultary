@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/multiuser/utils/SyncStatus.dart';
@@ -19,7 +20,8 @@ class FeedIngredientScreen extends StatefulWidget {
 
 class _FeedIngredientScreenState extends State<FeedIngredientScreen> with RefreshMixin {
   List<FeedIngredient> ingredients = [];
-
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
   @override
   void onRefreshEvent(String event) {
     try {
@@ -30,6 +32,40 @@ class _FeedIngredientScreenState extends State<FeedIngredientScreen> with Refres
     catch(ex){
       print(ex);
     }
+  }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
+  }
+
+
+
+  @override
+  void dispose() {
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
+
+    }
+    super.dispose();
   }
 
   @override
@@ -46,6 +82,9 @@ class _FeedIngredientScreenState extends State<FeedIngredientScreen> with Refres
     setState(() {
 
     });
+    if(Utils.isShowAdd && ingredients.length>0){
+      _loadBannerAd();
+    }
   }
 
   Future<void> _showIngredientDialog({FeedIngredient? ingredient}) async {
@@ -93,7 +132,7 @@ class _FeedIngredientScreenState extends State<FeedIngredientScreen> with Refres
               TextField(
                 controller: priceController,
                 decoration: InputDecoration(
-                  labelText: 'Price'.tr()+'per'.tr()+' ${Utils.selected_unit.tr()}',
+                  labelText: 'Price'.tr()+    " "+'per'.tr()+' ${Utils.selected_unit.tr()}',
                   prefixIcon: Icon(Icons.attach_money, color: Utils.getThemeColorBlue()),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 ),
@@ -230,70 +269,85 @@ class _FeedIngredientScreenState extends State<FeedIngredientScreen> with Refres
       ),
         body: ingredients.isEmpty
           ? Center(child: Text('No ingredients yet.'.tr()))
-          : SafeArea(
+          : Stack(children: [
+          SafeArea(
             child: ListView.builder(
-                    itemCount: ingredients.length,
-                    itemBuilder: (_, index) {
-            final ingredient = ingredients[index];
-                     return Card(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              elevation: 2,
-              child: Container(
-                padding: EdgeInsets.all(10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    /// Ingredient info
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${ingredient.name} (${ingredient.unit.tr()})',
-                            style:  TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Utils.getThemeColorBlue(),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            Utils.currency+' ${ingredient.pricePerKg.toStringAsFixed(2)} '+'per'.tr()+' ${ingredient.unit}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  
-                    /// Action buttons
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
+              itemCount: ingredients.length,
+              padding: EdgeInsets.only(top: 60),
+              itemBuilder: (_, index) {
+                final ingredient = ingredients[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 2,
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blueAccent),
-                          onPressed: () => _showIngredientDialog(ingredient: ingredient),
+                        /// Ingredient info
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${ingredient.name} (${ingredient.unit.tr()})',
+                                style:  TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Utils.getThemeColorBlue(),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                Utils.currency+' ${ingredient.pricePerKg.toStringAsFixed(2)} '+'per'.tr()+' ${ingredient.unit}',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.redAccent),
-                          onPressed: () => _deleteIngredient(ingredient.id!, ingredient.sync_id!),
+
+                        /// Action buttons
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blueAccent),
+                              onPressed: () => _showIngredientDialog(ingredient: ingredient),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.redAccent),
+                              onPressed: () => _deleteIngredient(ingredient.id!, ingredient.sync_id!),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-            );
-                
-                    },
                   ),
+                );
+
+              },
+            ),
+
           ),
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 0,
+            child: Container(
+              height: 60,
+              color: Colors.white,
+              child: Utils.showBannerAd(_bannerAd, _isBannerAdReady), // your banner here
+            ),
+          ),
+
+        ],)
     
     );
   }

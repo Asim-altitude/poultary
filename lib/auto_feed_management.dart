@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/utils.dart';
@@ -27,13 +28,17 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
   List<AutomaticFeedSetting> automaticFeedFlocks = [];
   List<String> _feedList = [];
   List<Flock> flocks = [];
-
+  late NativeAd _myNativeAd;
+  bool _isNativeAdLoaded = false;
   @override
   void initState() {
     super.initState();
     _initializeData();
 
     AnalyticsUtil.logScreenView(screenName: "add_feed_manage");
+  }
+  void dispose() {
+    super.dispose();
   }
 
   Future<void> initNotificationsSettings() async {
