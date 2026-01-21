@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/model/flock_detail.dart';
 import 'package:poultary/model/transaction_item.dart';
@@ -38,9 +39,16 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
    bool isCollection;
   _NewBirdsCollection(this.isCollection);
 
+  late NativeAd _myNativeAd;
+  bool _isNativeAdLoaded = false;
   @override
   void dispose() {
     super.dispose();
+    try{
+      _myNativeAd.dispose();
+    }catch(ex){
+
+    }
   }
 
   String _purposeselectedValue = "";
@@ -122,9 +130,45 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
 
     getList();
     Utils.showInterstitial();
-    Utils.setupAds();
-
+    if(Utils.isShowAdd){
+      _loadNativeAds();
+    }
     AnalyticsUtil.logScreenView(screenName: "add_birds");
+  }
+  _loadNativeAds(){
+    _myNativeAd = NativeAd(
+      adUnitId: Utils.NativeAdUnitId,
+      request: const AdRequest(),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.small, // or medium
+        mainBackgroundColor: Colors.white,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white,
+          backgroundColor: Colors.blue,
+          style: NativeTemplateFontStyle.bold,
+          size: 14,
+        ),
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          size: 14,
+        ),
+        secondaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white70,
+          size: 12,
+        ),
+      ),
+      listener: NativeAdListener(
+        onAdLoaded: (_) => setState(() => _isNativeAdLoaded = true),
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          debugPrint('Native ad failed: $error');
+        },
+      ),
+    );
+
+
+    _myNativeAd.load();
+
   }
 
   List<SubItem> _paymentMethodList = [];
@@ -816,100 +860,111 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
           width: widthScreen,
           height: heightScreen,
           color: Utils.getScreenBackground(),
-          child: SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-              children: [
-                Utils.getDistanceBar(),
-                SizedBox(height: 20,),
-                EasyStepper(
-                  activeStep: activeStep,
-                  activeStepTextColor: Colors.blue.shade900,
-                  finishedStepTextColor: Utils.getThemeColorBlue(),
-                  internalPadding: 20, // Reduce padding for better spacing
-                  stepShape: StepShape.circle,
-                  stepBorderRadius: 20,
-                  borderThickness: 3, // Balanced progress line thickness
-                  showLoadingAnimation: false,
-                  stepRadius: 15, // Reduced step size to fit screen
-                  showStepBorder: false,
-                  lineStyle: LineStyle(
-                    lineLength: 50,
-                    lineType: LineType.normal,
-                    defaultLineColor: Colors.grey.shade300,
-                    activeLineColor: Colors.blueAccent,
-                    finishedLineColor: Utils.getThemeColorBlue(),
-                  ),
-                  steps: [
-                    EasyStep(
-                      customStep: _buildStepIcon(Icons.info, 0),
-                      title: 'BIRDS'.tr(),
-                    ),
-                    EasyStep(
-                      customStep: _buildStepIcon(Icons.date_range, 1),
-                      title: 'DATE'.tr(),
-                    ),
-
-                  ],
-                  onStepReached: (index) => setState(() => activeStep = index),
+          child: Column(children: [
+            if (_isNativeAdLoaded && _myNativeAd != null)
+              Container(
+                height: 90,
+                margin: const EdgeInsets.only(bottom: 0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                child: AdWidget(ad: _myNativeAd),
+              ),
 
-                SizedBox(height: 10,),
-                Container(
-                  // height: !is_transaction ? heightScreen-250 : heightScreen - 134,
-                  child: Column(
-                      children: [
 
-                        activeStep == 0?   Container(
-                          margin: EdgeInsets.all(15),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.15),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                                offset: Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          padding: EdgeInsets.all(20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(height: 20),
-                              Center(
-                                child: Container(
-                                  child: Text(
-                                    isCollection? isEdit? "EDIT".tr() +" "+ 'Addition'.tr() : 'ADD_BIRDS'.tr() :isEdit? "EDIT".tr() +" "+ "Reduction".tr() :'REDUCE_BIRDS'.tr(),
-                                    textAlign: TextAlign.start,
-                                    style: TextStyle(
-                                        color: Utils.getThemeColorBlue(),
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold),
+            Expanded(child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  SizedBox(height: 10,),
+                  EasyStepper(
+                    activeStep: activeStep,
+                    activeStepTextColor: Colors.blue.shade900,
+                    finishedStepTextColor: Utils.getThemeColorBlue(),
+                    internalPadding: 20, // Reduce padding for better spacing
+                    stepShape: StepShape.circle,
+                    stepBorderRadius: 20,
+                    borderThickness: 3, // Balanced progress line thickness
+                    showLoadingAnimation: false,
+                    stepRadius: 15, // Reduced step size to fit screen
+                    showStepBorder: false,
+                    lineStyle: LineStyle(
+                      lineLength: 50,
+                      lineType: LineType.normal,
+                      defaultLineColor: Colors.grey.shade300,
+                      activeLineColor: Colors.blueAccent,
+                      finishedLineColor: Utils.getThemeColorBlue(),
+                    ),
+                    steps: [
+                      EasyStep(
+                        customStep: _buildStepIcon(Icons.info, 0),
+                        title: 'BIRDS'.tr(),
+                      ),
+                      EasyStep(
+                        customStep: _buildStepIcon(Icons.date_range, 1),
+                        title: 'DATE'.tr(),
+                      ),
+
+                    ],
+                    onStepReached: (index) => setState(() => activeStep = index),
+                  ),
+
+                  Container(
+                    // height: !is_transaction ? heightScreen-250 : heightScreen - 134,
+                    child: Column(
+                        children: [
+
+                          activeStep == 0?   Container(
+                            margin: EdgeInsets.only(left: 15,right: 15,bottom: 15),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            padding: EdgeInsets.all(20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(height: 20),
+                                Center(
+                                  child: Container(
+                                    child: Text(
+                                      isCollection? isEdit? "EDIT".tr() +" "+ 'Addition'.tr() : 'ADD_BIRDS'.tr() :isEdit? "EDIT".tr() +" "+ "Reduction".tr() :'REDUCE_BIRDS'.tr(),
+                                      textAlign: TextAlign.start,
+                                      style: TextStyle(
+                                          color: Utils.getThemeColorBlue(),
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(height: 30),
-                              // Choose Flock
-                              _buildSectionLabel("CHOOSE_FLOCK_1".tr()),
-                              _buildDropdownField("CHOOSE_FLOCK_1".tr(),_purposeList,_purposeselectedValue, (value) {
-                                _purposeselectedValue = value!;
-                              }),
-
-                              SizedBox(height: 15),
-
-                              // Reductions or Acquisitions (Based on isCollection)
-                              if (!isCollection) ...[
-                                _buildSectionLabel("REDUCTIONS_1".tr()),
-                                _buildDropdownField("REDUCTIONS_1".tr(), _reductionReasons, _reductionReasonValue, (value) {
-                                  setState(() {
-                                    _reductionReasonValue = value!;
-                                    is_transaction = (_reductionReasonValue == "SOLD");
-                                  });
+                                SizedBox(height: 30),
+                                // Choose Flock
+                                _buildSectionLabel("CHOOSE_FLOCK_1".tr()),
+                                _buildDropdownField("CHOOSE_FLOCK_1".tr(),_purposeList,_purposeselectedValue, (value) {
+                                  _purposeselectedValue = value!;
                                 }),
-                              ] else ...[
-                              /*  _buildSectionLabel("ACQUSITION".tr()),
+
+                                SizedBox(height: 15),
+
+                                // Reductions or Acquisitions (Based on isCollection)
+                                if (!isCollection) ...[
+                                  _buildSectionLabel("REDUCTIONS_1".tr()),
+                                  _buildDropdownField("REDUCTIONS_1".tr(), _reductionReasons, _reductionReasonValue, (value) {
+                                    setState(() {
+                                      _reductionReasonValue = value!;
+                                      is_transaction = (_reductionReasonValue == "SOLD");
+                                    });
+                                  }),
+                                ] else ...[
+                                  /*  _buildSectionLabel("ACQUSITION".tr()),
                                 _buildHorizontalList(acqusitionList, "ACQUSITION".tr(),  (value) {
                                   setState(() {
                                     _acqusitionselectedValue = value;
@@ -917,150 +972,150 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
 
                                   });
                                 },),*/
-                                _buildSectionLabel("ACQUSITION".tr()),
-                                _buildDropdownField("ACQUSITION".tr(),acqusitionList, _acqusitionselectedValue, (value) {
-                                  setState(() {
-                                    _acqusitionselectedValue = value!;
-                                    is_transaction = (_acqusitionselectedValue == "PURCHASED"); // Enable when PURCHASED is selected
+                                  _buildSectionLabel("ACQUSITION".tr()),
+                                  _buildDropdownField("ACQUSITION".tr(),acqusitionList, _acqusitionselectedValue, (value) {
+                                    setState(() {
+                                      _acqusitionselectedValue = value!;
+                                      is_transaction = (_acqusitionselectedValue == "PURCHASED"); // Enable when PURCHASED is selected
 
-                                  });
-                                }),
-                              ],
+                                    });
+                                  }),
+                                ],
 
 
 
-                              // Auto Transaction Label
-                              if (is_transaction && !isEdit)
-                                Center(
-                                  child: Text(
-                                    isCollection ? 'Auto_expense'.tr() : 'Auto_Income'.tr(),
-                                    style: TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.w500),
-                                  ),
-                                ),
-                              SizedBox(height: 15),
-                              // Birds Count & Sale/Expense Amount
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        _buildSectionLabel("BIRDS_COUNT".tr()),
-                                        _buildInputField("BIRDS_COUNT".tr(), totalBirdsController, Icons.numbers, keyboardType: TextInputType.number, inputFormat: "number"),
-                                      ],
+                                // Auto Transaction Label
+                                if (is_transaction && !isEdit)
+                                  Center(
+                                    child: Text(
+                                      isCollection ? 'Auto_expense'.tr() : 'Auto_Income'.tr(),
+                                      style: TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.w500),
                                     ),
                                   ),
-                                  if (is_transaction)
-                                    SizedBox(width: 10),
-                                  if (is_transaction)
+                                SizedBox(height: 15),
+                                // Birds Count & Sale/Expense Amount
+                                Row(
+                                  children: [
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          _buildSectionLabel(!isCollection ? "SALE_AMOUNT".tr() : "EXPENSE_AMOUNT".tr()),
-                                          _buildInputField(!isCollection ? "SALE_AMOUNT".tr() : "EXPENSE_AMOUNT".tr(), amountController, keyboardType: TextInputType.number, Icons.attach_money,inputFormat: "float"),
+                                          _buildSectionLabel("BIRDS_COUNT".tr()),
+                                          _buildInputField("BIRDS_COUNT".tr(), totalBirdsController, Icons.numbers, keyboardType: TextInputType.number, inputFormat: "number"),
                                         ],
                                       ),
                                     ),
-                                ],
-                              ),
-
-                              SizedBox(height: 15),
-
-                              // Paid To / Sold To Field
-                              if (is_transaction)
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _buildSectionLabel(isCollection ? "PAID_TO1".tr() : "SOLD_TO".tr()),
-                                    _buildInputField(isCollection ? "PAID_TO_HINT".tr() : "SOLD_TO_HINT".tr(), personController, Icons.person),
+                                    if (is_transaction)
+                                      SizedBox(width: 10),
+                                    if (is_transaction)
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            _buildSectionLabel(!isCollection ? "SALE_AMOUNT".tr() : "EXPENSE_AMOUNT".tr()),
+                                            _buildInputField(!isCollection ? "SALE_AMOUNT".tr() : "EXPENSE_AMOUNT".tr(), amountController, keyboardType: TextInputType.number, Icons.attach_money,inputFormat: "float"),
+                                          ],
+                                        ),
+                                      ),
                                   ],
                                 ),
-                            ],
-                          ),) : SizedBox(width: 1,),
-                        activeStep == 1?
-                        Container(
-                          margin: EdgeInsets.all(15),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.15),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                                offset: Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          padding: EdgeInsets.all(20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(height: 10),
-                              Center(
-                                child: Container(
-                                  child: Text(
-                                    isCollection? isEdit? "EDIT".tr() +" "+ 'Addition'.tr() : 'ADD_BIRDS'.tr() :isEdit? "EDIT".tr() +" "+ "Reduction".tr() :'REDUCE_BIRDS'.tr(),
-                                    textAlign: TextAlign.start,
-                                    style: TextStyle(
-                                        color: Utils.getThemeColorBlue(),
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              // Max Hint Warning
-                              if (max_hint.isNotEmpty)
-                                Padding(
-                                  padding: EdgeInsets.only(left: 5, bottom: 10),
-                                  child: Text(
-                                    max_hint,
-                                    style: TextStyle(color: Colors.red, fontSize: 14, fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-
-                              // Payment Method & Payment Status (Only if is_transaction is true)
-                              if (is_transaction) ...[
-                                SizedBox(height: 15),
-                                _buildSectionLabel("Payment Method".tr()),
-                                _buildDropdownField("Payment Method".tr(),_visiblePaymentMethodList, payment_method, (value) {
-                                  setState(() {
-                                    payment_method = value!;
-                                  });
-                                }),
 
                                 SizedBox(height: 15),
-                                _buildSectionLabel("Payment Status".tr()),
-                                _buildDropdownField("Payment Status".tr(),paymentStatusList, payment_status,(value) {
-                                  setState(() {
-                                    payment_status = value!;
-                                  });
-                                }),
+
+                                // Paid To / Sold To Field
+                                if (is_transaction)
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      _buildSectionLabel(isCollection ? "PAID_TO1".tr() : "SOLD_TO".tr()),
+                                      _buildInputField(isCollection ? "PAID_TO_HINT".tr() : "SOLD_TO_HINT".tr(), personController, Icons.person),
+                                    ],
+                                  ),
                               ],
+                            ),) : SizedBox(width: 1,),
+                          activeStep == 1?
+                          Container(
+                            margin: EdgeInsets.only(left: 15,right: 15,bottom: 15),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            padding: EdgeInsets.all(20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(height: 10),
+                                Center(
+                                  child: Container(
+                                    child: Text(
+                                      isCollection? isEdit? "EDIT".tr() +" "+ 'Addition'.tr() : 'ADD_BIRDS'.tr() :isEdit? "EDIT".tr() +" "+ "Reduction".tr() :'REDUCE_BIRDS'.tr(),
+                                      textAlign: TextAlign.start,
+                                      style: TextStyle(
+                                          color: Utils.getThemeColorBlue(),
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 20),
+                                // Max Hint Warning
+                                if (max_hint.isNotEmpty)
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 5, bottom: 10),
+                                    child: Text(
+                                      max_hint,
+                                      style: TextStyle(color: Colors.red, fontSize: 14, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
 
-                              SizedBox(height: 15),
+                                // Payment Method & Payment Status (Only if is_transaction is true)
+                                if (is_transaction) ...[
+                                  SizedBox(height: 15),
+                                  _buildSectionLabel("Payment Method".tr()),
+                                  _buildDropdownField("Payment Method".tr(),_visiblePaymentMethodList, payment_method, (value) {
+                                    setState(() {
+                                      payment_method = value!;
+                                    });
+                                  }),
 
-                              // Date Picker
-                              _buildSectionLabel("DATE".tr()),
-                              GestureDetector(
-                                onTap: () {
-                                  pickDate();
-                                },
-                                child: _buildDatePicker(Utils.getFormattedDate(date)),
-                              ),
+                                  SizedBox(height: 15),
+                                  _buildSectionLabel("Payment Status".tr()),
+                                  _buildDropdownField("Payment Status".tr(),paymentStatusList, payment_status,(value) {
+                                    setState(() {
+                                      payment_status = value!;
+                                    });
+                                  }),
+                                ],
 
-                              SizedBox(height: 15),
+                                SizedBox(height: 15),
 
-                              // Description Input
-                              _buildSectionLabel("DESCRIPTION_1".tr()),
-                              _buildInputField("NOTES_HINT".tr(), notesController, Icons.notes, keyboardType: TextInputType.multiline, height: 100),
-                            ],
-                          ),
-                        ) : SizedBox(width: 1,),
-                        SizedBox(height: 10,width: widthScreen),
-                        /*InkWell(
+                                // Date Picker
+                                _buildSectionLabel("DATE".tr()),
+                                GestureDetector(
+                                  onTap: () {
+                                    pickDate();
+                                  },
+                                  child: _buildDatePicker(Utils.getFormattedDate(date)),
+                                ),
+
+                                SizedBox(height: 15),
+
+                                // Description Input
+                                _buildSectionLabel("DESCRIPTION_1".tr()),
+                                _buildInputField("NOTES_HINT".tr(), notesController, Icons.notes, keyboardType: TextInputType.multiline, height: 100),
+                              ],
+                            ),
+                          ) : SizedBox(width: 1,),
+                          SizedBox(height: 10,width: widthScreen),
+                          /*InkWell(
                           onTap: () async {
 
                             activeStep++;
@@ -1285,11 +1340,12 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
                           ),
                         )*/
 
-                      ]),
-                ),
-              ],
-            ),
-          ),
+                        ]),
+                  ),
+                ],
+              ),
+            ))
+          ],),
         ),
       ),
     );

@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/add_expense.dart';
 import 'package:poultary/add_income.dart';
@@ -62,11 +63,16 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
 
   double widthScreen = 0;
   double heightScreen = 0;
-
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
   @override
   void dispose() {
     super.dispose();
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
 
+    }
   }
 
   int _other_filter = 2;
@@ -126,10 +132,35 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
     super.initState();
 
     getFilters();
-    Utils.setupAds();
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+    }
 
     AnalyticsUtil.logScreenView(screenName: "transaction_screen");
   }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
+  }
+
 
   bool no_colection = true;
   List<TransactionItem> transactionList = [], tempList = [];
@@ -367,15 +398,17 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
           width: widthScreen,
           height: heightScreen,
             color: Utils.getScreenBackground(),
-            child:SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.end,
-            children:  [
-              Utils.getDistanceBar(),
+            child:Column(children: [
+              Utils.showBannerAd(_bannerAd, _isBannerAdReady),
 
-              /*ClipRRect(
+              Expanded(child: SingleChildScrollView(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children:  [
+
+                      /*ClipRRect(
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(10),
                   bottomRight: Radius.circular(10),
@@ -470,412 +503,413 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                   ),
                 ),
               ),*/
-              Center(
-                child: Container(
-                  padding: EdgeInsets.only(top: 10),
-                  margin: EdgeInsets.symmetric(horizontal: 10), // Margin of 10 on left & right
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 3, // 60% of available space
-                        child: SizedBox(
-                          height: 55,
-                          child: _buildDropdownField(
-                            "Select Item",
-                            _purposeList,
-                            _purposeselectedValue,
-                                (String? newValue) {
-                                  _purposeselectedValue = newValue!;
+                      Center(
+                        child: Container(
+                          padding: EdgeInsets.only(top: 2),
+                          margin: EdgeInsets.symmetric(horizontal: 10), // Margin of 10 on left & right
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 3, // 60% of available space
+                                child: SizedBox(
+                                  height: 55,
+                                  child: _buildDropdownField(
+                                    "Select Item",
+                                    _purposeList,
+                                    _purposeselectedValue,
+                                        (String? newValue) {
+                                      _purposeselectedValue = newValue!;
 
-                                  f_id = getFlockID();
-                                  Utils.SELECTED_FLOCK = newValue;
-                                  Utils.SELECTED_FLOCK_ID = f_id;
-                                  print("SELECTED_FLOCK $f_id");
-                                  getFilteredTransactions(str_date, end_date);
+                                      f_id = getFlockID();
+                                      Utils.SELECTED_FLOCK = newValue;
+                                      Utils.SELECTED_FLOCK_ID = f_id;
+                                      print("SELECTED_FLOCK $f_id");
+                                      getFilteredTransactions(str_date, end_date);
 
-                            },
-                            width: double.infinity,
-                            height: 45,
+                                    },
+                                    width: double.infinity,
+                                    height: 45,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 5), // Space between the dropdowns
+                              Expanded(
+                                flex: 2, // 40% of available space
+                                child: SizedBox(
+                                  height: 55,
+                                  child: _buildDropdownField(
+                                    "Select Item",
+                                    filterList,
+                                    date_filter_name,
+                                        (String? newValue) {
+                                      date_filter_name = newValue!;
+                                      getData(date_filter_name);
+                                    },
+                                    width: double.infinity,
+                                    height: 45,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      SizedBox(width: 5), // Space between the dropdowns
-                      Expanded(
-                        flex: 2, // 40% of available space
-                        child: SizedBox(
-                          height: 55,
-                          child: _buildDropdownField(
-                            "Select Item",
-                            filterList,
-                            date_filter_name,
-                                (String? newValue) {
-                                  date_filter_name = newValue!;
-                                  getData(date_filter_name);
-                            },
-                            width: double.infinity,
-                            height: 45,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Container(
-                height: 55,
-                width: widthScreen,
-                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                  color: Colors.white.withOpacity(0.1), // Light transparent background
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 10,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    buildFilterButton('All', 1, Colors.blue),
-                    buildFilterButton('Income', 2, Colors.green),
-                    buildFilterButton('Expense', 3, Colors.red),
-                  ],
-                ),
-              ),
-
-              transactionList.length > 0 ?
-
-              Container(
-                height: heightScreen,
-                width: widthScreen,
-                child: Padding(
-                    padding: Utils.isShowAdd? const EdgeInsets.only(bottom: 370) : const EdgeInsets.only(bottom: 300), // Adjust this value as needed
-                child: ListView.builder(
-                    itemCount: transactionList.length,
-                    scrollDirection: Axis.vertical,
-                    shrinkWrap: true,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      Container(
+                        height: 55,
+                        width: widthScreen,
+                        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(30),
+                          color: Colors.white.withOpacity(0.1), // Light transparent background
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey.withOpacity(0.15),
-                              spreadRadius: 1,
-                              blurRadius: 4,
-                              offset: Offset(0, 2),
+                              color: Colors.black12,
+                              blurRadius: 10,
+                              offset: Offset(0, 3),
                             ),
                           ],
                         ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            buildFilterButton('All', 1, Colors.blue),
+                            buildFilterButton('Income', 2, Colors.green),
+                            buildFilterButton('Expense', 3, Colors.red),
+                          ],
+                        ),
+                      ),
+
+                      transactionList.length > 0 ?
+
+                      Container(
+                        height: heightScreen,
+                        width: widthScreen,
                         child: Padding(
-                          padding: EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-
-                              /// **Title & Menu (Aligned in Same Row)**
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      transactionList.elementAt(index).type == 'Income'
-                                          ? transactionList.elementAt(index).sale_item.tr()
-                                          : transactionList.elementAt(index).expense_item.tr(),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        color: Utils.getThemeColorBlue(),
+                          padding: Utils.isShowAdd? const EdgeInsets.only(bottom: 370) : const EdgeInsets.only(bottom: 300), // Adjust this value as needed
+                          child: ListView.builder(
+                              itemCount: transactionList.length,
+                              scrollDirection: Axis.vertical,
+                              shrinkWrap: true,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: Colors.white,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.15),
+                                        spreadRadius: 1,
+                                        blurRadius: 4,
+                                        offset: Offset(0, 2),
                                       ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-
-                                  /// **Options Menu**
-                                  GestureDetector(
-                                    onTapDown: (TapDownDetails details) {
-                                      selected_id = transactionList.elementAt(index).id;
-                                      selected_index = index;
-                                      showMemberMenu(details.globalPosition);
-                                    },
-                                    child: Container(
-                                      width: 32,
-                                      height: 32,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.grey.shade200,
-                                      ),
-                                      child: Icon(Icons.more_vert, size: 20, color: Colors.grey.shade700),
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              /// **Divider (Title Section)**
-                              Container(
-                                margin: EdgeInsets.symmetric(vertical: 6),
-                                height: 1,
-                                color: Colors.grey.shade300,
-                              ),
-
-                              /// **Item & Quantity**
-                              Row(
-                                children: [
-                                  Icon(Icons.shopping_bag, size: 16, color: Colors.blueAccent),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    transactionList.elementAt(index).f_name.tr(),
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
-                                  ),
-                                  SizedBox(width: 6),
-                                  Text(
-                                    "(${transactionList.elementAt(index).how_many} "+"ITEMS".tr()+")",
-                                    style: TextStyle(fontSize: 14, color: Colors.black54),
-                                  ),
-                                ],
-                              ),
-
-                              SizedBox(height: 6),
-                              /// **Quantity & Unit Price (Second Line)**
-                              Row(
-                                children: [
-                                  Text(
-                                    "${transactionList[index].how_many ?? 0} " + "ITEMS".tr(),
-                                    style: TextStyle(fontSize: 14, color: Colors.black),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text("•", style: TextStyle(color: Colors.grey, fontSize: 15)),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    "${"UNIT_PRICE".tr()}: ${(transactionList[index].unitPrice ?? 0).toStringAsFixed(2)} ${Utils.currency}",
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: (transactionList[index].unitPrice ?? 0) == 0
-                                          ? Colors.grey // dim if unit price is still 0
-                                          : Colors.blueGrey.shade700,
-                                      fontStyle: (transactionList[index].unitPrice ?? 0) == 0
-                                          ? FontStyle.italic
-                                          : FontStyle.normal,
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-
-                              SizedBox(height: 6),
-
-                              /// **Transaction Amount & Payment Status**
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  /// **Income/Expense Label**
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                    decoration: BoxDecoration(
-                                      color: transactionList.elementAt(index).type.toLowerCase() == 'income'
-                                          ? Colors.green.shade100
-                                          : Colors.red.shade100,
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-                                    child: Text(
-                                      transactionList.elementAt(index).type.tr(),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: transactionList.elementAt(index).type.toLowerCase() == 'income'
-                                            ? Colors.green
-                                            : Colors.red,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ),
-
-                                  /// **Amount**
-                                  Row(
-                                    children: [
-                                      Text(
-                                        transactionList.elementAt(index).amount.toString(),
-                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
-                                      ),
-                                      SizedBox(width: 4),
-                                      Text(Utils.currency, style: TextStyle(color: Colors.black, fontSize: 14)),
                                     ],
                                   ),
-
-                                  /// **Payment Status (Colored Tag)**
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    child: Text(
-                                      transactionList.elementAt(index).payment_status.toUpperCase().tr(),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: transactionList.elementAt(index).payment_status.toLowerCase() == "cleared"
-                                            ? Colors.green
-                                            : Colors.orange,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              SizedBox(height: 8),
-
-                              /// **Transaction Details**
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Colors.grey.withOpacity(0.25),
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    transactionList[index].type!.toLowerCase() == 'income'
-                                        ? Icons.trending_up
-                                        : Icons.trending_down,
-                                    size: 18,
-                                    color: transactionList[index].type!.toLowerCase() == 'income'
-                                        ? Colors.green
-                                        : Colors.red,
-                                  ),
-
-                                  const SizedBox(width: 10),
-
-                                  /// Two columns evenly spaced
-                                  Expanded(
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  child: Padding(
+                                    padding: EdgeInsets.all(12),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        /// Left column (constrained)
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                transactionList[index].type!.toLowerCase() == 'income'
-                                                    ? 'Sold To'.tr()
-                                                    : 'Paid To'.tr(),
-                                                style: const TextStyle(
-                                                  fontSize: 13,
-                                                  color: Colors.black54,
+
+                                        /// **Title & Menu (Aligned in Same Row)**
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                transactionList.elementAt(index).type == 'Income'
+                                                    ? transactionList.elementAt(index).sale_item.tr()
+                                                    : transactionList.elementAt(index).expense_item.tr(),
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                  color: Utils.getThemeColorBlue(),
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+
+                                            /// **Options Menu**
+                                            GestureDetector(
+                                              onTapDown: (TapDownDetails details) {
+                                                selected_id = transactionList.elementAt(index).id;
+                                                selected_index = index;
+                                                showMemberMenu(details.globalPosition);
+                                              },
+                                              child: Container(
+                                                width: 32,
+                                                height: 32,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Colors.grey.shade200,
+                                                ),
+                                                child: Icon(Icons.more_vert, size: 20, color: Colors.grey.shade700),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+
+                                        /// **Divider (Title Section)**
+                                        Container(
+                                          margin: EdgeInsets.symmetric(vertical: 6),
+                                          height: 1,
+                                          color: Colors.grey.shade300,
+                                        ),
+
+                                        /// **Item & Quantity**
+                                        Row(
+                                          children: [
+                                            Icon(Icons.shopping_bag, size: 16, color: Colors.blueAccent),
+                                            SizedBox(width: 5),
+                                            Text(
+                                              transactionList.elementAt(index).f_name.tr(),
+                                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
+                                            ),
+                                            SizedBox(width: 6),
+                                            Text(
+                                              "(${transactionList.elementAt(index).how_many} "+"ITEMS".tr()+")",
+                                              style: TextStyle(fontSize: 14, color: Colors.black54),
+                                            ),
+                                          ],
+                                        ),
+
+                                        SizedBox(height: 6),
+                                        /// **Quantity & Unit Price (Second Line)**
+                                        Row(
+                                          children: [
+                                            Text(
+                                              "${transactionList[index].how_many ?? 0} " + "ITEMS".tr(),
+                                              style: TextStyle(fontSize: 14, color: Colors.black),
+                                            ),
+                                            SizedBox(width: 10),
+                                            Text("•", style: TextStyle(color: Colors.grey, fontSize: 15)),
+                                            SizedBox(width: 10),
+                                            Text(
+                                              "${"UNIT_PRICE".tr()}: ${(transactionList[index].unitPrice ?? 0).toStringAsFixed(2)} ${Utils.currency}",
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                color: (transactionList[index].unitPrice ?? 0) == 0
+                                                    ? Colors.grey // dim if unit price is still 0
+                                                    : Colors.blueGrey.shade700,
+                                                fontStyle: (transactionList[index].unitPrice ?? 0) == 0
+                                                    ? FontStyle.italic
+                                                    : FontStyle.normal,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+
+
+                                        SizedBox(height: 6),
+
+                                        /// **Transaction Amount & Payment Status**
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            /// **Income/Expense Label**
+                                            Container(
+                                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                              decoration: BoxDecoration(
+                                                color: transactionList.elementAt(index).type.toLowerCase() == 'income'
+                                                    ? Colors.green.shade100
+                                                    : Colors.red.shade100,
+                                                borderRadius: BorderRadius.circular(5),
+                                              ),
+                                              child: Text(
+                                                transactionList.elementAt(index).type.tr(),
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: transactionList.elementAt(index).type.toLowerCase() == 'income'
+                                                      ? Colors.green
+                                                      : Colors.red,
+                                                  fontSize: 14,
                                                 ),
                                               ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                transactionList[index].sold_purchased_from,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 14,
-                                                  color: Colors.black,
+                                            ),
+
+                                            /// **Amount**
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  transactionList.elementAt(index).amount.toString(),
+                                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
+                                                ),
+                                                SizedBox(width: 4),
+                                                Text(Utils.currency, style: TextStyle(color: Colors.black, fontSize: 14)),
+                                              ],
+                                            ),
+
+                                            /// **Payment Status (Colored Tag)**
+                                            Container(
+                                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                              child: Text(
+                                                transactionList.elementAt(index).payment_status.toUpperCase().tr(),
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: transactionList.elementAt(index).payment_status.toLowerCase() == "cleared"
+                                                      ? Colors.green
+                                                      : Colors.orange,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+
+                                        SizedBox(height: 8),
+
+                                        /// **Transaction Details**
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: Colors.grey.withOpacity(0.25),
+                                            ),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Row(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                transactionList[index].type!.toLowerCase() == 'income'
+                                                    ? Icons.trending_up
+                                                    : Icons.trending_down,
+                                                size: 18,
+                                                color: transactionList[index].type!.toLowerCase() == 'income'
+                                                    ? Colors.green
+                                                    : Colors.red,
+                                              ),
+
+                                              const SizedBox(width: 10),
+
+                                              /// Two columns evenly spaced
+                                              Expanded(
+                                                child: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                  children: [
+                                                    /// Left column (constrained)
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Text(
+                                                            transactionList[index].type!.toLowerCase() == 'income'
+                                                                ? 'Sold To'.tr()
+                                                                : 'Paid To'.tr(),
+                                                            style: const TextStyle(
+                                                              fontSize: 13,
+                                                              color: Colors.black54,
+                                                            ),
+                                                          ),
+                                                          const SizedBox(height: 4),
+                                                          Text(
+                                                            transactionList[index].sold_purchased_from,
+                                                            maxLines: 1,
+                                                            overflow: TextOverflow.ellipsis,
+                                                            style: const TextStyle(
+                                                              fontWeight: FontWeight.w600,
+                                                              fontSize: 14,
+                                                              color: Colors.black,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+
+                                                    const SizedBox(width: 12),
+
+                                                    /// Right column (fixed width naturally)
+                                                    Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                                      children: [
+                                                        Text(
+                                                          "On".tr(),
+                                                          style: const TextStyle(
+                                                            fontSize: 13,
+                                                            color: Colors.black54,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(height: 4),
+                                                        Text(
+                                                          Utils.getFormattedDate(
+                                                            transactionList[index].date.toString(),
+                                                          ),
+                                                          style: const TextStyle(
+                                                            fontWeight: FontWeight.w600,
+                                                            fontSize: 14,
+                                                            color: Colors.black,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                             ],
                                           ),
                                         ),
 
-                                        const SizedBox(width: 12),
+                                        SizedBox(height: 6),
 
-                                        /// Right column (fixed width naturally)
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                        /// **Notes Section**
+                                        Row(
                                           children: [
-                                            Text(
-                                              "On".tr(),
-                                              style: const TextStyle(
-                                                fontSize: 13,
-                                                color: Colors.black54,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              Utils.getFormattedDate(
-                                                transactionList[index].date.toString(),
-                                              ),
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 14,
-                                                color: Colors.black,
+                                            Icon(Icons.notes, size: 15, color: Colors.grey.shade700),
+                                            SizedBox(width: 5),
+                                            Expanded(
+                                              child: Text(
+                                                transactionList.elementAt(index).short_note!.isEmpty ? 'NO_NOTES'.tr() : transactionList.elementAt(index).short_note!,
+                                                maxLines: 3,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(fontSize: 14, color: Colors.black),
                                               ),
                                             ),
                                           ],
                                         ),
+
+                                        /// **Sync Info Icon**
+                                        if(Utils.isMultiUSer)
+                                          GestureDetector(
+                                            onTap: () {
+                                              TransactionItem item = transactionList[index];
+                                              String updated_at = item.last_modified == null
+                                                  ? "Unknown".tr()
+                                                  : DateFormat("dd MMM yyyy hh:mm a").format(item.last_modified!);
+
+                                              String updated_by = item.modified_by == null || item.modified_by!.isEmpty
+                                                  ? "System".tr()
+                                                  : item.modified_by!;
+
+                                              Utils.showSyncInfo(context, updated_at, updated_by);
+                                            },
+                                            child: Container(
+                                              alignment: Alignment.centerRight,
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(Icons.info_outline, size: 16, color: Colors.blueGrey),
+                                                  SizedBox(width: 4),
+                                                  Text(
+                                                    "Sync Info",
+                                                    style: TextStyle(fontSize: 12, color: Colors.blueGrey),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
                                       ],
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-
-                            SizedBox(height: 6),
-
-                              /// **Notes Section**
-                              Row(
-                                children: [
-                                  Icon(Icons.notes, size: 15, color: Colors.grey.shade700),
-                                  SizedBox(width: 5),
-                                  Expanded(
-                                    child: Text(
-                                      transactionList.elementAt(index).short_note!.isEmpty ? 'NO_NOTES'.tr() : transactionList.elementAt(index).short_note!,
-                                      maxLines: 3,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(fontSize: 14, color: Colors.black),
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              /// **Sync Info Icon**
-                              if(Utils.isMultiUSer)
-                                GestureDetector(
-                                  onTap: () {
-                                    TransactionItem item = transactionList[index];
-                                    String updated_at = item.last_modified == null
-                                        ? "Unknown".tr()
-                                        : DateFormat("dd MMM yyyy hh:mm a").format(item.last_modified!);
-
-                                    String updated_by = item.modified_by == null || item.modified_by!.isEmpty
-                                        ? "System".tr()
-                                        : item.modified_by!;
-
-                                    Utils.showSyncInfo(context, updated_at, updated_by);
-                                  },
-                                  child: Container(
-                                    alignment: Alignment.centerRight,
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(Icons.info_outline, size: 16, color: Colors.blueGrey),
-                                        SizedBox(width: 4),
-                                        Text(
-                                          "Sync Info",
-                                          style: TextStyle(fontSize: 12, color: Colors.blueGrey),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      );
+                                );
 
 
-                    }),
-              ),) : Utils.getCustomEmptyMessage("assets/pfinance.png", "No Income/Expense added")
+                              }),
+                        ),) : Utils.getCustomEmptyMessage("assets/pfinance.png", "No Income/Expense added")
 
 
-                  ]
-      ),),),),);
+                    ]
+                ),))
+            ],),),),);
   }
 
   /// Function to Build Filter Buttons

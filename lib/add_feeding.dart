@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/model/feed_batch_summary.dart';
 import 'package:poultary/model/feed_item.dart';
@@ -36,10 +37,17 @@ class _NewFeeding extends State<NewFeeding>
     with SingleTickerProviderStateMixin {
   double widthScreen = 0;
   double heightScreen = 0;
-
+  late NativeAd _myNativeAd;
+  bool _isNativeAdLoaded = false;
   @override
   void dispose() {
     super.dispose();
+    try{
+      
+      _myNativeAd.dispose();
+    }catch(ex){
+
+    }
   }
 
   String _purposeselectedValue = "";
@@ -81,9 +89,45 @@ class _NewFeeding extends State<NewFeeding>
     getList();
     getFeedList();
     Utils.showInterstitial();
-    Utils.setupAds();
-
+    if(Utils.isShowAdd){
+      _loadNativeAds();
+    }
     AnalyticsUtil.logScreenView(screenName: "add_feed");
+  }
+  _loadNativeAds(){
+    _myNativeAd = NativeAd(
+      adUnitId: Utils.NativeAdUnitId,
+      request: const AdRequest(),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.small, // or medium
+        mainBackgroundColor: Colors.white,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white,
+          backgroundColor: Colors.blue,
+          style: NativeTemplateFontStyle.bold,
+          size: 14,
+        ),
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          size: 14,
+        ),
+        secondaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white70,
+          size: 12,
+        ),
+      ),
+      listener: NativeAdListener(
+        onAdLoaded: (_) => setState(() => _isNativeAdLoaded = true),
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          debugPrint('Native ad failed: $error');
+        },
+      ),
+    );
+
+
+    _myNativeAd.load();
+
   }
 
 
@@ -402,12 +446,22 @@ class _NewFeeding extends State<NewFeeding>
           width: widthScreen,
           height: heightScreen,
             color: Utils.getScreenBackground(),
-          child: SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-              children: [
-                Utils.getDistanceBar(),
+          child: Column(children: [
+            if (_isNativeAdLoaded && _myNativeAd != null)
+              Container(
+                height: 90,
+                margin: const EdgeInsets.only(bottom: 0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: AdWidget(ad: _myNativeAd),
+              ),
+            Expanded(child: SingleChildScrollView(
+              child: Column(
+                children: [
 
-                SizedBox(height: 10,),                /*ClipRRect(
+                  SizedBox(height: 0,),                /*ClipRRect(
                   borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                   child: Container(
                     decoration: BoxDecoration(
@@ -437,211 +491,211 @@ class _NewFeeding extends State<NewFeeding>
                     ),
                   ),
                 ),*/
-                EasyStepper(
-                  activeStep: activeStep,
-                  activeStepTextColor: Colors.blue.shade900,
-                  finishedStepTextColor: Utils.getThemeColorBlue(),
-                  internalPadding: 20, // Reduce padding for better spacing
-                  stepShape: StepShape.circle,
-                  stepBorderRadius: 20,
-                  borderThickness: 3, // Balanced progress line thickness
-                  showLoadingAnimation: false,
-                  stepRadius: 15, // Reduced step size to fit screen
-                  showStepBorder: false,
-                  lineStyle: LineStyle(
-                    lineLength: 50,
-                    lineType: LineType.normal,
-                    defaultLineColor: Colors.grey.shade300,
-                    activeLineColor: Colors.blueAccent,
-                    finishedLineColor: Utils.getThemeColorBlue(),
+                  EasyStepper(
+                    activeStep: activeStep,
+                    activeStepTextColor: Colors.blue.shade900,
+                    finishedStepTextColor: Utils.getThemeColorBlue(),
+                    internalPadding: 20, // Reduce padding for better spacing
+                    stepShape: StepShape.circle,
+                    stepBorderRadius: 20,
+                    borderThickness: 3, // Balanced progress line thickness
+                    showLoadingAnimation: false,
+                    stepRadius: 15, // Reduced step size to fit screen
+                    showStepBorder: false,
+                    lineStyle: LineStyle(
+                      lineLength: 50,
+                      lineType: LineType.normal,
+                      defaultLineColor: Colors.grey.shade300,
+                      activeLineColor: Colors.blueAccent,
+                      finishedLineColor: Utils.getThemeColorBlue(),
+                    ),
+                    steps: [
+                      EasyStep(
+                        customStep: _buildStepIcon(Icons.food_bank_outlined, 0),
+                        title: 'Feed'.tr(),
+                      ),
+                      EasyStep(
+                        customStep: _buildStepIcon(Icons.date_range, 1),
+                        title: 'DATE'.tr(),
+                      ),
+
+                    ],
+                    onStepReached: (index) => setState(() => activeStep = index),
                   ),
-                  steps: [
-                    EasyStep(
-                      customStep: _buildStepIcon(Icons.food_bank_outlined, 0),
-                      title: 'Feed'.tr(),
-                    ),
-                    EasyStep(
-                      customStep: _buildStepIcon(Icons.date_range, 1),
-                      title: 'DATE'.tr(),
-                    ),
+                  Container(
+                    // height: heightScreen - 250,
+                    margin: EdgeInsets.only(top: 0),
+                    child: Column(
 
-                  ],
-                  onStepReached: (index) => setState(() => activeStep = index),
-                ),
-                Container(
-                  // height: heightScreen - 250,
-                  margin: EdgeInsets.only(top: 10),
-                  child: Column(
+                        children: [
+                          Container(
+                              margin: EdgeInsets.only(left: 10),
+                              child: Text(
+                                isEdit?"EDIT".tr() +" "+"FEEDING".tr():"NEW_FEEDING".tr(),
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                    color: Utils.getThemeColorBlue(),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold),
+                              )),
 
-                      children: [
-                        Container(
-                            margin: EdgeInsets.only(left: 10),
-                            child: Text(
-                              isEdit?"EDIT".tr() +" "+"FEEDING".tr():"NEW_FEEDING".tr(),
-                              textAlign: TextAlign.start,
-                              style: TextStyle(
-                                  color: Utils.getThemeColorBlue(),
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold),
-                            )),
+                          activeStep==0? Container(
+                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Form Title
+                                Center(
+                                  child: Text(
+                                    "Feed".tr()+" & "+ "Quantity".tr(),
+                                    style: TextStyle(
+                                      color: Utils.getThemeColorBlue(),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 20),
 
-                       activeStep==0? Container(
-                         margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                         padding: EdgeInsets.all(18),
-                         decoration: BoxDecoration(
-                           color: Colors.white,
-                           borderRadius: BorderRadius.circular(18),
-                           boxShadow: [
-                             BoxShadow(
-                               color: Colors.grey.withOpacity(0.15),
-                               blurRadius: 10,
-                               spreadRadius: 2,
-                               offset: Offset(0, 5),
-                             ),
-                           ],
-                         ),
-                         child: Column(
-                           crossAxisAlignment: CrossAxisAlignment.start,
-                           children: [
-                             // Form Title
-                             Center(
-                               child: Text(
-                                 "Feed".tr()+" & "+ "Quantity".tr(),
-                                 style: TextStyle(
-                                   color: Utils.getThemeColorBlue(),
-                                   fontSize: 18,
-                                   fontWeight: FontWeight.bold,
-                                 ),
-                               ),
-                             ),
-                             SizedBox(height: 20),
+                                // Choose Flock
+                                _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
+                                SizedBox(height: 8),
+                                _buildDropdownField(getDropDownList()),
 
-                             // Choose Flock
-                             _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
-                             SizedBox(height: 8),
-                             _buildDropdownField(getDropDownList()),
+                                SizedBox(height: 20),
 
-                             SizedBox(height: 20),
+                                // Choose Feed Type
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    _buildInputLabel("Choose Feed".tr(), Icons.grass),
 
-                             // Choose Feed Type
-                             Row(
-                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                               children: [
-                                 _buildInputLabel("Choose Feed".tr(), Icons.grass),
+                                    InkWell(
+                                        onTap: () {
+                                          showFeedOptionsDialog(context);
+                                        },
+                                        child: Icon(Icons.add_circle, size: 27, color: Colors.blue,)),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                _buildDropdownField(getFeedTypeList()),
+                                if(!_feedselectedValue.isEmpty)
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        margin: EdgeInsets.only(right: 10),
+                                        alignment: Alignment.centerRight,
+                                        child: Text('Stock'.tr()+': ${getAvailableStock()}'+Utils.selected_unit.tr(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: getAvailableStock()=="0.0"? Colors.red :Colors.green),),),
+                                      getAvailableStock()=="0.0"? InkWell(
+                                        onTap: () async{
+                                          await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  FeedStockScreen(),
+                                            ),
+                                          );
 
-                                 InkWell(
-                                     onTap: () {
-                                       showFeedOptionsDialog(context);
-                                     },
-                                     child: Icon(Icons.add_circle, size: 27, color: Colors.blue,)),
-                               ],
-                             ),
-                             SizedBox(height: 8),
-                             _buildDropdownField(getFeedTypeList()),
-                             if(!_feedselectedValue.isEmpty)
-                               Row(
-                                 mainAxisAlignment: MainAxisAlignment.center,
-                                 children: [
-                                   Container(
-                                     margin: EdgeInsets.only(right: 10),
-                                       alignment: Alignment.centerRight,
-                                       child: Text('Stock'.tr()+': ${getAvailableStock()}'+Utils.selected_unit.tr(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: getAvailableStock()=="0.0"? Colors.red :Colors.green),),),
-                                  getAvailableStock()=="0.0"? InkWell(
-                                    onTap: () async{
-                                       await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              FeedStockScreen(),
+                                          fetchStockSummary();
+                                          setState(() {
+
+                                          });
+
+                                        },
+                                        child: Container(
+                                          alignment: Alignment.center,
+                                          width: 100,
+                                          padding: EdgeInsets.all(5),
+                                          margin: EdgeInsets.only(top: 5),
+                                          decoration: BoxDecoration(
+                                            color: Utils.getThemeColorBlue(),
+                                            borderRadius: BorderRadius.circular(10),
+                                            boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
+                                          ),
+                                          child: Text('Add Stock'.tr(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),),
                                         ),
-                                      );
+                                      ): SizedBox(width: 1,)
+                                    ],
+                                  ),
 
-                                       fetchStockSummary();
-                                       setState(() {
+                                SizedBox(height: 20),
 
-                                       });
+                                // Feed Quantity Input
+                                _buildInputLabel("Quantity".tr()+" (${Utils.selected_unit.tr()})", Icons.scale),
+                                SizedBox(height: 8),
+                                _buildNumberInputField(quantityController, "FEED_QUANTITY_HINT".tr()),
 
-                                    },
-                                    child: Container(
-                                      alignment: Alignment.center,
-                                      width: 100,
-                                      padding: EdgeInsets.all(5),
-                                      margin: EdgeInsets.only(top: 5),
-                                      decoration: BoxDecoration(
-                                        color: Utils.getThemeColorBlue(),
-                                        borderRadius: BorderRadius.circular(10),
-                                        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
-                                      ),
-                                       child: Text('Add Stock'.tr(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),),
-                                     ),
-                                  ): SizedBox(width: 1,)
-                                 ],
-                               ),
+                                SizedBox(height: 20),
+                              ],
+                            ),
+                          )
+                              :SizedBox(width: 1,),
 
-                             SizedBox(height: 20),
+                          activeStep==1? Container(
+                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Title
+                                Center(
+                                  child: Text(
+                                    "DATE".tr()+" & "+ "DESCRIPTION_1".tr(),
+                                    style: TextStyle(
+                                      color: Utils.getThemeColorBlue(),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 20),
 
-                             // Feed Quantity Input
-                             _buildInputLabel("Quantity".tr()+" (${Utils.selected_unit.tr()})", Icons.scale),
-                             SizedBox(height: 8),
-                             _buildNumberInputField(quantityController, "FEED_QUANTITY_HINT".tr()),
+                                // Date Picker
+                                _buildInputLabel("DATE".tr(), Icons.calendar_today),
+                                SizedBox(height: 8),
+                                _buildDateField(Utils.getFormattedDate(date), pickDate),
 
-                             SizedBox(height: 20),
-                           ],
-                         ),
-                       )
-                           :SizedBox(width: 1,),
+                                SizedBox(height: 20),
 
-                       activeStep==1? Container(
-                         margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                         padding: EdgeInsets.all(18),
-                         decoration: BoxDecoration(
-                           color: Colors.white,
-                           borderRadius: BorderRadius.circular(18),
-                           boxShadow: [
-                             BoxShadow(
-                               color: Colors.grey.withOpacity(0.15),
-                               blurRadius: 10,
-                               spreadRadius: 2,
-                               offset: Offset(0, 5),
-                             ),
-                           ],
-                         ),
-                         child: Column(
-                           crossAxisAlignment: CrossAxisAlignment.start,
-                           children: [
-                             // Title
-                             Center(
-                               child: Text(
-                                 "DATE".tr()+" & "+ "DESCRIPTION_1".tr(),
-                                 style: TextStyle(
-                                   color: Utils.getThemeColorBlue(),
-                                   fontSize: 18,
-                                   fontWeight: FontWeight.bold,
-                                 ),
-                               ),
-                             ),
-                             SizedBox(height: 20),
+                                // Description Input
+                                _buildInputLabel("DESCRIPTION_1".tr(), Icons.description),
+                                SizedBox(height: 8),
+                                _buildTextAreaField(notesController, "NOTES_HINT".tr()),
 
-                             // Date Picker
-                             _buildInputLabel("DATE".tr(), Icons.calendar_today),
-                             SizedBox(height: 8),
-                             _buildDateField(Utils.getFormattedDate(date), pickDate),
-
-                             SizedBox(height: 20),
-
-                             // Description Input
-                             _buildInputLabel("DESCRIPTION_1".tr(), Icons.description),
-                             SizedBox(height: 8),
-                             _buildTextAreaField(notesController, "NOTES_HINT".tr()),
-
-                             SizedBox(height: 20),
-                           ],
-                         ),
-                       )
-                           :SizedBox(width: 1,),
+                                SizedBox(height: 20),
+                              ],
+                            ),
+                          )
+                              :SizedBox(width: 1,),
 
 
-                        /*SizedBox(height: 10,width: widthScreen),
+                          /*SizedBox(height: 10,width: widthScreen),
                         InkWell(
                           onTap: () async {
 
@@ -720,11 +774,12 @@ class _NewFeeding extends State<NewFeeding>
                           ),
                         )*/
 
-                      ]),
-                ),
-              ],
-            ),
-          ),
+                        ]),
+                  ),
+                ],
+              ),
+            ))
+          ],),
         ),
       ),
     );

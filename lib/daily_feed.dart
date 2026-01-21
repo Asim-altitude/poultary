@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/add_feeding.dart';
 import 'package:poultary/model/feed_item.dart';
@@ -43,11 +44,16 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
   double heightScreen = 0;
 
   bool isAutoFeedEnabled = false;
-
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
   @override
   void dispose() {
     super.dispose();
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
 
+    }
   }
 
   int _other_filter = 2;
@@ -149,10 +155,33 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
   void initState() {
     super.initState();
     getFilters();
-
-    Utils.setupAds();
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+    }
 
     AnalyticsUtil.logScreenView(screenName: "daily_feed_screen");
+  }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
   }
 
   bool no_colection = true;
@@ -315,14 +344,15 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
           width: widthScreen,
           height: heightScreen,
             color: Utils.getScreenBackground(),
-            child:SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children:  [
-              Utils.getDistanceBar(),
+            child:Column(children: [
+              Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+              Expanded(child: SingleChildScrollView(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children:  [
 
-              /*ClipRRect(
+                      /*ClipRRect(
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(10),
                   bottomRight: Radius.circular(10),
@@ -418,54 +448,54 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                 ),
               ),
     */
-              Center(
-                child: Container(
-                  padding: EdgeInsets.only(top: 10),
-                  margin: EdgeInsets.symmetric(horizontal: 10), // Margin of 10 on left & right
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 3, // 60% of available space
-                        child: SizedBox(
-                          height: 55,
-                          child: _buildDropdownField(
-                            "Select Item",
-                            _purposeList,
-                            _purposeselectedValue,
-                                (String? newValue) {
-                                  _purposeselectedValue = newValue!;
-                                  getFlockID();
-                                  getFilteredTransactions(str_date, end_date);
-                            },
-                            width: double.infinity,
-                            height: 45,
+                      Center(
+                        child: Container(
+                          padding: EdgeInsets.only(top: 10),
+                          margin: EdgeInsets.symmetric(horizontal: 10), // Margin of 10 on left & right
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 3, // 60% of available space
+                                child: SizedBox(
+                                  height: 55,
+                                  child: _buildDropdownField(
+                                    "Select Item",
+                                    _purposeList,
+                                    _purposeselectedValue,
+                                        (String? newValue) {
+                                      _purposeselectedValue = newValue!;
+                                      getFlockID();
+                                      getFilteredTransactions(str_date, end_date);
+                                    },
+                                    width: double.infinity,
+                                    height: 45,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 5), // Space between the dropdowns
+                              Expanded(
+                                flex: 2, // 40% of available space
+                                child: SizedBox(
+                                  height: 55,
+                                  child: _buildDropdownField(
+                                    "Select Item",
+                                    filterList,
+                                    date_filter_name,
+                                        (String? newValue) {
+                                      setState(() {
+                                        date_filter_name = newValue!;
+                                        getData(date_filter_name);
+                                      });
+                                    },
+                                    width: double.infinity,
+                                    height: 45,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                      SizedBox(width: 5), // Space between the dropdowns
-                      Expanded(
-                        flex: 2, // 40% of available space
-                        child: SizedBox(
-                          height: 55,
-                          child: _buildDropdownField(
-                            "Select Item",
-                            filterList,
-                            date_filter_name,
-                                (String? newValue) {
-                              setState(() {
-                                date_filter_name = newValue!;
-                                getData(date_filter_name);
-                              });
-                            },
-                            width: double.infinity,
-                            height: 45,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),    /*Container(
+                      ),    /*Container(
                 height: 50,
                 width: widthScreen ,
                 margin: EdgeInsets.only(left: 25,right: 25,bottom: 5),
@@ -549,225 +579,225 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                   ),
                 ],),
               )*/
-              Visibility(
-                visible: false,
-                child: InkWell(
-                  onTap: () async {
-                   await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>  AutomaticFeedManagementScreen()),
-                    );
+                      Visibility(
+                        visible: false,
+                        child: InkWell(
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>  AutomaticFeedManagementScreen()),
+                            );
 
-                   SharedPreferences prefs = await SharedPreferences.getInstance();
-                   isAutoFeedEnabled = prefs.getBool('isAutoFeedEnabled') ?? false;
+                            SharedPreferences prefs = await SharedPreferences.getInstance();
+                            isAutoFeedEnabled = prefs.getBool('isAutoFeedEnabled') ?? false;
 
-                   setState(() {
+                            setState(() {
 
-                   });
+                            });
 
-                  },
-                  child: Container(height: 60,
-                    width: widthScreen,
-                    margin: EdgeInsets.all(10.0),
-                    padding: EdgeInsets.all(10.0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 2,
-                          offset: Offset(0, 1), // changes position of shadow
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(child: Text('Automatic Feed Management'.tr(), style: TextStyle(color: Utils.getThemeColorBlue(), fontSize: 15, fontWeight: FontWeight.w600),)),
-                        Icon(Icons.arrow_forward_ios_rounded, color: Utils.getThemeColorBlue(), size: 30,)
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              feedings.length > 0 ? Container(
-                height: heightScreen - (isAutoFeedEnabled? 50:100),
-                width: widthScreen,
-
-                child: ListView.builder(
-                    itemCount: feedings.length,
-                    scrollDirection: Axis.vertical,
-                    padding: EdgeInsets.only(bottom: 240),
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.1),
-                              blurRadius: 6,
-                              spreadRadius: 2,
-                              offset: Offset(0, 3),
+                          },
+                          child: Container(height: 60,
+                            width: widthScreen,
+                            margin: EdgeInsets.all(10.0),
+                            padding: EdgeInsets.all(10.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.all(Radius.circular(20)),
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 2,
+                                  blurRadius: 2,
+                                  offset: Offset(0, 1), // changes position of shadow
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // 🏷️ Top Row: Feed Name + More Options Button
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            child: Row(
                               children: [
-                                Expanded(
-                                  child: RichText(
-                                    text: TextSpan(
-                                      text: feedings[index].feed_name!.tr(),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
-                                        color: Utils.getThemeColorBlue(),
-                                      ),
+                                Expanded(child: Text('Automatic Feed Management'.tr(), style: TextStyle(color: Utils.getThemeColorBlue(), fontSize: 15, fontWeight: FontWeight.w600),)),
+                                Icon(Icons.arrow_forward_ios_rounded, color: Utils.getThemeColorBlue(), size: 30,)
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      feedings.length > 0 ? Container(
+                        height: heightScreen - (isAutoFeedEnabled? 50:100),
+                        width: widthScreen,
+
+                        child: ListView.builder(
+                            itemCount: feedings.length,
+                            scrollDirection: Axis.vertical,
+                            padding: EdgeInsets.only(bottom: 240),
+                            itemBuilder: (BuildContext context, int index) {
+                              return Container(
+                                margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                padding: EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.1),
+                                      blurRadius: 6,
+                                      spreadRadius: 2,
+                                      offset: Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // 🏷️ Top Row: Feed Name + More Options Button
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        TextSpan(
-                                          text: " (${feedings[index].f_name!.tr()})",
+                                        Expanded(
+                                          child: RichText(
+                                            text: TextSpan(
+                                              text: feedings[index].feed_name!.tr(),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                                color: Utils.getThemeColorBlue(),
+                                              ),
+                                              children: [
+                                                TextSpan(
+                                                  text: " (${feedings[index].f_name!.tr()})",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.normal,
+                                                    fontSize: 16,
+                                                    color: Colors.black87,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTapDown: (TapDownDetails details) {
+                                            selected_id = feedings[index].id;
+                                            selected_index = index;
+                                            showMemberMenu(details.globalPosition);
+                                          },
+                                          child: Icon(Icons.more_vert, color: Colors.grey.shade600),
+                                        ),
+                                      ],
+                                    ),
+
+                                    // 🔹 Divider Line (Under Feed Name & Flock Name)
+                                    Divider(color: Colors.grey.shade300, thickness: 1, height: 12),
+
+                                    // 📊 Consumption Info
+                                    Row(
+                                      children: [
+                                        Icon(Icons.restaurant, size: 16, color: Colors.grey.shade700),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          'Consumption'.tr() + ': ',
+                                          style: TextStyle(fontSize: 14, color: Colors.black87),
+                                        ),
+                                        Text(
+                                          "${feedings[index].quantity}"+Utils.selected_unit.tr(),
                                           style: TextStyle(
-                                            fontWeight: FontWeight.normal,
+                                            fontWeight: FontWeight.bold,
                                             fontSize: 16,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+
+                                    SizedBox(height: 6),
+
+                                    // 📅 Date Info
+                                    Row(
+                                      children: [
+                                        Icon(Icons.calendar_today, size: 16, color: Colors.grey.shade700),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          Utils.getFormattedDate(feedings[index].date.toString()),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
                                             color: Colors.black87,
                                           ),
                                         ),
                                       ],
                                     ),
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTapDown: (TapDownDetails details) {
-                                    selected_id = feedings[index].id;
-                                    selected_index = index;
-                                    showMemberMenu(details.globalPosition);
-                                  },
-                                  child: Icon(Icons.more_vert, color: Colors.grey.shade600),
-                                ),
-                              ],
-                            ),
 
-                            // 🔹 Divider Line (Under Feed Name & Flock Name)
-                            Divider(color: Colors.grey.shade300, thickness: 1, height: 12),
+                                    SizedBox(height: 8),
 
-                            // 📊 Consumption Info
-                            Row(
-                              children: [
-                                Icon(Icons.restaurant, size: 16, color: Colors.grey.shade700),
-                                SizedBox(width: 6),
-                                Text(
-                                  'Consumption'.tr() + ': ',
-                                  style: TextStyle(fontSize: 14, color: Colors.black87),
-                                ),
-                                Text(
-                                  "${feedings[index].quantity}"+Utils.selected_unit.tr(),
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ],
-                            ),
+                                    // 📝 Notes Section
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Icon(
+                                          Icons.notes,
+                                          size: 16,
+                                          color: feedings[index].short_note!.isNotEmpty
+                                              ? Colors.grey.shade700
+                                              : Colors.grey.shade500,),
+                                        SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            feedings[index].short_note!.isNotEmpty
+                                                ? feedings[index].short_note!
+                                                : 'NO_NOTES'.tr(),
+                                            maxLines: 3,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: feedings[index].short_note!.isNotEmpty
+                                                  ? Colors.black87
+                                                  : Colors.grey.shade600,
+                                            ),
+                                          ),
+                                        ),
 
-                            SizedBox(height: 6),
 
-                            // 📅 Date Info
-                            Row(
-                              children: [
-                                Icon(Icons.calendar_today, size: 16, color: Colors.grey.shade700),
-                                SizedBox(width: 6),
-                                Text(
-                                  Utils.getFormattedDate(feedings[index].date.toString()),
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            SizedBox(height: 8),
-
-                            // 📝 Notes Section
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(
-                                  Icons.notes,
-                                  size: 16,
-                                  color: feedings[index].short_note!.isNotEmpty
-                                      ? Colors.grey.shade700
-                                      : Colors.grey.shade500,),
-                                SizedBox(width: 6),
-                                Expanded(
-                                  child: Text(
-                                    feedings[index].short_note!.isNotEmpty
-                                        ? feedings[index].short_note!
-                                        : 'NO_NOTES'.tr(),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: feedings[index].short_note!.isNotEmpty
-                                          ? Colors.black87
-                                          : Colors.grey.shade600,
+                                      ],
                                     ),
-                                  ),
-                                ),
 
+                                    /// **Sync Info Icon**
+                                    if(Utils.isMultiUSer)
+                                      GestureDetector(
+                                        onTap: () {
+                                          Feeding item = feedings[index];
+                                          String updated_at = item.last_modified == null
+                                              ? "Unknown".tr()
+                                              : DateFormat("dd MMM yyyy hh:mm a").format(item.last_modified!);
 
-                              ],
-                            ),
+                                          String updated_by = item.modified_by == null || item.modified_by!.isEmpty
+                                              ? "System".tr()
+                                              : item.modified_by!;
 
-                            /// **Sync Info Icon**
-                            if(Utils.isMultiUSer)
-                              GestureDetector(
-                                onTap: () {
-                                  Feeding item = feedings[index];
-                                  String updated_at = item.last_modified == null
-                                      ? "Unknown".tr()
-                                      : DateFormat("dd MMM yyyy hh:mm a").format(item.last_modified!);
-
-                                  String updated_by = item.modified_by == null || item.modified_by!.isEmpty
-                                      ? "System".tr()
-                                      : item.modified_by!;
-
-                                  Utils.showSyncInfo(context, updated_at, updated_by);
-                                },
-                                child: Container(
-                                  alignment: Alignment.centerRight,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.info_outline, size: 16, color: Colors.blueGrey),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        "Sync Info",
-                                        style: TextStyle(fontSize: 12, color: Colors.blueGrey),
+                                          Utils.showSyncInfo(context, updated_at, updated_by);
+                                        },
+                                        child: Container(
+                                          alignment: Alignment.centerRight,
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(Icons.info_outline, size: 16, color: Colors.blueGrey),
+                                              SizedBox(width: 4),
+                                              Text(
+                                                "Sync Info",
+                                                style: TextStyle(fontSize: 12, color: Colors.blueGrey),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       ),
-                                    ],
-                                  ),
+                                  ],
                                 ),
-                              ),
-                          ],
-                        ),
-                      );
+                              );
 
-                    }),
-              ) : Utils.getCustomEmptyMessage("assets/pfeed.png", "NO_FFEDING")
+                            }),
+                      ) : Utils.getCustomEmptyMessage("assets/pfeed.png", "NO_FFEDING")
 
-                   /* Text(
+                      /* Text(
               "Main Menu",
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -997,8 +1027,9 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                           builder: (context) => const EmojiTemplateScreen()),
                     );*//*
                   }),*/
-                  ]
-      ),),),),);
+                    ]
+                ),))
+            ],),),),);
   }
 
   Widget _buildDropdownField(

@@ -5,6 +5,7 @@ import 'package:excel/excel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/model/finance_report_item.dart';
@@ -35,6 +36,13 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
   @override
   void dispose() {
+    try{
+      _bannerAd.dispose();
+      _myNativeAd.dispose();
+
+    }catch(ex){
+
+    }
     super.dispose();
 
   }
@@ -46,6 +54,10 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
   late ZoomPanBehavior _zoomPanBehavior;
 
   int _reports_filter = 2;
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
+  late NativeAd _myNativeAd;
+  bool _isNativeAdLoaded = false;
   void getFilters() async {
 
     _reports_filter = (await SessionManager.getReportFilter())!;
@@ -76,11 +88,72 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
      catch(ex){
        print(ex);
      }
-    Utils.setupAds();
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+      _loadNativeAds();
+
+    }
+
 
     AnalyticsUtil.logScreenView(screenName: "financial_screen");
   }
+  _loadNativeAds(){
+    _myNativeAd = NativeAd(
+      adUnitId: Utils.NativeAdUnitId,
+      request: const AdRequest(),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.small, // or medium
+        mainBackgroundColor: Colors.white,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white,
+          backgroundColor: Colors.blue,
+          style: NativeTemplateFontStyle.bold,
+          size: 14,
+        ),
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          size: 14,
+        ),
+        secondaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white70,
+          size: 12,
+        ),
+      ),
+      listener: NativeAdListener(
+        onAdLoaded: (_) => setState(() => _isNativeAdLoaded = true),
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          debugPrint('Native ad failed: $error');
+        },
+      ),
+    );
 
+
+    _myNativeAd.load();
+
+  }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
+  }
   List<TransactionItem> list = [];
   List<Finance_Chart_Item> incomeChartData = [];
   List<Finance_Chart_Item> expenseChartData = [];
@@ -275,7 +348,7 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
 
-    return SafeArea(child: Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Text(
           "Financial Report".tr(),
@@ -337,14 +410,15 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
           width: widthScreen,
           height: heightScreen,
            color: Colors.white,
-            child: SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children:  [
-              Utils.getDistanceBar(),
+            child: Column(children: [
+              Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+              Expanded(child: SingleChildScrollView(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children:  [
 
-              /*ClipRRect(
+                      /*ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
@@ -420,180 +494,191 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
                   ),
                 ),
               ),
-*/
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 45,
-                      alignment: Alignment.centerRight,
-                      padding: EdgeInsets.only(left: 10),
-                      margin: EdgeInsets.only(left: 10,right: 5),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: getDropDownList(),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      openDatePicker();
-                    },
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      height: 45,
-                      margin: EdgeInsets.only(right: 10, top: 10, bottom: 10),
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.calendar_today, color: Utils.getThemeColorBlue(), size: 18),
-                          SizedBox(width: 8),
-                          Text(
-                            date_filter_name.tr(),
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
-                          ),
-                          SizedBox(width: 8),
-                          Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(), size: 20),
-                        ],
-                      ),
-                    ),
-                  ),
-                ]
-              ),
-
-              Container(
-                color: Colors.white,
-                padding: EdgeInsets.all(15),
-                child: Column(
-                  children: [
-
-                    SizedBox(height: 10),
-                    // Income vs Expense chart
-                    SfCartesianChart(
-                      primaryXAxis: CategoryAxis(),
-                      zoomPanBehavior: _zoomPanBehavior,
-                      title: ChartTitle(text: date_filter_name.tr()),
-                      legend: Legend(isVisible: true, position: LegendPosition.bottom),
-                      tooltipBehavior: TooltipBehavior(enable: true),
-                      series: <CartesianSeries<Finance_Chart_Item, String>>[
-                        ColumnSeries(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                          color: Colors.green,
-                          name: 'Income'.tr(),
-                          dataSource: incomeChartData,
-                          xValueMapper: (Finance_Chart_Item incomeItem, _) => incomeItem.date,
-                          yValueMapper: (Finance_Chart_Item incomeItem, _) => incomeItem.amount,
-                        ),
-                        ColumnSeries(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                          color: Colors.red,
-                          name: 'Expense'.tr(),
-                          dataSource: expenseChartData,
-                          xValueMapper: (Finance_Chart_Item expenseItem, _) => expenseItem.date,
-                          yValueMapper: (Finance_Chart_Item expenseItem, _) => expenseItem.amount,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    // Financial Summary
-                    Card(
-                      elevation: 6,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                      margin: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-                      child: Padding(
-                        padding: EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+    */
+                      Row(
                           children: [
-                            // 🔹 Overall Summary
-                            Text(
-                              "Summary & Analytics".tr(),
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+                            Expanded(
+                              child: Container(
+                                height: 45,
+                                alignment: Alignment.centerRight,
+                                padding: EdgeInsets.only(left: 10),
+                                margin: EdgeInsets.only(left: 10,right: 5),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black12,
+                                      blurRadius: 4,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: getDropDownList(),
+                              ),
                             ),
-                            SizedBox(height: 12),
+                            InkWell(
+                              onTap: () {
+                                openDatePicker();
+                              },
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                height: 45,
+                                margin: EdgeInsets.only(right: 10, top: 10, bottom: 10),
+                                padding: EdgeInsets.symmetric(horizontal: 12),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
 
-                            _buildSummaryRow(Icons.arrow_upward, 'GROSS_INCOME'.tr(), gross_income, Colors.green),
-                            Divider(thickness: 1.2),
-                            _buildSummaryRow(Icons.arrow_downward, 'TOTAL_EXPENSE'.tr(), -total_expense, Colors.red),
-                            Divider(thickness: 1.2),
-                            _buildSummaryRow(Icons.account_balance_wallet, 'NET_INCOME'.tr(), net_income, Utils.getThemeColorBlue(), fontSize: 20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black12,
+                                      blurRadius: 4,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.calendar_today, color: Utils.getThemeColorBlue(), size: 18),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      date_filter_name.tr(),
+                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(), size: 20),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ]
+                      ),
+
+                      Container(
+                        color: Colors.white,
+                        padding: EdgeInsets.all(15),
+                        child: Column(
+                          children: [
 
                             SizedBox(height: 10),
-
-                           if(f_id==-1)
-                             Column(
-                               children: [
-                                 ...flockFinanceList.map((flock) => _buildFlockRow(
-                                   flock,
-                                   double.parse(gross_income.toString()),
-                                   double.parse(total_expense.toString()),
-                                 )).toList(),
-
-                               ],
-                             ),
-
-
-                            SizedBox(height: 10),
-
-                            // 📊 Top Income Items
-                            Text(
-                              'Top Income Sources'.tr(),
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
+                            // Income vs Expense chart
+                            SfCartesianChart(
+                              primaryXAxis: CategoryAxis(),
+                              zoomPanBehavior: _zoomPanBehavior,
+                              title: ChartTitle(text: date_filter_name.tr()),
+                              legend: Legend(isVisible: true, position: LegendPosition.bottom),
+                              tooltipBehavior: TooltipBehavior(enable: true),
+                              series: <CartesianSeries<Finance_Chart_Item, String>>[
+                                ColumnSeries(
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                  color: Colors.green,
+                                  name: 'Income'.tr(),
+                                  dataSource: incomeChartData,
+                                  xValueMapper: (Finance_Chart_Item incomeItem, _) => incomeItem.date,
+                                  yValueMapper: (Finance_Chart_Item incomeItem, _) => incomeItem.amount,
+                                ),
+                                ColumnSeries(
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                  color: Colors.red,
+                                  name: 'Expense'.tr(),
+                                  dataSource: expenseChartData,
+                                  xValueMapper: (Finance_Chart_Item expenseItem, _) => expenseItem.date,
+                                  yValueMapper: (Finance_Chart_Item expenseItem, _) => expenseItem.amount,
+                                ),
+                              ],
                             ),
-                            SizedBox(height: 8),
-                            Column(
-                              children: topIncomeItems.map((item) => _buildItemRow(item, Colors.green)).toList(),
-                            ),
+                            SizedBox(height: 20),
+                            // Financial Summary
+                            Card(
+                              elevation: 6,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                              margin: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                              child: Padding(
+                                padding: EdgeInsets.all(10),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // 🔹 Overall Summary
+                                    Text(
+                                      "Summary & Analytics".tr(),
+                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+                                    ),
+                                    SizedBox(height: 12),
 
-                            SizedBox(height: 15),
+                                    _buildSummaryRow(Icons.arrow_upward, 'GROSS_INCOME'.tr(), gross_income, Colors.green),
+                                    Divider(thickness: 1.2),
+                                    _buildSummaryRow(Icons.arrow_downward, 'TOTAL_EXPENSE'.tr(), -total_expense, Colors.red),
+                                    Divider(thickness: 1.2),
+                                    _buildSummaryRow(Icons.account_balance_wallet, 'NET_INCOME'.tr(), net_income, Utils.getThemeColorBlue(), fontSize: 20),
 
-                            // 📉 Top Expense Items
-                            Text(
-                              'Top Expenses'.tr(),
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
-                            ),
-                            SizedBox(height: 8),
-                            Column(
-                              children: topExpenseItems.map((item) => _buildItemRow(item, Colors.red)).toList(),
-                            ),
+                                    SizedBox(height: 10),
+                                    if (_isNativeAdLoaded && _myNativeAd != null)
+                                      Container(
+                                        height: 90,
+                                        margin: const EdgeInsets.only(bottom: 10),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: AdWidget(ad: _myNativeAd),
+                                      ),
+
+                                    if(f_id==-1)
+                                      Column(
+                                        children: [
+                                          ...flockFinanceList.map((flock) => _buildFlockRow(
+                                            flock,
+                                            double.parse(gross_income.toString()),
+                                            double.parse(total_expense.toString()),
+                                          )).toList(),
+
+                                        ],
+                                      ),
+
+
+                                    SizedBox(height: 10),
+
+                                    // 📊 Top Income Items
+                                    Text(
+                                      'Top Income Sources'.tr(),
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
+                                    ),
+                                    SizedBox(height: 8),
+                                    Column(
+                                      children: topIncomeItems.map((item) => _buildItemRow(item, Colors.green)).toList(),
+                                    ),
+
+                                    SizedBox(height: 15),
+
+                                    // 📉 Top Expense Items
+                                    Text(
+                                      'Top Expenses'.tr(),
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
+                                    ),
+                                    SizedBox(height: 8),
+                                    Column(
+                                      children: topExpenseItems.map((item) => _buildItemRow(item, Colors.red)).toList(),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
                           ],
                         ),
                       ),
-                    )
-                  ],
-                ),
-              ),
-            ]
-      ),),),),),);
+                    ]
+                ),),)
+            ],)),),);
   }
 
   DateTimeRange? selectedDateRange;

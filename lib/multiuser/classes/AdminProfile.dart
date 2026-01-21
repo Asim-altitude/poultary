@@ -310,8 +310,8 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
     init();
     getSyncQueueList();
     fetchRoles();
-
     AnalyticsUtil.logScreenView(screenName: "admin_screen");
+
   }
 
   FarmPlan? farmPlan = null;
@@ -324,10 +324,8 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
     latestBackupTime = await SessionManager.getLastBackupTime();
 
     if(farmPlan!= null) {
-      if (farmPlan!.isActive){
-        // await checkAndBackupIfNeeded(adminUser!.farmId);
-      }
-
+      if (farmPlan!.isActive)
+        await checkAndBackupIfNeeded(adminUser!.farmId);
     }
     else
     {
@@ -382,8 +380,8 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
         isUploading = true;
       });
       await FlockImageUploader().uploadDatabaseFile(farmId);
-    }
 
+    }
   }
 
   /// Function to check if a backup already exists today, and if not, perform it
@@ -562,7 +560,7 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
 
               const SizedBox(height: 10),
               Visibility(
-                visible: false, //(pendingRecords == null || pendingRecords!.length==0) ? false : true,
+                visible: (pendingRecords == null || pendingRecords!.length==0) ? false : true,
                 child: Center(
                   child: ElevatedButton.icon(
                     onPressed: (pendingRecords == null || pendingRecords!.length==0)

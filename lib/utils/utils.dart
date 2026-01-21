@@ -67,7 +67,7 @@ class Utils {
   static double HEIGHT_SCREEN = 0;
   static double _standardWidth = 414;
   static double _standardheight = 736;
-  static final bool ISTESTACCOUNT = false;
+  static final bool ISTESTACCOUNT = true;
   static late bool isShowAdd = true;
   static late bool iShowInterStitial = false;
 
@@ -1645,7 +1645,6 @@ $storeLink
       Utils.isShowAdd = true;
       inititalize();
     }
-    Utils.isShowAdd = false;
   }
 
 
@@ -1844,6 +1843,25 @@ $storeLink
   }
 
 
+  static String get NativeAdUnitId {
+    if (ISTESTACCOUNT) {
+      if (Platform.isAndroid) {
+        return 'ca-app-pub-3940256099942544/2247696110';
+      } else if (Platform.isIOS) {
+        return 'ca-app-pub-3940256099942544/3986624511';
+      } else {
+        throw new UnsupportedError('Unsupported platform');
+      }
+    } else {
+      if (Platform.isAndroid) {
+        return 'ca-app-pub-2367135251513556/4543318928';
+      } else if (Platform.isIOS) {
+        return 'ca-app-pub-2367135251513556/1326426398';
+      } else {
+        throw new UnsupportedError('Unsupported platform');
+      }
+    }
+  }
 
   static String get bannerAdUnitId {
     if (ISTESTACCOUNT) {
