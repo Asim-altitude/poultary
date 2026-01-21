@@ -45,6 +45,8 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
    BannerAd? _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
+  late NativeAd _myNativeAd;
+  bool _isNativeAdLoaded = false;
   Future<void> _pickDateRange() async {
     DateTime now = DateTime.now();
     DateTime firstDate = DateTime(now.year - 5); // Allows past 5 years
@@ -88,6 +90,7 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
   void dispose() {
     try{
       _bannerAd?.dispose();
+      _myNativeAd.dispose();
     }catch(ex){
 
     }
@@ -170,9 +173,44 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
     getFilters();
     if(Utils.isShowAdd){
       _loadBannerAd();
+      _loadNativeAds();
     }
-
     AnalyticsUtil.logScreenView(screenName: "production_report_screen");
+  }
+  _loadNativeAds(){
+    _myNativeAd = NativeAd(
+      adUnitId: Utils.NativeAdUnitId,
+      request: const AdRequest(),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.medium, // or medium
+        mainBackgroundColor: Colors.white,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white,
+          backgroundColor: Colors.blue,
+          style: NativeTemplateFontStyle.bold,
+          size: 14,
+        ),
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          size: 14,
+        ),
+        secondaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white70,
+          size: 12,
+        ),
+      ),
+      listener: NativeAdListener(
+        onAdLoaded: (_) => setState(() => _isNativeAdLoaded = true),
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          debugPrint('Native ad failed: $error');
+        },
+      ),
+    );
+
+
+    _myNativeAd.load();
+
   }
 
   int _reports_filter = 2;
@@ -738,7 +776,7 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
 
         Expanded(child:
         SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.only(left: 12,right: 12,top: 0,bottom: 4),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -916,6 +954,16 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
                   ),
                 ),
               ),
+              if (_isNativeAdLoaded && _myNativeAd != null)
+                Container(
+                  height: 350,
+                  margin: const EdgeInsets.only(top: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: AdWidget(ad: _myNativeAd),
+                ),
 
               SizedBox(height: 10,),
 

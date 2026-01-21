@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
@@ -43,15 +44,94 @@ class _PDFScreen extends State<PDFScreen> {
   int item = 0;
 
   _PDFScreen({required this.item});
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
 
+  late NativeAd _myNativeAd;
+  bool _isNativeAdLoaded = false;
+
+  void dispose() {
+    try{
+      _bannerAd.dispose();
+      _myNativeAd.dispose();
+    }catch(ex){
+
+    }
+
+    super.dispose();
+  }
   @override
   void initState() {
     super.initState();
     Utils.showInterstitial();
-    Utils.setupAds();
+    if(Utils.isShowAdd){
+      if(Utils.iShowInterStitial){
+        _loadBannerAd();
+      }
+      else{
+        _loadNativeAds();
+      }
+    }
+
 
   }
+  _loadNativeAds(){
+    _myNativeAd = NativeAd(
+      adUnitId: Utils.NativeAdUnitId,
+      request: const AdRequest(),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.small, // or medium
+        mainBackgroundColor: Colors.white,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white,
+          backgroundColor: Colors.blue,
+          style: NativeTemplateFontStyle.bold,
+          size: 14,
+        ),
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          size: 14,
+        ),
+        secondaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white70,
+          size: 12,
+        ),
+      ),
+      listener: NativeAdListener(
+        onAdLoaded: (_) => setState(() => _isNativeAdLoaded = true),
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          debugPrint('Native ad failed: $error');
+        },
+      ),
+    );
 
+
+    _myNativeAd.load();
+
+  }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
+  }
 
   Future<void> _saveAsFile(
       BuildContext context,
@@ -104,111 +184,164 @@ class _PDFScreen extends State<PDFScreen> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return SafeArea(
-      child: Scaffold(
-        body:
-        Center(
-          child:Container(
+    return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            "Pdf Report".tr(),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
+              color: Colors.white,
+            ),
+          ),
+          foregroundColor: Colors.white,
+          backgroundColor: Colors.blue,
+          elevation: 8,
+          automaticallyImplyLeading: true,
+          actions: [
+            InkWell(
+              onTap: () {
+                _saveAsFile(context, (format) => getSelectedPdf(format,item), PdfPageFormat.a4);
+              },
+              child: Container(
+                width: 30,
+                height: 30,
+                margin: EdgeInsets.only(right: 10),
+                child: Icon(Icons.download,color: Colors.white,),
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                _shareAsFile(context, (format) => getSelectedPdf(format,item), PdfPageFormat.a4);
+
+              },
+              child: Container(
+                width: 30,
+                height: 30,
+                margin: EdgeInsets.only(right: 10),
+                child: Icon(Icons.share,color: Colors.white,),
+              ),
+            )
+          ],
+        ),
+
+        body:SafeArea(
+        top: false,
+        child: Center(
+        child:Container(
             width: Utils.WIDTH_SCREEN,
             height: Utils.HEIGHT_SCREEN,
-            color: Color.fromRGBO(199, 199,204, 1),
+            color: Color.fromRGBO(255, 255,255, 1),
             // Center is a layout widget. It takes a single child and positions it
             // in the middle of the parent.
-            child:
-            SingleChildScrollViewWithStickyFirstWidget(
-              child: Column(
-
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Utils.getDistanceBar(),
-
-                  ClipRRect(
-                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: Utils.getThemeColorBlue(), //(x,y)
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            alignment: Alignment.center,
-                            width: 50,
-                            height: 50,
-                            child: InkWell(
-                              child: Icon(Icons.arrow_back,
-                                  color: Colors.white, size: 30),
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
-                                margin: EdgeInsets.only(left: 5),
-                                child: Text(
-                                  "Pdf Report".tr(),
-                                  textAlign: TextAlign.start,
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold),
-                                )),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              _saveAsFile(context, (format) => getSelectedPdf(format,item), PdfPageFormat.a4);
-                            },
-                            child: Container(
-                              width: 30,
-                              height: 30,
-                              margin: EdgeInsets.only(right: 10),
-                              child: Icon(Icons.download,color: Colors.white,),
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              _shareAsFile(context, (format) => getSelectedPdf(format,item), PdfPageFormat.a4);
-
-                            },
-                            child: Container(
-                              width: 30,
-                              height: 30,
-                              margin: EdgeInsets.only(right: 10),
-                              child: Icon(Icons.share,color: Colors.white,),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
+            child:Column(children: [
+              if (_isNativeAdLoaded && _myNativeAd != null)
+                Container(
+                  height: 90,
+                  margin: const EdgeInsets.only(bottom: 0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  child: AdWidget(ad: _myNativeAd),
+                ),
+              if(_isBannerAdReady && _bannerAd!=null)
+                Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+              Expanded(child:  SingleChildScrollView(
+                child: Column(
 
-                  Container(
-                    height: Utils.HEIGHT_SCREEN-100,
-                  child: PdfPreview(
-                    maxPageWidth: 700,
-                    build: (format) => getSelectedPdf(format,item),
-                    allowPrinting: false,
-                    allowSharing: false,
-                    canChangeOrientation: false,
-                    canDebug: false,
-                    canChangePageFormat: false,
-                    onPrinted: _showPrintedToast,
-                    onShared: _showSharedToast,
-                    // actions: actions,
-                  ),),
-                ],
-              ),
-            ),),),
-        // floatingActionButton: FloatingActionButton(
-        //   onPressed: _incrementCounter,
-        //   tooltip: 'Increment',
-        //   child: const Icon(Icons.add),
-        // ), // This trailing comma makes auto-formatting nicer for build methods.
-      ),
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+
+                    // ClipRRect(
+                    //   borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
+                    //   child: Container(
+                    //     decoration: BoxDecoration(
+                    //       boxShadow: [
+                    //         BoxShadow(
+                    //           color: Utils.getThemeColorBlue(), //(x,y)
+                    //         ),
+                    //       ],
+                    //     ),
+                    //     child: Row(
+                    //       children: [
+                    //         Container(
+                    //           alignment: Alignment.center,
+                    //           width: 50,
+                    //           height: 50,
+                    //           child: InkWell(
+                    //             child: Icon(Icons.arrow_back,
+                    //                 color: Colors.white, size: 30),
+                    //             onTap: () {
+                    //               Navigator.pop(context);
+                    //             },
+                    //           ),
+                    //         ),
+                    //         Expanded(
+                    //           child: Container(
+                    //               margin: EdgeInsets.only(left: 5),
+                    //               child: Text(
+                    //                 "Pdf Report".tr(),
+                    //                 textAlign: TextAlign.start,
+                    //                 style: TextStyle(
+                    //                     color: Colors.white,
+                    //                     fontSize: 18,
+                    //                     fontWeight: FontWeight.bold),
+                    //               )),
+                    //         ),
+                    //         InkWell(
+                    //           onTap: () {
+                    //             _saveAsFile(context, (format) => getSelectedPdf(format,item), PdfPageFormat.a4);
+                    //           },
+                    //           child: Container(
+                    //             width: 30,
+                    //             height: 30,
+                    //             margin: EdgeInsets.only(right: 10),
+                    //             child: Icon(Icons.download,color: Colors.white,),
+                    //           ),
+                    //         ),
+                    //         InkWell(
+                    //           onTap: () {
+                    //             _shareAsFile(context, (format) => getSelectedPdf(format,item), PdfPageFormat.a4);
+                    //
+                    //           },
+                    //           child: Container(
+                    //             width: 30,
+                    //             height: 30,
+                    //             margin: EdgeInsets.only(right: 10),
+                    //             child: Icon(Icons.share,color: Colors.white,),
+                    //           ),
+                    //         )
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+
+                    Container(
+                      height: Utils.HEIGHT_SCREEN-150,
+                      child: PdfPreview(
+                        maxPageWidth: 700,
+                        build: (format) => getSelectedPdf(format,item),
+                        allowPrinting: false,
+                        allowSharing: false,
+                        canChangeOrientation: false,
+                        canDebug: false,
+                        canChangePageFormat: false,
+                        onPrinted: _showPrintedToast,
+                        onShared: _showSharedToast,
+                        // actions: actions,
+                      ),),
+                  ],
+                ),
+              ),)
+            ],)
+        ),),)
+      
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: _incrementCounter,
+      //   tooltip: 'Increment',
+      //   child: const Icon(Icons.add),
+      // ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
   void _showPrintedToast(BuildContext context) {

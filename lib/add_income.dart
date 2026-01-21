@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:poultary/model/sub_category_item.dart';
@@ -39,6 +40,8 @@ class _NewIncome extends State<NewIncome>
     with SingleTickerProviderStateMixin {
   double widthScreen = 0;
   double heightScreen = 0;
+  late NativeAd _myNativeAd;
+  bool _isNativeAdLoaded = false;
 
   @override
   void dispose() {
@@ -48,6 +51,12 @@ class _NewIncome extends State<NewIncome>
     unitPriceController.dispose();
     amountController.dispose();
     super.dispose();
+    try{
+      _myNativeAd.dispose();
+    }catch(ex){
+
+    }
+
   }
 
   String _purposeselectedValue = "";
@@ -136,10 +145,47 @@ class _NewIncome extends State<NewIncome>
     getList();
     getIncomeCategoryList();
     getPayMethodList();
-    Utils.setupAds();
-
+    if(Utils.isShowAdd){
+      _loadNativeAds();
+    }
     AnalyticsUtil.logScreenView(screenName: "add_income");
   }
+  _loadNativeAds(){
+    _myNativeAd = NativeAd(
+      adUnitId: Utils.NativeAdUnitId,
+      request: const AdRequest(),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.small, // or medium
+        mainBackgroundColor: Colors.white,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white,
+          backgroundColor: Colors.blue,
+          style: NativeTemplateFontStyle.bold,
+          size: 14,
+        ),
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          size: 14,
+        ),
+        secondaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white70,
+          size: 12,
+        ),
+      ),
+      listener: NativeAdListener(
+        onAdLoaded: (_) => setState(() => _isNativeAdLoaded = true),
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          debugPrint('Native ad failed: $error');
+        },
+      ),
+    );
+
+
+    _myNativeAd.load();
+
+  }
+
 
 
 
@@ -705,11 +751,22 @@ class _NewIncome extends State<NewIncome>
           width: widthScreen,
           height: heightScreen,
           color: Utils.getScreenBackground(),
-          child: SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-              children: [
-                Utils.getDistanceBar(),
-                /*ClipRRect(
+          child:Column(children: [
+            if (_isNativeAdLoaded && _myNativeAd != null)
+              Container(
+                height: 90,
+                margin: const EdgeInsets.only(bottom: 0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: AdWidget(ad: _myNativeAd),
+              ),
+
+            Expanded(child:  SingleChildScrollView(
+              child: Column(
+                children: [
+                  /*ClipRRect(
                   borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                   child: Container(
                     decoration: BoxDecoration(
@@ -740,358 +797,358 @@ class _NewIncome extends State<NewIncome>
                 ),
     */
 
-                EasyStepper(
-                  activeStep: activeStep,
-                  activeStepTextColor: Colors.blue.shade900,
-                  finishedStepTextColor: Utils.getThemeColorBlue(),
-                  internalPadding: 20, // Reduce padding for better spacing
-                  stepShape: StepShape.circle,
-                  stepBorderRadius: 20,
-                  borderThickness: 3, // Balanced progress line thickness
-                  showLoadingAnimation: false,
-                  stepRadius: 15, // Reduced step size to fit screen
-                  showStepBorder: false,
-                  lineStyle: LineStyle(
-                    lineLength: 50,
-                    lineType: LineType.normal,
-                    defaultLineColor: Colors.grey.shade300,
-                    activeLineColor: Colors.blueAccent,
-                    finishedLineColor: Utils.getThemeColorBlue(),
+                  EasyStepper(
+                    activeStep: activeStep,
+                    activeStepTextColor: Colors.blue.shade900,
+                    finishedStepTextColor: Utils.getThemeColorBlue(),
+                    internalPadding: 20, // Reduce padding for better spacing
+                    stepShape: StepShape.circle,
+                    stepBorderRadius: 20,
+                    borderThickness: 3, // Balanced progress line thickness
+                    showLoadingAnimation: false,
+                    stepRadius: 15, // Reduced step size to fit screen
+                    showStepBorder: false,
+                    lineStyle: LineStyle(
+                      lineLength: 50,
+                      lineType: LineType.normal,
+                      defaultLineColor: Colors.grey.shade300,
+                      activeLineColor: Colors.blueAccent,
+                      finishedLineColor: Utils.getThemeColorBlue(),
+                    ),
+                    steps: [
+                      EasyStep(
+                        customStep: _buildStepIcon(Icons.wallet_giftcard, 0),
+                        title: 'Income'.tr(),
+                      ),
+                      EasyStep(
+                        customStep: _buildStepIcon(Icons.payments, 1),
+                        title: 'Payment Info'.tr(),
+                      ),
+                      EasyStep(
+                        customStep: _buildStepIcon(Icons.date_range, 1),
+                        title: 'DATE'.tr(),
+                      ),
+
+                    ],
+                    onStepReached: (index) => setState(() => activeStep = index),
                   ),
-                  steps: [
-                    EasyStep(
-                      customStep: _buildStepIcon(Icons.wallet_giftcard, 0),
-                      title: 'Income'.tr(),
-                    ),
-                    EasyStep(
-                      customStep: _buildStepIcon(Icons.payments, 1),
-                      title: 'Payment Info'.tr(),
-                    ),
-                    EasyStep(
-                      customStep: _buildStepIcon(Icons.date_range, 1),
-                      title: 'DATE'.tr(),
-                    ),
 
-                  ],
-                  onStepReached: (index) => setState(() => activeStep = index),
-                ),
+                  SizedBox(height: 0,),
+                  Container(
+                    alignment: Alignment.center,
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
 
-                SizedBox(height: 10,),
-                Container(
-                  alignment: Alignment.center,
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-
-                      activeStep==0? Container(
-                        margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                        padding: EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.15),
-                              blurRadius: 10,
-                              spreadRadius: 2,
-                              offset: Offset(0, 5),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Title
-                            Center(
-                              child: Text(
-                                isEdit ? "Edit".tr() + " " + "Income".tr() : "NEW_INCOME".tr(),
-                                style: TextStyle(
-                                  color: Utils.getThemeColorBlue(),
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
+                          activeStep==0? Container(
+                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
                                 ),
-                              ),
+                              ],
                             ),
-
-                            SizedBox(height: 15),
-                            // Flock Selection
-                            _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
-                            SizedBox(height: 8),
-                            _buildDropdownField(getDropDownList()),
-                            SizedBox(height: 15),
-                            // Purpose Selection
-                            _buildInputLabel("PURPOSE1".tr(), Icons.assignment),
-                            SizedBox(height: 8),
-                            _buildDropdownField(getSaleTypeList()),
-                            SizedBox(height: 10),
-
-                            if (is_bird_sale && is_specific_flock)
-                              Padding(
-                                padding: EdgeInsets.only(top: 10),
-                                child: Center(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Title
+                                Center(
                                   child: Text(
-                                    "Auto_reduction".tr(),
-                                    style: TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.w200),
+                                    isEdit ? "Edit".tr() + " " + "Income".tr() : "NEW_INCOME".tr(),
+                                    style: TextStyle(
+                                      color: Utils.getThemeColorBlue(),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                              ),
 
-                            // Income Categories
-                            if (choose_option) ...[
-                              SizedBox(height: 10),
-                              _buildInputLabel("Income Categories".tr(), Icons.category),
-                              SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Expanded(child: _buildDropdownField(getMySaleOptionsList())),
-                                  SizedBox(width: 10),
-                                  _buildAddButton(addNewIncomOption),
-                                ],
-                              ),
-                            ],
+                                SizedBox(height: 15),
+                                // Flock Selection
+                                _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
+                                SizedBox(height: 8),
+                                _buildDropdownField(getDropDownList()),
+                                SizedBox(height: 15),
+                                // Purpose Selection
+                                _buildInputLabel("PURPOSE1".tr(), Icons.assignment),
+                                SizedBox(height: 8),
+                                _buildDropdownField(getSaleTypeList()),
+                                SizedBox(height: 10),
 
-                            SizedBox(height: 15),
+                                if (is_bird_sale && is_specific_flock)
+                                  Padding(
+                                    padding: EdgeInsets.only(top: 10),
+                                    child: Center(
+                                      child: Text(
+                                        "Auto_reduction".tr(),
+                                        style: TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.w200),
+                                      ),
+                                    ),
+                                  ),
 
-                            // How Many & Sale Amount
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                // Income Categories
+                                if (choose_option) ...[
+                                  SizedBox(height: 10),
+                                  _buildInputLabel("Income Categories".tr(), Icons.category),
+                                  SizedBox(height: 8),
+                                  Row(
                                     children: [
-                                      _buildInputLabel("HOW_MANY".tr(), Icons.confirmation_num),
-                                      SizedBox(height: 8),
-                                      _buildNumberField(howmanyController, "HOW_MANY".tr(), readOnly: !is_specific_flock && is_bird_sale, onTap: () {
-                                        if (!is_specific_flock && is_bird_sale) showBottomDialog();
-                                      }),
+                                      Expanded(child: _buildDropdownField(getMySaleOptionsList())),
+                                      SizedBox(width: 10),
+                                      _buildAddButton(addNewIncomOption),
                                     ],
                                   ),
+                                ],
+
+                                SizedBox(height: 15),
+
+                                // How Many & Sale Amount
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          _buildInputLabel("HOW_MANY".tr(), Icons.confirmation_num),
+                                          SizedBox(height: 8),
+                                          _buildNumberField(howmanyController, "HOW_MANY".tr(), readOnly: !is_specific_flock && is_bird_sale, onTap: () {
+                                            if (!is_specific_flock && is_bird_sale) showBottomDialog();
+                                          }),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 5),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          _buildInputLabel("UNIT_PRICE".tr(), Icons.attach_money),
+                                          SizedBox(height: 8),
+                                          _buildNumberField(unitPriceController, "UNIT_PRICE".tr(), allowFloat: true),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(width: 5),
-                                Expanded(
+
+                                SizedBox(height: 15),
+
+                                Container(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      _buildInputLabel("UNIT_PRICE".tr(), Icons.attach_money),
+                                      _buildInputLabel("SALE_AMOUNT".tr(), Icons.attach_money),
                                       SizedBox(height: 8),
-                                      _buildNumberField(unitPriceController, "UNIT_PRICE".tr(), allowFloat: true),
+                                      _buildNumberField(amountController, "SALE_AMOUNT".tr(), allowFloat: true),
                                     ],
                                   ),
                                 ),
                               ],
                             ),
+                          )
+                              :SizedBox(width: 1,),
 
-                            SizedBox(height: 15),
 
-                            Container(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildInputLabel("SALE_AMOUNT".tr(), Icons.attach_money),
-                                  SizedBox(height: 8),
-                                  _buildNumberField(amountController, "SALE_AMOUNT".tr(), allowFloat: true),
-                                ],
-                              ),
+                          activeStep==1?  Container(
+                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      )
-                          :SizedBox(width: 1,),
-
-
-                        activeStep==1?  Container(
-                          margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                          padding: EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.15),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                                offset: Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Title
-                              Center(
-                                child: Text(
-                                  "Payment Info".tr(),
-                                  style: TextStyle(
-                                    color: Utils.getThemeColorBlue(),
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Title
+                                Center(
+                                  child: Text(
+                                    "Payment Info".tr(),
+                                    style: TextStyle(
+                                      color: Utils.getThemeColorBlue(),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(height: 20),
+                                SizedBox(height: 20),
 
-                              // Payment Method
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  _buildInputLabel("Payment Method".tr(), Icons.payment),
-                                  InkWell(
-                                      onTap: () async {
-                                        Utils.selected_category = 5;
-                                        Utils.selected_category_name = "Payment Method";
-                                        await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                SubCategoryScreen(),
-                                          ),
-                                        );
-                                        getPayMethodList();
-                                        setState(() {
+                                // Payment Method
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    _buildInputLabel("Payment Method".tr(), Icons.payment),
+                                    InkWell(
+                                        onTap: () async {
+                                          Utils.selected_category = 5;
+                                          Utils.selected_category_name = "Payment Method";
+                                          await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SubCategoryScreen(),
+                                            ),
+                                          );
+                                          getPayMethodList();
+                                          setState(() {
 
-                                        });
-                                      },
-                                      child: Icon(Icons.add_circle, size: 27, color: Colors.blue,)),
-                                ],
-                              ),
-                              SizedBox(height: 8),
-                              _buildDropdownField(getPaymentMethodList()),
+                                          });
+                                        },
+                                        child: Icon(Icons.add_circle, size: 27, color: Colors.blue,)),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                _buildDropdownField(getPaymentMethodList()),
 
-                              SizedBox(height: 20),
+                                SizedBox(height: 20),
 
-                              // Payment Status
-                              _buildInputLabel("Payment Status".tr(), Icons.check_circle),
-                              SizedBox(height: 8),
-                              _buildDropdownField(getPaymentStatusList()),
+                                // Payment Status
+                                _buildInputLabel("Payment Status".tr(), Icons.check_circle),
+                                SizedBox(height: 8),
+                                _buildDropdownField(getPaymentStatusList()),
 
-                              SizedBox(height: 20),
+                                SizedBox(height: 20),
 
-                              // Sold To
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  _buildInputLabel("SOLD_TO".tr(), Icons.person),
-                                  InkWell(
-                                      onTap: () async{
-                                        await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>  SaleContractorScreen()),
-                                        );
-                                        contractors = await DatabaseHelper.getContractors();
-                                        if(contractors.length >0) {
-                                          selectedContractor = contractors[0];
-                                          soldtoController.text = selectedContractor!.name;
-                                        }
-                                        setState(() {
+                                // Sold To
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    _buildInputLabel("SOLD_TO".tr(), Icons.person),
+                                    InkWell(
+                                        onTap: () async{
+                                          await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>  SaleContractorScreen()),
+                                          );
+                                          contractors = await DatabaseHelper.getContractors();
+                                          if(contractors.length >0) {
+                                            selectedContractor = contractors[0];
+                                            soldtoController.text = selectedContractor!.name;
+                                          }
+                                          setState(() {
 
-                                        });
-                                      },
-                                      child: Container(
-                                          margin: EdgeInsets.only(right: 10),
-                                          child: Icon(Icons.add, color: Utils.getThemeColorBlue(),))),
-                                ],
-                              ),
-                              SizedBox(height: 8),
-                             contractors.length == 0?
-                              _buildInputField(soldtoController, "SOLD_TO_HINT".tr(), Icons.person)
-                             : _buildDropdownContractor(getContractorDropDown())
+                                          });
+                                        },
+                                        child: Container(
+                                            margin: EdgeInsets.only(right: 10),
+                                            child: Icon(Icons.add, color: Utils.getThemeColorBlue(),))),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                contractors.length == 0?
+                                _buildInputField(soldtoController, "SOLD_TO_HINT".tr(), Icons.person)
+                                    : _buildDropdownContractor(getContractorDropDown())
 
-                            ],
-                          ),
-                        )
-                            :SizedBox(width: 1,),
+                              ],
+                            ),
+                          )
+                              :SizedBox(width: 1,),
 
 
-                        activeStep==2?  Container(
-                          margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                          padding: EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.15),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                                offset: Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Title
-                              Center(
-                                child: Text(
-                                  "Date_DESC".tr(),
-                                  style: TextStyle(
-                                    color: Utils.getThemeColorBlue(),
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
+                          activeStep==2?  Container(
+                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Title
+                                Center(
+                                  child: Text(
+                                    "Date_DESC".tr(),
+                                    style: TextStyle(
+                                      color: Utils.getThemeColorBlue(),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(height: 20),
+                                SizedBox(height: 20),
 
-                              // Date Selection
-                              _buildInputLabel("DATE".tr(), Icons.calendar_today),
-                              SizedBox(height: 8),
-                              Container(
-                                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withAlpha(70),
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(color: Colors.grey, width: 1),
-                                ),
-                                child: InkWell(
-                                  onTap: () {
-                                    pickDate();
-                                  },
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.calendar_today, color: Colors.black54),
-                                      SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          Utils.getFormattedDate(date),
-                                          style: TextStyle(color: Colors.black, fontSize: 16),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-
-                              SizedBox(height: 20),
-
-                              // Notes Input
-                              _buildInputLabel("DESCRIPTION_1".tr(), Icons.notes),
-                              SizedBox(height: 8),
-                              TextFormField(
-                                maxLines: 2,
-                                controller: notesController,
-                                keyboardType: TextInputType.multiline,
-                                textInputAction: TextInputAction.done,
-                                decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: Colors.white.withAlpha(70),
-                                  border: OutlineInputBorder(
+                                // Date Selection
+                                _buildInputLabel("DATE".tr(), Icons.calendar_today),
+                                SizedBox(height: 8),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withAlpha(70),
                                     borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide(color: Colors.grey),
+                                    border: Border.all(color: Colors.grey, width: 1),
                                   ),
-                                  hintText: "NOTES_HINT".tr(),
-                                  hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
+                                  child: InkWell(
+                                    onTap: () {
+                                      pickDate();
+                                    },
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.calendar_today, color: Colors.black54),
+                                        SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text(
+                                            Utils.getFormattedDate(date),
+                                            style: TextStyle(color: Colors.black, fontSize: 16),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        )
-                            :SizedBox(width: 1,),
+
+                                SizedBox(height: 20),
+
+                                // Notes Input
+                                _buildInputLabel("DESCRIPTION_1".tr(), Icons.notes),
+                                SizedBox(height: 8),
+                                TextFormField(
+                                  maxLines: 2,
+                                  controller: notesController,
+                                  keyboardType: TextInputType.multiline,
+                                  textInputAction: TextInputAction.done,
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white.withAlpha(70),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                      borderSide: BorderSide(color: Colors.grey),
+                                    ),
+                                    hintText: "NOTES_HINT".tr(),
+                                    hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                              :SizedBox(width: 1,),
 
 
-                        /*SizedBox(height: 10,width: widthScreen),
+                          /*SizedBox(height: 10,width: widthScreen),
                         InkWell(
                           onTap: () async {
                             bool validate = checkValidation();
@@ -1203,11 +1260,12 @@ class _NewIncome extends State<NewIncome>
                           ),
                         )*/
 
-                      ]),
-                ),
-              ],
-            ),
-          ),
+                        ]),
+                  ),
+                ],
+              ),
+            ))
+          ],),
         ),
       ),
     );

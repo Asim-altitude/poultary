@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/model/med_vac_item.dart';
 import 'package:poultary/model/sub_category_item.dart';
@@ -35,10 +36,16 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
     with SingleTickerProviderStateMixin {
   double widthScreen = 0;
   double heightScreen = 0;
-
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
   @override
   void dispose() {
     super.dispose();
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
+
+    }
   }
 
   String _purposeselectedValue = "";
@@ -92,9 +99,33 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
 
    // getDiseaseList();
     getList();
-    Utils.setupAds();
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+    }
 
     AnalyticsUtil.logScreenView(screenName: "add_health");
+  }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
   }
 
   int? medicineCategoryID = -1;
@@ -585,12 +616,13 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
           width: widthScreen,
           height: heightScreen,
           color: Utils.getScreenBackground(),
-          child: SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-              children: [
-                Utils.getDistanceBar(),
+          child:Column(children: [
+            Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+            Expanded(child:  SingleChildScrollView(
+              child: Column(
+                children: [
 
-                /*ClipRRect(
+                  /*ClipRRect(
                   borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                   child: Container(
                     decoration: BoxDecoration(
@@ -622,85 +654,85 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
                 ),
     */
 
-                EasyStepper(
-                  activeStep: activeStep,
-                  activeStepTextColor: Colors.blue.shade900,
-                  finishedStepTextColor: Utils.getThemeColorBlue(),
-                  internalPadding: 20, // Reduce padding for better spacing
-                  stepShape: StepShape.circle,
-                  stepBorderRadius: 20,
-                  borderThickness: 3, // Balanced progress line thickness
-                  showLoadingAnimation: false,
-                  stepRadius: 15, // Reduced step size to fit screen
-                  showStepBorder: false,
-                  lineStyle: LineStyle(
-                    lineLength: 50,
-                    lineType: LineType.normal,
-                    defaultLineColor: Colors.grey.shade300,
-                    activeLineColor: Colors.blueAccent,
-                    finishedLineColor: Utils.getThemeColorBlue(),
+                  EasyStepper(
+                    activeStep: activeStep,
+                    activeStepTextColor: Colors.blue.shade900,
+                    finishedStepTextColor: Utils.getThemeColorBlue(),
+                    internalPadding: 20, // Reduce padding for better spacing
+                    stepShape: StepShape.circle,
+                    stepBorderRadius: 20,
+                    borderThickness: 3, // Balanced progress line thickness
+                    showLoadingAnimation: false,
+                    stepRadius: 15, // Reduced step size to fit screen
+                    showStepBorder: false,
+                    lineStyle: LineStyle(
+                      lineLength: 50,
+                      lineType: LineType.normal,
+                      defaultLineColor: Colors.grey.shade300,
+                      activeLineColor: Colors.blueAccent,
+                      finishedLineColor: Utils.getThemeColorBlue(),
+                    ),
+                    steps: [
+                      EasyStep(
+                        customStep: _buildStepIcon(Icons.medical_information, 0),
+                        title: 'Medicine'.tr(),
+                      ),
+                      EasyStep(
+                        customStep: _buildStepIcon(Icons.date_range, 1),
+                        title: 'DATE'.tr(),
+                      ),
+
+                    ],
+                    onStepReached: (index) => setState(() => activeStep = index),
                   ),
-                  steps: [
-                    EasyStep(
-                      customStep: _buildStepIcon(Icons.medical_information, 0),
-                      title: 'Medicine'.tr(),
-                    ),
-                    EasyStep(
-                      customStep: _buildStepIcon(Icons.date_range, 1),
-                      title: 'DATE'.tr(),
-                    ),
 
-                  ],
-                  onStepReached: (index) => setState(() => activeStep = index),
-                ),
-
-                Container(
-                  // height: heightScreen - 140,
-                  alignment: Alignment.center,
-                  child: Column(
-                      children: [
-                      activeStep==0? Container(
-                        margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                        padding: EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.15),
-                              blurRadius: 10,
-                              spreadRadius: 2,
-                              offset: Offset(0, 5),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Title
-                            Center(
-                              child: Text(
-                                Utils.vaccine_medicine.toLowerCase().contains("medi")
-                                    ? (isEdit ? 'EDIT'.tr() + " " + 'Medication'.tr() : 'NEW_MEDICATION'.tr())
-                                    : (isEdit ? 'EDIT'.tr() + " " + 'Vaccination'.tr() : 'NEW_VACCINATION'.tr()),
-                                style: TextStyle(
-                                  color: Utils.getThemeColorBlue(),
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
+                  Container(
+                    // height: heightScreen - 140,
+                    alignment: Alignment.center,
+                    child: Column(
+                        children: [
+                          activeStep==0? Container(
+                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
                                 ),
-                              ),
+                              ],
                             ),
-                            SizedBox(height: 20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Title
+                                Center(
+                                  child: Text(
+                                    Utils.vaccine_medicine.toLowerCase().contains("medi")
+                                        ? (isEdit ? 'EDIT'.tr() + " " + 'Medication'.tr() : 'NEW_MEDICATION'.tr())
+                                        : (isEdit ? 'EDIT'.tr() + " " + 'Vaccination'.tr() : 'NEW_VACCINATION'.tr()),
+                                    style: TextStyle(
+                                      color: Utils.getThemeColorBlue(),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 20),
 
-                            // Choose Flock
-                            _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
-                            SizedBox(height: 5),
-                            _buildSimpleDropdownField(getDropDownList()),
+                                // Choose Flock
+                                _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
+                                SizedBox(height: 5),
+                                _buildSimpleDropdownField(getDropDownList()),
 
-                            SizedBox(height: 15),
+                                SizedBox(height: 15),
 
-                            // Choose Disease
-                            /*Row(
+                                // Choose Disease
+                                /*Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 _buildInputLabel("Choose Disease".tr(), Icons.sick),
@@ -723,12 +755,12 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
                                     child: Icon(Icons.add_circle, size: 27, color: Colors.blue,)),
                               ],
                             ),*/
-                            /*SizedBox(height: 5),
+                                /*SizedBox(height: 5),
                             _buildDropdownField(getDiseaseTypeList()),
 */
-                            SizedBox(height: 15),
-                            // Choose Medicine
-                          /*  Row(
+                                SizedBox(height: 15),
+                                // Choose Medicine
+                                /*  Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 _buildInputLabel(Utils.vaccine_medicine.toLowerCase().contains("medi")? "Medicine name".tr() : "Vaccine name".tr(), Icons.medical_information),
@@ -836,132 +868,133 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
                                 ],
                               ),*/
 
-                            Column(
-                              children: [
-                                ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: multiMedicineList.length,
-                                  itemBuilder: (context, i) => buildMultiMedicineItem(i),
-                                ),
+                                Column(
+                                  children: [
+                                    ListView.builder(
+                                      shrinkWrap: true,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      itemCount: multiMedicineList.length,
+                                      itemBuilder: (context, i) => buildMultiMedicineItem(i),
+                                    ),
 
-                                SizedBox(height: 10),
+                                    SizedBox(height: 10),
 
-                                /// ➕ Add New Entry Button
-                                AnimatedSwitcher(
-                                  duration: Duration(milliseconds: 300),
-                                  child: InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        TreatmentEntry treatmentEntry = TreatmentEntry(medicineName: _medselectedValue, diseaseName: _diseaseelectedValue, unit: "Tab", quantity: 1);
-                                        multiMedicineList.add(treatmentEntry);
-                                      });
-                                    },
-                                    child: Visibility(
-                                      visible: isEdit? false : true,
-                                      child: Container(
-                                        padding: EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: Utils.getThemeColorBlue(),
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Icon(Icons.add, color: Colors.white),
-                                            SizedBox(width: 6),
-                                            Text("Add Another Treatment".tr(), style: TextStyle(color: Colors.white)),
-                                          ],
+                                    /// ➕ Add New Entry Button
+                                    AnimatedSwitcher(
+                                      duration: Duration(milliseconds: 300),
+                                      child: InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            TreatmentEntry treatmentEntry = TreatmentEntry(medicineName: _medselectedValue, diseaseName: _diseaseelectedValue, unit: "Tab", quantity: 1);
+                                            multiMedicineList.add(treatmentEntry);
+                                          });
+                                        },
+                                        child: Visibility(
+                                          visible: isEdit? false : true,
+                                          child: Container(
+                                            padding: EdgeInsets.all(12),
+                                            decoration: BoxDecoration(
+                                              color: Utils.getThemeColorBlue(),
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Icon(Icons.add, color: Colors.white),
+                                                SizedBox(width: 6),
+                                                Text("Add Another Treatment".tr(), style: TextStyle(color: Colors.white)),
+                                              ],
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
+
+                                  ],
+                                )
+
+                              ],
+                            ),
+                          )
+                              : SizedBox(width: 1,),
+                          activeStep==1? Container(
+                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Title
+                                Center(
+                                  child: Text(
+                                    "DATE".tr() + " & " + "Doctor_Name".tr(),
+                                    style: TextStyle(
+                                      color: Utils.getThemeColorBlue(),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
+                                SizedBox(height: 15),
+                                // Bird Count
+                                _buildInputLabel("BIRDS_COUNT".tr(), Icons.numbers),
+                                SizedBox(height: 5),
+                                _buildNumberField(bird_countController, "BIRDS_COUNT".tr()),
+                                SizedBox(height: 15),
+                                // Date Picker
+                                _buildInputLabel("DATE".tr(), Icons.calendar_today),
+                                SizedBox(height: 5),
+                                _buildDatePickerField(),
 
-                              ],
-                            )
+                                SizedBox(height: 15),
 
-                          ],
-                        ),
-                      )
-                          : SizedBox(width: 1,),
-                      activeStep==1? Container(
-                        margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                        padding: EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.15),
-                              blurRadius: 10,
-                              spreadRadius: 2,
-                              offset: Offset(0, 5),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Title
-                            Center(
-                              child: Text(
-                                "DATE".tr() + " & " + "Doctor_Name".tr(),
-                                style: TextStyle(
-                                  color: Utils.getThemeColorBlue(),
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
+                                // Doctor Name
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    _buildInputLabel("Doctor_Name".tr(), Icons.person),
+                                    doctorList.length >0? InkWell(
+                                        onTap: () {
+                                          showDoctorNameDialog(context, doctorList, (value) {
+                                            doctorController.text = value;
+                                            setState(() {
+
+                                            });
+                                          });
+                                        },
+                                        child: Icon(Icons.list_alt, color: Colors.blue, size: 25,)) : SizedBox.shrink()
+                                  ],
                                 ),
-                              ),
-                            ),
-                            SizedBox(height: 15),
-    // Bird Count
-                            _buildInputLabel("BIRDS_COUNT".tr(), Icons.numbers),
-                            SizedBox(height: 5),
-                            _buildNumberField(bird_countController, "BIRDS_COUNT".tr()),
-                            SizedBox(height: 15),
-                            // Date Picker
-                            _buildInputLabel("DATE".tr(), Icons.calendar_today),
-                            SizedBox(height: 5),
-                            _buildDatePickerField(),
+                                SizedBox(height: 5),
+                                _buildTextField(doctorController, "Doctor_Name".tr()),
 
-                            SizedBox(height: 15),
+                                SizedBox(height: 15),
 
-                            // Doctor Name
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _buildInputLabel("Doctor_Name".tr(), Icons.person),
-                               doctorList.length >0? InkWell(
-                                   onTap: () {
-                                     showDoctorNameDialog(context, doctorList, (value) {
-                                       doctorController.text = value;
-                                       setState(() {
-
-                                       });
-                                     });
-                                   },
-                                   child: Icon(Icons.list_alt, color: Colors.blue, size: 25,)) : SizedBox.shrink()
+                                // Description
+                                _buildInputLabel("DESCRIPTION_1".tr(), Icons.description),
+                                SizedBox(height: 8),
+                                _buildMultilineTextField(notesController, "NOTES_HINT".tr()),
                               ],
                             ),
-                            SizedBox(height: 5),
-                            _buildTextField(doctorController, "Doctor_Name".tr()),
+                          ) : SizedBox(width: 1,),
 
-                            SizedBox(height: 15),
-
-                            // Description
-                            _buildInputLabel("DESCRIPTION_1".tr(), Icons.description),
-                            SizedBox(height: 8),
-                            _buildMultilineTextField(notesController, "NOTES_HINT".tr()),
-                          ],
-                        ),
-                      ) : SizedBox(width: 1,),
-
-                      ]),
-                ),
-              ],
-            ),
-          ),
+                        ]),
+                  ),
+                ],
+              ),
+            ),)
+          ],)
         ),
       ),
     );

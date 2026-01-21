@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/add_birds.dart';
 import 'package:poultary/sticky.dart';
@@ -47,12 +48,17 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
   double widthScreen = 0;
   double heightScreen = 0;
-
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
 
   @override
   void dispose() {
     super.dispose();
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
 
+    }
   }
 
   int _other_filter = 2;
@@ -110,10 +116,33 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
     super.initState();
 
     getFilters();
-
-    Utils.setupAds();
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+    }
 
     AnalyticsUtil.logScreenView(screenName: "add_reduce_flock");
+  }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
   }
 
   List<Flock> flocks = [];
@@ -318,14 +347,15 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
           width: widthScreen,
           height: heightScreen,
             color: Utils.getScreenBackground(),
-            child:SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children:  [
-              Utils.getDistanceBar(),
+            child:Column(children: [
+              Utils.showBannerAd(_bannerAd, _isBannerAdReady),
 
-              /*ClipRRect(
+              Expanded(child: SingleChildScrollView(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children:  [
+                      /*ClipRRect(
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(10),
                   bottomRight: Radius.circular(10),
@@ -421,300 +451,300 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                 ),
               ),
 */
-              Center(
-                child: Container(
-                  padding: EdgeInsets.only(top: 10),
-                  margin: EdgeInsets.symmetric(horizontal: 10), // Margin of 10 on left & right
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 3, // 60% of available space
-                        child: SizedBox(
-                          height: 55,
-                          child: _buildDropdownField(
-                            "Select Item",
-                            _purposeList,
-                            _purposeselectedValue,
-                                (String? newValue) {
-                                  _purposeselectedValue = newValue!;
-                                  getFlockID();
-                                  getFilteredTransactions(str_date, end_date);
-                            },
-                            width: double.infinity,
-                            height: 45,
+                      Center(
+                        child: Container(
+                          padding: EdgeInsets.only(top: 2),
+                          margin: EdgeInsets.symmetric(horizontal: 10), // Margin of 10 on left & right
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 3, // 60% of available space
+                                child: SizedBox(
+                                  height: 55,
+                                  child: _buildDropdownField(
+                                    "Select Item",
+                                    _purposeList,
+                                    _purposeselectedValue,
+                                        (String? newValue) {
+                                      _purposeselectedValue = newValue!;
+                                      getFlockID();
+                                      getFilteredTransactions(str_date, end_date);
+                                    },
+                                    width: double.infinity,
+                                    height: 45,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 5), // Space between the dropdowns
+                              Expanded(
+                                flex: 2, // 40% of available space
+                                child: SizedBox(
+                                  height: 55,
+                                  child: _buildDropdownField(
+                                    "Select Item",
+                                    filterList,
+                                    date_filter_name,
+                                        (String? newValue) {
+                                      setState(() {
+                                        date_filter_name = newValue!;
+                                        getData(date_filter_name);
+                                      });
+                                    },
+                                    width: double.infinity,
+                                    height: 45,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      SizedBox(width: 5), // Space between the dropdowns
-                      Expanded(
-                        flex: 2, // 40% of available space
-                        child: SizedBox(
-                          height: 55,
-                          child: _buildDropdownField(
-                            "Select Item",
-                            filterList,
-                            date_filter_name,
-                                (String? newValue) {
-                              setState(() {
-                                date_filter_name = newValue!;
-                                getData(date_filter_name);
-                              });
-                            },
-                            width: double.infinity,
-                            height: 45,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
 
-              /// Color-coded filter buttons
-              Container(
-                height: 55,
-                width: widthScreen,
-                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                  color: Colors.white.withOpacity(0.1), // Light transparent background
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 10,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    buildFilterButton('All', 1, Colors.blue),
-                    buildFilterButton('Addition', 2, Colors.green),
-                    buildFilterButton('Reduction', 3, Colors.red),
-                  ],
-                ),
-              ),
-
-              list.length > 0 ? Container(
-                height: Utils.isShowAdd? heightScreen - 350 : heightScreen - 300,
-                width: widthScreen,
-                child: ListView.builder(
-                  itemCount: list.length,
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  itemBuilder: (BuildContext context, int index) {
-                    var item = list[index];
-                    bool hasTransaction = item.transaction_id != "-1";
-
-                    return Card(
-                      elevation: 3,
-                      margin: EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(14),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            /// **Header: Name + Menu Icon**
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    item.f_name,
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ),
-
-                                /// **Menu Icon**
-                                !hasTransaction
-                                    ? GestureDetector(
-                                  onTapDown: (TapDownDetails details) {
-                                    selected_id = item.f_detail_id;
-                                    selected_index = index;
-                                    showMemberMenu(details.globalPosition);
-                                  },
-                                  child: Icon(Icons.more_vert, color: Colors.black54),
-                                )
-                                    : SizedBox(height: 1),
-                              ],
-                            ),
-
-                            SizedBox(height: 10),
-
-                            /// **Bird Count with Addition/Reduction Label**
-                            Row(
-                              children: [
-                                Image.asset("assets/bird_icon.png", width: 30, height: 30),
-                                SizedBox(width: 6),
-                                Text(
-                                  "${item.item_count} " + "BIRDS".tr(),
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                Container(
-                                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: 10),
-                                  decoration: BoxDecoration(
-                                    color: item.item_type == 'Reduction'
-                                        ? Colors.red.withOpacity(0.15)
-                                        : Colors.green.withOpacity(0.15),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    item.item_type.tr(),
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: item.item_type == 'Reduction' ? Colors.red : Colors.green,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 10),
-
-                            /// **Date**
-                            Row(
-                              children: [
-                                Icon(Icons.calendar_today, size: 16, color: Colors.blueGrey),
-                                SizedBox(width: 6),
-                                Text(
-                                  Utils.getFormattedDate(item.acqusition_date.toString()),
-                                  style: TextStyle(fontSize: 14, color: Colors.black54),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 10),
-
-                            /// **Reason / Acquisition Type**
-                            Text(
-                              item.item_type == 'Reduction'
-                                  ? item.reason.toString().tr()
-                                  : item.acqusition_type.toString().tr(),
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.blueAccent,
-                              ),
-                            ),
-                            SizedBox(height: 12),
-
-                            /// **Notes Section**
-                            if (item.short_note.isNotEmpty)
-                              Container(
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[100],
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.notes, size: 18, color: Colors.black54),
-                                    SizedBox(width: 6),
-                                    Expanded(
-                                      child: Text(
-                                        item.short_note,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(fontSize: 14, color: Colors.black87),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            SizedBox(height: 12),
-
-                            /// **Action Button (View Details)**
-                            if (hasTransaction)
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: GestureDetector(
-                                  onTap: () async {
-                                    selected_id = item.f_detail_id;
-                                    selected_index = index;
-                                    await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ViewCompleteTransaction(
-                                          transaction_id: item.transaction_id,
-                                          isTransaction: false,
-                                          flock_detail_id: '$selected_id',
-                                        ),
-                                      ),
-                                    );
-                                    getData(date_filter_name);
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 14),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blueAccent,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(Icons.visibility, size: 18, color: Colors.white),
-                                        SizedBox(width: 6),
-                                        Text(
-                                          "View Details".tr(),
-                                          style: TextStyle(fontSize: 14, color: Colors.white),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                            SizedBox(height: 6),
-
-                            /// **Sync Info Icon**
-                          if(Utils.isMultiUSer)
-                            GestureDetector(
-                              onTap: () {
-                                String updated_at = item.last_modified == null
-                                    ? "Unknown".tr()
-                                    : DateFormat("dd MMM yyyy hh:mm a").format(item.last_modified!);
-
-                                String updated_by = item.modified_by == null || item.modified_by!.isEmpty
-                                    ? "System".tr()
-                                    : item.modified_by!;
-
-                                Utils.showSyncInfo(context, updated_at, updated_by);
-                              },
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.info_outline, size: 16, color: Colors.blueGrey),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    "Sync Info",
-                                    style: TextStyle(fontSize: 12, color: Colors.blueGrey),
-                                  ),
-                                ],
-                              ),
+                      /// Color-coded filter buttons
+                      Container(
+                        height: 55,
+                        width: widthScreen,
+                        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                          color: Colors.white.withOpacity(0.1), // Light transparent background
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 10,
+                              offset: Offset(0, 3),
                             ),
                           ],
                         ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            buildFilterButton('All', 1, Colors.blue),
+                            buildFilterButton('Addition', 2, Colors.green),
+                            buildFilterButton('Reduction', 3, Colors.red),
+                          ],
+                        ),
                       ),
-                    );
 
-                  },
-                ),
-              )
-                    : Utils.getCustomEmptyMessage("assets/add_reduce_.png", "NO_BIRDS_ADD_REDUCE")
+                      list.length > 0 ? Container(
+                        height: Utils.isShowAdd? heightScreen - 350 : heightScreen - 300,
+                        width: widthScreen,
+                        child: ListView.builder(
+                          itemCount: list.length,
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          itemBuilder: (BuildContext context, int index) {
+                            var item = list[index];
+                            bool hasTransaction = item.transaction_id != "-1";
+
+                            return Card(
+                              elevation: 3,
+                              margin: EdgeInsets.only(bottom: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(14),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    /// **Header: Name + Menu Icon**
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            item.f_name,
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                        ),
+
+                                        /// **Menu Icon**
+                                        !hasTransaction
+                                            ? GestureDetector(
+                                          onTapDown: (TapDownDetails details) {
+                                            selected_id = item.f_detail_id;
+                                            selected_index = index;
+                                            showMemberMenu(details.globalPosition);
+                                          },
+                                          child: Icon(Icons.more_vert, color: Colors.black54),
+                                        )
+                                            : SizedBox(height: 1),
+                                      ],
+                                    ),
+
+                                    SizedBox(height: 10),
+
+                                    /// **Bird Count with Addition/Reduction Label**
+                                    Row(
+                                      children: [
+                                        Image.asset("assets/bird_icon.png", width: 30, height: 30),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          "${item.item_count} " + "BIRDS".tr(),
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                        SizedBox(width: 10),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+                                          decoration: BoxDecoration(
+                                            color: item.item_type == 'Reduction'
+                                                ? Colors.red.withOpacity(0.15)
+                                                : Colors.green.withOpacity(0.15),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Text(
+                                            item.item_type.tr(),
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w600,
+                                              color: item.item_type == 'Reduction' ? Colors.red : Colors.green,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 10),
+
+                                    /// **Date**
+                                    Row(
+                                      children: [
+                                        Icon(Icons.calendar_today, size: 16, color: Colors.blueGrey),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          Utils.getFormattedDate(item.acqusition_date.toString()),
+                                          style: TextStyle(fontSize: 14, color: Colors.black54),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 10),
+
+                                    /// **Reason / Acquisition Type**
+                                    Text(
+                                      item.item_type == 'Reduction'
+                                          ? item.reason.toString().tr()
+                                          : item.acqusition_type.toString().tr(),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.blueAccent,
+                                      ),
+                                    ),
+                                    SizedBox(height: 12),
+
+                                    /// **Notes Section**
+                                    if (item.short_note.isNotEmpty)
+                                      Container(
+                                        padding: EdgeInsets.all(10),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[100],
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.notes, size: 18, color: Colors.black54),
+                                            SizedBox(width: 6),
+                                            Expanded(
+                                              child: Text(
+                                                item.short_note,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(fontSize: 14, color: Colors.black87),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    SizedBox(height: 12),
+
+                                    /// **Action Button (View Details)**
+                                    if (hasTransaction)
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: GestureDetector(
+                                          onTap: () async {
+                                            selected_id = item.f_detail_id;
+                                            selected_index = index;
+                                            await Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => ViewCompleteTransaction(
+                                                  transaction_id: item.transaction_id,
+                                                  isTransaction: false,
+                                                  flock_detail_id: '$selected_id',
+                                                ),
+                                              ),
+                                            );
+                                            getData(date_filter_name);
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+                                            decoration: BoxDecoration(
+                                              color: Colors.blueAccent,
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(Icons.visibility, size: 18, color: Colors.white),
+                                                SizedBox(width: 6),
+                                                Text(
+                                                  "View Details".tr(),
+                                                  style: TextStyle(fontSize: 14, color: Colors.white),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+
+                                    SizedBox(height: 6),
+
+                                    /// **Sync Info Icon**
+                                    if(Utils.isMultiUSer)
+                                      GestureDetector(
+                                        onTap: () {
+                                          String updated_at = item.last_modified == null
+                                              ? "Unknown".tr()
+                                              : DateFormat("dd MMM yyyy hh:mm a").format(item.last_modified!);
+
+                                          String updated_by = item.modified_by == null || item.modified_by!.isEmpty
+                                              ? "System".tr()
+                                              : item.modified_by!;
+
+                                          Utils.showSyncInfo(context, updated_at, updated_by);
+                                        },
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.info_outline, size: 16, color: Colors.blueGrey),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              "Sync Info",
+                                              style: TextStyle(fontSize: 12, color: Colors.blueGrey),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            );
+
+                          },
+                        ),
+                      )
+                          : Utils.getCustomEmptyMessage("assets/add_reduce_.png", "NO_BIRDS_ADD_REDUCE")
 
 
-                   /* Text(
+                      /* Text(
               "Main Menu",
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -944,8 +974,9 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                           builder: (context) => const EmojiTemplateScreen()),
                     );*//*
                   }),*/
-                  ]
-      ),),),),);
+                    ]
+                ),))
+            ],),),),);
   }
 
   Widget _buildDropdownField(

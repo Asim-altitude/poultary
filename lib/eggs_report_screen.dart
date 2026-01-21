@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
 import 'package:poultary/database/databse_helper.dart';
@@ -37,10 +38,20 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
 
   double widthScreen = 0;
   double heightScreen = 0;
-
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
+  late NativeAd _myNativeAd;
+  bool _isNativeAdLoaded = false;
   @override
   void dispose() {
     super.dispose();
+    try{
+      _bannerAd.dispose();
+      _myNativeAd.dispose();
+
+    }catch(ex){
+
+    }
   }
 
   int _reports_filter = 2;
@@ -73,11 +84,72 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
     catch (ex) {
       print(ex);
     }
-    Utils.setupAds();
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+      _loadNativeAds();
+
+    }
 
     AnalyticsUtil.logScreenView(screenName: "egg_report_screen");
   }
+  _loadNativeAds(){
+    _myNativeAd = NativeAd(
+      adUnitId: Utils.NativeAdUnitId,
+      request: const AdRequest(),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.small, // or medium
+        mainBackgroundColor: Colors.white,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white,
+          backgroundColor: Colors.blue,
+          style: NativeTemplateFontStyle.bold,
+          size: 14,
+        ),
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          size: 14,
+        ),
+        secondaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white70,
+          size: 12,
+        ),
+      ),
+      listener: NativeAdListener(
+        onAdLoaded: (_) => setState(() => _isNativeAdLoaded = true),
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          debugPrint('Native ad failed: $error');
+        },
+      ),
+    );
 
+
+    _myNativeAd.load();
+
+  }
+
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
+  }
   List<Eggs_Chart_Item> collectionList = [],
       reductionList = [];
   List<Eggs> eggs = [];
@@ -237,7 +309,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
         .size
         .height - (safeAreaHeight + safeAreaHeightBottom);
 
-    return SafeArea(child: Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Text(
           "EGGS_REPORT".tr(),
@@ -301,14 +373,15 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
           width: widthScreen,
           height: heightScreen,
           color: Colors.white,
-          child: SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Utils.getDistanceBar(),
+          child: Column(children: [
+            Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+            Expanded(child: SingleChildScrollView(
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
 
-                  /*ClipRRect(
+                    /*ClipRRect(
                     borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(0),
                         bottomRight: Radius.circular(0)),
@@ -387,239 +460,252 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                     ),
                   ),*/
 
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 45,
-                          alignment: Alignment.centerRight,
-                          padding: EdgeInsets.only(left: 10),
-                          margin: EdgeInsets.only(left: 10,right: 5),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: getDropDownList(),
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          openDatePicker();
-                        },
-                        borderRadius: BorderRadius.circular(8), // Adds ripple effect with rounded edges
-                        child: Container(
-                          height: 45,
-                          margin: EdgeInsets.only(right: 10, top: 10, bottom: 10),
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.calendar_today, color: Utils.getThemeColorBlue(), size: 18),
-                              SizedBox(width: 8),
-                              Text(
-                                date_filter_name.tr(),
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
-                              ),
-                              SizedBox(width: 8),
-                              Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(), size: 20),
-                            ],
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-
-                  Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 8,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
+                        Expanded(
+                          child: Container(
+                            height: 45,
+                            alignment: Alignment.centerRight,
+                            padding: EdgeInsets.only(left: 10),
+                            margin: EdgeInsets.only(left: 10,right: 5),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
 
-                        // Chart Section
-                        Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: EdgeInsets.all(10),
-                          child: SfCartesianChart(
-                            primaryXAxis: CategoryAxis(),
-                            zoomPanBehavior: _zoomPanBehavior,
-                            title: ChartTitle(text: date_filter_name.tr()),
-                            legend: Legend(isVisible: true,
-                                position: LegendPosition.bottom),
-                            tooltipBehavior: TooltipBehavior(enable: true),
-                            series: <CartesianSeries<Eggs_Chart_Item, String>>[
-                              ColumnSeries(
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(10)),
-                                color: Colors.green,
-                                name: 'Collections'.tr(),
-                                dataSource: collectionList,
-                                xValueMapper: (Eggs_Chart_Item item, _) =>
-                                item.date,
-                                yValueMapper: (Eggs_Chart_Item item, _) =>
-                                item.total,
-                              ),
-                              ColumnSeries(
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(10)),
-                                color: Colors.red,
-                                name: 'Reductions'.tr(),
-                                dataSource: reductionList,
-                                xValueMapper: (Eggs_Chart_Item item, _) =>
-                                item.date,
-                                yValueMapper: (Eggs_Chart_Item item, _) =>
-                                item.total,
-                              ),
-                            ],
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: getDropDownList(),
                           ),
                         ),
+                        InkWell(
+                          onTap: () {
+                            openDatePicker();
+                          },
+                          borderRadius: BorderRadius.circular(8), // Adds ripple effect with rounded edges
+                          child: Container(
+                            height: 45,
+                            margin: EdgeInsets.only(right: 10, top: 10, bottom: 10),
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
 
-                        SizedBox(height: 20),
-
-                        Card(
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          child: Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                // 📌 Summary Section
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment
-                                      .spaceBetween,
-                                  children: [
-                                    Text(
-                                      "Summary & Analytics".tr(),
-                                      style: TextStyle(fontSize: 18,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 12),
-                                Divider(),
-                                SizedBox(height: 8),
-
-
-                          Column(
-                          children: [
-                          SummaryRow(
-                          title: 'Total Collected'.tr(),
-                          value: '$total_eggs_collected',
-                          icon: Icons.egg,
-                          color: Colors.green,
-                          percentage: "100%",
-                          isBold: true,
-                        ),
-
-                        SummaryRow(
-                          title: 'Good Eggs'.tr(),
-                          value: '$good_eggs',
-                          icon: Icons.check_circle,
-                          color: Colors.blue,
-                          percentage: percent(good_eggs, total_eggs_collected),
-                        ),
-
-                        SummaryRow(
-                          title: 'Bad Eggs'.tr(),
-                          value: '$bad_eggs',
-                          icon: Icons.warning_amber_rounded,
-                          color: Colors.orange,
-                          percentage: percent(bad_eggs, total_eggs_collected),
-                        ),
-
-                        const Divider(),
-
-                        SummaryRow(
-                          title: 'Total Used'.tr(),
-                          value: '-$total_eggs_reduced',
-                          icon: Icons.remove_circle,
-                          color: Colors.red,
-                          percentage: percent(total_eggs_reduced, total_eggs_collected),
-                        ),
-
-                        SummaryRow(
-                          title: 'Remaining Eggs'.tr(),
-                          value: '${total_eggs_collected - total_eggs_reduced}',
-                          icon: Icons.egg_alt,
-                          color: (total_eggs_collected - total_eggs_reduced) >= 0 ? Colors.black : Colors.red,
-                          percentage: percent((total_eggs_collected - total_eggs_reduced), total_eggs_collected),
-                          isBold: true,
-                        ),
-                      ],
-                    ),
-
-                      SizedBox(height: 16),
-                                Divider(),
-
-                                // 🐔 Flock-wise Summary Section
+                                Icon(Icons.calendar_today, color: Utils.getThemeColorBlue(), size: 18),
+                                SizedBox(width: 8),
                                 Text(
-                                  "By Flock".tr(),
-                                  style: TextStyle(fontSize: 16,
-                                      fontWeight: FontWeight.bold),
+                                  date_filter_name.tr(),
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
                                 ),
-                                SizedBox(height: 8),
-
-                                // 🏷️ Flock List
-                                Column(
-                                  children: flockEggSummary.map((flock) =>
-                                      _buildFlockRow(flock, total_eggs_collected)).toList(),
-                                ),
-                                SizedBox(height: 8),
-                                buildEggReductionList(eggReductionSummary)
+                                SizedBox(width: 8),
+                                Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(), size: 20),
                               ],
                             ),
                           ),
                         )
-
                       ],
                     ),
-                  )
 
-                ]
-            ),),),),),);
+                    Container(
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 8,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+
+                          // Chart Section
+                          Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: EdgeInsets.all(10),
+                            child: SfCartesianChart(
+                              primaryXAxis: CategoryAxis(),
+                              zoomPanBehavior: _zoomPanBehavior,
+                              title: ChartTitle(text: date_filter_name.tr()),
+                              legend: Legend(isVisible: true,
+                                  position: LegendPosition.bottom),
+                              tooltipBehavior: TooltipBehavior(enable: true),
+                              series: <CartesianSeries<Eggs_Chart_Item, String>>[
+                                ColumnSeries(
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(10)),
+                                  color: Colors.green,
+                                  name: 'Collections'.tr(),
+                                  dataSource: collectionList,
+                                  xValueMapper: (Eggs_Chart_Item item, _) =>
+                                  item.date,
+                                  yValueMapper: (Eggs_Chart_Item item, _) =>
+                                  item.total,
+                                ),
+                                ColumnSeries(
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(10)),
+                                  color: Colors.red,
+                                  name: 'Reductions'.tr(),
+                                  dataSource: reductionList,
+                                  xValueMapper: (Eggs_Chart_Item item, _) =>
+                                  item.date,
+                                  yValueMapper: (Eggs_Chart_Item item, _) =>
+                                  item.total,
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          SizedBox(height: 20),
+
+                          Card(
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // 📌 Summary Section
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment
+                                        .spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Summary & Analytics".tr(),
+                                        style: TextStyle(fontSize: 18,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 12),
+                                  Divider(),
+                                  SizedBox(height: 8),
+
+
+                                  Column(
+                                    children: [
+                                      SummaryRow(
+                                        title: 'Total Collected'.tr(),
+                                        value: '$total_eggs_collected',
+                                        icon: Icons.egg,
+                                        color: Colors.green,
+                                        percentage: "100%",
+                                        isBold: true,
+                                      ),
+
+                                      SummaryRow(
+                                        title: 'Good Eggs'.tr(),
+                                        value: '$good_eggs',
+                                        icon: Icons.check_circle,
+                                        color: Colors.blue,
+                                        percentage: percent(good_eggs, total_eggs_collected),
+                                      ),
+
+                                      SummaryRow(
+                                        title: 'Bad Eggs'.tr(),
+                                        value: '$bad_eggs',
+                                        icon: Icons.warning_amber_rounded,
+                                        color: Colors.orange,
+                                        percentage: percent(bad_eggs, total_eggs_collected),
+                                      ),
+
+                                      const Divider(),
+
+                                      SummaryRow(
+                                        title: 'Total Used'.tr(),
+                                        value: '-$total_eggs_reduced',
+                                        icon: Icons.remove_circle,
+                                        color: Colors.red,
+                                        percentage: percent(total_eggs_reduced, total_eggs_collected),
+                                      ),
+
+                                      SummaryRow(
+                                        title: 'Remaining Eggs'.tr(),
+                                        value: '${total_eggs_collected - total_eggs_reduced}',
+                                        icon: Icons.egg_alt,
+                                        color: (total_eggs_collected - total_eggs_reduced) >= 0 ? Colors.black : Colors.red,
+                                        percentage: percent((total_eggs_collected - total_eggs_reduced), total_eggs_collected),
+                                        isBold: true,
+                                      ),
+                                    ],
+                                  ),
+
+                                  SizedBox(height: 16),
+                                  if (_isNativeAdLoaded && _myNativeAd != null)
+                                    Container(
+                                      height: 90,
+                                      margin: const EdgeInsets.only(bottom: 10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: AdWidget(ad: _myNativeAd),
+                                    ),
+
+
+                                  Divider(),
+
+                                  // 🐔 Flock-wise Summary Section
+                                  Text(
+                                    "By Flock".tr(),
+                                    style: TextStyle(fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(height: 8),
+
+                                  // 🏷️ Flock List
+                                  Column(
+                                    children: flockEggSummary.map((flock) =>
+                                        _buildFlockRow(flock, total_eggs_collected)).toList(),
+                                  ),
+                                  SizedBox(height: 8),
+                                  buildEggReductionList(eggReductionSummary)
+                                ],
+                              ),
+                            ),
+                          )
+
+                        ],
+                      ),
+                    )
+
+                  ]
+              ),))
+          ],),),),);
   }
 
   String percent(num part, num total) {

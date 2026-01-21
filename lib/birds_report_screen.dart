@@ -6,6 +6,7 @@ import 'package:excel/excel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
@@ -31,13 +32,21 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
 
   double widthScreen = 0;
   double heightScreen = 0;
+  late NativeAd _myNativeAd;
+  bool _isNativeAdLoaded = false;
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
 
   @override
   void dispose() {
     super.dispose();
+    try{
+      _bannerAd.dispose();
+      _myNativeAd.dispose();
+    }catch(ex){
 
+    }
   }
-
   int _reports_filter = 2;
   void getFilters() async {
 
@@ -61,8 +70,69 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
      catch(ex){
        print(ex);
      }
-    Utils.setupAds();
+    if(Utils.isShowAdd){
+      _loadNativeAds();
+      _loadBannerAd();
+    }
+
     AnalyticsUtil.logScreenView(screenName: "birds_screen");
+  }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
+  }
+  _loadNativeAds(){
+    _myNativeAd = NativeAd(
+      adUnitId: Utils.NativeAdUnitId,
+      request: const AdRequest(),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.small, // or medium
+        mainBackgroundColor: Colors.white,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white,
+          backgroundColor: Colors.blue,
+          style: NativeTemplateFontStyle.bold,
+          size: 14,
+        ),
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          size: 14,
+        ),
+        secondaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white70,
+          size: 12,
+        ),
+      ),
+      listener: NativeAdListener(
+        onAdLoaded: (_) => setState(() => _isNativeAdLoaded = true),
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          debugPrint('Native ad failed: $error');
+        },
+      ),
+    );
+
+
+    _myNativeAd.load();
+
   }
 
   List<Flock_Detail> list = [];
@@ -158,7 +228,7 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
 
-    return SafeArea(child: Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Text(
           "BIRDS".tr() +" "+"REPORT".tr(),
@@ -227,14 +297,15 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
           width: widthScreen,
           height: heightScreen,
            color: Colors.white,
-            child: SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children:  [
-              Utils.getDistanceBar(),
+            child: Column(children: [
+              Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+              Expanded(child: SingleChildScrollView(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children:  [
 
-              /*ClipRRect(
+                      /*ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
@@ -317,281 +388,293 @@ class _BirdsReportsScreen extends State<BirdsReportsScreen> with SingleTickerPro
                 ),
               ),*/
 
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 45,
-                      alignment: Alignment.centerRight,
-                      padding: EdgeInsets.only(left: 10),
-                      margin: EdgeInsets.only(left: 10,right: 5),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                       /* border: Border.all(
-                          color: Utils.getThemeColorBlue(),
-                          width: 1.2,
-                        ),*/
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: getDropDownList(),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      openDatePicker();
-                    },
-                    borderRadius: BorderRadius.circular(8), // Adds ripple effect with rounded edges
-                    child: Container(
-                      height: 45,
-                      margin: EdgeInsets.only(right: 10, top: 10, bottom: 10),
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                       /* border: Border.all(
-                          color: Utils.getThemeColorBlue(),
-                          width: 1.2,
-                        ),*/
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.calendar_today, color: Utils.getThemeColorBlue(), size: 18),
-                          SizedBox(width: 8),
-                          Text(
-                            date_filter_name.tr(),
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
-                          ),
-                          SizedBox(width: 8),
-                          Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(), size: 20),
-                        ],
-                      ),
-                    ),
-                  )
-                ],
-              ),
-
-
-              SizedBox(height: 10),
-
-              _flockDateChart(),
-              SizedBox(height: 10),
-
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.white, Colors.blue.shade50], // Subtle gradient
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 8,
-                      spreadRadius: 2,
-                      offset: Offset(0, 4), // Softer drop shadow
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 🔷 Title
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'SUMMARY'.tr(),
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Utils.getThemeColorBlue(),
+                          Expanded(
+                            child: Container(
+                              height: 45,
+                              alignment: Alignment.centerRight,
+                              padding: EdgeInsets.only(left: 10),
+                              margin: EdgeInsets.only(left: 10,right: 5),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                                /* border: Border.all(
+                          color: Utils.getThemeColorBlue(),
+                          width: 1.2,
+                        ),*/
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 4,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: getDropDownList(),
                             ),
                           ),
-                          Icon(Icons.bar_chart, color: Utils.getThemeColorBlue()), // Chart icon
+                          InkWell(
+                            onTap: () {
+                              openDatePicker();
+                            },
+                            borderRadius: BorderRadius.circular(8), // Adds ripple effect with rounded edges
+                            child: Container(
+                              height: 45,
+                              margin: EdgeInsets.only(right: 10, top: 10, bottom: 10),
+                              padding: EdgeInsets.symmetric(horizontal: 10),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                                /* border: Border.all(
+                          color: Utils.getThemeColorBlue(),
+                          width: 1.2,
+                        ),*/
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 4,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.calendar_today, color: Utils.getThemeColorBlue(), size: 18),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    date_filter_name.tr(),
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(), size: 20),
+                                ],
+                              ),
+                            ),
+                          )
                         ],
                       ),
-                      SizedBox(height: 12),
 
-                      // 🐥 Total Added
-                      _buildSummaryRow(
-                        icon: Icons.add_circle,
-                        label: 'TOTAL_ADDED'.tr(),
-                        value: '$total_birds_added',
-                        valueColor: Colors.green.shade700,
-                      ),
 
-                      Divider(color: Colors.grey[300], thickness: 0.8),
+                      SizedBox(height: 10),
 
-                      // ❌ Total Reduced
-                      _buildSummaryRow(
-                        icon: Icons.remove_circle,
-                        label: 'TOTAL_REDUCED'.tr(),
-                        value: '-$total_birds_reduced',
-                        valueColor: Colors.red.shade700,
-                      ),
+                      _flockDateChart(),
+                      SizedBox(height: 10),
 
-                      Divider(color: Colors.grey[300], thickness: 0.8),
-
-                      // 🏠 Current Birds (Highlighted)
-                      _buildSummaryRow(
-                        icon: Icons.pets,
-                        label: 'CURRENT_BIRDS'.tr(),
-                        value: '$current_birds',
-                        valueColor: Colors.black,
-                        isBold: true,
-                        fontSize: 18,
-                      ),
-
-                      SizedBox(height: 15),
-
-                      // 📊 Birds Added Per Flock Title
-                      Text(
-                        'By Flock'.tr(),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Utils.getThemeColorBlue(),
-                        ),
-                      ),
-                      SizedBox(height: 8),
-
-                      // 🐥 Birds Added Per Flock List
-                      ListView.separated(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: additionsSummary.length,
-                        separatorBuilder: (context, index) => Divider(color: Colors.grey[300], thickness: 0.8),
-                        itemBuilder: (context, index) {
-                          FlockSummary summary = additionsSummary[index];
-
-                          // Calculate percentage change
-                          int netChange = summary.totalAdded - summary.totalReduced;
-                          double percentageChange = summary.totalAdded > 0
-                              ? (netChange / summary.totalAdded) * 100
-                              : 0;
-
-                          // Determine color based on net change
-                          Color changeColor = netChange >= 0 ? Colors.green.shade700 : Colors.red.shade700;
-                          String changeSymbol = netChange >= 0 ? '+' : ''; // Add "+" only for positive values
-
-                          return ListTile(
-                            leading: Icon(
-                              netChange >= 0 ? Icons.trending_up : Icons.trending_down,
-                              color: changeColor,
-                              size: 28,
-                            ),
-                            title: Text(
-                              summary.flockName,
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                            ),
-                            subtitle: Row(
-                              children: [
-                                Text(
-                                  'Added'.tr()+': ${summary.totalAdded}  ',
-                                  style: TextStyle(fontSize: 12, color: Colors.green.shade700),
-                                ),
-                                Text(
-                                  'Reduced'.tr()+': ${summary.totalReduced}',
-                                  style: TextStyle(fontSize: 12, color: Colors.red.shade700),
-                                ),
-                              ],
-                            ),
-                            trailing: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  '$changeSymbol${netChange}',
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: changeColor),
-                                ),
-                                Text(
-                                  '(${percentageChange.toStringAsFixed(1)}%)',
-                                  style: TextStyle(fontSize: 12, color: changeColor),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Title
-                          Text(
-                            'Reduction By Reason'.tr(),
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Utils.getThemeColorBlue(),
-                            ),
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Colors.white, Colors.blue.shade50], // Subtle gradient
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
-                          SizedBox(height: 8),
-
-                          // Using `map()` inside Column with SingleChildScrollView
-                          SingleChildScrollView(
-                            child: Column(
-                              children: reductionByReason.map((reduction) {
-                                return Card(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                  elevation: 4,
-                                  margin: EdgeInsets.symmetric(vertical: 5, horizontal: 8),
-                                  child: ListTile(
-                                    leading: CircleAvatar(
-                                      backgroundColor: Colors.redAccent,
-                                      child: Icon(Icons.trending_down, color: Colors.white),
-                                    ),
-                                    title: Text(
-                                      reduction.reason.tr(),
-                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                    ),
-                                    subtitle: Text(
-                                      "TOTAL".tr()+" ${reduction.totalCount}",
-                                      style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              spreadRadius: 2,
+                              offset: Offset(0, 4), // Softer drop shadow
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(15),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 🔷 Title
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'SUMMARY'.tr(),
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Utils.getThemeColorBlue(),
                                     ),
                                   ),
-                                );
-                              }).toList(),
-                            ),
+                                  Icon(Icons.bar_chart, color: Utils.getThemeColorBlue()), // Chart icon
+                                ],
+                              ),
+                              SizedBox(height: 12),
+
+                              // 🐥 Total Added
+                              _buildSummaryRow(
+                                icon: Icons.add_circle,
+                                label: 'TOTAL_ADDED'.tr(),
+                                value: '$total_birds_added',
+                                valueColor: Colors.green.shade700,
+                              ),
+
+                              Divider(color: Colors.grey[300], thickness: 0.8),
+
+                              // ❌ Total Reduced
+                              _buildSummaryRow(
+                                icon: Icons.remove_circle,
+                                label: 'TOTAL_REDUCED'.tr(),
+                                value: '-$total_birds_reduced',
+                                valueColor: Colors.red.shade700,
+                              ),
+
+                              Divider(color: Colors.grey[300], thickness: 0.8),
+
+                              // 🏠 Current Birds (Highlighted)
+                              _buildSummaryRow(
+                                icon: Icons.pets,
+                                label: 'CURRENT_BIRDS'.tr(),
+                                value: '$current_birds',
+                                valueColor: Colors.black,
+                                isBold: true,
+                                fontSize: 18,
+                              ),
+
+                              SizedBox(height: 15),
+                              if (_isNativeAdLoaded && _myNativeAd != null)
+                                Container(
+                                  height: 90,
+                                  margin: const EdgeInsets.only(bottom: 10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: AdWidget(ad: _myNativeAd),
+                                ),
+
+
+                              // 📊 Birds Added Per Flock Title
+                              Text(
+                                'By Flock'.tr(),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Utils.getThemeColorBlue(),
+                                ),
+                              ),
+                              SizedBox(height: 8),
+
+                              // 🐥 Birds Added Per Flock List
+                              ListView.separated(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                itemCount: additionsSummary.length,
+                                separatorBuilder: (context, index) => Divider(color: Colors.grey[300], thickness: 0.8),
+                                itemBuilder: (context, index) {
+                                  FlockSummary summary = additionsSummary[index];
+
+                                  // Calculate percentage change
+                                  int netChange = summary.totalAdded - summary.totalReduced;
+                                  double percentageChange = summary.totalAdded > 0
+                                      ? (netChange / summary.totalAdded) * 100
+                                      : 0;
+
+                                  // Determine color based on net change
+                                  Color changeColor = netChange >= 0 ? Colors.green.shade700 : Colors.red.shade700;
+                                  String changeSymbol = netChange >= 0 ? '+' : ''; // Add "+" only for positive values
+
+                                  return ListTile(
+                                    leading: Icon(
+                                      netChange >= 0 ? Icons.trending_up : Icons.trending_down,
+                                      color: changeColor,
+                                      size: 28,
+                                    ),
+                                    title: Text(
+                                      summary.flockName,
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                    ),
+                                    subtitle: Row(
+                                      children: [
+                                        Text(
+                                          'Added'.tr()+': ${summary.totalAdded}  ',
+                                          style: TextStyle(fontSize: 12, color: Colors.green.shade700),
+                                        ),
+                                        Text(
+                                          'Reduced'.tr()+': ${summary.totalReduced}',
+                                          style: TextStyle(fontSize: 12, color: Colors.red.shade700),
+                                        ),
+                                      ],
+                                    ),
+                                    trailing: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          '$changeSymbol${netChange}',
+                                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: changeColor),
+                                        ),
+                                        Text(
+                                          '(${percentageChange.toStringAsFixed(1)}%)',
+                                          style: TextStyle(fontSize: 12, color: changeColor),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Title
+                                  Text(
+                                    'Reduction By Reason'.tr(),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Utils.getThemeColorBlue(),
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+
+                                  // Using `map()` inside Column with SingleChildScrollView
+                                  SingleChildScrollView(
+                                    child: Column(
+                                      children: reductionByReason.map((reduction) {
+                                        return Card(
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                          elevation: 4,
+                                          margin: EdgeInsets.symmetric(vertical: 5, horizontal: 8),
+                                          child: ListTile(
+                                            leading: CircleAvatar(
+                                              backgroundColor: Colors.redAccent,
+                                              child: Icon(Icons.trending_down, color: Colors.white),
+                                            ),
+                                            title: Text(
+                                              reduction.reason.tr(),
+                                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                            ),
+                                            subtitle: Text(
+                                              "TOTAL".tr()+" ${reduction.totalCount}",
+                                              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ],
+                              )
+
+
+                            ],
                           ),
-                        ],
-                      )
+                        ),
+                      ),
 
 
-                    ],
-                  ),
-                ),
-              ),
-
-
-            ]
-      ),),),),),);
+                    ]
+                ),))
+            ],),),),);
   }
 
   /// 📌 **Reusable Summary Row**

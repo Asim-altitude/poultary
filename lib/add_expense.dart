@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:poultary/model/sub_category_item.dart';
@@ -36,7 +37,8 @@ class _NewExpense extends State<NewExpense>
     with SingleTickerProviderStateMixin {
   double widthScreen = 0;
   double heightScreen = 0;
-
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
   @override
   void dispose() {
     howmanyController.removeListener(_updateAmount);
@@ -44,6 +46,11 @@ class _NewExpense extends State<NewExpense>
     howmanyController.dispose();
     unitPriceController.dispose();
     amountController.dispose();
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
+
+    }
     super.dispose();
   }
 
@@ -121,11 +128,33 @@ class _NewExpense extends State<NewExpense>
     getExpenseCategoryList();
     getPayMethodList();
     Utils.showInterstitial();
-    Utils.setupAds();
-
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+    }
     AnalyticsUtil.logScreenView(screenName: "add_expense");
   }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
 
+    _bannerAd.load();
+  }
   void _updateAmount() {
     try {
       final howMany = double.tryParse(howmanyController.text) ?? 0;
@@ -663,12 +692,14 @@ class _NewExpense extends State<NewExpense>
           width: widthScreen,
           height: heightScreen,
           color: Utils.getScreenBackground(),
-          child: SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-              children: [
-                Utils.getDistanceBar(),
+          child:Column(children: [
+            Utils.showBannerAd(_bannerAd, _isBannerAdReady),
 
-                /*ClipRRect(
+            Expanded(child:  SingleChildScrollView(
+              child: Column(
+                children: [
+
+                  /*ClipRRect(
                   borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                   child: Container(
                     decoration: BoxDecoration(
@@ -699,304 +730,304 @@ class _NewExpense extends State<NewExpense>
                   ),
                 ),
     */
-                EasyStepper(
-                  activeStep: activeStep,
-                  activeStepTextColor: Colors.blue.shade900,
-                  finishedStepTextColor: Utils.getThemeColorBlue(),
-                  internalPadding: 20, // Reduce padding for better spacing
-                  stepShape: StepShape.circle,
-                  stepBorderRadius: 20,
-                  borderThickness: 3, // Balanced progress line thickness
-                  showLoadingAnimation: false,
-                  stepRadius: 15, // Reduced step size to fit screen
-                  showStepBorder: false,
-                  lineStyle: LineStyle(
-                    lineLength: 50,
-                    lineType: LineType.normal,
-                    defaultLineColor: Colors.grey.shade300,
-                    activeLineColor: Colors.blueAccent,
-                    finishedLineColor: Utils.getThemeColorBlue(),
+                  EasyStepper(
+                    activeStep: activeStep,
+                    activeStepTextColor: Colors.blue.shade900,
+                    finishedStepTextColor: Utils.getThemeColorBlue(),
+                    internalPadding: 20, // Reduce padding for better spacing
+                    stepShape: StepShape.circle,
+                    stepBorderRadius: 20,
+                    borderThickness: 3, // Balanced progress line thickness
+                    showLoadingAnimation: false,
+                    stepRadius: 15, // Reduced step size to fit screen
+                    showStepBorder: false,
+                    lineStyle: LineStyle(
+                      lineLength: 50,
+                      lineType: LineType.normal,
+                      defaultLineColor: Colors.grey.shade300,
+                      activeLineColor: Colors.blueAccent,
+                      finishedLineColor: Utils.getThemeColorBlue(),
+                    ),
+                    steps: [
+                      EasyStep(
+                        customStep: _buildStepIcon(Icons.wallet_giftcard, 0),
+                        title: 'Expense'.tr(),
+                      ),
+                      EasyStep(
+                        customStep: _buildStepIcon(Icons.payments, 1),
+                        title: 'Payment Info'.tr(),
+                      ),
+                      EasyStep(
+                        customStep: _buildStepIcon(Icons.date_range, 1),
+                        title: 'DATE'.tr(),
+                      ),
+
+                    ],
+                    onStepReached: (index) => setState(() => activeStep = index),
                   ),
-                  steps: [
-                    EasyStep(
-                      customStep: _buildStepIcon(Icons.wallet_giftcard, 0),
-                      title: 'Expense'.tr(),
-                    ),
-                    EasyStep(
-                      customStep: _buildStepIcon(Icons.payments, 1),
-                      title: 'Payment Info'.tr(),
-                    ),
-                    EasyStep(
-                      customStep: _buildStepIcon(Icons.date_range, 1),
-                      title: 'DATE'.tr(),
-                    ),
 
-                  ],
-                  onStepReached: (index) => setState(() => activeStep = index),
-                ),
+                  Container(
+                    alignment: Alignment.center,
 
-                Container(
-                  alignment: Alignment.center,
-
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(height: 10,width: widthScreen),
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(height: 0,width: widthScreen),
 
 
-                        activeStep == 0? Container(
-                          margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                          padding: EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.15),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                                offset: Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Title
-                              Center(
-                                child: Text(
-                                  isEdit ? "EDIT".tr() + " " + "Expense".tr() : "NEW_EXPENSE".tr(),
-                                  style: TextStyle(
-                                    color: Utils.getThemeColorBlue(),
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                          activeStep == 0? Container(
+                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
                                 ),
-                              ),
-                              SizedBox(height: 20),
-
-                              // Flock Selection
-                              _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
-                              SizedBox(height: 8),
-                              _buildDropdownField(getDropDownList()),
-
-                              SizedBox(height: 20),
-
-                              // Expense Item Selection
-                              _buildInputLabel("Expense Item".tr(), Icons.assignment),
-                              SizedBox(height: 8),
-                              _buildDropdownField(getSaleTypeList()),
-
-                              if (is_bird_sale && is_specific_flock)
-                                Padding(
-                                  padding: EdgeInsets.only(top: 10),
-                                  child: Center(
-                                    child: Text(
-                                      "Auto_addition".tr(),
-                                      style: TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.w200),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Title
+                                Center(
+                                  child: Text(
+                                    isEdit ? "EDIT".tr() + " " + "Expense".tr() : "NEW_EXPENSE".tr(),
+                                    style: TextStyle(
+                                      color: Utils.getThemeColorBlue(),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
-
-                              // Income Categories (if applicable)
-                              if (choose_option) ...[
                                 SizedBox(height: 20),
-                                _buildInputLabel("Expense Categories".tr(), Icons.category),
+
+                                // Flock Selection
+                                _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
                                 SizedBox(height: 8),
+                                _buildDropdownField(getDropDownList()),
+
+                                SizedBox(height: 20),
+
+                                // Expense Item Selection
+                                _buildInputLabel("Expense Item".tr(), Icons.assignment),
+                                SizedBox(height: 8),
+                                _buildDropdownField(getSaleTypeList()),
+
+                                if (is_bird_sale && is_specific_flock)
+                                  Padding(
+                                    padding: EdgeInsets.only(top: 10),
+                                    child: Center(
+                                      child: Text(
+                                        "Auto_addition".tr(),
+                                        style: TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.w200),
+                                      ),
+                                    ),
+                                  ),
+
+                                // Income Categories (if applicable)
+                                if (choose_option) ...[
+                                  SizedBox(height: 20),
+                                  _buildInputLabel("Expense Categories".tr(), Icons.category),
+                                  SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Expanded(child: _buildDropdownField(getMySaleOptionsList())),
+                                      SizedBox(width: 10),
+                                      _buildAddButton(addNewExpenseOption),
+                                    ],
+                                  ),
+                                ],
+
+                                SizedBox(height: 20),
+
+                                // How Much & Expense Amount
                                 Row(
                                   children: [
-                                    Expanded(child: _buildDropdownField(getMySaleOptionsList())),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          _buildInputLabel("Quantity".tr(), Icons.confirmation_num,),
+                                          SizedBox(height: 8),
+                                          _buildNumberField(howmanyController, "Quantity".tr(), readOnly: !is_specific_flock && is_bird_sale, onTap: () {
+                                            if (!is_specific_flock && is_bird_sale) showBottomDialog();
+                                          }),
+                                        ],
+                                      ),
+                                    ),
                                     SizedBox(width: 10),
-                                    _buildAddButton(addNewExpenseOption),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          _buildInputLabel("UNIT_PRICE".tr(), Icons.attach_money),
+                                          SizedBox(height: 8),
+                                          _buildNumberField(unitPriceController, "UNIT_PRICE".tr(), allowFloat: true),
+                                        ],
+                                      ),
+                                    ),
+
+                                  ],
+                                ),
+                                SizedBox(height: 10),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildInputLabel("Amount".tr(), Icons.attach_money),
+                                    SizedBox(height: 8),
+                                    _buildNumberField(amountController, "Amount".tr(), allowFloat: true),
                                   ],
                                 ),
                               ],
+                            ),
+                          )
+                              : SizedBox(width: 1),
 
-                              SizedBox(height: 20),
-
-                              // How Much & Expense Amount
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        _buildInputLabel("Quantity".tr(), Icons.confirmation_num,),
-                                        SizedBox(height: 8),
-                                        _buildNumberField(howmanyController, "Quantity".tr(), readOnly: !is_specific_flock && is_bird_sale, onTap: () {
-                                          if (!is_specific_flock && is_bird_sale) showBottomDialog();
-                                        }),
-                                      ],
+                          activeStep == 1?  Container(
+                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Title
+                                Center(
+                                  child: Text(
+                                    "Payment Info".tr(),
+                                    style: TextStyle(
+                                      color: Utils.getThemeColorBlue(),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  SizedBox(width: 10),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        _buildInputLabel("UNIT_PRICE".tr(), Icons.attach_money),
-                                        SizedBox(height: 8),
-                                        _buildNumberField(unitPriceController, "UNIT_PRICE".tr(), allowFloat: true),
-                                      ],
+                                ),
+                                SizedBox(height: 20),
+
+                                // Payment Method
+                                _buildInputLabel("Payment Method".tr(), Icons.payment),
+                                SizedBox(height: 8),
+                                _buildDropdownField(getPaymentMethodList()),
+
+                                SizedBox(height: 20),
+
+                                // Payment Status
+                                _buildInputLabel("Payment Status".tr(), Icons.check_circle),
+                                SizedBox(height: 8),
+                                _buildDropdownField(getPaymentStatusList()),
+
+                                SizedBox(height: 20),
+
+                                // Sold To
+                                _buildInputLabel("PAID_TO1".tr(), Icons.person),
+                                SizedBox(height: 8),
+                                _buildInputField(soldtoController, "PAID_TO_HINT".tr(), Icons.person),
+                              ],
+                            ),
+                          ) : SizedBox(width: 1),
+
+                          activeStep == 2?  Container(
+                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Title
+                                Center(
+                                  child: Text(
+                                    "Date_DESC".tr(),
+                                    style: TextStyle(
+                                      color: Utils.getThemeColorBlue(),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-
-                                ],
-                              ),
-                              SizedBox(height: 10),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildInputLabel("Amount".tr(), Icons.attach_money),
-                                  SizedBox(height: 8),
-                                  _buildNumberField(amountController, "Amount".tr(), allowFloat: true),
-                                ],
-                              ),
-                            ],
-                          ),
-                        )
-                            : SizedBox(width: 1),
-
-                        activeStep == 1?  Container(
-                          margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                          padding: EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.15),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                                offset: Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Title
-                              Center(
-                                child: Text(
-                                  "Payment Info".tr(),
-                                  style: TextStyle(
-                                    color: Utils.getThemeColorBlue(),
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 20),
+                                SizedBox(height: 20),
 
-                              // Payment Method
-                              _buildInputLabel("Payment Method".tr(), Icons.payment),
-                              SizedBox(height: 8),
-                              _buildDropdownField(getPaymentMethodList()),
-
-                              SizedBox(height: 20),
-
-                              // Payment Status
-                              _buildInputLabel("Payment Status".tr(), Icons.check_circle),
-                              SizedBox(height: 8),
-                              _buildDropdownField(getPaymentStatusList()),
-
-                              SizedBox(height: 20),
-
-                              // Sold To
-                              _buildInputLabel("PAID_TO1".tr(), Icons.person),
-                              SizedBox(height: 8),
-                              _buildInputField(soldtoController, "PAID_TO_HINT".tr(), Icons.person),
-                            ],
-                          ),
-                        ) : SizedBox(width: 1),
-
-                        activeStep == 2?  Container(
-                          margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                          padding: EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.15),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                                offset: Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Title
-                              Center(
-                                child: Text(
-                                  "Date_DESC".tr(),
-                                  style: TextStyle(
-                                    color: Utils.getThemeColorBlue(),
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: 20),
-
-                              // Date Selection
-                              _buildInputLabel("DATE".tr(), Icons.calendar_today),
-                              SizedBox(height: 8),
-                              Container(
-                                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withAlpha(70),
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(color: Colors.grey, width: 1),
-                                ),
-                                child: InkWell(
-                                  onTap: () {
-                                    pickDate();
-                                  },
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.calendar_today, color: Colors.black54),
-                                      SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          Utils.getFormattedDate(date),
-                                          style: TextStyle(color: Colors.black, fontSize: 16),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-
-                              SizedBox(height: 20),
-
-                              // Notes Input
-                              _buildInputLabel("DESCRIPTION_1".tr(), Icons.notes),
-                              SizedBox(height: 8),
-                              TextFormField(
-                                maxLines: 2,
-                                controller: notesController,
-                                keyboardType: TextInputType.multiline,
-                                textInputAction: TextInputAction.done,
-                                decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: Colors.white.withAlpha(70),
-                                  border: OutlineInputBorder(
+                                // Date Selection
+                                _buildInputLabel("DATE".tr(), Icons.calendar_today),
+                                SizedBox(height: 8),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withAlpha(70),
                                     borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide(color: Colors.grey),
+                                    border: Border.all(color: Colors.grey, width: 1),
                                   ),
-                                  hintText: "NOTES_HINT".tr(),
-                                  hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
+                                  child: InkWell(
+                                    onTap: () {
+                                      pickDate();
+                                    },
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.calendar_today, color: Colors.black54),
+                                        SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text(
+                                            Utils.getFormattedDate(date),
+                                            style: TextStyle(color: Colors.black, fontSize: 16),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ) : SizedBox(width: 1),
 
-                        /*SizedBox(height: 10,width: widthScreen),
+                                SizedBox(height: 20),
+
+                                // Notes Input
+                                _buildInputLabel("DESCRIPTION_1".tr(), Icons.notes),
+                                SizedBox(height: 8),
+                                TextFormField(
+                                  maxLines: 2,
+                                  controller: notesController,
+                                  keyboardType: TextInputType.multiline,
+                                  textInputAction: TextInputAction.done,
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white.withAlpha(70),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                      borderSide: BorderSide(color: Colors.grey),
+                                    ),
+                                    hintText: "NOTES_HINT".tr(),
+                                    hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ) : SizedBox(width: 1),
+
+                          /*SizedBox(height: 10,width: widthScreen),
                         InkWell(
                           onTap: () async {
 
@@ -1115,11 +1146,12 @@ class _NewExpense extends State<NewExpense>
                           ),
                         )*/
 
-                      ]),
-                ),
-              ],
-            ),
-          ),
+                        ]),
+                  ),
+                ],
+              ),
+            ),)
+          ],)
         ),
       ),
     );

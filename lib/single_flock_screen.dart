@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:poultary/app_intro/image_slider.dart';
 import 'package:poultary/model/flock_detail.dart';
@@ -78,7 +79,11 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
   @override
   void dispose() {
     super.dispose();
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
 
+    }
   }
 
   String date = "Choose date";
@@ -95,6 +100,9 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
   List<Flock_Image> images = [];
   List<Uint8List> byteimages = [];
   List<BirdUsage> birdUsageList = [];
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
+
   void getImages() async {
 
    await DatabaseHelper.instance.database;
@@ -321,9 +329,33 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
     getUsage();
     addEggColorColumn();
     getAllCategories();
-    Utils.setupAds();
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+    }
 
     AnalyticsUtil.logScreenView(screenName: "single_flock_screen");
+  }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
   }
 
   int mortalityCount = 0,cullingCount = 0;
@@ -428,12 +460,14 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
           width: widthScreen,
           height: heightScreen,
             color: Utils.getThemeColorBlue(), // Customize the color
-            child: SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-             children:  [
-              Utils.getDistanceBar(),
+            child:Column(children: [
+              Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+              Expanded(child:SingleChildScrollView(
+                child: Column(
+                    children:  [
+                      // Utils.getDistanceBar(),
 
-              /*ClipRRect(
+                      /*ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
@@ -492,126 +526,61 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                   ),
                 ),
               ),*/
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-
-                    /// **Flock Name (Title)**
-                    Center(
-                      child: Text(
-                        Utils.selected_flock!.f_name,
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
-                    ),
-
-                    SizedBox(height: 8),
-
-                    /// **Flock Details Row**
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        /// 🐦 Flock Image + Acquisition Type
-                        Column(
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            InkWell(
-                              onTap: () {
-                                if(byteimages.length==0){
-                                  String defaultImage = '${Utils.selected_flock!.icon.replaceAll("jpeg", "png")}';
 
-                                  showAssetImageDialog(context, defaultImage);
-                                }else {
-                                  _showFullScreenImage(context, byteimages, 0);
-                                }
-                              },
-                              child: Container(
-                                width: 120,
-                                height: 120,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black26,
-                                      blurRadius: 6,
-                                      offset: Offset(0, 3),
+                            /// **Flock Name (Title)**
+                            Center(
+                              child: Text(
+                                Utils.selected_flock!.f_name,
+                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                              ),
+                            ),
+
+                            SizedBox(height: 8),
+
+                            /// **Flock Details Row**
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                /// 🐦 Flock Image + Acquisition Type
+                                Column(
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        if(byteimages.length==0){
+                                          String defaultImage = '${Utils.selected_flock!.icon.replaceAll("jpeg", "png")}';
+
+                                          showAssetImageDialog(context, defaultImage);
+                                        }else {
+                                          _showFullScreenImage(context, byteimages, 0);
+                                        }
+                                      },
+                                      child: Container(
+                                        width: 120,
+                                        height: 120,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(12),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black26,
+                                              blurRadius: 6,
+                                              offset: Offset(0, 3),
+                                            ),
+                                          ],
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(12),
+                                          child: buildImageGrid(byteimages),
+                                        ),
+                                      ),
                                     ),
-                                  ],
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: buildImageGrid(byteimages),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              Utils.selected_flock!.acqusition_type.tr(),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(width: 16),
-
-                        /// 📋 Details Section
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              /// 🔢 Bird Count
-
-                              InkWell(
-                                onTap: () async {
-                                  await _showFlockBatchesBottomSheet(context);
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.all(5.0),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white12,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        Utils.selected_flock!.active_bird_count.toString(),
-                                        style: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        "BIRDS".tr(),
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.white70,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-
-                              const SizedBox(height: 8),
-
-                              /// 🎯 Purpose
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Icon(Icons.assignment, color: Colors.white70, size: 18),
-                                  const SizedBox(width: 6),
-                                  Text('PURPOSE1'.tr() + ": ",
-                                      style: const TextStyle(fontSize: 12, color: Colors.white70)),
-                                  Expanded(
-                                    child: Text(
-                                      Utils.selected_flock!.purpose.tr(),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      Utils.selected_flock!.acqusition_type.tr(),
                                       style: const TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.bold,
@@ -619,227 +588,292 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 8),
-
-                              /// 🕒 Age
-                              Row(
-                                children: [
-                                  const Icon(Icons.watch_later_outlined, color: Colors.white70, size: 18),
-                                  const SizedBox(width: 6),
-                                  Text('Age'.tr() + ": ",
-                                      style: const TextStyle(fontSize: 12, color: Colors.white70)),
-                                  Text(
-                                    ageInWeeks? Utils.getAnimalAgeWeeks(Utils.selected_flock!.acqusition_date):Utils.getAnimalAge(Utils.selected_flock!.acqusition_date),
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  SizedBox(width: 10,),
-                                  InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        ageInWeeks = !ageInWeeks;
-                                      });
-                                    },
-                                      child: const Icon(Icons.switch_camera_outlined, color: Colors.white70, size: 22)),
-
-                                ],
-                              ),
-
-                              const SizedBox(height: 8),
-
-                              /// 📅 Acquisition Date
-                              Row(
-                                children: [
-                                  const Icon(Icons.calendar_today, color: Colors.white70, size: 18),
-                                  const SizedBox(width: 6),
-                                  Text('DATE'.tr() + ": ",
-                                      style: const TextStyle(fontSize: 12, color: Colors.white70)),
-                                  Text(
-                                    Utils.getFormattedDate(Utils.selected_flock!.acqusition_date),
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    Center(
-                      child: InkWell(
-                        onTap: () async{
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => WeightRecordScreen(
-                                flockId: Utils.selected_flock!.f_id,
-                                birdsCount: Utils.selected_flock!.active_bird_count!,
-                              ),
-                            ),
-                          );
-
-                          refreshData();
-                        },
-                        child: Card(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          color: Colors.white12,
-                          elevation: 2,
-                          margin: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.monitor_weight, color: Colors.white70),
-                                SizedBox(width: 8),
-                                Text(
-                                  'AVG Weight'.tr() + ": ",
-                                  style: TextStyle(fontSize: 14, color: Colors.white70),
+                                  ],
                                 ),
-                                Text(
-                                  weightRecord != null
-                                      ? "${weightRecord!.averageWeight} ${Utils.selected_unit.tr()}"
-                                      : 'No Records'.tr(),
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+
+                                const SizedBox(width: 16),
+
+                                /// 📋 Details Section
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      /// 🔢 Bird Count
+
+                                      InkWell(
+                                        onTap: () async {
+                                          await _showFlockBatchesBottomSheet(context);
+                                        },
+                                        child: Container(
+                                          padding: EdgeInsets.all(5.0),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white12,
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                Utils.selected_flock!.active_bird_count.toString(),
+                                                style: const TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                "BIRDS".tr(),
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                  color: Colors.white70,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 8),
+
+                                      /// 🎯 Purpose
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Icon(Icons.assignment, color: Colors.white70, size: 18),
+                                          const SizedBox(width: 6),
+                                          Text('PURPOSE1'.tr() + ": ",
+                                              style: const TextStyle(fontSize: 12, color: Colors.white70)),
+                                          Expanded(
+                                            child: Text(
+                                              Utils.selected_flock!.purpose.tr(),
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+
+                                      const SizedBox(height: 8),
+
+                                      /// 🕒 Age
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.watch_later_outlined, color: Colors.white70, size: 18),
+                                          const SizedBox(width: 6),
+                                          Text('Age'.tr() + ": ",
+                                              style: const TextStyle(fontSize: 12, color: Colors.white70)),
+                                          Text(
+                                            ageInWeeks? Utils.getAnimalAgeWeeks(Utils.selected_flock!.acqusition_date):Utils.getAnimalAge(Utils.selected_flock!.acqusition_date),
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          SizedBox(width: 10,),
+                                          InkWell(
+                                              onTap: () {
+                                                setState(() {
+                                                  ageInWeeks = !ageInWeeks;
+                                                });
+                                              },
+                                              child: const Icon(Icons.switch_camera_outlined, color: Colors.white70, size: 22)),
+
+                                        ],
+                                      ),
+
+                                      const SizedBox(height: 8),
+
+                                      /// 📅 Acquisition Date
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.calendar_today, color: Colors.white70, size: 18),
+                                          const SizedBox(width: 6),
+                                          Text('DATE'.tr() + ": ",
+                                              style: const TextStyle(fontSize: 12, color: Colors.white70)),
+                                          Text(
+                                            Utils.getFormattedDate(Utils.selected_flock!.acqusition_date),
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                SizedBox(width: 8),
-                                Icon(Icons.arrow_forward_ios_rounded, color: Colors.white54, size: 18),
                               ],
                             ),
-                          ),
-                        ),
-                      ),
-                    ),
 
-                    /// **Notes Section**
-                    if (Utils.selected_flock!.notes.isNotEmpty)
-                      Container(
-                        padding: EdgeInsets.all(10),
-                        margin: EdgeInsets.only(left: 5, right: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white12,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          Utils.selected_flock!.notes,
-                          style: TextStyle(fontSize: 14, color: Colors.white70),
-                        ),
-                      ),
+                            Center(
+                              child: InkWell(
+                                onTap: () async{
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => WeightRecordScreen(
+                                        flockId: Utils.selected_flock!.f_id,
+                                        birdsCount: Utils.selected_flock!.active_bird_count!,
+                                      ),
+                                    ),
+                                  );
+
+                                  refreshData();
+                                },
+                                child: Card(
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  color: Colors.white12,
+                                  elevation: 2,
+                                  margin: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.monitor_weight, color: Colors.white70),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'AVG Weight'.tr() + ": ",
+                                          style: TextStyle(fontSize: 14, color: Colors.white70),
+                                        ),
+                                        Text(
+                                          weightRecord != null
+                                              ? "${weightRecord!.averageWeight} ${Utils.selected_unit.tr()}"
+                                              : 'No Records'.tr(),
+                                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Icon(Icons.arrow_forward_ios_rounded, color: Colors.white54, size: 18),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            /// **Notes Section**
+                            if (Utils.selected_flock!.notes.isNotEmpty)
+                              Container(
+                                padding: EdgeInsets.all(10),
+                                margin: EdgeInsets.only(left: 5, right: 5),
+                                decoration: BoxDecoration(
+                                  color: Colors.white12,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  Utils.selected_flock!.notes,
+                                  style: TextStyle(fontSize: 14, color: Colors.white70),
+                                ),
+                              ),
 
 
-                    Card(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      color: Utils.getScreenBackground(),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Title Row
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
+                            Card(
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              color: Utils.getScreenBackground(),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      "MORTALITY".tr()+"/"+ "CULLING".tr(),
-                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.red),
+                                    // Title Row
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+                                            SizedBox(width: 8),
+                                            Text(
+                                              "MORTALITY".tr()+"/"+ "CULLING".tr(),
+                                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.red),
+                                            ),
+                                          ],
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            _showAddMortalityDialog(context); // Modified dialog to choose between Mortality / Culling
+                                          },
+                                          child: Icon(Icons.add_circle_outline, color: Utils.getThemeColorBlue(), size: 30),
+                                        ),
+                                      ],
+                                    ),
+
+                                    SizedBox(height: 5),
+
+                                    // Mortality Row
+                                    GestureDetector(
+                                      onTap: () {
+                                        _showMortalityRecordsDialog(context, 'MORTALITY');
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            "MORTALITY".tr(),
+                                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                mortalityCount > 0 ? "$mortalityCount ${'BIRDS'.tr()}" : "No Records".tr(),
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: mortalityCount > 0 ? Colors.black : Colors.grey,
+                                                ),
+                                              ),
+                                              Icon(Icons.arrow_forward_ios_rounded, size: 20, color: Colors.grey,),
+                                            ],
+                                          ),
+
+                                        ],
+                                      ),
+                                    ),
+
+                                    SizedBox(height: 5),
+
+                                    // Culling Row
+                                    GestureDetector(
+                                      onTap: () {
+                                        _showMortalityRecordsDialog(context, 'CULLING');
+
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            "CULLING".tr(),
+                                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                cullingCount > 0 ? "$cullingCount ${'BIRDS'.tr()}" : "No Records".tr(),
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: cullingCount > 0 ? Colors.black : Colors.grey,
+                                                ),
+                                              ),
+                                              Icon(Icons.arrow_forward_ios_rounded, size: 20, color: Colors.grey,),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
-                                GestureDetector(
-                                  onTap: () {
-                                    _showAddMortalityDialog(context); // Modified dialog to choose between Mortality / Culling
-                                  },
-                                  child: Icon(Icons.add_circle_outline, color: Utils.getThemeColorBlue(), size: 30),
-                                ),
-                              ],
-                            ),
-
-                            SizedBox(height: 5),
-
-                            // Mortality Row
-                            GestureDetector(
-                              onTap: () {
-                                _showMortalityRecordsDialog(context, 'MORTALITY');
-                              },
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "MORTALITY".tr(),
-                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                                  ),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        mortalityCount > 0 ? "$mortalityCount ${'BIRDS'.tr()}" : "No Records".tr(),
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: mortalityCount > 0 ? Colors.black : Colors.grey,
-                                        ),
-                                      ),
-                                      Icon(Icons.arrow_forward_ios_rounded, size: 20, color: Colors.grey,),
-                                    ],
-                                  ),
-
-                                ],
                               ),
                             ),
 
-                            SizedBox(height: 5),
-
-                            // Culling Row
-                            GestureDetector(
-                              onTap: () {
-                                _showMortalityRecordsDialog(context, 'CULLING');
-
-                              },
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "CULLING".tr(),
-                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                                  ),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        cullingCount > 0 ? "$cullingCount ${'BIRDS'.tr()}" : "No Records".tr(),
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: cullingCount > 0 ? Colors.black : Colors.grey,
-                                        ),
-                                      ),
-                                      Icon(Icons.arrow_forward_ios_rounded, size: 20, color: Colors.grey,),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    /*/// **Images List**
+                            /*/// **Images List**
                     if (imagesAdded)
                       Container(
                         height: 80,
@@ -906,76 +940,76 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                             );
                           },
                         ),),*/
-                  ],
-                ),
-              ),
-              Container(
-                height: heightScreen,
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-                  color: Utils.getScreenBackground(),
-
-                ),
-                child: Column(
-                  children: [
-                    Stack(
-                      children: [
-                        Container(
-                          margin: EdgeInsets.only(top: 5),
-                          alignment: Alignment.center,
-                          child: Text(
-                            "Manage_Flock_1".tr(),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: Utils.getThemeColorBlue(),
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold),
-                          ),
+                          ],
                         ),
-                        InkWell(
-                          onTap: () async {
-                            await DatabaseHelper.createCustomCategoriesTableIfNotExists();
+                      ),
+                      Container(
+                        height: heightScreen,
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+                          color: Utils.getScreenBackground(),
 
-                            await Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                  builder: (context) =>  CustomCategoryScreen(customCategory: null,)),
-                            );
-
-                            getAllCategories();
-
-                          },
-                          child: Align(
-                              alignment: Alignment.centerRight,
-                              child: Container(
-                                  width: 50,
+                        ),
+                        child: Column(
+                          children: [
+                            Stack(
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.only(top: 5),
                                   alignment: Alignment.center,
-                                  padding: EdgeInsets.all(7),
-                                  margin: EdgeInsets.only(right: 10),
-                                  decoration: BoxDecoration(
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.5),
-                                        spreadRadius: 2,
-                                        blurRadius: 2,
-                                        offset: Offset(0, 1), // changes position of shadow
-                                      ),
-                                    ],
-                                    color: Utils.getThemeColorBlue(),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(10.0)),
-                                    border: Border.all(
-                                      color:  Utils.getThemeColorBlue(),
-                                      width: 2.0,
-                                    ),
-                                  ),child: Text("+", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 20, color: Colors.white),))),
-                        ),
-                      ],
-                    ),
+                                  child: Text(
+                                    "Manage_Flock_1".tr(),
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        color: Utils.getThemeColorBlue(),
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () async {
+                                    await DatabaseHelper.createCustomCategoriesTableIfNotExists();
 
-                    SizedBox(width: widthScreen, height: 20,),
-                  /*  Row(
+                                    await Navigator.push(
+                                      context,
+                                      CupertinoPageRoute(
+                                          builder: (context) =>  CustomCategoryScreen(customCategory: null,)),
+                                    );
+
+                                    getAllCategories();
+
+                                  },
+                                  child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Container(
+                                          width: 50,
+                                          alignment: Alignment.center,
+                                          padding: EdgeInsets.all(7),
+                                          margin: EdgeInsets.only(right: 10),
+                                          decoration: BoxDecoration(
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.grey.withOpacity(0.5),
+                                                spreadRadius: 2,
+                                                blurRadius: 2,
+                                                offset: Offset(0, 1), // changes position of shadow
+                                              ),
+                                            ],
+                                            color: Utils.getThemeColorBlue(),
+                                            borderRadius: const BorderRadius.all(
+                                                Radius.circular(10.0)),
+                                            border: Border.all(
+                                              color:  Utils.getThemeColorBlue(),
+                                              width: 2.0,
+                                            ),
+                                          ),child: Text("+", style: TextStyle( fontWeight: FontWeight.normal, fontSize: 20, color: Colors.white),))),
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(width: widthScreen, height: 20,),
+                            /*  Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                       Expanded(
@@ -1308,141 +1342,141 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                         ),
                       ],
                     ),*/
-                   GridView.builder(
-                     shrinkWrap: true, // ✅ important!
-                     physics: NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 5.0,
-                          mainAxisSpacing: 5.0,
-                          childAspectRatio: 1.0,
-                        ),
-                        itemCount: defaultcategories.length,
-                        itemBuilder: (context, index) {
-                          final category = defaultcategories[index];
-                          return InkWell(
-                            onTap: () {
-                              if (index == 0) {
+                            GridView.builder(
+                              shrinkWrap: true, // ✅ important!
+                              physics: NeverScrollableScrollPhysics(),
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                crossAxisSpacing: 5.0,
+                                mainAxisSpacing: 5.0,
+                                childAspectRatio: 1.0,
+                              ),
+                              itemCount: defaultcategories.length,
+                              itemBuilder: (context, index) {
+                                final category = defaultcategories[index];
+                                return InkWell(
+                                  onTap: () {
+                                    if (index == 0) {
 
-                                if(Utils.isMultiUSer && !Utils.hasFeaturePermission("view_birds"))
-                                {
-                                  Utils.showMissingPermissionDialog(context, "view_birds");
-                                  return;
-                                }
+                                      if(Utils.isMultiUSer && !Utils.hasFeaturePermission("view_birds"))
+                                      {
+                                        Utils.showMissingPermissionDialog(context, "view_birds");
+                                        return;
+                                      }
 
-                                print("Birds Modification");
-                                moveToAddReduceFlock();
-                              } else if (index == 1) {
-                                if(Utils.isMultiUSer && !Utils.hasFeaturePermission("view_eggs"))
-                                {
-                                  Utils.showMissingPermissionDialog(context, "view_eggs");
-                                  return;
-                                }
+                                      print("Birds Modification");
+                                      moveToAddReduceFlock();
+                                    } else if (index == 1) {
+                                      if(Utils.isMultiUSer && !Utils.hasFeaturePermission("view_eggs"))
+                                      {
+                                        Utils.showMissingPermissionDialog(context, "view_eggs");
+                                        return;
+                                      }
 
-                                print("Egg Collection");
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const EggCollectionScreen()),
-                                );
-                              } else if (index == 2) {
+                                      print("Egg Collection");
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => const EggCollectionScreen()),
+                                      );
+                                    } else if (index == 2) {
 
-                                if(Utils.isMultiUSer && !Utils.hasFeaturePermission("view_feed"))
-                                {
-                                  Utils.showMissingPermissionDialog(context, "view_feed");
-                                  return;
-                                }
+                                      if(Utils.isMultiUSer && !Utils.hasFeaturePermission("view_feed"))
+                                      {
+                                        Utils.showMissingPermissionDialog(context, "view_feed");
+                                        return;
+                                      }
 
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const DailyFeedScreen()),
-                                );
-                              } else if (index == 3) {
-                                if(Utils.isMultiUSer && !Utils.hasFeaturePermission("view_health"))
-                                {
-                                  Utils.showMissingPermissionDialog(context, "view_health");
-                                  return;
-                                }
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => const DailyFeedScreen()),
+                                      );
+                                    } else if (index == 3) {
+                                      if(Utils.isMultiUSer && !Utils.hasFeaturePermission("view_health"))
+                                      {
+                                        Utils.showMissingPermissionDialog(context, "view_health");
+                                        return;
+                                      }
 
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const MedicationVaccinationScreen()),
-                                );
-                              } else if (index == 4) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => const MedicationVaccinationScreen()),
+                                      );
+                                    } else if (index == 4) {
 
-                                if(Utils.isMultiUSer && !Utils.hasFeaturePermission("view_transaction"))
-                                {
-                                  Utils.showMissingPermissionDialog(context, "view_transaction");
-                                  return;
-                                }
+                                      if(Utils.isMultiUSer && !Utils.hasFeaturePermission("view_transaction"))
+                                      {
+                                        Utils.showMissingPermissionDialog(context, "view_transaction");
+                                        return;
+                                      }
 
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const TransactionsScreen()),
-                                );
-                              } else {
-                                if(Utils.isMultiUSer && !Utils.hasFeaturePermission("view_custom_category"))
-                                {
-                                  Utils.showMissingPermissionDialog(context, "view_custom_category");
-                                  return;
-                                }
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => const TransactionsScreen()),
+                                      );
+                                    } else {
+                                      if(Utils.isMultiUSer && !Utils.hasFeaturePermission("view_custom_category"))
+                                      {
+                                        Utils.showMissingPermissionDialog(context, "view_custom_category");
+                                        return;
+                                      }
 
-                                _showOptions(index);
-                              }
-                            },
-                            child: Card(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                              elevation: 4,
-                              color: category.enabled == 1 ? Colors.white : Colors.grey[300],
-                              child: Padding(
-                                padding: const EdgeInsets.all(5.0),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    index <= 4
-                                        ? Container(
-                                      width: 35,
-                                      height: 35,
-                                      child: Image(
-                                        image: AssetImage(category.cIcon),
-                                        fit: BoxFit.fill,
-                                        color: Utils.getThemeColorBlue(),
-                                      ),
-                                    )
-                                        : Icon(category.icon, size: 35, color: Utils.getThemeColorBlue()),
-                                    SizedBox(height: 5),
-                                    Text(
-                                      category.name.tr(),
-                                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    /*Text(
+                                      _showOptions(index);
+                                    }
+                                  },
+                                  child: Card(
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                    elevation: 4,
+                                    color: category.enabled == 1 ? Colors.white : Colors.grey[300],
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(5.0),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          index <= 4
+                                              ? Container(
+                                            width: 35,
+                                            height: 35,
+                                            child: Image(
+                                              image: AssetImage(category.cIcon),
+                                              fit: BoxFit.fill,
+                                              color: Utils.getThemeColorBlue(),
+                                            ),
+                                          )
+                                              : Icon(category.icon, size: 35, color: Utils.getThemeColorBlue()),
+                                          SizedBox(height: 5),
+                                          Text(
+                                            category.name.tr(),
+                                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          /*Text(
                                       '${category.cat_type}',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(fontSize: 14, color: Colors.grey),
                                     ),*/
-                                    Text('${category.itemtype.tr()}',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(fontSize: 10, color: category.itemtype == "Collection" ? Colors.green : category.itemtype == "Default"?Colors.grey:Colors.red),
+                                          Text('${category.itemtype.tr()}',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(fontSize: 10, color: category.itemtype == "Collection" ? Colors.green : category.itemtype == "Default"?Colors.grey:Colors.red),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ],
-                                ),
-                              ),
+                                  ),
+                                );
+                              },
                             ),
-                          );
-                        },
+
+
+
+                          ],
+                        ),
                       ),
 
-
-
-                  ],
-                ),
-              ),
-
-                   /* Text(
+                      /* Text(
               "Main Menu",
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -1672,8 +1706,11 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                           builder: (context) => const EmojiTemplateScreen()),
                     );*//*
                   }),*/
-                  ]
-      ),),),),);
+                    ]
+                ),))
+            ],)
+
+            ,),),);
   }
 
 

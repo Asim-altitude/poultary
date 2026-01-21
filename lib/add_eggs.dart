@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
@@ -60,11 +61,16 @@ class _NewEggCollection extends State<NewEggCollection>
 
    bool isCollection;
   _NewEggCollection(this.isCollection);
-
+  late NativeAd _myNativeAd;
+  bool _isNativeAdLoaded = false;
   @override
   void dispose() {
     super.dispose();
+    try{
+      _myNativeAd.dispose();
+    }catch(ex){
 
+    }
   }
 
   EggTransaction? eggTransaction = null;
@@ -128,10 +134,47 @@ class _NewEggCollection extends State<NewEggCollection>
 
     getList();
     Utils.showInterstitial();
-    Utils.setupAds();
     //_loadItems();
 
     AnalyticsUtil.logScreenView(screenName: "add_eggs");
+    if(Utils.isShowAdd){
+      _loadNativeAds();
+    }
+  }
+  _loadNativeAds(){
+    _myNativeAd = NativeAd(
+      adUnitId: Utils.NativeAdUnitId,
+      request: const AdRequest(),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.small, // or medium
+        mainBackgroundColor: Colors.white,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white,
+          backgroundColor: Colors.blue,
+          style: NativeTemplateFontStyle.bold,
+          size: 14,
+        ),
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          size: 14,
+        ),
+        secondaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white70,
+          size: 12,
+        ),
+      ),
+      listener: NativeAdListener(
+        onAdLoaded: (_) => setState(() => _isNativeAdLoaded = true),
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          debugPrint('Native ad failed: $error');
+        },
+      ),
+    );
+
+
+    _myNativeAd.load();
+
   }
 
   bool consumeStock = false;
@@ -702,13 +745,24 @@ class _NewEggCollection extends State<NewEggCollection>
           width: widthScreen,
           height: heightScreen,
           color: Utils.getScreenBackground(),
-          child: SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-              children: [
-                Utils.getDistanceBar(),
+          child:Column(children: [
+            if (_isNativeAdLoaded && _myNativeAd != null)
+              Container(
+                height: 90,
+                margin: const EdgeInsets.only(bottom: 0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: AdWidget(ad: _myNativeAd),
+              ),
 
-                SizedBox(height: 10,),
-                /*ClipRRect(
+            Expanded(child:  SingleChildScrollView(
+              child: Column(
+                children: [
+
+                  SizedBox(height: 0,),
+                  /*ClipRRect(
                   borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                   child: Container(
                     decoration: BoxDecoration(
@@ -747,306 +801,306 @@ class _NewEggCollection extends State<NewEggCollection>
                     ),
                   ),
                 ),*/
-                EasyStepper(
-                  activeStep: activeStep,
-                  activeStepTextColor: Colors.blue.shade900,
-                  finishedStepTextColor: Utils.getThemeColorBlue(),
-                  internalPadding: 20, // Reduce padding for better spacing
-                  stepShape: StepShape.circle,
-                  stepBorderRadius: 20,
-                  borderThickness: 3, // Balanced progress line thickness
-                  showLoadingAnimation: false,
-                  stepRadius: 15, // Reduced step size to fit screen
-                  showStepBorder: false,
-                  lineStyle: LineStyle(
-                    lineLength: 50,
-                    lineType: LineType.normal,
-                    defaultLineColor: Colors.grey.shade300,
-                    activeLineColor: Colors.blueAccent,
-                    finishedLineColor: Utils.getThemeColorBlue(),
+                  EasyStepper(
+                    activeStep: activeStep,
+                    activeStepTextColor: Colors.blue.shade900,
+                    finishedStepTextColor: Utils.getThemeColorBlue(),
+                    internalPadding: 20, // Reduce padding for better spacing
+                    stepShape: StepShape.circle,
+                    stepBorderRadius: 20,
+                    borderThickness: 3, // Balanced progress line thickness
+                    showLoadingAnimation: false,
+                    stepRadius: 15, // Reduced step size to fit screen
+                    showStepBorder: false,
+                    lineStyle: LineStyle(
+                      lineLength: 50,
+                      lineType: LineType.normal,
+                      defaultLineColor: Colors.grey.shade300,
+                      activeLineColor: Colors.blueAccent,
+                      finishedLineColor: Utils.getThemeColorBlue(),
+                    ),
+                    steps: [
+                      EasyStep(
+                        customStep: _buildStepIcon(Icons.egg, 0),
+                        title: 'Eggs'.tr(),
+                      ),
+                      EasyStep(
+                        customStep: _buildStepIcon(Icons.color_lens, 1),
+                        title: 'DATE'.tr()+" & " +"Color".tr(),
+                      ),
+
+                    ],
+                    onStepReached: (index) => setState(() => activeStep = index),
                   ),
-                  steps: [
-                    EasyStep(
-                      customStep: _buildStepIcon(Icons.egg, 0),
-                      title: 'Eggs'.tr(),
-                    ),
-                    EasyStep(
-                      customStep: _buildStepIcon(Icons.color_lens, 1),
-                      title: 'DATE'.tr()+" & " +"Color".tr(),
-                    ),
-
-                  ],
-                  onStepReached: (index) => setState(() => activeStep = index),
-                ),
-                Container(
-                  child: Column(
-                       children: [
-                        activeStep == 0? Container(
-                          margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                          padding: EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.15),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                                offset: Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Title
-                              Center(
-                                child: Text(
-                                  isCollection
-                                      ? isEdit
-                                      ? "EDIT".tr() + " " + "COLLECTION".tr()
-                                      : "NEW".tr() + " " + "Collection".tr()
-                                      : isEdit
-                                      ? "EDIT".tr() + " " + "Reduction".tr()
-                                      : "NEW".tr() + " " + "Reduction".tr(),
-                                  style: TextStyle(
-                                    color: Utils.getThemeColorBlue(),
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                  Container(
+                    child: Column(
+                        children: [
+                          activeStep == 0? Container(
+                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Title
+                                Center(
+                                  child: Text(
+                                    isCollection
+                                        ? isEdit
+                                        ? "EDIT".tr() + " " + "COLLECTION".tr()
+                                        : "NEW".tr() + " " + "Collection".tr()
+                                        : isEdit
+                                        ? "EDIT".tr() + " " + "Reduction".tr()
+                                        : "NEW".tr() + " " + "Reduction".tr(),
+                                    style: TextStyle(
+                                      color: Utils.getThemeColorBlue(),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(height: 20),
+                                SizedBox(height: 20),
 
-                              // Choose Flock
-                              _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.list_alt),
-                              SizedBox(height: 5),
-                              _buildDropdownField(getDropDownList()),
+                                // Choose Flock
+                                _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.list_alt),
+                                SizedBox(height: 5),
+                                _buildDropdownField(getDropDownList()),
 
-                              SizedBox(height: 10),
-                              Container(
-                                margin: EdgeInsets.only(left: 10, right: 10),
-                                child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                SizedBox(height: 10),
+                                Container(
+                                  margin: EdgeInsets.only(left: 10, right: 10),
+                                  child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text("Enter in Trays".tr(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                        Switch(
+                                          value: inTrays,
+                                          activeColor: Utils.getThemeColorBlue(),
+                                          onChanged: (value) {
+                                            setState(() {
+                                              inTrays = value;
+                                              SessionManager.setBool(inTrays);
+                                              calculateTotalEggs();
+                                            });
+                                          },
+                                        ),
+                                      ]
+                                  ),
+                                ),
+
+                                inTrays? Container(
+                                  padding: EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                                  ),
+                                  child: Column(
                                     children: [
-                                      Text("Enter in Trays".tr(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                      Switch(
-                                        value: inTrays,
-                                        activeColor: Utils.getThemeColorBlue(),
-                                        onChanged: (value) {
-                                          setState(() {
-                                            inTrays = value;
-                                            SessionManager.setBool(inTrays);
-                                            calculateTotalEggs();
-                                          });
-                                        },
+
+                                      if (inTrays)
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  _buildInputLabelNoIcon("Good Trays".tr()),
+                                                  SizedBox(height: 5),
+                                                  _buildInputFieldTrays(
+                                                    traysGoodEggsController,
+                                                    "Trays count".tr(),
+                                                    Icons.check_circle,
+                                                    onChanged: (text) {
+                                                      calculateTotalEggs();
+                                                    },
+                                                    isFloat: false,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            SizedBox(width: 16),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  _buildInputLabelNoIcon("Bad Trays".tr()),
+                                                  SizedBox(height: 5),
+                                                  _buildInputFieldTrays(
+                                                    traysBadEggsController,
+                                                    "Trays count".tr(),
+                                                    Icons.cancel,
+                                                    onChanged: (text) {
+                                                      calculateTotalEggs();
+                                                    },
+                                                    isFloat: false,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+
+                                      if (inTrays)
+                                        Container(
+                                          margin: EdgeInsets.only(left: 10, right: 10),
+                                          child: Row(
+                                            children: [
+                                              Text("Eggs per Tray".tr()+": " + "$eggsPerTray", style: TextStyle(fontSize: 16)),
+                                              Spacer(),
+                                              TextButton(
+                                                onPressed: () {
+                                                  showChangeEggsPerTrayDialog(context);
+                                                },
+                                                child: Text("Change".tr(), style: TextStyle(color: Utils.getThemeColorBlue())),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ) : SizedBox(width: 1,),
+                                SizedBox(height: 10),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          _buildInputLabel("Good Eggs".tr(), Icons.egg),
+                                          SizedBox(height: 5),
+                                          _buildInputFieldIntFLoat(
+                                            goodEggsController,
+                                            "Enter Good Eggs".tr(),
+                                            Icons.check_circle,
+                                            onChanged: (text) {
+                                              good_eggs = text.isEmpty ? 0 : int.parse(text);
+                                              calculateTotalEggs();
+                                            },
+                                            isFloat: false,
+                                          ),
+                                        ],
                                       ),
-                                    ]
-                                ),
-                              ),
-
-                              inTrays? Container(
-                               padding: EdgeInsets.all(10),
-                               decoration: BoxDecoration(
-                                 color: Colors.grey.withOpacity(0.1),
-                                 borderRadius: BorderRadius.circular(14),
-                                 border: Border.all(color: Colors.grey.shade300, width: 1.2),
-                               ),
-                               child: Column(
-                                 children: [
-
-                                   if (inTrays)
-                                     Row(
-                                       children: [
-                                         Expanded(
-                                           child: Column(
-                                             crossAxisAlignment: CrossAxisAlignment.start,
-                                             children: [
-                                               _buildInputLabelNoIcon("Good Trays".tr()),
-                                               SizedBox(height: 5),
-                                               _buildInputFieldTrays(
-                                                 traysGoodEggsController,
-                                                 "Trays count".tr(),
-                                                 Icons.check_circle,
-                                                 onChanged: (text) {
-                                                   calculateTotalEggs();
-                                                 },
-                                                 isFloat: false,
-                                               ),
-                                             ],
-                                           ),
-                                         ),
-                                         SizedBox(width: 16),
-                                         Expanded(
-                                           child: Column(
-                                             crossAxisAlignment: CrossAxisAlignment.start,
-                                             children: [
-                                               _buildInputLabelNoIcon("Bad Trays".tr()),
-                                               SizedBox(height: 5),
-                                               _buildInputFieldTrays(
-                                                 traysBadEggsController,
-                                                 "Trays count".tr(),
-                                                 Icons.cancel,
-                                                 onChanged: (text) {
-                                                   calculateTotalEggs();
-                                                 },
-                                                 isFloat: false,
-                                               ),
-                                             ],
-                                           ),
-                                         ),
-                                       ],
-                                     ),
-
-                                   if (inTrays)
-                                     Container(
-                                       margin: EdgeInsets.only(left: 10, right: 10),
-                                       child: Row(
-                                         children: [
-                                           Text("Eggs per Tray".tr()+": " + "$eggsPerTray", style: TextStyle(fontSize: 16)),
-                                           Spacer(),
-                                           TextButton(
-                                             onPressed: () {
-                                               showChangeEggsPerTrayDialog(context);
-                                             },
-                                             child: Text("Change".tr(), style: TextStyle(color: Utils.getThemeColorBlue())),
-                                           ),
-                                         ],
-                                       ),
-                                     ),
-                                 ],
-                               ),
-                             ) : SizedBox(width: 1,),
-                              SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        _buildInputLabel("Good Eggs".tr(), Icons.egg),
-                                        SizedBox(height: 5),
-                                        _buildInputFieldIntFLoat(
-                                          goodEggsController,
-                                          "Enter Good Eggs".tr(),
-                                          Icons.check_circle,
-                                          onChanged: (text) {
-                                            good_eggs = text.isEmpty ? 0 : int.parse(text);
-                                            calculateTotalEggs();
-                                          },
-                                          isFloat: false,
-                                        ),
-                                      ],
                                     ),
-                                  ),
-                                  SizedBox(width: 16), // Space between the two columns
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        _buildInputLabel("Bad Eggs".tr(), Icons.egg_outlined),
-                                        SizedBox(height: 5),
-                                        _buildInputFieldIntFLoat(
-                                          badEggsController,
-                                          "Enter Bad Eggs".tr(),
-                                          Icons.cancel,
-                                          onChanged: (text) {
-                                            bad_eggs = text.isEmpty ? 0 : int.parse(text);
-                                            calculateTotalEggs();
-                                          },
-                                          isFloat: false,
-                                        ),
-                                      ],
+                                    SizedBox(width: 16), // Space between the two columns
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          _buildInputLabel("Bad Eggs".tr(), Icons.egg_outlined),
+                                          SizedBox(height: 5),
+                                          _buildInputFieldIntFLoat(
+                                            badEggsController,
+                                            "Enter Bad Eggs".tr(),
+                                            Icons.cancel,
+                                            onChanged: (text) {
+                                              bad_eggs = text.isEmpty ? 0 : int.parse(text);
+                                              calculateTotalEggs();
+                                            },
+                                            isFloat: false,
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-
-
-                              SizedBox(height: 20),
-
-                              // Total Eggs (Read-Only)
-                              _buildInputLabel("Total Eggs".tr(), Icons.shopping_basket),
-                              SizedBox(height: 8),
-                              _buildInputField(
-                                totalEggsController,
-                                "Total Eggs".tr(),
-                                Icons.numbers,
-                                readOnly: true,
-
-                              ),
-                              SizedBox(height: 10),
-
-                            ],
-                          ),
-                        ) :SizedBox(width: 1,),
-
-                        activeStep==1? Container(
-                          margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                          padding: EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.15),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                                offset: Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Title
-                              Center(
-                                child: Text(
-                                  "Choose date".tr()+" & "+"DESCRIPTION_1".tr(),
-                                  style: TextStyle(
-                                    color: Utils.getThemeColorBlue(),
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  ],
                                 ),
-                              ),
-                              SizedBox(height: 20),
 
-                              // Reduction List (Only if not Collection)
-                              if (!isCollection) ...[
-                                _buildInputLabel("REDUCTIONS_1".tr(), Icons.remove_circle_outline),
+
+                                SizedBox(height: 20),
+
+                                // Total Eggs (Read-Only)
+                                _buildInputLabel("Total Eggs".tr(), Icons.shopping_basket),
                                 SizedBox(height: 8),
-                                _buildDropdownField(getReductionList()),
+                                _buildInputField(
+                                  totalEggsController,
+                                  "Total Eggs".tr(),
+                                  Icons.numbers,
+                                  readOnly: true,
+
+                                ),
+                                SizedBox(height: 10),
 
                               ],
+                            ),
+                          ) :SizedBox(width: 1,),
 
-                              SizedBox(height: 10),
-                              // Egg Color Selection
-                              _buildInputLabel("EGG".tr()+" "+ "Color".tr(), Icons.palette),
-                              SizedBox(height: 8),
-                              _buildDropdownField(
-                                DropdownButtonFormField<String>(
-                                  decoration: const InputDecoration.collapsed(hintText: null), // Disable default decoration
-                                  value: selectedColor,
-                                  hint: Text('Select Egg Color'.tr()),
-                                  items: eggColors.map((color) {
-                                    return DropdownMenuItem(
-                                      value: color,
-                                      child: Text(color.tr(), style: TextStyle(fontSize: 16)),
-                                    );
-                                  }).toList(),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedColor = value;
-                                    });
-                                  },
-                                  icon: Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue()),
-                                  dropdownColor: Colors.white,
+                          activeStep==1? Container(
+                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: Offset(0, 5),
                                 ),
-                              ),
-                              SizedBox(height: 10),
-                              if(!isCollection && isEggSale())...[
-                                /*Column(
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Title
+                                Center(
+                                  child: Text(
+                                    "Choose date".tr()+" & "+"DESCRIPTION_1".tr(),
+                                    style: TextStyle(
+                                      color: Utils.getThemeColorBlue(),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 20),
+
+                                // Reduction List (Only if not Collection)
+                                if (!isCollection) ...[
+                                  _buildInputLabel("REDUCTIONS_1".tr(), Icons.remove_circle_outline),
+                                  SizedBox(height: 8),
+                                  _buildDropdownField(getReductionList()),
+
+                                ],
+
+                                SizedBox(height: 10),
+                                // Egg Color Selection
+                                _buildInputLabel("EGG".tr()+" "+ "Color".tr(), Icons.palette),
+                                SizedBox(height: 8),
+                                _buildDropdownField(
+                                  DropdownButtonFormField<String>(
+                                    decoration: const InputDecoration.collapsed(hintText: null), // Disable default decoration
+                                    value: selectedColor,
+                                    hint: Text('Select Egg Color'.tr()),
+                                    items: eggColors.map((color) {
+                                      return DropdownMenuItem(
+                                        value: color,
+                                        child: Text(color.tr(), style: TextStyle(fontSize: 16)),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        selectedColor = value;
+                                      });
+                                    },
+                                    icon: Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue()),
+                                    dropdownColor: Colors.white,
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+                                if(!isCollection && isEggSale())...[
+                                  /*Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
 
@@ -1159,31 +1213,31 @@ class _NewEggCollection extends State<NewEggCollection>
                                   ],
                                 ),*/
 
-                               /// SizedBox(height: 5),
-                                buildPaymentSummaryTile(context, amount: amount, paymentType: payment_method, status: payment_status, c_name: contractorName),
-                                // Total Eggs (Read-Only)
+                                  /// SizedBox(height: 5),
+                                  buildPaymentSummaryTile(context, amount: amount, paymentType: payment_method, status: payment_status, c_name: contractorName),
+                                  // Total Eggs (Read-Only)
+                                ],
+                                SizedBox(height: 10),
+                                // Date Selection
+                                _buildInputLabel("DATE".tr(), Icons.calendar_today),
+                                SizedBox(height: 8),
+                                _buildDatePickerField(),
+
+                                SizedBox(height: 20),
+
+                                // Description Field
+                                _buildInputLabel("DESCRIPTION_1".tr(), Icons.notes),
+                                SizedBox(height: 8),
+                                _buildTextAreaField(notesController, "NOTES_HINT".tr()),
+
+                                SizedBox(height: 20),
                               ],
-                              SizedBox(height: 10),
-                              // Date Selection
-                              _buildInputLabel("DATE".tr(), Icons.calendar_today),
-                              SizedBox(height: 8),
-                              _buildDatePickerField(),
-
-                              SizedBox(height: 20),
-
-                              // Description Field
-                              _buildInputLabel("DESCRIPTION_1".tr(), Icons.notes),
-                              SizedBox(height: 8),
-                              _buildTextAreaField(notesController, "NOTES_HINT".tr()),
-
-                              SizedBox(height: 20),
-                            ],
-                          ),
-                        )
-                            :SizedBox(width: 1,),
+                            ),
+                          )
+                              :SizedBox(width: 1,),
 
 
-                      /*  InkWell(
+                          /*  InkWell(
                           onTap: () async {
 
                             good_eggs = int.parse(goodEggsController.text);
@@ -1322,11 +1376,12 @@ class _NewEggCollection extends State<NewEggCollection>
                           ),
                         )
     */
-                      ]),
-                ),
-              ],
-            ),
-          ),
+                        ]),
+                  ),
+                ],
+              ),
+            ),),
+          ],),
         ),
       ),
     );

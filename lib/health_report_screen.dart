@@ -5,6 +5,7 @@ import 'package:excel/excel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/model/med_vac_item.dart';
@@ -31,11 +32,17 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
 
   double widthScreen = 0;
   double heightScreen = 0;
-
+  late NativeAd _myNativeAd;
+  bool _isNativeAdLoaded = false;
   @override
   void dispose() {
     super.dispose();
+    try{
 
+      _myNativeAd.dispose();
+    }catch(ex){
+
+    }
   }
 
   int _reports_filter = 2;
@@ -70,10 +77,47 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
      {
        print(ex);
      }
-    Utils.setupAds();
-
+    if(Utils.isShowAdd){
+      _loadNativeAds();
+    }
     AnalyticsUtil.logScreenView(screenName: "health_screen");
   }
+  _loadNativeAds(){
+    _myNativeAd = NativeAd(
+      adUnitId: Utils.NativeAdUnitId,
+      request: const AdRequest(),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.small, // or medium
+        mainBackgroundColor: Colors.white,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white,
+          backgroundColor: Colors.blue,
+          style: NativeTemplateFontStyle.bold,
+          size: 14,
+        ),
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          size: 14,
+        ),
+        secondaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white70,
+          size: 12,
+        ),
+      ),
+      listener: NativeAdListener(
+        onAdLoaded: (_) => setState(() => _isNativeAdLoaded = true),
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          debugPrint('Native ad failed: $error');
+        },
+      ),
+    );
+
+
+    _myNativeAd.load();
+
+  }
+
 
   List<Vaccination_Medication> list = [];
   List<Health_Chart_Item> medlist = [], vaclist = [];
@@ -457,14 +501,24 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
           width: widthScreen,
           height: heightScreen,
            color: Colors.white,
-            child: SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children:  [
-              Utils.getDistanceBar(),
+            child: Column(children: [
+              if (_isNativeAdLoaded && _myNativeAd != null)
+                Container(
+                  height: 90,
+                  margin: const EdgeInsets.only(bottom: 0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: AdWidget(ad: _myNativeAd),
+                ),
+              Expanded(child: SingleChildScrollView(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children:  [
 
-              /*ClipRRect(
+                      /*ClipRRect(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
                 child: Container(
                   decoration: BoxDecoration(
@@ -542,297 +596,298 @@ class _HealthReportScreen extends State<HealthReportScreen> with SingleTickerPro
                 ),
               ),
 */
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 45,
-                      alignment: Alignment.centerRight,
-                      padding: EdgeInsets.only(left: 10),
-                      margin: EdgeInsets.only(left: 10,right: 5),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                        /*border: Border.all(
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              height: 45,
+                              alignment: Alignment.centerRight,
+                              padding: EdgeInsets.only(left: 10),
+                              margin: EdgeInsets.only(left: 10,right: 5),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                                /*border: Border.all(
                           color: Utils.getThemeColorBlue(),
                           width: 1.2,
                         ),*/
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 4,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: getDropDownList(),
+                            ),
                           ),
-                        ],
-                      ),
-                      child: getDropDownList(),
-                    ),
-                  ),
-                 InkWell(
-                    onTap: () {
-                      openDatePicker();
-                    },
-                    borderRadius: BorderRadius.circular(8), // Adds ripple effect with rounded edges
-                    child: Container(
-                      height: 45,
-                      margin: EdgeInsets.only(right: 10, top: 10, bottom: 10),
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                       /* border: Border.all(
+                          InkWell(
+                            onTap: () {
+                              openDatePicker();
+                            },
+                            borderRadius: BorderRadius.circular(8), // Adds ripple effect with rounded edges
+                            child: Container(
+                              height: 45,
+                              margin: EdgeInsets.only(right: 10, top: 10, bottom: 10),
+                              padding: EdgeInsets.symmetric(horizontal: 10),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                                /* border: Border.all(
                           color: Utils.getThemeColorBlue(),
                           width: 1.2,
                         ),*/
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.calendar_today, color: Utils.getThemeColorBlue(), size: 18),
-                          SizedBox(width: 8),
-                          Text(
-                            date_filter_name.tr(),
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
-                          ),
-                          SizedBox(width: 8),
-                          Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(), size: 20),
-                        ],
-                      ),
-                    ),
-                  )
-                ],
-              ),
-
-              Container(
-                padding: EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-
-                    SizedBox(height: 12),
-
-                    // Health Chart Container
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Column(
-                        children: [
-                          Text(
-                            date_filter_name.tr(),
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(height: 10),
-
-                          // Chart Widget
-                          SfCartesianChart(
-                            primaryXAxis: CategoryAxis(),
-                            zoomPanBehavior: _zoomPanBehavior,
-                            legend: Legend(isVisible: true, position: LegendPosition.bottom),
-                            tooltipBehavior: TooltipBehavior(enable: true),
-                            series: <CartesianSeries<Health_Chart_Item, String>>[
-                              ColumnSeries(
-                                borderRadius: BorderRadius.all(Radius.circular(10)),
-                                color: Colors.orange,
-                                name: 'Medication'.tr(),
-                                dataSource: medlist,
-                                xValueMapper: (Health_Chart_Item collItem, _) => collItem.date,
-                                yValueMapper: (Health_Chart_Item collItem, _) => collItem.total,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 4,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                              ColumnSeries(
-                                borderRadius: BorderRadius.all(Radius.circular(10)),
-                                color: Colors.deepOrange,
-                                name: 'Vaccination'.tr(),
-                                dataSource: vaclist,
-                                xValueMapper: (Health_Chart_Item collItem, _) => collItem.date,
-                                yValueMapper: (Health_Chart_Item collItem, _) => collItem.total,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.calendar_today, color: Utils.getThemeColorBlue(), size: 18),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    date_filter_name.tr(),
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(), size: 20),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          )
                         ],
                       ),
-                    ),
 
-                    SizedBox(height: 16),
-
-                    Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
+                      Container(
+                        padding: EdgeInsets.all(12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Summary Section
-                            Text("Summary & Analytics".tr(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue())),
+
                             SizedBox(height: 12),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                _buildSummaryBox('Vaccination'.tr(), vac_count, Colors.green, Icons.vaccines),
-                                _buildSummaryBox('Medication'.tr(), med_count, Colors.red, Icons.medical_services),
-                                _buildSummaryBox('TOTAL'.tr(), total_health_count, Utils.getThemeColorBlue(), Icons.calculate, isBold: true),
-                              ],
+
+                            // Health Chart Container
+                            Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    date_filter_name.tr(),
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(height: 10),
+
+                                  // Chart Widget
+                                  SfCartesianChart(
+                                    primaryXAxis: CategoryAxis(),
+                                    zoomPanBehavior: _zoomPanBehavior,
+                                    legend: Legend(isVisible: true, position: LegendPosition.bottom),
+                                    tooltipBehavior: TooltipBehavior(enable: true),
+                                    series: <CartesianSeries<Health_Chart_Item, String>>[
+                                      ColumnSeries(
+                                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                                        color: Colors.orange,
+                                        name: 'Medication'.tr(),
+                                        dataSource: medlist,
+                                        xValueMapper: (Health_Chart_Item collItem, _) => collItem.date,
+                                        yValueMapper: (Health_Chart_Item collItem, _) => collItem.total,
+                                      ),
+                                      ColumnSeries(
+                                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                                        color: Colors.deepOrange,
+                                        name: 'Vaccination'.tr(),
+                                        dataSource: vaclist,
+                                        xValueMapper: (Health_Chart_Item collItem, _) => collItem.date,
+                                        yValueMapper: (Health_Chart_Item collItem, _) => collItem.total,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
+
                             SizedBox(height: 16),
-                            Divider(thickness: 1.5),
 
-                            // Flock Records Section
-                            Text('By Flock Name'.tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                            SizedBox(height: 8),
-                            Column(
-                              children: groupedList.map((group) {
-                                int vaccinationCount = group.records.where((r) => r.type == "Vaccination").length;
-                                int medicationCount = group.records.where((r) => r.type == "Medication").length;
-
-                                // Group diseases with their respective medicines and type
-                                Map<String, List<Map<String, String>>> diseaseDetails = {};
-
-                                for (var record in group.records) {
-                                  if (record.disease.isNotEmpty) {
-                                    if (!diseaseDetails.containsKey(record.disease)) {
-                                      diseaseDetails[record.disease] = [];
-                                    }
-                                    diseaseDetails[record.disease]!.add({
-                                      "type": record.type.tr(),      // Vaccination or Medication
-                                      "medicine": record.medicine.tr()
-                                    });
-                                  }
-                                }
-
-                                return Card(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                  elevation: 3,
-                                  margin: EdgeInsets.symmetric(vertical: 6),
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                            Card(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 4,
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Summary Section
+                                    Text("Summary & Analytics".tr(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue())),
+                                    SizedBox(height: 12),
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                                       children: [
-                                        // Flock Name
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              group.flockName,
-                                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                            ),
-                                            Row(
+                                        _buildSummaryBox('Vaccination'.tr(), vac_count, Colors.green, Icons.vaccines),
+                                        _buildSummaryBox('Medication'.tr(), med_count, Colors.red, Icons.medical_services),
+                                        _buildSummaryBox('TOTAL'.tr(), total_health_count, Utils.getThemeColorBlue(), Icons.calculate, isBold: true),
+                                      ],
+                                    ),
+                                    SizedBox(height: 16),
+                                    Divider(thickness: 1.5),
+
+                                    // Flock Records Section
+                                    Text('By Flock Name'.tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                    SizedBox(height: 8),
+                                    Column(
+                                      children: groupedList.map((group) {
+                                        int vaccinationCount = group.records.where((r) => r.type == "Vaccination").length;
+                                        int medicationCount = group.records.where((r) => r.type == "Medication").length;
+
+                                        // Group diseases with their respective medicines and type
+                                        Map<String, List<Map<String, String>>> diseaseDetails = {};
+
+                                        for (var record in group.records) {
+                                          if (record.disease.isNotEmpty) {
+                                            if (!diseaseDetails.containsKey(record.disease)) {
+                                              diseaseDetails[record.disease] = [];
+                                            }
+                                            diseaseDetails[record.disease]!.add({
+                                              "type": record.type.tr(),      // Vaccination or Medication
+                                              "medicine": record.medicine.tr()
+                                            });
+                                          }
+                                        }
+
+                                        return Card(
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                          elevation: 3,
+                                          margin: EdgeInsets.symmetric(vertical: 6),
+                                          child: Padding(
+                                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
+                                                // Flock Name
                                                 Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                   children: [
-                                                    Icon(Icons.vaccines, color: Colors.green, size: 20),
-                                                    SizedBox(width: 4),
-                                                    Text("$vaccinationCount", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.green)),
-                                                  ],
-                                                ),
-                                                SizedBox(width: 6),
-                                                Row(
-                                                  children: [
-                                                    Icon(Icons.medical_services, color: Colors.red, size: 20),
-                                                    SizedBox(width: 4),
-                                                    Text("$medicationCount", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.red)),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-
-                                        SizedBox(height: 10),
-
-                                        // Disease and Medicines List
-                                        if (diseaseDetails.isNotEmpty) ...[
-                                          Divider(),
-                                          Text("Disease".tr()+" & "+ "TREATMENT".tr(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black54)),
-                                          SizedBox(height: 6),
-                                          Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: diseaseDetails.entries.map((entry) {
-                                              return Padding(
-                                                padding: EdgeInsets.symmetric(vertical: 4),
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
+                                                    Text(
+                                                      group.flockName,
+                                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                                    ),
                                                     Row(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
                                                       children: [
-                                                        Icon(Icons.coronavirus, color: Colors.orange, size: 18),
+                                                        Row(
+                                                          children: [
+                                                            Icon(Icons.vaccines, color: Colors.green, size: 20),
+                                                            SizedBox(width: 4),
+                                                            Text("$vaccinationCount", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.green)),
+                                                          ],
+                                                        ),
                                                         SizedBox(width: 6),
-                                                        Expanded(
-                                                          child: Text(
-                                                            "Disease".tr()+" : "+ "${entry.key}".tr(),  // Disease Name with label
-                                                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                                          ),
+                                                        Row(
+                                                          children: [
+                                                            Icon(Icons.medical_services, color: Colors.red, size: 20),
+                                                            SizedBox(width: 4),
+                                                            Text("$medicationCount", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.red)),
+                                                          ],
                                                         ),
                                                       ],
                                                     ),
-                                                    SizedBox(height: 4),
-                                                    Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: entry.value.map((detail) {
-                                                        return Padding(
-                                                          padding: EdgeInsets.only(left: 26), // Indent under disease name
-                                                          child: Row(
-                                                            children: [
-                                                              Text(
-                                                                "[${detail['type']}]".tr(), // Show type: Vaccination or Medication
-                                                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.blue),
-                                                              ),
-                                                              SizedBox(width: 6),
-                                                              Expanded(
-                                                                child: Text(
-                                                                  detail['medicine']!.tr(), // Medicine Name
-                                                                  style: TextStyle(fontSize: 14, color: Colors.black87),
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        );
-                                                      }).toList(),
-                                                    ),
                                                   ],
                                                 ),
-                                              );
-                                            }).toList(),
+
+                                                SizedBox(height: 10),
+
+                                                // Disease and Medicines List
+                                                if (diseaseDetails.isNotEmpty) ...[
+                                                  Divider(),
+                                                  Text("Disease".tr()+" & "+ "TREATMENT".tr(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black54)),
+                                                  SizedBox(height: 6),
+                                                  Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: diseaseDetails.entries.map((entry) {
+                                                      return Padding(
+                                                        padding: EdgeInsets.symmetric(vertical: 4),
+                                                        child: Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          children: [
+                                                            Row(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                Icon(Icons.coronavirus, color: Colors.orange, size: 18),
+                                                                SizedBox(width: 6),
+                                                                Expanded(
+                                                                  child: Text(
+                                                                    "Disease".tr()+" : "+ "${entry.key}".tr(),  // Disease Name with label
+                                                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            SizedBox(height: 4),
+                                                            Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: entry.value.map((detail) {
+                                                                return Padding(
+                                                                  padding: EdgeInsets.only(left: 26), // Indent under disease name
+                                                                  child: Row(
+                                                                    children: [
+                                                                      Text(
+                                                                        "[${detail['type']}]".tr(), // Show type: Vaccination or Medication
+                                                                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.blue),
+                                                                      ),
+                                                                      SizedBox(width: 6),
+                                                                      Expanded(
+                                                                        child: Text(
+                                                                          detail['medicine']!.tr(), // Medicine Name
+                                                                          style: TextStyle(fontSize: 14, color: Colors.black87),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                );
+                                                              }).toList(),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                    }).toList(),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
                                           ),
-                                        ],
-                                      ],
+                                        );
+                                      }).toList(),
                                     ),
-                                  ),
-                                );
-                              }).toList(),
+
+
+
+                                  ],
+                                ),
+                              ),
                             ),
 
-
-
+                            _buildTopItemsGrid("Top Diseases".tr(), topDiseases, Icons.warning_amber_rounded, Colors.orange),
+                            SizedBox(height: 12),
+                            _buildTopItemsGrid("Top Medicine".tr(), topMedicines, Icons.medication, Colors.purple),
                           ],
                         ),
-                      ),
-                    ),
+                      )
 
-                    _buildTopItemsGrid("Top Diseases".tr(), topDiseases, Icons.warning_amber_rounded, Colors.orange),
-                    SizedBox(height: 12),
-                    _buildTopItemsGrid("Top Medicine".tr(), topMedicines, Icons.medication, Colors.purple),
-                  ],
-                ),
-              )
-
-            ]
-      ),),),),);
+                    ]
+                ),))
+            ],),),),);
   }
 
   Widget _buildTopItemsGrid<T>(String title, List<T> items, IconData icon, Color color) {

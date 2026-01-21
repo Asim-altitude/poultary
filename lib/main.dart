@@ -48,8 +48,8 @@ Future<void> main() async {
   direction = await Utils.getDirection();
   await MobileAds.instance.initialize();
   Utils.direction = await Utils.getDirection();
-   // MobileAds.instance.updateRequestConfiguration(
-   // RequestConfiguration(testDeviceIds: ['C0B856BD630A2928BC9F472E0A5C870A','C1F82EF953946E2EACA6F014AFF27318','6A26B5F47A581E9DF187B0FAE54A685E']));
+   MobileAds.instance.updateRequestConfiguration(
+   RequestConfiguration(testDeviceIds: ['C0B856BD630A2928BC9F472E0A5C870A','C1F82EF953946E2EACA6F014AFF27318','6A26B5F47A581E9DF187B0FAE54A685E']));
   await Hive.initFlutter();
   Hive.registerAdapter(BlogAdapter());
 
