@@ -24,8 +24,9 @@ class BackupRestoreScreen extends StatefulWidget {
 }
 
 class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
-  RewardedAd? _rewardedAd;
-  bool _isAdDisplayed = false;
+
+  late NativeAd _myNativeAd;
+  bool _isNativeAdLoaded = false;
 
 
   @override
@@ -33,64 +34,84 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
     // TODO: implement initState
     super.initState();
     checkAutoBackupEnabled();
-    Utils.setupAds();
     if(Utils.isShowAdd){
-      _loadRewardedAd();
+      _loadNativeAds();
     }
 
     AnalyticsUtil.logScreenView(screenName: "backup_screen");
   }
   @override
   void dispose() {
-    _rewardedAd?.dispose();
+    _myNativeAd?.dispose();
     super.dispose();
   }
 
-  void _loadRewardedAd() {
-    RewardedAd.load(
-      adUnitId: Utils.rewardedAdUnitId, // Replace with your AdMob Rewarded Ad Unit ID
-      request: AdRequest(),
-      rewardedAdLoadCallback: RewardedAdLoadCallback(
-        onAdLoaded: (RewardedAd ad) {
-          setState(() {
-            _rewardedAd = ad;
-          });
-        },
-        onAdFailedToLoad: (LoadAdError error) {
-          print('Failed to load rewarded ad: $error');
+  _loadNativeAds(){
+    _myNativeAd = NativeAd(
+      adUnitId: Utils.NativeAdUnitId,
+      request: const AdRequest(),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.small, // or medium
+        mainBackgroundColor: Colors.white,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white,
+          backgroundColor: Colors.blue,
+          style: NativeTemplateFontStyle.bold,
+          size: 14,
+        ),
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          size: 14,
+        ),
+        secondaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white70,
+          size: 12,
+        ),
+      ),
+      listener: NativeAdListener(
+        onAdLoaded: (_) => setState(() => _isNativeAdLoaded = true),
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          debugPrint('Native ad failed: $error');
         },
       ),
     );
+
+
+    _myNativeAd.load();
+
   }
+
+
   // Show Rewarded Ad
-  void _showRewardedAd() {
-    if (_rewardedAd == null) {
-      print('Rewarded Ad not loaded yet');
-      Utils.showInterstitial();
-      return;
-    }
-
-    _rewardedAd!.show(
-      onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
-        print('User earned reward: ${reward.amount} ${reward.type}');
-        // Grant the reward (e.g., unlock content, give in-app currency)
-      },
-    );
-
-    // Dispose and reload the ad after it's used
-    _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
-      onAdDismissedFullScreenContent: (RewardedAd ad) {
-        ad.dispose();
-        _loadRewardedAd();
-      },
-      onAdFailedToShowFullScreenContent: (RewardedAd ad, AdError error) {
-        ad.dispose();
-        _loadRewardedAd();
-      },
-    );
-
-    _rewardedAd = null;
-  }
+  // void _showRewardedAd() {
+  //   if (_rewardedAd == null) {
+  //     print('Rewarded Ad not loaded yet');
+  //     Utils.showInterstitial();
+  //     return;
+  //   }
+  //
+  //   _rewardedAd!.show(
+  //     onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
+  //       print('User earned reward: ${reward.amount} ${reward.type}');
+  //       // Grant the reward (e.g., unlock content, give in-app currency)
+  //     },
+  //   );
+  //
+  //   // Dispose and reload the ad after it's used
+  //   _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
+  //     onAdDismissedFullScreenContent: (RewardedAd ad) {
+  //       ad.dispose();
+  //       _loadRewardedAd();
+  //     },
+  //     onAdFailedToShowFullScreenContent: (RewardedAd ad, AdError error) {
+  //       ad.dispose();
+  //       _loadRewardedAd();
+  //     },
+  //   );
+  //
+  //   _rewardedAd = null;
+  // }
 
   void checkAutoBackupEnabled() async {
     isAutoBackupEnabled = await SessionManager.isAutoOnlineBackup();
@@ -139,36 +160,47 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
       body: Padding(
         padding: EdgeInsets.all(16),
 
-        child:SingleChildScrollViewWithStickyFirstWidget(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Utils.getDistanceBar(),
-
-            SizedBox(height: 10),
-
-            /// **Backup Database Button**
-            _buildBackupRestoreTile(
-              title: "BACKUP".tr(),
-              subtitle: "Save a copy of your data securely".tr(),
-              icon: Icons.backup,
-              color: Colors.green,
-              onTap: () {
-                // Perform Backup Action
-                shareFiles();
-              },
+        child:Column(children: [
+          if (_isNativeAdLoaded && _myNativeAd != null)
+            Container(
+              height: 90,
+              margin: const EdgeInsets.only(bottom: 0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: AdWidget(ad: _myNativeAd),
             ),
 
-            /// **Restore Database Button**
-            _buildBackupRestoreTile(
-              title: "RESTORE".tr(),
-              subtitle: "Restore data from a previous backup".tr(),
-              icon: Icons.restore,
-              color: Colors.orange,
-              onTap: () async {
-                // Perform Restore Action
+          Expanded(child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
 
-               /* await DatabaseHelper.importDataBaseFile(context);
+                SizedBox(height: 10),
+
+                /// **Backup Database Button**
+                _buildBackupRestoreTile(
+                  title: "BACKUP".tr(),
+                  subtitle: "Save a copy of your data securely".tr(),
+                  icon: Icons.backup,
+                  color: Colors.green,
+                  onTap: () {
+                    // Perform Backup Action
+                    shareFiles();
+                  },
+                ),
+
+                /// **Restore Database Button**
+                _buildBackupRestoreTile(
+                  title: "RESTORE".tr(),
+                  subtitle: "Restore data from a previous backup".tr(),
+                  icon: Icons.restore,
+                  color: Colors.orange,
+                  onTap: () async {
+                    // Perform Restore Action
+
+                    /* await DatabaseHelper.importDataBaseFile(context);
                 try
                 {
                   await DatabaseHelper.addEggColorColumn();
@@ -185,15 +217,15 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                   print(ex);
                 }*/
 
-                if(Utils.isMultiUSer){
-                  showFarmRestoreWarningDialog(context, () {
-                    showRestoreOptionsDialog(context, () async {
-                      await DatabaseHelper.importDataBaseFile(context);
+                    if(Utils.isMultiUSer){
+                      showFarmRestoreWarningDialog(context, () {
+                        showRestoreOptionsDialog(context, () async {
+                          await DatabaseHelper.importDataBaseFile(context);
 
-                      await DatabaseHelper.instance.database;
-                      await Utils.generateDatabaseTables();
+                          await DatabaseHelper.instance.database;
+                          await Utils.generateDatabaseTables();
 
-            /*          try {
+                          /*          try {
                         await DatabaseHelper.addEggColorColumn();
                         await DatabaseHelper.addFlockInfoColumn();
                         await DatabaseHelper.addQuantityColumnMedicine();
@@ -216,33 +248,33 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                       catch (ex) {
                         print(ex);
                       }*/
-                      try {
-                        List<String> tables = Utils.getTAllables(); // Add your actual table names
+                          try {
+                            List<String> tables = Utils.getTAllables(); // Add your actual table names
 
-                        for (final table in tables) {
-                          await DatabaseHelper.instance.addSyncColumnsToTable(
-                              table);
-                          await DatabaseHelper.instance.assignSyncIds(table);
-                        }
+                            for (final table in tables) {
+                              await DatabaseHelper.instance.addSyncColumnsToTable(
+                                  table);
+                              await DatabaseHelper.instance.assignSyncIds(table);
+                            }
 
-                        await DatabaseHelper.instance.database; // forces re-open
-                        await SessionManager.setBoolValue(SessionManager
-                            .table_created, true);
-                        print('TABLE CREATION DONE');
-                      }
-                      catch (ex) {
-                        print(ex);
-                      }
-                    }, () {
-                      restoreDatabaseFromDrive();
-                    });
-                  });
-                }else {
-                  showRestoreOptionsDialog(context, () async {
-                    await DatabaseHelper.importDataBaseFile(context);
-                    await DatabaseHelper.instance.database;
-                    await Utils.generateDatabaseTables();
-                /*    try {
+                            await DatabaseHelper.instance.database; // forces re-open
+                            await SessionManager.setBoolValue(SessionManager
+                                .table_created, true);
+                            print('TABLE CREATION DONE');
+                          }
+                          catch (ex) {
+                            print(ex);
+                          }
+                        }, () {
+                          restoreDatabaseFromDrive();
+                        });
+                      });
+                    }else {
+                      showRestoreOptionsDialog(context, () async {
+                        await DatabaseHelper.importDataBaseFile(context);
+                        await DatabaseHelper.instance.database;
+                        await Utils.generateDatabaseTables();
+                        /*    try {
                       await DatabaseHelper.addEggColorColumn();
                       await DatabaseHelper.addFlockInfoColumn();
                       await DatabaseHelper.addQuantityColumnMedicine();
@@ -265,60 +297,61 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                     catch (ex) {
                       print(ex);
                     }*/
-                    try {
-                      List<String> tables = [
-                        'Flock',
-                        'Flock_Image',
-                        'Eggs',
-                        'Feeding',
-                        'Transactions',
-                        'Vaccination_Medication',
-                        'Category_Detail',
-                        'EggTransaction',
-                        'FeedBatch',
-                        'FeedBatchItem',
-                        'FeedIngredient',
-                        'FeedStockHistory',
-                        'Flock_Detail',
-                        'MedicineStockHistory',
-                        'SaleContractor',
-                        'ScheduledNotification',
-                        'VaccineStockHistory',
-                        'WeightRecord',
-                        'StockExpense',
-                        'CustomCategory',
-                        'CustomCategoryData',
+                        try {
+                          List<String> tables = [
+                            'Flock',
+                            'Flock_Image',
+                            'Eggs',
+                            'Feeding',
+                            'Transactions',
+                            'Vaccination_Medication',
+                            'Category_Detail',
+                            'EggTransaction',
+                            'FeedBatch',
+                            'FeedBatchItem',
+                            'FeedIngredient',
+                            'FeedStockHistory',
+                            'Flock_Detail',
+                            'MedicineStockHistory',
+                            'SaleContractor',
+                            'ScheduledNotification',
+                            'VaccineStockHistory',
+                            'WeightRecord',
+                            'StockExpense',
+                            'CustomCategory',
+                            'CustomCategoryData',
 
-                      ]; // Add your actual table names
+                          ]; // Add your actual table names
 
-                      for (final table in tables) {
-                        await DatabaseHelper.instance.addSyncColumnsToTable(
-                            table);
-                        await DatabaseHelper.instance.assignSyncIds(table);
-                      }
+                          for (final table in tables) {
+                            await DatabaseHelper.instance.addSyncColumnsToTable(
+                                table);
+                            await DatabaseHelper.instance.assignSyncIds(table);
+                          }
 
-                      await DatabaseHelper.instance.database; // forces re-open
-                      await SessionManager.setBoolValue(SessionManager
-                          .table_created, true);
-                      print('TABLE CREATION DONE');
+                          await DatabaseHelper.instance.database; // forces re-open
+                          await SessionManager.setBoolValue(SessionManager
+                              .table_created, true);
+                          print('TABLE CREATION DONE');
+                        }
+                        catch (ex) {
+                          print(ex);
+                        }
+                      }, () {
+                        restoreDatabaseFromDrive();
+                      });
                     }
-                    catch (ex) {
-                      print(ex);
-                    }
-                  }, () {
-                    restoreDatabaseFromDrive();
-                  });
-                }
 
-              },
+                  },
+                ),
+
+                /// **Automatic Cloud Backup - Card Option**
+                SizedBox(height: 20),
+                _buildCloudBackupCard(),
+              ],
             ),
-
-            /// **Automatic Cloud Backup - Card Option**
-            SizedBox(height: 20),
-            _buildCloudBackupCard(),
-          ],
-        ),
-      ),),
+          ))
+        ],),),
     );
   }
 
@@ -820,13 +853,13 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
 
   Future<void> uploadDatabaseToDrive() async {
 
-    if(!_isAdDisplayed){
-      _showRewardedAd();
-      _isAdDisplayed = true;
-      setState(() {
-
-      });
-    }
+    // if(!_isAdDisplayed){
+    //   _showRewardedAd();
+    //   _isAdDisplayed = true;
+    //   setState(() {
+    //
+    //   });
+    // }
 
     if (_googleSignIn.currentUser == null) {
       print("User is not signed in.");

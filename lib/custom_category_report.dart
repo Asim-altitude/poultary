@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
 import 'package:poultary/sticky.dart';
@@ -41,6 +42,8 @@ class _CategoryChartScreenState extends State<CategoryChartScreen> {
   double heightScreen = 0;
 
   int _reports_filter = 2;
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
 
   void getFilters() async {
     _reports_filter = (await SessionManager.getReportFilter())!;
@@ -58,8 +61,45 @@ class _CategoryChartScreenState extends State<CategoryChartScreen> {
 
 
     AnalyticsUtil.logScreenView(screenName: "custom_report_screen");
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+    }
+
+  }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
   }
 
+
+
+  @override
+  void dispose() {
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
+
+    }
+    super.dispose();
+  }
 
   List<FlockQuantity> flockQuantityMap = [];
   Future<void> getCategoryDataList() async {
@@ -223,152 +263,155 @@ class _CategoryChartScreenState extends State<CategoryChartScreen> {
           ),*/
         ],
       ),
-      body: SingleChildScrollViewWithStickyFirstWidget(
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 45,
-                    alignment: Alignment.centerRight,
-                    padding: EdgeInsets.only(left: 10),
-                    margin: EdgeInsets.only(top: 10,left: 10,right: 5),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: const BorderRadius.all(
-                          Radius.circular(5.0)),
-                      border: Border.all(
-                        color:  Utils.getThemeColorBlue(),
-                        width: 1.0,
-                      ),
-                    ),
-                    child: getDropDownList(),
-                  ),
-                ),
-                InkWell(
-                  onTap: () {
-                    openDatePicker();
-                  },
-                  borderRadius: BorderRadius.circular(8), // Adds ripple effect with rounded edges
-                  child: Container(
-                    height: 45,
-                    width: widthScreen - 20,
-                    margin: EdgeInsets.only(right: 10,left: 10, top: 15, bottom: 10),
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Utils.getThemeColorBlue(),
-                        width: 1.2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
+      body: Column(children: [
+        Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+        Expanded(child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 45,
+                      alignment: Alignment.centerRight,
+                      padding: EdgeInsets.only(left: 10),
+                      margin: EdgeInsets.only(top: 10,left: 10,right: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: const BorderRadius.all(
+                            Radius.circular(5.0)),
+                        border: Border.all(
+                          color:  Utils.getThemeColorBlue(),
+                          width: 1.0,
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.calendar_today, color: Utils.getThemeColorBlue(), size: 18),
-                        SizedBox(width: 8),
-                        Text(
-                          date_filter_name.tr(),
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
-                        ),
-                        SizedBox(width: 8),
-                        Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(), size: 20),
-                      ],
+                      ),
+                      child: getDropDownList(),
                     ),
                   ),
-                )
-              ],
-            ),
-        
-        
-            records.isEmpty
-                ? Center(child: Text("No Data Available".tr(), style: TextStyle(fontSize: 18, color: Colors.grey)))
-                : Padding( padding: EdgeInsets.all(12),
-                              child: SfCartesianChart(
-                                primaryXAxis: CategoryAxis(),
-                                primaryYAxis: NumericAxis(),
-                                title: ChartTitle(text: widget.customCategory!.name.tr()+" "+"Quantity".tr(), textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue())),
-                                tooltipBehavior: TooltipBehavior(enable: true),
-                                series: <CartesianSeries<dynamic, dynamic>>[
-                                  ColumnSeries<CustomCategoryData, String>(
-                                    dataSource: records,
-                                    xValueMapper: (CustomCategoryData data, _) => data.date.substring(5),
-                                    yValueMapper: (CustomCategoryData data, _) => data.quantity,
-                                    name: "Quantity".tr(),
-                                    dataLabelSettings: DataLabelSettings(isVisible: true, color: Colors.white),
-                                    color: Colors.blueAccent,
-                                  )
-                                ],
-                              ),
-                ),
-            Padding(
-              padding: EdgeInsets.all(16),
-              child: Card(
-                elevation: 6,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                color: Colors.white,
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 📌 Summary Section
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                           "Summary & Analytics".tr(),
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
+                  InkWell(
+                    onTap: () {
+                      openDatePicker();
+                    },
+                    borderRadius: BorderRadius.circular(8), // Adds ripple effect with rounded edges
+                    child: Container(
+                      height: 45,
+                      width: widthScreen - 20,
+                      margin: EdgeInsets.only(right: 10,left: 10, top: 15, bottom: 10),
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Utils.getThemeColorBlue().withOpacity(0.1), Colors.white],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Utils.getThemeColorBlue(),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
                           ),
-        
                         ],
                       ),
-                      SizedBox(height: 8),
-                      Text(
-                        "TOTAL".tr()+" "+"Quantity".tr()+": ${totalQuantity.toStringAsFixed(2)} ${widget.customCategory!.unit.tr()}",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.calendar_today, color: Utils.getThemeColorBlue(), size: 18),
+                          SizedBox(width: 8),
+                          Text(
+                            date_filter_name.tr(),
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+                          ),
+                          SizedBox(width: 8),
+                          Icon(Icons.arrow_drop_down, color: Utils.getThemeColorBlue(), size: 20),
+                        ],
                       ),
-                      Divider(thickness: 1, height: 20),
-        
-                      // 📌 Flock Quantity List
-                      Column(
-                        children: flockQuantityMap.map((entry) {
-                          return Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5),
-                            child: ListTile(
-                              contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                              leading: CircleAvatar(
-                                backgroundColor: Colors.blue.shade100,
-                                child: Icon(Icons.home, color: Colors.blue),
-                              ),
-                              title: Text(entry.flockName, style: TextStyle(fontWeight: FontWeight.bold)),
-                              subtitle: Text("Quantity".tr()+": ${entry.totalQuantity.toStringAsFixed(2)} ${widget.customCategory!.unit.toString()}"),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  ),
+                    ),
+                  )
+                ],
+              ),
+
+
+              records.isEmpty
+                  ? Center(child: Text("No Data Available".tr(), style: TextStyle(fontSize: 18, color: Colors.grey)))
+                  : Padding( padding: EdgeInsets.all(12),
+                child: SfCartesianChart(
+                  primaryXAxis: CategoryAxis(),
+                  primaryYAxis: NumericAxis(),
+                  title: ChartTitle(text: widget.customCategory!.name.tr()+" "+"Quantity".tr(), textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue())),
+                  tooltipBehavior: TooltipBehavior(enable: true),
+                  series: <CartesianSeries<dynamic, dynamic>>[
+                    ColumnSeries<CustomCategoryData, String>(
+                      dataSource: records,
+                      xValueMapper: (CustomCategoryData data, _) => data.date.substring(5),
+                      yValueMapper: (CustomCategoryData data, _) => data.quantity,
+                      name: "Quantity".tr(),
+                      dataLabelSettings: DataLabelSettings(isVisible: true, color: Colors.white),
+                      color: Colors.blueAccent,
+                    )
+                  ],
                 ),
               ),
-            )
-        
-          ],
-        ),
-      ),
+              Padding(
+                padding: EdgeInsets.all(16),
+                child: Card(
+                  elevation: 6,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  color: Colors.white,
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 📌 Summary Section
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Summary & Analytics".tr(),
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
+                            ),
+
+                          ],
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          "TOTAL".tr()+" "+"Quantity".tr()+": ${totalQuantity.toStringAsFixed(2)} ${widget.customCategory!.unit.tr()}",
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                        Divider(thickness: 1, height: 20),
+
+                        // 📌 Flock Quantity List
+                        Column(
+                          children: flockQuantityMap.map((entry) {
+                            return Padding(
+                              padding: EdgeInsets.symmetric(vertical: 5),
+                              child: ListTile(
+                                contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                                leading: CircleAvatar(
+                                  backgroundColor: Colors.blue.shade100,
+                                  child: Icon(Icons.home, color: Colors.blue),
+                                ),
+                                title: Text(entry.flockName, style: TextStyle(fontWeight: FontWeight.bold)),
+                                subtitle: Text("Quantity".tr()+": ${entry.totalQuantity.toStringAsFixed(2)} ${widget.customCategory!.unit.toString()}"),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+
+            ],
+          ),
+        ))
+      ],),
     );
   }
 

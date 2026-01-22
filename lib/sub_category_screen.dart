@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/single_flock_screen.dart';
@@ -25,7 +26,8 @@ class SubCategoryScreen extends StatefulWidget {
 String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
 
 class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProviderStateMixin, RefreshMixin {
-
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
   @override
   void onRefreshEvent(String event) {
     try {
@@ -41,10 +43,39 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
   double widthScreen = 0;
   double heightScreen = 0;
 
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
+  }
+
+
+
   @override
   void dispose() {
-    super.dispose();
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
 
+    }
+    super.dispose();
   }
 
   @override
@@ -52,7 +83,9 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
     super.initState();
 
     getSubCategoriesList();
-    Utils.setupAds();
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+    }
 
   }
 
@@ -155,59 +188,61 @@ class _SubCategoryScreen extends State<SubCategoryScreen> with SingleTickerProvi
           height: heightScreen ,
 
           color: Utils.getScreenBackground(),
-            child:SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children:  [
-              Utils.getDistanceBar(),
+            child:Column(children: [
+              Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+              Expanded(child: SingleChildScrollView(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children:  [
 
 
-              SizedBox(height: 10,),
-              Container(
-                height: heightScreen - 220,
-                width: widthScreen,
-                child: ListView.builder(
-                    controller: _controller,
-                    itemCount: categoryList.length,
-                    scrollDirection: Axis.vertical,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(3)),
+                      SizedBox(height: 10,),
+                      Container(
+                        height: heightScreen - 220,
+                        width: widthScreen,
+                        child: ListView.builder(
+                            controller: _controller,
+                            itemCount: categoryList.length,
+                            scrollDirection: Axis.vertical,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.all(Radius.circular(3)),
 
-                            color: Colors.white,
-                            border: Border.all(color: Colors.grey,width: 1.0)
-                        ),
-                        margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
-                        child: Row(
-                          children: [
-                            Row( children: [
-                              Column( children: [
-                                Container(
+                                    color: Colors.white,
+                                    border: Border.all(color: Colors.grey,width: 1.0)
+                                ),
+                                margin: EdgeInsets.only(left: 12,right: 12,top: 2,bottom: 8),
+                                child: Row(
+                                  children: [
+                                    Row( children: [
+                                      Column( children: [
+                                        Container(
 
-                                    width: (widthScreen - widthScreen/4)+6,
-                                    margin: EdgeInsets.all(4) , padding: EdgeInsets.all(10), child: Text(categoryList.elementAt(index).name!.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 18, color: Colors.black),)),
-                         // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
-                              ],),
+                                            width: (widthScreen - widthScreen/4)+6,
+                                            margin: EdgeInsets.all(4) , padding: EdgeInsets.all(10), child: Text(categoryList.elementAt(index).name!.tr(), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 18, color: Colors.black),)),
+                                        // Container(margin: EdgeInsets.all(0), child: Text(Utils.getFormattedDate(flocks.elementAt(index).acqusition_date), style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+                                      ],),
 
-                            ]),
-                            Visibility(
-                              visible: categoryList.length==1? false : true,
-                              child: InkWell(
-                                onTap: () {
-                                  showAlertDialog(context,index);
-                                },child: Container(width: 40,height: 40,child: Icon(Icons.cancel, color: Colors.red,),)),
-                            )
-                          ],
-                        ),
-                      );
+                                    ]),
+                                    Visibility(
+                                      visible: categoryList.length==1? false : true,
+                                      child: InkWell(
+                                          onTap: () {
+                                            showAlertDialog(context,index);
+                                          },child: Container(width: 40,height: 40,child: Icon(Icons.cancel, color: Colors.red,),)),
+                                    )
+                                  ],
+                                ),
+                              );
 
-                    }),
-              )
+                            }),
+                      )
 
-                  ]
-      ),),),),);
+                    ]
+                ),))
+            ],),),),);
   }
 
   showAlertDialog(BuildContext context, int index) {

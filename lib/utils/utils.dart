@@ -1645,6 +1645,7 @@ $storeLink
       Utils.isShowAdd = true;
       inititalize();
     }
+    Utils.isShowAdd = false;
 
   }
 
@@ -2127,6 +2128,9 @@ $storeLink
     else if(language =="el"){
       return Languages.greek;
     }
+    else if(language =="sw"){
+      return Languages.swahili;
+    }
     return Languages.english;
   }
 
@@ -2224,6 +2228,9 @@ $storeLink
     }
     else if(language.isoCode =="el"){
       languageName = "el";
+    }
+    else if(language.isoCode =="sw"){
+      languageName = "sw";
     }
 
     print(language.isoCode);

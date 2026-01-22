@@ -42,7 +42,6 @@ class _FlockScreen extends State<FlockScreen>
 
     
     getList();
-    Utils.setupAds();
 
   }
   List<Flock> flocks = [];
@@ -90,14 +89,13 @@ class _FlockScreen extends State<FlockScreen>
       child: Scaffold(
         body: SafeArea(
           top: false,
-          child: SingleChildScrollViewWithStickyFirstWidget(
+          child: SingleChildScrollView(
             child: Container(
               width: widthScreen,
               height: heightScreen,
               color: Utils.getScreenBackground(),
               child: Column(
                 children: [
-                  Utils.getDistanceBar(),
 
                   Row(
                     children: [

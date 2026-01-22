@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:poultary/database/databse_helper.dart';
 import 'package:poultary/model/sale_contractor.dart';
 import 'package:poultary/model/transaction_item.dart';
@@ -23,6 +24,8 @@ class ContractorProfileScreen extends StatefulWidget {
 
 class _ContractorProfileScreenState extends State<ContractorProfileScreen> with RefreshMixin {
 
+  late NativeAd _myNativeAd;
+  bool _isNativeAdLoaded = false;
   @override
   void onRefreshEvent(String event) async {
     try {
@@ -41,7 +44,14 @@ class _ContractorProfileScreenState extends State<ContractorProfileScreen> with 
       print(ex);
     }
   }
+  void dispose() {
+    try{
+      _myNativeAd.dispose();
+    }catch(ex){
 
+    }
+    super.dispose();
+  }
   bool isLoading = true;
   late SaleContractor contractor;
   num pendingAmount = 0, saleAmount = 0, clearedAmount = 0;
@@ -52,7 +62,46 @@ class _ContractorProfileScreenState extends State<ContractorProfileScreen> with 
     super.initState();
     contractor = widget.contractor;
     fetchAdditionalData();
+    if(Utils.isShowAdd){
+      _loadNativeAds();
+    }
   }
+  _loadNativeAds(){
+    _myNativeAd = NativeAd(
+      adUnitId: Utils.NativeAdUnitId,
+      request: const AdRequest(),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.small, // or medium
+        mainBackgroundColor: Colors.white,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white,
+          backgroundColor: Colors.blue,
+          style: NativeTemplateFontStyle.bold,
+          size: 14,
+        ),
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          size: 14,
+        ),
+        secondaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white70,
+          size: 12,
+        ),
+      ),
+      listener: NativeAdListener(
+        onAdLoaded: (_) => setState(() => _isNativeAdLoaded = true),
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          debugPrint('Native ad failed: $error');
+        },
+      ),
+    );
+
+
+    _myNativeAd.load();
+
+  }
+
 
   Future<void> fetchAdditionalData() async {
     transactions = await DatabaseHelper.getTransactionsForContractor(widget.contractor.name);
@@ -210,6 +259,16 @@ class _ContractorProfileScreenState extends State<ContractorProfileScreen> with 
                 ),
               ),
               SizedBox(height: 20),
+              if (_isNativeAdLoaded && _myNativeAd != null)
+                Container(
+                  height: 90,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: AdWidget(ad: _myNativeAd),
+                ),
 
               // Balance Summary
               Text("Balance Summary".tr(),

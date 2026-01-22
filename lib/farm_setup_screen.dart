@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -36,15 +37,45 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
     with SingleTickerProviderStateMixin {
   double widthScreen = 0;
   double heightScreen = 0;
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
+
+
+
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
+  }
 
 
 
   @override
   void dispose() {
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
+
+    }
     super.dispose();
-
   }
-
   String _purposeselectedValue = "";
   String _reductionReasonValue = "";
 
@@ -56,7 +87,9 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
     super.initState();
 
     getInfo();
-    Utils.setupAds();
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+    }
 
   }
 
@@ -184,158 +217,161 @@ class _FarmSetupScreen extends State<FarmSetupScreen>
           width: widthScreen,
           height: heightScreen,
           color: Utils.getScreenBackground(),
-          child: SingleChildScrollViewWithStickyFirstWidget(
-            child: Column(
-              children: [
-                Utils.getDistanceBar(),
-                Container(
-                  margin: EdgeInsets.all(15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 🖼 Image Picker with Overlay
-                      Center(
-                        child: InkWell(
-                          onTap: selectImage,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Container(
-                                width: 140,
-                                height: 140,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade200,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: Colors.grey.shade400),
-                                  image: modified == 1 ? DecorationImage(
-                                      image: MemoryImage(Base64Decoder().convert(farmSetup!.image)),
-                                      fit: BoxFit.cover)
-                                      : DecorationImage(
-                                      image: AssetImage('assets/farm_icon.png'),
-                                      fit: BoxFit.contain),
-                                ),
-                              ),
-                              // Overlay Icon & Text
-                              Positioned(
-                                bottom: 10,
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+          child: Column(children: [
+            Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+
+            Expanded(child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Container(
+                    margin: EdgeInsets.all(15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 🖼 Image Picker with Overlay
+                        Center(
+                          child: InkWell(
+                            onTap: selectImage,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: 140,
+                                  height: 140,
                                   decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.6),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.camera_alt, color: Colors.white, size: 12),
-                                      SizedBox(width: 6),
-                                      Text("Tap to change".tr(), style: TextStyle(color: Colors.white, fontSize: 10)),
-                                    ],
+                                    color: Colors.grey.shade200,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: Colors.grey.shade400),
+                                    image: modified == 1 ? DecorationImage(
+                                        image: MemoryImage(Base64Decoder().convert(farmSetup!.image)),
+                                        fit: BoxFit.cover)
+                                        : DecorationImage(
+                                        image: AssetImage('assets/farm_icon.png'),
+                                        fit: BoxFit.contain),
                                   ),
                                 ),
-                              )
+                                // Overlay Icon & Text
+                                Positioned(
+                                  bottom: 10,
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.6),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.camera_alt, color: Colors.white, size: 12),
+                                        SizedBox(width: 6),
+                                        Text("Tap to change".tr(), style: TextStyle(color: Colors.white, fontSize: 10)),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 30),
+
+                        // 📝 Farm Name
+                        _buildCardField(
+                          icon: Icons.home,
+                          label: "FARM_NAME".tr(),
+                          child: TextField(
+                            controller: nameController,
+                            decoration: InputDecoration(
+                              hintText: "Enter farm name".tr(),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        _buildCardField(
+                          icon: Icons.attach_money,
+                          label: "CURRENCY".tr(),
+                          onTap: chooseCurrency, // 👈 pass tap handler here
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                selectedCurrency ?? "Select Currency".tr(),
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                              const Icon(Icons.arrow_drop_down),
                             ],
                           ),
                         ),
-                      ),
-                      SizedBox(height: 30),
 
-                      // 📝 Farm Name
-                      _buildCardField(
-                        icon: Icons.home,
-                        label: "FARM_NAME".tr(),
-                        child: TextField(
-                          controller: nameController,
-                          decoration: InputDecoration(
-                            hintText: "Enter farm name".tr(),
-                            border: InputBorder.none,
+                        const SizedBox(height: 16),
+
+                        // 📅 Date Picker
+                        _buildCardField(
+                          icon: Icons.calendar_today,
+                          label: "Farm Setup Date".tr(),
+                          onTap: pickDate,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                date ?? "Select Date".tr(),
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                              const Icon(Icons.calendar_month),
+                            ],
                           ),
                         ),
-                      ),
 
-                      const SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
-                      _buildCardField(
-                        icon: Icons.attach_money,
-                        label: "CURRENCY".tr(),
-                        onTap: chooseCurrency, // 👈 pass tap handler here
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              selectedCurrency ?? "Select Currency".tr(),
-                              style: const TextStyle(fontSize: 16),
+                        // ⚖️ Select Unit
+                        Text("Select Unit".tr(),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 8),
+                        Container(
+                          height: 60,
+                          width: widthScreen,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade300),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.shade200,
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              )
+                            ],
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: selectedUnit,
+                              icon: const Icon(Icons.arrow_drop_down),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  selectedUnit = newValue!;
+                                });
+                              },
+                              items: <String>['KG', 'lbs'].map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value.tr(), style: const TextStyle(fontSize: 16)),
+                                );
+                              }).toList(),
                             ),
-                            const Icon(Icons.arrow_drop_down),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // 📅 Date Picker
-                      _buildCardField(
-                        icon: Icons.calendar_today,
-                        label: "Farm Setup Date".tr(),
-                        onTap: pickDate,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              date ?? "Select Date".tr(),
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const Icon(Icons.calendar_month),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // ⚖️ Select Unit
-                      Text("Select Unit".tr(),
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 8),
-                      Container(
-                        height: 60,
-                        width: widthScreen,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey.shade300),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.shade200,
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            )
-                          ],
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: selectedUnit,
-                            icon: const Icon(Icons.arrow_drop_down),
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                selectedUnit = newValue!;
-                              });
-                            },
-                            items: <String>['KG', 'lbs'].map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value.tr(), style: const TextStyle(fontSize: 16)),
-                              );
-                            }).toList(),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
 
-              ],
-            ),
-          ),
+                ],
+              ),
+            ),)
+          ],),
         ),
       ),
     );

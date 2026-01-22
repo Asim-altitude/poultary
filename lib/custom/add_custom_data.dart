@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/model/custom_category.dart';
 import 'package:poultary/model/custom_category_data.dart';
@@ -32,10 +33,7 @@ class _NewCustomData extends State<NewCustomData>
   double widthScreen = 0;
   double heightScreen = 0;
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
+
 
   String _purposeselectedValue = "";
   String _feedselectedValue = "";
@@ -44,6 +42,8 @@ class _NewCustomData extends State<NewCustomData>
   List<String> _purposeList = [];
   List<String> _feedList = [];
   List<SubItem> _subItemList = [];
+  late BannerAd _bannerAd;
+  bool _isBannerAdReady = false;
 
   int chosen_index = 0;
   bool isEdit = false;
@@ -65,8 +65,44 @@ class _NewCustomData extends State<NewCustomData>
 
     getList();
     Utils.showInterstitial();
-    Utils.setupAds();
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+    }
 
+  }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
+  }
+
+
+
+  @override
+  void dispose() {
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
+
+    }
+    super.dispose();
   }
 
 
@@ -319,142 +355,143 @@ class _NewCustomData extends State<NewCustomData>
             width: widthScreen,
             height: heightScreen,
             color: Utils.getScreenBackground(),
-            child: SingleChildScrollViewWithStickyFirstWidget(
-              child: Column(
-                children: [
-                  Utils.getDistanceBar(),
+            child: Column(children: [
+              Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+              Expanded(child: SingleChildScrollView(
+                child: Column(
+                  children: [
 
-                  ClipRRect(
-                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: Utils.getScreenBackground(), //(x,y)
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            alignment: Alignment.center,
-                            width: 50,
-                            height: 50,
-                            child: InkWell(
-                              child: Icon(Icons.arrow_back,
-                                  color:Utils.getThemeColorBlue(), size: 30),
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
+                    ClipRRect(
+                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0),bottomRight: Radius.circular(0)),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Utils.getScreenBackground(), //(x,y)
                             ),
-                          ),
-
-
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20,),
-                  EasyStepper(
-                    activeStep: activeStep,
-                    activeStepTextColor: Colors.blue.shade900,
-                    finishedStepTextColor: Utils.getThemeColorBlue(),
-                    internalPadding: 20, // Reduce padding for better spacing
-                    stepShape: StepShape.circle,
-                    stepBorderRadius: 20,
-                    borderThickness: 3, // Balanced progress line thickness
-                    showLoadingAnimation: false,
-                    stepRadius: 15, // Reduced step size to fit screen
-                    showStepBorder: false,
-                    lineStyle: LineStyle(
-                      lineLength: 50,
-                      lineType: LineType.normal,
-                      defaultLineColor: Colors.grey.shade300,
-                      activeLineColor: Colors.blueAccent,
-                      finishedLineColor: Utils.getThemeColorBlue(),
-                    ),
-                    steps: [
-                      EasyStep(
-                        customStep: _buildStepIcon(Icons.backup_table_sharp, 0),
-                        title: 'Quantity'.tr(),
-                      ),
-                      EasyStep(
-                        customStep: _buildStepIcon(Icons.date_range, 1),
-                        title: 'DATE'.tr(),
-                      ),
-
-                    ],
-                    onStepReached: (index) => setState(() => activeStep = index),
-                  ),
-                  Container(
-                    alignment: Alignment.center,
-
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(height: 40,width: widthScreen),
-
-                          Center(
-                            child: Text(
-                              isEdit?"EDIT".tr() +" ${widget.customCategory.name.tr()}":"NEW".tr()+" ${widget.customCategory.name.tr()}",
-                              style: TextStyle(
-                                color: Utils.getThemeColorBlue(),
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              alignment: Alignment.center,
+                              width: 50,
+                              height: 50,
+                              child: InkWell(
+                                child: Icon(Icons.arrow_back,
+                                    color:Utils.getThemeColorBlue(), size: 30),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                },
                               ),
                             ),
-                          ),
-                          SizedBox(height: 30,width: widthScreen),
 
-                          activeStep==0? Container(
-                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                            padding: EdgeInsets.all(18),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.15),
-                                  blurRadius: 10,
-                                  spreadRadius: 2,
-                                  offset: Offset(0, 5),
+
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20,),
+                    EasyStepper(
+                      activeStep: activeStep,
+                      activeStepTextColor: Colors.blue.shade900,
+                      finishedStepTextColor: Utils.getThemeColorBlue(),
+                      internalPadding: 20, // Reduce padding for better spacing
+                      stepShape: StepShape.circle,
+                      stepBorderRadius: 20,
+                      borderThickness: 3, // Balanced progress line thickness
+                      showLoadingAnimation: false,
+                      stepRadius: 15, // Reduced step size to fit screen
+                      showStepBorder: false,
+                      lineStyle: LineStyle(
+                        lineLength: 50,
+                        lineType: LineType.normal,
+                        defaultLineColor: Colors.grey.shade300,
+                        activeLineColor: Colors.blueAccent,
+                        finishedLineColor: Utils.getThemeColorBlue(),
+                      ),
+                      steps: [
+                        EasyStep(
+                          customStep: _buildStepIcon(Icons.backup_table_sharp, 0),
+                          title: 'Quantity'.tr(),
+                        ),
+                        EasyStep(
+                          customStep: _buildStepIcon(Icons.date_range, 1),
+                          title: 'DATE'.tr(),
+                        ),
+
+                      ],
+                      onStepReached: (index) => setState(() => activeStep = index),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(height: 40,width: widthScreen),
+
+                            Center(
+                              child: Text(
+                                isEdit?"EDIT".tr() +" ${widget.customCategory.name.tr()}":"NEW".tr()+" ${widget.customCategory.name.tr()}",
+                                style: TextStyle(
+                                  color: Utils.getThemeColorBlue(),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              ],
+                              ),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Form Title
-                                Center(
-                                  child: Text(
-                                  "Quantity".tr(),
-                                    style: TextStyle(
-                                      color: Utils.getThemeColorBlue(),
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                            SizedBox(height: 30,width: widthScreen),
+
+                            activeStep==0? Container(
+                              margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                              padding: EdgeInsets.all(18),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.15),
+                                    blurRadius: 10,
+                                    spreadRadius: 2,
+                                    offset: Offset(0, 5),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Form Title
+                                  Center(
+                                    child: Text(
+                                      "Quantity".tr(),
+                                      style: TextStyle(
+                                        color: Utils.getThemeColorBlue(),
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(height: 20),
+                                  SizedBox(height: 20),
 
-                                // Choose Flock
-                                _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
-                                SizedBox(height: 8),
-                                _buildDropdownField(getDropDownList()),
+                                  // Choose Flock
+                                  _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
+                                  SizedBox(height: 8),
+                                  _buildDropdownField(getDropDownList()),
 
-                                SizedBox(height: 20),
+                                  SizedBox(height: 20),
 
-                                // Feed Quantity Input
-                                _buildInputLabel('Quantity'.tr()+"(${widget.customCategory.unit.tr()})", Icons.scale),
-                                SizedBox(height: 8),
-                                _buildNumberInputField(quantityController,'Quantity'.tr()+"(${widget.customCategory.unit.tr()})"),
+                                  // Feed Quantity Input
+                                  _buildInputLabel('Quantity'.tr()+"(${widget.customCategory.unit.tr()})", Icons.scale),
+                                  SizedBox(height: 8),
+                                  _buildNumberInputField(quantityController,'Quantity'.tr()+"(${widget.customCategory.unit.tr()})"),
 
-                                SizedBox(height: 20),
-                              ],
-                            ),
-                          ):SizedBox(width: 1,),
-                          /*Container(
+                                  SizedBox(height: 20),
+                                ],
+                              ),
+                            ):SizedBox(width: 1,),
+                            /*Container(
                             margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                             padding: EdgeInsets.all(18),
                             decoration: BoxDecoration(
@@ -501,56 +538,56 @@ class _NewCustomData extends State<NewCustomData>
                               ],
                             ),
                           )*/
-                          activeStep==1? Container(
-                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                            padding: EdgeInsets.all(18),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.15),
-                                  blurRadius: 10,
-                                  spreadRadius: 2,
-                                  offset: Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Title
-                                Center(
-                                  child: Text(
-                                    "DATE".tr()+" & "+ "DESCRIPTION_1".tr(),
-                                    style: TextStyle(
-                                      color: Utils.getThemeColorBlue(),
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                            activeStep==1? Container(
+                              margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                              padding: EdgeInsets.all(18),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.15),
+                                    blurRadius: 10,
+                                    spreadRadius: 2,
+                                    offset: Offset(0, 5),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Title
+                                  Center(
+                                    child: Text(
+                                      "DATE".tr()+" & "+ "DESCRIPTION_1".tr(),
+                                      style: TextStyle(
+                                        color: Utils.getThemeColorBlue(),
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(height: 20),
+                                  SizedBox(height: 20),
 
-                                // Date Picker
-                                _buildInputLabel("DATE".tr(), Icons.calendar_today),
-                                SizedBox(height: 8),
-                                _buildDateField(Utils.getFormattedDate(date), pickDate),
+                                  // Date Picker
+                                  _buildInputLabel("DATE".tr(), Icons.calendar_today),
+                                  SizedBox(height: 8),
+                                  _buildDateField(Utils.getFormattedDate(date), pickDate),
 
-                                SizedBox(height: 20),
+                                  SizedBox(height: 20),
 
-                                // Description Input
-                                _buildInputLabel("DESCRIPTION_1".tr(), Icons.description),
-                                SizedBox(height: 8),
-                                _buildTextAreaField(notesController, "NOTES_HINT".tr()),
+                                  // Description Input
+                                  _buildInputLabel("DESCRIPTION_1".tr(), Icons.description),
+                                  SizedBox(height: 8),
+                                  _buildTextAreaField(notesController, "NOTES_HINT".tr()),
 
-                                SizedBox(height: 20),
-                              ],
-                            ),
-                          ):SizedBox(width: 1,),
+                                  SizedBox(height: 20),
+                                ],
+                              ),
+                            ):SizedBox(width: 1,),
 
 
-                         /* SizedBox(height: 10,width: widthScreen),
+                            /* SizedBox(height: 10,width: widthScreen),
                           InkWell(
                             onTap: () async {
 
@@ -621,11 +658,12 @@ class _NewCustomData extends State<NewCustomData>
                             ),
                           )*/
 
-                        ]),
-                  ),
-                ],
-              ),
-            ),
+                          ]),
+                    ),
+                  ],
+                ),
+              ))
+            ],),
           ),
         ),
       ),
