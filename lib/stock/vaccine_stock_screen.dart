@@ -45,7 +45,7 @@ class _MedicineStockScreenState extends State<VaccineStockScreen> with RefreshMi
   }
 
   List<VaccineStockSummary>? _stockSummary = [];
-   BannerAd? _bannerAd;
+  late BannerAd _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
   @override
@@ -61,7 +61,7 @@ class _MedicineStockScreenState extends State<VaccineStockScreen> with RefreshMi
   @override
   void dispose() {
     try{
-      _bannerAd?.dispose();
+      _bannerAd.dispose();
     }catch(ex){
 
     }
@@ -90,7 +90,7 @@ class _MedicineStockScreenState extends State<VaccineStockScreen> with RefreshMi
       ),
     );
 
-    _bannerAd?.load();
+    _bannerAd.load();
   }
   void createTables() async {
     await DatabaseHelper.instance.database;
@@ -347,7 +347,15 @@ class _MedicineStockScreenState extends State<VaccineStockScreen> with RefreshMi
       body: SafeArea(
         child: Container(
           child: Column(children: [
-            Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+             if(_isBannerAdReady)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                      height: 60.0,
+                      width: Utils.WIDTH_SCREEN,
+                      child: AdWidget(ad: _bannerAd)
+                  ),
+                ),
 
             _stockSummary!.isEmpty
                 ? Center(

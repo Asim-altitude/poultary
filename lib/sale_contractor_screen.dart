@@ -146,7 +146,15 @@ class _SaleContractorScreenState extends State<SaleContractorScreen> with Refres
       body: Column(
         children: [
           // Search bar
-          Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+           if(_isBannerAdReady)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                      height: 60.0,
+                      width: Utils.WIDTH_SCREEN,
+                      child: AdWidget(ad: _bannerAd)
+                  ),
+                ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Container(

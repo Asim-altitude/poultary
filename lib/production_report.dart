@@ -42,7 +42,7 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
   late List<bool> _monthlyExpanded;
   DateTimeRange? selectedDateRange;
 
-   BannerAd? _bannerAd;
+   late BannerAd _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
   late NativeAd _myNativeAd;
@@ -89,7 +89,7 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
   @override
   void dispose() {
     try{
-      _bannerAd?.dispose();
+      _bannerAd.dispose();
       _myNativeAd.dispose();
     }catch(ex){
 
@@ -244,7 +244,7 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
       ),
     );
 
-    _bannerAd?.load();
+    _bannerAd.load();
   }
 
   String getDateString(DateTime date) {
@@ -772,7 +772,15 @@ class _ProductionReportScreenState extends State<ProductionReportScreen> {
         ),
 
         body: Column(children: [
-        Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+         if(_isBannerAdReady)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                      height: 60.0,
+                      width: Utils.WIDTH_SCREEN,
+                      child: AdWidget(ad: _bannerAd)
+                  ),
+                ),
 
         Expanded(child:
         SingleChildScrollView(

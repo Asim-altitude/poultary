@@ -32,7 +32,7 @@ class _ReportListScreen extends State<ReportListScreen> {
   ];
 
   List<CustomCategory> categories = [];
-  BannerAd? _bannerAd;
+  late BannerAd _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
 
@@ -70,13 +70,13 @@ class _ReportListScreen extends State<ReportListScreen> {
       ),
     );
 
-    _bannerAd?.load();
+    _bannerAd.load();
   }
 
   @override
   void dispose() {
     try{
-      _bannerAd?.dispose();
+      _bannerAd.dispose();
     }catch(ex){
 
     }
@@ -118,7 +118,15 @@ class _ReportListScreen extends State<ReportListScreen> {
       body: Column(
         children: [
 
-          Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+           if(_isBannerAdReady)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                      height: 60.0,
+                      width: Utils.WIDTH_SCREEN,
+                      child: AdWidget(ad: _bannerAd)
+                  ),
+                ),
 
           // ListView inside Expanded
 

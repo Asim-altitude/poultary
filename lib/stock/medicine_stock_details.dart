@@ -24,7 +24,7 @@ class MedicineStockDetailScreen extends StatefulWidget{
 }
 
 class _MedicineStockDetailScreen extends State<MedicineStockDetailScreen> {
-  BannerAd? _bannerAd;
+  late BannerAd _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
   _loadBannerAd(){
@@ -50,7 +50,7 @@ class _MedicineStockDetailScreen extends State<MedicineStockDetailScreen> {
       ),
     );
 
-    _bannerAd?.load();
+    _bannerAd.load();
   }
   @override
   void initState() {
@@ -62,7 +62,7 @@ class _MedicineStockDetailScreen extends State<MedicineStockDetailScreen> {
   @override
   void dispose() {
     try{
-      _bannerAd?.dispose();
+      _bannerAd.dispose();
     }catch(ex){
 
     }
@@ -78,7 +78,15 @@ class _MedicineStockDetailScreen extends State<MedicineStockDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+               if(_isBannerAdReady)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                      height: 60.0,
+                      width: Utils.WIDTH_SCREEN,
+                      child: AdWidget(ad: _bannerAd)
+                  ),
+                ),
             
               _buildStockItem(widget.stock),
               SizedBox(height: 16),

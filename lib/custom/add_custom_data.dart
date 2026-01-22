@@ -356,7 +356,15 @@ class _NewCustomData extends State<NewCustomData>
             height: heightScreen,
             color: Utils.getScreenBackground(),
             child: Column(children: [
-              Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+               if(_isBannerAdReady)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                      height: 60.0,
+                      width: Utils.WIDTH_SCREEN,
+                      child: AdWidget(ad: _bannerAd)
+                  ),
+                ),
               Expanded(child: SingleChildScrollView(
                 child: Column(
                   children: [

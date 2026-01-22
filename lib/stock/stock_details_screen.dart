@@ -24,13 +24,13 @@ class StockDetailScreen extends StatefulWidget{
 }
 
 class _StockDetailScreen extends State<StockDetailScreen> {
-   BannerAd? _bannerAd;
+  late BannerAd _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
   @override
   void dispose() {
     try{
-      _bannerAd?.dispose();
+      _bannerAd.dispose();
     }catch(ex){
 
     }
@@ -66,7 +66,7 @@ class _StockDetailScreen extends State<StockDetailScreen> {
       ),
     );
 
-    _bannerAd?.load();
+    _bannerAd.load();
   }
 
   @override
@@ -80,7 +80,15 @@ class _StockDetailScreen extends State<StockDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // **Stock Summary Section**
-              Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+               if(_isBannerAdReady)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                      height: 60.0,
+                      width: Utils.WIDTH_SCREEN,
+                      child: AdWidget(ad: _bannerAd)
+                  ),
+                ),
             
               _buildStockItem(widget.stock, 0, kAlwaysCompleteAnimation),
             

@@ -41,7 +41,7 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
 
   double widthScreen = 0;
   double heightScreen = 0;
-   BannerAd? _bannerAd;
+   late BannerAd _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
   _loadBannerAd(){
@@ -67,13 +67,13 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
       ),
     );
 
-    _bannerAd?.load();
+    _bannerAd.load();
   }
 
   @override
   void dispose() {
     try{
-      _bannerAd?.dispose();
+      _bannerAd.dispose();
     }catch(ex){
 
     }
@@ -354,7 +354,15 @@ class _MedicationVaccinationScreen extends State<MedicationVaccinationScreen> wi
           height: heightScreen,
             color: Utils.getScreenBackground(),
             child:Column(children: [
-              Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+               if(_isBannerAdReady)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                      height: 60.0,
+                      width: Utils.WIDTH_SCREEN,
+                      child: AdWidget(ad: _bannerAd)
+                  ),
+                ),
 
               Expanded(child:
               SingleChildScrollView(

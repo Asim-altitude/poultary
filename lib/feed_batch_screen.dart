@@ -41,7 +41,7 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> with RefreshMixin {
   }
 
   List<FeedBatch> _batches = [];
-   BannerAd? _bannerAd;
+  late BannerAd _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
   @override
@@ -78,13 +78,13 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> with RefreshMixin {
       ),
     );
 
-    _bannerAd?.load();
+    _bannerAd.load();
   }
 
   @override
   void dispose() {
     try{
-      _bannerAd?.dispose();
+      _bannerAd.dispose();
     }catch(ex){
 
     }
@@ -218,7 +218,15 @@ class _FeedBatchScreenState extends State<FeedBatchScreen> with RefreshMixin {
               child: Column(
                 children:
                 [
-                  Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+                   if(_isBannerAdReady)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                      height: 60.0,
+                      width: Utils.WIDTH_SCREEN,
+                      child: AdWidget(ad: _bannerAd)
+                  ),
+                ),
                   
                   Container(
                     margin: EdgeInsets.all(15),

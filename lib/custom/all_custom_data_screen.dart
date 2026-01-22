@@ -24,7 +24,7 @@ class _CustomCategoryListScreenState extends State<CategoryDataListScreen> {
   int? selectedFlock;
   String? selectedType;
   List<String> categoryTypes = [];
-  BannerAd? _bannerAd;
+  late BannerAd _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
   bool isEdit = false;
@@ -65,13 +65,13 @@ class _CustomCategoryListScreenState extends State<CategoryDataListScreen> {
       ),
     );
 
-    _bannerAd?.load();
+    _bannerAd.load();
   }
 
   @override
   void dispose() {
     try{
-      _bannerAd?.dispose();
+      _bannerAd.dispose();
     }catch(ex){
 
     }
@@ -205,7 +205,15 @@ class _CustomCategoryListScreenState extends State<CategoryDataListScreen> {
       ),
       body: SafeArea(
         child:Column(children: [
-          Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+           if(_isBannerAdReady)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                      height: 60.0,
+                      width: Utils.WIDTH_SCREEN,
+                      child: AdWidget(ad: _bannerAd)
+                  ),
+                ),
 
           Expanded(child:
           SingleChildScrollView(

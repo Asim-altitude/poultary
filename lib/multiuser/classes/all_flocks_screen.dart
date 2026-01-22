@@ -114,7 +114,15 @@ class _AllFlocksScreen extends State<AllFlocksScreen> with RefreshMixin {
         centerTitle: true,
       ),
       body: Column(children: [
-        Utils.showBannerAd(_bannerAd, _isBannerAdReady),
+         if(_isBannerAdReady)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                      height: 60.0,
+                      width: Utils.WIDTH_SCREEN,
+                      child: AdWidget(ad: _bannerAd)
+                  ),
+                ),
         Expanded(child: SingleChildScrollView(
           padding: EdgeInsets.only(bottom: 20), // for spacing after list
           child: Column(

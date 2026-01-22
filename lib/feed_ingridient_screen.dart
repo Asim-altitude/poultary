@@ -336,14 +336,22 @@ class _FeedIngredientScreenState extends State<FeedIngredientScreen> with Refres
             ),
 
           ),
-          Positioned(
+          if(_isBannerAdReady) Positioned(
             left: 0,
             right: 0,
             top: 0,
             child: Container(
               height: 60,
               color: Colors.white,
-              child: Utils.showBannerAd(_bannerAd, _isBannerAdReady), // your banner here
+              child:
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                      height: 60.0,
+                      width: Utils.WIDTH_SCREEN,
+                      child: AdWidget(ad: _bannerAd)
+                  ),
+                ), // your banner here
             ),
           ),
 

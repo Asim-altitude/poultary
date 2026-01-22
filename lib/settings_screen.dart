@@ -13,11 +13,9 @@ import 'package:poultary/add_feeding.dart';
 import 'package:poultary/all_events.dart';
 import 'package:poultary/category_screen.dart';
 import 'package:poultary/sale_contractor_screen.dart';
-import 'package:poultary/sticky.dart';
 import 'package:poultary/support_screen.dart';
 import 'package:poultary/utils/about.dart';
 import 'package:poultary/utils/fb_analytics.dart';
-import 'package:poultary/utils/premium_subscription_screen.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
@@ -268,14 +266,20 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
             color: Colors.white,
             // color: Utils.getScreenBackground(),
             child: Column(children: [
-              Utils.showBannerAd(_bannerAd, _isBannerAdReady),
-
+              if(_isBannerAdReady)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                      height: 60.0,
+                      width: Utils.WIDTH_SCREEN,
+                      child: AdWidget(ad: _bannerAd)
+                  ),
+                ),
               Expanded(child: SingleChildScrollView(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children:  [
-
 
                     // Farm & Inventory Section
                     // Farm & Inventory Section
