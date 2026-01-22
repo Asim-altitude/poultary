@@ -110,7 +110,6 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
     _selectedCupertinoLanguage = await Utils.getSelectedLanguage();
     setState(() {
       isGetLanguage = true;
-
     });
 
   }
