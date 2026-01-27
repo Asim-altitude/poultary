@@ -1133,6 +1133,14 @@
   "Repair": "Ремонт",
   "Replacement": "Заміна",
   "Inspection": "Огляд",
-  "Calibration": "Калібрування"
+  "Calibration": "Калібрування",
+
+  "Initial": "Початковий",
+  "Now": "Зараз",
+  "Start": "старт",
+  "Total Change": "Повна зміна",
+  "Weight Report": "Звіт про вагу",
+  "Flock Weight Report": "Звіт про вагу стада",
+  "View report of Flock Weight Change": "Переглянути звіт про зміну ваги стада"
 
 }

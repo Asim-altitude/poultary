@@ -172,6 +172,10 @@ class _NewEventReminder extends State<NewEventReminder>
       bottomNavigationBar: InkWell(
         onTap: () async {
           activeStep++;
+
+          if(activeStep > 2)
+            activeStep = 2;
+
           if(activeStep==1){
             if(isOther){
               if(nameController.text.isEmpty)
@@ -190,38 +194,58 @@ class _NewEventReminder extends State<NewEventReminder>
             }
             else
             {
-              DateTime datetime = DateFormat("dd MMM yyyy - hh:mm a").parse(Utils.getReminderFormattedDate(date)); // DateTime.parse();
-              int notification_time = ((datetime.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch) / 1000).round();
-              print("TIME $notification_time");
+              try {
+                DateTime datetime = DateFormat("dd MMM yyyy - hh:mm a").parse(
+                    Utils.getReminderFormattedDate(date)); // DateTime.parse();
+                int notification_time = ((datetime.millisecondsSinceEpoch -
+                    DateTime
+                        .now()
+                        .millisecondsSinceEpoch) / 1000).round();
+                print("TIME $notification_time");
 
-              if(isEdit){
-                MyEvent myevent = MyEvent(widget.myEvent!.id, getFlockID(),
-                    _purposeselectedValue,
-                    isOther
-                        ? nameController.text
-                        : _reminderValue,
-                    notesController.text ,1, date, 1);
-                await EventsDatabaseHelper.instance
-                    .database;
+                if (isEdit) {
+                  MyEvent myevent = MyEvent(
+                      widget.myEvent!.id,
+                      getFlockID(),
+                      _purposeselectedValue,
+                      isOther
+                          ? nameController.text
+                          : _reminderValue,
+                      notesController.text,
+                      1,
+                      date,
+                      1);
+                  await EventsDatabaseHelper.instance
+                      .database;
 
-                EventsDatabaseHelper.updateEvent(myevent);
-                Utils.showToast("Reminder Added");
-                Navigator.pop(context);
+                  EventsDatabaseHelper.updateEvent(myevent);
+                  Utils.showToast("Reminder Added");
+                  Navigator.pop(context);
+                } else {
+                  MyEvent myevent = MyEvent(
+                      -1,
+                      getFlockID(),
+                      _purposeselectedValue,
+                      isOther
+                          ? nameController.text
+                          : _reminderValue,
+                      notesController.text,
+                      1,
+                      date,
+                      1);
+                  await EventsDatabaseHelper.instance
+                      .database;
 
-              } else {
-                MyEvent myevent = MyEvent(-1, getFlockID(),
-                    _purposeselectedValue,
-                    isOther
-                        ? nameController.text
-                        : _reminderValue,
-                    notesController.text, 1, date, 1);
-                await EventsDatabaseHelper.instance
-                    .database;
-
-                EventsDatabaseHelper.insertNewEvent(myevent);
-                Utils.showNotification(Utils.generateRandomNumber(), myevent.event_name!, myevent.event_detail!, notification_time);
-                Utils.showToast("Reminder Added");
-                Navigator.pop(context);
+                  EventsDatabaseHelper.insertNewEvent(myevent);
+                  Utils.showNotification(
+                      Utils.generateRandomNumber(), myevent.event_name!,
+                      myevent.event_detail!, notification_time);
+                  Utils.showToast("Reminder Added");
+                  Navigator.pop(context);
+                }
+              }catch(ex){
+                print(ex);
+                Utils.showToast(ex.toString());
               }
             }
           }
@@ -272,6 +296,7 @@ class _NewEventReminder extends State<NewEventReminder>
                       child: AdWidget(ad: _bannerAd)
                   ),
                 ),
+
             Expanded(child: SingleChildScrollView(
               child: Column(
                 children: [

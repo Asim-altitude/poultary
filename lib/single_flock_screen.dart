@@ -535,35 +535,35 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                 ),
               ),*/
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
 
                             /// **Flock Name (Title)**
-                            Center(
-                              child: Text(
-                                Utils.selected_flock!.f_name,
-                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                            Card(
+                              elevation: 4,
+                              color: Colors.white.withOpacity(0.08),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
                               ),
-                            ),
-
-                            SizedBox(height: 8),
-
-                            /// **Flock Details Row**
-                            Row(
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                /// 🐦 Flock Image + Acquisition Type
-                                Column(
+
+                                /// 🔝 Image + Name Row
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     InkWell(
                                       onTap: () {
-                                        if(byteimages.length==0){
-                                          String defaultImage = '${Utils.selected_flock!.icon.replaceAll("jpeg", "png")}';
-
+                                        if (byteimages.isEmpty) {
+                                          String defaultImage =
+                                          Utils.selected_flock!.icon.replaceAll("jpeg", "png");
                                           showAssetImageDialog(context, defaultImage);
-                                        }else {
+                                        } else {
                                           _showFullScreenImage(context, byteimages, 0);
                                         }
                                       },
@@ -571,12 +571,16 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                         width: 120,
                                         height: 120,
                                         decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(12),
-                                          boxShadow: [
+                                          borderRadius: BorderRadius.circular(14),
+                                          border: Border.all(
+                                            color: Colors.white24,
+                                            width: 1,
+                                          ),
+                                          boxShadow: const [
                                             BoxShadow(
-                                              color: Colors.black26,
-                                              blurRadius: 6,
-                                              offset: Offset(0, 3),
+                                              color: Colors.black38,
+                                              blurRadius: 8,
+                                              offset: Offset(0, 4),
                                             ),
                                           ],
                                         ),
@@ -586,300 +590,317 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(height: 6),
+
+                                    const SizedBox(width: 12),
+
+                                    /// Name + Acquisition Type
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          InkWell(
+                                            onTap: () => _showFlockInfoBottomSheet(context),
+                                            child: Row(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(
+                                                        Utils.selected_flock!.f_name,
+                                                        maxLines: 2,
+                                                        overflow: TextOverflow.ellipsis,
+                                                        style: const TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight: FontWeight.w700,
+                                                          color: Colors.white,
+                                                          letterSpacing: 0.3,
+                                                        ),
+                                                      ),
+
+                                                      /*const SizedBox(height: 4),
+                                                      Text(
+                                                        Utils.selected_flock!.acqusition_type.tr(),
+                                                        style: const TextStyle(
+                                                          fontSize: 14,
+                                                          color: Colors.white70,
+                                                          fontWeight: FontWeight.w600,
+                                                        ),
+                                                      ),*/
+                                                    ],
+                                                  ),
+                                                ),
+
+                                                const Icon(
+                                                  Icons.info_outline,
+                                                  color: Colors.white70,
+                                                  size: 26,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+
+                                          const SizedBox(height: 4),
+                                          /// 🐦 Bird Count
+                                          InkWell(
+                                            onTap: () async => await _showFlockBatchesBottomSheet(context),
+                                            child: Container(
+                                              padding: const EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white12,
+                                                borderRadius: BorderRadius.circular(10),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  Text(
+                                                    Utils.selected_flock!.active_bird_count.toString(),
+                                                    style: const TextStyle(
+                                                      fontSize: 22,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    "BIRDS".tr(),
+                                                    style: const TextStyle(fontSize: 16, color: Colors.white70),
+                                                  ),
+                                                  const Spacer(),
+                                                  const Icon(
+                                                    Icons.arrow_forward_ios_rounded,
+                                                    size: 16,
+                                                    color: Colors.white54,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            Utils.selected_flock!.acqusition_type.tr(),
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.white70,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Card(
+                                  elevation: 3,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  color: Colors.white10,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+
+                                        /// ================= HEADER =================
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                const Icon(Icons.warning_amber_rounded,
+                                                    color: Colors.red, size: 22),
+                                                const SizedBox(width: 6),
+                                                Text(
+                                                  "${"MORTALITY".tr()} / ${"CULLING".tr()}",
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+
+                                            /// ADD BUTTON
+                                            InkWell(
+                                              onTap: () {
+                                                _showAddMortalityDialog(context);
+                                              },
+                                              borderRadius: BorderRadius.circular(20),
+                                              child: Container(
+                                                padding: const EdgeInsets.all(6),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Icon(
+                                                  Icons.add,
+                                                  color: Utils.getThemeColorBlue(),
+                                                  size: 20,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+
+                                        const SizedBox(height: 6),
+                                        const Divider(height: 1),
+                                        const SizedBox(height: 8),
+                                        /// ================= STATS ROW =================
+                                        Row(
+                                          children: [
+
+                                            /// MORTALITY
+                                            Expanded(
+                                              child: _statBox(
+                                                label: "MORTALITY".tr(),
+                                                value: mortalityCount,
+                                                onTap: () {
+                                                  _showMortalityRecordsDialog(context, 'MORTALITY');
+                                                },
+                                              ),
+                                            ),
+
+                                            const SizedBox(width: 8),
+
+                                            /// CULLING
+                                            Expanded(
+                                              child: _statBox(
+                                                label: "CULLING".tr(),
+                                                value: cullingCount,
+                                                onTap: () {
+                                                  _showMortalityRecordsDialog(context, 'CULLING');
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                /*const Divider(color: Colors.white24),
+
+                                const SizedBox(height: 5),*/
+
+                               /* /// 🎯 Purpose
+                                _infoRow(
+                                  icon: Icons.assignment,
+                                  label: 'PURPOSE1'.tr(),
+                                  value: Utils.selected_flock!.purpose.tr(),
+                                ),
+
+                                const SizedBox(height: 6),
+
+                                /// 🕒 Age
+                                Row(
+                                  children: [
+                                    const Icon(Icons.watch_later_outlined, color: Colors.white70, size: 18),
+                                    const SizedBox(width: 6),
+                                    Text('Age'.tr() + ": ",
+                                        style: const TextStyle(fontSize: 12, color: Colors.white70)),
                                     Text(
-                                      Utils.selected_flock!.acqusition_type.tr(),
+                                      ageInWeeks
+                                          ? Utils.getAnimalAgeWeeks(Utils.selected_flock!.acqusition_date)
+                                          : Utils.getAnimalAge(Utils.selected_flock!.acqusition_date),
                                       style: const TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white,
                                       ),
-                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    InkWell(
+                                      onTap: () => setState(() => ageInWeeks = !ageInWeeks),
+                                      child: const Icon(Icons.switch_camera_outlined,
+                                          color: Colors.white70, size: 22),
                                     ),
                                   ],
                                 ),
 
-                                const SizedBox(width: 16),
+                                const SizedBox(height: 6),
 
-                                /// 📋 Details Section
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      /// 🔢 Bird Count
+                                /// 📅 Date
+                                _infoRow(
+                                  icon: Icons.calendar_today,
+                                  label: 'DATE'.tr(),
+                                  value: Utils.getFormattedDate(
+                                      Utils.selected_flock!.acqusition_date),
+                                ),
 
-                                      InkWell(
-                                        onTap: () async {
-                                          await _showFlockBatchesBottomSheet(context);
-                                        },
-                                        child: Container(
-                                          padding: EdgeInsets.all(5.0),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white12,
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                Utils.selected_flock!.active_bird_count.toString(),
-                                                style: const TextStyle(
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                "BIRDS".tr(),
-                                                style: const TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.white70,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
+                                const SizedBox(height: 12),
+
+
+                                /// 📝 Notes
+                                if (Utils.selected_flock!.notes.isNotEmpty) ...[
+
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white12,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      Utils.selected_flock!.notes,
+                                      style: const TextStyle(color: Colors.white70),
+                                    ),
+                                  ),
+                                ],
+                                const SizedBox(height: 10),*/
+                             InkWell(
+                                  onTap: () async {
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => WeightRecordScreen(
+                                          flockId: Utils.selected_flock!.f_id,
+                                          birdsCount: Utils.selected_flock!.active_bird_count!,
                                         ),
                                       ),
-
-                                      const SizedBox(height: 8),
-
-                                      /// 🎯 Purpose
-                                      Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          const Icon(Icons.assignment, color: Colors.white70, size: 18),
-                                          const SizedBox(width: 6),
-                                          Text('PURPOSE1'.tr() + ": ",
-                                              style: const TextStyle(fontSize: 12, color: Colors.white70)),
-                                          Expanded(
-                                            child: Text(
-                                              Utils.selected_flock!.purpose.tr(),
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-
-                                      const SizedBox(height: 8),
-
-                                      /// 🕒 Age
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.watch_later_outlined, color: Colors.white70, size: 18),
-                                          const SizedBox(width: 6),
-                                          Text('Age'.tr() + ": ",
-                                              style: const TextStyle(fontSize: 12, color: Colors.white70)),
-                                          Text(
-                                            ageInWeeks? Utils.getAnimalAgeWeeks(Utils.selected_flock!.acqusition_date):Utils.getAnimalAge(Utils.selected_flock!.acqusition_date),
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          SizedBox(width: 10,),
-                                          InkWell(
-                                              onTap: () {
-                                                setState(() {
-                                                  ageInWeeks = !ageInWeeks;
-                                                });
-                                              },
-                                              child: const Icon(Icons.switch_camera_outlined, color: Colors.white70, size: 22)),
-
-                                        ],
-                                      ),
-
-                                      const SizedBox(height: 8),
-
-                                      /// 📅 Acquisition Date
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.calendar_today, color: Colors.white70, size: 18),
-                                          const SizedBox(width: 6),
-                                          Text('DATE'.tr() + ": ",
-                                              style: const TextStyle(fontSize: 12, color: Colors.white70)),
-                                          Text(
-                                            Utils.getFormattedDate(Utils.selected_flock!.acqusition_date),
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            Center(
-                              child: InkWell(
-                                onTap: () async{
-                                  await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => WeightRecordScreen(
-                                        flockId: Utils.selected_flock!.f_id,
-                                        birdsCount: Utils.selected_flock!.active_bird_count!,
-                                      ),
+                                    );
+                                    refreshData();
+                                  },
+                                  child: Container(
+                                    margin: const EdgeInsets.only(left: 8, right: 8),
+                                    padding: const EdgeInsets.symmetric(vertical: 15),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white10,
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                  );
-
-                                  refreshData();
-                                },
-                                child: Card(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                  color: Colors.white12,
-                                  elevation: 2,
-                                  margin: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.monitor_weight, color: Colors.white70),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          'AVG Weight'.tr() + ": ",
-                                          style: TextStyle(fontSize: 14, color: Colors.white70),
-                                        ),
+                                        Image.asset("assets/weight_icon.png", width: 25, height: 25,color: Colors.white,),
+                                        const SizedBox(width: 6),
+                                        Text('AVG Weight'.tr() + ":  ",
+                                            style: const TextStyle(color: Colors.white70)),
                                         Text(
                                           weightRecord != null
                                               ? "${weightRecord!.averageWeight} ${Utils.selected_unit.tr()}"
                                               : 'No Records'.tr(),
-                                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
                                         ),
-                                        SizedBox(width: 8),
-                                        Icon(Icons.arrow_forward_ios_rounded, color: Colors.white54, size: 18),
+                                        const SizedBox(width: 6),
+                                        const Icon(Icons.arrow_forward_ios_rounded,
+                                            color: Colors.white54, size: 16),
                                       ],
                                     ),
                                   ),
                                 ),
-                              ),
+
+                              ],
                             ),
-
-                            /// **Notes Section**
-                            if (Utils.selected_flock!.notes.isNotEmpty)
-                              Container(
-                                padding: EdgeInsets.all(10),
-                                margin: EdgeInsets.only(left: 5, right: 5),
-                                decoration: BoxDecoration(
-                                  color: Colors.white12,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  Utils.selected_flock!.notes,
-                                  style: TextStyle(fontSize: 14, color: Colors.white70),
-                                ),
-                              ),
+                          ),
+                        ),
 
 
-                            Card(
-                              elevation: 3,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              color: Utils.getScreenBackground(),
-                              child: Padding(
-                                padding: const EdgeInsets.all(12),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Title Row
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
-                                            SizedBox(width: 8),
-                                            Text(
-                                              "MORTALITY".tr()+"/"+ "CULLING".tr(),
-                                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.red),
-                                            ),
-                                          ],
-                                        ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            _showAddMortalityDialog(context); // Modified dialog to choose between Mortality / Culling
-                                          },
-                                          child: Icon(Icons.add_circle_outline, color: Utils.getThemeColorBlue(), size: 30),
-                                        ),
-                                      ],
-                                    ),
 
-                                    SizedBox(height: 5),
 
-                                    // Mortality Row
-                                    GestureDetector(
-                                      onTap: () {
-                                        _showMortalityRecordsDialog(context, 'MORTALITY');
-                                      },
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            "MORTALITY".tr(),
-                                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                                          ),
-                                          Row(
-                                            children: [
-                                              Text(
-                                                mortalityCount > 0 ? "$mortalityCount ${'BIRDS'.tr()}" : "No Records".tr(),
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: mortalityCount > 0 ? Colors.black : Colors.grey,
-                                                ),
-                                              ),
-                                              Icon(Icons.arrow_forward_ios_rounded, size: 20, color: Colors.grey,),
-                                            ],
-                                          ),
 
-                                        ],
-                                      ),
-                                    ),
-
-                                    SizedBox(height: 5),
-
-                                    // Culling Row
-                                    GestureDetector(
-                                      onTap: () {
-                                        _showMortalityRecordsDialog(context, 'CULLING');
-
-                                      },
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            "CULLING".tr(),
-                                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                                          ),
-                                          Row(
-                                            children: [
-                                              Text(
-                                                cullingCount > 0 ? "$cullingCount ${'BIRDS'.tr()}" : "No Records".tr(),
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: cullingCount > 0 ? Colors.black : Colors.grey,
-                                                ),
-                                              ),
-                                              Icon(Icons.arrow_forward_ios_rounded, size: 20, color: Colors.grey,),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
 
                             /*/// **Images List**
                     if (imagesAdded)
@@ -1722,6 +1743,267 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
   }
 
 
+  void _showFlockInfoBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.4,
+          minChildSize: 0.4,
+          maxChildSize: 0.5,
+          builder: (context, scrollController) {
+            return Container(
+              padding: const EdgeInsets.all(12),
+              decoration: const BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: Card(
+                  elevation: 2,
+                  color: Colors.white10,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+
+                        /// 🔝 Image + Name Row
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                if (byteimages.isEmpty) {
+                                  String defaultImage =
+                                  Utils.selected_flock!.icon.replaceAll("jpeg", "png");
+                                  showAssetImageDialog(context, defaultImage);
+                                } else {
+                                  _showFullScreenImage(context, byteimages, 0);
+                                }
+                              },
+                              child: Container(
+                                width: 120,
+                                height: 120,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 6,
+                                      offset: Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: buildImageGrid(byteimages),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(width: 12),
+
+                            /// Name + Acquisition Type
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  InkWell(
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                Utils.selected_flock!.f_name,
+                                                style: const TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                Utils.selected_flock!.acqusition_type.tr(),
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.white70,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+
+                                      ],
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 4),
+
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 5),
+                        const Divider(color: Colors.white24),
+
+                        const SizedBox(height: 5),
+
+                        /// 🎯 Purpose
+                        _infoRow(
+                          icon: Icons.assignment,
+                          label: 'PURPOSE1'.tr(),
+                          value: Utils.selected_flock!.purpose.tr(),
+                        ),
+
+                        const SizedBox(height: 6),
+
+                        /// 🕒 Age
+                        Row(
+                          children: [
+                            const Icon(Icons.watch_later_outlined, color: Colors.white70, size: 18),
+                            const SizedBox(width: 6),
+                            Text('Age'.tr() + ": ",
+                                style: const TextStyle(fontSize: 12, color: Colors.white70)),
+                            Text(
+                              ageInWeeks
+                                  ? Utils.getAnimalAgeWeeks(Utils.selected_flock!.acqusition_date)
+                                  : Utils.getAnimalAge(Utils.selected_flock!.acqusition_date),
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            InkWell(
+                              onTap: () => setState(() => ageInWeeks = !ageInWeeks),
+                              child: const Icon(Icons.switch_camera_outlined,
+                                  color: Colors.white70, size: 22),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 6),
+
+                        /// 📅 Date
+                        _infoRow(
+                          icon: Icons.calendar_today,
+                          label: 'DATE'.tr(),
+                          value: Utils.getFormattedDate(
+                              Utils.selected_flock!.acqusition_date),
+                        ),
+
+                        const SizedBox(height: 12),
+
+
+                        /// 📝 Notes
+                        if (Utils.selected_flock!.notes.isNotEmpty) ...[
+
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white12,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              Utils.selected_flock!.notes,
+                              style: const TextStyle(color: Colors.white70),
+                            ),
+                          ),
+                        ],
+
+
+                      ],
+                    ),
+                  ),
+                ), // reuse same card widget
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+
+  Widget _infoRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: Colors.white70, size: 18),
+        const SizedBox(width: 6),
+        Text("$label: ",
+            style: const TextStyle(fontSize: 12, color: Colors.white70)),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+
+  Widget _statBox({
+    required String label,
+    required int value,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white10,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value > 0 ? "$value ${'BIRDS'.tr()}" : "No Records".tr(),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: value > 0 ? Colors.white : Colors.white30,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void showAssetImageDialog(BuildContext context, String image) {
     showDialog(
       context: context,
@@ -1856,8 +2138,8 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                 child: Text(
                   "+${images.length - 1} "+"more".tr(),
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),
                 ),

@@ -53,6 +53,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/src/widgets/image.dart';
 
+import '../model/weight_record.dart';
 import '../multiuser/model/egg_record.dart';
 import '../multiuser/model/flockfb.dart';
 import '../multiuser/model/role_permissions.dart';
@@ -67,7 +68,7 @@ class Utils {
   static double HEIGHT_SCREEN = 0;
   static double _standardWidth = 414;
   static double _standardheight = 736;
-  static final bool ISTESTACCOUNT = false;
+  static final bool ISTESTACCOUNT = true;
   static late bool isShowAdd = true;
   static late bool iShowInterStitial = false;
 
@@ -141,6 +142,13 @@ class Utils {
   static List<Feed_Report_Item> feed_report_list = [];
   static List<FeedFlock_Report_Item> feed_flock_report_list = [];
   static List<Finance_Report_Item> finance_report_list = [];
+
+  static List<WeightRecord> weight_list = [];
+  static Flock? selectedWeightFlock;
+  static double initialWeight = 0;
+  static double currentWeight = 0;
+  static double changeWeight = 0;
+
 
   static List<Health_Report_Item> vaccine_report_list = [];
   static List<Health_Report_Item> medication_report_list = [];
@@ -1645,6 +1653,8 @@ $storeLink
       Utils.isShowAdd = true;
       inititalize();
     }
+
+    Utils.isShowAdd = false;
 
   }
 

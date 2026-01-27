@@ -5,9 +5,11 @@ import 'package:poultary/birds_report_screen.dart';
 import 'package:poultary/eggs_report_screen.dart';
 import 'package:poultary/feed_report_screen.dart';
 import 'package:poultary/financial_report_screen.dart';
+import 'package:poultary/flock_weight_report.dart';
 import 'package:poultary/production_report.dart';
 import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/utils.dart';
+import 'package:poultary/weight_record_screen.dart';
 
 import 'custom_category_report.dart';
 import 'database/databse_helper.dart';
@@ -29,6 +31,8 @@ class _ReportListScreen extends State<ReportListScreen> {
     Item(image: 'assets/eggs_count.png', title: 'EGG'.tr()+" "+ "REPORT".tr(), subtitle: 'View report of egg collection and reduction'.tr()),
     Item(image: 'assets/feed.png', title: 'Feed'.tr()+' '+ 'REPORT'.tr(), subtitle: 'View report of Feed Consumption'.tr()),
     Item(image: 'assets/health.png', title: 'Health'.tr()+" "+'REPORT'.tr(), subtitle: 'View report of Health Events'.tr()),
+    Item(image: 'assets/weight_icon.png', title: 'Weight Report'.tr(), subtitle: 'View report of Flock Weight Change'.tr()),
+
   ];
 
   List<CustomCategory> categories = [];
@@ -184,12 +188,17 @@ class _ReportListScreen extends State<ReportListScreen> {
                           context,
                           MaterialPageRoute(builder: (context) => const HealthReportScreen()),
                         );
+                      } else if (index == 6) {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const WeightReportScreen()),
+                        );
                       } else {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => CategoryChartScreen(
-                              customCategory: categories[index - 6],
+                              customCategory: categories[index - 7],
                             ),
                           ),
                         );

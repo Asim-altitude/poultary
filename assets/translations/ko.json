@@ -1115,7 +1115,15 @@
  "Repair": "수리하다",
  "Replacement": "대사",
  "Inspection": "점검",
- "Calibration": "구경 측정"
+ "Calibration": "구경 측정",
+
+ "Initial": "초기의",
+ "Now": "지금",
+ "Start": "시작",
+ "Total Change": "총 변화",
+ "Weight Report": "중량 보고서",
+ "Flock Weight Report": "무리 무게 보고서",
+ "View report of Flock Weight Change": "무리 체중 변화 보고서 보기"
 
 
 }

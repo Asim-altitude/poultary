@@ -1117,6 +1117,14 @@
  "Repair": "Reparar",
  "Replacement": "Substituição",
  "Inspection": "Inspeção",
- "Calibration": "Calibração"
+ "Calibration": "Calibração",
+
+ "Initial": "Inicial",
+ "Now": "Agora",
+ "Start": "Começar",
+ "Total Change": "Mudança total",
+ "Weight Report": "Relatório de Peso",
+ "Flock Weight Report": "Relatório de peso do rebanho",
+ "View report of Flock Weight Change": "Ver relatório de mudança de peso do rebanho"
 
 }

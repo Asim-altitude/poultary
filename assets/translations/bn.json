@@ -1114,6 +1114,14 @@
   "Repair": "মেরামত",
   "Replacement": "প্রতিস্থাপন",
   "Inspection": "পরিদর্শন",
-  "Calibration": "ক্রমাঙ্কন"
+  "Calibration": "ক্রমাঙ্কন",
+
+  "Initial": "প্রাথমিক",
+  "Now": "এখন",
+  "Start": "শুরু করুন",
+  "Total Change": "মোট পরিবর্তন",
+  "Weight Report": "ওজন রিপোর্ট",
+  "Flock Weight Report": "ফ্লক ওয়েট রিপোর্ট",
+  "View report of Flock Weight Change": "ফ্লকের ওজন পরিবর্তনের রিপোর্ট দেখুন"
 
 }

@@ -1111,6 +1111,14 @@
   "Repair": "维修",
   "Replacement": "替代品",
   "Inspection": "检查",
-  "Calibration": "校准"
+  "Calibration": "校准",
+
+  "Initial": "最初的",
+  "Now": "现在",
+  "Start": "开始",
+  "Total Change": "总体变化",
+  "Weight Report": "体重报告",
+  "Flock Weight Report": "鸡群重量报告",
+  "View report of Flock Weight Change": "查看鸡群重量变化报告"
 
 }

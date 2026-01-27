@@ -57,10 +57,12 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
     checkPermissions();
 
     AnalyticsUtil.logScreenView(screenName: "add_events");
+    print('SHOWADS:${Utils.isShowAdd}');
     if(Utils.isShowAdd){
       _loadNativeAds();
     }
   }
+
   _loadNativeAds(){
     _myNativeAd = NativeAd(
       adUnitId: Utils.NativeAdUnitId,
@@ -107,6 +109,9 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
   }
 
   List<MyEvent> events = [];
+  List<MyEvent> allEvents = [];
+
+
   List<String> flock_name = [];
 
 
@@ -190,11 +195,12 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
       body:SafeArea(
         top: false,
           child:Container(
+
           width: widthScreen,
           height: heightScreen,
-            color: Utils.getScreenBackground(),
-            child:Column(children: [
-              if (_isNativeAdLoaded && _myNativeAd != null)
+            color: Colors.white,
+            child: Column(children: [
+              if (_isNativeAdLoaded)
                 Container(
                   height: 90,
                   margin: const EdgeInsets.only(bottom: 0),
@@ -204,6 +210,8 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
                   ),
                   child: AdWidget(ad: _myNativeAd),
                 ),
+
+              _buildFilterBar(),
               Expanded(child:SingleChildScrollView(
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -292,7 +300,7 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
                                       width: 1.0,
                                     ),
                                   ),
-                                  child: Text('EXPIRED'.tr(), style: TextStyle(
+                                  child: Text('Disposed'.tr(), style: TextStyle(
                                       color: selected==3 ? Colors.white : Utils.getThemeColorBlue(), fontSize: 14),),
                                 ),
                               ),
@@ -302,8 +310,9 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
                       ),
 
                       events.length > 0 ? Container(
-                        height: heightScreen - 100,
+                        height: heightScreen - (_isNativeAdLoaded? 260 : 160),
                         width: widthScreen,
+                        margin: EdgeInsets.only(bottom: 50),
                         child: ListView.builder(
                             itemCount: events.length,
                             scrollDirection: Axis.vertical,
@@ -363,6 +372,7 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
                                               ],
                                             ),
                                             Container(margin: EdgeInsets.all(0), child: Text(events.elementAt(index).event_detail!, style: TextStyle( fontWeight: FontWeight.normal, fontSize: 12, color: Colors.black),)),
+                                           // Text("Scheduled on".tr(), style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600),),
 
                                             Container(
                                               margin: EdgeInsets.only(right: 10),
@@ -640,6 +650,63 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
 
   }
 
+  Widget _buildFilterBar() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Utils.getThemeColorBlue()),
+        color: Colors.white,
+      ),
+      child: Row(
+        children: [
+          _filterItem(title: 'All'.tr(), index: 1),
+          _filterItem(title: 'Active'.tr(), index: 2),
+          _filterItem(title: 'EXPIRED'.tr(), index: 3),
+        ],
+      ),
+    );
+  }
+
+  Widget _filterItem({required String title, required int index}) {
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            selected = index;
+            applyFilter();
+          });
+        },
+
+        child: Container(
+          height: 42,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: selected == index
+                ? Utils.getThemeColorBlue()
+                : Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(index == 1 ? 10 : 0),
+              bottomLeft: Radius.circular(index == 1 ? 10 : 0),
+              topRight: Radius.circular(index == 3 ? 10 : 0),
+              bottomRight: Radius.circular(index == 3 ? 10 : 0),
+            ),
+          ),
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: selected == index
+                  ? Colors.white
+                  : Utils.getThemeColorBlue(),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
 
   //FILTER WORK
   List<Flock> flocks = [];
@@ -673,27 +740,39 @@ class _AllEventsScreen extends State<AllEventsScreen> with SingleTickerProviderS
   String filter_name = "All";
 
   int active = -1;
-  void getAllEvents() async {
-
+  Future<void> getAllEvents() async {
     await EventsDatabaseHelper.instance.database;
 
-    events = await EventsDatabaseHelper.getAllReminders(active);
+    allEvents = await EventsDatabaseHelper.getAllReminders(active); // NO FILTER
 
-    int notification_time = 0;
-    DateTime datetime;
-    for(int i=0;i<events.length;i++)
-    {
-       datetime = DateFormat("dd MMM yyyy - hh:mm a").parse(Utils.getReminderFormattedDate(events.elementAt(i).date!)); // DateTime.parse();
-       notification_time = ((datetime.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch) / 1000).round();
-      if(notification_time < 0){
-        events.elementAt(i).type = 0;
-      }
+    final now = DateTime.now();
+
+    for (var e in allEvents) {
+      final DateTime eventDate =
+      DateFormat("dd MMM yyyy - hh:mm a")
+          .parse(Utils.getReminderFormattedDate(e.date!));
+
+      e.type = eventDate.isBefore(now) ? 0 : 1;
     }
 
-    setState(() {
+    applyFilter(); // apply selected filter
+  }
 
-    });
+  void applyFilter() {
+    if (selected == 1) {
+      // ALL
+      events = List.from(allEvents);
+    }
+    else if (selected == 2) {
+      // ACTIVE
+      events = allEvents.where((e) => e.type == 1).toList();
+    }
+    else {
+      // EXPIRED
+      events = allEvents.where((e) => e.type == 0).toList();
+    }
 
+    setState(() {});
   }
 
 

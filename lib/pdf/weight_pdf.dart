@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:poultary/model/weight_record.dart';
 import 'package:poultary/utils/utils.dart';
 
 import '../../data.dart';
@@ -16,12 +17,12 @@ import '../model/egg_report_item.dart';
 import '../model/feed_report_item.dart';
 import '../model/feedflock_report_item.dart';
 
-Future<Uint8List> generateCustomReport(
+Future<Uint8List> generateWeightReport(
     PdfPageFormat pageFormat, CustomData data) async
 {
   final lorem = pw.LoremText();
 
-  final products = Utils.feed_report_list;
+  final products = Utils.weight_list;
   final feedbyflock = Utils.feed_flock_report_list;
 
   final invoice = Invoice(
@@ -53,7 +54,7 @@ class Invoice {
     required this.accentColor,
   });
 
-  final List<Feed_Report_Item> products;
+  final List<WeightRecord> products;
   final List<FeedFlock_Report_Item> flockFeedList;
   final String customerName;
   final String customerAddress;
@@ -91,7 +92,7 @@ class Invoice {
   num getFeedTotal() {
     num total = 0;
     for (int i=0;i<products.length;i++){
-      total = total + products.elementAt(i).consumption!;
+      total = total + products.elementAt(i).averageWeight;
     }
 
     total = num.parse(total.toStringAsFixed(2));
@@ -141,64 +142,32 @@ class Invoice {
         ),
         header: _buildHeader,
         build: (context) => [
-          pw.Container(
-            height: 30,
-            alignment: pw.Alignment.topLeft,
-            child: pw.Directionality(
-              textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-              child: pw.Text(
-                'By FLock'.tr(),
-                style: pw.TextStyle(
-                  color: PdfColors.black,
-                  fontSize: 12,
-                ),
-              ),),
 
-          ),
-          _contentTable1(context),
+          /*buildWeightSummary(),
+          buildWeightTable(),*/
           pw.SizedBox(height: 10),
-          pw.Container(
-            height: 30,
-            alignment: pw.Alignment.topLeft,
-            child: pw.Directionality(
-              textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-              child: pw.Text(
-                'By Date'.tr(),
-                style: pw.TextStyle(
-                  color: PdfColors.black,
-                  fontSize: 12,
-                ),
-              ),),
 
-          ),
-          _contentTable2(context, Utils.categoryDataList!),
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                'Flock Weight Report'.tr(),
+                style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+              ),
+              pw.SizedBox(height: 6),
+              pw.Text(
+                ' ${Utils.selectedWeightFlock!.f_name}',
+                style: pw.TextStyle(fontSize: 14, color: PdfColors.grey800),
+              ),
 
-          pw.Container(
-              height: 40,
-              alignment: pw.Alignment.topRight,
-              margin: pw.EdgeInsets.only(top: 10),
-              child: pw.Row(
-                  children: [
-                    pw.Directionality(
-                      textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                      child: pw.Text(
-                        'Total Consumption: '.tr(),
-                        style: pw.TextStyle(
-                          color: PdfColors.black,
-                          fontSize: 10,
-                        ),
-                      ),),
-                    pw.Text(
-                      Utils.TOTAL_CONSUMPTION.toString()+" "+"KG".tr(),
-                      style: pw.TextStyle(
-                        color: PdfColors.black,
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ]
-              )
+              pw.SizedBox(height: 14),
+              buildWeightSummary(),
+
+              pw.SizedBox(height: 14),
+              buildWeightTable(),
+            ],
           ),
+
           pw.Container(
               margin: pw.EdgeInsets.only(top: 10),
               child: pw.Row(
@@ -272,16 +241,15 @@ class Invoice {
               ),
             ),
             pw.SizedBox(height: 4),
-
-            // REPORT TITLE
             pw.Text(
-              Utils.INVOICE_SUB_HEADING.tr(),
+              "Weight Report".tr(),
               style: pw.TextStyle(
                 color: PdfColors.black,
-                fontWeight: pw.FontWeight.bold,
+                fontWeight: pw.FontWeight.normal,
                 fontSize: 18,
               ),
             ),
+
             pw.SizedBox(height: 6),
 
             // DATE
@@ -294,7 +262,7 @@ class Invoice {
               child: pw.Padding(
                 padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 child: pw.Text(
-                  Utils.INVOICE_DATE,
+                  Utils.INVOICE_DATE.tr(),
                   style: pw.TextStyle(
                     color: PdfColors.black,
                     fontSize: 14,
@@ -308,125 +276,159 @@ class Invoice {
       ),
     );
   }
-  pw.Widget _buildSummary(pw.Context context) {
-    return pw.Directionality(
-      textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-      child:pw.Container(
-      height: 120,
-      margin: pw.EdgeInsets.only(top: 10),
-      child: pw.Column(
+  pw.Widget buildWeightSummary() {
+
+    final initialWeight = Utils.initialWeight;
+    final currentWeight = Utils.currentWeight;
+    final change = Utils.changeWeight;
+
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(10),
+      decoration: pw.BoxDecoration(
+        color: PdfColors.grey100,
+        borderRadius: pw.BorderRadius.circular(6),
+      ),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-
-          pw.Expanded(
-            child: pw.Column(
-              children: [
-                pw.Container(
-                  height: 30,
-                  alignment: pw.Alignment.topLeft,
-                  child: pw.Directionality(
-                    textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                    child: pw.Text(
-                      'SUMMARY'.tr(),
-                      style: pw.TextStyle(
-                        color: PdfColors.black,
-                        fontSize: 10,
-                      ),
-                    ),),
-
-                ),
-
-                pw.Row(
-                  children: [
-                    pw.Container(
-                      alignment: pw.Alignment.topLeft,
-                      child: pw.Directionality(
-                        textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                        child: pw.Text(
-                          'Collcted Eggs'.tr(),
-                          style: pw.TextStyle(
-                            color: PdfColors.black,
-                            fontSize: 10,
-                          ),
-                        ),),
-
-                    ),pw.Container(
-                      alignment: pw.Alignment.topLeft,
-                      child: pw.Text(
-                        Utils.TOTAL_EGG_COLLECTED,
-                        style: pw.TextStyle(
-                          color: PdfColors.black,
-                          fontWeight: pw.FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ]
-                ),
-
-                pw.Row(
-                    children: [
-                      pw.Container(
-                        alignment: pw.Alignment.topLeft,
-                        child: pw.Directionality(
-                          textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                          child: pw.Text(
-                            'Reduced Eggs'.tr(),
-                            style: pw.TextStyle(
-                              color: PdfColors.black,
-                              fontSize: 10,
-                            ),
-                          ),),
-                      ),pw.Container(
-                        alignment: pw.Alignment.topLeft,
-
-                        child: pw.Text(
-                          Utils.TOTAL_EGG_REDUCED,
-                          style: pw.TextStyle(
-                            color: PdfColors.black,
-                            fontWeight: pw.FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ]
-                ),
-
-                pw.Row(
-                    children: [
-                      pw.Container(
-                        alignment: pw.Alignment.topLeft,
-                        child: pw.Directionality(
-                          textDirection: direction? pw.TextDirection.ltr:pw.TextDirection.rtl,
-                          child: pw.Text(
-                            'Reserve Eggs'.tr(),
-                            style: pw.TextStyle(
-                              color: PdfColors.black,
-                              fontSize: 10,
-                            ),
-                          ),),
-
-                      ),pw.Container(
-                        alignment: pw.Alignment.topLeft,
-                         child: pw.Text(
-                          Utils.EGG_RESERVE,
-                          style: pw.TextStyle(
-                            color: PdfColors.black,
-                            fontWeight: pw.FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ]
-                )
-
-              ],
-            ),
+          _summaryTile(
+            'Initial',
+            '${initialWeight.toStringAsFixed(2)} ',
           ),
-
+          _summaryTile(
+            'Now',
+            '${currentWeight.toStringAsFixed(2)} ',
+          ),
+          _summaryTile(
+            'Total Change',
+            '${change >= 0 ? '+' : ''}${change.toStringAsFixed(2)} ',
+             valueColor: change >= 0 ? PdfColors.green : PdfColors.red,
+          ),
         ],
       ),
-    ),);
+    );
   }
+
+  pw.Widget _summaryTile(
+      String title,
+      String value, {
+      PdfColor? valueColor,
+      }) {
+    return pw.Directionality(
+        textDirection:
+        direction? pw.TextDirection.ltr : pw.TextDirection.rtl,
+        child: pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text(
+          title.tr(),
+          style: pw.TextStyle(
+            fontSize: 9,
+            color: PdfColors.grey700,
+          ),
+        ),
+        pw.SizedBox(height: 3),
+        pw.Text(
+          value + Utils.selected_unit.tr(),
+          style: pw.TextStyle(
+            fontSize: 13,
+            fontWeight: pw.FontWeight.bold,
+            color: valueColor ?? PdfColors.black,
+          ),
+        ),
+      ],
+    ));
+  }
+
+
+  pw.Widget buildWeightTable() {
+    final list = Utils.weight_list;
+
+    return pw.Directionality(
+        textDirection:
+        direction? pw.TextDirection.ltr : pw.TextDirection.rtl,
+        child:  pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.grey300),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(2), // Date
+        1: const pw.FlexColumnWidth(2), // Weight
+        2: const pw.FlexColumnWidth(2), // Change
+      },
+      children: [
+        pw.TableRow(
+          decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+          children: [
+            _cell('Date', bold: true),
+            _cell('Weight', bold: true),
+            _cell('Change', bold: true),
+          ],
+        ),
+
+        for (int i = 0; i < list.length; i++)
+          _weightRow(
+            list[i],
+            i == 0 ? null : list[i - 1],
+          ),
+      ],
+    ));
+  }
+
+  pw.TableRow _weightRow(item, previousItem) {
+    final current = item.averageWeight;
+    final previous = previousItem?.averageWeight ?? current;
+    final change = previousItem == null ? 0 : current - previous;
+
+    return pw.TableRow(
+      children: [
+        _cell(Utils.getFormattedDate(item.date)),
+        _cell(
+          current.toStringAsFixed(2) + Utils.selected_unit.tr(),
+        ),
+        _cell(
+          '${change >= 0 ? '+' : ''}${change.toStringAsFixed(2)}${Utils.selected_unit.tr()}',
+          color:PdfColors.black
+        ),
+      ],
+    );
+  }
+
+  pw.Widget _cell(
+      String text, {
+        bool bold = false,
+        PdfColor? color,
+      }) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.all(6),
+      child: pw.Text(
+        text.tr(),
+        style: pw.TextStyle(
+          fontSize: 9,
+          fontWeight: bold ? pw.FontWeight.bold : pw.FontWeight.normal,
+          color: color ?? PdfColors.black,
+        ),
+      ),
+    );
+  }
+
+  pw.TableRow _weightHeaderRow() {
+    return pw.TableRow(
+      decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+      children: [
+        _cell('Date', bold: true),
+        _cell('Avg (kg)', bold: true),
+      ],
+    );
+  }
+
+  pw.TableRow _weightDataRow(item) {
+    return pw.TableRow(
+      children: [
+        _cell(Utils.getFormattedDate(item.date)),
+        _cell(item.averageWeight.toStringAsFixed(2)),
+      ],
+    );
+  }
+
 
 
   pw.Widget _buildFooter(pw.Context context) {
@@ -784,8 +786,8 @@ class Invoice {
       ),
       headers: tableHeaders.map((header) => header.tr()).toList(),
       data: products.map((feed) => [
-        feed.feed_name.tr(),
-        "${feed.consumption.toString()}".tr(), // Formatting quantity
+        feed.averageWeight,
+        "${feed.averageWeight.toString()}".tr(), // Formatting quantity
       ]).toList(),
     );
   }

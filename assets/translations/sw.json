@@ -1086,5 +1086,13 @@
   "Repair": "Rekebisha",
   "Replacement": "Uingizwaji",
   "Inspection": "Ukaguzi",
-  "Calibration": "Urekebishaji"
+  "Calibration": "Urekebishaji",
+
+  "Initial": "Awali",
+  "Now": "Sasa",
+  "Start": "Anza",
+  "Total Change": "Jumla ya Mabadiliko",
+  "Weight Report": "Ripoti ya uzito",
+  "Flock Weight Report": "Ripoti ya Uzito wa kundi",
+  "View report of Flock Weight Change": "Tazama ripoti ya Mabadiliko ya Uzito wa Kundi"
 }

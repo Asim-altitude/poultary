@@ -11,6 +11,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:poultary/pdf/weight_example.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/utils.dart';
 
@@ -404,6 +405,9 @@ class _PDFScreen extends State<PDFScreen> {
         break;
       case 5:
         uint8list = await customexamples[_tab].builder(format, _data);
+        break;
+      case 6:
+        uint8list = await weightexamples[_tab].builder(format, _data);
         break;
 
     }

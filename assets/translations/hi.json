@@ -1115,6 +1115,14 @@
   "Repair": "मरम्मत",
   "Replacement": "प्रतिस्थापन",
   "Inspection": "निरीक्षण",
-  "Calibration": "कैलिब्रेशन"
+  "Calibration": "कैलिब्रेशन",
+
+  "Initial": "प्रारंभिक",
+  "Now": "अब",
+  "Start": "शुरू",
+  "Total Change": "संपूर्ण परिवर्तन",
+  "Weight Report": "वज़न रिपोर्ट",
+  "Flock Weight Report": "झुंड वजन रिपोर्ट",
+  "View report of Flock Weight Change": "झुंड के वजन में बदलाव की रिपोर्ट देखें"
 
 }

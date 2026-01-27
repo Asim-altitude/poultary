@@ -1113,5 +1113,13 @@
   "Repair": "Επισκευή",
   "Replacement": "Αντικατάσταση",
   "Inspection": "Επιθεώρηση",
-  "Calibration": "Διαμέτρηση"
+  "Calibration": "Διαμέτρηση",
+
+  "Initial": "Αρχικός",
+  "Now": "Τώρα",
+  "Start": "Αρχή",
+  "Total Change": "Συνολική Αλλαγή",
+  "Weight Report": "Αναφορά βάρους",
+  "Flock Weight Report": "Αναφορά βάρους κοπαδιού",
+  "View report of Flock Weight Change": "Προβολή αναφοράς της Αλλαγής Βάρους Σμηνών"
 }

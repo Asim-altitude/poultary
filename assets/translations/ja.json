@@ -1116,6 +1116,14 @@
  "Repair": "修理",
  "Replacement": "交換",
  "Inspection": "検査",
- "Calibration": "較正"
+ "Calibration": "較正",
+
+ "Initial": "イニシャル",
+ "Now": "今",
+ "Start": "始める",
+ "Total Change": "合計の変化",
+ "Weight Report": "体重レポート",
+ "Flock Weight Report": "群れの体重レポート",
+ "View report of Flock Weight Change": "群れの体重変化のレポートを見る"
 
 }

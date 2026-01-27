@@ -1114,6 +1114,14 @@
  "Repair": "بصلح",
  "Replacement": "استبدال",
  "Inspection": "تقتيش",
- "Calibration": "معايرة"
+ "Calibration": "معايرة",
+
+ "Initial": "أولي",
+ "Now": "الآن",
+ "Start": "يبدأ",
+ "Total Change": "التغيير الكلي",
+ "Weight Report": "تقرير الوزن",
+ "Flock Weight Report": "تقرير وزن القطيع",
+ "View report of Flock Weight Change": "عرض تقرير تغيير وزن القطيع"
 
 }

@@ -1112,5 +1112,13 @@
   "Repair": "مرمت",
   "Replacement": "تبدیلی",
   "Inspection": "معائنہ",
-  "Calibration": "انشانکن"
+  "Calibration": "انشانکن",
+
+  "Initial": "ابتدائی",
+  "Now": "اب",
+  "Start": "شروع کریں",
+  "Total Change": "کل تبدیلی",
+  "Weight Report": "وزن کی رپورٹ",
+  "Flock Weight Report": "ریوڑ وزن کی رپورٹ",
+  "View report of Flock Weight Change": "ریوڑ کے وزن میں تبدیلی کی رپورٹ دیکھیں"
 }

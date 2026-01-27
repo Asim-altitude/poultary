@@ -1141,7 +1141,16 @@
   "Repair": "Repair",
   "Replacement": "Replacement",
   "Inspection": "Inspection",
-  "Calibration": "Calibration"
+  "Calibration": "Calibration",
+
+
+  "Initial": "Initial",
+  "Now": "Now",
+  "Start": "Start",
+  "Total Change": "Total Change",
+  "Weight Report": "Weight Report",
+  "Flock Weight Report": "Flock Weight Report",
+  "View report of Flock Weight Change": "View report of Flock Weight Change"
 
 
 }

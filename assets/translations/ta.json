@@ -1116,6 +1116,14 @@
   "Repair": "பழுது",
   "Replacement": "மாற்று",
   "Inspection": "ஆய்வு",
-  "Calibration": "அளவுத்திருத்தம்"
+  "Calibration": "அளவுத்திருத்தம்",
+
+  "Initial": "ஆரம்ப",
+  "Now": "இப்போது",
+  "Start": "தொடங்கு",
+  "Total Change": "மொத்த மாற்றம்",
+  "Weight Report": "எடை அறிக்கை",
+  "Flock Weight Report": "மந்தை எடை அறிக்கை",
+  "View report of Flock Weight Change": "மந்தையின் எடை மாற்றத்தின் அறிக்கையைப் பார்க்கவும்"
 
 }

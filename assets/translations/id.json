@@ -1114,6 +1114,14 @@
   "Repair": "Memperbaiki",
   "Replacement": "Penggantian",
   "Inspection": "Inspeksi",
-  "Calibration": "Kalibrasi"
+  "Calibration": "Kalibrasi",
+
+  "Initial": "Awal",
+  "Now": "Sekarang",
+  "Start": "Awal",
+  "Total Change": "Perubahan Total",
+  "Weight Report": "Laporan Berat",
+  "Flock Weight Report": "Laporan Berat Kawanan",
+  "View report of Flock Weight Change": "Lihat laporan Perubahan Berat Kawanan"
 
 }

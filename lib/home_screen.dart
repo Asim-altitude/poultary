@@ -173,6 +173,7 @@ class _HomeScreen extends State<HomeScreen> {
     getCurrency();
    // addEggColorColumn();
 
+    Utils.setupAds();
     if(Utils.isMultiUSer)
     {
       // Delay to ensure context is available

@@ -547,7 +547,6 @@ class _NewEggCollection extends State<NewEggCollection>
                                 last_modified: Utils.getTimeStamp(),
                                 modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
                                 farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-
                               );
 
                               bool synced = await FireBaseUtils

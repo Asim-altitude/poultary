@@ -157,7 +157,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
     loadInAppData();
     beforeInit();
     super.initState();
-    setUpInitial();
+    //setUpInitial();
     if(Utils.isShowAdd){
       _loadBannerAd();
     }

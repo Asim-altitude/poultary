@@ -1115,7 +1115,15 @@
  "Repair": "تعمیر",
  "Replacement": "جایگزینی",
  "Inspection": "بازرسی",
- "Calibration": "کالیبراسیون"
+ "Calibration": "کالیبراسیون",
+
+ "Initial": "اولیه",
+ "Now": "در حال حاضر",
+ "Start": "شروع کنید",
+ "Total Change": "کل تغییر",
+ "Weight Report": "گزارش وزن",
+ "Flock Weight Report": "گزارش وزن گله",
+ "View report of Flock Weight Change": "مشاهده گزارش تغییر وزن گله"
 
 
 }

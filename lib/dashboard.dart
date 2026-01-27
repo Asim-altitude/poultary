@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:language_picker/languages.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:poultary/all_events.dart';
 import 'package:poultary/eggs_report_screen.dart';
 import 'package:poultary/feed_report_screen.dart';
 import 'package:poultary/health_report_screen.dart';
@@ -1486,27 +1487,43 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
 
                  isMenuEnabled?
                  Container(
-                   margin: EdgeInsets.only(top: 10),
+                   margin: const EdgeInsets.only(top: 5),
                    child: Column(
                      children: [
-                       Align(
-                         alignment: Alignment.center,
-                         child: Stack(
-                           children: [
-                             InkWell(
-                                 onTap: ()
-                                 async {
-                                   await SessionManager.setBoolValue("dashboard_menu", false);
-                                   setState(() {
-                                     isMenuEnabled = false;
-                                   });
-                                 },
-                                 child: Align(
-                                     alignment: Alignment.centerRight,
-                                     child: Container(
-                                         margin: EdgeInsets.only(right: 20),
-                                         child: Icon(Icons.cancel_sharp, size: 30, color: Colors.blue,)))),
-                             Center(
+                       Row(
+                         crossAxisAlignment: CrossAxisAlignment.center,
+                         children: [
+                           const SizedBox(width: 20),
+                           // Menu icon (cancel)
+                           InkWell(
+                             onTap: () async {
+                               await SessionManager.setBoolValue("dashboard_menu", false);
+                               setState(() {
+                                 isMenuEnabled = false;
+                               });
+                             },
+                             child: Container(
+                               padding: const EdgeInsets.all(8), // circular padding
+                               decoration: BoxDecoration(
+                                 color: Colors.blue.shade100, // light blue background
+                                 shape: BoxShape.circle,
+                                 boxShadow: [
+                                   BoxShadow(
+                                     color: Colors.blue.shade300.withOpacity(0.5),
+                                     blurRadius: 4,
+                                     offset: const Offset(0, 2),
+                                   ),
+                                 ],
+                               ),
+                               child: const Icon(Icons.cancel_sharp, size: 30, color: Colors.blue),
+                             ),
+                           ),
+
+                           const SizedBox(width: 10), // reduced spacing
+
+                           // Center title
+                           Expanded(
+                             child: Center(
                                child: Text(
                                  "Quick Menu".tr(),
                                  style: TextStyle(
@@ -1516,15 +1533,50 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                                  ),
                                ),
                              ),
-                           ],
-                         ),
+                           ),
+
+                           // Notification icon
+                           InkWell(
+                             onTap: () async {
+                               await Navigator.push(
+                                 context,
+                                 CupertinoPageRoute(
+                                     builder: (context) => const AllEventsScreen()),
+                               );
+                             },
+                             child: Container(
+                               padding: const EdgeInsets.all(8), // padding inside circle
+                               decoration: BoxDecoration(
+                                 color: Colors.orange.shade100, // light orange background
+                                 shape: BoxShape.circle,
+                                 boxShadow: [
+                                   BoxShadow(
+                                     color: Colors.orange.shade300.withOpacity(0.5),
+                                     blurRadius: 4,
+                                     offset: const Offset(0, 2),
+                                   ),
+                                 ],
+                               ),
+                               child: const Icon(
+                                 Icons.notifications_active,
+                                 color: Colors.orange,
+                                 size: 24,
+                               ),
+                             ),
+                           ),
+                           const SizedBox(width: 20), // reduced spacing
+                         ],
                        ),
+
+                       // Module grid
                        Container(
-                           margin: EdgeInsets.only(top: 20),
-                           child: _buildModuleGrid()),
+                         margin: const EdgeInsets.only(top: 20),
+                         child: _buildModuleGrid(),
+                       ),
                      ],
                    ),
-                 ) :
+                 )
+                     :
                  Container(
                     margin: EdgeInsets.only(top: 0),
                     decoration: BoxDecoration(
@@ -1538,24 +1590,69 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                       children: [
                         // Title Section
                         Container(
-                          margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                          child: Stack(
+                          margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                          child: Row(
                             children: [
                               InkWell(
-                                  onTap: () async {
-                                    await SessionManager.setBoolValue("dashboard_menu", true);
+                                onTap: () async {
+                                  await SessionManager.setBoolValue("dashboard_menu", true);
 
-                                    setState(() {
-                                      isMenuEnabled = true;
-                                    });
-                                  },
-                                  child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Container(
-                                          margin: EdgeInsets.only(top: 15),
-                                          child: Image.asset("assets/dot_menu.png", width: 20, height: 20, color: Colors.blue,)))),
-                              Align(
-                                alignment: Alignment.center,
+                                  setState(() {
+                                    isMenuEnabled = true;
+                                  });
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(top: 10),
+                                  padding: const EdgeInsets.all(8), // padding inside the circle
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.shade100, // light blue background
+                                    shape: BoxShape.circle, // circular shape
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.blue.shade300.withOpacity(0.5), // soft shadow
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Image.asset(
+                                    "assets/menu_icon.png",
+                                    width: 24,
+                                    height: 24,
+                                    color: Colors.blue, // icon color
+                                  ),
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () async {
+                                  await Navigator.push(
+                                    context,
+                                    CupertinoPageRoute(
+                                        builder: (context) => const AllEventsScreen()),
+                                  );
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(top: 10, left: 15),
+                                  padding: const EdgeInsets.all(8), // padding inside circle
+                                  decoration: BoxDecoration(
+                                    color: Colors.orange.shade100, // light orange background
+                                    shape: BoxShape.circle, // makes it circular
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.orange.shade300.withOpacity(0.5),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.notifications_active,
+                                    color: Colors.orange,
+                                    size: 24,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -1583,21 +1680,44 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                               flocks.isNotEmpty
                                   ? Align(
                                 alignment: Alignment.centerRight,
-                                child: FloatingActionButton(
-                                  backgroundColor: backgroundColor,
-                                  elevation: 4,
-                                  onPressed: () async {
-                                    await Navigator.push(
-                                      context,
-                                      CupertinoPageRoute(
-                                          builder: (context) => const ADDFlockScreen()),
-                                    );
-                                    getList();
-                                    getFilteredData(date_filter_name);
-                                  },
-                                  child: Icon(Icons.add, color: primaryTextColor, size: 28),
+                                child: Container(
+                                  margin: const EdgeInsets.only(right: 0), // optional spacing
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: LinearGradient(
+                                      colors: [Colors.blueAccent, Colors.blue],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.blue,
+                                        blurRadius: 2,
+                                        offset: const Offset(0, 1),
+                                      ),
+                                    ],
+                                  ),
+                                  child: FloatingActionButton(
+                                    backgroundColor: Colors.transparent, // use container gradient
+                                    elevation: 0, // shadow handled by container
+                                    onPressed: () async {
+                                      await Navigator.push(
+                                        context,
+                                        CupertinoPageRoute(
+                                            builder: (context) => const ADDFlockScreen()),
+                                      );
+                                      getList();
+                                      getFilteredData(date_filter_name);
+                                    },
+                                    child: Icon(
+                                      Icons.add,
+                                      color: Colors.white, // icon stands out on gradient
+                                      size: 30,
+                                    ),
+                                  ),
                                 ),
                               )
+
                                   : SizedBox(),
                             ],
                           ),

@@ -1119,6 +1119,14 @@
   "Repair": "మరమ్మత్తు",
   "Replacement": "ప్రత్యామ్నాయం",
   "Inspection": "తనిఖీ",
-  "Calibration": "క్రమాంకనం"
+  "Calibration": "క్రమాంకనం",
+
+  "Initial": "ప్రారంభ",
+  "Now": "ఇప్పుడు",
+  "Start": "ప్రారంభించండి",
+  "Total Change": "మొత్తం మార్పు",
+  "Weight Report": "బరువు నివేదిక",
+  "Flock Weight Report": "మంద బరువు నివేదిక",
+  "View report of Flock Weight Change": "మంద బరువు మార్పు నివేదికను వీక్షించండి"
 
 }

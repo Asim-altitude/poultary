@@ -1113,6 +1113,14 @@
  "Repair": "Tamirat",
  "Replacement": "Yenisiyle değiştirme",
  "Inspection": "Denetleme",
- "Calibration": "Kalibrasyon"
+ "Calibration": "Kalibrasyon",
+
+ "Initial": "İlk",
+ "Now": "Şimdi",
+ "Start": "Başlangıç",
+ "Total Change": "Toplam Değişim",
+ "Weight Report": "Ağırlık Raporu",
+ "Flock Weight Report": "Sürü Ağırlık Raporu",
+ "View report of Flock Weight Change": "Sürü Ağırlık Değişimi raporunu görüntüle"
 
 }
