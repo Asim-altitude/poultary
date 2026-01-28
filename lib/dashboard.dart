@@ -15,6 +15,7 @@ import 'package:poultary/health_report_screen.dart';
 import 'package:poultary/multiuser/classes/AdminProfile.dart';
 import 'package:poultary/settings_screen.dart';
 import 'package:poultary/single_flock_screen.dart';
+import 'package:poultary/task_calender/task_calendar_screen.dart';
 import 'package:poultary/transactions_screen.dart';
 import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
@@ -1560,6 +1561,35 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                                child: const Icon(
                                  Icons.notifications_active,
                                  color: Colors.orange,
+                                 size: 24,
+                               ),
+                             ),
+                           ),
+                           const SizedBox(width: 10),
+                           InkWell(
+                             onTap: () async {
+                               await Navigator.push(
+                                 context,
+                                 CupertinoPageRoute(
+                                     builder: (context) => const TaskCalendarScreen()),
+                               );
+                             },
+                             child: Container(
+                               padding: const EdgeInsets.all(8), // padding inside circle
+                               decoration: BoxDecoration(
+                                 color: Colors.amber.shade100, // light orange background
+                                 shape: BoxShape.circle,
+                                 boxShadow: [
+                                   BoxShadow(
+                                     color: Colors.orange.shade300.withOpacity(0.5),
+                                     blurRadius: 4,
+                                     offset: const Offset(0, 2),
+                                   ),
+                                 ],
+                               ),
+                               child: const Icon(
+                                 Icons.task,
+                                 color: Colors.amber,
                                  size: 24,
                                ),
                              ),

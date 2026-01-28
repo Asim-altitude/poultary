@@ -57,6 +57,7 @@ import '../stock/model/stock_transactions.dart';
 import '../stock/tools_assets/model/tool_asset.dart';
 import '../stock/tools_assets/model/tool_asset_maintenance.dart';
 import '../stock/tools_assets/model/tool_asset_unit.dart';
+import '../task_calender/task_calendar_screen.dart';
 import '../utils/utils.dart';
 import 'package:uuid/uuid.dart';
 
@@ -309,6 +310,334 @@ class DatabaseHelper  {
     );
 
   }
+
+  static Future<void> createTaskTable() async {
+    await _database?.execute('''
+      CREATE TABLE tasks (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        date TEXT NOT NULL,
+        time TEXT NOT NULL,
+        task_type TEXT NOT NULL,
+        completed INTEGER NOT NULL DEFAULT 0,
+        notes TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    ''');
+
+    // Task assignments table (many-to-many relationship)
+    await _database?.execute('''
+      CREATE TABLE task_assignments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        task_id TEXT NOT NULL,
+        user_id TEXT NOT NULL,
+        user_name TEXT NOT NULL,
+        FOREIGN KEY (task_id) REFERENCES tasks (id) ON DELETE CASCADE
+      )
+    ''');
+
+    // Task history/logs table
+    await _database?.execute('''
+      CREATE TABLE task_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        task_id TEXT NOT NULL,
+        action TEXT NOT NULL,
+        performed_by TEXT NOT NULL,
+        performed_at TEXT NOT NULL,
+        notes TEXT,
+        FOREIGN KEY (task_id) REFERENCES tasks (id) ON DELETE CASCADE
+      )
+    ''');
+  }
+
+
+  Future<String> createTask(LivestockTask task, DateTime date) async {
+    final now = DateTime.now().toIso8601String();
+
+    // Insert task
+    await _database?.insert('tasks', {
+      'id': task.id,
+      'title': task.title,
+      'description': task.description,
+      'date': _dateToString(date),
+      'time': '${task.time.hour}:${task.time.minute}',
+      'task_type': task.taskType.toString(),
+      'completed': task.completed ? 1 : 0,
+      'notes': task.notes,
+      'created_at': now,
+      'updated_at': now,
+    });
+
+    // Insert task assignments
+    for (final userName in task.assignedUsers) {
+      await _database?.insert('task_assignments', {
+        'task_id': task.id,
+        'user_id': userName.toLowerCase().replaceAll(' ', '_'),
+        'user_name': userName,
+      });
+    }
+
+    // Log task creation
+    await _logTaskAction(task.id, 'created', 'System', 'Task created');
+
+    return task.id;
+  }
+
+  Future<List<LivestockTask>> getTasksForDate(DateTime date) async {
+    final dateStr = _dateToString(date);
+
+    final taskMaps = await _database?.query(
+      'tasks',
+      where: 'date = ?',
+      whereArgs: [dateStr],
+      orderBy: 'time ASC',
+    );
+
+    List<LivestockTask> tasks = [];
+    for (final map in taskMaps!) {
+      final assignedUsers = await _getAssignedUsers(map['id'] as String);
+      tasks.add(_taskFromMap(map, assignedUsers));
+    }
+
+    return tasks;
+  }
+
+  Future<List<LivestockTask>> getAllTasks() async {
+
+    final taskMaps = await _database?.query('tasks', orderBy: 'date DESC, time ASC');
+
+    List<LivestockTask> tasks = [];
+    for (final map in taskMaps!) {
+      final assignedUsers = await _getAssignedUsers(map['id'] as String);
+      tasks.add(_taskFromMap(map, assignedUsers));
+    }
+
+    return tasks;
+  }
+
+  Future<Map<DateTime, List<LivestockTask>>> getTasksGroupedByDate({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async
+  {
+
+    String whereClause = '';
+    List<dynamic> whereArgs = [];
+
+    if (startDate != null && endDate != null) {
+      whereClause = 'date BETWEEN ? AND ?';
+      whereArgs = [_dateToString(startDate), _dateToString(endDate)];
+    }
+
+    final taskMaps = await _database?.query(
+      'tasks',
+      where: whereClause.isEmpty ? null : whereClause,
+      whereArgs: whereArgs.isEmpty ? null : whereArgs,
+      orderBy: 'date ASC, time ASC',
+    );
+
+    Map<DateTime, List<LivestockTask>> groupedTasks = {};
+
+    for (final map in taskMaps!) {
+      final assignedUsers = await _getAssignedUsers(map['id'] as String);
+      final task = _taskFromMap(map, assignedUsers);
+      final date = _stringToDate(map['date'] as String);
+
+      if (!groupedTasks.containsKey(date)) {
+        groupedTasks[date] = [];
+      }
+      groupedTasks[date]!.add(task);
+    }
+
+    return groupedTasks;
+  }
+
+  Future<LivestockTask?> getTaskById(String id) async {
+
+    final maps = await _database?.query(
+      'tasks',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (maps!.isEmpty) return null;
+
+    final assignedUsers = await _getAssignedUsers(id);
+    return _taskFromMap(maps.first, assignedUsers);
+  }
+
+  Future<int?> updateTask(LivestockTask task, DateTime date) async {
+    final now = DateTime.now().toIso8601String();
+
+    // Update task
+    final result = await _database?.update(
+      'tasks',
+      {
+        'title': task.title,
+        'description': task.description,
+        'date': _dateToString(date),
+        'time': '${task.time.hour}:${task.time.minute}',
+        'task_type': task.taskType.toString(),
+        'completed': task.completed ? 1 : 0,
+        'notes': task.notes,
+        'updated_at': now,
+      },
+      where: 'id = ?',
+      whereArgs: [task.id],
+    );
+
+    // Update assignments (delete and re-insert)
+    await _database?.delete('task_assignments', where: 'task_id = ?', whereArgs: [task.id]);
+    for (final userName in task.assignedUsers) {
+      await _database?.insert('task_assignments', {
+        'task_id': task.id,
+        'user_id': userName.toLowerCase().replaceAll(' ', '_'),
+        'user_name': userName,
+      });
+    }
+
+    // Log task update
+    await _logTaskAction(task.id, 'updated', 'System', 'Task updated');
+
+    return result;
+  }
+
+  Future<int> toggleTaskCompletion(String taskId) async {
+
+    final task = await getTaskById(taskId);
+
+    if (task == null) return 0;
+
+    final newStatus = !task.completed;
+    final result = await _database?.update(
+      'tasks',
+      {
+        'completed': newStatus ? 1 : 0,
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [taskId],
+    );
+
+    // Log completion status change
+    await _logTaskAction(
+      taskId,
+      newStatus ? 'completed' : 'reopened',
+      'System',
+      newStatus ? 'Task marked as completed' : 'Task reopened',
+    );
+
+    return result!;
+  }
+
+  Future<int?> deleteTask(String id) async {
+    final db = await database;
+
+    // Log deletion before deleting
+    await _logTaskAction(id, 'deleted', 'System', 'Task deleted');
+
+    // Delete task (cascades to assignments due to foreign key)
+    return await _database?.delete('tasks', where: 'id = ?', whereArgs: [id]);
+  }
+
+
+  Future<List<String>> _getAssignedUsers(String taskId) async {
+
+    final maps = await _database?.query(
+      'task_assignments',
+      columns: ['user_name'],
+      where: 'task_id = ?',
+      whereArgs: [taskId],
+    );
+
+    return maps!.map((m) => m['user_name'] as String).toList();
+  }
+
+  Future<void> _logTaskAction(
+      String taskId,
+      String action,
+      String performedBy,
+      String? notes,
+      ) async
+  {
+    await _database?.insert('task_logs', {
+      'task_id': taskId,
+      'action': action,
+      'performed_by': performedBy,
+      'performed_at': DateTime.now().toIso8601String(),
+      'notes': notes,
+    });
+  }
+
+  LivestockTask _taskFromMap(Map<String, dynamic> map, List<String> assignedUsers) {
+    final timeParts = (map['time'] as String).split(':');
+    return LivestockTask(
+      id: map['id'] as String,
+      title: map['title'] as String,
+      description: map['description'] as String,
+      time: TimeOfDay(
+        hour: int.parse(timeParts[0]),
+        minute: int.parse(timeParts[1]),
+      ),
+      taskType: _stringToTaskType(map['task_type'] as String),
+      assignedUsers: assignedUsers,
+      completed: (map['completed'] as int) == 1,
+      notes: map['notes'] as String?,
+    );
+  }
+
+  TaskType _stringToTaskType(String typeString) {
+    return TaskType.values.firstWhere(
+          (e) => e.toString() == typeString,
+      orElse: () => TaskType.other,
+    );
+  }
+
+  String _dateToString(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  DateTime _stringToDate(String dateString) {
+    final parts = dateString.split('-');
+    return DateTime(
+      int.parse(parts[0]),
+      int.parse(parts[1]),
+      int.parse(parts[2]),
+    );
+  }
+
+  // Statistics and Analytics
+
+  Future<Map<String, int>> getTaskStatistics({DateTime? startDate, DateTime? endDate}) async {
+
+    String whereClause = '';
+    List<dynamic> whereArgs = [];
+
+    if (startDate != null && endDate != null) {
+      whereClause = 'WHERE date BETWEEN ? AND ?';
+      whereArgs = [_dateToString(startDate), _dateToString(endDate)];
+    }
+
+    final result = await _database?.rawQuery('''
+      SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END) as completed,
+        SUM(CASE WHEN completed = 0 THEN 1 ELSE 0 END) as pending
+      FROM tasks
+      $whereClause
+    ''', whereArgs);
+
+    final row = result!.first;
+    return {
+      'total': row['total'] as int,
+      'completed': row['completed'] as int,
+      'pending': row['pending'] as int,
+    };
+  }
+
 
   static Future<void> createGeneralStockTable() async {
     await _database?.execute('''

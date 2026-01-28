@@ -14,6 +14,7 @@ import 'package:poultary/all_events.dart';
 import 'package:poultary/category_screen.dart';
 import 'package:poultary/sale_contractor_screen.dart';
 import 'package:poultary/support_screen.dart';
+import 'package:poultary/task_calender/task_calendar_screen.dart';
 import 'package:poultary/utils/about.dart';
 import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
@@ -331,6 +332,12 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _sectionTitle(context, 'Reminders & Automation'),
+                            _buildSettingsTile(
+                              context,
+                              icon: Icons.task,
+                              title: 'task_calendar'.tr(),
+                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TaskCalendarScreen())),
+                            ),
                             _buildSettingsTile(
                               context,
                               icon: Icons.notifications_active,

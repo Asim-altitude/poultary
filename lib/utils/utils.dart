@@ -238,6 +238,7 @@ class Utils {
       await DatabaseHelper.createToolAssetMasterTable();
       await DatabaseHelper.createToolAssetUnitTable();
       await DatabaseHelper.createToolAssetMaintenanceTable();
+      await DatabaseHelper.createTaskTable();
       await DatabaseHelper.addColumnIfNotExists("Transactions", "unit_price", "REAL", 0);
       await addNewColumn();
       await addMissingCategories();
