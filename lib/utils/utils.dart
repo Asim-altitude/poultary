@@ -1655,8 +1655,6 @@ $storeLink
       inititalize();
     }
 
-    Utils.isShowAdd = false;
-
   }
 
 
