@@ -13,6 +13,7 @@ import 'package:poultary/sale_contractor_screen.dart';
 import 'package:poultary/sticky.dart';
 import 'package:poultary/sub_category_screen.dart';
 import 'package:poultary/utils/fb_analytics.dart';
+import 'package:poultary/utils/ui/flock_ui_list.dart';
 import 'package:poultary/utils/utils.dart';
 import 'database/databse_helper.dart';
 import 'model/finance_flock_item.dart';
@@ -202,6 +203,8 @@ class _NewIncome extends State<NewIncome>
      if(!isEdit) {
        await DatabaseHelper.instance.database;
        flocks = await DatabaseHelper.getFlocks();
+       flocks.insert(0, Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1, flock_new: 1));
+
        is_specific_flock = true;
        /*if(flocks.length > 1){
          *//*flocks.insert(0, Flock(f_id: -1,
@@ -426,11 +429,11 @@ class _NewIncome extends State<NewIncome>
         }
         else if(i == 1){
           choose_option = false;
-          is_bird_sale = true;
+          is_bird_sale = false;
          // _purposeselectedValue = Utils.selected_flock!.f_name;
           purpose_option_invalid = false;
           if(getFlockID() == -1)
-            showBottomDialog();
+            is_bird_sale = false;
 
         }else if(i == _saleItemList.length-1){
           choose_option = true;
@@ -492,6 +495,47 @@ class _NewIncome extends State<NewIncome>
   int good_eggs = 0;
   int bad_eggs = 0;
 
+  Widget _buildStepper() {
+    return  Container(
+      color: Utils.getThemeColorBlue(),
+      child: EasyStepper(
+        activeStep: activeStep,
+        activeStepTextColor: Colors.white,
+        finishedStepTextColor: Colors.white30,
+        internalPadding: 20, // Reduce padding for better spacing
+        stepShape: StepShape.circle,
+        stepBorderRadius: 20,
+        borderThickness: 3, // Balanced progress line thickness
+        showLoadingAnimation: false,
+        stepRadius: 15, // Reduced step size to fit screen
+        showStepBorder: false,
+        lineStyle: LineStyle(
+          lineLength: 50,
+          lineType: LineType.normal,
+          defaultLineColor: Colors.grey.shade300,
+          activeLineColor: Colors.blueAccent,
+          finishedLineColor: Utils.getThemeColorBlue(),
+        ),
+        steps: [
+          EasyStep(
+            customStep: _buildStepIcon(Icons.wallet_giftcard, 0),
+            title: 'Income'.tr(),
+          ),
+          EasyStep(
+            customStep: _buildStepIcon(Icons.payments, 1),
+            title: 'Payment Info'.tr(),
+          ),
+          EasyStep(
+            customStep: _buildStepIcon(Icons.date_range, 1),
+            title: 'DATE'.tr(),
+          ),
+
+        ],
+        onStepReached: (index) => setState(() => activeStep = index),
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -505,244 +549,260 @@ class _NewIncome extends State<NewIncome>
         (safeAreaHeight + safeAreaHeightBottom);
     child:
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0, // removes the shadow
-        scrolledUnderElevation: 0, // removes shadow when scrolling (Flutter 3.7+)
-        surfaceTintColor: Colors.transparent, // removes Material3 tint
-        backgroundColor: Utils.getScreenBackground(), // Customize the color
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Utils.getThemeColorBlue()),
-          onPressed: () {
-            Navigator.pop(context); // Navigates back
-          },
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(120),
+        child: AppBar(
+          backgroundColor: Utils.getThemeColorBlue(),
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              if (activeStep > 0) {
+                setState(() => activeStep--);
+              } else {
+                Navigator.pop(context);
+              }
+            },
+          ),
+          automaticallyImplyLeading: true,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(30),
+            child: _buildStepper(),
+          ),
         ),
       ),
-      bottomNavigationBar: Container(
-        margin: EdgeInsets.all(15),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Show Previous Button only if activeStep > 0
-            if (activeStep > 0)
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      activeStep--;
-                    });
-                  },
-                  child: Container(
-                    height: 55,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade700,
-                      borderRadius: BorderRadius.circular(30), // More rounded
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.3),
-                          spreadRadius: 2,
-                          blurRadius: 6,
-                          offset: Offset(0, 3),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+          child: Container(
+            margin: EdgeInsets.all(15),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Show Previous Button only if activeStep > 0
+                if (activeStep > 0)
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          activeStep--;
+                        });
+                      },
+                      child: Container(
+                        height: 55,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade700,
+                          borderRadius: BorderRadius.circular(30), // More rounded
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.3),
+                              spreadRadius: 2,
+                              blurRadius: 6,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    margin: EdgeInsets.symmetric(horizontal: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
-                        SizedBox(width: 5),
-                        Text(
-                          "Previous".tr(),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        margin: EdgeInsets.symmetric(horizontal: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
+                            SizedBox(width: 5),
+                            Text(
+                              "Previous".tr(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
 
-            // Next or Finish Button
-            Expanded(
-              child: GestureDetector(
-                onTap: () async {
+                // Next or Finish Button
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
 
-                  activeStep++;
-                  if(activeStep==1){
-                    if(invalidInput())
-                    {
-                      activeStep--;
-                      Utils.showToast("PROVIDE_ALL");
-                    }else{
-                      setState(() {
+                      activeStep++;
+                      if(activeStep==1){
+                        if(invalidInput())
+                        {
+                          activeStep--;
+                          Utils.showToast("PROVIDE_ALL");
+                        }else{
+                          setState(() {
 
-                      });
-                    }
-                  }
-
-                  if(activeStep==2){
-                    if(!invalidInput() && soldtoController.text.trim().length>0)
-                    {
-                      setState(() {
-
-                      });
-                    }else{
-                      activeStep--;
-                      Utils.showToast("PROVIDE_ALL");
-                    }
-                  }
-
-                  if(activeStep==3)
-                  {
-
-                    if(isEdit)
-                    {
-                      await DatabaseHelper.instance.database;
-                      TransactionItem transaction_item = TransactionItem(
-                          f_id: getFlockID(),
-                          date: date,
-                          sale_item: choose_option?_mysaleselectedValue : _saleselectedValue,
-                          expense_item: "",
-                          type: "Income",
-                          amount: amountController.text,
-                          payment_method: payment_method,
-                          payment_status: payment_status,
-                          sold_purchased_from: soldtoController
-                              .text,
-                          short_note: notesController.text,
-                          how_many: howmanyController.text,
-                          unitPrice: double.parse(unitPriceController.text),
-                          extra_cost: "",
-                          extra_cost_details: "",
-                          f_name: _purposeselectedValue, flock_update_id: '-1',
-                          sync_id: widget.transactionItem!.sync_id,
-                          sync_status: SyncStatus.SYNCED,
-                          last_modified: Utils.getTimeStamp(),
-                          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                          f_sync_id: getFlockSyncID());
-
-                      transaction_item.id = widget.transactionItem!.id;
-
-                      int? id = await DatabaseHelper
-                          .updateTransaction(transaction_item);
-
-                      financeItem = FinanceItem(transaction: transaction_item);
-                      financeItem!.sync_id = transaction_item.sync_id;
-                      financeItem!.sync_status = SyncStatus.UPDATED;
-                      financeItem!.last_modified = Utils.getTimeStamp();
-                      financeItem!.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
-                      financeItem!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
-
-
-                      reduceBirds(widget.transactionItem!.id!);
-                      Utils.showToast("SUCCESSFUL");
-                      Navigator.pop(context);
-                    }
-                    else
-                    {
-
-                      print("Everything Okay");
-                      await DatabaseHelper.instance.database;
-                      TransactionItem transaction_item = TransactionItem(
-                          f_id: getFlockID(),
-                          date: date,
-                          sale_item: choose_option? _mysaleselectedValue : _saleselectedValue,
-                          expense_item: "",
-                          type: "Income",
-                          amount: amountController.text,
-                          payment_method: payment_method,
-                          payment_status: payment_status,
-                          sold_purchased_from: soldtoController
-                              .text,
-                          short_note: notesController.text,
-                          how_many: howmanyController.text,
-                          unitPrice: double.parse(unitPriceController.text),
-                          extra_cost: "",
-                          extra_cost_details: "",
-                          f_name: _purposeselectedValue, flock_update_id: '-1',
-                          sync_id: Utils.getUniueId(),
-                          sync_status: SyncStatus.SYNCED,
-                          last_modified: Utils.getTimeStamp(),
-                          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                          f_sync_id: getFlockSyncID());
-                      int? id = await DatabaseHelper
-                          .insertNewTransaction(transaction_item);
-
-                      financeItem = FinanceItem(transaction: transaction_item);
-                      financeItem!.sync_id = transaction_item.sync_id;
-                      financeItem!.sync_status = SyncStatus.SYNCED;
-                      financeItem!.last_modified = Utils.getTimeStamp();
-                      financeItem!.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
-                      financeItem!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
-
-
-                      if(widget.selectedIncomeType != null){
-                        if(widget.selectedIncomeType!.toLowerCase()=="egg sale"){
-
+                          });
                         }
-                      }else if (widget.selectedExpenseType != null){
-
-                      } else {
-                        reduceBirds(id!);
                       }
-                      Utils.showToast("SUCCESSFUL");
-                      Navigator.pop(context);
-                    }
 
-                    AnalyticsUtil.logAddTransaction(type: "Income", amount: double.parse(amountController.text));
-                  }
-                },
-                child: Container(
-                  height: 55,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: activeStep == 2
-                          ? [Utils.getThemeColorBlue(), Colors.greenAccent] // Finish Button
-                          : [Utils.getThemeColorBlue(), Colors.blueAccent], // Next Button
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(30), // More rounded
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.blue.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 6,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  margin: EdgeInsets.symmetric(horizontal: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        activeStep == 2 ? "SAVE".tr() : "Next".tr(),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      if(activeStep==2){
+                        if(!invalidInput() && soldtoController.text.trim().length>0)
+                        {
+                          setState(() {
+
+                          });
+                        }else{
+                          activeStep--;
+                          Utils.showToast("PROVIDE_ALL");
+                        }
+                      }
+
+                      if(activeStep==3)
+                      {
+
+                        if(isEdit)
+                        {
+                          await DatabaseHelper.instance.database;
+                          TransactionItem transaction_item = TransactionItem(
+                              f_id: getFlockID(),
+                              date: date,
+                              sale_item: choose_option?_mysaleselectedValue : _saleselectedValue,
+                              expense_item: "",
+                              type: "Income",
+                              amount: amountController.text,
+                              payment_method: payment_method,
+                              payment_status: payment_status,
+                              sold_purchased_from: soldtoController
+                                  .text,
+                              short_note: notesController.text,
+                              how_many: howmanyController.text,
+                              unitPrice: double.parse(unitPriceController.text),
+                              extra_cost: "",
+                              extra_cost_details: "",
+                              f_name: _purposeselectedValue, flock_update_id: '-1',
+                              sync_id: widget.transactionItem!.sync_id,
+                              sync_status: SyncStatus.SYNCED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                              f_sync_id: getFlockSyncID());
+
+                          transaction_item.id = widget.transactionItem!.id;
+
+                          int? id = await DatabaseHelper
+                              .updateTransaction(transaction_item);
+
+                          financeItem = FinanceItem(transaction: transaction_item);
+                          financeItem!.sync_id = transaction_item.sync_id;
+                          financeItem!.sync_status = SyncStatus.UPDATED;
+                          financeItem!.last_modified = Utils.getTimeStamp();
+                          financeItem!.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                          financeItem!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+
+                          reduceBirds(widget.transactionItem!.id!);
+                          Utils.showToast("SUCCESSFUL");
+                          Navigator.pop(context);
+                        }
+                        else
+                        {
+
+                          print("Everything Okay");
+                          await DatabaseHelper.instance.database;
+                          TransactionItem transaction_item = TransactionItem(
+                              f_id: getFlockID(),
+                              date: date,
+                              sale_item: choose_option? _mysaleselectedValue : _saleselectedValue,
+                              expense_item: "",
+                              type: "Income",
+                              amount: amountController.text,
+                              payment_method: payment_method,
+                              payment_status: payment_status,
+                              sold_purchased_from: soldtoController
+                                  .text,
+                              short_note: notesController.text,
+                              how_many: howmanyController.text,
+                              unitPrice: double.parse(unitPriceController.text),
+                              extra_cost: "",
+                              extra_cost_details: "",
+                              f_name: _purposeselectedValue, flock_update_id: '-1',
+                              sync_id: Utils.getUniueId(),
+                              sync_status: SyncStatus.SYNCED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                              f_sync_id: getFlockSyncID());
+                          int? id = await DatabaseHelper
+                              .insertNewTransaction(transaction_item);
+
+                          financeItem = FinanceItem(transaction: transaction_item);
+                          financeItem!.sync_id = transaction_item.sync_id;
+                          financeItem!.sync_status = SyncStatus.SYNCED;
+                          financeItem!.last_modified = Utils.getTimeStamp();
+                          financeItem!.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                          financeItem!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+
+                          if(widget.selectedIncomeType != null){
+                            if(widget.selectedIncomeType!.toLowerCase()=="egg sale"){
+
+                            }
+                          }else if (widget.selectedExpenseType != null){
+
+                          } else {
+                            reduceBirds(id!);
+                          }
+                          Utils.showToast("SUCCESSFUL");
+                          Navigator.pop(context);
+                        }
+
+                        AnalyticsUtil.logAddTransaction(type: "Income", amount: double.parse(amountController.text));
+                      }
+                    },
+                    child: Container(
+                      height: 55,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: activeStep == 2
+                              ? [Utils.getThemeColorBlue(), Colors.greenAccent] // Finish Button
+                              : [Utils.getThemeColorBlue(), Colors.blueAccent], // Next Button
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
+                        borderRadius: BorderRadius.circular(30), // More rounded
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 6,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 5),
-                      Icon(
-                        activeStep == 1 ? Icons.check_circle : Icons.arrow_forward_ios,
-                        color: Colors.white,
-                        size: 20,
+                      margin: EdgeInsets.symmetric(horizontal: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            activeStep == 2 ? "SAVE".tr() : "Next".tr(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(width: 5),
+                          Icon(
+                            activeStep == 1 ? Icons.check_circle : Icons.arrow_forward_ios,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
       body: SafeArea(
@@ -750,7 +810,7 @@ class _NewIncome extends State<NewIncome>
         child: Container(
           width: widthScreen,
           height: heightScreen,
-          color: Utils.getScreenBackground(),
+          color: Colors.white,
           child:Column(children: [
             if (_isNativeAdLoaded && _myNativeAd != null)
               Container(
@@ -797,7 +857,7 @@ class _NewIncome extends State<NewIncome>
                 ),
     */
 
-                  EasyStepper(
+                  /*EasyStepper(
                     activeStep: activeStep,
                     activeStepTextColor: Colors.blue.shade900,
                     finishedStepTextColor: Utils.getThemeColorBlue(),
@@ -832,7 +892,7 @@ class _NewIncome extends State<NewIncome>
                     ],
                     onStepReached: (index) => setState(() => activeStep = index),
                   ),
-
+*/
                   SizedBox(height: 0,),
                   Container(
                     alignment: Alignment.center,
@@ -842,11 +902,11 @@ class _NewIncome extends State<NewIncome>
                         children: [
 
                           activeStep==0? Container(
-                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                           // margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                             padding: EdgeInsets.all(18),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
+                             /* borderRadius: BorderRadius.circular(18),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.grey.withOpacity(0.15),
@@ -854,7 +914,7 @@ class _NewIncome extends State<NewIncome>
                                   spreadRadius: 2,
                                   offset: Offset(0, 5),
                                 ),
-                              ],
+                              ],*/
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -875,7 +935,17 @@ class _NewIncome extends State<NewIncome>
                                 // Flock Selection
                                 _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
                                 SizedBox(height: 8),
-                                _buildDropdownField(getDropDownList()),
+                               // _buildDropdownField(getDropDownList()),
+                                FlockHorizontalList(
+                                  flocks: flocks,
+                                  selectedFlockId: _purposeselectedValue,
+                                  onSelect: (flock) {
+                                    setState(() {
+                                      _purposeselectedValue = flock.f_name;
+                                    });
+                                  },
+                                ),
+
                                 SizedBox(height: 15),
                                 // Purpose Selection
                                 _buildInputLabel("PURPOSE1".tr(), Icons.assignment),
@@ -958,11 +1028,11 @@ class _NewIncome extends State<NewIncome>
 
 
                           activeStep==1?  Container(
-                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                           // margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                             padding: EdgeInsets.all(18),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
+                              /*borderRadius: BorderRadius.circular(18),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.grey.withOpacity(0.15),
@@ -970,7 +1040,7 @@ class _NewIncome extends State<NewIncome>
                                   spreadRadius: 2,
                                   offset: Offset(0, 5),
                                 ),
-                              ],
+                              ],*/
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1062,11 +1132,11 @@ class _NewIncome extends State<NewIncome>
 
 
                           activeStep==2?  Container(
-                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                            //margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                             padding: EdgeInsets.all(18),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
+                             /* borderRadius: BorderRadius.circular(18),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.grey.withOpacity(0.15),
@@ -1074,7 +1144,7 @@ class _NewIncome extends State<NewIncome>
                                   spreadRadius: 2,
                                   offset: Offset(0, 5),
                                 ),
-                              ],
+                              ],*/
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

@@ -15,6 +15,7 @@ import 'package:poultary/sticky.dart';
 import 'package:poultary/stock/stock_screen.dart';
 import 'package:poultary/sub_category_screen.dart';
 import 'package:poultary/utils/fb_analytics.dart';
+import 'package:poultary/utils/ui/flock_ui_list.dart';
 import 'package:poultary/utils/utils.dart';
 import 'database/databse_helper.dart';
 import 'feed_batch_screen.dart';
@@ -139,7 +140,6 @@ class _NewFeeding extends State<NewFeeding>
     date = DateFormat('yyyy-MM-dd').format(dateTime);
   }
 
-
     await DatabaseHelper.instance.database;
 
     flocks = await DatabaseHelper.getFlocks();
@@ -235,6 +235,45 @@ class _NewFeeding extends State<NewFeeding>
   int good_eggs = 0;
   int bad_eggs = 0;
 
+  Widget _buildStepper() {
+    return  Container(
+      color: Utils.getThemeColorBlue(),
+      child: EasyStepper(
+        activeStep: activeStep,
+        activeStepTextColor: Colors.white,
+        finishedStepTextColor: Colors.white30,
+        internalPadding: 20, // Reduce padding for better spacing
+        stepShape: StepShape.circle,
+        stepBorderRadius: 20,
+        borderThickness: 3, // Balanced progress line thickness
+        showLoadingAnimation: false,
+        stepRadius: 15, // Reduced step size to fit screen
+        showStepBorder: false,
+        lineStyle: LineStyle(
+          lineLength: 50,
+          lineType: LineType.normal,
+          defaultLineColor: Colors.grey.shade300,
+          activeLineColor: Colors.blueAccent,
+          finishedLineColor: Utils.getThemeColorBlue(),
+        ),
+        steps: [
+          EasyStep(
+            customStep: _buildStepIcon(Icons.food_bank_outlined, 0),
+            title: widget.feeding == null? 'NEW'.tr()+' '+'Feed'.tr() : 'EDIT'.tr()+' '+'Feed'.tr(),
+          ),
+          EasyStep(
+            customStep: _buildStepIcon(Icons.date_range, 1),
+            title: 'DATE'.tr(),
+          ),
+
+        ],
+        onStepReached: (index) => setState(() => activeStep = index),
+      ),
+
+    );
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -248,196 +287,212 @@ class _NewFeeding extends State<NewFeeding>
         (safeAreaHeight + safeAreaHeightBottom);
     child:
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0, // removes the shadow
-        scrolledUnderElevation: 0, // removes shadow when scrolling (Flutter 3.7+)
-        surfaceTintColor: Colors.transparent, // removes Material3 tint
-        backgroundColor: Utils.getScreenBackground(), // Customize the color
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Utils.getThemeColorBlue()),
-          onPressed: () {
-            Navigator.pop(context); // Navigates back
-          },
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(120),
+        child: AppBar(
+          backgroundColor: Utils.getThemeColorBlue(),
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              if (activeStep > 0) {
+                setState(() => activeStep--);
+              } else {
+                Navigator.pop(context);
+              }
+            },
+          ),
+          automaticallyImplyLeading: true,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(30),
+            child: _buildStepper(),
+          ),
         ),
       ),
-      bottomNavigationBar: Container(
-        margin: EdgeInsets.all(15),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Show Previous Button only if activeStep > 0
-            if (activeStep > 0)
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      activeStep--;
-                    });
-                  },
-                  child: Container(
-                    height: 55,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade700,
-                      borderRadius: BorderRadius.circular(30), // More rounded
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.3),
-                          spreadRadius: 2,
-                          blurRadius: 6,
-                          offset: Offset(0, 3),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+          child: Container(
+            margin: EdgeInsets.all(15),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Show Previous Button only if activeStep > 0
+                if (activeStep > 0)
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          activeStep--;
+                        });
+                      },
+                      child: Container(
+                        height: 55,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade700,
+                          borderRadius: BorderRadius.circular(30), // More rounded
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.3),
+                              spreadRadius: 2,
+                              blurRadius: 6,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
                         ),
-                      ],
+                        margin: EdgeInsets.symmetric(horizontal: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
+                            SizedBox(width: 5),
+                            Text(
+                              "Previous".tr(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    margin: EdgeInsets.symmetric(horizontal: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
-                        SizedBox(width: 5),
-                        Text(
-                          "Previous".tr(),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                  ),
+
+                // Next or Finish Button
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
+
+                      activeStep++;
+
+                      if(activeStep==1) {
+                        if (quantityController.text
+                            .trim()
+                            .length == 0) {
+                          activeStep--;
+                          Utils.showToast("PROVIDE_ALL");
+                        }else{
+                          setState(() {
+
+                          });
+                        }
+                      }
+
+                      if(activeStep==2){
+
+                        if(isEdit)
+                        {
+                          await DatabaseHelper.instance.database;
+
+                          Feeding feeding = Feeding(
+                            f_id: getFlockID(),
+                            short_note: notesController.text,
+                            date: date,
+                            feed_name: _feedselectedValue,
+                            quantity: quantityController.text,
+                            f_name: _purposeselectedValue,
+                              sync_id: widget.feeding!.sync_id,
+                              sync_status: SyncStatus.UPDATED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                              f_sync_id: getFlockSyncID());
+                          feeding.id = widget.feeding!.id;
+
+                          int? id = await DatabaseHelper
+                              .updateFeeding(feeding);
+
+                          if(Utils.isMultiUSer && Utils.hasFeaturePermission('edit_feed'))
+                          {
+                            await FireBaseUtils.updateFeedingRecord(feeding);
+                          }
+
+                          Utils.showToast("SUCCESSFUL");
+                          Navigator.pop(context);
+                        } else
+                        {
+                          Feeding feeding = Feeding(
+                              f_id: getFlockID(),
+                              short_note: notesController.text,
+                              date: date,
+                              feed_name: _feedselectedValue,
+                              quantity: quantityController.text,
+                              f_name: _purposeselectedValue,
+                              sync_id: Utils.getUniueId(),
+                              sync_status: SyncStatus.SYNCED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                              f_sync_id: getFlockSyncID()
+                          );
+                          await DatabaseHelper.instance.database;
+                          int? id = await DatabaseHelper
+                              .insertNewFeeding(feeding);
+                          Utils.showToast("SUCCESSFUL");
+
+                          if(Utils.isMultiUSer && Utils.hasFeaturePermission('add_feed'))
+                          {
+                            await FireBaseUtils.uploadFeedingRecord(feeding);
+                          }
+
+                          Navigator.pop(context);
+                        }
+
+                        AnalyticsUtil.logAddFeed(unit: Utils.selected_unit, quantity: double.parse(quantityController.text));
+
+                      }
+                    },
+                    child: Container(
+                      height: 55,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: activeStep == 1
+                              ? [Utils.getThemeColorBlue(), Colors.greenAccent] // Finish Button
+                              : [Utils.getThemeColorBlue(), Colors.blueAccent], // Next Button
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(30), // More rounded
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 6,
+                            offset: Offset(0, 3),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                      margin: EdgeInsets.symmetric(horizontal: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            activeStep == 1 ? "SAVE".tr() : "Next".tr(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(width: 5),
+                          Icon(
+                            activeStep == 1 ? Icons.check_circle : Icons.arrow_forward_ios,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-
-            // Next or Finish Button
-            Expanded(
-              child: GestureDetector(
-                onTap: () async {
-
-                  activeStep++;
-
-                  if(activeStep==1) {
-                    if (quantityController.text
-                        .trim()
-                        .length == 0) {
-                      activeStep--;
-                      Utils.showToast("PROVIDE_ALL");
-                    }else{
-                      setState(() {
-
-                      });
-                    }
-                  }
-
-                  if(activeStep==2){
-
-                    if(isEdit)
-                    {
-                      await DatabaseHelper.instance.database;
-
-                      Feeding feeding = Feeding(
-                        f_id: getFlockID(),
-                        short_note: notesController.text,
-                        date: date,
-                        feed_name: _feedselectedValue,
-                        quantity: quantityController.text,
-                        f_name: _purposeselectedValue,
-                          sync_id: widget.feeding!.sync_id,
-                          sync_status: SyncStatus.UPDATED,
-                          last_modified: Utils.getTimeStamp(),
-                          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                          f_sync_id: getFlockSyncID());
-                      feeding.id = widget.feeding!.id;
-
-                      int? id = await DatabaseHelper
-                          .updateFeeding(feeding);
-
-                      if(Utils.isMultiUSer && Utils.hasFeaturePermission('edit_feed'))
-                      {
-                        await FireBaseUtils.updateFeedingRecord(feeding);
-                      }
-
-                      Utils.showToast("SUCCESSFUL");
-                      Navigator.pop(context);
-                    } else
-                    {
-                      Feeding feeding = Feeding(
-                          f_id: getFlockID(),
-                          short_note: notesController.text,
-                          date: date,
-                          feed_name: _feedselectedValue,
-                          quantity: quantityController.text,
-                          f_name: _purposeselectedValue,
-                          sync_id: Utils.getUniueId(),
-                          sync_status: SyncStatus.SYNCED,
-                          last_modified: Utils.getTimeStamp(),
-                          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                          f_sync_id: getFlockSyncID()
-                      );
-                      await DatabaseHelper.instance.database;
-                      int? id = await DatabaseHelper
-                          .insertNewFeeding(feeding);
-                      Utils.showToast("SUCCESSFUL");
-
-                      if(Utils.isMultiUSer && Utils.hasFeaturePermission('add_feed'))
-                      {
-                        await FireBaseUtils.uploadFeedingRecord(feeding);
-                      }
-
-                      Navigator.pop(context);
-                    }
-
-                    AnalyticsUtil.logAddFeed(unit: Utils.selected_unit, quantity: double.parse(quantityController.text));
-
-                  }
-                },
-                child: Container(
-                  height: 55,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: activeStep == 1
-                          ? [Utils.getThemeColorBlue(), Colors.greenAccent] // Finish Button
-                          : [Utils.getThemeColorBlue(), Colors.blueAccent], // Next Button
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(30), // More rounded
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.blue.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 6,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  margin: EdgeInsets.symmetric(horizontal: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        activeStep == 1 ? "SAVE".tr() : "Next".tr(),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(width: 5),
-                      Icon(
-                        activeStep == 1 ? Icons.check_circle : Icons.arrow_forward_ios,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
       body: SafeArea(
@@ -445,7 +500,7 @@ class _NewFeeding extends State<NewFeeding>
         child: Container(
           width: widthScreen,
           height: heightScreen,
-            color: Utils.getScreenBackground(),
+            color: Colors.white,
           child: Column(children: [
             if (_isNativeAdLoaded && _myNativeAd != null)
               Container(
@@ -491,44 +546,13 @@ class _NewFeeding extends State<NewFeeding>
                     ),
                   ),
                 ),*/
-                  EasyStepper(
-                    activeStep: activeStep,
-                    activeStepTextColor: Colors.blue.shade900,
-                    finishedStepTextColor: Utils.getThemeColorBlue(),
-                    internalPadding: 20, // Reduce padding for better spacing
-                    stepShape: StepShape.circle,
-                    stepBorderRadius: 20,
-                    borderThickness: 3, // Balanced progress line thickness
-                    showLoadingAnimation: false,
-                    stepRadius: 15, // Reduced step size to fit screen
-                    showStepBorder: false,
-                    lineStyle: LineStyle(
-                      lineLength: 50,
-                      lineType: LineType.normal,
-                      defaultLineColor: Colors.grey.shade300,
-                      activeLineColor: Colors.blueAccent,
-                      finishedLineColor: Utils.getThemeColorBlue(),
-                    ),
-                    steps: [
-                      EasyStep(
-                        customStep: _buildStepIcon(Icons.food_bank_outlined, 0),
-                        title: 'Feed'.tr(),
-                      ),
-                      EasyStep(
-                        customStep: _buildStepIcon(Icons.date_range, 1),
-                        title: 'DATE'.tr(),
-                      ),
-
-                    ],
-                    onStepReached: (index) => setState(() => activeStep = index),
-                  ),
                   Container(
                     // height: heightScreen - 250,
                     margin: EdgeInsets.only(top: 0),
                     child: Column(
 
                         children: [
-                          Container(
+                          /*Container(
                               margin: EdgeInsets.only(left: 10),
                               child: Text(
                                 isEdit?"EDIT".tr() +" "+"FEEDING".tr():"NEW_FEEDING".tr(),
@@ -537,14 +561,14 @@ class _NewFeeding extends State<NewFeeding>
                                     color: Utils.getThemeColorBlue(),
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold),
-                              )),
+                              )),*/
 
                           activeStep==0? Container(
-                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                          //  margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                             padding: EdgeInsets.all(18),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
+                             /* borderRadius: BorderRadius.circular(18),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.grey.withOpacity(0.15),
@@ -552,7 +576,7 @@ class _NewFeeding extends State<NewFeeding>
                                   spreadRadius: 2,
                                   offset: Offset(0, 5),
                                 ),
-                              ],
+                              ],*/
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -568,12 +592,21 @@ class _NewFeeding extends State<NewFeeding>
                                     ),
                                   ),
                                 ),
-                                SizedBox(height: 20),
+                                SizedBox(height: 10),
 
                                 // Choose Flock
                                 _buildInputLabel("CHOOSE_FLOCK_1".tr(), Icons.pets),
                                 SizedBox(height: 8),
-                                _buildDropdownField(getDropDownList()),
+                               // _buildDropdownField(getDropDownList()),
+                                FlockHorizontalList(
+                                  flocks: flocks,
+                                  selectedFlockId: _purposeselectedValue,
+                                  onSelect: (flock) {
+                                    setState(() {
+                                      _purposeselectedValue = flock.f_name;
+                                    });
+                                  },
+                                ),
 
                                 SizedBox(height: 20),
 
@@ -646,11 +679,11 @@ class _NewFeeding extends State<NewFeeding>
                               :SizedBox(width: 1,),
 
                           activeStep==1? Container(
-                            margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                          //  margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                             padding: EdgeInsets.all(18),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
+                             /* borderRadius: BorderRadius.circular(18),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.grey.withOpacity(0.15),
@@ -658,7 +691,7 @@ class _NewFeeding extends State<NewFeeding>
                                   spreadRadius: 2,
                                   offset: Offset(0, 5),
                                 ),
-                              ],
+                              ],*/
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

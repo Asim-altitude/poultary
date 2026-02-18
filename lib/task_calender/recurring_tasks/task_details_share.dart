@@ -474,7 +474,8 @@ class ShareOptionsSheet extends StatelessWidget {
   void _shareViaOtherApps(BuildContext context) async {
     final message = _formatTaskMessage();
     
-    try {
+    try
+    {
       await Share.share(
         message,
         subject: 'Easy Poultry Task: ${task.title}',
@@ -511,10 +512,11 @@ Future<void> shareTaskViaWhatsAppDirect({
   required String phoneNumber,
   required LivestockTask task,
   required DateTime date,
-}) async {
+}) async
+{
   final dateStr = '${date.day}/${date.month}/${date.year}';
   final timeStr = '${task.time.hour.toString().padLeft(2, '0')}:${task.time.minute.toString().padLeft(2, '0')}';
-  
+
   final message = '''
 🐔 Easy Poultry Task Reminder
 

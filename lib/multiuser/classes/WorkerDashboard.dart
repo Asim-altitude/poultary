@@ -1074,9 +1074,9 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
     } else if (module.toLowerCase() == "stock") {
       Navigator.push(context, MaterialPageRoute(builder: (_) => ManageInventoryScreen()));
     } else if (module.toLowerCase() == "reports") {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => ReportListScreen()));
+      Navigator.push(context, MaterialPageRoute(builder: (_) => ReportListScreen(showBack: true,)));
     } else if (module.toLowerCase() == "settings") {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => SettingsScreen()));
+      Navigator.push(context, MaterialPageRoute(builder: (_) => SettingsScreen(showBack: true,)));
     }
   }
 

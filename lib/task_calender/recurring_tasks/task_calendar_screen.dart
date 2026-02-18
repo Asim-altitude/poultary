@@ -1,9 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:poultary/task_calender/task_details_share.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:poultary/task_calender/recurring_tasks/task_details_share.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../database/databse_helper.dart';
+import '../../database/databse_helper.dart';
+import '../../utils/utils.dart';
 import 'add_edit_task_screen.dart';
+import 'notification_service.dart';
 
 // Main Task Calendar Screen
 class TaskCalendarScreen extends StatefulWidget {
@@ -26,6 +29,48 @@ class _TaskCalendarScreenState extends State<TaskCalendarScreen> {
     super.initState();
     _selectedDay = _focusedDay;
     _loadTasks();
+
+    if(Utils.isShowAdd){
+      _loadNativeAds();
+    }
+  }
+
+  late NativeAd _myNativeAd;
+  bool _isNativeAdLoaded = false;
+  _loadNativeAds(){
+    _myNativeAd = NativeAd(
+      adUnitId: Utils.NativeAdUnitId,
+      request: const AdRequest(),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.small, // or medium
+        mainBackgroundColor: Colors.white,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white,
+          backgroundColor: Colors.blue,
+          style: NativeTemplateFontStyle.bold,
+          size: 14,
+        ),
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          size: 14,
+        ),
+        secondaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.white70,
+          size: 12,
+        ),
+      ),
+      listener: NativeAdListener(
+        onAdLoaded: (_) => setState(() => _isNativeAdLoaded = true),
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          debugPrint('Native ad failed: $error');
+        },
+      ),
+    );
+
+
+    _myNativeAd.load();
+
   }
 
   Future<void> _loadTasks() async {
@@ -45,6 +90,7 @@ class _TaskCalendarScreenState extends State<TaskCalendarScreen> {
         _tasks = groupedTasks;
         _isLoading = false;
       });
+
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
@@ -78,6 +124,16 @@ class _TaskCalendarScreenState extends State<TaskCalendarScreen> {
           ? Center(child: CircularProgressIndicator())
           : Column(
               children: [
+                if (_isNativeAdLoaded)
+                  Container(
+                    height: 90,
+                    margin: const EdgeInsets.only(bottom: 0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: AdWidget(ad: _myNativeAd),
+                  ),
                 // Calendar Widget
                 TableCalendar(
                   firstDay: DateTime.utc(2020, 1, 1),
@@ -194,6 +250,14 @@ class _TaskCalendarScreenState extends State<TaskCalendarScreen> {
                 Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
                 SizedBox(width: 4),
                 Text(timeStr),
+                if (task.recurrencePattern != null) ...[
+                  SizedBox(width: 8),
+                  Icon(Icons.repeat, size: 16, color: Colors.blue[700]),
+                ],
+                if (task.enableNotification) ...[
+                  SizedBox(width: 8),
+                  Icon(Icons.notifications_active, size: 16, color: Colors.orange[700]),
+                ],
               ],
             ),
             if (task.assignedUsers.isNotEmpty) ...[
@@ -294,6 +358,37 @@ class _TaskCalendarScreenState extends State<TaskCalendarScreen> {
       ),
     );
   }
+
+  Future<void> _scheduleTaskNotification(LivestockTask task, DateTime taskDate) async {
+    try {
+      final taskDateTime = DateTime(
+        taskDate.year,
+        taskDate.month,
+        taskDate.day,
+        task.time.hour,
+        task.time.minute,
+      );
+
+      /* // Calculate notification time
+      final notificationTime = taskDateTime.subtract(Duration(minutes: task.notificationMinutesBefore!));
+      int notification_time = ((notificationTime.millisecondsSinceEpoch -
+          DateTime.now().millisecondsSinceEpoch) / 1000).round();
+      Utils.showNotification(
+          Utils.generateNotificationId(task.id), task.title,
+          task.description, notification_time);*/
+
+      await NotificationService.instance.scheduleTaskNotification(
+        taskId: task.id,
+        title: task.title,
+        description: task.description,
+        taskDateTime: taskDateTime,
+        minutesBefore: task.notificationMinutesBefore!,
+      );
+    } catch (e) {
+      print('Error scheduling notification: $e');
+    }
+  }
+
 
   void _showEditTaskDialog(LivestockTask task) async {
     final result = await Navigator.push(
@@ -479,14 +574,11 @@ class _TaskCalendarScreenState extends State<TaskCalendarScreen> {
       case TaskType.other:
         return Colors.grey;
       case TaskType.medication:
-        // TODO: Handle this case.
         return Colors.brown;
       case TaskType.egg_collection:
-        // TODO: Handle this case.
         return Colors.white;
       case TaskType.packing:
         return Colors.yellow;
-
     }
   }
 
@@ -505,15 +597,11 @@ class _TaskCalendarScreenState extends State<TaskCalendarScreen> {
       case TaskType.other:
         return Icons.task;
       case TaskType.medication:
-        // TODO: Handle this case.
         return Icons.medical_information;
       case TaskType.egg_collection:
-        // TODO: Handle this case.
         return Icons.egg;
       case TaskType.packing:
-        // TODO: Handle this case.
         return Icons.backpack;
-
     }
   }
 }
@@ -528,6 +616,9 @@ class LivestockTask {
   final List<String> assignedUsers;
   final bool completed;
   final String? notes;
+  final RecurrencePattern? recurrencePattern;
+  final bool enableNotification;
+  final int? notificationMinutesBefore;
 
   LivestockTask({
     required this.id,
@@ -538,6 +629,9 @@ class LivestockTask {
     required this.assignedUsers,
     this.completed = false,
     this.notes,
+    this.recurrencePattern,
+    this.enableNotification = false,
+    this.notificationMinutesBefore,
   });
 
   LivestockTask copyWith({
@@ -549,6 +643,9 @@ class LivestockTask {
     List<String>? assignedUsers,
     bool? completed,
     String? notes,
+    RecurrencePattern? recurrencePattern,
+    bool? enableNotification,
+    int? notificationMinutesBefore,
   }) {
     return LivestockTask(
       id: id ?? this.id,
@@ -559,6 +656,9 @@ class LivestockTask {
       assignedUsers: assignedUsers ?? this.assignedUsers,
       completed: completed ?? this.completed,
       notes: notes ?? this.notes,
+      recurrencePattern: recurrencePattern ?? this.recurrencePattern,
+      enableNotification: enableNotification ?? this.enableNotification,
+      notificationMinutesBefore: notificationMinutesBefore ?? this.notificationMinutesBefore,
     );
   }
 
@@ -572,6 +672,9 @@ class LivestockTask {
       'assignedUsers': assignedUsers,
       'completed': completed,
       'notes': notes,
+      'recurrencePattern': recurrencePattern?.toJson(),
+      'enableNotification': enableNotification,
+      'notificationMinutesBefore': notificationMinutesBefore,
     };
   }
 }
@@ -586,4 +689,42 @@ enum TaskType {
   breeding,
   cleaning,
   other,
+}
+
+// Recurrence Pattern Model
+class RecurrencePattern {
+  final RecurrenceType type;
+  final int interval; // Every X days/weeks/months
+  final DateTime? endDate;
+
+  RecurrencePattern({
+    required this.type,
+    required this.interval,
+    this.endDate,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type.toString(),
+      'interval': interval,
+      'endDate': endDate?.toIso8601String(),
+    };
+  }
+
+  factory RecurrencePattern.fromJson(Map<String, dynamic> json) {
+    return RecurrencePattern(
+      type: RecurrenceType.values.firstWhere(
+        (e) => e.toString() == json['type'],
+        orElse: () => RecurrenceType.daily,
+      ),
+      interval: json['interval'] as int,
+      endDate: json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
+    );
+  }
+}
+
+enum RecurrenceType {
+  daily,
+  weekly,
+  monthly,
 }

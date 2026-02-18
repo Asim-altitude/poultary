@@ -169,7 +169,7 @@ class _AllFlocksScreen extends State<AllFlocksScreen> with RefreshMixin {
                               await Navigator.push(
                                 context,
                                 CupertinoPageRoute(builder: (
-                                    context) => const ADDFlockScreen()),);
+                                    context) =>  ADDFlockScreen(isStart: false,)),);
 
                               init();
 
@@ -400,7 +400,7 @@ class _AllFlocksScreen extends State<AllFlocksScreen> with RefreshMixin {
               await Navigator.push(
                 context,
                 CupertinoPageRoute(builder: (
-                    context) => const ADDFlockScreen()),);
+                    context) =>  ADDFlockScreen(isStart: false,)),);
 
               init();
               // Refresh logic

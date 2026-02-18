@@ -44,7 +44,7 @@ class _Inventory extends State<Inventory> with SingleTickerProviderStateMixin{
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
       child:
-    return SafeArea(child: Scaffold(
+    return Scaffold(
       body:SafeArea(
         top: false,
 
@@ -205,7 +205,7 @@ class _Inventory extends State<Inventory> with SingleTickerProviderStateMixin{
 
                   ]
       ),),
-        ),),),),);
+        ),),),);
   }
 }
 

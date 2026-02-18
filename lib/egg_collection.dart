@@ -4,19 +4,20 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/add_eggs.dart';
-import 'package:poultary/add_income.dart';
 import 'package:poultary/model/egg_income.dart';
 import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/multiuser/model/egg_record.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
-import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'database/databse_helper.dart';
+import 'farm_routine/farm_routine_screen.dart';
+import 'farm_routine/routine_prefs.dart';
 import 'model/egg_item.dart';
 import 'model/flock.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -1168,7 +1169,9 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
     );
   }
 
-
+  final _prefs = RoutinePrefs.instance;
+  static const _routineOrder = ['Egg', 'Feed', 'Health'];
+  Map<String, bool>    _statuses   = {for (final t in _routineOrder) t: false};
   Future<void> addNewCollection() async {
     if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_eggs"))
     {
@@ -1182,8 +1185,26 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
           builder: (context) =>  NewEggCollection(isCollection: true,eggs: null, reason: null,)),
     );
 
-    print(result);
+
+    try{
+      bool isFirst = await DatabaseHelper.isFirstRecord("Eggs");
+      if(isFirst) {
+        _statuses  = await _prefs.loadAllStatuses(_routineOrder);
+        bool complete = _statuses["Egg"] ?? false;
+        if(!complete) {
+          _showEggRoutineSuggestionDialog();
+        }
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+
+    print("Flock ID $result");
     getData(date_filter_name);
+
+
+    //checkReminderScheduling(result.toString());
 
   }
 
@@ -1201,6 +1222,118 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
     );
     print(result);
     getData(date_filter_name);
+  }
+
+  void _showEggRoutineSuggestionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text("🥚", style: TextStyle(fontSize: 52)),
+              const SizedBox(height: 12),
+
+              Text(
+                "egg_routine_dialog_title".tr(),
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 10),
+
+              Text(
+                "egg_routine_dialog_body".tr(),
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.black54,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 24),
+
+              // ✅ Setup Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FarmRoutineScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    minimumSize: const Size(double.infinity, 48),
+                  ),
+                  child: Text(
+                    "egg_routine_dialog_setup".tr(),
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // ⏳ Do Later Button
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.orange, width: 2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    minimumSize: const Size(double.infinity, 48),
+                  ),
+                  child: Text(
+                    "egg_routine_dialog_later".tr(),
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.orange,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // 💡 Hint Text
+              Text(
+                "egg_routine_dialog_hint".tr(),
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: Colors.black45,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
 
@@ -1802,6 +1935,114 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
       },
     );
   }
+
+  /*Future<void> checkReminderScheduling(String flockId) async {
+
+    // Check if reminder is already set up
+    final reminderService = ReminderSchedulerService();
+    final hasReminder = await reminderService.hasActiveReminder(
+      flockId,
+      'egg_collection',
+    );
+
+    if (!hasReminder) {
+      // Show reminder setup dialog
+      await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => ReminderFrequencySetup(
+        reminderType: ReminderType.eggCollection,
+        onComplete: (frequency, times, customDays) async {
+          await _scheduleReminders(frequency, times, customDays,flockId);
+        },
+        onSkip: () {
+          // User skipped
+        },
+      ),
+      );
+    }
+  }
+
+
+  Future<void> _scheduleReminders(
+      ReminderFrequency frequency,
+      List<TimeOfDay>? times,
+      List<int>? customDays,
+      String flockId
+      ) async
+  {
+    if (times == null || times.isEmpty) return;
+
+    final reminderService = ReminderSchedulerService();
+
+    try {
+      // Initialize the notification service
+      await reminderService.initialize();
+
+      // Request notification permissions
+      final hasPermission = await reminderService.requestPermissions();
+
+      if (!hasPermission) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Notification permission is required for reminders. Please enable it in settings.'),
+              backgroundColor: Colors.orange,
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 5),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Convert ReminderFrequency enum to string
+      final frequencyString = _frequencyToString(frequency);
+
+      // Schedule the reminders
+      await reminderService.scheduleReminders(
+        flockId: flockId, // Your flock ID
+        reminderType: 'egg_collection', // or 'feed_consumption'
+        frequency: frequencyString,
+        times: times,
+        customDays: customDays,
+      );
+
+      print('✅ Reminders scheduled successfully!');
+
+    } catch (e) {
+      print('❌ Error scheduling reminders: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to set reminder: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+// Helper function to convert enum to string
+  String _frequencyToString(ReminderFrequency frequency) {
+    switch (frequency) {
+      case ReminderFrequency.daily:
+        return 'daily';
+      case ReminderFrequency.twiceDaily:
+        return 'twice_daily';
+      case ReminderFrequency.threeTimesWeek:
+        return 'three_times_week';
+      case ReminderFrequency.fourTimesWeek:
+        return 'four_times_week';
+      case ReminderFrequency.weekly:
+        return 'weekly';
+      case ReminderFrequency.custom:
+        return 'custom';
+      default:
+        return 'daily';
+    }
+  }*/
 
 }
 

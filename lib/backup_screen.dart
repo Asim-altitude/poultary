@@ -4,7 +4,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
@@ -42,7 +41,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
   }
   @override
   void dispose() {
-    _myNativeAd?.dispose();
+    _myNativeAd.dispose();
     super.dispose();
   }
 
@@ -298,30 +297,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                       print(ex);
                     }*/
                         try {
-                          List<String> tables = [
-                            'Flock',
-                            'Flock_Image',
-                            'Eggs',
-                            'Feeding',
-                            'Transactions',
-                            'Vaccination_Medication',
-                            'Category_Detail',
-                            'EggTransaction',
-                            'FeedBatch',
-                            'FeedBatchItem',
-                            'FeedIngredient',
-                            'FeedStockHistory',
-                            'Flock_Detail',
-                            'MedicineStockHistory',
-                            'SaleContractor',
-                            'ScheduledNotification',
-                            'VaccineStockHistory',
-                            'WeightRecord',
-                            'StockExpense',
-                            'CustomCategory',
-                            'CustomCategoryData',
-
-                          ]; // Add your actual table names
+                          List<String> tables = Utils.getTAllables(); // Add your actual table names
 
                           for (final table in tables) {
                             await DatabaseHelper.instance.addSyncColumnsToTable(
@@ -874,7 +850,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
     });
 
     final authHeaders = await _googleSignIn.currentUser!.authHeaders;
-    final authenticateClient = GoogleAuthClient(authHeaders!);
+    final authenticateClient = GoogleAuthClient(authHeaders);
     final driveApi = drive.DriveApi(authenticateClient);
 
     File dbFile = await DatabaseHelper.getFilePathDB();

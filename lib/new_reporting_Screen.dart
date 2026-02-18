@@ -8,16 +8,19 @@ import 'package:poultary/financial_report_screen.dart';
 import 'package:poultary/flock_weight_report.dart';
 import 'package:poultary/production_report.dart';
 import 'package:poultary/utils/fb_analytics.dart';
+import 'package:poultary/utils/ui/ai_insights_widget.dart';
 import 'package:poultary/utils/utils.dart';
-import 'package:poultary/weight_record_screen.dart';
 
+
+import 'advance_insights_engine/ui/usage_example.dart';
 import 'custom_category_report.dart';
 import 'database/databse_helper.dart';
 import 'health_report_screen.dart';
 import 'model/custom_category.dart';
 
 class ReportListScreen extends StatefulWidget {
-  const ReportListScreen({Key? key}) : super(key: key);
+  bool showBack;
+  ReportListScreen({Key? key, required this.showBack}) : super(key: key);
 
   @override
   _ReportListScreen createState() => _ReportListScreen();
@@ -117,7 +120,7 @@ class _ReportListScreen extends State<ReportListScreen> {
         foregroundColor: Colors.white,
         backgroundColor: Colors.blue,
         elevation: 8,
-        automaticallyImplyLeading: (Utils.isMultiUSer && Utils.currentUser!.role.toLowerCase() != "admin")? true : false,
+        automaticallyImplyLeading: ((Utils.isMultiUSer && Utils.currentUser!.role.toLowerCase() != "admin") || widget.showBack)? true : false,
       ),
       body: Column(
         children: [
@@ -134,6 +137,15 @@ class _ReportListScreen extends State<ReportListScreen> {
 
           // ListView inside Expanded
 
+         /* Container(
+            margin: EdgeInsets.all(10.0),
+            child: AdvancedInsightsCard(onTap: () {
+               Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) =>  InsightsExamplePage()),
+              );
+            },),
+          ),*/
           Expanded(child:
           Container(
             color: Colors.grey[100],

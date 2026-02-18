@@ -251,97 +251,98 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
           ),
         ),
       ),
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.transparent,
-        child: Container(
-          height: 65,
-          width: widthScreen,
-          child: Row(
-            children: [
-              /// Add Birds Button
-              Expanded(
-                child: InkWell(
-                  onTap: () => addNewCollection(),
-                  borderRadius: BorderRadius.circular(10),
-                  child: AnimatedContainer(
-                    duration: Duration(milliseconds: 300),
-                    height: 55,
-                    margin: EdgeInsets.symmetric(horizontal: 6),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.green.shade700, Colors.green.shade500],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+          child: Container(
+            height: 65,
+            width: widthScreen,
+            child: Row(
+              children: [
+                /// Add Birds Button
+                Expanded(
+                  child: InkWell(
+                    onTap: () => addNewCollection(),
+                    borderRadius: BorderRadius.circular(10),
+                    child: AnimatedContainer(
+                      duration: Duration(milliseconds: 300),
+                      height: 55,
+                      margin: EdgeInsets.symmetric(horizontal: 6),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.green.shade700, Colors.green.shade500],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.green.withOpacity(0.4),
+                            blurRadius: 6,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
                       ),
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.green.withOpacity(0.4),
-                          blurRadius: 6,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.add_circle_outline_sharp, color: Colors.white, size: 28),
-                        SizedBox(width: 6),
-                        Text(
-                          'ADD_BIRDS'.tr(),
-                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-                        ),
-                      ],
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.add_circle_outline_sharp, color: Colors.white, size: 28),
+                          SizedBox(width: 6),
+                          Text(
+                            'ADD_BIRDS'.tr(),
+                            style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              /// Reduce Birds Button
-              Expanded(
-                child: InkWell(
-                  onTap: () => reduceCollection(),
-                  borderRadius: BorderRadius.circular(10),
-                  child: AnimatedContainer(
-                    duration: Duration(milliseconds: 300),
-                    height: 55,
-                    margin: EdgeInsets.symmetric(horizontal: 6),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.red.shade700, Colors.red.shade500],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                /// Reduce Birds Button
+                Expanded(
+                  child: InkWell(
+                    onTap: () => reduceCollection(),
+                    borderRadius: BorderRadius.circular(10),
+                    child: AnimatedContainer(
+                      duration: Duration(milliseconds: 300),
+                      height: 55,
+                      margin: EdgeInsets.symmetric(horizontal: 6),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.red.shade700, Colors.red.shade500],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.red.withOpacity(0.4),
+                            blurRadius: 6,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
                       ),
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.red.withOpacity(0.4),
-                          blurRadius: 6,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.remove_circle_outline, color: Colors.white, size: 28),
-                        SizedBox(width: 6),
-                        Text(
-                          'REDUCE_BIRDS'.tr(),
-                          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-                        ),
-                      ],
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.remove_circle_outline, color: Colors.white, size: 28),
+                          SizedBox(width: 6),
+                          Text(
+                            'REDUCE_BIRDS'.tr(),
+                            style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-
-        elevation: 0,
       ),
-      body:SafeArea(
+      body: SafeArea(
         top: false,
           child:Container(
           width: widthScreen,

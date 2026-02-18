@@ -57,7 +57,7 @@ import '../stock/model/stock_transactions.dart';
 import '../stock/tools_assets/model/tool_asset.dart';
 import '../stock/tools_assets/model/tool_asset_maintenance.dart';
 import '../stock/tools_assets/model/tool_asset_unit.dart';
-import '../task_calender/task_calendar_screen.dart';
+import '../task_calender/recurring_tasks/task_calendar_screen.dart';
 import '../utils/utils.dart';
 import 'package:uuid/uuid.dart';
 
@@ -313,7 +313,7 @@ class DatabaseHelper  {
 
   static Future<void> createTaskTable() async {
     await _database?.execute('''
-      CREATE TABLE tasks (
+      CREATE TABLE IF NOT EXISTS tasks (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
         description TEXT NOT NULL,
@@ -329,7 +329,7 @@ class DatabaseHelper  {
 
     // Task assignments table (many-to-many relationship)
     await _database?.execute('''
-      CREATE TABLE task_assignments (
+      CREATE TABLE IF NOT EXISTS task_assignments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         task_id TEXT NOT NULL,
         user_id TEXT NOT NULL,
@@ -340,7 +340,7 @@ class DatabaseHelper  {
 
     // Task history/logs table
     await _database?.execute('''
-      CREATE TABLE task_logs (
+      CREATE TABLE IF NOT EXISTS task_logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         task_id TEXT NOT NULL,
         action TEXT NOT NULL,
@@ -352,8 +352,53 @@ class DatabaseHelper  {
     ''');
   }
 
+  static Future<void> addTaskRecurrenceColumns() async {
+
+
+    // Get existing columns
+    final List<Map<String, Object?>>? columns =
+    await _database?.rawQuery("PRAGMA table_info(tasks)");
+
+    final existingColumns =
+    columns!.map((c) => c['name'] as String).toSet();
+
+    Future<void> addColumn(String columnSql, String columnName) async {
+      if (!existingColumns.contains(columnName)) {
+        await _database?.execute(columnSql);
+      }
+    }
+
+    await addColumn(
+      "ALTER TABLE tasks ADD COLUMN is_recurring INTEGER NOT NULL DEFAULT 0",
+      "is_recurring",
+    );
+
+    await addColumn(
+      "ALTER TABLE tasks ADD COLUMN recurrence_type TEXT",
+      "recurrence_type",
+    );
+
+    await addColumn(
+      "ALTER TABLE tasks ADD COLUMN recurrence_interval INTEGER",
+      "recurrence_interval",
+    );
+
+    await addColumn(
+      "ALTER TABLE tasks ADD COLUMN recurrence_end_date TEXT",
+      "recurrence_end_date",
+    );
+
+    await addColumn(
+      "ALTER TABLE tasks ADD COLUMN parent_task_id TEXT",
+      "parent_task_id",
+    );
+  }
+
+
+  // CRUD Operations for Tasks
 
   Future<String> createTask(LivestockTask task, DateTime date) async {
+   // final db = await database;
     final now = DateTime.now().toIso8601String();
 
     // Insert task
@@ -366,6 +411,13 @@ class DatabaseHelper  {
       'task_type': task.taskType.toString(),
       'completed': task.completed ? 1 : 0,
       'notes': task.notes,
+      'is_recurring': task.recurrencePattern != null ? 1 : 0,
+      'recurrence_type': task.recurrencePattern?.type.toString(),
+      'recurrence_interval': task.recurrencePattern?.interval,
+      'recurrence_end_date': task.recurrencePattern?.endDate != null
+          ? _dateToString(task.recurrencePattern!.endDate!)
+          : null,
+      'parent_task_id': null,
       'created_at': now,
       'updated_at': now,
     });
@@ -386,6 +438,7 @@ class DatabaseHelper  {
   }
 
   Future<List<LivestockTask>> getTasksForDate(DateTime date) async {
+    final db = await database;
     final dateStr = _dateToString(date);
 
     final taskMaps = await _database?.query(
@@ -405,7 +458,7 @@ class DatabaseHelper  {
   }
 
   Future<List<LivestockTask>> getAllTasks() async {
-
+    final db = await database;
     final taskMaps = await _database?.query('tasks', orderBy: 'date DESC, time ASC');
 
     List<LivestockTask> tasks = [];
@@ -422,6 +475,7 @@ class DatabaseHelper  {
     DateTime? endDate,
   }) async
   {
+    final db = await database;
 
     String whereClause = '';
     List<dynamic> whereArgs = [];
@@ -455,7 +509,7 @@ class DatabaseHelper  {
   }
 
   Future<LivestockTask?> getTaskById(String id) async {
-
+   // final db = await database;
     final maps = await _database?.query(
       'tasks',
       where: 'id = ?',
@@ -470,6 +524,7 @@ class DatabaseHelper  {
   }
 
   Future<int?> updateTask(LivestockTask task, DateTime date) async {
+    final db = await database;
     final now = DateTime.now().toIso8601String();
 
     // Update task
@@ -506,7 +561,7 @@ class DatabaseHelper  {
   }
 
   Future<int> toggleTaskCompletion(String taskId) async {
-
+    final db = await database;
     final task = await getTaskById(taskId);
 
     if (task == null) return 0;
@@ -534,7 +589,6 @@ class DatabaseHelper  {
   }
 
   Future<int?> deleteTask(String id) async {
-    final db = await database;
 
     // Log deletion before deleting
     await _logTaskAction(id, 'deleted', 'System', 'Task deleted');
@@ -543,6 +597,41 @@ class DatabaseHelper  {
     return await _database?.delete('tasks', where: 'id = ?', whereArgs: [id]);
   }
 
+  // User Management
+
+  Future<String> addUser({
+    required String name,
+    String? phoneNumber,
+    String? email,
+    String? role,
+  }) async
+  {
+    final id = DateTime.now().millisecondsSinceEpoch.toString();
+
+    await _database?.insert('users', {
+      'id': id,
+      'name': name,
+      'phone_number': phoneNumber,
+      'email': email,
+      'role': role,
+      'is_active': 1,
+      'created_at': DateTime.now().toIso8601String(),
+    });
+
+    return id;
+  }
+
+  Future<List<Map<String, dynamic>>?> getAllTaskUsers({bool activeOnly = true}) async {
+
+    return await _database?.query(
+      'users',
+      where: activeOnly ? 'is_active = ?' : null,
+      whereArgs: activeOnly ? [1] : null,
+      orderBy: 'name ASC',
+    );
+  }
+
+  // Helper Methods
 
   Future<List<String>> _getAssignedUsers(String taskId) async {
 
@@ -563,6 +652,7 @@ class DatabaseHelper  {
       String? notes,
       ) async
   {
+
     await _database?.insert('task_logs', {
       'task_id': taskId,
       'action': action,
@@ -574,6 +664,18 @@ class DatabaseHelper  {
 
   LivestockTask _taskFromMap(Map<String, dynamic> map, List<String> assignedUsers) {
     final timeParts = (map['time'] as String).split(':');
+
+    RecurrencePattern? recurrencePattern;
+    if (map['is_recurring'] == 1) {
+      recurrencePattern = RecurrencePattern(
+        type: _stringToRecurrenceType(map['recurrence_type'] as String?),
+        interval: map['recurrence_interval'] as int? ?? 1,
+        endDate: map['recurrence_end_date'] != null
+            ? _stringToDate(map['recurrence_end_date'] as String)
+            : null,
+      );
+    }
+
     return LivestockTask(
       id: map['id'] as String,
       title: map['title'] as String,
@@ -586,6 +688,7 @@ class DatabaseHelper  {
       assignedUsers: assignedUsers,
       completed: (map['completed'] as int) == 1,
       notes: map['notes'] as String?,
+      recurrencePattern: recurrencePattern,
     );
   }
 
@@ -593,6 +696,14 @@ class DatabaseHelper  {
     return TaskType.values.firstWhere(
           (e) => e.toString() == typeString,
       orElse: () => TaskType.other,
+    );
+  }
+
+  RecurrenceType _stringToRecurrenceType(String? typeString) {
+    if (typeString == null) return RecurrenceType.daily;
+    return RecurrenceType.values.firstWhere(
+          (e) => e.toString() == typeString,
+      orElse: () => RecurrenceType.daily,
     );
   }
 
@@ -612,6 +723,7 @@ class DatabaseHelper  {
   // Statistics and Analytics
 
   Future<Map<String, int>> getTaskStatistics({DateTime? startDate, DateTime? endDate}) async {
+    final db = await database;
 
     String whereClause = '';
     List<dynamic> whereArgs = [];
@@ -2823,7 +2935,8 @@ class DatabaseHelper  {
   }
 
   static Future<List<Eggs>> getFilteredEggsWithSort(
-      int f_id, String type, String str_date, String end_date, String sort) async {
+      int f_id, String type, String str_date, String end_date, String sort) async
+  {
 
     var result;
 
@@ -2880,6 +2993,17 @@ class DatabaseHelper  {
     }
 
     return _transactionList;
+  }
+
+  static Future<bool> isFirstRecord(String tableName) async {
+
+    final result = await _database?.rawQuery(
+      'SELECT COUNT(*) as count FROM $tableName',
+    );
+
+    int count = Sqflite.firstIntValue(result!) ?? 0;
+
+    return count == 1;
   }
 
   static Future<List<Eggs>>  getFilteredEggs(int f_id,String type,String str_date, String end_date) async {

@@ -100,7 +100,6 @@ class _SuggestedNotificationScreenState extends State<SuggestedNotificationScree
     return DateTime(triggerDate.year, triggerDate.month, triggerDate.day, 6); // 6 AM
   }
 
-
   void _showAddCustomNotificationDialog() {
     final _titleController = TextEditingController();
     final _descController = TextEditingController();

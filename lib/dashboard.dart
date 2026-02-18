@@ -15,7 +15,7 @@ import 'package:poultary/health_report_screen.dart';
 import 'package:poultary/multiuser/classes/AdminProfile.dart';
 import 'package:poultary/settings_screen.dart';
 import 'package:poultary/single_flock_screen.dart';
-import 'package:poultary/task_calender/task_calendar_screen.dart';
+import 'package:poultary/task_calender/recurring_tasks/task_calendar_screen.dart';
 import 'package:poultary/transactions_screen.dart';
 import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
@@ -1548,11 +1548,11 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                              child: Container(
                                padding: const EdgeInsets.all(8), // padding inside circle
                                decoration: BoxDecoration(
-                                 color: Colors.orange.shade100, // light orange background
+                                 color: Colors.amber.shade100, // light orange background
                                  shape: BoxShape.circle,
                                  boxShadow: [
                                    BoxShadow(
-                                     color: Colors.orange.shade300.withOpacity(0.5),
+                                     color: Colors.amber.shade300.withOpacity(0.5),
                                      blurRadius: 4,
                                      offset: const Offset(0, 2),
                                    ),
@@ -1560,7 +1560,7 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                                ),
                                child: const Icon(
                                  Icons.notifications_active,
-                                 color: Colors.orange,
+                                 color: Colors.amber,
                                  size: 24,
                                ),
                              ),
@@ -1588,7 +1588,7 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                                  ],
                                ),
                                child: const Icon(
-                                 Icons.task,
+                                 Icons.calendar_month_outlined,
                                  color: Colors.amber,
                                  size: 24,
                                ),
@@ -1734,7 +1734,7 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                                       await Navigator.push(
                                         context,
                                         CupertinoPageRoute(
-                                            builder: (context) => const ADDFlockScreen()),
+                                            builder: (context) =>  ADDFlockScreen(isStart: false,)),
                                       );
                                       getList();
                                       getFilteredData(date_filter_name);
@@ -1912,7 +1912,7 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                                 await Navigator.push(
                                   context,
                                   CupertinoPageRoute(
-                                      builder: (context) => const ADDFlockScreen()),
+                                      builder: (context) =>  ADDFlockScreen(isStart: false,)),
                                 );
                                 getList();
                                 getFilteredData(date_filter_name);
@@ -2347,7 +2347,7 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>  SettingsScreen()),
+                            builder: (context) =>  SettingsScreen(showBack: true,)),
                       ); // Example route
                     },
                     child:  Text('Activate Now'.tr(), style: TextStyle(color: Colors.white),),

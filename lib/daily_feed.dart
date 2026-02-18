@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/add_feeding.dart';
@@ -15,6 +16,8 @@ import 'package:poultary/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auto_feed_management.dart';
 import 'database/databse_helper.dart';
+import 'farm_routine/farm_routine_screen.dart';
+import 'farm_routine/routine_prefs.dart';
 import 'model/flock.dart';
 import 'multiuser/utils/RefreshMixin.dart';
 
@@ -140,6 +143,20 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
         MaterialPageRoute(
             builder: (context) =>  NewFeeding()),
       );
+
+     try{
+       bool isFirst = await DatabaseHelper.isFirstRecord("Feeding");
+       if(isFirst) {
+         _statuses  = await _prefs.loadAllStatuses(_routineOrder);
+         bool complete = _statuses["Feed"] ?? false;
+         if(!complete) {
+           _showFeedRoutineSuggestionDialog();
+         }
+       }
+     }
+     catch(ex){
+       print(ex);
+     }
 
       getFilteredTransactions(str_date, end_date);
     }
@@ -1089,14 +1106,145 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
     );
   }
 
-  Future<void> addNewCollection() async{
+  final _prefs = RoutinePrefs.instance;
+  static const _routineOrder = ['Egg', 'Feed', 'Health'];
+  Map<String, bool>    _statuses   = {for (final t in _routineOrder) t: false};
+
+  Future<void> addNewCollection() async {
     await Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => NewFeeding()),
     );
 
+    try{
+      bool isFirst = await DatabaseHelper.isFirstRecord("Feeding");
+      if(isFirst) {
+        _statuses  = await _prefs.loadAllStatuses(_routineOrder);
+        bool complete = _statuses["Feed"] ?? false;
+        if(!complete) {
+          _showFeedRoutineSuggestionDialog();
+        }
+      }
+    }
+    catch(ex){
+      print(ex);
+    }
+
     getFilteredTransactions(str_date, end_date);
+  }
+
+
+  void _showFeedRoutineSuggestionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text("🌾", style: TextStyle(fontSize: 52)),
+              const SizedBox(height: 12),
+
+              Text(
+                "feed_routine_dialog_title".tr(),
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 10),
+
+              Text(
+                "feed_routine_dialog_body".tr(),
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.black54,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 24),
+
+              // ✅ Setup Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context); // close dialog first
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FarmRoutineScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    minimumSize: const Size(double.infinity, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Text(
+                    "feed_routine_dialog_setup".tr(),
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // ⏳ Do Later Button
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.green, width: 2),
+                    minimumSize: const Size(double.infinity, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Text(
+                    "feed_routine_dialog_later".tr(),
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.green,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // 💡 Hint
+              Text(
+                "feed_routine_dialog_hint".tr(),
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: Colors.black45,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
 

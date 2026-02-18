@@ -179,7 +179,7 @@ class _FlockScreen extends State<FlockScreen>
                               Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const ADDFlockScreen()),
+                          builder: (context) =>  ADDFlockScreen(isStart: false,)),
                     );
                             }),
                         SizedBox(height: 10,width: widthScreen),

@@ -46,7 +46,8 @@ class _FlockNotificationScreenState extends State<FlockNotificationScreen> {
     required DateTime scheduledAt,
     required RecurrenceType recurrence,
     required VoidCallback onDelete,
-  }) {
+  })
+  {
     final now = DateTime.now().toLocal();
     final daysRemaining = scheduledAt.difference(DateTime(now.year, now.month, now.day)).inDays;
     final recurrenceText = recurrence.name[0].toUpperCase() + recurrence.name.substring(1);

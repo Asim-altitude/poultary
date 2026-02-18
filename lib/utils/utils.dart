@@ -71,7 +71,7 @@ class Utils {
   static final bool ISTESTACCOUNT = true;
   static late bool isShowAdd = true;
   static late bool iShowInterStitial = false;
-
+  static late bool isInterAdShown = false;
   static bool shouldBackup = false;
 
   static final String ProxyAPI = "https://photogallerytv.com/Api/proxy.php?url=";
@@ -79,7 +79,6 @@ class Utils {
   static final String appIdIOS     = "ca-app-pub-2367135251513556~6965974738";
   static final String appIdAndroid = "ca-app-pub-2367135251513556~8724531818";
   static var box;
-
   static final String testIOS     = "ca-app-pub-3940256099942544~1458002511";
   static final String testAndroid = "ca-app-pub-3940256099942544~3347511713";
 
@@ -149,7 +148,6 @@ class Utils {
   static double currentWeight = 0;
   static double changeWeight = 0;
 
-
   static List<Health_Report_Item> vaccine_report_list = [];
   static List<Health_Report_Item> medication_report_list = [];
   static BannerAd? _bannerAd ;
@@ -213,6 +211,7 @@ class Utils {
     ];
   }
 
+
   static Future<void> generateDatabaseTables() async {
     try
     {
@@ -240,6 +239,7 @@ class Utils {
       await DatabaseHelper.createToolAssetMaintenanceTable();
       await DatabaseHelper.createTaskTable();
       await DatabaseHelper.addColumnIfNotExists("Transactions", "unit_price", "REAL", 0);
+      await DatabaseHelper.addTaskRecurrenceColumns();
       await addNewColumn();
       await addMissingCategories();
       // await createMissingEggsRecords();
@@ -1721,7 +1721,7 @@ $storeLink
     if(Utils.isShowAdd){
 
       Future.delayed(const Duration(seconds: 0), () {
-        if(iShowInterStitial){
+        if(iShowInterStitial && !isInterAdShown){
           iShowInterStitial = false;
           _createInterstitialAd();
           // manager?.showInterstitial(new InterstitialListenerWrapper());
@@ -1743,6 +1743,7 @@ $storeLink
             _interstitialAd!.setImmersiveMode(true);
             Future.delayed(Duration(seconds: 0), () {
               _interstitialAd!.show();
+              isInterAdShown = true;
             });
           },
           onAdFailedToLoad: (LoadAdError error) {
@@ -2304,7 +2305,11 @@ $storeLink
   //LOCAL NOTIFICATION
 
   static late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-
+  static int generateNotificationId(String taskId) {
+    // Convert task ID string to a unique integer
+    // Using hashCode ensures consistency for the same task ID
+    return taskId.hashCode.abs() % 2147483647; // Max int32 value
+  }
   static Future<void> showNotification(int id, String title, String body, int time) async {
     int notificationId = generateRandomNumber();
 
@@ -2317,12 +2322,19 @@ $storeLink
           title,
           body,
           tz.TZDateTime.now(tz.local).add(Duration(seconds: time)),
-          const NotificationDetails(
+           NotificationDetails(
             // Android details
             android: AndroidNotificationDetails('main_channel', 'Main Channel',
               channelDescription: "kelsey",
               importance: Importance.max,
               priority: Priority.max,
+
+              // 🔥 THIS FIXES ONE LINE ISSUE
+              styleInformation: BigTextStyleInformation(
+                body,
+                contentTitle: title,
+                summaryText: "Farm Routine Reminder",
+              ),
 
             ),
             // iOS details
@@ -2341,26 +2353,35 @@ $storeLink
 
     }catch(ex){
       pushInexactNotification(notificationId,title,body,time);
-
     }
+
+    print("Notification SET TASK");
   }
+
   static pushInexactNotification(int notificationId,String title,String body,int time) async {
     try{
       await initNotification();
       tz.initializeTimeZones();
-
 
       await flutterLocalNotificationsPlugin.zonedSchedule(
         notificationId,
         title,
         body,
         tz.TZDateTime.now(tz.local).add(Duration(seconds: time)),
-        const NotificationDetails(
+         NotificationDetails(
           // Android details
           android: AndroidNotificationDetails('main_channel', 'Main Channel',
             channelDescription: "kelsey",
             importance: Importance.max,
             priority: Priority.max,
+
+
+            // 🔥 THIS FIXES ONE LINE ISSUE
+            styleInformation: BigTextStyleInformation(
+              body,
+              contentTitle: title,
+              summaryText: "Farm Routine Reminder",
+            ),
 
           ),
           // iOS details
@@ -2387,7 +2408,8 @@ $storeLink
     required String body,
     required DateTime scheduledDate,
     String? payload,
-  }) async {
+  }) async
+  {
     initNotification();
     tz.initializeTimeZones();
 
@@ -2480,6 +2502,9 @@ $storeLink
     await DatabaseHelper.deleteNotification(id);
   }
 
+  Future<void> cancelTaskNotification(int id) async {
+    await flutterLocalNotificationsPlugin.cancel(id);
+  }
 
   static Future<bool> isAndroidPermissionGranted() async {
     if (Platform.isAndroid) {

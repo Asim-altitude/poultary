@@ -7,12 +7,10 @@ import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/database/events_databse_helper.dart';
-import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/utils.dart';
 
 import 'database/databse_helper.dart';
-import 'model/egg_item.dart';
 import 'model/event_item.dart';
 import 'model/flock.dart';
 
@@ -198,8 +196,7 @@ class _NewEventReminder extends State<NewEventReminder>
                 DateTime datetime = DateFormat("dd MMM yyyy - hh:mm a").parse(
                     Utils.getReminderFormattedDate(date)); // DateTime.parse();
                 int notification_time = ((datetime.millisecondsSinceEpoch -
-                    DateTime
-                        .now()
+                    DateTime.now()
                         .millisecondsSinceEpoch) / 1000).round();
                 print("TIME $notification_time");
 
@@ -254,30 +251,36 @@ class _NewEventReminder extends State<NewEventReminder>
 
           });
         },
-        child: Container(
-          width: widthScreen,
-          height: 60,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: Utils.getThemeColorBlue(),
-            borderRadius: BorderRadius.circular(30), // More rounded
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.3),
-                spreadRadius: 2,
-                blurRadius: 6,
-                offset: Offset(0, 3),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+            child: Container(
+              width: widthScreen,
+              height: 60,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Utils.getThemeColorBlue(),
+                borderRadius: BorderRadius.circular(30), // More rounded
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    spreadRadius: 2,
+                    blurRadius: 6,
+                    offset: Offset(0, 3),
+                  ),
+                ],
               ),
-            ],
-          ),
-          margin: EdgeInsets.all(20),
-          child: Text(
-            activeStep==0? "Next".tr() : "CONFIRM".tr(),
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold),
+              margin: EdgeInsets.all(20),
+              child: Text(
+                activeStep==0? "Next".tr() : "CONFIRM".tr(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
           ),
         ),
       ),

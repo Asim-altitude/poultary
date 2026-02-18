@@ -347,194 +347,200 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
           },
         ),
       ),
-      bottomNavigationBar: Container(
-        margin: EdgeInsets.all(15),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Show Previous Button only if activeStep > 0
-            if (activeStep > 0)
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      activeStep--;
-                    });
-                  },
-                  child: Container(
-                    height: 55,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade700,
-                      borderRadius: BorderRadius.circular(30), // More rounded
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.3),
-                          spreadRadius: 2,
-                          blurRadius: 6,
-                          offset: Offset(0, 3),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+          child: Container(
+            margin: EdgeInsets.all(15),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Show Previous Button only if activeStep > 0
+                if (activeStep > 0)
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          activeStep--;
+                        });
+                      },
+                      child: Container(
+                        height: 55,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade700,
+                          borderRadius: BorderRadius.circular(30), // More rounded
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.3),
+                              spreadRadius: 2,
+                              blurRadius: 6,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    margin: EdgeInsets.symmetric(horizontal: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
-                        SizedBox(width: 5),
-                        Text(
-                          "Previous".tr(),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        margin: EdgeInsets.symmetric(horizontal: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
+                            SizedBox(width: 5),
+                            Text(
+                              "Previous".tr(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
 
-            // Next or Finish Button
-            Expanded(
-              child: GestureDetector(
-                onTap: () async {
+                // Next or Finish Button
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
 
 
-                  activeStep++;
+                      activeStep++;
 
-                  if(activeStep==1){
+                      if(activeStep==1){
 
-                    if(qtycountController.text.trim().length==0)
-                    {
-                      activeStep--;
-                      Utils.showToast("PROVIDE_ALL");
-                    }else{
-                      setState(() {
+                        if(qtycountController.text.trim().length==0)
+                        {
+                          activeStep--;
+                          Utils.showToast("PROVIDE_ALL");
+                        }else{
+                          setState(() {
 
-                      });
-                    }
-
-                  }
-
-                  if(activeStep==2){
-
-                    if(doctorController.text.trim().length==0 || qtycountController.text.isEmpty || bird_countController.text.isEmpty){
-                      activeStep--;
-                      Utils.showToast("PROVIDE_ALL");
-                    }else{
-                      if(isEdit) {
-                        Vaccination_Medication med_vacc = Vaccination_Medication(
-                          f_id: getFlockID(),
-                          disease: _diseaseelectedValue,
-                          medicine: _medselectedValue,
-                          date: date,
-                          type: Utils.vaccine_medicine.toLowerCase()
-                              .contains("medi")
-                              ? 'Medication'
-                              : 'Vaccination',
-                          short_note: notesController.text,
-                          bird_count: int.parse(
-                              bird_countController.text),
-                          doctor_name: doctorController.text,
-                          f_name: _purposeselectedValue, quantity: qtycountController.text, unit: _selectedUnit,
-                            sync_id: widget.vaccination_medication!.sync_id,
-                            sync_status: SyncStatus.UPDATED,
-                            last_modified: Utils.getTimeStamp(),
-                            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                            f_sync_id: getFlockSyncID());
-
-                        med_vacc.id = widget.vaccination_medication!.id!;
-                        int? id = await DatabaseHelper.updateHealth(
-                            med_vacc);
-                        Utils.showToast("SUCCESSFUL");
-
-                        if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_health")){
-                          await FireBaseUtils.updateHealthRecord(med_vacc);
+                          });
                         }
 
-                        Navigator.pop(context);
-                      } else {
-                        Vaccination_Medication med_vacc = Vaccination_Medication(
-                          f_id: getFlockID(),
-                          disease: _diseaseelectedValue,
-                          medicine: _medselectedValue,
-                          date: date,
-                          type: Utils.vaccine_medicine.toLowerCase()
-                              .contains("medi")
-                              ? 'Medication'
-                              : 'Vaccination',
-                          short_note: notesController.text,
-                          bird_count: int.parse(
-                              bird_countController.text),
-                          doctor_name: doctorController.text,
-                          f_name: _purposeselectedValue, quantity: qtycountController.text, unit: _selectedUnit,
-                            sync_id: Utils.getUniueId(),
-                            sync_status: SyncStatus.SYNCED,
-                            last_modified: Utils.getTimeStamp(),
-                            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
-                            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
-                            f_sync_id: getFlockSyncID());
-                        int? id = await DatabaseHelper.insertMedVac(
-                            med_vacc);
-                        Utils.showToast("SUCCESSFUL");
-
-                        if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_health")){
-                          await FireBaseUtils.uploadHealthRecord(med_vacc);
-                        }
-                        Navigator.pop(context);
                       }
-                    }
-                  }
 
-                },
-                child: Container(
-                  height: 55,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: activeStep == 1
-                          ? [Utils.getThemeColorBlue(), Colors.greenAccent] // Finish Button
-                          : [Utils.getThemeColorBlue(), Colors.blueAccent], // Next Button
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(30), // More rounded
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.blue.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 6,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  margin: EdgeInsets.symmetric(horizontal: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        activeStep == 1 ? "SAVE".tr() : "Next".tr(),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      if(activeStep==2){
+
+                        if(doctorController.text.trim().length==0 || qtycountController.text.isEmpty || bird_countController.text.isEmpty){
+                          activeStep--;
+                          Utils.showToast("PROVIDE_ALL");
+                        }else{
+                          if(isEdit) {
+                            Vaccination_Medication med_vacc = Vaccination_Medication(
+                              f_id: getFlockID(),
+                              disease: _diseaseelectedValue,
+                              medicine: _medselectedValue,
+                              date: date,
+                              type: Utils.vaccine_medicine.toLowerCase()
+                                  .contains("medi")
+                                  ? 'Medication'
+                                  : 'Vaccination',
+                              short_note: notesController.text,
+                              bird_count: int.parse(
+                                  bird_countController.text),
+                              doctor_name: doctorController.text,
+                              f_name: _purposeselectedValue, quantity: qtycountController.text, unit: _selectedUnit,
+                                sync_id: widget.vaccination_medication!.sync_id,
+                                sync_status: SyncStatus.UPDATED,
+                                last_modified: Utils.getTimeStamp(),
+                                modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                                farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                                f_sync_id: getFlockSyncID());
+
+                            med_vacc.id = widget.vaccination_medication!.id!;
+                            int? id = await DatabaseHelper.updateHealth(
+                                med_vacc);
+                            Utils.showToast("SUCCESSFUL");
+
+                            if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_health")){
+                              await FireBaseUtils.updateHealthRecord(med_vacc);
+                            }
+
+                            Navigator.pop(context);
+                          } else {
+                            Vaccination_Medication med_vacc = Vaccination_Medication(
+                              f_id: getFlockID(),
+                              disease: _diseaseelectedValue,
+                              medicine: _medselectedValue,
+                              date: date,
+                              type: Utils.vaccine_medicine.toLowerCase()
+                                  .contains("medi")
+                                  ? 'Medication'
+                                  : 'Vaccination',
+                              short_note: notesController.text,
+                              bird_count: int.parse(
+                                  bird_countController.text),
+                              doctor_name: doctorController.text,
+                              f_name: _purposeselectedValue, quantity: qtycountController.text, unit: _selectedUnit,
+                                sync_id: Utils.getUniueId(),
+                                sync_status: SyncStatus.SYNCED,
+                                last_modified: Utils.getTimeStamp(),
+                                modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                                farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                                f_sync_id: getFlockSyncID());
+                            int? id = await DatabaseHelper.insertMedVac(
+                                med_vacc);
+                            Utils.showToast("SUCCESSFUL");
+
+                            if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_health")){
+                              await FireBaseUtils.uploadHealthRecord(med_vacc);
+                            }
+                            Navigator.pop(context);
+                          }
+                        }
+                      }
+
+                    },
+                    child: Container(
+                      height: 55,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: activeStep == 1
+                              ? [Utils.getThemeColorBlue(), Colors.greenAccent] // Finish Button
+                              : [Utils.getThemeColorBlue(), Colors.blueAccent], // Next Button
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
+                        borderRadius: BorderRadius.circular(30), // More rounded
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 6,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 5),
-                      Icon(
-                        activeStep == 1 ? Icons.check_circle : Icons.arrow_forward_ios,
-                        color: Colors.white,
-                        size: 20,
+                      margin: EdgeInsets.symmetric(horizontal: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            activeStep == 1 ? "SAVE".tr() : "Next".tr(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(width: 5),
+                          Icon(
+                            activeStep == 1 ? Icons.check_circle : Icons.arrow_forward_ios,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
       body: SafeArea(

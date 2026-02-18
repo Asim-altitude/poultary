@@ -14,7 +14,7 @@ import 'package:poultary/all_events.dart';
 import 'package:poultary/category_screen.dart';
 import 'package:poultary/sale_contractor_screen.dart';
 import 'package:poultary/support_screen.dart';
-import 'package:poultary/task_calender/task_calendar_screen.dart';
+import 'package:poultary/task_calender/recurring_tasks/task_calendar_screen.dart';
 import 'package:poultary/utils/about.dart';
 import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
@@ -24,6 +24,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'auto_feed_management.dart';
 import 'backup_screen.dart';
 import 'database/databse_helper.dart';
+import 'farm_routine/farm_routine_screen.dart';
 import 'farm_setup_screen.dart';
 import 'feed_batch_screen.dart';
 import 'filter_setup_screen.dart';
@@ -37,7 +38,8 @@ import 'multiuser/classes/AdminProfile.dart';
 import 'multiuser/classes/AuthGate.dart';
 import 'multiuser/model/user.dart';
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+  bool showBack;
+   SettingsScreen({Key? key, required this.showBack}) : super(key: key);
 
   @override
   _SettingsScreen createState() => _SettingsScreen();
@@ -257,7 +259,7 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
         centerTitle: true,
         backgroundColor: Colors.blue,
         elevation: 8,
-        automaticallyImplyLeading: (Utils.isMultiUSer && Utils.currentUser!.role.toLowerCase() != "admin")? true : false,
+        automaticallyImplyLeading: (Utils.isMultiUSer && Utils.currentUser!.role.toLowerCase() != "admin") || widget.showBack? true : false,
       ),
       body:SafeArea(
         top: false,
@@ -294,6 +296,12 @@ class _SettingsScreen extends State<SettingsScreen> with SingleTickerProviderSta
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _sectionTitle(context, 'Farm & Inventory'),
+                            _buildSettingsTile(
+                              context,
+                              icon: Icons.checklist,
+                              title: 'FARM_ROUTINE'.tr(),
+                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) =>  FarmRoutineScreen())),
+                            ),
                             _buildSettingsTile(
                               context,
                               icon: Icons.account_balance,
