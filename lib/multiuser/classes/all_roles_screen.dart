@@ -397,17 +397,47 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
     );
   }
 
+
+  Future<RoleWithPermissions> getPermissionsByRole(String role) async {
+
+    RoleWithPermissions rolePerms;
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('roles_permissions')
+        .doc(Utils.currentUser!.farmId+"_"+role)
+        .get();
+
+    if (querySnapshot.exists) {
+      final data = querySnapshot.data();
+      rolePerms =  RoleWithPermissions.fromMap(data!);
+      return rolePerms;// return as a list
+      // print("PERMS ${rolePerms!.toMap()}");
+    }else{
+      rolePerms = RoleWithPermissions(role: role, farmId: Utils.currentUser!.farmId, permissions: []);
+      return rolePerms;
+    }
+
+  }
+
+  Future<List<Permission>> getSelectedPermissions(RoleWithPermissions rolePerms) async {
+    List<Permission> permissions = [];
+    for(int i=0;i<rolePerms.permissions.length;i++){
+      Permission permission = Permission(name: rolePerms.permissions[i]);
+      permissions.add(permission);
+    }
+    return permissions;
+  }
+
   void showEditRoleDialog(Role role) async {
     final TextEditingController roleNameController =
     TextEditingController(text: role.name);
     final TextEditingController searchController = TextEditingController();
 
     List<Permission> allPermissions = await DatabaseHelper.getAllPermissions();
-    List<Permission> selectedPermissions =
-    await DatabaseHelper.getPermissionsForRole(role.id!);
+    RoleWithPermissions rolePerms = await getPermissionsByRole(role.name);
+    List<Permission> selectedPermissions = await getSelectedPermissions(rolePerms);
 
     allPermissions.removeWhere(
-            (perm) => selectedPermissions.any((sp) => sp.id == perm.id));
+            (perm) => selectedPermissions.any((sp) => sp.name == perm.name));
     List<Permission> displayedPermissions = List.from(allPermissions);
 
     Color getPermissionColor(String permission) {
@@ -625,10 +655,10 @@ class _AllRolesScreenState extends State<AllRolesScreen> {
 
                             await DatabaseHelper.updateRole(Role(
                                 name: updatedRoleName, id: role.id));
-                            final permissionIds =
+                            /*final permissionIds =
                             selectedPermissions.map((p) => p.id!).toList();
                             await DatabaseHelper.assignPermissionsToRole(
-                                role.id!, permissionIds);
+                                role.id!, permissionIds);*/
                             await uploadRoleToFirebase(farmID,
                                 Role(name: updatedRoleName, id: role.id));
                             await uploadRoleWithPermissionsToFirestore(

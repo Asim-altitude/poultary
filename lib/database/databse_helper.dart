@@ -1910,7 +1910,6 @@ class DatabaseHelper  {
   }
 
 
-
   static Future<int?> insertRole(Role role) async {
   return await _database?.insert('roles', role.toMap());
   }
@@ -2094,6 +2093,21 @@ class DatabaseHelper  {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+  static Future<List<String>> getUniquePersons() async {
+
+    final List<Map<String, Object?>>? result = await _database?.rawQuery('''
+    SELECT DISTINCT sold_purchased_from
+    FROM Transactions
+    WHERE sold_purchased_from IS NOT NULL
+      AND sold_purchased_from != ''
+    ORDER BY sold_purchased_from ASC
+  ''');
+
+    return result!
+        .map((row) => row['sold_purchased_from'] as String)
+        .toList();
   }
 
   static Future<List<TransactionItem>> getTransactionsForContractor(String contractorName) async {

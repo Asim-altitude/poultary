@@ -1187,7 +1187,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
 
     try{
-      bool isFirst = await DatabaseHelper.isFirstRecord("Eggs");
+      bool isFirst = true;//await DatabaseHelper.isFirstRecord("Eggs");
       if(isFirst) {
         _statuses  = await _prefs.loadAllStatuses(_routineOrder);
         bool complete = _statuses["Egg"] ?? false;

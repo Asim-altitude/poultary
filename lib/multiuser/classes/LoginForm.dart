@@ -3,11 +3,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:poultary/home_screen.dart';
-import 'package:poultary/multiuser/classes/WorkerDashboard.dart';
 import 'package:poultary/multiuser/model/user.dart';
 import 'package:poultary/utils/session_manager.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../utils/utils.dart';
 import 'backup_restore.dart';
@@ -92,8 +89,7 @@ class _LoginFormState extends State<LoginForm> {
             if(initialized) {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => FarmWelcomeScreen(multiUser: Utils.currentUser!, isStart: true,)),
-              );
+                MaterialPageRoute(builder: (_) => FarmWelcomeScreen(multiUser: Utils.currentUser!, isStart: true,)),);
             }
             else{
               Navigator.pushReplacement(
@@ -105,7 +101,6 @@ class _LoginFormState extends State<LoginForm> {
                 MaterialPageRoute(builder: (_) => BackupFoundScreen(isAdmin:  true, user: multiUser,)),
               );*/
             }
-
 
           } else {
             showDialog(

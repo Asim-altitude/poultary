@@ -964,7 +964,7 @@ class _HomeScreen extends State<HomeScreen> {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Future.delayed(const Duration(seconds: 30), () async {
                 // final ctx = navigatorKey.currentState?.overlay?.context;
-               DateTime? bckupTime = (await SessionManager.getLastBackupTime())!;
+               DateTime? bckupTime = (await SessionManager.getLastBackupTime());
                if(bckupTime == null){
                  _showGlobalBackupPrompt(context);
                }
@@ -1122,7 +1122,8 @@ class _HomeScreen extends State<HomeScreen> {
     return results;
   }
 
-  List<Section> _getSortedSections() {
+  List<Section> _getSortedSections()
+  {
     final pinned = sections.where((s) => _pinnedIds.contains(s.id)).toList();
     final unpinned = sections.where((s) => !_pinnedIds.contains(s.id)).toList();
     final stockUnpinned = unpinned.where((s) => s.tier == "stock").toList();

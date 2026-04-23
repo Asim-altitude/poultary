@@ -101,6 +101,9 @@ dependencies:
   # Calendar Widget
   table_calendar: ^3.0.9
   expandable: ^5.0.1
+  # new — web only (doesn't affect mobile build)
+  sembast: ^3.7.2
+  sembast_web: ^2.4.0
 
 dependency_overrides:
     flutter_spinkit: 5.2.0

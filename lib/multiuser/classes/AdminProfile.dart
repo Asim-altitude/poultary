@@ -302,7 +302,6 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
   }
 
 
-
   @override
   void initState() {
     // TODO: implement initState
@@ -311,12 +310,12 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
     getSyncQueueList();
     fetchRoles();
     AnalyticsUtil.logScreenView(screenName: "admin_screen");
-
   }
 
   FarmPlan? farmPlan = null;
   MultiUser? adminUser = null;
-  Future<void> init() async {
+  Future<void> init() async
+  {
 
     adminUser = widget.users;
 
@@ -357,21 +356,25 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
         if(latestBackupTime == null)
           latestBackupTime = lastBackupDate;
 
-// Compare difference in full days between now and lastBackupDate
+     // Compare difference in full days between now and lastBackupDate
         final Duration difference = now.difference(lastBackupDate!);
-        if (difference.inDays < 3) {
+        if (difference.inDays < 7)
+        {
           shouldBackup = false;
           print("Backup done recently. Next backup allowed after ${3 - difference.inDays} day(s).");
-        } else {
+        }
+        else
+        {
           shouldBackup = true;
         }
 
         print("Last Backup: ${DateFormat('yyyy-MM-dd').format(lastBackupDate!)}");
         print("Today: ${DateFormat('yyyy-MM-dd').format(now)}");
-
         setState(() {
 
         });
+
+
       }
     }
 

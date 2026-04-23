@@ -1598,9 +1598,86 @@
   "feed_routine_dialog_body": "Your first feeding record has been saved successfully.\n\nLet’s create a feeding routine to keep your birds on a consistent schedule. We’ll remind you at the right time.",
   "feed_routine_dialog_setup": "Setup Feeding Routine",
   "feed_routine_dialog_later": "I’ll Do It Later",
-  "feed_routine_dialog_hint": "You can set it up later anytime from Settings."
+  "feed_routine_dialog_hint": "You can set it up later anytime from Settings.",
 
+  "Tap_View": "Tap to view full info",
+  "Performance Report": "Performance Report",
 
+  "Calculating performance…": "Calculating performance…",
+  "No flocks found": "No flocks found",
+
+  "Key Performance Indicators": "Key Performance Indicators",
+  "Based on": "Based on",
+  "data": "data",
+
+  "Feed Conversion Ratio": "Feed Conversion Ratio",
+  "Total feed consumed ÷ total weight gained": "Total feed consumed ÷ total weight gained",
+
+  "Weight & Growth (per Bird)": "Weight & Growth (per Bird)",
+  "weigh-in records": "weigh-in records",
+
+  "Flock Health & Mortality": "Flock Health & Mortality",
+  "Deaths, culls and livability breakdown": "Deaths, culls and livability breakdown",
+
+  "Egg Performance": "Egg Performance",
+  "Hen-day production and egg quality": "Hen-day production and egg quality",
+
+  "Sales Summary": "Sales Summary",
+  "Revenue from bird and egg sales": "Revenue from bird and egg sales",
+
+  "Overall Efficiency Score": "Overall Efficiency Score",
+  "European Production Efficiency Factor (EPEF)": "European Production Efficiency Factor (EPEF)",
+
+  "Closed": "Closed",
+
+  "Initial Birds": "Initial Birds",
+  "Flock Age": "Flock Age",
+  "Started": "Started",
+
+  "No data": "No data",
+  "Excellent": "Excellent",
+  "Average": "Average",
+  "Poor": "Poor",
+  "High losses": "High losses",
+  "Needs work": "Needs work",
+
+  "FCR": "FCR",
+  "Livability": "Livability",
+  "Daily Gain": "Daily Gain",
+
+  "Feed ÷ weight gain\nLower = better": "Feed ÷ weight gain\nLower = better",
+  "Surviving birds\nTarget ≥ 96%": "Surviving birds\nTarget ≥ 96%",
+
+  "Based on {} data": "Based on {} data",
+  "{} weigh-in records": "{} weigh-in records",
+  "{} days": "{} days",
+  "Wk {}": "Wk {}",
+
+  "per bird / day": "per bird / day",
+  "FCR, Daily Weight Gain, Livability, Growth & Mortality insights": "FCR, Daily Weight Gain, Livability, Growth & Mortality insights",
+  "Overall efficiency\\nTarget ≥ 280": "Overall efficiency\\nTarget ≥ 280",
+  "Avg weight gained\\nper bird per day": "Avg weight gained\\nper bird per day",
+  "FCR Breakdown": "FCR Breakdown",
+  "Total feed consumed": "Total feed consumed",
+  "Total weight gained": "Total weight gained",
+  "FCR Result": "FCR Result",
+  "Benchmark scale": "Benchmark scale",
+  "Your FCR": "Your FCR",
+  "Initial Weight": "Initial Weight",
+  "Current Weight": "Current Weight",
+  "Total Gain": "Total Gain",
+  "Weight records over time": "Weight records over time",
+  "Surviving": "Surviving",
+  "Culled": "Culled",
+  "Dead": "Dead",
+  "Hen Day Production (HDP)": "Hen Day Production (HDP)",
+  "Low": "Low",
+  "Rejected": "Rejected",
+  "Corrected": "Corrected",
+  "EPEF Score": "EPEF Score",
+  "Eurpean Production Efficiency Factor": "Eurpean Production Efficiency Factor",
+  "How it's calculated": "How it's calculated",
+  "(FCR x Age days) ÷ (Livability% x Avg weight kg x 100)": "(FCR x Age days) ÷ (Livability% x Avg weight kg x 100)"
 
 }
 

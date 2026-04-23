@@ -442,6 +442,8 @@ class _FeedStockScreenState extends State<FeedStockScreen> with RefreshMixin {
                       List<FeedStockHistory> history = await DatabaseHelper
                           .fetchStockHistory(
                           _stockSummary!.elementAt(index).feedName);
+
+                      FeedStockSummary stock = _stockSummary!.elementAt(index);
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -889,7 +891,8 @@ Widget _buildTextField({
   required String label,
   required IconData icon,
   TextInputType keyboardType = TextInputType.text,
-}) {
+})
+{
   return TextField(
     controller: controller,
     keyboardType: keyboardType,

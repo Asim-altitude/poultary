@@ -142,6 +142,7 @@ class _NewEggCollection extends State<NewEggCollection>
       _loadNativeAds();
     }
   }
+
   _loadNativeAds(){
     _myNativeAd = NativeAd(
       adUnitId: Utils.NativeAdUnitId,

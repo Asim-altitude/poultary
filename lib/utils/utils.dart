@@ -1655,6 +1655,8 @@ $storeLink
       inititalize();
     }
 
+    Utils.isShowAdd = false;
+
   }
 
 
@@ -2140,6 +2142,9 @@ $storeLink
     else if(language =="sw"){
       return Languages.swahili;
     }
+    else if(language =="cs"){
+      return Languages.czech;
+    }
     return Languages.english;
   }
 
@@ -2240,6 +2245,8 @@ $storeLink
     }
     else if(language.isoCode =="sw"){
       languageName = "sw";
+    }else if(language.isoCode =="cs"){
+      languageName = "cs";
     }
 
     print(language.isoCode);
@@ -2262,6 +2269,7 @@ $storeLink
     var uuid = Uuid();
     return "$appDocPath/resumeapp-${uuid.v1()}.jpg";
   }
+
   static Future<File> convertToJPGFileIfRequiredWithCompression(File file,
       {int maxSizeKB = 500}) async {
     print("Original file path: ${file.path}");

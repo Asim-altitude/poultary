@@ -13,7 +13,6 @@ import 'package:poultary/model/flock_detail.dart';
 import 'package:poultary/model/flock_image.dart';
 import 'package:poultary/model/weight_record.dart';
 import 'package:poultary/multiuser/utils/SyncManager.dart';
-import 'package:poultary/sticky.dart';
 import 'package:poultary/suggested_notifcations.dart';
 import 'package:poultary/transactions_screen.dart';
 import 'package:poultary/utils/fb_analytics.dart';
@@ -632,11 +631,11 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                                   ),
                                                 ),
 
-                                                const Icon(
+                                                /*const Icon(
                                                   Icons.info_outline,
                                                   color: Colors.white70,
                                                   size: 26,
-                                                ),
+                                                ),*/
                                               ],
                                             ),
                                           ),
@@ -685,10 +684,19 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                               fontWeight: FontWeight.w600,
                                             ),
                                           ),
+
                                         ],
                                       ),
                                     ),
                                   ],
+                                ),
+                                SizedBox(height: 5,),
+                                Container(
+                                  child: ViewMoreInfoButton(
+                                    onTap: () {
+                                      _showFlockInfoBottomSheet(context);
+                                    },
+                                  ),
                                 ),
                                 Card(
                                   elevation: 3,
@@ -1868,32 +1876,38 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
                         const SizedBox(height: 6),
 
-                        /// 🕒 Age
-                        Row(
-                          children: [
-                            const Icon(Icons.watch_later_outlined, color: Colors.white70, size: 18),
-                            const SizedBox(width: 6),
-                            Text('Age'.tr() + ": ",
-                                style: const TextStyle(fontSize: 12, color: Colors.white70)),
-                            Text(
-                              ageInWeeks
-                                  ? Utils.getAnimalAgeWeeks(Utils.selected_flock!.acqusition_date)
-                                  : Utils.getAnimalAge(Utils.selected_flock!.acqusition_date),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            InkWell(
-                              onTap: () => setState(() => ageInWeeks = !ageInWeeks),
-                              child: const Icon(Icons.switch_camera_outlined,
-                                  color: Colors.white70, size: 22),
-                            ),
-                          ],
+                        StatefulBuilder(
+                          builder: (context, setStateSB) {
+                            return Row(
+                              children: [
+                                const Icon(Icons.watch_later_outlined, color: Colors.white70, size: 18),
+                                const SizedBox(width: 6),
+                                Text('Age'.tr() + ": ",
+                                    style: const TextStyle(fontSize: 12, color: Colors.white70)),
+                                Text(
+                                  ageInWeeks
+                                      ? Utils.getAnimalAgeWeeks(Utils.selected_flock!.acqusition_date)
+                                      : Utils.getAnimalAge(Utils.selected_flock!.acqusition_date),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                InkWell(
+                                  onTap: () {
+                                    setStateSB(() {
+                                      ageInWeeks = !ageInWeeks;
+                                    });
+                                  },
+                                  child: const Icon(Icons.switch_camera_outlined,
+                                      color: Colors.white70, size: 22),
+                                ),
+                              ],
+                            );
+                          },
                         ),
-
                         const SizedBox(height: 6),
 
                         /// 📅 Date
@@ -3530,5 +3544,55 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
   }
 
 
+}
+
+class ViewMoreInfoButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const ViewMoreInfoButton({super.key, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(30),
+      child: Ink(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Colors.white10, Colors.white10],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children:  [
+
+            Icon(
+              Icons.info_outline,
+              color: Colors.white,
+              size: 18,
+            ),
+            SizedBox(width: 8),
+
+            Text(
+              "Tap_View".tr(),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.2,
+              ),
+            ),
+
+          ],
+        ),
+      ),
+    );
+  }
 }
 

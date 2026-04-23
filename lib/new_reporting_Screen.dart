@@ -6,6 +6,7 @@ import 'package:poultary/eggs_report_screen.dart';
 import 'package:poultary/feed_report_screen.dart';
 import 'package:poultary/financial_report_screen.dart';
 import 'package:poultary/flock_weight_report.dart';
+import 'package:poultary/performance_report_screen.dart';
 import 'package:poultary/production_report.dart';
 import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/ui/ai_insights_widget.dart';
@@ -137,15 +138,15 @@ class _ReportListScreen extends State<ReportListScreen> {
 
           // ListView inside Expanded
 
-         /* Container(
+          Container(
             margin: EdgeInsets.all(10.0),
-            child: AdvancedInsightsCard(onTap: () {
+            child: PerformanceReportCard(onTap: () {
                Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) =>  InsightsExamplePage()),
+                MaterialPageRoute(builder: (context) =>  PerformanceReportScreen()),
               );
             },),
-          ),*/
+          ),
           Expanded(child:
           Container(
             color: Colors.grey[100],
@@ -155,17 +156,17 @@ class _ReportListScreen extends State<ReportListScreen> {
               itemCount: items.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2, // Two items per row
-                crossAxisSpacing: 6,
-                mainAxisSpacing: 6,
+                crossAxisSpacing: 2,
+                mainAxisSpacing: 2,
                 childAspectRatio: 1.1, // Adjust height/width ratio
               ),
               itemBuilder: (context, index) {
                 final item = items[index];
-                return Card(
+               return Card(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  elevation: 3,
+                  elevation: 0,
                   margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(20),
@@ -218,70 +219,82 @@ class _ReportListScreen extends State<ReportListScreen> {
                     },
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.blue.shade100, width: 1),
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFF4F46E5), // Indigo
+                            Color(0xFF06B6D4), // Cyan
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.blueGrey.withOpacity(0.08),
-                            blurRadius: 10,
-                            offset: const Offset(2, 4),
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 15,
+                            offset: const Offset(0, 7),
                           ),
                         ],
                       ),
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12), // reduced height
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          // Icon
                           Container(
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
                             padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              shape: BoxShape.circle,
+                            ),
                             child: item.image != ""
                                 ? Image.asset(
                               item.image,
-                              width: 30,
-                              height: 30,
+                              width: 26,
+                              height: 26,
                               fit: BoxFit.contain,
-                              color: Utils.getThemeColorBlue(),
+                              color: Colors.white,
                             )
                                 : Icon(
                               item.icon,
-                              size: 30,
-                              color: Utils.getThemeColorBlue(),
+                              size: 26,
+                              color: Colors.white,
                             ),
                           ),
-                          const SizedBox(height: 5),
+
+                          const SizedBox(height: 8),
+
+                          // Title
                           Text(
                             item.title,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
-                              color: Utils.getThemeColorBlue(),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.white,
                             ),
                             maxLines: 1,
-                            overflow: TextOverflow.ellipsis, // ✅ title never goes out
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 2),
+
+                          const SizedBox(height: 3),
+
+                          // Subtitle
                           Text(
                             item.subtitle,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 11,
-                              color: Colors.grey[700],
+                              color: Colors.white70,
+                              height: 1.2,
                             ),
-                            maxLines: 2, // ✅ desc max 2 lines
-                            overflow: TextOverflow.ellipsis, // ✅ cut gracefully if longer
-                            softWrap: true,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
                     ),
                   ),
                 );
-
               },
             ),
           ),),
