@@ -54,6 +54,18 @@ class PerformanceMetrics {
   final double birdSaleRevenue;
   final double eggSaleRevenue;
   final int birdsSold;
+  // ── Financial KPIs ─────────────────────────────────────────────────
+  final double totalRevenue;
+  final double totalExpenses;
+  final double feedCost;
+  final double medicineCost;
+  final double otherExpenses;
+  final double netProfit;
+  final double revenuePerBird;
+  final double costPerBird;
+  final double netProfitPerBird;
+  final double breakEvenPricePerBird;
+  final double feedCostPercent;
   final List<Map<String, dynamic>> fcrWeeklyTrend;
   final List<WeightRecord> weightRecords;
 
@@ -75,6 +87,17 @@ class PerformanceMetrics {
     required this.birdSaleRevenue,
     required this.eggSaleRevenue,
     required this.birdsSold,
+    required this.totalRevenue,
+    required this.totalExpenses,
+    required this.feedCost,
+    required this.medicineCost,
+    required this.otherExpenses,
+    required this.netProfit,
+    required this.revenuePerBird,
+    required this.costPerBird,
+    required this.netProfitPerBird,
+    required this.breakEvenPricePerBird,
+    required this.feedCostPercent,
     required this.fcrWeeklyTrend,
     required this.weightRecords,
   });
@@ -135,11 +158,40 @@ class PerformanceCalculator {
       eggRejectionPercent     = totalEggs > 0 ? (totalBadEggs! / totalEggs) * 100 : 0.0;
     }
 
-    final birdSales       = transactions.where((t) => t.sale_item.toLowerCase() == 'bird sale');
-    final eggSales        = transactions.where((t) => t.sale_item.toLowerCase() == 'egg sale');
+    // ── Income transactions ────────────────────────────────────────────────
+    final incomeList      = transactions.where((t) => t.type.toLowerCase() == 'income').toList();
+    final birdSales       = incomeList.where((t) => (t.sale_item.toLowerCase() == 'flock sale' || t.sale_item.toLowerCase() == 'bird sale' || t.sale_item.toLowerCase() == 'sold'));
+    final eggSales        = incomeList.where((t) => t.sale_item.toLowerCase() == 'egg sale');
     final birdSaleRevenue = birdSales.fold<double>(0.0, (s, t) => s + (double.tryParse(t.amount) ?? 0.0));
     final eggSaleRevenue  = eggSales.fold<double>(0.0,  (s, t) => s + (double.tryParse(t.amount) ?? 0.0));
     final birdsSold       = birdSales.fold<int>(0, (s, t) => s + (int.tryParse(t.how_many) ?? 0));
+    final totalRevenue    = incomeList.fold<double>(0.0, (s, t) => s + (double.tryParse(t.amount) ?? 0.0));
+
+    // ── Expense transactions ───────────────────────────────────────────────
+    final expenseList = transactions.where((t) => t.type.toLowerCase() == 'expense').toList();
+    double feedCost      = 0.0;
+    double medicineCost  = 0.0;
+    double otherExpenses = 0.0;
+    for (final t in expenseList) {
+      final amt  = double.tryParse(t.amount) ?? 0.0;
+      final item = t.expense_item.toLowerCase();
+      if (item == 'feed purchase') {
+        feedCost += amt;
+      } else if (item.contains('medicine') || item.contains('vaccine')) {
+        medicineCost += amt;
+      } else {
+        otherExpenses += amt;
+      }
+    }
+    final totalExpenses         = feedCost + medicineCost + otherExpenses;
+    final activeBirdsCount      = (flock.active_bird_count ?? survivingBirds).toDouble();
+    final birdsSoldSafe         = birdsSold > 0 ? birdsSold.toDouble() : 1.0;
+    final costPerBird           = activeBirdsCount > 0 ? totalExpenses / activeBirdsCount : 0.0;
+    final feedCostPercent       = totalExpenses > 0 ? (feedCost / totalExpenses) * 100 : 0.0;
+    final netProfit             = totalRevenue - totalExpenses;
+    final revenuePerBird        = flock.purpose.toLowerCase() != "meat"? totalRevenue/activeBirdsCount :  birdsSold > 0 ? totalRevenue   / birdsSoldSafe : 0.0;
+    final netProfitPerBird      = flock.purpose.toLowerCase() != "meat"? netProfit/activeBirdsCount : birdsSold > 0 ? netProfit      / birdsSoldSafe : 0.0;
+    final breakEvenPricePerBird = flock.purpose.toLowerCase() != "meat"? totalExpenses/(totalGoodEggs!+totalBadEggs!) :  activeBirdsCount > 0 ? totalExpenses  / activeBirdsCount : 0.0;
 
     return PerformanceMetrics(
       fcr: fcr, livabilityPercent: livabilityPercent, adgGrams: adgGrams, epef: epef,
@@ -149,6 +201,11 @@ class PerformanceCalculator {
       eggRejectionPercent: eggRejectionPercent, totalGoodEggs: totalGoodEggs,
       totalBadEggs: totalBadEggs, birdSaleRevenue: birdSaleRevenue,
       eggSaleRevenue: eggSaleRevenue, birdsSold: birdsSold,
+      totalRevenue: totalRevenue, totalExpenses: totalExpenses,
+      feedCost: feedCost, medicineCost: medicineCost, otherExpenses: otherExpenses,
+      netProfit: netProfit, revenuePerBird: revenuePerBird,
+      costPerBird: costPerBird, netProfitPerBird: netProfitPerBird,
+      breakEvenPricePerBird: breakEvenPricePerBird, feedCostPercent: feedCostPercent,
       fcrWeeklyTrend: fcrWeeklyTrend, weightRecords: sortedWeights,
     );
   }
@@ -383,11 +440,11 @@ class _PerformanceReportScreenState extends State<PerformanceReportScreen> {
       const SizedBox(width: 10),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Text('Performance Report',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: _C.ink)),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: _C.ink)),
         if (_flock != null)
           Text(_flock!.f_name,
-            style: const TextStyle(fontSize: 11, color: _C.inkLight),
-            overflow: TextOverflow.ellipsis),
+              style: const TextStyle(fontSize: 11, color: _C.inkLight),
+              overflow: TextOverflow.ellipsis),
       ])),
     ]),
     bottom: PreferredSize(
@@ -419,7 +476,7 @@ class _PerformanceReportScreenState extends State<PerformanceReportScreen> {
             items: _flockNames.map((n) => DropdownMenuItem(
               value: n,
               child: Text(n, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _C.ink)),
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _C.ink)),
             )).toList(),
           ),
         ),
@@ -441,8 +498,8 @@ class _PerformanceReportScreenState extends State<PerformanceReportScreen> {
             ConstrainedBox(
               constraints: BoxConstraints(maxWidth: Utils.WIDTH_SCREEN * 0.28),
               child: Text(_filterLabel.tr(),
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _C.blue),
-                overflow: TextOverflow.ellipsis),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _C.blue),
+                  overflow: TextOverflow.ellipsis),
             ),
             const SizedBox(width: 4),
             const Icon(Icons.arrow_drop_down, size: 18, color: _C.blue),
@@ -457,7 +514,7 @@ class _PerformanceReportScreenState extends State<PerformanceReportScreen> {
       context: context,
       backgroundColor: _C.card,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) {
         return SingleChildScrollView(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -472,7 +529,7 @@ class _PerformanceReportScreenState extends State<PerformanceReportScreen> {
                 const Icon(Icons.filter_list_rounded, size: 18, color: _C.blue),
                 const SizedBox(width: 8),
                 Text('DATE_FILTER'.tr(),
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _C.ink)),
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _C.ink)),
               ]),
             ),
             Container(height: 1, color: _C.border),
@@ -490,8 +547,8 @@ class _PerformanceReportScreenState extends State<PerformanceReportScreen> {
                     color: isActive ? _C.blueLight : Colors.transparent,
                     child: Row(children: [
                       Expanded(child: Text(key.tr(),
-                        style: TextStyle(fontSize: 14, color: isActive ? _C.blue : _C.ink,
-                          fontWeight: isActive ? FontWeight.w700 : FontWeight.w400))),
+                          style: TextStyle(fontSize: 14, color: isActive ? _C.blue : _C.ink,
+                              fontWeight: isActive ? FontWeight.w700 : FontWeight.w400))),
                       if (isActive)
                         const Icon(Icons.check_circle_rounded, size: 18, color: _C.blue),
                     ]),
@@ -581,6 +638,15 @@ class _PerformanceReportScreenState extends State<PerformanceReportScreen> {
           _SalesCard(metrics: m),
           const SizedBox(height: 22),
         ],
+
+        // Financial Performance
+        _SectionHeader(
+          title: 'Financial Performance',
+          subtitle: 'Cost, revenue & profit per bird',
+        ),
+        const SizedBox(height: 10),
+        _FinancialCard(metrics: m, flock: _flock!,),
+        const SizedBox(height: 22),
 
         const _SectionHeader(title: 'Overall Efficiency Score',
             subtitle: 'European Production Efficiency Factor (EPEF)'),
@@ -693,11 +759,11 @@ class _FlockInfoCard extends StatelessWidget {
       // Header
       _TintSection(color: _C.blue, topRound: true, child: Row(children: [
         Expanded(child: Text(flock.f_name,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _C.ink),
-          overflow: TextOverflow.ellipsis)),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _C.ink),
+            overflow: TextOverflow.ellipsis)),
         const SizedBox(width: 8),
         _Pill(flock.active == 1 ? 'Active' : 'Closed',
-          flock.active == 1 ? _C.green : _C.red),
+            flock.active == 1 ? _C.green : _C.red),
         const SizedBox(width: 6),
         if (flock.purpose.isNotEmpty) _Pill(flock.purpose, _C.blue),
       ])),
@@ -795,16 +861,16 @@ class _KpiTile extends StatelessWidget {
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
         Container(padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(8)),
-          child: Icon(icon, size: 14, color: color)),
+            decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(8)),
+            child: Icon(icon, size: 14, color: color)),
         const SizedBox(width: 8),
         Expanded(child: Text(label.tr(),
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _C.inkMid),
-          overflow: TextOverflow.ellipsis)),
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _C.inkMid),
+            overflow: TextOverflow.ellipsis)),
       ]),
       const SizedBox(height: 10),
       FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
-        child: Text(value, style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: color, height: 1.0))),
+          child: Text(value, style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: color, height: 1.0))),
       const SizedBox(height: 8),
       _Pill(status, color),
       const SizedBox(height: 6),
@@ -844,21 +910,21 @@ class _FcrCard extends StatelessWidget {
           const SizedBox(height: 12),
           _FRow(Icons.inventory_2_outlined,   'Total feed consumed',  '${metrics.totalFeedKg.toStringAsFixed(1)} '+"KG".tr()),
           Padding(padding: const EdgeInsets.fromLTRB(4, 3, 0, 3),
-            child: Text('÷', style: TextStyle(fontSize: 22, color: _C.inkLight, fontWeight: FontWeight.w200))),
+              child: Text('÷', style: TextStyle(fontSize: 22, color: _C.inkLight, fontWeight: FontWeight.w200))),
           _FRow(Icons.monitor_weight_outlined,'Total weight gained', '${metrics.totalWeightGainedKg.toStringAsFixed(1)} '+"KG".tr()),
           Padding(padding: const EdgeInsets.fromLTRB(4, 3, 0, 3),
-            child: Text('=', style: TextStyle(fontSize: 22, color: _C.inkLight, fontWeight: FontWeight.w200))),
+              child: Text('=', style: TextStyle(fontSize: 22, color: _C.inkLight, fontWeight: FontWeight.w200))),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(color: c.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(12), border: Border.all(color: c.withOpacity(0.2))),
+                borderRadius: BorderRadius.circular(12), border: Border.all(color: c.withOpacity(0.2))),
             child: Row(children: [
               Icon(Icons.swap_horiz_rounded, size: 18, color: c),
               const SizedBox(width: 10),
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text('FCR Result'.tr(), style: TextStyle(fontSize: 10, color: c.withOpacity(0.8))),
                 Text(metrics.fcr.toStringAsFixed(2),
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: c)),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: c)),
               ]),
               const Spacer(),
               _Pill(_lbl, c),
@@ -871,15 +937,15 @@ class _FcrCard extends StatelessWidget {
       Container(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
         decoration: BoxDecoration(color: _C.surface,
-          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16))),
+            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16))),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-             Text('Benchmark scale'.tr(), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _C.inkMid)),
+            Text('Benchmark scale'.tr(), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _C.inkMid)),
             if (metrics.fcr > 0) Container(
               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
               decoration: BoxDecoration(color: c.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
               child: Text('Your FCR'.tr()+': ${metrics.fcr.toStringAsFixed(2)}',
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: c)),
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: c)),
             ),
           ]),
           const SizedBox(height: 10),
@@ -895,7 +961,7 @@ class _FcrCard extends StatelessWidget {
             const SizedBox(height: 16),
             Container(height: 1, color: _C.border),
             const SizedBox(height: 14),
-             Text('Weekly FCR trend'.tr(), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _C.inkMid)),
+            Text('Weekly FCR trend'.tr(), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _C.inkMid)),
             const SizedBox(height: 10),
             _FcrTrend(trend: metrics.fcrWeeklyTrend),
           ],
@@ -944,18 +1010,18 @@ class _FcrBar extends StatelessWidget {
     final pos = ((fcr - 1.0) / 2.0).clamp(0.0, 1.0);
     return LayoutBuilder(builder: (ctx, box) => Stack(clipBehavior: Clip.none, children: [
       ClipRRect(
-        borderRadius: BorderRadius.circular(6),
-        child: Container(height: 12, decoration: const BoxDecoration(
-          gradient: LinearGradient(colors: [Color(0xFF4CAF50), Color(0xFF8BC34A), Color(0xFFFFC107), Color(0xFFF44336)])))),
+          borderRadius: BorderRadius.circular(6),
+          child: Container(height: 12, decoration: const BoxDecoration(
+              gradient: LinearGradient(colors: [Color(0xFF4CAF50), Color(0xFF8BC34A), Color(0xFFFFC107), Color(0xFFF44336)])))),
       if (fcr > 0)
         Positioned(
-          left: (box.maxWidth * pos - 10).clamp(0.0, box.maxWidth - 20),
-          top: -4,
-          child: Container(width: 20, height: 20,
-            decoration: BoxDecoration(
-              color: _C.card, shape: BoxShape.circle,
-              border: Border.all(color: _C.ink, width: 2.5),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 4)]))),
+            left: (box.maxWidth * pos - 10).clamp(0.0, box.maxWidth - 20),
+            top: -4,
+            child: Container(width: 20, height: 20,
+                decoration: BoxDecoration(
+                    color: _C.card, shape: BoxShape.circle,
+                    border: Border.all(color: _C.ink, width: 2.5),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 4)]))),
     ]));
   }
 }
@@ -1051,20 +1117,20 @@ class _GrowthCard extends StatelessWidget {
 
     return _CardShell(padding: EdgeInsets.zero, child: Column(children: [
       Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-        child: Wrap(spacing: 10, runSpacing: 10, children: [
-          _GStat('Initial Weight', '${initial.toStringAsFixed(2)}'+"KG".tr(), Icons.start_rounded,            _C.inkMid),
-          _GStat('Current Weight', '${latest.toStringAsFixed(2)}'+"KG".tr(),  Icons.monitor_weight_outlined,  _C.blue),
-          _GStat('Total Gain',     '+${gain.toStringAsFixed(2)}'+"KG".tr(),   Icons.trending_up_rounded,      gain >= 0 ? _C.green : _C.red),
-        ])),
+          child: Wrap(spacing: 10, runSpacing: 10, children: [
+            _GStat('Initial Weight', '${initial.toStringAsFixed(2)}'+"KG".tr(), Icons.start_rounded,            _C.inkMid),
+            _GStat('Current Weight', '${latest.toStringAsFixed(2)}'+"KG".tr(),  Icons.monitor_weight_outlined,  _C.blue),
+            _GStat('Total Gain',     '+${gain.toStringAsFixed(2)}'+"KG".tr(),   Icons.trending_up_rounded,      gain >= 0 ? _C.green : _C.red),
+          ])),
       if (sorted.length > 1) ...[
         Container(height: 1, color: _C.divider),
         Padding(padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-             Text('Weight records over time'.tr(),
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _C.inkMid)),
-            const SizedBox(height: 12),
-            _WTimeline(records: sorted),
-          ])),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('Weight records over time'.tr(),
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _C.inkMid)),
+              const SizedBox(height: 12),
+              _WTimeline(records: sorted),
+            ])),
       ],
     ]));
   }
@@ -1080,8 +1146,8 @@ class _GStat extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
     decoration: BoxDecoration(
-      color: color.withOpacity(0.07), borderRadius: BorderRadius.circular(10),
-      border: Border.all(color: color.withOpacity(0.15))),
+        color: color.withOpacity(0.07), borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withOpacity(0.15))),
     child: Row(mainAxisSize: MainAxisSize.min, children: [
       Icon(icon, size: 14, color: color),
       const SizedBox(width: 8),
@@ -1104,19 +1170,19 @@ class _WTimeline extends StatelessWidget {
       final frac    = maxW > 0 ? r.averageWeight / maxW : 0.0;
       final dateStr = r.date.length >= 10 ? r.date.substring(0, 10) : r.date;
       return Padding(padding: const EdgeInsets.only(bottom: 10),
-        child: Row(children: [
-          SizedBox(width: 88, child: Text(dateStr,
-            style: const TextStyle(fontSize: 10, color: _C.inkLight), overflow: TextOverflow.ellipsis)),
-          Expanded(child: Stack(children: [
-            Container(height: 10, decoration: BoxDecoration(color: _C.surface, borderRadius: BorderRadius.circular(5))),
-            FractionallySizedBox(widthFactor: frac, child: Container(height: 10,
-              decoration: BoxDecoration(color: _C.blue.withOpacity(0.75), borderRadius: BorderRadius.circular(5)))),
-          ])),
-          const SizedBox(width: 10),
-          SizedBox(width: 52, child: Text('${r.averageWeight.toStringAsFixed(2)} '+"KG".tr(),
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: _C.ink),
-            textAlign: TextAlign.right)),
-        ]));
+          child: Row(children: [
+            SizedBox(width: 88, child: Text(dateStr,
+                style: const TextStyle(fontSize: 10, color: _C.inkLight), overflow: TextOverflow.ellipsis)),
+            Expanded(child: Stack(children: [
+              Container(height: 10, decoration: BoxDecoration(color: _C.surface, borderRadius: BorderRadius.circular(5))),
+              FractionallySizedBox(widthFactor: frac, child: Container(height: 10,
+                  decoration: BoxDecoration(color: _C.blue.withOpacity(0.75), borderRadius: BorderRadius.circular(5)))),
+            ])),
+            const SizedBox(width: 10),
+            SizedBox(width: 52, child: Text('${r.averageWeight.toStringAsFixed(2)} '+"KG".tr(),
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: _C.ink),
+                textAlign: TextAlign.right)),
+          ]));
     }).toList());
   }
 }
@@ -1193,7 +1259,7 @@ class _MortTile extends StatelessWidget {
       ]),
       const SizedBox(height: 6),
       FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
-        child: Text('$count', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: color))),
+          child: Text('$count', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: color))),
       Text(label.tr(), style: TextStyle(fontSize: 10, color: color.withOpacity(0.75), fontWeight: FontWeight.w500)),
     ]),
   );
@@ -1222,17 +1288,17 @@ class _EggCard extends StatelessWidget {
           Row(children: [
             Icon(Icons.egg_outlined, size: 14, color: hdpCol),
             const SizedBox(width: 8),
-             Expanded(child: Text('Hen-Day Production (HDP)'.tr(),
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: _C.ink))),
-             Text('Target ≥ 80%'.tr(), style: TextStyle(fontSize: 10, color: _C.inkLight)),
+            Expanded(child: Text('Hen-Day Production (HDP)'.tr(),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: _C.ink))),
+            Text('Target ≥ 80%'.tr(), style: TextStyle(fontSize: 10, color: _C.inkLight)),
           ]),
           const SizedBox(height: 10),
           Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
             Text('${hdp.toStringAsFixed(1)}%',
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: hdpCol)),
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: hdpCol)),
             const SizedBox(width: 10),
             Padding(padding: const EdgeInsets.only(bottom: 5),
-              child: _Pill(hdp >= 80 ? 'Excellent' : hdp >= 70 ? 'Good' : 'Low', hdpCol)),
+                child: _Pill(hdp >= 80 ? 'Excellent' : hdp >= 70 ? 'Good' : 'Low', hdpCol)),
           ]),
           const SizedBox(height: 8),
           ClipRRect(
@@ -1254,7 +1320,7 @@ class _EggCard extends StatelessWidget {
           _EggTile('Spoilt Eggs',   '${metrics.totalBadEggs ?? 0}',  'rejected',  _C.red,   w),
           const SizedBox(width: 10),
           _EggTile('Rejection Rate','${rej.toStringAsFixed(1)}%',
-            rej < 3 ? 'Normal' : rej < 6 ? 'Moderate' : 'High', rejCol, w),
+              rej < 3 ? 'Normal' : rej < 6 ? 'Moderate' : 'High', rejCol, w),
         ]),
       ),
     ]));
@@ -1272,13 +1338,13 @@ class _EggTile extends StatelessWidget {
     width: width,
     padding: const EdgeInsets.all(10),
     decoration: BoxDecoration(
-      color: color.withOpacity(0.07), borderRadius: BorderRadius.circular(10),
-      border: Border.all(color: color.withOpacity(0.15))),
+        color: color.withOpacity(0.07), borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withOpacity(0.15))),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(label.tr(), style: TextStyle(fontSize: 9, color: color.withOpacity(0.8), fontWeight: FontWeight.w500)),
       const SizedBox(height: 4),
       FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
-        child: Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: color))),
+          child: Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: color))),
       Text(sub, style: TextStyle(fontSize: 9, color: color, fontWeight: FontWeight.w600)),
     ]),
   );
@@ -1298,13 +1364,13 @@ class _SalesCard extends StatelessWidget {
       _TintSection(color: _C.green, topRound: true,
         child: Row(children: [
           Container(padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: _C.green.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
-            child: const Icon(Icons.account_balance_wallet_outlined, size: 18, color: _C.green)),
+              decoration: BoxDecoration(color: _C.green.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
+              child: const Icon(Icons.account_balance_wallet_outlined, size: 18, color: _C.green)),
           const SizedBox(width: 12),
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-             Text('Total Revenue'.tr(), style: TextStyle(fontSize: 11, color: _C.inkLight, fontWeight: FontWeight.w500)),
+            Text('Total Revenue'.tr(), style: TextStyle(fontSize: 11, color: _C.inkLight, fontWeight: FontWeight.w500)),
             Text('Rs'.tr()+' ${total.toStringAsFixed(0)}',
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: _C.green)),
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: _C.green)),
           ]),
         ]),
       ),
@@ -1330,15 +1396,15 @@ class _SRow extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     child: Row(children: [
       Container(padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-        child: Icon(icon, size: 16, color: color)),
+          decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+          child: Icon(icon, size: 16, color: color)),
       const SizedBox(width: 12),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(label.tr(), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _C.ink)),
         Text(sub.tr(),   style: const TextStyle(fontSize: 10, color: _C.inkLight)),
       ])),
       Text('Rs'.tr()+' ${revenue.toStringAsFixed(0)}',
-        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: color)),
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: color)),
     ]),
   );
 }
@@ -1360,38 +1426,38 @@ class _EpefCard extends StatelessWidget {
       _TintSection(color: color, topRound: true,
         child: Row(children: [
           Container(padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
-            child: Icon(Icons.star_rounded, size: 18, color: color)),
+              decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
+              child: Icon(Icons.star_rounded, size: 18, color: color)),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const Text('EPEF Score', style: TextStyle(fontSize: 11, color: _C.inkLight, fontWeight: FontWeight.w500)),
             const Text('European Production Efficiency Factor',
-              style: TextStyle(fontSize: 10, color: _C.inkLight)),
+                style: TextStyle(fontSize: 10, color: _C.inkLight)),
           ])),
           // FittedBox prevents large number overflow
           Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
             FittedBox(child: Text(epef.toStringAsFixed(2),
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: color))),
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: color))),
             _Pill(label, color),
           ]),
         ]),
       ),
       Padding(padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-           Text("How it's calculated".tr(),
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: _C.inkMid)),
+          Text("How it's calculated".tr(),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: _C.inkMid)),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(color: _C.surface, borderRadius: BorderRadius.circular(10)),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-               Text('(Livability% × Avg weight kg × 100) ÷ (FCR × Age days)'.tr(),
-                style: TextStyle(fontSize: 10, color: _C.inkLight, fontStyle: FontStyle.italic)),
+              Text('(Livability% × Avg weight kg × 100) ÷ (FCR × Age days)'.tr(),
+                  style: TextStyle(fontSize: 10, color: _C.inkLight, fontStyle: FontStyle.italic)),
               const SizedBox(height: 6),
               Text(
                 '= (${metrics.livabilityPercent.toStringAsFixed(1)}% × '
-                '${metrics.latestAvgWeightKg.toStringAsFixed(2)}kg × 100) ÷ '
-                '(${metrics.fcr.toStringAsFixed(2)} × ${metrics.ageDays}d)',
+                    '${metrics.latestAvgWeightKg.toStringAsFixed(2)}kg × 100) ÷ '
+                    '(${metrics.fcr.toStringAsFixed(2)} × ${metrics.ageDays}d)',
                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color),
               ),
             ]),
@@ -1427,4 +1493,341 @@ class _EB extends StatelessWidget {
       Text(range,  style: TextStyle(fontSize: 8, color: color.withOpacity(0.8)), textAlign: TextAlign.center),
     ]),
   ));
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FINANCIAL PERFORMANCE CARD
+// ═══════════════════════════════════════════════════════════════════
+class _FinancialCard extends StatelessWidget {
+  final PerformanceMetrics metrics;
+  final Flock flock;
+  const _FinancialCard({required this.metrics, required this.flock});
+
+  Color _profitCol(double v) =>
+      v > 0 ? _C.green : v < 0 ? _C.red : _C.inkLight;
+
+  String _profitLbl(double v) =>
+      v > 0 ? 'Profit' : v < 0 ? 'Loss' : 'Break Even';
+
+  @override
+  Widget build(BuildContext context) {
+    final m           = metrics;
+    final profitColor = _profitCol(m.netProfit);
+    final isProfit    = m.netProfit >= 0;
+    final screenW     = MediaQuery.of(context).size.width;
+    final tileW       = (screenW - 28 - 30) / 2; // 2-col grid width
+
+    return _CardShell(padding: EdgeInsets.zero, child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+
+        // ── Hero: Revenue / Expenses / Net Profit ─────────────────────
+        _TintSection(color: profitColor, topRound: true, child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title row
+            Row(children: [
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: profitColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  isProfit ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+                  size: 16, color: profitColor,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(child: Text('Net Profit Overview'.tr(),
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: _C.ink))),
+              _Pill(_profitLbl(m.netProfit), profitColor),
+            ]),
+            const SizedBox(height: 14),
+
+            // 3-col summary: Revenue | Expenses | Net
+            Row(children: [
+              Expanded(child: _FinHeroCol(
+                label: 'Total Revenue'.tr(),
+                value: '${'Rs'.tr()} ${m.totalRevenue.toStringAsFixed(0)}',
+                icon: Icons.arrow_downward_rounded,
+                color: _C.green,
+              )),
+              Container(width: 1, height: 48, color: _C.border),
+              Expanded(child: _FinHeroCol(
+                label: 'Total Expenses'.tr(),
+                value: '${'Rs'.tr()} ${m.totalExpenses.toStringAsFixed(0)}',
+                icon: Icons.arrow_upward_rounded,
+                color: _C.red,
+              )),
+              Container(width: 1, height: 48, color: _C.border),
+              Expanded(child: _FinHeroCol(
+                label: 'Net Profit'.tr(),
+                value: '${'Rs'.tr()} ${m.netProfit.toStringAsFixed(0)}',
+                icon: isProfit ? Icons.savings_outlined : Icons.money_off_rounded,
+                color: profitColor,
+              )),
+            ]),
+            const SizedBox(height: 12),
+
+            // Profit margin bar
+            if (m.totalRevenue > 0) ...[
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                Text('Profit Margin'.tr(),
+                    style: const TextStyle(fontSize: 10, color: _C.inkLight)),
+                Text(
+                  '${((m.netProfit / m.totalRevenue) * 100).toStringAsFixed(1)}%',
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: profitColor),
+                ),
+              ]),
+              const SizedBox(height: 5),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: LinearProgressIndicator(
+                  value: (m.netProfit / m.totalRevenue).clamp(0.0, 1.0),
+                  minHeight: 8,
+                  backgroundColor: _C.red.withOpacity(0.15),
+                  valueColor: AlwaysStoppedAnimation(profitColor),
+                ),
+              ),
+            ],
+
+            // Disclaimer
+            const SizedBox(height: 8),
+            Text('* ${'Based on recorded transactions only'.tr()}',
+                style: const TextStyle(fontSize: 9, color: _C.inkLight,
+                    fontStyle: FontStyle.italic)),
+          ],
+        )),
+
+        // ── Per-bird metrics ─────────────────────────────────────────
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: Row(children: [
+            const Icon(Icons.egg_alt_outlined, size: 13, color: _C.inkMid),
+            const SizedBox(width: 6),
+            Text('Per Bird Metrics'.tr(),
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: _C.inkMid)),
+            const SizedBox(width: 8),
+            Expanded(child: Container(height: 1, color: _C.border)),
+          ]),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: Wrap(spacing: 10, runSpacing: 10, children: [
+            _PerBirdTile(
+              label: 'Revenue / Bird'.tr(),
+              value: '${'Rs'.tr()} ${m.revenuePerBird.toStringAsFixed(0)}',
+              hint: '${m.birdsSold} ${'birds sold'.tr()}',
+              icon: Icons.payments_outlined,
+              color: _C.blue,
+              width: tileW,
+            ),
+            _PerBirdTile(
+              label: 'Cost / Bird'.tr(),
+              value: '${'Rs'.tr()} ${m.costPerBird.toStringAsFixed(0)}',
+              hint: 'avg per active bird'.tr(),
+              icon: Icons.receipt_long_outlined,
+              color: _C.amber,
+              width: tileW,
+            ),
+            _PerBirdTile(
+              label: 'Profit / Bird'.tr(),
+              value: '${'Rs'.tr()} ${m.netProfitPerBird.toStringAsFixed(0)}',
+              hint: _profitLbl(m.netProfitPerBird).tr(),
+              icon: m.netProfitPerBird >= 0
+                  ? Icons.trending_up_rounded
+                  : Icons.trending_down_rounded,
+              color: _profitCol(m.netProfitPerBird),
+              width: tileW,
+            ),
+
+            _PerBirdTile(
+              label: 'Break-Even Price'.tr(),
+              value: '${'Rs'.tr()} ${m.breakEvenPricePerBird.toStringAsFixed(0)}',
+              hint:   flock.purpose.toLowerCase()=="meat"? 'Based on per bird sale'.tr() : 'Based on per egg sale'.tr(),
+              icon: Icons.balance_outlined,
+              color: _C.inkMid,
+              width: tileW,
+            ),
+          ]),
+        ),
+
+        // ── Expense breakdown ─────────────────────────────────────────
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+          child: Row(children: [
+            const Icon(Icons.pie_chart_outline_rounded, size: 13, color: _C.inkMid),
+            const SizedBox(width: 6),
+            Text('Expense Breakdown'.tr(),
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: _C.inkMid)),
+            const SizedBox(width: 8),
+            Expanded(child: Container(height: 1, color: _C.border)),
+          ]),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          child: m.totalExpenses == 0
+              ? Text('No expenses recorded'.tr(),
+              style: const TextStyle(fontSize: 12, color: _C.inkLight))
+              : Column(children: [
+            _ExpBar(
+              label: 'Feed Purchase'.tr(),
+              amount: m.feedCost,
+              total: m.totalExpenses,
+              color: _C.blue,
+              icon: Icons.grass_outlined,
+            ),
+            const SizedBox(height: 10),
+            _ExpBar(
+              label: 'Medicine & Vaccine'.tr(),
+              amount: m.medicineCost,
+              total: m.totalExpenses,
+              color: const Color(0xFF6A1B9A),
+              icon: Icons.medical_services_outlined,
+            ),
+            const SizedBox(height: 10),
+            _ExpBar(
+              label: 'Other Expenses'.tr(),
+              amount: m.otherExpenses,
+              total: m.totalExpenses,
+              color: _C.inkMid,
+              icon: Icons.more_horiz_rounded,
+            ),
+          ]),
+        ),
+
+        // ── Feed cost insight ─────────────────────────────────────────
+        if (m.totalExpenses > 0 && m.feedCost > 0)
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: _C.blueLight,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: _C.blue.withOpacity(0.2)),
+            ),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Icon(Icons.lightbulb_outline_rounded, size: 15, color: _C.blue),
+              const SizedBox(width: 8),
+              Expanded(child: Text(
+                '${'Feed is'.tr()} ${m.feedCostPercent.toStringAsFixed(1)}% '
+                    '${'of total expenses'.tr()}. '
+                    '${m.feedCostPercent > 70
+                    ? 'High feed cost — review feed type or supplier'.tr()
+                    : 'Feed cost is within normal range'.tr()}',
+                style: const TextStyle(fontSize: 11, color: _C.blue, height: 1.4),
+              )),
+            ]),
+          ),
+      ],
+    ));
+  }
+}
+
+// ── Hero column (Revenue / Expenses / Net) ─────────────────────────────────
+class _FinHeroCol extends StatelessWidget {
+  final String label, value;
+  final IconData icon;
+  final Color color;
+  const _FinHeroCol({required this.label, required this.value,
+    required this.icon, required this.color});
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 6),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+      Icon(icon, size: 13, color: color),
+      const SizedBox(height: 4),
+      FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(value,
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: color)),
+      ),
+      Text(label,
+          style: const TextStyle(fontSize: 9, color: _C.inkLight),
+          textAlign: TextAlign.center, maxLines: 2),
+    ]),
+  );
+}
+
+// ── Per-bird metric tile ────────────────────────────────────────────────────
+class _PerBirdTile extends StatelessWidget {
+  final String label, value, hint;
+  final IconData icon;
+  final Color color;
+  final double width;
+  const _PerBirdTile({required this.label, required this.value,
+    required this.hint, required this.icon,
+    required this.color, required this.width});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: width,
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: color.withOpacity(0.07),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: color.withOpacity(0.18)),
+    ),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(children: [
+        Icon(icon, size: 13, color: color),
+        const SizedBox(width: 5),
+        Expanded(child: Text(label,
+            style: TextStyle(fontSize: 10, color: color.withOpacity(0.85),
+                fontWeight: FontWeight.w600),
+            overflow: TextOverflow.ellipsis)),
+      ]),
+      const SizedBox(height: 6),
+      FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: Text(value,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: color)),
+      ),
+      Text(hint, style: const TextStyle(fontSize: 9, color: _C.inkLight)),
+    ]),
+  );
+}
+
+// ── Expense bar row ─────────────────────────────────────────────────────────
+class _ExpBar extends StatelessWidget {
+  final String label;
+  final double amount, total;
+  final Color color;
+  final IconData icon;
+  const _ExpBar({required this.label, required this.amount,
+    required this.total, required this.color, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    final pct  = total > 0 ? (amount / total).clamp(0.0, 1.0) : 0.0;
+    final pctS = '${(pct * 100).toStringAsFixed(1)}%';
+    return Column(children: [
+      Row(children: [
+        Icon(icon, size: 13, color: color),
+        const SizedBox(width: 7),
+        Expanded(child: Text(label,
+            style: const TextStyle(fontSize: 12, color: _C.inkMid),
+            overflow: TextOverflow.ellipsis)),
+        Text('${'Rs'.tr()} ${amount.toStringAsFixed(0)}',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: color)),
+        const SizedBox(width: 8),
+        SizedBox(width: 38, child: Text(pctS,
+            style: const TextStyle(fontSize: 10, color: _C.inkLight),
+            textAlign: TextAlign.right)),
+      ]),
+      const SizedBox(height: 5),
+      ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: LinearProgressIndicator(
+          value: pct,
+          minHeight: 7,
+          backgroundColor: color.withOpacity(0.1),
+          valueColor: AlwaysStoppedAnimation(color),
+        ),
+      ),
+    ]);
+  }
 }

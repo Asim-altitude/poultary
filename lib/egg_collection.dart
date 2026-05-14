@@ -103,6 +103,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
     }
     AnalyticsUtil.logScreenView(screenName: "eggs_screen");
   }
+
   _loadBannerAd(){
     // TODO: Initialize _bannerAd
     _bannerAd = BannerAd(

@@ -14,6 +14,8 @@ import 'package:sqflite/sqflite.dart';
 import 'dart:io';
 import 'package:path/path.dart';
 
+import '../artificial_intelligence/model/ai_credit.dart';
+import '../artificial_intelligence/model/ai_response.dart';
 import '../financial_report_screen.dart';
 import '../model/bird_item.dart';
 import '../model/category_item.dart';
@@ -28,6 +30,7 @@ import '../model/feed_batch_summary.dart';
 import '../model/feed_ingridient.dart';
 import '../model/feed_item.dart';
 import '../model/feed_report_item.dart';
+import '../model/feed_stock_cost.dart';
 import '../model/feed_stock_history.dart';
 import '../model/feed_stock_summary.dart';
 import '../model/feed_summary.dart';
@@ -53,6 +56,7 @@ import '../multiuser/model/role.dart';
 import '../multiuser/model/sync_queue.dart';
 import '../multiuser/model/user.dart';
 import '../multiuser/utils/SyncStatus.dart';
+import '../stock/cost_engine/inventory_stock_model.dart';
 import '../stock/model/stock_transactions.dart';
 import '../stock/tools_assets/model/tool_asset.dart';
 import '../stock/tools_assets/model/tool_asset_maintenance.dart';
@@ -1003,6 +1007,142 @@ class DatabaseHelper  {
         ON DELETE CASCADE
     )
   ''');
+  }
+
+
+  static Future<void> createAITables() async {
+    final db = _database;
+
+    try {
+      const String createTable = '''
+    CREATE TABLE IF NOT EXISTS ai_credits (
+      user_id INTEGER PRIMARY KEY,
+      total_credits INTEGER NOT NULL,
+      last_updated TEXT NOT NULL
+    )
+  ''';
+
+      const String createTable1 = '''
+    CREATE TABLE IF NOT EXISTS ai_responses (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      flock_id TEXT NOT NULL,
+      category TEXT NOT NULL,
+      title TEXT NOT NULL,
+      response TEXT NOT NULL,
+      credits_used INTEGER NOT NULL,
+      created_at TEXT NOT NULL,
+      bird_count INTEGER,
+      age_weeks INTEGER
+    )
+  ''';
+
+      await db!.execute(createTable);
+      await db.execute(createTable1);
+    }
+    catch(ex){
+      print(ex);
+    }
+  }
+
+  /// Insert Response
+  static Future<int> insertResponse(AIResponse response) async {
+    final db = await _database;
+
+    return await db!.insert(
+      "ai_responses",
+      response.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Get All Responses
+  static Future<List<AIResponse>> getAllResponses() async {
+    final db = await _database;
+
+    final result = await db!.query(
+      "ai_responses",
+      orderBy: "created_at DESC",
+    );
+
+    return result.map((e) => AIResponse.fromMap(e)).toList();
+  }
+
+  /// Get Responses by Flock
+  static Future<List<AIResponse>> getByFlock(String flockId) async {
+    final db = await _database;
+
+    final result = await db!.query(
+      "ai_responses",
+      where: "flock_id = ?",
+      whereArgs: [flockId],
+      orderBy: "created_at DESC",
+    );
+
+    return result.map((e) => AIResponse.fromMap(e)).toList();
+  }
+
+  /// Delete Response
+  static Future<void> deleteResponse(int id) async {
+    final db = await _database;
+
+    await db!.delete(
+      "ai_responses",
+      where: "id = ?",
+      whereArgs: [id],
+    );
+  }
+
+  static Future<void> insertCredits(AICredit credit) async {
+    final db = await _database;
+
+    await db?.insert(
+      "ai_credits",
+      credit.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Get Credits
+  static Future<AICredit?> getCredits(int userId) async {
+    final db = await _database;
+
+    final result = await db?.query(
+      "ai_credits",
+    );
+
+    if (result!.isNotEmpty) {
+      return AICredit.fromMap(result.first);
+    }
+    return null;
+  }
+
+  /// Add Credits
+  static Future<void> addCredits(int userId, int amount) async {
+    final db = await _database;
+
+    await db?.rawUpdate('''
+      UPDATE ai_credits
+      SET total_credits = total_credits + ?, last_updated = ?
+      WHERE user_id = ?
+    ''', [amount, DateTime.now().toIso8601String(), userId]);
+  }
+
+  /// Deduct Credits (Important)
+  static Future<bool> deductCredits(int userId, int amount) async {
+    final db = await _database;
+
+    final credit = await getCredits(userId);
+    if (credit == null || credit.totalCredits < amount) {
+      return false;
+    }
+
+    await db?.rawUpdate('''
+      UPDATE ai_credits
+      SET total_credits = total_credits - ?, last_updated = ?
+      WHERE user_id = ?
+    ''', [amount, DateTime.now().toIso8601String(), userId]);
+
+    return true;
   }
 
 
@@ -2830,6 +2970,22 @@ class DatabaseHelper  {
       }
     }
     return _List;
+  }
+
+  static Future<List<String>> getDistinctFeedNamesByFlockId(int fId) async {
+
+    final result = await _database?.rawQuery('''
+    SELECT DISTINCT feed_name
+    FROM Feeding
+    WHERE f_id = ?
+      AND feed_name IS NOT NULL
+      AND feed_name != ''
+    ORDER BY feed_name ASC
+  ''', [fId]);
+
+    return result!
+        .map((e) => e['feed_name'].toString())
+        .toList();
   }
 
   static Future<List<Feeding>>  getFeedingsByFlock(int id) async {
@@ -5729,6 +5885,279 @@ class DatabaseHelper  {
     return results!.map((row) => row['doctor_name'] as String).toList();
   }
 
+  // ==========================================
+// FETCH STOCK EXPENSES BY STOCK IDS
+// ==========================================
+
+  static Future<List<FeedStockModel>>
+  getCombinedFeedStockData(
+      List<String> feedNames) async
+  {
+
+
+    if (feedNames.isEmpty) {
+      return [];
+    }
+
+    String placeholders =
+    List.filled(feedNames.length, '?').join(',');
+
+    final result = await _database?.rawQuery(
+      '''
+    SELECT
+      fsh.id as stockId,
+      fsh.feed_id,
+      fsh.feed_name,
+      fsh.quantity,
+      fsh.unit,
+      fsh.date,
+
+      t.amount as totalCost
+
+    FROM FeedStockHistory fsh
+
+    LEFT JOIN StockExpense se
+      ON se.stock_item_id = fsh.id
+
+    LEFT JOIN Transactions t
+      ON t.id = se.transaction_id
+
+    WHERE fsh.feed_name IN ($placeholders)
+
+    ORDER BY fsh.date ASC
+    ''',
+      feedNames,
+    );
+
+    List<FeedStockModel> list = [];
+
+    for (var row in result!) {
+
+      double qty =
+          double.tryParse(
+              row['quantity'].toString()) ?? 0;
+
+      double totalCost =
+          double.tryParse(
+              row['totalCost'].toString()) ?? 0;
+
+      double costPerUnit =
+      qty > 0 ? totalCost / qty : 0;
+
+      list.add(
+        FeedStockModel(
+          stockId: row['stockId'] as int?,
+          feedId: row['feed_id'] as int,
+          feedName: row['feed_name'].toString(),
+          quantity: qty,
+          unit: row['unit'].toString(),
+          totalCost: totalCost,
+          costPerUnit: costPerUnit,
+          date: row['date'].toString(),
+        ),
+      );
+    }
+
+    return list;
+  }
+
+
+  static Future<List<InventoryStockModel>>
+  getCombinedInventoryStockData({
+
+    required String tableName,
+
+    required String itemIdColumn,
+
+    required String itemNameColumn,
+
+    required List<String> itemNames,
+
+    required String inventoryType,
+
+  }) async {
+
+
+    if (itemNames.isEmpty) {
+      return [];
+    }
+
+    String placeholders =
+    List.filled(itemNames.length, '?').join(',');
+
+    final result = await _database?.rawQuery(
+      '''
+    SELECT
+
+      sh.id as stockId,
+
+      sh.$itemIdColumn as itemId,
+
+      sh.$itemNameColumn as itemName,
+
+      sh.quantity as quantity,
+
+      sh.unit as unit,
+
+      sh.date as date,
+
+      t.amount as totalCost
+
+    FROM $tableName sh
+
+    LEFT JOIN StockExpense se
+      ON se.stock_item_id = sh.id
+
+    LEFT JOIN Transactions t
+      ON t.id = se.transaction_id
+
+    WHERE sh.$itemNameColumn IN ($placeholders)
+
+    ORDER BY sh.date ASC
+    ''',
+      itemNames,
+    );
+
+    List<InventoryStockModel> list = [];
+
+    for (var row in result!) {
+
+      double qty =
+          double.tryParse(
+              row['quantity'].toString()) ?? 0;
+
+      double totalCost =
+          double.tryParse(
+              row['totalCost'].toString()) ?? 0;
+
+      double costPerUnit =
+      qty > 0
+          ? totalCost / qty
+          : 0;
+
+      list.add(
+        InventoryStockModel(
+
+          stockId: row['stockId'] as int?,
+
+          itemId: row['itemId'] as int,
+
+          itemName:
+          row['itemName'].toString(),
+
+          unit:
+          row['unit'].toString(),
+
+          quantity: qty,
+
+          totalCost: totalCost,
+
+          costPerUnit: costPerUnit,
+
+          date:
+          row['date'].toString(),
+
+          inventoryType: inventoryType,
+        ),
+      );
+    }
+
+    return list;
+  }
+
+  // ==========================================
+// FETCH TRANSACTIONS BY IDS
+// ==========================================
+
+  static Future<List<TransactionItem>>
+  getTransactionsByIds(
+      List<int> transactionIds) async {
+
+
+    if (transactionIds.isEmpty) {
+      return [];
+    }
+
+    String placeholders =
+    List.filled(transactionIds.length, '?').join(',');
+
+    final List<Map<String, dynamic>>? maps =
+    await _database?.rawQuery(
+      '''
+    SELECT *
+    FROM Transactions
+    WHERE id IN ($placeholders)
+    ''',
+      transactionIds,
+    );
+
+    return List.generate(
+      maps!.length,
+          (i) => TransactionItem.fromJson(maps[i]),
+    );
+  }
+
+  static Future<List<StockExpense>>
+  getStockExpensesByStockIds(
+      List<int> stockIds) async {
+
+
+    if (stockIds.isEmpty) {
+      return [];
+    }
+
+    String placeholders =
+    List.filled(stockIds.length, '?').join(',');
+
+    final List<Map<String, dynamic>>? maps =
+    await _database?.rawQuery(
+      '''
+    SELECT *
+    FROM StockExpense
+    WHERE stock_item_id IN ($placeholders)
+    ''',
+      stockIds,
+    );
+
+    return List.generate(
+      maps!.length,
+          (i) => StockExpense.fromMap(maps[i]),
+    );
+  }
+
+  // ==========================================
+// FETCH STOCK HISTORY BY FEED NAMES
+// ==========================================
+
+  static Future<List<FeedStockHistory>>
+  fetchStockHistoryByNames(
+      List<String> feedNames) async {
+
+
+    if (feedNames.isEmpty) {
+      return [];
+    }
+
+    // ?,?,?
+    String placeholders =
+    List.filled(feedNames.length, '?').join(',');
+
+    final List<Map<String, Object?>>? maps =
+    await _database?.rawQuery(
+      '''
+    SELECT *
+    FROM FeedStockHistory
+    WHERE feed_name IN ($placeholders)
+    ORDER BY date ASC
+    ''',
+      feedNames,
+    );
+
+    return List.generate(
+      maps!.length,
+          (i) => FeedStockHistory.fromJson(maps[i]),
+    );
+  }
 
   static Future<void> deleteFlockAndRelatedInfoSyncID(String sync_id, int f_id) async {
 

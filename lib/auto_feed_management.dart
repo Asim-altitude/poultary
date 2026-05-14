@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'auto_add_feed_screen.dart';
 import 'database/databse_helper.dart';
 import 'model/flock.dart';
 import 'model/sub_category_item.dart';
@@ -447,9 +448,13 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
             if(isAutoFeedEnabled){
-              _saveFlockSettings();
+              await _saveFlockSettings();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) =>  AutoFeedSyncScreen()),
+              );
             }
           },
           style: ElevatedButton.styleFrom(

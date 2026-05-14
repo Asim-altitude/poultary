@@ -21,4 +21,5 @@ class FeedStockSummary {
       availableStock: (map['available_stock'] ?? 0).toDouble(),
     );
   }
+
 }

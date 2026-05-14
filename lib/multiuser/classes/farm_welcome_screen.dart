@@ -86,7 +86,7 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
       _farmPlan = farmPlan;
       print(_farmPlan!.toJson());
 
-      if(!farmPlan.isActive){
+      if(!farmPlan.isActive) {
         Utils.isMultiUSer = false;
       }
 
@@ -299,10 +299,24 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
                                       SessionManager.offlineConfirmation, value);
                                 });
                               } else {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => HomeScreen()),
-                                );
+                                if(_planStatus == PlanStatus.notStarted)
+                                  Utils.isShowAdd = true;
+                                else
+                                  Utils.isShowAdd = false;
+
+                                SharedPreferences prefs = await SharedPreferences.getInstance();
+                                bool isAutoFeedEnabled = prefs.getBool('isAutoFeedEnabled') ?? false;
+
+                                if(isAutoFeedEnabled){
+                                  Navigator.pushAndRemoveUntil(context,
+                                    MaterialPageRoute(builder: (_) =>
+                                        AutoFeedSyncScreen(),)
+                                    , (route) => false,);
+                                }else {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(builder: (_) => HomeScreen()),);
+                                }
                               }
                             },
                           ),
@@ -1150,7 +1164,12 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
                   textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 onPressed: () async {
-                  Utils.isShowAdd = false;
+
+                  if(_planStatus == PlanStatus.notStarted)
+                    Utils.isShowAdd = true;
+                  else
+                    Utils.isShowAdd = false;
+
                   Utils.isMultiUSer = false;
                   onContinue(dontShowAgain);
                   SharedPreferences prefs = await SharedPreferences.getInstance();

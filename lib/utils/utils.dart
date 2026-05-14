@@ -87,6 +87,9 @@ class Utils {
   //static final totalSecondsInDay = 5;
   static final totalSecondsInDay = 86400;
 
+
+  static int ai_credits = 0;
+
   static Flock? selected_flock;
   static Eggs? selected_egg_collection;
   static Flock_Detail? selected_flock_collection;
@@ -240,6 +243,7 @@ class Utils {
       await DatabaseHelper.createTaskTable();
       await DatabaseHelper.addColumnIfNotExists("Transactions", "unit_price", "REAL", 0);
       await DatabaseHelper.addTaskRecurrenceColumns();
+      await DatabaseHelper.createAITables();
       await addNewColumn();
       await addMissingCategories();
       // await createMissingEggsRecords();

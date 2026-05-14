@@ -1677,7 +1677,12 @@
   "EPEF Score": "EPEF Score",
   "Eurpean Production Efficiency Factor": "Eurpean Production Efficiency Factor",
   "How it's calculated": "How it's calculated",
-  "(FCR x Age days) ÷ (Livability% x Avg weight kg x 100)": "(FCR x Age days) ÷ (Livability% x Avg weight kg x 100)"
+  "(FCR x Age days) ÷ (Livability% x Avg weight kg x 100)": "(FCR x Age days) ÷ (Livability% x Avg weight kg x 100)",
+
+  "Expense Breakdown": "Expense Breakdown",
+  "Based on stock costs": "Based on stock costs",
+  "Based on per bird sale" : "Based on per bird sale",
+  "Based on per egg sale": "Based on per egg sale"
 
 }
 
