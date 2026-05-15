@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "488113567172",
+    "firebase_url": "https://poultry-multiuser-default-rtdb.firebaseio.com",
     "project_id": "poultry-multiuser",
     "storage_bucket": "poultry-multiuser.firebasestorage.app"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.zaheer.poultry"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "488113567172-k15ej9po0kftccgmjh6ut2s8gi2elmka.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zaheer.poultry",
+            "certificate_hash": "896268c7658c786173ec7f545dd12c5754843957"
+          }
+        },
+        {
+          "client_id": "488113567172-uap1r799tirimgmvoc2jdmdsfr73vnd2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBUbWsKSYGYKpfbpS0Y9iru4kJiC1WMw7w"
@@ -20,7 +34,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "488113567172-uap1r799tirimgmvoc2jdmdsfr73vnd2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "488113567172-9n7uvv2ean1jln1tk68o9dk3ak77c2ht.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.zaheer.poultry"
+              }
+            }
+          ]
         }
       }
     }

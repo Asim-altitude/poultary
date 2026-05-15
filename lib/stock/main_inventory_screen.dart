@@ -7,7 +7,6 @@ import 'package:poultary/stock/screens/general_stock_screen.dart';
 import 'package:poultary/stock/tools_assets/screens/tools_assets_screen.dart';
 import 'package:poultary/stock/vaccine_stock_screen.dart';
 import 'package:poultary/utils/utils.dart';
-
 import '../stock/stock_screen.dart';
 import '../utils/fb_analytics.dart';
 import 'egg_stock_screen.dart';
@@ -108,6 +107,75 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
           child: SafeArea(
             child: Column(
               children: [
+
+                Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: GridView.count(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.9,
+                    children: [
+
+                      _buildInventoryItem(
+                        icon: Icons.fastfood,
+                        title: "Feed Stock".tr(),
+                        description: "Manage available feed quantity and types".tr(),
+                        onTap: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => FeedStockScreen()),
+                          );
+                        },
+                      ),
+                      _buildInventoryItem(
+                        icon: Icons.egg,
+                        title: "Egg Stock".tr(),
+                        description: "Manage collected eggs and storage".tr(),
+                        onTap: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => EggStockScreen()),
+                          );
+                        },
+                      ),
+                      _buildInventoryItem(
+                        icon: Icons.medical_services,
+                        title: "Medicine Stock".tr(),
+                        description: "Track medicines and expiration dates".tr(),
+                        onTap: () async {
+                          CategoryItem item = CategoryItem(id: null, name: "Medicine");
+                          int? medicineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);
+
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MedicineStockScreen(id: medicineCategoryID!),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildInventoryItem(
+                        icon: Icons.vaccines,
+                        title: "Vaccine Stock".tr(),
+                        description: "Manage vaccination schedules and stock".tr(),
+                        onTap: () async {
+                          CategoryItem item = CategoryItem(id: null, name: "Vaccine");
+                          int? vaccineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);
+
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => VaccineStockScreen(id: vaccineCategoryID!),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -276,74 +344,6 @@ class _ManageInventoryScreenState extends State<ManageInventoryScreen> {
                         ),
                       ],
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: GridView.count(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 0.9,
-                    children: [
-
-                      _buildInventoryItem(
-                        icon: Icons.fastfood,
-                        title: "Feed Stock".tr(),
-                        description: "Manage available feed quantity and types".tr(),
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => FeedStockScreen()),
-                          );
-                        },
-                      ),
-                      _buildInventoryItem(
-                        icon: Icons.egg,
-                        title: "Egg Stock".tr(),
-                        description: "Manage collected eggs and storage".tr(),
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => EggStockScreen()),
-                          );
-                        },
-                      ),
-                      _buildInventoryItem(
-                        icon: Icons.medical_services,
-                        title: "Medicine Stock".tr(),
-                        description: "Track medicines and expiration dates".tr(),
-                        onTap: () async {
-                          CategoryItem item = CategoryItem(id: null, name: "Medicine");
-                          int? medicineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);
-
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MedicineStockScreen(id: medicineCategoryID!),
-                            ),
-                          );
-                        },
-                      ),
-                      _buildInventoryItem(
-                        icon: Icons.vaccines,
-                        title: "Vaccine Stock".tr(),
-                        description: "Manage vaccination schedules and stock".tr(),
-                        onTap: () async {
-                          CategoryItem item = CategoryItem(id: null, name: "Vaccine");
-                          int? vaccineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);
-
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => VaccineStockScreen(id: vaccineCategoryID!),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
                   ),
                 ),
               ],

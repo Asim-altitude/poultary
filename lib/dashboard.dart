@@ -103,7 +103,8 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
     Languages.telugu,
     Languages.tamil,
     Languages.greek,
-    Languages.swahili
+    Languages.swahili,
+    Languages.czech
   ];
   double widthScreen = 0;
   double heightScreen = 0;
@@ -325,44 +326,44 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
     try {
       if (Utils.isMultiUSer) {
 
-      MultiUser? user = await SessionManager.getUserFromPrefs();
+        MultiUser? user = await SessionManager.getUserFromPrefs();
 
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      bool initialized = prefs.getBool('db_initialized_${user!.farmId}') ?? false;
-      //final lastTime = await SessionManager.getLastSyncTime(FireBaseUtils.FLOCKS);
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        bool initialized = prefs.getBool('db_initialized_${user!.farmId}') ?? false;
+        //final lastTime = await SessionManager.getLastSyncTime(FireBaseUtils.FLOCKS);
 
-      widget.syncTimeNotifier.addListener(() {
-        final syncTime = widget.syncTimeNotifier.value;
-        if (syncTime != null) {
-         // getFlocksFromFirebase(user.farmId, syncTime); // or startSyncListeners(syncTime)
-          getList();
-        }
-      });
+        widget.syncTimeNotifier.addListener(() {
+          final syncTime = widget.syncTimeNotifier.value;
+          if (syncTime != null) {
+            // getFlocksFromFirebase(user.farmId, syncTime); // or startSyncListeners(syncTime)
+            getList();
+          }
+        });
 
 
-      syncManager = SyncManager();
-      syncManager.init(
-        totalListeners: total,
-        onAllComplete: () {
-          setState(() {
-            isSyncing = false;
-            Utils.isSyncDone = true;
-            /*if (Utils.backup_changes >= 10) {
+        syncManager = SyncManager();
+        syncManager.init(
+          totalListeners: total,
+          onAllComplete: () {
+            setState(() {
+              isSyncing = false;
+              Utils.isSyncDone = true;
+              /*if (Utils.backup_changes >= 10) {
               Utils.showFloatingMessage(context, profileKey, "${Utils.backup_changes}"+"Changes".tr()+" "+"Backup Recommended".tr());
 
             }*/
-          });
-        },
-        onProgress: (c, t) {
-          setState(() {
-            completed = c;
-          });
-        },
-      );
+            });
+          },
+          onProgress: (c, t) {
+            setState(() {
+              completed = c;
+            });
+          },
+        );
 
         if (initialized) {
           print("Database already initialized for farm ${user.farmId}");
-        //  getFlocksFromFirebase(user.farmId, lastSyncTime);
+          //  getFlocksFromFirebase(user.farmId, lastSyncTime);
           return;
         }
 
@@ -634,7 +635,7 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                         Navigator.pop(context);
                         Navigator.push(context, MaterialPageRoute(
                             builder: (_) =>
-                            AuthGate(isStart: false,)));
+                                AuthGate(isStart: false,)));
                         // Continue logic here
                       },
                       child: Text("continue".tr(), style: TextStyle(color: Colors.white),),
@@ -710,7 +711,7 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
     } else if (module.toLowerCase() == "eggs") {
       await Navigator.push(context, MaterialPageRoute(builder: (_) => EggCollectionScreen()));
     } else if (module.toLowerCase() == "birds") {
-     await Navigator.push(context, MaterialPageRoute(builder: (_) => AddReduceFlockScreen()));
+      await Navigator.push(context, MaterialPageRoute(builder: (_) => AddReduceFlockScreen()));
     } else if (module.toLowerCase() == "finance") {
       await Navigator.push(context, MaterialPageRoute(builder: (_) => TransactionsScreen()));
     } else if (module.toLowerCase() == "feed") {
@@ -1069,7 +1070,7 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
       Utils.showToast("Please add new flock to continue.".tr());
 
     }else{
-     Utils.selected_flock = flocks[0];
+      Utils.selected_flock = flocks[0];
     }
 
     flock_total = flocks.length;
@@ -1121,19 +1122,18 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
 
     return SafeArea(child: Scaffold(
-
-      body:  SafeArea(
-        top: false,
-          child:Container(
-          width: widthScreen,
-          height: heightScreen,
-          color: Utils.getScreenBackground(),
-            child:SingleChildScrollView(
-            child: Column(
-            children:  [
-              // Utils.getDistanceBar(),
-              // Show sync status at top
-              /*(Utils.isMultiUSer && !Utils.isSyncDone)? Padding(
+        body:  SafeArea(
+            top: false,
+            child:Container(
+                width: widthScreen,
+                height: heightScreen,
+                color: Utils.getScreenBackground(),
+                child:SingleChildScrollView(
+                    child: Column(
+                        children:  [
+                          // Utils.getDistanceBar(),
+                          // Show sync status at top
+                          /*(Utils.isMultiUSer && !Utils.isSyncDone)? Padding(
                 padding: const EdgeInsets.all(0.0),
                 child: SyncStatusWidget(
                   isSyncing: isSyncing,
@@ -1141,190 +1141,190 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                   total: total,
                 ),
               ) : SizedBox.shrink(),*/
-              ClipRRect(
-            child: Container(
-              width: widthScreen,
-              height: 65,
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.blue.shade700,
-                    Colors.blue.shade400,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                ),
-              ),
-
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children:
-                [
-                  // 🌍 Language Picker (Left Side)
-                  if (isGetLanguage)
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          showModalBottomSheet(
-                            context: context,
-                            backgroundColor: Colors.transparent,
-                            builder: (context) {
-                              return ClipRRect(
-                                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                                child: Container(
-                                  color: Colors.white,
-                                  child: ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: supportedLanguages.length,
-                                    itemBuilder: (context, index) {
-                                      final language = supportedLanguages[index];
-                                      return ListTile(
-                                        title: Text("${language.name} (${language.isoCode})"),
-                                        onTap: () {
-                                          setState(() {
-                                            _selectedCupertinoLanguage = language;
-                                          });
-                                          Utils.setSelectedLanguage(language, context);
-                                          Navigator.pop(context);
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          ClipRRect(
                             child: Container(
-                              height: 45,
-                              padding: EdgeInsets.symmetric(horizontal: 10),
+                              width: widthScreen,
+                              height: 65,
+                              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                               decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.white),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.language, size: 20, color: Colors.black.withOpacity(0.8)),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    _selectedCupertinoLanguage.name.toLowerCase().contains("chinese")
-                                        ? "Chinese"
-                                        : _selectedCupertinoLanguage.name,
-                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    "(${Utils.displayLangCode(_selectedCupertinoLanguage)})",
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.blue.shade700,
+                                    Colors.blue.shade400,
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black26.withOpacity(0.2),
+                                    blurRadius: 8,
+                                    offset: Offset(0, 4),
                                   ),
                                 ],
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(20),
+                                  bottomRight: Radius.circular(20),
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children:
+                                [
+                                  // 🌍 Language Picker (Left Side)
+                                  if (isGetLanguage)
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          showModalBottomSheet(
+                                            context: context,
+                                            backgroundColor: Colors.transparent,
+                                            builder: (context) {
+                                              return ClipRRect(
+                                                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                                                child: Container(
+                                                  color: Colors.white,
+                                                  child: ListView.builder(
+                                                    shrinkWrap: true,
+                                                    itemCount: supportedLanguages.length,
+                                                    itemBuilder: (context, index) {
+                                                      final language = supportedLanguages[index];
+                                                      return ListTile(
+                                                        title: Text("${language.name} (${language.isoCode})"),
+                                                        onTap: () {
+                                                          setState(() {
+                                                            _selectedCupertinoLanguage = language;
+                                                          });
+                                                          Utils.setSelectedLanguage(language, context);
+                                                          Navigator.pop(context);
+                                                        },
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        },
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(12),
+                                          child: BackdropFilter(
+                                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                                            child: Container(
+                                              height: 45,
+                                              padding: EdgeInsets.symmetric(horizontal: 10),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius: BorderRadius.circular(12),
+                                                border: Border.all(color: Colors.white),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.language, size: 20, color: Colors.black.withOpacity(0.8)),
+                                                  SizedBox(width: 8),
+                                                  Text(
+                                                    _selectedCupertinoLanguage.name.toLowerCase().contains("chinese")
+                                                        ? "Chinese"
+                                                        : _selectedCupertinoLanguage.name,
+                                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                                  ),
+                                                  SizedBox(width: 5),
+                                                  Text(
+                                                    "(${Utils.displayLangCode(_selectedCupertinoLanguage)})",
+                                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
 
 
-                  SizedBox(width: 8),
+                                  SizedBox(width: 8),
 
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: openDatePicker,
-                      child: Container(
-                        height: 45,
-                        padding: EdgeInsets.symmetric(horizontal: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.2),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Icon(Icons.calendar_today, size: 20, color: Colors.black.withOpacity(0.8)),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                date_filter_name.tr(),
-                                style: TextStyle(fontSize: 12.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                    fontFamily: 'PTSans'),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            Icon(Icons.arrow_drop_down, size: 24, color: Colors.black.withOpacity(0.8)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: openDatePicker,
+                                      child: Container(
+                                        height: 45,
+                                        padding: EdgeInsets.symmetric(horizontal: 5),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.2),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Icon(Icons.calendar_today, size: 20, color: Colors.black.withOpacity(0.8)),
+                                            SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                date_filter_name.tr(),
+                                                style: TextStyle(fontSize: 12.0,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black,
+                                                    fontFamily: 'PTSans'),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            Icon(Icons.arrow_drop_down, size: 24, color: Colors.black.withOpacity(0.8)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
 
-                  SizedBox(width: 8),
+                                  SizedBox(width: 8),
 
-                Utils.isMultiUSer?
-                InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => AdminProfileScreen(users: Utils.currentUser!)),
-                    );
-                  },
-                  child: Container(
-                    key: profileKey,
-                    padding: EdgeInsets.all(2), // Thickness of the border
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white, // Border color
-                        width: 2, // Border width
-                      ),
-                    ),
-                    child: CircleAvatar(
-                      radius: 22,
+                                  Utils.isMultiUSer?
+                                  InkWell(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) => AdminProfileScreen(users: Utils.currentUser!)),
+                                        );
+                                      },
+                                      child: Container(
+                                        key: profileKey,
+                                        padding: EdgeInsets.all(2), // Thickness of the border
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: Colors.white, // Border color
+                                            width: 2, // Border width
+                                          ),
+                                        ),
+                                        child: CircleAvatar(
+                                          radius: 22,
 
-                      backgroundImage: (Utils.currentUser!.image != null && Utils.currentUser!.image.isNotEmpty)
-                          ? NetworkImage(Utils.ProxyAPI+Utils.currentUser!.image)
-                          : null,
-                      child: (Utils.currentUser!.image == null || Utils.currentUser!.image.isEmpty)
-                          ? Icon(Icons.person, size: 25, color: Colors.white)
-                          : null,
-                    ),
-                  ))
-                : Visibility(
-                      visible: true,
-                      child: InkWell(
-                                        onTap: () async {
-                       bool loggedIn = await SessionManager.getBool(SessionManager.loggedIn);
+                                          backgroundImage: (Utils.currentUser!.image != null && Utils.currentUser!.image.isNotEmpty)
+                                              ? NetworkImage(Utils.ProxyAPI+Utils.currentUser!.image)
+                                              : null,
+                                          child: (Utils.currentUser!.image == null || Utils.currentUser!.image.isEmpty)
+                                              ? Icon(Icons.person, size: 25, color: Colors.white)
+                                              : null,
+                                        ),
+                                      ))
+                                      : Visibility(
+                                    visible: true,
+                                    child: InkWell(
+                                      onTap: () async {
+                                        bool loggedIn = await SessionManager.getBool(SessionManager.loggedIn);
 
-                       if(loggedIn){
-                         await Navigator.push(context, MaterialPageRoute(
-                             builder: (_) =>
-                             AdminProfileScreen(users: Utils.currentUser!,)));
-                       }else {
-                         showFarmAccountIntro(context);
-                       }
-                                          // SessionManager.setBoolValue("farm_intro", true);
+                                        if(loggedIn){
+                                          await Navigator.push(context, MaterialPageRoute(
+                                              builder: (_) =>
+                                                  AdminProfileScreen(users: Utils.currentUser!,)));
+                                        }else {
+                                          showFarmAccountIntro(context);
+                                        }
+                                        // SessionManager.setBoolValue("farm_intro", true);
 
-                     /* bool hasIntroduced = await SessionManager.getBool("farm_intro");
+                                        /* bool hasIntroduced = await SessionManager.getBool("farm_intro");
                       if(!hasIntroduced){
                         SessionManager.setBoolValue("farm_intro", true);
                         showFarmAccountIntro(context);
@@ -1336,140 +1336,140 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                             !loggedIn
                                 ? AuthGate(isStart: false,)
                                 : AdminProfileScreen(users: Utils.currentUser!,)));
-                      
+
                       }*/
-                                        },
-                        child: CircleAvatar(
-                        radius: 22, // Size of the circle
-                        backgroundColor: Colors.white, // White background
-                        child: Icon(
-                          Icons.person,
-                          size: 25, // Icon size inside
-                          color: Colors.black, // Icon color
-                        ),
-                                          ),
-                      ),
-                    )
-
-                ],
-              ),
-            ),
-          ),
-              Column(
-                children: [
-
-                  Container(
-                    padding: EdgeInsets.only(bottom: 10),
-                    child: Padding(
-                      padding: EdgeInsets.all(10),
-                      child: Column(
-                        children: [
-                          // Financial Overview (Pie Chart + Info)
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // Pie Chart (Left Side)
-                              InkWell(
-                                onTap: (){
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => FinanceReportsScreen()),
-                                  );
-                                },
-                                child: Container(
-                                  width: widthScreen / 2,
-                                  height: 200,
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue.shade50,
-                                    borderRadius: BorderRadius.circular(15),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.2),
-                                        blurRadius: 10,
-                                        spreadRadius: 3,
-                                        offset: Offset(3, 5),
+                                      },
+                                      child: CircleAvatar(
+                                        radius: 22, // Size of the circle
+                                        backgroundColor: Colors.white, // White background
+                                        child: Icon(
+                                          Icons.person,
+                                          size: 25, // Icon size inside
+                                          color: Colors.black, // Icon color
+                                        ),
                                       ),
-                                    ],
-                                    border: Border.all(
-                                      color: Colors.blue.shade300,
                                     ),
-                                  ),
-                                  child: _piData.isNotEmpty
-                                ? Padding(
-                                padding: EdgeInsets.all(1.0),
-                      child: SfCircularChart(
-                        legend: Legend(
-                          isVisible: true,
-                          textStyle: TextStyle(fontSize: 11, color: Colors.black),
-                          padding: 2,
-                        ),
-                        series: <CircularSeries>[
-                          PieSeries<PieData, String>(
-                            dataSource: _piData,
-                            xValueMapper: (PieData data, _) => data.label,
-                            yValueMapper: (PieData data, _) => data.value,
-                            dataLabelSettings: DataLabelSettings(
-                              isVisible: true,
-                              textStyle: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                  )
+
+                                ],
                               ),
                             ),
-                            pointColorMapper: (PieData data, _) => data.color,
                           ),
-                        ],
-                      ),
-                    )
-                : Center(
-          child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.pie_chart_outline, size: 40, color: Colors.blueGrey),
-              SizedBox(height: 8),
-              Text(
-                'No data available'.tr(),
-                style: TextStyle(color: Colors.blueGrey, fontSize: 14),
-              ),
-            ],
-          ),
-      ),
-                                ),
-                              ),
-
-
-                              // Financial Summary (Right Side)
-                              Expanded(
-                                flex: 1,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(height:4),
-
-                                    getFinanceCard(Icons.arrow_upward, "Income", "${Utils.currency} $gross_income", Colors.green.shade300, FinanceReportsScreen(), context,0),
-                                    getFinanceCard(Icons.arrow_downward, "Expense", "${Utils.currency} $total_expense", Colors.red, FinanceReportsScreen(), context,1),
-                                    getFinanceCard(Icons.monetization_on, "NET_PROFIT", net_income >= 0 ? "${Utils.currency} $net_income" : "-${Utils.currency} ${-net_income}", net_income >= 0 ? Colors.white : Colors.white, FinanceReportsScreen(), context,2),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          SizedBox(height: 5,),
-                          // Egg Collection, Feed Consumption, Treatment Summary
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          Column(
                             children: [
-                              Expanded(child: getSummaryCard(Icons.egg, "Eggs", "$total_eggs_collected", Colors.white, EggsReportsScreen(), context)),
-                              Expanded(child: getSummaryCard(Icons.food_bank, "Feed", "$total_feed_consumption"+ Utils.selected_unit.tr(), Colors.white, FeedReportsScreen(), context)),
-                              Expanded(child: getSummaryCard(Icons.medical_information, "Health", "$treatmentCount", Colors.white, HealthReportScreen(), context)),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                 /* Container(
+
+                              Container(
+                                padding: EdgeInsets.only(bottom: 10),
+                                child: Padding(
+                                  padding: EdgeInsets.all(10),
+                                  child: Column(
+                                    children: [
+                                      // Financial Overview (Pie Chart + Info)
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          // Pie Chart (Left Side)
+                                          InkWell(
+                                            onTap: (){
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(builder: (context) => FinanceReportsScreen()),
+                                              );
+                                            },
+                                            child: Container(
+                                              width: widthScreen / 2,
+                                              height: 200,
+                                              decoration: BoxDecoration(
+                                                color: Colors.blue.shade50,
+                                                borderRadius: BorderRadius.circular(15),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black.withOpacity(0.2),
+                                                    blurRadius: 10,
+                                                    spreadRadius: 3,
+                                                    offset: Offset(3, 5),
+                                                  ),
+                                                ],
+                                                border: Border.all(
+                                                  color: Colors.blue.shade300,
+                                                ),
+                                              ),
+                                              child: _piData.isNotEmpty
+                                                  ? Padding(
+                                                padding: EdgeInsets.all(1.0),
+                                                child: SfCircularChart(
+                                                  legend: Legend(
+                                                    isVisible: true,
+                                                    textStyle: TextStyle(fontSize: 11, color: Colors.black),
+                                                    padding: 2,
+                                                  ),
+                                                  series: <CircularSeries>[
+                                                    PieSeries<PieData, String>(
+                                                      dataSource: _piData,
+                                                      xValueMapper: (PieData data, _) => data.label,
+                                                      yValueMapper: (PieData data, _) => data.value,
+                                                      dataLabelSettings: DataLabelSettings(
+                                                        isVisible: true,
+                                                        textStyle: TextStyle(
+                                                          fontSize: 12,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: Colors.white,
+                                                        ),
+                                                      ),
+                                                      pointColorMapper: (PieData data, _) => data.color,
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                                  : Center(
+                                                child: Column(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    Icon(Icons.pie_chart_outline, size: 40, color: Colors.blueGrey),
+                                                    SizedBox(height: 8),
+                                                    Text(
+                                                      'No data available'.tr(),
+                                                      style: TextStyle(color: Colors.blueGrey, fontSize: 14),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+
+
+                                          // Financial Summary (Right Side)
+                                          Expanded(
+                                            flex: 1,
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                SizedBox(height:4),
+
+                                                getFinanceCard(Icons.arrow_upward, "Income", "${Utils.currency} $gross_income", Colors.green.shade300, FinanceReportsScreen(), context,0),
+                                                getFinanceCard(Icons.arrow_downward, "Expense", "${Utils.currency} $total_expense", Colors.red, FinanceReportsScreen(), context,1),
+                                                getFinanceCard(Icons.monetization_on, "NET_PROFIT", net_income >= 0 ? "${Utils.currency} $net_income" : "-${Utils.currency} ${-net_income}", net_income >= 0 ? Colors.white : Colors.white, FinanceReportsScreen(), context,2),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+
+                                      SizedBox(height: 5,),
+                                      // Egg Collection, Feed Consumption, Treatment Summary
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Expanded(child: getSummaryCard(Icons.egg, "Eggs", "$total_eggs_collected", Colors.white, EggsReportsScreen(), context)),
+                                          Expanded(child: getSummaryCard(Icons.food_bank, "Feed", "$total_feed_consumption"+ Utils.selected_unit.tr(), Colors.white, FeedReportsScreen(), context)),
+                                          Expanded(child: getSummaryCard(Icons.medical_information, "Health", "$treatmentCount", Colors.white, HealthReportScreen(), context)),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              /* Container(
                     height: 50,
                     padding: EdgeInsets.all(10),
                     child: ValueListenableBuilder<int>(
@@ -1486,392 +1486,47 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                     ),
                   ),*/
 
-                 isMenuEnabled?
-                 Container(
-                   margin: const EdgeInsets.only(top: 5),
-                   child: Column(
-                     children: [
-                       Row(
-                         crossAxisAlignment: CrossAxisAlignment.center,
-                         children: [
-                           const SizedBox(width: 20),
-                           // Menu icon (cancel)
-                           InkWell(
-                             onTap: () async {
-                               await SessionManager.setBoolValue("dashboard_menu", false);
-                               setState(() {
-                                 isMenuEnabled = false;
-                               });
-                             },
-                             child: Container(
-                               padding: const EdgeInsets.all(8), // circular padding
-                               decoration: BoxDecoration(
-                                 color: Colors.blue.shade100, // light blue background
-                                 shape: BoxShape.circle,
-                                 boxShadow: [
-                                   BoxShadow(
-                                     color: Colors.blue.shade300.withOpacity(0.5),
-                                     blurRadius: 4,
-                                     offset: const Offset(0, 2),
-                                   ),
-                                 ],
-                               ),
-                               child: const Icon(Icons.cancel_sharp, size: 30, color: Colors.blue),
-                             ),
-                           ),
-
-                           const SizedBox(width: 10), // reduced spacing
-
-                           // Center title
-                           Expanded(
-                             child: Center(
-                               child: Text(
-                                 "Quick Menu".tr(),
-                                 style: TextStyle(
-                                   fontSize: 18,
-                                   fontWeight: FontWeight.bold,
-                                   color: primaryTextColor,
-                                 ),
-                               ),
-                             ),
-                           ),
-
-                           // Notification icon
-                           InkWell(
-                             onTap: () async {
-                               await Navigator.push(
-                                 context,
-                                 CupertinoPageRoute(
-                                     builder: (context) => const AllEventsScreen()),
-                               );
-                             },
-                             child: Container(
-                               padding: const EdgeInsets.all(8), // padding inside circle
-                               decoration: BoxDecoration(
-                                 color: Colors.amber.shade100, // light orange background
-                                 shape: BoxShape.circle,
-                                 boxShadow: [
-                                   BoxShadow(
-                                     color: Colors.amber.shade300.withOpacity(0.5),
-                                     blurRadius: 4,
-                                     offset: const Offset(0, 2),
-                                   ),
-                                 ],
-                               ),
-                               child: const Icon(
-                                 Icons.notifications_active,
-                                 color: Colors.amber,
-                                 size: 24,
-                               ),
-                             ),
-                           ),
-                           const SizedBox(width: 10),
-                           InkWell(
-                             onTap: () async {
-                               await Navigator.push(
-                                 context,
-                                 CupertinoPageRoute(
-                                     builder: (context) => const TaskCalendarScreen()),
-                               );
-                             },
-                             child: Container(
-                               padding: const EdgeInsets.all(8), // padding inside circle
-                               decoration: BoxDecoration(
-                                 color: Colors.amber.shade100, // light orange background
-                                 shape: BoxShape.circle,
-                                 boxShadow: [
-                                   BoxShadow(
-                                     color: Colors.orange.shade300.withOpacity(0.5),
-                                     blurRadius: 4,
-                                     offset: const Offset(0, 2),
-                                   ),
-                                 ],
-                               ),
-                               child: const Icon(
-                                 Icons.calendar_month_outlined,
-                                 color: Colors.amber,
-                                 size: 24,
-                               ),
-                             ),
-                           ),
-                           const SizedBox(width: 20), // reduced spacing
-                         ],
-                       ),
-
-                       // Module grid
-                       Container(
-                         margin: const EdgeInsets.only(top: 20),
-                         child: _buildModuleGrid(),
-                       ),
-                     ],
-                   ),
-                 )
-                     :
-                 Container(
-                    margin: EdgeInsets.only(top: 0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(30),
-                        topRight: Radius.circular(30),
-                      ),
-                      color: backgroundColor,
-                    ),
-                    child: Column(
-                      children: [
-                        // Title Section
-                        Container(
-                          margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                          child: Row(
-                            children: [
-                              InkWell(
-                                onTap: () async {
-                                  await SessionManager.setBoolValue("dashboard_menu", true);
-
-                                  setState(() {
-                                    isMenuEnabled = true;
-                                  });
-                                },
-                                child: Container(
-                                  margin: const EdgeInsets.only(top: 10),
-                                  padding: const EdgeInsets.all(8), // padding inside the circle
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue.shade100, // light blue background
-                                    shape: BoxShape.circle, // circular shape
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.blue.shade300.withOpacity(0.5), // soft shadow
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Image.asset(
-                                    "assets/menu_icon.png",
-                                    width: 24,
-                                    height: 24,
-                                    color: Colors.blue, // icon color
-                                  ),
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () async {
-                                  await Navigator.push(
-                                    context,
-                                    CupertinoPageRoute(
-                                        builder: (context) => const AllEventsScreen()),
-                                  );
-                                },
-                                child: Container(
-                                  margin: const EdgeInsets.only(top: 10, left: 15),
-                                  padding: const EdgeInsets.all(8), // padding inside circle
-                                  decoration: BoxDecoration(
-                                    color: Colors.orange.shade100, // light orange background
-                                    shape: BoxShape.circle, // makes it circular
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.orange.shade300.withOpacity(0.5),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Icon(
-                                    Icons.notifications_active,
-                                    color: Colors.orange,
-                                    size: 24,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                              isMenuEnabled?
+                              Container(
+                                margin: const EdgeInsets.only(top: 5),
+                                child: Column(
                                   children: [
-                                    Text(
-                                      "ALL_FLOCKS".tr(),
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: primaryTextColor,
-                                      ),
-                                    ),
-                                    SizedBox(width: 6),
-                                    Text(
-                                      "(${flocks.length})",
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.normal,
-                                        color: Colors.grey.shade700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              // Floating Action Button
-                              flocks.isNotEmpty
-                                  ? Align(
-                                alignment: Alignment.centerRight,
-                                child: Container(
-                                  margin: const EdgeInsets.only(right: 0), // optional spacing
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: LinearGradient(
-                                      colors: [Colors.blueAccent, Colors.blue],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.blue,
-                                        blurRadius: 2,
-                                        offset: const Offset(0, 1),
-                                      ),
-                                    ],
-                                  ),
-                                  child: FloatingActionButton(
-                                    backgroundColor: Colors.transparent, // use container gradient
-                                    elevation: 0, // shadow handled by container
-                                    onPressed: () async {
-                                      await Navigator.push(
-                                        context,
-                                        CupertinoPageRoute(
-                                            builder: (context) =>  ADDFlockScreen(isStart: false,)),
-                                      );
-                                      getList();
-                                      getFilteredData(date_filter_name);
-                                    },
-                                    child: Icon(
-                                      Icons.add,
-                                      color: Colors.white, // icon stands out on gradient
-                                      size: 30,
-                                    ),
-                                  ),
-                                ),
-                              )
-
-                                  : SizedBox(),
-                            ],
-                          ),
-                        ),
-
-                        SizedBox(height: 8),
-
-                        // Flock List with Neumorphic Effect
-                        flocks.isNotEmpty
-                            ? ListView.builder(
-                          itemCount: flocks.length,
-                          shrinkWrap: true,
-                          physics: BouncingScrollPhysics(),
-                          itemBuilder: (context, index) {
-                            return GestureDetector(
-                                onTap: () async {
-                                  Utils.selected_flock = flocks[index];
-                                  await Navigator.push(
-                                    context,
-                                    CupertinoPageRoute(
-                                        builder: (context) => const SingleFlockScreen()),
-                                  );
-                                  getList();
-                                  getFilteredData(date_filter_name);
-                                },
-                                child: Container(
-                                  margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                  padding: EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                    color: backgroundColor,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey,
-                                        offset: Offset(4, 4),
-                                        blurRadius: 8,
-                                      ),
-                                      BoxShadow(
-                                        color: lightShadowColor,
-                                        offset: Offset(-4, -4),
-                                        blurRadius: 8,
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      // Flock Icon
-                                      Container(
-                                        margin: EdgeInsets.all(5),
-                                        height: 70,
-                                        width: 70,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(10),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.grey.shade300,
-                                              blurRadius: 3,
-                                            ),
-                                          ],
-                                        ),
-                                        child: Image.asset(
-                                          flocks[index].icon.replaceAll("jpeg", "png"),
-                                          fit: BoxFit.contain,
-                                        ),
-                                      ),
-                                      SizedBox(width: 12),
-
-                                      // Flock Info (Expanded to take available space)
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              flocks[index].f_name,
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                color: primaryTextColor,
-                                              ),
-                                            ),
-                                            SizedBox(height: 4),
-                                            Text(
-                                              flocks[index].acqusition_type.tr(),
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w500,
-                                                color: Colors.black54,
-                                              ),
-                                            ),
-                                            SizedBox(height: 4),
-                                            Text(
-                                              Utils.getFormattedDate(flocks[index].acqusition_date),
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.black38,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-
-                                      // Bird Count + Arrow in a Column
-                                      Column(
-                                        children: [
-                                          Container(
-                                            padding: EdgeInsets.all(8),
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        const SizedBox(width: 20),
+                                        // Menu icon (cancel)
+                                        InkWell(
+                                          onTap: () async {
+                                            await SessionManager.setBoolValue("dashboard_menu", false);
+                                            setState(() {
+                                              isMenuEnabled = false;
+                                            });
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.all(8), // circular padding
                                             decoration: BoxDecoration(
-                                              color: backgroundColor,
-                                              borderRadius: BorderRadius.circular(20),
+                                              color: Colors.blue.shade100, // light blue background
+                                              shape: BoxShape.circle,
                                               boxShadow: [
                                                 BoxShadow(
-                                                  color: shadowColor,
-                                                  offset: Offset(2, 2),
+                                                  color: Colors.blue.shade300.withOpacity(0.5),
                                                   blurRadius: 4,
-                                                ),
-                                                BoxShadow(
-                                                  color: lightShadowColor,
-                                                  offset: Offset(-2, -2),
-                                                  blurRadius: 4,
+                                                  offset: const Offset(0, 2),
                                                 ),
                                               ],
                                             ),
+                                            child: const Icon(Icons.cancel_sharp, size: 30, color: Colors.blue),
+                                          ),
+                                        ),
+
+                                        const SizedBox(width: 10), // reduced spacing
+
+                                        // Center title
+                                        Expanded(
+                                          child: Center(
                                             child: Text(
-                                              flocks[index].active_bird_count.toString(),
+                                              "Quick Menu".tr(),
                                               style: TextStyle(
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.bold,
@@ -1879,68 +1534,413 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                                               ),
                                             ),
                                           ),
-                                          SizedBox(height: 4),
-                                          Text(
-                                            "BIRDS".tr(),
-                                            style: TextStyle(
-                                              color: primaryTextColor,
-                                              fontSize: 14,
+                                        ),
+
+                                        // Notification icon
+                                        InkWell(
+                                          onTap: () async {
+                                            await Navigator.push(
+                                              context,
+                                              CupertinoPageRoute(
+                                                  builder: (context) => const AllEventsScreen()),
+                                            );
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.all(8), // padding inside circle
+                                            decoration: BoxDecoration(
+                                              color: Colors.amber.shade100, // light orange background
+                                              shape: BoxShape.circle,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.amber.shade300.withOpacity(0.5),
+                                                  blurRadius: 4,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: const Icon(
+                                              Icons.notifications_active,
+                                              color: Colors.amber,
+                                              size: 24,
                                             ),
                                           ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        InkWell(
+                                          onTap: () async {
+                                            await Navigator.push(
+                                              context,
+                                              CupertinoPageRoute(
+                                                  builder: (context) => const TaskCalendarScreen()),
+                                            );
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.all(8), // padding inside circle
+                                            decoration: BoxDecoration(
+                                              color: Colors.amber.shade100, // light orange background
+                                              shape: BoxShape.circle,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.orange.shade300.withOpacity(0.5),
+                                                  blurRadius: 4,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: const Icon(
+                                              Icons.calendar_month_outlined,
+                                              color: Colors.amber,
+                                              size: 24,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 20), // reduced spacing
+                                      ],
+                                    ),
+
+                                    // Module grid
+                                    Container(
+                                      margin: const EdgeInsets.only(top: 20),
+                                      child: _buildModuleGrid(),
+                                    ),
+                                  ],
+                                ),
+                              )
+                                  :
+                              Container(
+                                margin: EdgeInsets.only(top: 0),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(30),
+                                    topRight: Radius.circular(30),
+                                  ),
+                                  color: backgroundColor,
+                                ),
+                                child: Column(
+                                  children: [
+                                    // Title Section
+                                    Container(
+                                      margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                                      child: Row(
+                                        children: [
+                                          InkWell(
+                                            onTap: () async {
+                                              await SessionManager.setBoolValue("dashboard_menu", true);
+
+                                              setState(() {
+                                                isMenuEnabled = true;
+                                              });
+                                            },
+                                            child: Container(
+                                              margin: const EdgeInsets.only(top: 10),
+                                              padding: const EdgeInsets.all(8), // padding inside the circle
+                                              decoration: BoxDecoration(
+                                                color: Colors.blue.shade100, // light blue background
+                                                shape: BoxShape.circle, // circular shape
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.blue.shade300.withOpacity(0.5), // soft shadow
+                                                    blurRadius: 4,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Image.asset(
+                                                "assets/menu_icon.png",
+                                                width: 24,
+                                                height: 24,
+                                                color: Colors.blue, // icon color
+                                              ),
+                                            ),
+                                          ),
+                                          InkWell(
+                                            onTap: () async {
+                                              await Navigator.push(
+                                                context,
+                                                CupertinoPageRoute(
+                                                    builder: (context) => const AllEventsScreen()),
+                                              );
+                                            },
+                                            child: Container(
+                                              margin: const EdgeInsets.only(top: 10, left: 15),
+                                              padding: const EdgeInsets.all(8), // padding inside circle
+                                              decoration: BoxDecoration(
+                                                color: Colors.orange.shade100, // light orange background
+                                                shape: BoxShape.circle, // makes it circular
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.orange.shade300.withOpacity(0.5),
+                                                    blurRadius: 4,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: const Icon(
+                                                Icons.notifications_active,
+                                                color: Colors.orange,
+                                                size: 24,
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  "ALL_FLOCKS".tr(),
+                                                  style: TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: primaryTextColor,
+                                                  ),
+                                                ),
+                                                SizedBox(width: 6),
+                                                Text(
+                                                  "(${flocks.length})",
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.normal,
+                                                    color: Colors.grey.shade700,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          // Floating Action Button
+                                          flocks.isNotEmpty
+                                              ? Align(
+                                            alignment: Alignment.centerRight,
+                                            child: Container(
+                                              margin: const EdgeInsets.only(right: 0), // optional spacing
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                gradient: LinearGradient(
+                                                  colors: [Colors.blueAccent, Colors.blue],
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                ),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.blue,
+                                                    blurRadius: 2,
+                                                    offset: const Offset(0, 1),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: FloatingActionButton(
+                                                backgroundColor: Colors.transparent, // use container gradient
+                                                elevation: 0, // shadow handled by container
+                                                onPressed: () async {
+                                                  await Navigator.push(
+                                                    context,
+                                                    CupertinoPageRoute(
+                                                        builder: (context) =>  ADDFlockScreen(isStart: false,)),
+                                                  );
+                                                  getList();
+                                                  getFilteredData(date_filter_name);
+                                                },
+                                                child: Icon(
+                                                  Icons.add,
+                                                  color: Colors.white, // icon stands out on gradient
+                                                  size: 30,
+                                                ),
+                                              ),
+                                            ),
+                                          )
+
+                                              : SizedBox(),
                                         ],
                                       ),
+                                    ),
+
+                                    SizedBox(height: 8),
+
+                                    // Flock List with Neumorphic Effect
+                                    flocks.isNotEmpty
+                                        ? ListView.builder(
+                                      itemCount: flocks.length,
+                                      shrinkWrap: true,
+                                      physics: BouncingScrollPhysics(),
+                                      itemBuilder: (context, index) {
+                                        return GestureDetector(
+                                            onTap: () async {
+                                              Utils.selected_flock = flocks[index];
+                                              await Navigator.push(
+                                                context,
+                                                CupertinoPageRoute(
+                                                    builder: (context) => const SingleFlockScreen()),
+                                              );
+                                              getList();
+                                              getFilteredData(date_filter_name);
+                                            },
+                                            child: Container(
+                                              margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                              padding: EdgeInsets.all(12),
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(12),
+                                                color: backgroundColor,
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.grey,
+                                                    offset: Offset(4, 4),
+                                                    blurRadius: 8,
+                                                  ),
+                                                  BoxShadow(
+                                                    color: lightShadowColor,
+                                                    offset: Offset(-4, -4),
+                                                    blurRadius: 8,
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  // Flock Icon
+                                                  Container(
+                                                    margin: EdgeInsets.all(5),
+                                                    height: 70,
+                                                    width: 70,
+                                                    decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(10),
+                                                      boxShadow: [
+                                                        BoxShadow(
+                                                          color: Colors.grey.shade300,
+                                                          blurRadius: 3,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    child: Image.asset(
+                                                      flocks[index].icon.replaceAll("jpeg", "png"),
+                                                      fit: BoxFit.contain,
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 12),
+
+                                                  // Flock Info (Expanded to take available space)
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Text(
+                                                          flocks[index].f_name,
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight: FontWeight.bold,
+                                                            color: primaryTextColor,
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: 4),
+                                                        Text(
+                                                          flocks[index].acqusition_type.tr(),
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                            fontWeight: FontWeight.w500,
+                                                            color: Colors.black54,
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: 4),
+                                                        Text(
+                                                          Utils.getFormattedDate(flocks[index].acqusition_date),
+                                                          style: TextStyle(
+                                                            fontSize: 12,
+                                                            color: Colors.black38,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+
+                                                  // Bird Count + Arrow in a Column
+                                                  Column(
+                                                    children: [
+                                                      Container(
+                                                        padding: EdgeInsets.all(8),
+                                                        decoration: BoxDecoration(
+                                                          color: backgroundColor,
+                                                          borderRadius: BorderRadius.circular(20),
+                                                          boxShadow: [
+                                                            BoxShadow(
+                                                              color: shadowColor,
+                                                              offset: Offset(2, 2),
+                                                              blurRadius: 4,
+                                                            ),
+                                                            BoxShadow(
+                                                              color: lightShadowColor,
+                                                              offset: Offset(-2, -2),
+                                                              blurRadius: 4,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        child: Text(
+                                                          flocks[index].active_bird_count.toString(),
+                                                          style: TextStyle(
+                                                            fontSize: 18,
+                                                            fontWeight: FontWeight.bold,
+                                                            color: primaryTextColor,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      SizedBox(height: 4),
+                                                      Text(
+                                                        "BIRDS".tr(),
+                                                        style: TextStyle(
+                                                          color: primaryTextColor,
+                                                          fontSize: 14,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
 
 
-                                    ],
-                                  ),
-                                )
+                                                ],
+                                              ),
+                                            )
 
-                            );
-                          },
-                        )
-                            : // Empty State UI
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "NO_FLOCKS".tr(),
-                              style: TextStyle(fontSize: 16, color: primaryTextColor),
-                            ),
-                            SizedBox(height: 10),
-                            ElevatedButton.icon(
-                              onPressed: () async {
-                                await Navigator.push(
-                                  context,
-                                  CupertinoPageRoute(
-                                      builder: (context) =>  ADDFlockScreen(isStart: false,)),
-                                );
-                                getList();
-                                getFilteredData(date_filter_name);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: backgroundColor,
-                                shadowColor: shadowColor,
-                                elevation: 6,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
+                                        );
+                                      },
+                                    )
+                                        : // Empty State UI
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          "NO_FLOCKS".tr(),
+                                          style: TextStyle(fontSize: 16, color: primaryTextColor),
+                                        ),
+                                        SizedBox(height: 10),
+                                        ElevatedButton.icon(
+                                          onPressed: () async {
+                                            await Navigator.push(
+                                              context,
+                                              CupertinoPageRoute(
+                                                  builder: (context) =>  ADDFlockScreen(isStart: false,)),
+                                            );
+                                            getList();
+                                            getFilteredData(date_filter_name);
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: backgroundColor,
+                                            shadowColor: shadowColor,
+                                            elevation: 6,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(30),
+                                            ),
+                                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                          ),
+                                          icon: Icon(Icons.add, color: primaryTextColor),
+                                          label: Text(
+                                            "NEW_FLOCK".tr(),
+                                            style: TextStyle(fontSize: 16, color: primaryTextColor),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                              ),
-                              icon: Icon(Icons.add, color: primaryTextColor),
-                              label: Text(
-                                "NEW_FLOCK".tr(),
-                                style: TextStyle(fontSize: 16, color: primaryTextColor),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
+                              )
+                            ],
+                          ),
 
-    ]))))));
+                        ]))))));
   }
 
   Widget buildDateFilterWidget(String selectedFilter, VoidCallback onTap) {
@@ -2112,14 +2112,14 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
                   fit: BoxFit.scaleDown,
                   child:
                   Text(title.tr(),
-                    textAlign: TextAlign.center,
+                      textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
 
                       style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500, color: Colors.white70)),),
 
               ],
             ),
-              SizedBox(height: 2),
+            SizedBox(height: 2),
             Text(value,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
           ],
@@ -2132,11 +2132,11 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
   Widget getDashboardDataBox(Color color, String title, String data, IconData icon, Color iconColor) {
     return Container(
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(5)),
-          color: color,
+        borderRadius: BorderRadius.all(Radius.circular(5)),
+        color: color,
 
       ),
-       padding: EdgeInsets.all(10.0),
+      padding: EdgeInsets.all(10.0),
       margin: EdgeInsets.all(5.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -2146,10 +2146,10 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-         
-            Icon(icon, color: iconColor,),
-            Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white70),)
-          ],),
+
+              Icon(icon, color: iconColor,),
+              Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white70),)
+            ],),
 
           Container(
               margin: EdgeInsets.only(top: 5),
@@ -2179,10 +2179,10 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
 
             children: [
 
-            imageSource == ''? SizedBox(width: 0,height: 0,) :  Image.asset(imageSource, width: 40, height: 40,),
+              imageSource == ''? SizedBox(width: 0,height: 0,) :  Image.asset(imageSource, width: 40, height: 40,),
 
-            Text(title, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w400, color: Colors.white70),)
-          ],),
+              Text(title, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w400, color: Colors.white70),)
+            ],),
 
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -2321,12 +2321,12 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-               Text(
+              Text(
                 'New Feature: Automatic Feed Management!'.tr(),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
-               Text(
+              Text(
                 'feature_msg'.tr(),
                 textAlign: TextAlign.center,
               ),
@@ -2454,10 +2454,10 @@ class _DashboardScreen extends State<DashboardScreen> with RefreshMixin {
 
 class PieData {
   final String label;
-final num value;
-final Color color;
+  final num value;
+  final Color color;
 
-PieData(this.label, this.value, this.color);
+  PieData(this.label, this.value, this.color);
 }
 
 class FinanceData {

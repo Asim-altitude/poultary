@@ -145,7 +145,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
       );
 
      try{
-       bool isFirst = await DatabaseHelper.isFirstRecord("Feeding");
+       bool isFirst = true;//await DatabaseHelper.isFirstRecord("Feeding");
        if(isFirst) {
          _statuses  = await _prefs.loadAllStatuses(_routineOrder);
          bool complete = _statuses["Feed"] ?? false;

@@ -9,6 +9,7 @@ import 'package:poultary/utils/utils.dart';
 import '../model/feed_stock_history.dart';
 import '../model/feed_stock_summary.dart';
 import '../model/stock_expense.dart';
+import '../model/sub_category_item.dart';
 import '../multiuser/model/feedstockfb.dart';
 import '../multiuser/utils/FirebaseUtils.dart';
 import '../sticky.dart';
@@ -27,6 +28,12 @@ class _StockDetailScreen extends State<StockDetailScreen> {
   late BannerAd _bannerAd;
   double _heightBanner = 0;
   bool _isBannerAdReady = false;
+
+  List<SubItem> feeds = [];
+  void _loadFeedItems() async {
+    feeds = await DatabaseHelper.getSubCategoryList(3);
+  }
+
   @override
   void dispose() {
     try{
@@ -42,7 +49,14 @@ class _StockDetailScreen extends State<StockDetailScreen> {
     if(Utils.isShowAdd){
       _loadBannerAd();
     }
+
+    _loadFeedItems();
   }
+
+  int getFeedIdbyName() {
+    return feeds.firstWhere((feed) => feed.name == widget.stock.feedName).id!;
+  }
+
   _loadBannerAd(){
     // TODO: Initialize _bannerAd
     _bannerAd = BannerAd(
@@ -69,6 +83,30 @@ class _StockDetailScreen extends State<StockDetailScreen> {
     _bannerAd.load();
   }
 
+  void showAdjustStockSheet({
+    required BuildContext context,
+    required String feedName,
+    required double currentStock,
+    required OnAdjustSave onSave,
+  })
+  {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _AdjustStockSheet(
+        feedName: feedName,
+        currentStock: currentStock,
+        onSave: onSave, // ✅ Forward it directly
+      ),
+    );
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,7 +127,93 @@ class _StockDetailScreen extends State<StockDetailScreen> {
                       child: AdWidget(ad: _bannerAd)
                   ),
                 ),
-            
+              InkWell(
+                onTap: () {
+                  showAdjustStockSheet(
+                    context: context,
+                    feedName: widget.stock.feedName,
+                    currentStock: widget.stock.availableStock,
+                    onSave: ({
+                      required double quantity,
+                      required String reason,
+                      required String mode,
+                      required double finalStock,
+                    }) async
+                    {
+
+
+                      print(widget.stock.feedName+" "+quantity.toString()+" "+reason+" "+mode+" "+finalStock.toString());
+
+                      FeedStockHistory stock = FeedStockHistory(
+                          feedId: getFeedIdbyName(),
+                          quantity: quantity,
+                          unit: Utils.selected_unit,
+                          source: "Adjustment | "+reason,
+                          date: DateFormat('yyyy-MM-dd').format(new DateTime.now()), // Use selected date
+                          feed_name: widget.stock.feedName,
+                          sync_id: Utils.getUniueId(),
+                          sync_status: SyncStatus.SYNCED,
+                          last_modified: Utils.getTimeStamp(),
+                          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '');
+
+                      int? stock_item_id =  await DatabaseHelper.insertFeedStock(stock);
+
+                      FeedStockFB feedStockFB = FeedStockFB(stock: stock);
+
+                      if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_feed")) {
+                        feedStockFB.sync_id = stock.sync_id;
+                        feedStockFB.sync_status = SyncStatus.SYNCED;
+                        feedStockFB.last_modified = Utils.getTimeStamp();
+                        feedStockFB.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                        feedStockFB.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+                        await FireBaseUtils.uploadFeedStockHistory(feedStockFB);
+                      }
+                      /* final entry = FeedStockFB(
+                        feedName: "Starter Feed",
+                        quantity: quantity,
+                        remark: reason,
+                        type: "adjustment",
+                        isAdjustment: true,
+                        amount: 0,
+                        date: DateTime.now().toString().substring(0, 10),
+                      );
+
+                      await database.insertFeedStock(entry);
+*/
+                      setState(() {});
+                    },
+                  );
+                },
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    margin: EdgeInsets.only(right: 15),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade700,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min, // Ensures dynamic width
+                      children: [
+                        Icon(Icons.tune, color: Colors.white, size: 16),
+                        SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            "Adjust Stock".tr(),
+                            style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold),
+                            overflow: TextOverflow.ellipsis, // Prevents overflow
+                            softWrap: true, // Allows wrapping
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               _buildStockItem(widget.stock, 0, kAlwaysCompleteAnimation),
             
               SizedBox(height: 16),
@@ -410,4 +534,251 @@ class _StockDetailScreen extends State<StockDetailScreen> {
     );
   }
 
+}
+
+typedef OnAdjustSave = Future<void> Function({
+required double quantity,
+required String reason,
+required String mode,
+required double finalStock,
+});
+
+class _AdjustStockSheet extends StatefulWidget {
+  final String feedName;
+  final double currentStock;
+  final OnAdjustSave onSave; // ✅ clean
+
+  const _AdjustStockSheet({
+    required this.feedName,
+    required this.currentStock,
+    required this.onSave,
+  });
+
+  @override
+  State<_AdjustStockSheet> createState() => _AdjustStockSheetState();
+}
+
+class _AdjustStockSheetState extends State<_AdjustStockSheet> {
+  String mode = "decrease"; // increase | decrease | exact
+  final TextEditingController qtyCtrl = TextEditingController();
+  String? selectedReason;
+
+  final reasons = ["Wastage", "Damage", "Manual Correction", "Other"];
+
+  double get qty => double.tryParse(qtyCtrl.text) ?? 0;
+
+  double get finalStock {
+    if (mode == "increase") return widget.currentStock + qty;
+    if (mode == "decrease") return widget.currentStock - qty;
+    return qty; // exact
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).viewInsets.bottom;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottom),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+
+            /// Handle
+            Container(
+              margin: const EdgeInsets.only(top: 10, bottom: 8),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+
+            /// Title
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  const Icon(Icons.tune, size: 18, color: Colors.blue),
+                  const SizedBox(width: 8),
+                  const Text(
+                    "Adjust Stock",
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            /// Feed Name
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  const Text("Feed: ",
+                      style: TextStyle(fontWeight: FontWeight.w600)),
+                  Text(widget.feedName),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            /// Current Stock
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  const Text("Available: ",
+                      style: TextStyle(fontWeight: FontWeight.w600)),
+                  Text("${widget.currentStock.toStringAsFixed(1)} kg"),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            /// Mode Selection
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _modeBtn("Increase"),
+                _modeBtn("Decrease"),
+                _modeBtn("Set Exact"),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            /// Quantity Input
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(
+                controller: qtyCtrl,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: mode == "exact"
+                      ? "Enter final stock"
+                      : "Enter quantity",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onChanged: (_) => setState(() {}),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            /// Final Stock Preview
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  const Text("Final Stock: ",
+                      style: TextStyle(fontWeight: FontWeight.w600)),
+                  Text("${finalStock.toStringAsFixed(1)} kg",
+                      style: const TextStyle(color: Colors.blue)),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            /// Reason Dropdown
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: DropdownButtonFormField<String>(
+                value: selectedReason,
+                items: reasons
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
+                onChanged: (v) => setState(() => selectedReason = v),
+                decoration: InputDecoration(
+                  labelText: "Reason",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            /// Save Button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _save,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text("Save Adjustment"),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _modeBtn(String label) {
+    final value = label.toLowerCase().replaceAll(" ", "");
+    final isActive = mode == value;
+
+    return ChoiceChip(
+      label: Text(label),
+      selected: isActive,
+      onSelected: (_) => setState(() => mode = value),
+    );
+  }
+
+  void _save() async {
+    if (selectedReason == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please select reason")),
+      );
+      return;
+    }
+
+    if (finalStock < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Stock cannot be negative")),
+      );
+      return;
+    }
+
+    double quantity;
+
+    if (mode == "increase") {
+      quantity = qty;
+    } else if (mode == "decrease") {
+      quantity = -qty;
+    } else {
+      quantity = finalStock - widget.currentStock;
+    }
+
+    // ✅ IMPORTANT: await the callback
+    await widget.onSave(
+      quantity: quantity,
+      reason: selectedReason!,
+      mode: mode,
+      finalStock: finalStock,
+    );
+
+    // ✅ Close AFTER save completes
+    if (mounted) {
+      Navigator.pop(context);
+    }
+  }
 }

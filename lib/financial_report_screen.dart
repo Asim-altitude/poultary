@@ -8,15 +8,24 @@ import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/database/databse_helper.dart';
+import 'package:poultary/model/feed_stock_history.dart';
 import 'package:poultary/model/finance_report_item.dart';
+import 'package:poultary/model/med_vac_item.dart';
+import 'package:poultary/model/stock_expense.dart';
+import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/pdf/pdf_screen.dart';
-import 'package:poultary/sticky.dart';
+import 'package:poultary/stock/cost_engine/inventory_type.dart';
+import 'package:poultary/stock/cost_engine/inventory_cost_engine.dart';
+import 'package:poultary/stock/cost_engine/inventory_stock_model.dart';
 import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'model/category_item.dart';
+import 'model/feed_item.dart';
+import 'model/feed_stock_cost.dart';
 import 'model/finance_chart_data.dart';
 import 'model/finance_summary_flock.dart';
 import 'model/flock.dart';
@@ -172,9 +181,9 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
   }
 
-  List<FlockIncomeExpense> flockFinanceList = [];
+  List<FlockIncomeExpense> flockFinanceList = [], sortedFlocks = [];
 
-  var sortedFlocks = [];
+
   void getAllData() async{
 
     await DatabaseHelper.instance.database;
@@ -194,11 +203,11 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
     total_expense = num.parse(total_expense.toStringAsFixed(2));
     net_income = num.parse(net_income.toStringAsFixed(2));
 
-    getFilteredEggsCollections(str_date, end_date);
+    await getFilteredEggsCollections(str_date, end_date);
 
 
     // Sort flocks: profitable first, then loss-making
-    final sortedFlocks = [...flockFinanceList];
+    sortedFlocks = [...flockFinanceList];
 
     sortedFlocks.sort((a, b) {
       final profitA = a.totalIncome - a.totalExpense;
@@ -215,7 +224,14 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
       // If both same category, sort by profit amount descending
       return profitB.compareTo(profitA);
     });
-
+    
+   /* for(int i=0;i<sortedFlocks.length;i++){
+      List<String> flockFeedNames = await DatabaseHelper.getDistinctFeedNamesByFlockId(sortedFlocks[i].fId);
+      if(flockFeedNames.isNotEmpty)
+      await combineFeedStockHistoryAndCost(flockFeedNames);
+    }*/
+   // await loadFlockFeedStockCosting();
+    await loadAllStockCostsByFlock();
 
     setState(() {
 
@@ -223,7 +239,501 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
 
   }
 
-  void getFilteredEggsCollections(String st,String end) async {
+
+  Future<void> loadAllStockCostsByFlock() async {
+
+    Set<String> allFeedNames = {};
+
+    Map<int, List<String>> flockFeedMap = {};
+
+    for (int i = 0; i < sortedFlocks.length; i++) {
+
+      int flockId = sortedFlocks[i].fId;
+
+      List<String> flockFeedNames =
+      await DatabaseHelper
+          .getDistinctFeedNamesByFlockId(flockId);
+
+      flockFeedMap[flockId] = flockFeedNames;
+
+      allFeedNames.addAll(flockFeedNames);
+    }
+
+    List<InventoryStockModel> feedStocks =
+    await DatabaseHelper
+        .getCombinedInventoryStockData(
+
+      tableName: "FeedStockHistory",
+
+      itemIdColumn: "feed_id",
+
+      itemNameColumn: "feed_name",
+
+      itemNames: allFeedNames.toList(),
+
+      inventoryType: "feed",
+    );
+
+    //FEED COST BY FLOCK
+    for(int i=0;i<sortedFlocks.length;i++){
+      List<Feeding> allFeedings = await DatabaseHelper.getFilteredFeeding(sortedFlocks[i].fId, "All", str_date, end_date);
+      double feedExpense = await InventoryCostEngine.calculateFeedExpense(flockId: sortedFlocks[i].fId, startDate: str_date, endDate: end_date, feedings: allFeedings, stocks: feedStocks); //await calculateFlockFeedExpense(flockId: sortedFlocks[i].fId, startDate: str_date, endDate: end_date, allFeedings: allFeedings, allStocks: flockFeedStocks);
+      sortedFlocks[i].totalExpense += feedExpense;
+      sortedFlocks[i].feedCost = feedExpense;
+    }
+
+    // Medicine Costs
+
+    CategoryItem item = CategoryItem(id: null, name: "Medicine");
+    int? medicineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);
+
+    List<SubItem> medSubItem = await DatabaseHelper.getSubCategoryList(medicineCategoryID!);
+
+    List<String> medicineList = [];
+    for(int i=0;i<medSubItem.length;i++){
+      medicineList.add(medSubItem.elementAt(i).name!);
+    }
+
+    List<InventoryStockModel> medicineStocks =
+    await DatabaseHelper
+        .getCombinedInventoryStockData(
+
+      tableName: "MedicineStockHistory",
+
+      itemIdColumn: "medicine_id",
+
+      itemNameColumn: "medicine_name",
+
+      itemNames: medicineList,
+
+      inventoryType: "medicine",
+    );
+
+
+    // Medicine costs by flock
+    for(int i=0;i<sortedFlocks.length;i++){
+      List<Vaccination_Medication> allMedications = await DatabaseHelper.getFilteredMedication(sortedFlocks[i].fId, "Medication", str_date, end_date);
+      double medicineCost = await InventoryCostEngine.calculateMedicationExpense(flockId: sortedFlocks[i].fId, startDate: str_date, endDate: end_date, consumptions: allMedications, stocks: medicineStocks, inventoryType: InventoryTypes.medicine); //await calculateFlockFeedExpense(flockId: sortedFlocks[i].fId, startDate: str_date, endDate: end_date, allFeedings: allFeedings, allStocks: flockFeedStocks);
+      sortedFlocks[i].totalExpense += medicineCost;
+      sortedFlocks[i].medicineCost = medicineCost;
+    }
+
+
+    // Vaccine Costs
+
+     item = CategoryItem(id: null, name: "Vaccine");
+     medicineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);
+
+     medSubItem = await DatabaseHelper.getSubCategoryList(medicineCategoryID!);
+
+     medicineList = [];
+    for(int i=0;i<medSubItem.length;i++){
+      medicineList.add(medSubItem.elementAt(i).name!);
+    }
+
+    List<InventoryStockModel> vaccineStocks =
+    await DatabaseHelper
+        .getCombinedInventoryStockData(
+
+      tableName: "VaccineStockHistory",
+
+      itemIdColumn: "vaccine_id",
+
+      itemNameColumn: "vaccine_name",
+
+      itemNames: medicineList,
+
+      inventoryType: "vaccine",
+    );
+
+
+    // Medicine costs by flock
+    for(int i=0;i<sortedFlocks.length;i++){
+      List<Vaccination_Medication> allMedications = await DatabaseHelper.getFilteredMedication(sortedFlocks[i].fId, "Vaccination", str_date, end_date);
+      double vaccineCost = await InventoryCostEngine.calculateMedicationExpense(flockId: sortedFlocks[i].fId, startDate: str_date, endDate: end_date, consumptions: allMedications, stocks: vaccineStocks, inventoryType: InventoryTypes.vaccine); //await calculateFlockFeedExpense(flockId: sortedFlocks[i].fId, startDate: str_date, endDate: end_date, allFeedings: allFeedings, allStocks: flockFeedStocks);
+      sortedFlocks[i].totalExpense += vaccineCost;
+      sortedFlocks[i].vaccineCost = vaccineCost;
+    }
+
+
+    setState(() {
+
+    });
+
+
+  }
+
+
+  Future<void> loadFlockFeedStockCosting() async {
+
+    // ==========================================
+    // STEP 1
+    // Get ALL flock feed names together
+    // ==========================================
+
+    Set<String> allFeedNames = {};
+
+    Map<int, List<String>> flockFeedMap = {};
+
+    for (int i = 0; i < sortedFlocks.length; i++) {
+
+      int flockId = sortedFlocks[i].fId;
+
+      List<String> flockFeedNames =
+      await DatabaseHelper
+          .getDistinctFeedNamesByFlockId(flockId);
+
+      flockFeedMap[flockId] = flockFeedNames;
+
+      allFeedNames.addAll(flockFeedNames);
+    }
+
+    // ==========================================
+    // STEP 2
+    // Fetch ALL feed stock + cost in ONE query
+    // ==========================================
+
+    List<FeedStockModel> allFeedStockData =
+    await DatabaseHelper.getCombinedFeedStockData(
+      allFeedNames.toList(),
+    );
+
+
+    // ==========================================
+    // STEP 3
+    // Group by feed name for fast lookup
+    // ==========================================
+
+    Map<String, List<FeedStockModel>>
+    groupedFeedStock = {};
+
+    for (var item in allFeedStockData) {
+
+      if (!groupedFeedStock.containsKey(item.feedName)) {
+        groupedFeedStock[item.feedName] = [];
+      }
+
+      groupedFeedStock[item.feedName]!.add(item);
+    }
+
+    // ==========================================
+    // STEP 4
+    // Sort each feed history by date
+    // ==========================================
+
+    groupedFeedStock.forEach((key, value) {
+
+      value.sort(
+            (a, b) => a.date.compareTo(b.date),
+      );
+    });
+
+    // ==========================================
+    // STEP 5
+    // Process flock-wise
+    // ==========================================
+
+    for (int i = 0; i < sortedFlocks.length; i++) {
+
+      int flockId = sortedFlocks[i].fId;
+
+      List<String> flockFeedNames =
+          flockFeedMap[flockId] ?? [];
+
+      // ======================================
+      // Feed stock records for this flock
+      // ======================================
+
+      List<FeedStockModel> flockFeedStocks = [];
+
+      for (String feedName in flockFeedNames) {
+
+        if (groupedFeedStock.containsKey(feedName)) {
+
+          flockFeedStocks.addAll(
+            groupedFeedStock[feedName]!,
+          );
+        }
+      }
+
+      // ======================================
+      // OPTIONAL
+      // Remove duplicates if needed
+      // ======================================
+
+      final uniqueIds = <int>{};
+
+      flockFeedStocks = flockFeedStocks.where((e) {
+
+        if (e.stockId == null) return false;
+
+        if (uniqueIds.contains(e.stockId)) {
+          return false;
+        }
+
+        uniqueIds.add(e.stockId!);
+
+        return true;
+
+      }).toList();
+
+      // ======================================
+      // OPTIONAL
+      // Sort final list
+      // ======================================
+
+      flockFeedStocks.sort(
+            (a, b) => a.date.compareTo(b.date),
+      );
+
+
+      for(int i=0;i<sortedFlocks.length;i++){
+        List<Feeding> allFeedings = await DatabaseHelper.getFilteredFeeding(sortedFlocks[i].fId, "All", str_date, end_date);
+        double feedExpense = await calculateFlockFeedExpense(flockId: sortedFlocks[i].fId, startDate: str_date, endDate: end_date, allFeedings: allFeedings, allStocks: flockFeedStocks);
+        sortedFlocks[i].totalExpense += feedExpense;
+      }
+
+      setState(() {
+
+      });
+
+      // ======================================
+      // NOW YOU HAVE:
+      // flockFeedStocks
+      //
+      // USE THIS FOR:
+      // - runtime costing
+      // - weighted average
+      // - expense reports
+      // ======================================
+
+
+      // TODO:
+      // calculate flock feed expense here
+    }
+  }
+
+  // =======================================================
+// CALCULATE FLOCK FEED EXPENSE (RUNTIME)
+// =======================================================
+//
+// REQUIREMENTS:
+// - Feed names matched exactly (normalized)
+// - Uses weighted average costing
+// - Uses historical stock BEFORE feeding date
+// - Runtime only (NO DB save)
+// - Date format: yyyy-MM-dd
+// - Unit: KG
+//
+// =======================================================
+
+  Future<double> calculateFlockFeedExpense({
+    required int flockId,
+    required String startDate,
+    required String endDate,
+
+    required List<Feeding> allFeedings,
+    required List<FeedStockModel> allStocks,
+  }) async {
+
+    double totalExpense = 0;
+
+    // =====================================================
+    // NORMALIZE FEED NAME
+    // =====================================================
+
+    String normalizeFeedName(String name) {
+      return name.trim().toLowerCase();
+    }
+
+    // =====================================================
+    // FILTER FLOCK FEEDINGS
+    // =====================================================
+
+    List<Feeding> flockFeedings =
+    allFeedings.where((feeding) {
+
+      if (feeding.f_id != flockId) {
+        return false;
+      }
+
+      if (feeding.date == null) {
+        return false;
+      }
+
+      DateTime feedingDate =
+      DateTime.parse(feeding.date!);
+
+      return
+        feedingDate.isAfter(
+            DateTime.parse(startDate)
+                .subtract(const Duration(days: 1))) &&
+
+            feedingDate.isBefore(
+                DateTime.parse(endDate)
+                    .add(const Duration(days: 1)));
+
+    }).toList();
+
+    if (flockFeedings.isEmpty) {
+      return 0;
+    }
+
+    // =====================================================
+    // GROUP STOCKS BY FEED NAME
+    // =====================================================
+
+    Map<String, List<FeedStockModel>> stockMap = {};
+
+    for (var stock in allStocks) {
+
+      String normalizedName =
+      normalizeFeedName(stock.feedName);
+
+      if (!stockMap.containsKey(normalizedName)) {
+        stockMap[normalizedName] = [];
+      }
+
+      stockMap[normalizedName]!.add(stock);
+    }
+
+    // =====================================================
+    // SORT STOCKS BY DATE
+    // =====================================================
+
+    stockMap.forEach((key, value) {
+
+      value.sort(
+            (a, b) =>
+            a.date.compareTo(b.date),
+      );
+    });
+
+    // =====================================================
+    // CACHE FOR PERFORMANCE
+    // =====================================================
+
+    Map<String, double> weightedCostCache = {};
+
+    // =====================================================
+    // PROCESS FEEDINGS
+    // =====================================================
+
+    for (var feeding in flockFeedings) {
+
+      String feedName =
+      normalizeFeedName(
+          feeding.feed_name ?? "");
+
+      double feedingQty =
+          double.tryParse(
+              feeding.quantity ?? "0") ?? 0;
+
+      if (feedingQty <= 0) {
+        continue;
+      }
+
+      DateTime feedingDate =
+      DateTime.parse(feeding.date!);
+
+      // ===================================================
+      // GET STOCK LIST FOR FEED
+      // ===================================================
+
+      List<FeedStockModel> stocks =
+          stockMap[feedName] ?? [];
+
+      if (stocks.isEmpty) {
+        continue;
+      }
+
+      // ===================================================
+      // CACHE KEY
+      // ===================================================
+
+      String cacheKey =
+          "${feedName}_${feeding.date}";
+
+      double weightedAvgCost = 0;
+
+      // ===================================================
+      // USE CACHE IF AVAILABLE
+      // ===================================================
+
+      if (weightedCostCache.containsKey(cacheKey)) {
+
+        weightedAvgCost =
+        weightedCostCache[cacheKey]!;
+
+      } else {
+
+        double totalQty = 0;
+        double totalCost = 0;
+
+        // ===============================================
+        // CALCULATE HISTORICAL WEIGHTED AVG
+        // ===============================================
+
+        for (var stock in stocks) {
+
+          DateTime stockDate =
+          DateTime.parse(stock.date);
+
+          // ONLY USE STOCKS BEFORE FEEDING DATE
+
+          if (stockDate.isAfter(feedingDate)) {
+            continue;
+          }
+
+          totalQty += stock.quantity;
+
+          totalCost += stock.totalCost;
+        }
+
+        // ===============================================
+        // WEIGHTED AVG
+        // ===============================================
+
+        if (totalQty > 0) {
+
+          weightedAvgCost =
+              totalCost / totalQty;
+
+        } else {
+
+          // FALLBACK
+          // Use latest available cost
+
+          weightedAvgCost =
+              stocks.last.costPerUnit;
+        }
+
+        // ===============================================
+        // SAVE CACHE
+        // ===============================================
+
+        weightedCostCache[cacheKey] =
+            weightedAvgCost;
+      }
+
+      // ===================================================
+      // FEEDING EXPENSE
+      // ===================================================
+
+      double feedingExpense =
+          feedingQty * weightedAvgCost;
+
+      totalExpense += feedingExpense;
+    }
+
+    // =====================================================
+    // FINAL RESULT
+    // =====================================================
+
+    return totalExpense;
+  }
+
+  Future<void> getFilteredEggsCollections(String st,String end) async {
 
     await DatabaseHelper.instance.database;
 
@@ -925,62 +1435,123 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
     return Card(
       elevation: 5,
       margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+      ),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blueGrey.shade50, Colors.white],
+            colors: [
+              Colors.blueGrey.shade50,
+              Colors.white,
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.shade300,
+              color: Colors.grey.shade200,
               blurRadius: 6,
               offset: const Offset(2, 2),
-            )
+            ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 🐔 Header: Flock Name + Profit Icon
+
+            // ================= HEADER =================
             Row(
               children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Colors.blueGrey.shade100,
+                  child: Icon(
+                    Icons.pets,
+                    color: Colors.blueGrey.shade700,
+                    size: 20,
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
                 Expanded(
-                  child: Text(
-                    flock.fName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        flock.fName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+
+                      const SizedBox(height: 3),
+
+                      Text(
+                        isProfitable
+                            ? "Profitable Flock"
+                            : "Loss Running Flock",
+                        style: TextStyle(
+                          fontSize: 11,
+                          color:
+                          isProfitable ? Colors.green : Colors.red,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Icon(
-                  isProfitable ? Icons.trending_up : Icons.trending_down,
-                  color: isProfitable ? Colors.green : Colors.red,
-                  size: 20,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  "${Utils.currency}$netProfit",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                    color: isProfitable ? Colors.green : Colors.red,
-                  ),
-                ),
+
               ],
             ),
 
-            const SizedBox(height: 12),
-
-            // 💰 Income Bar
+            Align(
+              alignment: Alignment.centerRight,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: isProfitable
+                      ? Colors.green.shade50
+                      : Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      isProfitable
+                          ? Icons.trending_up
+                          : Icons.trending_down,
+                      color:
+                      isProfitable ? Colors.green : Colors.red,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      "${Utils.currency}$netProfit",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: isProfitable
+                            ? Colors.green
+                            : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // ================= INCOME =================
             _buildFinanceBar(
               label: "Income",
               amount: flock.totalIncome,
@@ -989,9 +1560,9 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
               color: Colors.green.shade400,
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
 
-            // 💸 Expense Bar
+            // ================= EXPENSE =================
             _buildFinanceBar(
               label: "Expense",
               amount: flock.totalExpense,
@@ -999,8 +1570,123 @@ class _FinanceReportsScreen extends State<FinanceReportsScreen> with SingleTicke
               percentValue: expensePercentValue,
               color: Colors.red.shade400,
             ),
+
+            const SizedBox(height: 16),
+
+            Divider(
+              color: Colors.grey.shade300,
+              thickness: 1,
+            ),
+
+            const SizedBox(height: 12),
+
+            // ================= EXPENSE DETAILS =================
+            Text(
+              "Expense Breakdown".tr(),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                color: Colors.grey.shade800,
+              ),
+            ),
+            Text(
+              "Based on stock costs".tr(),
+              style: TextStyle(
+                fontWeight: FontWeight.normal,
+                fontSize: 9,
+                color: Colors.grey,
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            Row(
+              children: [
+                Expanded(
+                  child: _buildExpenseTile(
+                    title: "Feed",
+                    value: flock.feedCost ?? 0,
+                    icon: Icons.restaurant,
+                    color: Colors.orange,
+                  ),
+                ),
+
+                const SizedBox(width: 10),
+
+                Expanded(
+                  child: _buildExpenseTile(
+                    title: "Vaccine",
+                    value: flock.vaccineCost ?? 0,
+                    icon: Icons.vaccines,
+                    color: Colors.blue,
+                  ),
+                ),
+
+                const SizedBox(width: 10),
+
+                Expanded(
+                  child: _buildExpenseTile(
+                    title: "Medicine",
+                    value: flock.medicineCost ?? 0,
+                    icon: Icons.medication,
+                    color: Colors.purple,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildExpenseTile({
+    required String title,
+    required double value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 12,
+      ),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            color: color,
+            size: 20,
+          ),
+
+          const SizedBox(height: 6),
+
+          Text(
+            title.tr(),
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade700,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+
+          const SizedBox(height: 4),
+
+          Text(
+            "${Utils.currency}$value",
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
       ),
     );
   }

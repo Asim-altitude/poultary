@@ -554,6 +554,7 @@ class _AddMedicineStockBottomSheetState extends State<AddMedicineStockBottomShee
   int getMedicineIdbyName() {
     return _subItems.firstWhere((med) => med.name == _selectedMedicine).id!;
   }
+
   double widthScreen = 0;
   double heightScreen = 0;
   @override

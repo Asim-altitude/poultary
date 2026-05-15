@@ -13,6 +13,7 @@ import 'package:poultary/add_reduce_flock.dart';
 import 'package:poultary/model/feed_stock_history.dart';
 import 'package:poultary/model/medicine_stock_history.dart';
 import 'package:poultary/model/stock_expense.dart';
+import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/model/transaction_item.dart';
 import 'package:poultary/model/vaccine_stock_history.dart';
 import 'package:poultary/multiuser/model/egg_record.dart';
@@ -187,7 +188,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
 
     tempList = await DatabaseHelper.getFilteredTransactionsWithSort(f_id,filter_name,st,end,sortSelected);
 
-    transactionList = tempList.reversed.toList();
+    transactionList = _applyPaymentFilters(tempList.reversed.toList());
     feed_total = transactionList.length;
 
     setState(() {
@@ -239,14 +240,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
               InkWell(
                 borderRadius: BorderRadius.circular(10),
                 onTap: () {
-                  openSortDialog(context, (selectedSort) {
-                    setState(() {
-                      sortOption = selectedSort == "date_desc" ? "Date (New)" : "Date (Old)";
-                      sortSelected = selectedSort == "date_desc" ? "DESC" : "ASC";
-                    });
-
-                    getFilteredTransactions(str_date, end_date);
-                  });
+                  openSortFilterChooser(context);
                 },
                 child: Container(
                   height: 45,
@@ -263,12 +257,30 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                     children: [
                       Expanded(
                         child: Text(
-                          sortOption.tr(),
+                          _hasActiveFilter() ? "Filtered".tr() : sortOption.tr(),
                           style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Icon(Icons.sort, color: Colors.white, size: 22),
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Icon(Icons.tune, color: Colors.white, size: 22),
+                          if (_hasActiveFilter())
+                            Positioned(
+                              right: -3,
+                              top: -3,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: Colors.orangeAccent,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -711,57 +723,148 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                                         SizedBox(height: 6),
 
                                         /// **Transaction Amount & Payment Status**
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            /// **Income/Expense Label**
-                                            Container(
-                                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                              decoration: BoxDecoration(
-                                                color: transactionList.elementAt(index).type.toLowerCase() == 'income'
-                                                    ? Colors.green.shade100
-                                                    : Colors.red.shade100,
-                                                borderRadius: BorderRadius.circular(5),
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(14),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withOpacity(0.05),
+                                                blurRadius: 10,
+                                                offset: const Offset(0, 4),
                                               ),
-                                              child: Text(
-                                                transactionList.elementAt(index).type.tr(),
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: transactionList.elementAt(index).type.toLowerCase() == 'income'
-                                                      ? Colors.green
-                                                      : Colors.red,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                            ),
+                                            ],
+                                          ),
+                                          child: Column(
+                                            children: [
 
-                                            /// **Amount**
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  transactionList.elementAt(index).amount.toString(),
-                                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
-                                                ),
-                                                SizedBox(width: 4),
-                                                Text(Utils.currency, style: TextStyle(color: Colors.black, fontSize: 14)),
-                                              ],
-                                            ),
+                                              /// TOP ROW
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
 
-                                            /// **Payment Status (Colored Tag)**
-                                            Container(
-                                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                              child: Text(
-                                                transactionList.elementAt(index).payment_status.toUpperCase().tr(),
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: transactionList.elementAt(index).payment_status.toLowerCase() == "cleared"
-                                                      ? Colors.green
-                                                      : Colors.orange,
-                                                  fontSize: 12,
-                                                ),
+                                                  /// Income / Expense Badge
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                                    decoration: BoxDecoration(
+                                                      color: transactionList[index].type.toLowerCase() == 'income'
+                                                          ? Colors.green.withOpacity(0.12)
+                                                          : Colors.red.withOpacity(0.12),
+                                                      borderRadius: BorderRadius.circular(20),
+                                                    ),
+                                                    child: Row(
+                                                      children: [
+                                                        Icon(
+                                                          transactionList[index].type.toLowerCase() == 'income'
+                                                              ? Icons.arrow_downward
+                                                              : Icons.arrow_upward,
+                                                          size: 14,
+                                                          color: transactionList[index].type.toLowerCase() == 'income'
+                                                              ? Colors.green
+                                                              : Colors.red,
+                                                        ),
+                                                        const SizedBox(width: 5),
+                                                        Text(
+                                                          transactionList[index].type.tr(),
+                                                          style: TextStyle(
+                                                            fontWeight: FontWeight.w600,
+                                                            fontSize: 13,
+                                                            color: transactionList[index].type.toLowerCase() == 'income'
+                                                                ? Colors.green
+                                                                : Colors.red,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+
+                                                  /// Amount
+                                                  Row(
+                                                    children: [
+                                                      Text(
+                                                        transactionList[index].amount.toString(),
+                                                        style: const TextStyle(
+                                                          fontWeight: FontWeight.bold,
+                                                          fontSize: 18,
+                                                          color: Colors.black,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 4),
+                                                      Text(
+                                                        Utils.currency,
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          color: Colors.grey.shade700,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
                                               ),
-                                            ),
-                                          ],
+
+                                              const SizedBox(height: 12),
+
+                                              /// DIVIDER
+                                              Divider(height: 1, color: Colors.grey.shade200),
+
+                                              const SizedBox(height: 10),
+
+                                              /// BOTTOM ROW
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+
+                                                  /// Payment Method
+                                                  Row(
+                                                    children: [
+                                                      Container(
+                                                        padding: const EdgeInsets.all(6),
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.blue.withOpacity(0.1),
+                                                          borderRadius: BorderRadius.circular(8),
+                                                        ),
+                                                        child: const Icon(
+                                                          Icons.account_balance_wallet,
+                                                          size: 18,
+                                                          color: Colors.blue,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 8),
+                                                      Text(
+                                                        transactionList[index].payment_method.tr(),
+                                                        style: const TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight: FontWeight.w500,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+
+                                                  /// Status Badge
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                    decoration: BoxDecoration(
+                                                      color: transactionList[index].payment_status.toLowerCase() == "cleared"
+                                                          ? Colors.green.withOpacity(0.15)
+                                                          : Colors.orange.withOpacity(0.15),
+                                                      borderRadius: BorderRadius.circular(20),
+                                                    ),
+                                                    child: Text(
+                                                      transactionList[index].payment_status.toUpperCase().tr(),
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                        fontWeight: FontWeight.w600,
+                                                        color: transactionList[index].payment_status.toLowerCase() == "cleared"
+                                                            ? Colors.green.shade700
+                                                            : Colors.orange.shade800,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
                                         ),
 
                                         SizedBox(height: 8),
@@ -1362,35 +1465,71 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
     await showMenu(
       context: context,
       position: RelativeRect.fromLTRB(left, top, 0, 0),
-
       items: [
         PopupMenuItem(
-          value: 2,
-          child: Text(
-            "EDIT_RECORD".tr(),
-            style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: Colors.black),
+          value: 3,
+          child: Row(
+            children: [
+              Icon(Icons.info_outline, size: 18, color: Colors.blueAccent),
+              SizedBox(width: 8),
+              Text(
+                "VIEW_INFO".tr(),
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
+              ),
+            ],
           ),
         ),
         PopupMenuItem(
-          value: 1,
-          child: Text(
-            transactionList.elementAt(selected_index!).flock_update_id!= "-1" ? "VIEW_RECORD".tr() : "DELETE_RECORD".tr(),
-
-            style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: Colors.black),
+          value: 2,
+          child: Row(
+            children: [
+              Icon(Icons.edit, size: 18, color: Colors.orange),
+              SizedBox(width: 8),
+              Text(
+                "EDIT_RECORD".tr(),
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
+              ),
+            ],
           ),
         ),
-
+        if (transactionList.elementAt(selected_index!).flock_update_id == "-1")
+          PopupMenuItem(
+            value: 1,
+            child: Row(
+              children: [
+                Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                SizedBox(width: 8),
+                Text(
+                  "DELETE_RECORD".tr(),
+                  style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
+                ),
+              ],
+            ),
+          ),
       ],
       elevation: 8.0,
     ).then((value) async {
       if (value != null) {
-        if(value == 2) {
+        if (value == 3) {
+          // View Info
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TransactionInfoScreen(
+                transaction: transactionList.elementAt(selected_index!),
+              ),
+            ),
+          );
+        } else if(value == 2) {
           if(Utils.isMultiUSer && !Utils.hasFeaturePermission("edit_transaction"))
           {
             Utils.showMissingPermissionDialog(context, "edit_transaction");
@@ -1447,32 +1586,22 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
           }
         }
         else if(value == 1){
-          if(transactionList.elementAt(selected_index!).flock_update_id!= "-1"){
-            print(selected_index);
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>  ViewCompleteTransaction(transaction_id: transactionList.elementAt(selected_index!).id.toString(), isTransaction: true, flock_detail_id: '-1',)),
-            );
-
-            getData(date_filter_name);
-          }else {
-            if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_transaction"))
-            {
-              Utils.showMissingPermissionDialog(context, "delete_transaction");
-              return;
-            }
-
-            StockExpense? stockExpense = await DatabaseHelper.getByTransactionItemId(transactionList.elementAt(selected_index!).id!);
-
-            if(stockExpense != null){
-              showDeleteStockAlertDialog(context);
-              return;
-            }
-
-            showAlertDialog(context);
+          // Delete (only reachable when flock_update_id == "-1")
+          if(Utils.isMultiUSer && !Utils.hasFeaturePermission("delete_transaction"))
+          {
+            Utils.showMissingPermissionDialog(context, "delete_transaction");
+            return;
           }
-        }else {
+
+          StockExpense? stockExpense = await DatabaseHelper.getByTransactionItemId(transactionList.elementAt(selected_index!).id!);
+
+          if(stockExpense != null){
+            showDeleteStockAlertDialog(context);
+            return;
+          }
+
+          showAlertDialog(context);
+        } else {
           print(value);
         }
       }
@@ -1786,6 +1915,453 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
     );
   }
 
+  String? selectedTransactionName; // null = All
+  List<String> getDistinctTransactionNames(List<TransactionItem> list) {
+    return list
+        .map((e) => e.expense_item ?? e.sale_item) // pick whichever exists
+        .where((name) => name != null && name.trim().isNotEmpty)
+        .map((name) => name!.trim())
+        .toSet()
+        .toList()
+      ..sort(); // optional: alphabetical order
+  }
+
+  // ── Payment Method filter: null = All, "Cash" | "Online" | "Other"
+  String? filterPaymentMethod;
+  // ── Payment Type filter: null = All, "Cleared" | "Uncleared" | "Reconciled"
+  String? filterPaymentType;
+
+  String? filterPerson;
+
+  bool _hasActiveFilter() =>
+      filterPaymentMethod != null || filterPaymentType != null;
+
+  List<TransactionItem> _applyPaymentFilters(List<TransactionItem> list) {
+    return list.where((t) {
+
+      bool methodOk = filterPaymentMethod == null ||
+          t.payment_method.toLowerCase() == filterPaymentMethod!.toLowerCase();
+
+      bool typeOk = filterPaymentType == null ||
+          t.payment_status.toLowerCase() == filterPaymentType!.toLowerCase();
+
+     /* bool personOk = filterPerson == null ||
+          t.sold_purchased_from.toLowerCase() == filterPerson!.toLowerCase();
+*/
+      return methodOk && typeOk;
+
+    }).toList();
+  }
+
+  /// Shows a small bottom sheet asking the user to pick Sort or Filter
+  void openSortFilterChooser(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // drag handle
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 18),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(Icons.sort, color: Colors.blue.shade700),
+                ),
+                title: Text("Sort".tr(),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 16)),
+                subtitle: Text(sortOption.tr(),
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  openUpdatedSortDialog(
+                    context,
+                    getDistinctTransactionNames(transactionList),
+                    (selectedSort, transactionName) {
+                      setState(() {
+                        sortSelected = selectedSort;
+                        sortOption =
+                            selectedSort == "DESC" ? "Date (New)" : "Date (Old)";
+                        selectedTransactionName = transactionName;
+                      });
+                      getFilteredTransactions(str_date, end_date);
+                    },
+                  );
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _hasActiveFilter()
+                        ? Colors.orange.shade50
+                        : Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(Icons.filter_list,
+                      color: _hasActiveFilter()
+                          ? Colors.orange.shade700
+                          : Colors.green.shade700),
+                ),
+                title: Text("Filter".tr(),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 16)),
+                subtitle: Text(
+                  _hasActiveFilter() ? "Filters active".tr() : "All transactions".tr(),
+                  style: TextStyle(
+                    color: _hasActiveFilter()
+                        ? Colors.orange.shade700
+                        : Colors.grey.shade600,
+                    fontSize: 13,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  openFilterDialog(context);
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  List<Map<String, dynamic>> methodOptions = [];
+
+  void buildPaymentMethods(List<SubItem> payMethods) {
+    methodOptions = [];
+
+    /// Default ALL option
+    methodOptions.add({
+      'label': 'All',
+      'icon': Icons.select_all,
+      'color': Colors.blue,
+    });
+
+    /// Icons to rotate
+    List<IconData> icons = [
+      Icons.money,
+      Icons.account_balance,
+      Icons.phone_android,
+      Icons.credit_card,
+      Icons.wallet,
+      Icons.payments,
+    ];
+
+    /// Colors to rotate
+    List<Color> colors = [
+      Colors.green,
+      Colors.purple,
+      Colors.orange,
+      Colors.blue,
+      Colors.teal,
+      Colors.red,
+    ];
+
+    for (int i = 0; i < payMethods.length; i++) {
+      final method = payMethods[i];
+
+      methodOptions.add({
+        'label': method.name,
+        'icon': icons[i % icons.length],
+        'color': colors[i % colors.length],
+      });
+    }
+  }
+  /// Filter bottom sheet: Payment Method + Payment Type
+  void openFilterDialog(BuildContext context) async {
+
+    List<SubItem> pay_methods = await DatabaseHelper.getSubCategoryList(5);
+   // List<String> persons = await DatabaseHelper.getUniquePersons();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      builder: (ctx) {
+        String? tempMethod = filterPaymentMethod;
+        String? tempType = filterPaymentType;
+        String? tempPerson = "All";
+
+        buildPaymentMethods(pay_methods);
+
+        final List<Map<String, dynamic>> typeOptions = [
+          {'label': 'All', 'icon': Icons.select_all, 'color': Colors.blue},
+          {'label': 'CLEARED', 'icon': Icons.check_circle_outline, 'color': Colors.green},
+          {'label': 'UNCLEAR', 'icon': Icons.pending_outlined, 'color': Colors.orange},
+          {'label': 'RECONCILED', 'icon': Icons.verified_outlined, 'color': Colors.teal},
+        ];
+
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // drag handle
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[400],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Filter".tr(),
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      if (tempMethod != null || tempType != null)
+                        TextButton(
+                          onPressed: () {
+                            setModalState(() {
+                              tempMethod = null;
+                              tempType = null;
+                            });
+                          },
+                          child: Text("Clear All".tr(),
+                              style: TextStyle(color: Colors.red.shade400)),
+                        ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // ── Payment Method
+                  Text("Payment Method".tr(),
+                      style: const TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: methodOptions.map((opt) {
+                      final label = opt['label'] as String;
+                      final isSelected = label == 'All'
+                          ? tempMethod == null
+                          : tempMethod == label;
+                      final color = opt['color'] as Color;
+                      return GestureDetector(
+                        onTap: () {
+                          setModalState(() {
+                            tempMethod = label == 'All' ? null : label;
+                          });
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
+                          decoration: BoxDecoration(
+                            color:
+                                isSelected ? color : Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isSelected
+                                  ? color
+                                  : Colors.grey.shade300,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(opt['icon'] as IconData,
+                                  size: 16,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Colors.grey.shade600),
+                              const SizedBox(width: 6),
+                              Text(label.tr(),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : Colors.black87,
+                                  )),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  // ── Payment Type
+                  Text("Payment Type".tr(),
+                      style: const TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: typeOptions.map((opt) {
+                      final label = opt['label'] as String;
+                      final isSelected = label == 'All'
+                          ? tempType == null
+                          : tempType == label;
+                      final color = opt['color'] as Color;
+                      return GestureDetector(
+                        onTap: () {
+                          setModalState(() {
+                            tempType = label == 'All' ? null : label;
+                          });
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
+                          decoration: BoxDecoration(
+                            color:
+                                isSelected ? color : Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isSelected
+                                  ? color
+                                  : Colors.grey.shade300,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(opt['icon'] as IconData,
+                                  size: 16,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Colors.grey.shade600),
+                              const SizedBox(width: 6),
+                              Text(label.tr(),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : Colors.black87,
+                                  )),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 18),
+
+                  Text("SOLD_TO".tr(),
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 10),
+
+                /*  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ...["All", ...persons].map((name) {
+                        final isSelected = name == "All"
+                            ? tempPerson == null
+                            : tempPerson == name;
+
+                        return GestureDetector(
+                          onTap: () {
+                            setModalState(() {
+                              tempPerson = name == "All" ? null : name;
+                            });
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isSelected ? Colors.blue : Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isSelected ? Colors.blue : Colors.grey.shade300,
+                              ),
+                            ),
+                            child: Text(
+                              name,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: isSelected ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                          ),
+                        );
+                      })
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),*/
+
+                  // Apply Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          filterPaymentMethod = tempMethod;
+                          filterPaymentType = tempType;
+                          filterPerson = tempPerson;
+                        });
+                        Navigator.pop(ctx);
+                        // Re-apply filters on the already-fetched list
+                        setState(() {
+                          transactionList =
+                              _applyPaymentFilters(tempList.reversed.toList());
+                        });
+                      },
+                      child: Text("Apply".tr(),
+                          style: const TextStyle(
+                              fontSize: 16, color: Colors.white)),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   String sortSelected = "DESC"; // Default label
   String sortOption = "Date (New)";
   void openSortDialog(BuildContext context, Function(String) onSortSelected) {
@@ -1823,6 +2399,425 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
     );
   }
 
+  void openUpdatedSortDialog(
+      BuildContext context,
+      List<String> transactionNames,
+      Function(String sort, String? transactionName) onApply,
+      ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      builder: (context) {
+        String tempSort = sortSelected;
+        String? tempTransaction = selectedTransactionName;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+                  /// Drag handle
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 15),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[400],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+
+                  /// SORT SECTION
+                  Text("Sort By".tr(),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+
+                  RadioListTile<String>(
+                    value: "DESC",
+                    groupValue: tempSort,
+                    title: Text("Date (New)".tr()),
+                    onChanged: (value) {
+                      setState(() => tempSort = value!);
+                    },
+                  ),
+
+                  RadioListTile<String>(
+                    value: "ASC",
+                    groupValue: tempSort,
+                    title: Text("Date (Old)".tr()),
+                    onChanged: (value) {
+                      setState(() => tempSort = value!);
+                    },
+                  ),
+
+                  const Divider(height: 30),
+
+                  /// TRANSACTION FILTER SECTION
+                  Text("Transaction Type".tr(),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold)),
+
+                  const SizedBox(height: 12),
+
+                  SizedBox(
+                    height: 45,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: transactionNames.length + 1,
+                      itemBuilder: (context, index) {
+                        String name =
+                        index == 0 ? "All" : transactionNames[index - 1];
+
+                        bool isSelected = name == "All"
+                            ? tempTransaction == null
+                            : tempTransaction == name;
+
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: ChoiceChip(
+                            label: Text(name),
+                            selected: isSelected,
+                            selectedColor: Colors.green.shade600,
+                            backgroundColor: Colors.grey.shade200,
+                            labelStyle: TextStyle(
+                              color:
+                              isSelected ? Colors.white : Colors.black87,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            onSelected: (_) {
+                              setState(() {
+                                tempTransaction =
+                                name == "All" ? null : name;
+                              });
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  /// APPLY BUTTON
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding:
+                        const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      onPressed: () {
+                        onApply(tempSort, tempTransaction);
+                        Navigator.pop(context);
+                      },
+                      child: Text("Apply".tr(),
+                          style: const TextStyle(fontSize: 16)),
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Transaction Info Screen
+// ─────────────────────────────────────────────────────────────────────────────
+class TransactionInfoScreen extends StatelessWidget {
+  final TransactionItem transaction;
+
+  const TransactionInfoScreen({Key? key, required this.transaction})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isIncome = transaction.type?.toLowerCase() == 'income';
+    final Color typeColor = isIncome ? Colors.green : Colors.red;
+    final Color typeBg = isIncome ? Colors.green.shade50 : Colors.red.shade50;
+
+    return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(10),
+            bottomRight: Radius.circular(10),
+          ),
+          child: AppBar(
+            backgroundColor: Colors.blue,
+            elevation: 8,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: Text(
+              "Transaction Info".tr(),
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600),
+            ),
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header card ───────────────────────────────────────────────
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.12),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          isIncome
+                              ? (transaction.sale_item ?? '').tr()
+                              : (transaction.expense_item ?? '').tr(),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Utils.getThemeColorBlue(),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: typeBg,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: typeColor.withOpacity(0.4)),
+                        ),
+                        child: Text(
+                          (transaction.type ?? '').tr(),
+                          style: TextStyle(
+                              color: typeColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Icon(
+                        isIncome ? Icons.trending_up : Icons.trending_down,
+                        color: typeColor,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        "${transaction.amount ?? 0} ${Utils.currency}",
+                        style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: typeColor),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            // ── Summary ───────────────────────────────────────────────────
+            _sectionTitle("Summary".tr()),
+            _infoCard([
+              _infoRow(Icons.calendar_today, "Date".tr(),
+                  Utils.getFormattedDate(transaction.date.toString())),
+              _divider(),
+              _infoRow(Icons.store, "Flock / Farm".tr(),
+                  (transaction.f_name ?? '').tr()),
+              _divider(),
+              _infoRow(
+                isIncome ? Icons.person_outline : Icons.person_outline,
+                isIncome ? "Sold To".tr() : "Paid To".tr(),
+                transaction.sold_purchased_from ?? '-',
+              ),
+              _divider(),
+              _infoRow(Icons.production_quantity_limits, "Quantity".tr(),
+                  "${transaction.how_many ?? 0} ${"ITEMS".tr()}"),
+              _divider(),
+              _infoRow(
+                Icons.price_change_outlined,
+                "Unit Price".tr(),
+                "${(transaction.unitPrice ?? 0).toStringAsFixed(2)} ${Utils.currency}",
+              ),
+            ]),
+
+            const SizedBox(height: 14),
+
+            // ── Payment Details ───────────────────────────────────────────
+            _sectionTitle("Payment Details".tr()),
+            _infoCard([
+              _infoRow(
+                Icons.payment,
+                "Payment Method".tr(),
+                (transaction.payment_method?.isEmpty ?? true)
+                    ? '-'
+                    : transaction.payment_method!.tr(),
+              ),
+              _divider(),
+              _infoRow(
+                Icons.verified_outlined,
+                "Payment Status".tr(),
+                (transaction.payment_status?.isEmpty ?? true)
+                    ? '-'
+                    : transaction.payment_status!.toUpperCase().tr(),
+                valueColor:
+                    transaction.payment_status?.toLowerCase() == 'cleared'
+                        ? Colors.green
+                        : Colors.orange,
+              ),
+            ]),
+
+            const SizedBox(height: 14),
+
+            // ── Notes ─────────────────────────────────────────────────────
+            _sectionTitle("Notes".tr()),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.10),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.notes, color: Colors.grey.shade500, size: 18),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      (transaction.short_note?.isEmpty ?? true)
+                          ? 'NO_NOTES'.tr()
+                          : transaction.short_note!,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: (transaction.short_note?.isEmpty ?? true)
+                            ? Colors.grey
+                            : Colors.black87,
+                        fontStyle: (transaction.short_note?.isEmpty ?? true)
+                            ? FontStyle.italic
+                            : FontStyle.normal,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _sectionTitle(String title) => Padding(
+        padding: const EdgeInsets.only(bottom: 8, left: 2),
+        child: Text(
+          title,
+          style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: Colors.black54,
+              letterSpacing: 0.5),
+        ),
+      );
+
+  Widget _infoCard(List<Widget> children) => Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.10),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(children: children),
+      );
+
+  Widget _divider() =>
+      Divider(height: 1, thickness: 1, color: Colors.grey.shade100);
+
+  Widget _infoRow(IconData icon, String label, String value,
+          {Color? valueColor}) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: Colors.blueGrey.shade400),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(label,
+                  style:
+                      const TextStyle(fontSize: 13, color: Colors.black54)),
+            ),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: valueColor ?? Colors.black87,
+              ),
+            ),
+          ],
+        ),
+      );
+}

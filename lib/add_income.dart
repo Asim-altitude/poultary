@@ -10,7 +10,6 @@ import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/sale_contractor_screen.dart';
-import 'package:poultary/sticky.dart';
 import 'package:poultary/sub_category_screen.dart';
 import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/ui/flock_ui_list.dart';
@@ -188,8 +187,6 @@ class _NewIncome extends State<NewIncome>
   }
 
 
-
-
   List<String> contractorNames = [];
    List<Flock> flocks = [];
    void getList() async {
@@ -200,7 +197,8 @@ class _NewIncome extends State<NewIncome>
        soldtoController.text = selectedContractor!.name;
      }
 
-     if(!isEdit) {
+     if(!isEdit)
+     {
        await DatabaseHelper.instance.database;
        flocks = await DatabaseHelper.getFlocks();
        flocks.insert(0, Flock(f_id: -1,f_name: 'Farm Wide'.tr(),bird_count: 0,purpose: '',acqusition_date: '',acqusition_type: '',notes: '',icon: '', active_bird_count: 0, active: 1, flock_new: 1));
@@ -267,8 +265,6 @@ class _NewIncome extends State<NewIncome>
     });
 
   }
-
-
 
 
   void getPayMethodList() async {
@@ -669,8 +665,7 @@ class _NewIncome extends State<NewIncome>
                               amount: amountController.text,
                               payment_method: payment_method,
                               payment_status: payment_status,
-                              sold_purchased_from: soldtoController
-                                  .text,
+                              sold_purchased_from: soldtoController.text,
                               short_note: notesController.text,
                               how_many: howmanyController.text,
                               unitPrice: double.parse(unitPriceController.text),

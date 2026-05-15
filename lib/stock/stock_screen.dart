@@ -442,6 +442,8 @@ class _FeedStockScreenState extends State<FeedStockScreen> with RefreshMixin {
                       List<FeedStockHistory> history = await DatabaseHelper
                           .fetchStockHistory(
                           _stockSummary!.elementAt(index).feedName);
+
+                      FeedStockSummary stock = _stockSummary!.elementAt(index);
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -618,6 +620,7 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
 
     if(!_amountController.text.isEmpty)
     {
+
       TransactionItem transaction_item = TransactionItem(
           f_id: -1,
           date: DateFormat('yyyy-MM-dd').format(_selectedDate),
@@ -639,21 +642,23 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
           last_modified: Utils.getTimeStamp(),
           modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
           farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '');
-
       int? transaction_id = await DatabaseHelper.insertNewTransaction(transaction_item);
       StockExpense stockExpense = StockExpense(stockItemId: stock_item_id!, transactionId: transaction_id!);
       await DatabaseHelper.insertStockJunction(stockExpense);
       feedStockFB.transaction = transaction_item;
+
     }
 
-    if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_feed")) {
+    if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_feed"))
+    {
+
       feedStockFB.sync_id = stock.sync_id;
       feedStockFB.sync_status = SyncStatus.SYNCED;
       feedStockFB.last_modified = Utils.getTimeStamp();
       feedStockFB.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
       feedStockFB.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
-
       await FireBaseUtils.uploadFeedStockHistory(feedStockFB);
+
     }
 
     Navigator.pop(context, true);
@@ -666,6 +671,7 @@ class _AddStockBottomSheetState extends State<AddStockBottomSheet> {
   bool isRequired = false;
   double widthScreen = 0;
   double heightScreen = 0;
+
   @override
   Widget build(BuildContext context) {
 
@@ -889,7 +895,8 @@ Widget _buildTextField({
   required String label,
   required IconData icon,
   TextInputType keyboardType = TextInputType.text,
-}) {
+})
+{
   return TextField(
     controller: controller,
     keyboardType: keyboardType,

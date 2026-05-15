@@ -47,13 +47,15 @@ class _BackupFoundScreenState extends State<BackupFoundScreen> {
     isLooking = false;
     setState(() {});
 
+   // latestBackupUrl = "https://photogallerytv.com/db_temp/farm_CONF8571C3374_1765090746.db";
     print("BACKUP_URL $latestBackupUrl");
     final uri = Uri.parse(latestBackupUrl);
 
     final client = http.Client();
     final request = http.Request('GET', uri);
 
-    try {
+    try
+    {
       final response = await client.send(request).timeout(const Duration(seconds: 30));
 
       if (response.statusCode != 200) {

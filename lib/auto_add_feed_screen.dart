@@ -152,7 +152,7 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                   (fs) => fs.day == _getDayName(weekday),
             );
 
-            if (morningFeedSetting != null) {
+            if (morningFeedSetting != null  && morningFeedSetting.feedName.toLowerCase() != "not specified") {
               String formattedDate = DateFormat('yyyy-MM-dd').format(date);
               Feeding morningFeeding = Feeding(
                 f_id: setting.id,
@@ -174,7 +174,7 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
               });
             }
 
-            if (eveningFeedSetting != null) {
+            if (eveningFeedSetting != null  && eveningFeedSetting.feedName.toLowerCase() != "not specified") {
               String formattedDate = DateFormat('yyyy-MM-dd').format(date);
               Feeding eveningFeeding = Feeding(
                 f_id: setting.id,
@@ -195,13 +195,14 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
                 pendingFeedRecords.add(eveningFeeding);
               });
             }
-          } else {
+          }
+          else {
             // Generate a single feeding record if Twice a Day is off (Once a Day)
             FeedSetting? feedSetting = setting.feedSettings.firstWhereOrNull(
                   (fs) => fs.day == _getDayName(weekday),
             );
 
-            if (feedSetting != null) {
+            if (feedSetting != null && feedSetting.feedName.toLowerCase() != "not specified") {
               String formattedDate = DateFormat('yyyy-MM-dd').format(date);
               Feeding newFeeding = Feeding(
                 f_id: setting.id,

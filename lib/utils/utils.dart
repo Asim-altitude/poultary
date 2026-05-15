@@ -87,6 +87,9 @@ class Utils {
   //static final totalSecondsInDay = 5;
   static final totalSecondsInDay = 86400;
 
+
+  static int ai_credits = 0;
+
   static Flock? selected_flock;
   static Eggs? selected_egg_collection;
   static Flock_Detail? selected_flock_collection;
@@ -240,6 +243,7 @@ class Utils {
       await DatabaseHelper.createTaskTable();
       await DatabaseHelper.addColumnIfNotExists("Transactions", "unit_price", "REAL", 0);
       await DatabaseHelper.addTaskRecurrenceColumns();
+      await DatabaseHelper.createAITables();
       await addNewColumn();
       await addMissingCategories();
       // await createMissingEggsRecords();
@@ -1655,6 +1659,8 @@ $storeLink
       inititalize();
     }
 
+    Utils.isShowAdd = false;
+
   }
 
 
@@ -2140,6 +2146,9 @@ $storeLink
     else if(language =="sw"){
       return Languages.swahili;
     }
+    else if(language =="cs"){
+      return Languages.czech;
+    }
     return Languages.english;
   }
 
@@ -2240,6 +2249,8 @@ $storeLink
     }
     else if(language.isoCode =="sw"){
       languageName = "sw";
+    }else if(language.isoCode =="cs"){
+      languageName = "cs";
     }
 
     print(language.isoCode);
@@ -2262,6 +2273,7 @@ $storeLink
     var uuid = Uuid();
     return "$appDocPath/resumeapp-${uuid.v1()}.jpg";
   }
+
   static Future<File> convertToJPGFileIfRequiredWithCompression(File file,
       {int maxSizeKB = 500}) async {
     print("Original file path: ${file.path}");

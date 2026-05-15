@@ -4,6 +4,8 @@ class FlockIncomeExpense {
   double totalIncome;
   double totalExpense;
 
+  double feedCost = 0, medicineCost = 0, vaccineCost = 0;
+
   FlockIncomeExpense({
     required this.fId,
     required this.fName,

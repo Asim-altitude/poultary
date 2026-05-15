@@ -13,7 +13,6 @@ import 'package:poultary/model/flock_detail.dart';
 import 'package:poultary/model/flock_image.dart';
 import 'package:poultary/model/weight_record.dart';
 import 'package:poultary/multiuser/utils/SyncManager.dart';
-import 'package:poultary/sticky.dart';
 import 'package:poultary/suggested_notifcations.dart';
 import 'package:poultary/transactions_screen.dart';
 import 'package:poultary/utils/fb_analytics.dart';
@@ -22,6 +21,8 @@ import 'package:poultary/utils/utils.dart';
 import 'package:poultary/weight_record_screen.dart';
 import 'add_birds.dart';
 import 'add_reduce_flock.dart';
+import 'artificial_intelligence/screens/ai_suggestions_screen.dart';
+import 'artificial_intelligence/util/ai_analyze.dart';
 import 'custom/all_custom_data_screen.dart';
 import 'custom/custom_flock_category.dart';
 import 'daily_feed.dart';
@@ -418,6 +419,31 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
           },
         ),
         actions: [
+         /* InkWell(
+            onTap: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AISuggestionsScreen(),
+                ),
+              );
+            },
+            child: Container(
+              width: 40,
+              height: 40,
+              padding: EdgeInsets.all(5),
+              child: Image.asset('assets/ai_analysis.png',),),
+          ),
+         */
+          /*Container(
+            alignment: Alignment.center,
+            child: AIWaveButton(
+              onTap: ()  {
+                // Navigate to AI screen
+               showAIFarmDialog(context);
+              },
+            ),
+          ),*/
           IconButton(
             icon: const Icon(Icons.notifications_active, color: Colors.orangeAccent,),
             tooltip: 'Notification',
@@ -632,11 +658,11 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                                   ),
                                                 ),
 
-                                                const Icon(
+                                                /*const Icon(
                                                   Icons.info_outline,
                                                   color: Colors.white70,
                                                   size: 26,
-                                                ),
+                                                ),*/
                                               ],
                                             ),
                                           ),
@@ -685,10 +711,19 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                                               fontWeight: FontWeight.w600,
                                             ),
                                           ),
+
                                         ],
                                       ),
                                     ),
                                   ],
+                                ),
+                                SizedBox(height: 5,),
+                                Container(
+                                  child: ViewMoreInfoButton(
+                                    onTap: () {
+                                      _showFlockInfoBottomSheet(context);
+                                    },
+                                  ),
                                 ),
                                 Card(
                                   elevation: 3,
@@ -969,9 +1004,12 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                             );
                           },
                         ),),*/
+
                           ],
                         ),
                       ),
+
+
                       Container(
                         height: heightScreen,
                         padding: EdgeInsets.all(10),
@@ -1742,6 +1780,156 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
             ,),),);
   }
 
+  void showAIFarmDialog(BuildContext context) {
+    bool isChecked = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+
+                  // 🔥 Header
+                  Container(
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.indigo, Colors.blueAccent],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.auto_awesome, color: Colors.white, size: 32),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            "AI Farm Analysis Tool",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(height: 16),
+
+                  // 📄 Description
+                  Text(
+                    "Our AI will securely analyze your farm flock data to generate valuable insights. "
+                        "These insights will help you optimize feeding, improve bird health, manage finances better, "
+                        "and boost overall farm productivity.",
+                    style: TextStyle(
+                      fontSize: 14,
+                      height: 1.5,
+                      color: Colors.black87,
+                    ),
+                  ),
+
+                  SizedBox(height: 16),
+
+                  // ✨ Features
+                  _featureItem(Icons.restaurant, "Feed optimization suggestions"),
+                  _featureItem(Icons.health_and_safety, "Health & disease insights"),
+                  _featureItem(Icons.attach_money, "Financial performance tips"),
+                  _featureItem(Icons.trending_up, "Productivity improvement"),
+
+                  SizedBox(height: 16),
+
+                  // ☑️ Checkbox
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: isChecked,
+                        onChanged: (val) {
+                          setState(() {
+                            isChecked = val!;
+                          });
+                        },
+                      ),
+                      Expanded(
+                        child: Text(
+                          "I agree to send my farm data for AI analysis",
+                          style: TextStyle(fontSize: 13),
+                        ),
+                      )
+                    ],
+                  ),
+
+                  SizedBox(height: 10),
+
+                  // 🚀 Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: isChecked
+                          ? () async {
+                        Navigator.pop(context);
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => AISuggestionsScreen()),);
+                        // Continue flow
+                      }
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        backgroundColor:
+                        isChecked ? Colors.blue : Colors.grey.shade400,
+                      ),
+                      child: Text(
+                        "Get Started",
+                        style: TextStyle(fontSize: 16, color: isChecked ? Colors.white : Colors.grey),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+// ✨ Feature Row Widget
+  Widget _featureItem(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.indigo, size: 20),
+          SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(fontSize: 14),
+            ),
+          )
+        ],
+      ),
+    );
+  }
 
   void _showFlockInfoBottomSheet(BuildContext context) {
     showModalBottomSheet(
@@ -1868,32 +2056,38 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
 
                         const SizedBox(height: 6),
 
-                        /// 🕒 Age
-                        Row(
-                          children: [
-                            const Icon(Icons.watch_later_outlined, color: Colors.white70, size: 18),
-                            const SizedBox(width: 6),
-                            Text('Age'.tr() + ": ",
-                                style: const TextStyle(fontSize: 12, color: Colors.white70)),
-                            Text(
-                              ageInWeeks
-                                  ? Utils.getAnimalAgeWeeks(Utils.selected_flock!.acqusition_date)
-                                  : Utils.getAnimalAge(Utils.selected_flock!.acqusition_date),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            InkWell(
-                              onTap: () => setState(() => ageInWeeks = !ageInWeeks),
-                              child: const Icon(Icons.switch_camera_outlined,
-                                  color: Colors.white70, size: 22),
-                            ),
-                          ],
+                        StatefulBuilder(
+                          builder: (context, setStateSB) {
+                            return Row(
+                              children: [
+                                const Icon(Icons.watch_later_outlined, color: Colors.white70, size: 18),
+                                const SizedBox(width: 6),
+                                Text('Age'.tr() + ": ",
+                                    style: const TextStyle(fontSize: 12, color: Colors.white70)),
+                                Text(
+                                  ageInWeeks
+                                      ? Utils.getAnimalAgeWeeks(Utils.selected_flock!.acqusition_date)
+                                      : Utils.getAnimalAge(Utils.selected_flock!.acqusition_date),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                InkWell(
+                                  onTap: () {
+                                    setStateSB(() {
+                                      ageInWeeks = !ageInWeeks;
+                                    });
+                                  },
+                                  child: const Icon(Icons.switch_camera_outlined,
+                                      color: Colors.white70, size: 22),
+                                ),
+                              ],
+                            );
+                          },
                         ),
-
                         const SizedBox(height: 6),
 
                         /// 📅 Date
@@ -3527,6 +3721,58 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
       }
     }
 
+  }
+
+
+}
+
+class ViewMoreInfoButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const ViewMoreInfoButton({super.key, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(30),
+      child: Ink(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Colors.white10, Colors.white10],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children:  [
+
+            Icon(
+              Icons.info_outline,
+              color: Colors.white,
+              size: 18,
+            ),
+            SizedBox(width: 8),
+
+            Text(
+              "Tap_View".tr(),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.2,
+              ),
+            ),
+
+          ],
+        ),
+      ),
+    );
   }
 
 

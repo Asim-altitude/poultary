@@ -103,6 +103,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
     }
     AnalyticsUtil.logScreenView(screenName: "eggs_screen");
   }
+
   _loadBannerAd(){
     // TODO: Initialize _bannerAd
     _bannerAd = BannerAd(
@@ -1187,7 +1188,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
 
     try{
-      bool isFirst = await DatabaseHelper.isFirstRecord("Eggs");
+      bool isFirst = true;//await DatabaseHelper.isFirstRecord("Eggs");
       if(isFirst) {
         _statuses  = await _prefs.loadAllStatuses(_routineOrder);
         bool complete = _statuses["Egg"] ?? false;

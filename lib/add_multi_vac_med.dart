@@ -11,6 +11,7 @@ import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/multiuser/model/multi_health_record.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
 import 'package:poultary/sticky.dart';
+import 'package:poultary/sub_category_screen.dart';
 import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/utils.dart';
 
@@ -282,6 +283,31 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
 
     _selectedUnit = _selectedunitList[0];
     print("Final selected units: $_selectedunitList");
+  }
+
+  void getMedicineList() async
+  {
+
+    if(isEdit)
+      return;
+
+    await DatabaseHelper.instance.database;
+
+    _subItemList = await DatabaseHelper.getSubCategoryList(medicineCategoryID!);
+
+    medicineList = [];
+
+    for(int i=0;i<_subItemList.length;i++){
+      medicineList.add(_subItemList.elementAt(i).name!);
+    }
+
+    if(!isEdit)
+      _medselectedValue = medicineList[0];
+
+    setState(() {
+
+    });
+
   }
 
 
@@ -1048,10 +1074,19 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
 
             // Disease Dropdown
             _titleWithIcon("Disease".tr(), Icons.sick, () async {
-              /*int? catID = await DatabaseHelper.addCategoryIfNotExists(
-                CategoryItem(id: null, ca: "Disease", category_type: '', name: ''),
+              Utils.selected_category = 4;
+              Utils.selected_category_name = "Disease";
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      SubCategoryScreen(),
+                ),
               );
-              await addNewItem(catID!, 0);*/
+              getDiseaseList();
+              setState(() {
+
+              });
             }),
 
             SizedBox(height: 6),
@@ -1073,14 +1108,34 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
               Utils.vaccine_medicine.toLowerCase().contains("medi") ? "Medicine" : "Vaccine",
               Icons.medication_rounded,
                   () async {
-                String type = Utils.vaccine_medicine.toLowerCase().contains("medi")
-                    ? "Medicine"
-                    : "Vaccine";
 
-               /* int? catID = await DatabaseHelper.addCategoryIfNotExists(
-                  CategoryItem(id: null, category_name: type, category_type: ''),
-                );
-                await addNewItem(catID!, 1);*/
+                    String type = "Vaccine";
+                    if( Utils.vaccine_medicine.toLowerCase().contains("medi"))
+                      type = "Medicine";
+
+                    CategoryItem item = CategoryItem(id: null, name: type);
+                    medicineCategoryID = await DatabaseHelper.addCategoryIfNotExists(item);
+
+                    Utils.selected_category = medicineCategoryID!;
+                    if(Utils.vaccine_medicine.toLowerCase().contains("medi")) {
+
+                      Utils.selected_category_name = "Medicine";
+                    }
+                    else
+                    {
+                      Utils.selected_category_name = "Vaccine";
+                    }
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            SubCategoryScreen(),
+                      ),
+                    );
+                    getMedicineList();
+                    setState(() {
+
+                    });
               },
             ),
 

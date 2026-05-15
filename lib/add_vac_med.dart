@@ -9,13 +9,11 @@ import 'package:intl/intl.dart';
 import 'package:poultary/model/med_vac_item.dart';
 import 'package:poultary/model/sub_category_item.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
-import 'package:poultary/sticky.dart';
 import 'package:poultary/stock/medicine_stock_screen.dart';
 import 'package:poultary/stock/vaccine_stock_screen.dart';
 import 'package:poultary/sub_category_screen.dart';
 import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/utils.dart';
-
 import 'database/databse_helper.dart';
 import 'model/category_item.dart';
 import 'model/flock.dart';
@@ -104,6 +102,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
     }
     AnalyticsUtil.logScreenView(screenName: "add_health");
   }
+
   _loadNativeAds(){
     _myNativeAd = NativeAd(
       adUnitId: Utils.NativeAdUnitId,
@@ -139,6 +138,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
     _myNativeAd.load();
 
   }
+
   int? medicineCategoryID = -1;
   int activeStep = 0;
   List<Flock> flocks = [];
@@ -171,7 +171,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
     doctorList = (await DatabaseHelper.getDistinctDoctorNames())!;
 
     String type = "Vaccine";
-    if( Utils.vaccine_medicine.toLowerCase().contains("medi"))
+    if(Utils.vaccine_medicine.toLowerCase().contains("medi"))
       type = "Medicine";
 
     CategoryItem item = CategoryItem(id: null, name: type);
@@ -198,6 +198,31 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
     });
 
   }
+
+  void getMedicineList() async {
+
+    if(isEdit)
+      return;
+
+    await DatabaseHelper.instance.database;
+
+    _subItemList = await DatabaseHelper.getSubCategoryList(medicineCategoryID!);
+
+    medicineList = [];
+
+    for(int i=0;i<_subItemList.length;i++){
+      medicineList.add(_subItemList.elementAt(i).name!);
+    }
+
+    if(!isEdit)
+      _medselectedValue = medicineList[0];
+
+    setState(() {
+
+    });
+
+  }
+
 
   void reloadStocks() async{
     _stockSummary = await DatabaseHelper.getMedicineStockSummary();
@@ -284,6 +309,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
     _selectedUnit = _selectedunitList[0];
     print("Final selected units: $_selectedunitList");
   }
+
 
 
   void getDiseaseList() async {
@@ -723,7 +749,7 @@ class _NewVaccineMedicine extends State<NewVaccineMedicine>
                                                   SubCategoryScreen(),
                                             ),
                                           );
-                                          getDiseaseList();
+                                          getMedicineList();
                                           setState(() {
 
                                           });

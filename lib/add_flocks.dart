@@ -1776,8 +1776,11 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
   void gotoNotificationsScreen(int f_id) {
     if (widget.isStart) {
       //Navigator.pop(context);
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) =>
-          HomeScreen()));
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen()),
+            (route) => false,
+      );
 
     } else {
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) =>

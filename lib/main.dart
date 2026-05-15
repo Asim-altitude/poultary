@@ -39,7 +39,7 @@ Future<void> main() async {
   );
 
   runApp(EasyLocalization(
-          supportedLocales: [Locale('en'), Locale('ar'),Locale('de'),Locale('ru'),Locale('fa'),Locale('it'),Locale('ja'),Locale('ko'),Locale('pt'),Locale('tr'),Locale('fr'),Locale('id'),Locale('hi'),Locale('es'),Locale('zh'),Locale('uk'),Locale('pl'),Locale('bn'),Locale('te'),Locale('ta'),Locale('el'),Locale('sw')],
+          supportedLocales: [Locale('en'), Locale('ar'),Locale('de'),Locale('ru'),Locale('fa'),Locale('it'),Locale('ja'),Locale('ko'),Locale('pt'),Locale('tr'),Locale('fr'),Locale('id'),Locale('hi'),Locale('es'),Locale('zh'),Locale('uk'),Locale('pl'),Locale('bn'),Locale('te'),Locale('ta'),Locale('el'),Locale('sw'),Locale('cs')],
           path: 'assets/translations', // <-- change the path of the translation files
           fallbackLocale: Locale('en'),
       child: MyApp()),);
@@ -82,7 +82,8 @@ Future<Widget> getInitialScreen() async {
   bool isAutoFeedEnabled = prefs.getBool('isAutoFeedEnabled') ?? false;
   Utils.currentUser = user;
 
-  try {
+  try
+  {
     _configEasyLoading();
   }
   catch (ex) {
@@ -210,15 +211,15 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      // darkTheme: ThemeData(
-      //   fontFamily: 'Roboto',
-      //   colorScheme: ColorScheme.fromSeed(
-      //     seedColor: Utils.getThemeColorBlue(),
-      //     brightness: Brightness.dark,
-      //   ),
-      //   useMaterial3: true,
-      // ),
-      themeMode: ThemeMode.system, //
+      darkTheme: ThemeData(                          // ✅ uncommented
+        fontFamily: 'Roboto',
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Utils.getThemeColorBlue(),
+          brightness: Brightness.dark,               // ✅ this is the key line
+        ),
+        useMaterial3: true,
+      ),
+      themeMode: ThemeMode.system,                   // ✅ already correct
       home: Directionality(
         textDirection: direction ? ui.TextDirection.ltr : ui.TextDirection.rtl,
         child: FutureBuilder<Widget>(
