@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../../database/databse_helper.dart';
 import '../../utils/utils.dart';
@@ -55,10 +56,55 @@ class _GuidedRoutineScreenState extends State<GuidedRoutineScreen> {
       default:        return [];
     }
   }
-
+  late BannerAd _bannerAd;
+  double _heightBanner = 0;
+  bool _isBannerAdReady = false;
   // ══════════════════════════════════════════════════════════════════════
   //  STEP DEFINITIONS
   // ══════════════════════════════════════════════════════════════════════
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if(Utils.isShowAdd){
+      _loadBannerAd();
+    }
+
+  }
+  @override
+  void dispose() {
+    try{
+      _bannerAd.dispose();
+    }catch(ex){
+
+    }
+    super.dispose();
+  }
+  _loadBannerAd(){
+    // TODO: Initialize _bannerAd
+    _bannerAd = BannerAd(
+      adUnitId: Utils.bannerAdUnitId,
+
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _heightBanner = 60;
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          _heightBanner = 0;
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd.load();
+  }
 
   List<_RoutineStep> _eggSteps() => [
     _RoutineStep(
@@ -756,7 +802,17 @@ class _GuidedRoutineScreenState extends State<GuidedRoutineScreen> {
         child: Column(
           children: [
             _ProgressBar(current: safe + 1, total: steps.length),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
+            if(_isBannerAdReady)
+              Align(
+                alignment: Alignment.topCenter,
+                child: Container(
+                    height: 60.0,
+                    width: Utils.WIDTH_SCREEN,
+                    child: AdWidget(ad: _bannerAd)
+                ),
+              ),
+            const SizedBox(height: 8),
 
             Expanded(
               child: SingleChildScrollView(
