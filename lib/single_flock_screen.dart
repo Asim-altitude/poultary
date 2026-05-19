@@ -435,7 +435,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
               child: Image.asset('assets/ai_analysis.png',),),
           ),
          */
-          Container(
+          /*Container(
             alignment: Alignment.center,
             child: AIWaveButton(
               onTap: ()  {
@@ -443,7 +443,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
                showAIFarmDialog(context);
               },
             ),
-          ),
+          ),*/
           IconButton(
             icon: const Icon(Icons.notifications_active, color: Colors.orangeAccent,),
             tooltip: 'Notification',
