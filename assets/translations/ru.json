@@ -1378,7 +1378,7 @@
 
  "routine_screen_title": "🐔 Моя ферма",
  "routine_assistant_greeting": "👋 Давайте настроим распорядок вашей фермы!",
- "routine_assistant_greeting_named": "👋 Добро пожаловать, {ферма}! ",
+ "routine_assistant_greeting_named": "👋 Добро пожаловать, {farm}! ",
  "routine_assistant_subtitle": "Будьте в курсе всех задач — никогда больше не пропустите сбор, кормление или проверку здоровья.",
  "routine_assistant_yes": "Да, пожалуйста",
  "routine_assistant_skip": "Может быть, позже",
@@ -1386,7 +1386,7 @@
  "routine_all_done_subtitle": "Коснитесь любой карточки, чтобы просмотреть или обновить программу.",
  "routine_progress_label": "Настроено {завершено} из {всего} процедур",
  "routine_picker_title": "Какую программу вы бы хотели настроить?",
- "routine_card_label": "{тип} Рутина",
+ "routine_card_label": "{type} Рутина",
  "routine_card_configured": "Запланировано · Напоминания активны",
  "routine_card_not_configured": "Нажмите, чтобы настроить",
  "routine_card_long_press_hint": "Длительное нажатие для сброса",

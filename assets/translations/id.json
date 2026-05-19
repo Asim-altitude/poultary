@@ -1376,7 +1376,7 @@
 
   "routine_screen_title": "🐔 Rutinitas Peternakan Saya",
   "routine_assistant_greeting": "👋 Ayo atur rutinitas pertanianmu!",
-  "routine_assistant_greeting_named": "👋 Selamat datang, {pertanian}! ",
+  "routine_assistant_greeting_named": "👋 Selamat datang, {farm}! ",
   "routine_assistant_subtitle": "Pantau terus setiap tugas — jangan pernah melewatkan pengumpulan, pemberian makan, atau pemeriksaan kesehatan lagi.",
   "routine_assistant_yes": "Ya, tolong",
   "routine_assistant_skip": "mungkin nanti",

@@ -223,8 +223,8 @@ class _AskAIDetailsScreenState extends State<AskAIDetailsScreen> {
         backgroundColor: Colors.transparent,
         foregroundColor: const Color(0xff1A1F36),
         centerTitle: true,
-        title: const Text(
-          "AI Analysis",
+        title:  Text(
+          "AI Analysis".tr(),
           style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 18,
@@ -455,8 +455,8 @@ class _AskAIDetailsScreenState extends State<AskAIDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "AI Insights",
+                 Text(
+                  "AI Insights".tr(),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -500,7 +500,7 @@ class _AskAIDetailsScreenState extends State<AskAIDetailsScreen> {
           ),
           const SizedBox(width: 8),
           Text(
-            title,
+            title.tr(),
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
@@ -555,11 +555,11 @@ class _AskAIDetailsScreenState extends State<AskAIDetailsScreen> {
 
     if (isDropdown && dropdownItems != null && dropdownValue != null) {
       return DropdownButtonFormField<String>(
-        value: dropdownValue,
+        value: dropdownValue.tr(),
         isExpanded: true,
         icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
         decoration: InputDecoration(
-          labelText: label,
+          labelText: label.tr(),
           labelStyle: const TextStyle(fontSize: 13, color: Color(0xff8A94A6)),
           prefixIcon: Icon(icon, size: 18, color: const Color(0xff6A5AE0)),
           filled: true,
@@ -653,11 +653,11 @@ class _AskAIDetailsScreenState extends State<AskAIDetailsScreen> {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
+          children:  [
             Icon(Icons.auto_awesome, color: Colors.white, size: 20),
             SizedBox(width: 10),
             Text(
-              "Analyze with AI",
+              "Analyze with AI".tr(),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 16,
@@ -720,8 +720,8 @@ class _AskAIDetailsScreenState extends State<AskAIDetailsScreen> {
 
           const SizedBox(height: 20),
 
-          const Text(
-            "AI is analyzing your flock...",
+           Text(
+            "AI is analyzing your flock...".tr(),
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w700,
@@ -732,7 +732,7 @@ class _AskAIDetailsScreenState extends State<AskAIDetailsScreen> {
           const SizedBox(height: 8),
 
           Text(
-            "Generating smart feed and health recommendations",
+            "Generating smart feed and health recommendations".tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.grey[500],
@@ -809,8 +809,8 @@ class _AskAIDetailsScreenState extends State<AskAIDetailsScreen> {
 
                 const SizedBox(height: 20),
 
-                const Text(
-                  "AI Analysis",
+                 Text(
+                  "AI Analysis".tr(),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
@@ -821,7 +821,7 @@ class _AskAIDetailsScreenState extends State<AskAIDetailsScreen> {
                 const SizedBox(height: 8),
 
                 Text(
-                  "This AI request will use",
+                  "This AI request will use".tr(),
                   style: TextStyle(color: Colors.grey[500], fontSize: 14),
                 ),
 
@@ -839,7 +839,7 @@ class _AskAIDetailsScreenState extends State<AskAIDetailsScreen> {
                       const Text("🪙", style: TextStyle(fontSize: 20)),
                       const SizedBox(width: 8),
                       Text(
-                        "$creditsNeeded Credits",
+                        "$creditsNeeded"+ "Credits".tr(),
                         style: const TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 17,
@@ -853,7 +853,7 @@ class _AskAIDetailsScreenState extends State<AskAIDetailsScreen> {
                 const SizedBox(height: 14),
 
                 Text(
-                  "AI will analyze flock performance, feed usage, growth and environmental conditions.",
+                  "AI will analyze flock performance, feed usage, growth and environmental conditions.".tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.grey[500],
@@ -875,8 +875,8 @@ class _AskAIDetailsScreenState extends State<AskAIDetailsScreen> {
                           side: const BorderSide(color: Color(0xffDDDDEE)),
                         ),
                         onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          "Cancel",
+                        child:  Text(
+                          "CANCEL".tr(),
                           style: TextStyle(
                             color: Color(0xff8A94A6),
                             fontWeight: FontWeight.w600,
@@ -905,8 +905,8 @@ class _AskAIDetailsScreenState extends State<AskAIDetailsScreen> {
                             isLoading = false;
                           });
                         },
-                        child: const Text(
-                          "Proceed",
+                        child:  Text(
+                          "Proceed".tr(),
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
@@ -958,11 +958,11 @@ class _AskAIDetailsScreenState extends State<AskAIDetailsScreen> {
               ),
             ),
             child: Row(
-              children: const [
+              children:  [
                 Icon(Icons.auto_awesome, color: Colors.white, size: 18),
                 SizedBox(width: 8),
                 Text(
-                  "AI Analysis Result",
+                  "AI Analysis Result".tr(),
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -1065,7 +1065,7 @@ class _AskAIDetailsScreenState extends State<AskAIDetailsScreen> {
       final result = await AIServer.askAI(aiData);
 
       if (result == null) {
-        Utils.showToast("Error occured");
+        Utils.showToast("Error occured".tr());
       }
 
       aiResponse = result;
@@ -1092,7 +1092,7 @@ class _AskAIDetailsScreenState extends State<AskAIDetailsScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Failed to generate AI response"),
+          content: Text("Failed to generate AI response".tr()),
         ),
       );
     }

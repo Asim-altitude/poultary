@@ -1379,7 +1379,7 @@
 
  "routine_screen_title": "🐔 Rutyna com mojej farmie",
  "routine_assistant_greeting": "👋 Ustalmy rutynę w Twoim gospodarstwie!",
- "routine_assistant_greeting_named": "👋 Vitamy, {farma}! ",
+ "routine_assistant_greeting_named": "👋 Vitamy, {farm}! ",
  "routine_assistant_subtitle": "Bądź na bieżąco z każdym zadaniem — nigdy więcej nie przegapisz zbiórki, karmienia ani kontroli stanu zdrowia.",
  "routine_assistant_yes": "Tak, proszę",
  "routine_assistant_skip": "Może później",
@@ -1387,7 +1387,7 @@
  "routine_all_done_subtitle": "Clique em dowolną kartę para verificar a atualização da rotina.",
  "routine_progress_label": "Skonfigurowano {concluído} z {total} procedimento",
  "routine_picker_title": "Którą rutynę chcesz skonfigurować?",
- "routine_card_label": "{tipo} Rutyna",
+ "routine_card_label": "{type} Rutyna",
  "routine_card_configured": "Zaplanowane · Przypomnienia aktywne",
  "routine_card_not_configured": "Clique, por skonfigurować",
  "routine_card_long_press_hint": "Naciśnij długo, aby zresetować",

@@ -1346,7 +1346,7 @@
   "Farm Logo": "Logo farmy",
   "routine_screen_title": "🐔 Moje farma rutina",
   "routine_assistant_greeting": "👋 Pojďme nastavit vaši farmářskou rutinu!",
-  "routine_assistant_greeting_named": "👋 Vítejte, {farma}! ",
+  "routine_assistant_greeting_named": "👋 Vítejte, {farm}! ",
   "routine_assistant_subtitle": "Mějte přehled o každém úkolu – už nikdy nezmeškáte odběr, krmení nebo kontrolu zdravotního stavu.",
   "routine_assistant_yes": "Ano, prosím",
   "routine_assistant_skip": "Možná později",

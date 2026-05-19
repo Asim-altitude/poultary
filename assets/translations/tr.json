@@ -1374,7 +1374,7 @@
 
  "routine_screen_title": "🐔 Çiftlik Rutinim",
  "routine_assistant_greeting": "👋 Çiftlik rutininizi oluşturalım!",
- "routine_assistant_greeting_named": "👋 Hoş geldiniz {çiftlik}! ",
+ "routine_assistant_greeting_named": "👋 Hoş geldiniz {farm}! ",
  "routine_assistant_subtitle": "Her görevin üstesinden gelin; bir daha asla toplama, besleme veya sağlık kontrolünü kaçırmayın.",
  "routine_assistant_yes": "Evet lütfen",
  "routine_assistant_skip": "Belki daha sonra",

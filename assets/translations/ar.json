@@ -1376,7 +1376,7 @@
 
  "routine_screen_title": "🐔 روتين مزرعتي",
  "routine_assistant_greeting": "👋 لنقم بإعداد روتين مزرعتك!",
- "routine_assistant_greeting_named": "👋 مرحبًا {المزرعة}! ",
+ "routine_assistant_greeting_named": "👋 مرحبًا {farm}! ",
  "routine_assistant_subtitle": "ابق على اطلاع بكل مهمة - لا تفوت أي فحص جمع أو إطعام أو صحة مرة أخرى.",
  "routine_assistant_yes": "نعم من فضلك",
  "routine_assistant_skip": "ربما في وقت لاحق",
@@ -1384,7 +1384,7 @@
  "routine_all_done_subtitle": "انقر فوق أي بطاقة لمراجعة الروتين أو تحديثه.",
  "routine_progress_label": "{مكتملة} من إجمالي {total} الإجراءات التي تم تكوينها",
  "routine_picker_title": "ما هو الروتين الذي ترغب في إعداده؟",
- "routine_card_label": "{نوع} روتين",
+ "routine_card_label": "{type} روتين",
  "routine_card_configured": "مجدولة · التذكيرات نشطة",
  "routine_card_not_configured": "انقر للتكوين",
  "routine_card_long_press_hint": "اضغط لفترة طويلة لإعادة التعيين",

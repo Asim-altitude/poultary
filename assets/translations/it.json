@@ -1361,7 +1361,7 @@
 
   "routine_screen_title": "🐔 La mia routine agricola",
   "routine_assistant_greeting": "👋Impostiamo la tua routine agricola!",
-  "routine_assistant_greeting_named": "👋 Benvenuto, {fattoria}! ",
+  "routine_assistant_greeting_named": "👋 Benvenuto, {farm}! ",
   "routine_assistant_subtitle": "Rimani aggiornato su ogni attività: non perdere mai più una raccolta, un'alimentazione o un controllo sanitario.",
   "routine_assistant_yes": "Sì, per favore",
   "routine_assistant_skip": "Forse più tardi",

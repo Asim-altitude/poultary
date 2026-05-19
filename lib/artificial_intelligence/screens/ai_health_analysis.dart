@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -376,7 +377,7 @@ class _HealthAnalysisScreenState extends State<HealthAnalysisScreen>
           child: const Icon(Icons.health_and_safety_rounded, size: 16, color: Colors.white),
         ),
         const SizedBox(width: 8),
-        const Text("Health Analysis",
+         Text("Health Analysis".tr(),
             style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17, letterSpacing: 0.3)),
       ],
     ),
@@ -405,7 +406,7 @@ class _HealthAnalysisScreenState extends State<HealthAnalysisScreen>
               Text(widget.flockName,
                   style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: _txt1)),
               const SizedBox(height: 2),
-              Text("${widget.birdType} · ${widget.breed} · ${widget.ageDays} days old",
+              Text("${widget.birdType} · ${widget.breed} · ${widget.ageDays}"+" days old".tr(),
                   style: const TextStyle(fontSize: 12, color: _txt2)),
             ],
           ),
@@ -415,7 +416,7 @@ class _HealthAnalysisScreenState extends State<HealthAnalysisScreen>
           children: [
             _pillBadge("${widget.currentBirds}", Icons.sunny_snowing, _accent, _accentLt),
             const SizedBox(height: 4),
-            Text("of ${widget.totalBirds} birds",
+            Text("of".tr()+" ${widget.totalBirds} "+"birds".tr(),
                 style: const TextStyle(fontSize: 11, color: _txt2)),
           ],
         ),
@@ -429,7 +430,7 @@ class _HealthAnalysisScreenState extends State<HealthAnalysisScreen>
     child: Row(mainAxisSize: MainAxisSize.min, children: [
       Icon(icon, size: 12, color: fg),
       const SizedBox(width: 4),
-      Text(text, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: fg)),
+      Text(text.tr(), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: fg)),
     ]),
   );
 
@@ -489,7 +490,7 @@ class _HealthAnalysisScreenState extends State<HealthAnalysisScreen>
                 ),
               ),
               const SizedBox(height: 4),
-              Text(_steps[s]['label'] as String,
+              Text(_steps[s]['label'].toString().tr(),
                   style: TextStyle(
                     fontSize: 9.5,
                     fontWeight: active ? FontWeight.w700 : FontWeight.w500,
@@ -557,7 +558,7 @@ class _HealthAnalysisScreenState extends State<HealthAnalysisScreen>
         final s = symptoms[i];
         bool val = s['val'] as bool;
         return _symptomTile(
-          label: s['label'] as String,
+          label: s['label'].toString().tr(),
           icon:  s['icon'] as IconData,
           selected: val,
           onTap: () => setState(() {
@@ -598,7 +599,7 @@ class _HealthAnalysisScreenState extends State<HealthAnalysisScreen>
           Icon(icon, size: 18, color: selected ? _danger : _txt2),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(label,
+            child: Text(label.tr(),
                 style: TextStyle(
                   fontSize: 12.5,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
@@ -634,7 +635,7 @@ class _HealthAnalysisScreenState extends State<HealthAnalysisScreen>
 
       // Feed card
       _groupCard(
-        title: "Feed Consumption",
+        title: "FEED_CONSUMPTION",
         icon: Icons.restaurant_rounded,
         iconColor: _warn,
         iconBg: _warnLt,
@@ -793,7 +794,7 @@ class _HealthAnalysisScreenState extends State<HealthAnalysisScreen>
         iconColor: _danger,
         iconBg: _dangerLt,
         children: [
-          _label("Yesterday  (${_dayLabel(1)})"),
+          _label("YESTERDAY".tr()+"  (${_dayLabel(1)})"),
           const SizedBox(height: 8),
           _textField(
             controller: _dead1Ctrl,
@@ -803,7 +804,7 @@ class _HealthAnalysisScreenState extends State<HealthAnalysisScreen>
             suffix: "birds",
           ),
           const SizedBox(height: 14),
-          _label("Today  (${_dayLabel(0)})"),
+          _label("TODAY".tr()+"  (${_dayLabel(0)})"),
           const SizedBox(height: 8),
           _textField(
             controller: _dead2Ctrl,
@@ -847,7 +848,7 @@ class _HealthAnalysisScreenState extends State<HealthAnalysisScreen>
           Row(children: [
             Icon(Icons.summarize_rounded, size: 16, color: _accent),
             const SizedBox(width: 6),
-            const Text("Analysis Summary",
+             Text("Analysis Summary".tr(),
                 style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: _accent)),
           ]),
           const SizedBox(height: 14),
@@ -873,7 +874,7 @@ class _HealthAnalysisScreenState extends State<HealthAnalysisScreen>
     padding: const EdgeInsets.only(bottom: 8),
     child: Row(
       children: [
-        Expanded(child: Text(k, style: const TextStyle(fontSize: 12.5, color: _txt2))),
+        Expanded(child: Text(k.tr(), style: const TextStyle(fontSize: 12.5, color: _txt2))),
         Text(v, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: _txt1)),
       ],
     ),
@@ -1023,7 +1024,7 @@ class _HealthAnalysisScreenState extends State<HealthAnalysisScreen>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("Next: ${_steps[_step + 1]['label']}",
+              Text("Next".tr()+": ${_steps[_step + 1]['label']}",
                   style: TextStyle(
                     fontSize: 14, fontWeight: FontWeight.w700,
                     color: enabled ? Colors.white : _txt2,
@@ -1062,10 +1063,10 @@ class _HealthAnalysisScreenState extends State<HealthAnalysisScreen>
       Expanded(child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
+          Text(title.tr(),
               style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: fg)),
           const SizedBox(height: 2),
-          Text(sub, style: TextStyle(fontSize: 12, color: fg.withOpacity(0.7))),
+          Text(sub.tr(), style: TextStyle(fontSize: 12, color: fg.withOpacity(0.7))),
         ],
       )),
     ]),
@@ -1093,17 +1094,16 @@ class _HealthAnalysisScreenState extends State<HealthAnalysisScreen>
           child: Icon(icon, color: iconColor, size: 18),
         ),
         const SizedBox(width: 10),
-        Text(title,
+        Text(title.tr(),
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: _txt1)),
       ]),
       const SizedBox(height: 16),
       const Divider(height: 1, color: Color(0xFFF3F4F6)),
       const SizedBox(height: 16),
       ...children,
-    ]),
-  );
+    ]),);
 
-  Widget _label(String text) => Text(text,
+  Widget _label(String text) => Text(text.tr(),
       style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: _txt2));
 
   Widget _textField({
@@ -1113,14 +1113,15 @@ class _HealthAnalysisScreenState extends State<HealthAnalysisScreen>
     TextInputType keyboardType = TextInputType.text,
     int maxLines = 1,
     String? suffix,
-  }) => TextField(
+  }) =>
+      TextField(
     controller: controller,
     keyboardType: keyboardType,
     maxLines: maxLines,
     onChanged: (_) => setState(() {}),
     style: const TextStyle(fontSize: 14, color: _txt1, fontWeight: FontWeight.w500),
     decoration: InputDecoration(
-      hintText: hint,
+      hintText: hint.tr(),
       hintStyle: const TextStyle(fontSize: 13.5, color: Color(0xFFD1D5DB)),
       filled: true,
       fillColor: _fieldBg,

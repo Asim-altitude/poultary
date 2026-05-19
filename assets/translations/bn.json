@@ -1375,7 +1375,7 @@
 
   "routine_screen_title": "🐔 আমার খামারের রুটিন",
   "routine_assistant_greeting": "👋 আসুন আপনার খামারের রুটিন সেট আপ করি!",
-  "routine_assistant_greeting_named": "👋 স্বাগতম, {ফার্ম}! ",
+  "routine_assistant_greeting_named": "👋 স্বাগতম, {farm}! ",
   "routine_assistant_subtitle": "প্রতিটি কাজের শীর্ষে থাকুন — আর কখনও সংগ্রহ, খাওয়ানো বা স্বাস্থ্য পরীক্ষা মিস করবেন না।",
   "routine_assistant_yes": "হ্যাঁ, দয়া করে",
   "routine_assistant_skip": "হয়তো পরে",

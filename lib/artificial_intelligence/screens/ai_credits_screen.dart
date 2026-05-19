@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +35,7 @@ class _CreditScreen extends State<CreditScreen> {
     return Scaffold(
       backgroundColor: Color(0xFFF6F8FB),
       appBar: AppBar(
-        title: Text("AI Credits"),
+        title: Text("AI Credits".tr()),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -52,7 +53,7 @@ class _CreditScreen extends State<CreditScreen> {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  "Choose a Plan",
+                  "Choose a Plan".tr(),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -63,13 +64,13 @@ class _CreditScreen extends State<CreditScreen> {
 
             SizedBox(height: 10),
 
-            _creditOption("10 Credits", "\$2.99"),
-            _creditOption("20 Credits", "\$4.99"),
+            _creditOption("10 Credits".tr(), "\$2.99"),
+            _creditOption("20 Credits".tr(), "\$4.99"),
             _creditOption(
-              "50 Credits",
+              "50 Credits".tr(),
               "\$9.99",
               highlight: true,
-              badge: "BEST VALUE",
+              badge: "BEST VALUE".tr(),
             ),
 
             SizedBox(height: 30),
@@ -133,7 +134,7 @@ class _CreditScreen extends State<CreditScreen> {
 
           /// Credits Label
           Text(
-            "Available Credits",
+            "Available Credits".tr(),
             style: TextStyle(color: Colors.white70, fontSize: 14),
           ),
 
@@ -153,7 +154,7 @@ class _CreditScreen extends State<CreditScreen> {
 
           /// Description
           Text(
-            "Use credits to generate AI insights for your farm",
+            "Use credits to generate AI insights for your farm".tr(),
             style: TextStyle(color: Colors.white70, fontSize: 12),
           ),
         ],
@@ -253,7 +254,7 @@ class _CreditScreen extends State<CreditScreen> {
                   Row(
                     children: [
                       Text(
-                        title,
+                        title.tr(),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -282,7 +283,7 @@ class _CreditScreen extends State<CreditScreen> {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    "Instant AI analysis for your poultry farm",
+                    "Instant AI analysis for your poultry farm".tr(),
                     style: TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
@@ -411,7 +412,7 @@ class _CreditScreen extends State<CreditScreen> {
 
           /// Title
           Text(
-            "Account",
+            "Account".tr(),
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
 
@@ -467,7 +468,7 @@ class _CreditScreen extends State<CreditScreen> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    "ACTIVE",
+                    "ACTIVE".tr(),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 10,
@@ -496,7 +497,7 @@ class _CreditScreen extends State<CreditScreen> {
                 await _switchAccount(context);
               },
               child: Text(
-                "Switch Account",
+                "Switch Account".tr(),
                 style: TextStyle(fontSize: 16, color: Colors.white),
               ),
             ),
@@ -507,7 +508,7 @@ class _CreditScreen extends State<CreditScreen> {
           /// Cancel
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Cancel"),
+            child: Text("Cancel".tr()),
           ),
 
           SizedBox(height: 10),

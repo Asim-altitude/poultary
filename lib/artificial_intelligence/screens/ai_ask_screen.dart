@@ -134,7 +134,7 @@ class _AskAIScreenState extends State<AskAIScreen> with TickerProviderStateMixin
           ),
           SizedBox(width: 8),
           Text(
-            "Ask AI",
+            "Ask AI".tr(),
             style: TextStyle(
               fontWeight: FontWeight.w700,
               letterSpacing: 0.5,
@@ -279,7 +279,7 @@ class _AskAIScreenState extends State<AskAIScreen> with TickerProviderStateMixin
         Icon(icon, size: 16, color: _accent),
         SizedBox(width: 6),
         Text(
-          text,
+          text.tr(),
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
@@ -329,7 +329,7 @@ class _AskAIScreenState extends State<AskAIScreen> with TickerProviderStateMixin
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    title.tr(),
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
@@ -338,7 +338,7 @@ class _AskAIScreenState extends State<AskAIScreen> with TickerProviderStateMixin
                   ),
                   SizedBox(height: 3),
                   Text(
-                    subtitle,
+                    subtitle.tr(),
                     style: TextStyle(fontSize: 12, color: _textSecondary),
                   ),
                 ],
@@ -424,7 +424,7 @@ class _AskAIScreenState extends State<AskAIScreen> with TickerProviderStateMixin
                 );
               }
             },
-            label: "Analyze with AI",
+            label: "Analyze with AI".tr(),
             icon: Icons.auto_awesome,
           ),
         ],
@@ -514,7 +514,7 @@ class _AskAIScreenState extends State<AskAIScreen> with TickerProviderStateMixin
                 Icon(Icons.auto_awesome, size: 14, color: _accent),
                 SizedBox(width: 6),
                 Text(
-                  "AI Result",
+                  "AI Result".tr(),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -543,7 +543,7 @@ class _AskAIScreenState extends State<AskAIScreen> with TickerProviderStateMixin
                     ),
                   ),
                   SizedBox(height: 16),
-                  Text("Analyzing your flock...",
+                  Text("Analyzing your flock...".tr(),
                       style: TextStyle(color: _textSecondary, fontSize: 14)),
                 ],
               ),
@@ -614,7 +614,7 @@ class _AskAIScreenState extends State<AskAIScreen> with TickerProviderStateMixin
                   Icon(Icons.refresh_rounded, size: 16, color: _textSecondary),
                   SizedBox(width: 6),
                   Text(
-                    "Ask Again",
+                    "Ask Again".tr(),
                     style: TextStyle(
                       color: _textSecondary,
                       fontWeight: FontWeight.w600,
@@ -669,7 +669,7 @@ class _AskAIScreenState extends State<AskAIScreen> with TickerProviderStateMixin
                 SizedBox(width: 8),
               ],
               Text(
-                label,
+                label.tr(),
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
@@ -708,7 +708,7 @@ class _AskAIScreenState extends State<AskAIScreen> with TickerProviderStateMixin
           children: [
             Icon(icon, size: 17, color: _textSecondary),
             SizedBox(width: 7),
-            Text(label,
+            Text(label.tr(),
                 style: TextStyle(color: _textSecondary, fontWeight: FontWeight.w600)),
           ],
         ),
@@ -735,7 +735,7 @@ class _AskAIScreenState extends State<AskAIScreen> with TickerProviderStateMixin
           children: [
             Icon(icon, size: 17, color: _accent),
             SizedBox(width: 7),
-            Text(label,
+            Text(label.tr(),
                 style: TextStyle(color: _accent, fontWeight: FontWeight.w700)),
           ],
         ),
