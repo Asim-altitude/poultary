@@ -278,7 +278,7 @@ class _FarmRoutineScreenState extends State<FarmRoutineScreen> {
                     style: const TextStyle(fontSize: 18)),
               ),
               title: Text(
-                'routine_card_label'.tr(namedArgs: {'type': type}),
+                'routine_card_label'.tr(namedArgs: {'type': type.tr()}),
                 style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
               ),
               subtitle: done && _summaries[type] != null
