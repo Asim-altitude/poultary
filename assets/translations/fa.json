@@ -1377,7 +1377,7 @@
 
  "routine_screen_title": "🐔 روال مزرعه من",
  "routine_assistant_greeting": "👋 بیایید روال مزرعه خود را تنظیم کنیم!",
- "routine_assistant_greeting_named": "👋 خوش آمدید، {مزرعه}! ",
+ "routine_assistant_greeting_named": "👋 خوش آمدید، {farm}! ",
  "routine_assistant_subtitle": "در بالای هر کاری بمانید - هرگز جمع آوری، تغذیه یا بررسی سلامتی را از دست ندهید.",
  "routine_assistant_yes": "بله، لطفا",
  "routine_assistant_skip": "شاید بعدا",

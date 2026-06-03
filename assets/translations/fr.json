@@ -1377,8 +1377,8 @@
 
   "routine_screen_title": "🐔 Ma routine à la ferme",
   "routine_assistant_greeting": "👋Installons votre routine agricole !",
-  "routine_assistant_greeting_named": "👋 Bienvenue, {ferme} ! ",
-  "routine_assistant_subtitle": "Restez au courant de chaque tâche : ne manquez plus jamais une collecte, une alimentation ou un bilan de santé.",
+  "routine_assistant_greeting_named": "👋 Bienvenue, {farm}! ",
+  "routine_assistant_subtitle": "Restez au courant de chaque tâche : ne manquez plus jamais une collecte, une alimentation ou un bilan de santé.",
   "routine_assistant_yes": "Oui s'il vous plait",
   "routine_assistant_skip": "Peut-être plus tard",
   "routine_all_done_title": "Toutes les routines sont actives !",

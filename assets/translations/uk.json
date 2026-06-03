@@ -1394,7 +1394,7 @@
 
   "routine_screen_title": "🐔 Моя розпорядок роботи на фермі",
   "routine_assistant_greeting": "👋 Давайте налаштуємо ваш розпорядок життя на фермі!",
-  "routine_assistant_greeting_named": "👋 Ласкаво просимо, {ферма}! ",
+  "routine_assistant_greeting_named": "👋 Ласкаво просимо, {farm}! ",
   "routine_assistant_subtitle": "Будьте в курсі кожного завдання — ніколи більше не пропускайте збір, годування чи перевірку стану здоров’я.",
   "routine_assistant_yes": "Так, будь ласка",
   "routine_assistant_skip": "Можливо пізніше",

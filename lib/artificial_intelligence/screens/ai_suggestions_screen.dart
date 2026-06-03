@@ -37,19 +37,24 @@ class _AISuggestionsScreenState extends State<AISuggestionsScreen> {
     user = auth.currentUser;
 
     if (user == null) {
+
       setState(() {
         isLoading = false;
       });
 
-      signInWithGoogle();
+      // Show Sign In Bottom Sheet
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showSignInBottomDialog();
+      });
+
       return;
     }
 
     credits = await _fetchCredits();
     Utils.ai_credits = credits;
 
+    setState(() {});
   }
-
   Future<int> _fetchCredits() async {
     final user = _auth.currentUser;
 
@@ -121,7 +126,7 @@ class _AISuggestionsScreenState extends State<AISuggestionsScreen> {
       }
 
     if(Utils.ai_credits <= 0) {
-      Utils.showToast("Low Credits. Please Recharge");
+      Utils.showToast("Low Credits. Please Recharge".tr());
       return;
     }
 
@@ -228,6 +233,118 @@ class _AISuggestionsScreenState extends State<AISuggestionsScreen> {
         "Google Sign-In Error: $error",
       );
     }
+  }
+
+
+  void _showSignInBottomDialog() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(25),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+
+              Container(
+                width: 50,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              Icon(
+                Icons.auto_awesome,
+                size: 60,
+                color: Colors.blue,
+              ),
+
+              const SizedBox(height: 15),
+
+              Text(
+                "Sign In Required".tr(),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              Text(
+                "sign_in_desc".tr(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  fontSize: 15,
+                ),
+              ),
+
+              const SizedBox(height: 25),
+
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  onPressed: () async {
+
+                    Navigator.pop(context);
+
+                    await signInWithGoogle();
+                  },
+                  icon: Image.asset(
+                    "assets/google_icon.png",
+                    height: 24,
+                  ),
+                  label: Text(
+                    "Continue with Google".tr(),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  "Maybe Later".tr(),
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _createOrGetUser(User user) async {
@@ -395,10 +512,10 @@ class _AISuggestionsScreenState extends State<AISuggestionsScreen> {
                   SizedBox(height: 4),
 
                   Text(
-                    "ai_suggestions.birds_weeks".tr(args: [
-                      "${response.birdCount ?? '-'}",
-                      "${response.ageWeeks ?? '-'}"
-                    ]),
+                    "ai_suggestions.birds_weeks".tr() +
+                  "${response.birdCount ?? '-'}"+
+                    "${response.ageWeeks ?? '-'}"
+                    ,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],

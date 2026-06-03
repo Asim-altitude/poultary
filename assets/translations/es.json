@@ -1379,7 +1379,7 @@
 
   "routine_screen_title": "🐔 Mi rutina de granja",
   "routine_assistant_greeting": "👋 ¡Vamos a configurar tu rutina agrícola!",
-  "routine_assistant_greeting_named": "👋 ¡Bienvenido, {granja}! ",
+  "routine_assistant_greeting_named": "👋 ¡Bienvenido, {farm}! ",
   "routine_assistant_subtitle": "Manténgase al tanto de cada tarea: nunca más se pierda una recolección, alimentación o control de salud.",
   "routine_assistant_yes": "Sí, por favor",
   "routine_assistant_skip": "tal vez más tarde",

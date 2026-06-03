@@ -1377,7 +1377,7 @@
 
   "routine_screen_title": "🐔 मेरा फार्म रूटीन",
   "routine_assistant_greeting": "👋आइए आपके खेत की दिनचर्या व्यवस्थित करें!",
-  "routine_assistant_greeting_named": "👋 स्वागत है, {खेत}! ",
+  "routine_assistant_greeting_named": "👋 स्वागत है, {farm}! ",
   "routine_assistant_subtitle": "प्रत्येक कार्य में शीर्ष पर रहें - संग्रह, भोजन, या स्वास्थ्य जांच दोबारा कभी न चूकें।",
   "routine_assistant_yes": "जी कहिये",
   "routine_assistant_skip": "शायद बाद में",

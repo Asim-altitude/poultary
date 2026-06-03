@@ -1380,7 +1380,7 @@
 
   "routine_screen_title": "🐔 నా వ్యవసాయ దినచర్య",
   "routine_assistant_greeting": "👋 మీ వ్యవసాయ దినచర్యను సెటప్ చేద్దాం!",
-  "routine_assistant_greeting_named": "👋 స్వాగతం, {వ్యవసాయం}! ",
+  "routine_assistant_greeting_named": "👋 స్వాగతం, {farm}! ",
   "routine_assistant_subtitle": "ప్రతి పనిలో అగ్రస్థానంలో ఉండండి — సేకరణ, ఆహారం అందించడం లేదా ఆరోగ్య తనిఖీని మళ్లీ కోల్పోవద్దు.",
   "routine_assistant_yes": "అవును, దయచేసి",
   "routine_assistant_skip": "బహుశా తర్వాత",

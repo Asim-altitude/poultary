@@ -1377,7 +1377,7 @@
 
   "routine_screen_title": "🐔 எனது பண்ணை வழக்கம்",
   "routine_assistant_greeting": "👋 உங்கள் பண்ணை வழக்கத்தை அமைப்போம்!",
-  "routine_assistant_greeting_named": "👋 வரவேற்கிறோம், {பண்ணை}! ",
+  "routine_assistant_greeting_named": "👋 வரவேற்கிறோம், {farm}! ",
   "routine_assistant_subtitle": "ஒவ்வொரு பணியிலும் சிறந்து விளங்குங்கள் - சேகரிப்பு, உணவு வழங்குதல் அல்லது உடல்நலப் பரிசோதனையை மீண்டும் தவறவிடாதீர்கள்.",
   "routine_assistant_yes": "ஆம், தயவுசெய்து",
   "routine_assistant_skip": "பின்னர் இருக்கலாம்",

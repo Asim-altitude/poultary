@@ -1373,7 +1373,7 @@
 
   "routine_screen_title": "🐔 我的农场日常",
   "routine_assistant_greeting": "👋 让我们开始你的农场生活吧！",
-  "routine_assistant_greeting_named": "👋 欢迎，{农场}！",
+  "routine_assistant_greeting_named": "👋 欢迎，{farm}！",
   "routine_assistant_subtitle": "掌控每项任务——再也不会错过收集、喂食或健康检查。",
   "routine_assistant_yes": "是的，请",
   "routine_assistant_skip": "也许稍后",
@@ -1381,7 +1381,7 @@
   "routine_all_done_subtitle": "点击任意卡片即可查看或更新例程。",
   "routine_progress_label": "已配置 {total} 个例程，共 {completed} 个",
   "routine_picker_title": "您想设置哪种例程？",
-  "routine_card_label": "{类型}例程",
+  "routine_card_label": "{type}例程",
   "routine_card_configured": "已安排 · 提醒已激活",
   "routine_card_not_configured": "点击进行配置",
   "routine_card_long_press_hint": "长按重置",

@@ -22,7 +22,7 @@ class FarmRoutineScreen extends StatefulWidget {
 }
 
 class _FarmRoutineScreenState extends State<FarmRoutineScreen> {
-  static const _builtInOrder = ['Egg', 'Feed', 'Health'];
+  static const _builtInOrder = ['EGG', 'Feed', 'Health'];
   final _prefs = RoutinePrefs.instance;
 
   Map<String, bool>    _statuses       = {for (final t in _builtInOrder) t: false};
@@ -742,7 +742,7 @@ class RoutineCard extends StatelessWidget {
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(
-                'routine_card_label'.tr(namedArgs: {'type': routineName}),
+                'routine_card_label'.tr(namedArgs: {'type': routineName.tr()}),
                 style: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,

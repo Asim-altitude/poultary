@@ -452,8 +452,8 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
 
           const SizedBox(height: 20),
 
-          const Text(
-            "AI is analyzing your flock...",
+           Text(
+            "AI is analyzing your flock...".tr(),
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w700,
@@ -464,7 +464,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
           const SizedBox(height: 8),
 
           Text(
-            "Generating smart feed and health recommendations",
+            "Generating smart feed and health recommendations".tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.grey[500],
@@ -517,11 +517,11 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
               ),
             ),
             child: Row(
-              children: const [
+              children:  [
                 Icon(Icons.auto_awesome, color: Colors.white, size: 18),
                 SizedBox(width: 8),
                 Text(
-                  "AI Analysis Result",
+                  "AI Analysis Result".tr(),
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -686,7 +686,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
         child: const Icon(Icons.bar_chart_rounded, size: 16, color: Colors.white),
       ),
       const SizedBox(width: 8),
-      const Text("Financial Analysis",
+       Text("Financial Analysis".tr(),
           style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17, letterSpacing: 0.3)),
     ]),
    /* actions: [
@@ -728,7 +728,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
           Container(width: 36, height: 4,
               decoration: BoxDecoration(color: _border, borderRadius: BorderRadius.circular(2))),
           const SizedBox(height: 16),
-          const Text("Select Currency",
+           Text("Select Currency".tr(),
               style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: _txt1)),
           const SizedBox(height: 16),
           Wrap(
@@ -773,13 +773,13 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
         Text(widget.flockName,
             style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: _txt1)),
         const SizedBox(height: 2),
-        Text("${widget.birdType} · ${widget.ageDays} days old · $_currency",
+        Text("${widget.birdType} · ${widget.ageDays}"+" days old".tr()+" · $_currency",
             style: const TextStyle(fontSize: 12, color: _txt2)),
       ])),
       Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
         _pillBadge("${widget.currentBirds}", Icons.pets_rounded, _green, _greenLt),
         const SizedBox(height: 4),
-        Text("of ${widget.initialBirds} birds",
+        Text("of".tr()+" ${widget.initialBirds}" +"birds".tr(),
             style: const TextStyle(fontSize: 11, color: _txt2)),
       ]),
     ]),
@@ -791,7 +791,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
     child: Row(mainAxisSize: MainAxisSize.min, children: [
       Icon(icon, size: 12, color: fg),
       const SizedBox(width: 4),
-      Text(text, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: fg)),
+      Text(text.tr(), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: fg)),
     ]),
   );
 
@@ -845,7 +845,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
                 ),
               ),
               const SizedBox(height: 4),
-              Text(_steps[s]['label'] as String,
+              Text(_steps[s]['label'].tr() as String,
                   style: TextStyle(
                     fontSize: 9.5,
                     fontWeight: active ? FontWeight.w700 : FontWeight.w500,
@@ -1009,11 +1009,11 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
             color: c, size: 28),
         const SizedBox(width: 12),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(positive ? "Profitable Batch 🎉" : "Loss Detected ⚠️",
+          Text(positive ? "Profitable Batch 🎉".tr() : "Loss Detected ⚠️".tr(),
               style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: c)),
           const SizedBox(height: 2),
           Text("${positive ? '+' : ''}${_fmt(_profit)} $_currency  ·  "
-              "${_fmt(_profitPerBird)} per bird",
+              "${_fmt(_profitPerBird)} "+"per bird".tr(),
               style: TextStyle(fontSize: 12, color: c.withOpacity(0.8))),
         ])),
       ]),
@@ -1090,7 +1090,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
     Color c = onTrack ? _green : _amber;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text("Weight Progress",
+        Text("Weight Progress".tr(),
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _txt2)),
         Text("${(pct * 100).toStringAsFixed(0)}% of target",
             style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: c)),
@@ -1106,7 +1106,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
         ),
       ),
       const SizedBox(height: 6),
-      Text(onTrack ? "✅ On track with target weight" : "⚠️ Below target — ${((target - avg)).toStringAsFixed(2)} kg gap",
+      Text(onTrack ? "✅ On track with target weight".tr() : "⚠️ Below target".tr()+" — ${((target - avg)).toStringAsFixed(2)} kg gap",
           style: TextStyle(fontSize: 11.5, color: c, fontWeight: FontWeight.w500)),
     ]);
   }
@@ -1131,9 +1131,9 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
         Icon(Icons.loop_rounded, color: c, size: 20),
         const SizedBox(width: 10),
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text("FCR: ${fcr.toStringAsFixed(2)}",
+          Text("FCR".tr()+": ${fcr.toStringAsFixed(2)}",
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: c)),
-          Text("Rating: $rating",
+          Text("Rating".tr()+": $rating",
               style: TextStyle(fontSize: 11, color: c.withOpacity(0.8))),
         ]),
       ]),
@@ -1159,12 +1159,12 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
         ),
         const SizedBox(width: 12),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text("Mortality Rate",
+          Text("Mortality %".tr(),
               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _txt2)),
           const SizedBox(height: 2),
-          Text("${pct.toStringAsFixed(1)}%  ·  $label",
+          Text("${pct.toStringAsFixed(1)}%  ·  "+label.tr(),
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: c)),
-          Text("${mortality} birds lost from ${widget.currentBirds}",
+          Text("${mortality} "+"birds lost from".tr()+" ${widget.currentBirds}",
               style: const TextStyle(fontSize: 11, color: _txt2)),
         ])),
       ]),
@@ -1220,7 +1220,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
           Icon(profitable ? Icons.trending_up_rounded : Icons.trending_down_rounded,
               color: c, size: 20),
           const SizedBox(width: 8),
-          Text(profitable ? "Profitable Batch" : "Loss Recorded",
+          Text(profitable ? "Profitable Batch".tr() : "Loss Recorded".tr(),
               style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13,
                   color: c, letterSpacing: 0.3)),
         ]),
@@ -1229,7 +1229,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
             style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900,
                 color: c, letterSpacing: -0.5)),
         const SizedBox(height: 4),
-        Text("${_fmt(_totalIncome)} income  −  ${_fmt(_totalExpenses)} expenses",
+        Text("${_fmt(_totalIncome)} "+"income".tr()+"  −  ${_fmt(_totalExpenses)} "+"expenses".tr(),
             style: TextStyle(fontSize: 12.5, color: c.withOpacity(0.7))),
       ]),
     );
@@ -1277,7 +1277,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(item['label'] as String,
+                Text(item['label'].toString().tr(),
                     style: const TextStyle(fontSize: 10.5, color: _txt2, fontWeight: FontWeight.w500)),
                 const SizedBox(height: 2),
                 Text(item['value'] as String,
@@ -1315,7 +1315,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
           padding: const EdgeInsets.only(bottom: 10),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text(item['label'] as String,
+              Text(item['label'].toString().tr(),
                   style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: _txt1)),
               Text("${_fmt(val)} ($_currency  ·  ${(pct * 100).toStringAsFixed(0)}%)",
                   style: TextStyle(fontSize: 12, color: c, fontWeight: FontWeight.w700)),
@@ -1347,7 +1347,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
       Row(children: [
         const Icon(Icons.summarize_rounded, size: 16, color: _accent),
         const SizedBox(width: 6),
-        const Text("Analysis Summary",
+         Text("Analysis Summary".tr(),
             style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: _accent)),
       ]),
       const SizedBox(height: 14),
@@ -1368,7 +1368,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
   Widget _summaryRow(String k, String v) => Padding(
     padding: const EdgeInsets.only(bottom: 8),
     child: Row(children: [
-      Expanded(child: Text(k, style: const TextStyle(fontSize: 12.5, color: _txt2))),
+      Expanded(child: Text(k.tr(), style: const TextStyle(fontSize: 12.5, color: _txt2))),
       Text(v, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: _txt1)),
     ]),
   );
@@ -1447,10 +1447,10 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
           blurRadius: 20, offset: const Offset(0, 6),
         )],
       ),
-      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: const [
+      child: Row(mainAxisAlignment: MainAxisAlignment.center, children:  [
         Icon(Icons.bar_chart_rounded, size: 20, color: Colors.white),
         SizedBox(width: 10),
-        Text("Analyze Finances with AI",
+        Text("Analyze Finances with AI".tr(),
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800,
                 color: Colors.white, letterSpacing: 0.4)),
         SizedBox(width: 8),
@@ -1507,7 +1507,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
                 : [],
           ),
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text("Next: ${_steps[_step + 1]['label']}",
+            Text("Next".tr()+": ${_steps[_step + 1]['label']}",
                 style: TextStyle(
                   fontSize: 14, fontWeight: FontWeight.w700,
                   color: enabled ? Colors.white : _txt2, letterSpacing: 0.3,
@@ -1539,10 +1539,10 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
           ),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title,
+            Text(title.tr(),
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: fg)),
             const SizedBox(height: 2),
-            Text(sub, style: TextStyle(fontSize: 12, color: fg.withOpacity(0.7))),
+            Text(sub.tr(), style: TextStyle(fontSize: 12, color: fg.withOpacity(0.7))),
           ])),
         ]),
       );
@@ -1571,7 +1571,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
               child: Icon(icon, color: iconColor, size: 18),
             ),
             const SizedBox(width: 10),
-            Text(title,
+            Text(title.tr(),
                 style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: _txt1)),
           ]),
           const SizedBox(height: 16),
@@ -1581,7 +1581,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
         ]),
       );
 
-  Widget _label(String text) => Text(text,
+  Widget _label(String text) => Text(text.tr(),
       style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: _txt2));
 
   Widget _numField({
@@ -1637,7 +1637,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
         child: Row(children: [
           Icon(icon, color: color, size: 20),
           const SizedBox(width: 10),
-          Text("$label: ",
+          Text(label.tr()+": ",
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _txt2)),
           Text("${_fmt(value)} $_currency",
               style: TextStyle(
@@ -1654,7 +1654,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
     child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Icon(icon, size: 16, color: fg),
       const SizedBox(width: 8),
-      Expanded(child: Text(text,
+      Expanded(child: Text(text.tr(),
           style: TextStyle(fontSize: 12, color: fg.withOpacity(0.85), height: 1.5))),
     ]),
   );
