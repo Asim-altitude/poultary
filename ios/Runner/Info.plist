@@ -31,7 +31,9 @@
 		<string>uk</string>
 		<string>ur</string>
 		<string>zh</string>
+		<string>cs</string>
 	</array>
+
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>
@@ -247,14 +249,12 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>We use your photo library to let you add or update photos for your farms and animals, helping you keep a visual record of your livestock and property.</string>
-
-    <key>NSCameraUsageDescription</key>
-    <string>We use your camera to let you take photos of your farms and animals directly in the app, so you can easily update their profiles and keep your records up to date.</string>
-
-    <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>We save photos of your farms and animals to your photo library so you can keep a local copy of your records.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We use your photo library to let you add or update photos for your farms and animals, helping you keep a visual record of your livestock and property.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We use your camera to let you take photos of your farms and animals directly in the app, so you can easily update their profiles and keep your records up to date.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>We save photos of your farms and animals to your photo library so you can keep a local copy of your records.</string>
 	<key>FirebaseAnalyticsCollectionEnabled</key>
 	<true/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
@@ -274,11 +274,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.7.0</string>
+	<string>2.8.0</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>23</string>
+	<string>24</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
