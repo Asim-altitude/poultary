@@ -49,7 +49,7 @@ class _GuidedRoutineScreenState extends State<GuidedRoutineScreen> {
   // ── Step list (dynamic — rebuilds when state changes) ─────────────────
   List<_RoutineStep> get _steps {
     switch (widget.routineType) {
-      case 'Egg':     return _eggSteps();
+      case 'EGG':     return _eggSteps();
       case 'Feed':    return _feedSteps();
       case 'Health':  return _healthSteps();
       case 'Finance': return _financeSteps();
