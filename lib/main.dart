@@ -211,14 +211,14 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      darkTheme: ThemeData(                          // ✅ uncommented
-        fontFamily: 'Roboto',
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Utils.getThemeColorBlue(),
-          brightness: Brightness.dark,               // ✅ this is the key line
-        ),
-        useMaterial3: true,
-      ),
+      // darkTheme: ThemeData(                          // ✅ uncommented
+      //   fontFamily: 'Roboto',
+      //   colorScheme: ColorScheme.fromSeed(
+      //     seedColor: Utils.getThemeColorBlue(),
+      //     brightness: Brightness.dark,               // ✅ this is the key line
+      //   ),
+      //   useMaterial3: true,
+      // ),
       themeMode: ThemeMode.system,                   // ✅ already correct
       home: Directionality(
         textDirection: direction ? ui.TextDirection.ltr : ui.TextDirection.rtl,
