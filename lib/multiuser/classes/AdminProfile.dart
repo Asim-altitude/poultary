@@ -42,6 +42,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 import 'backup_restore.dart';
+import 'delete_account_screen.dart';
 
 
 class AdminProfileScreen extends StatefulWidget {
@@ -694,6 +695,19 @@ class _AdminProfileScreen extends State<AdminProfileScreen> {
                   showLogoutConfirmationDialog(context, () {
                     handleLogout(context);
                   });
+                },
+              ),
+              _AdminActionCard(
+                icon: Icons.delete,
+                label: 'Delete Account'.tr(),
+                color: Colors.red,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const DeleteAccountScreen(),
+                    ),
+                  );
                 },
               ),
             ],

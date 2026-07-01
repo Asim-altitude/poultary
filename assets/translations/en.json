@@ -1843,7 +1843,28 @@
   "Feed Today": "Feed Today",
   "Temp / Humidity": "Temp / Humidity",
   "Ventilation": "Ventilation",
-  "Ammonia Smell": "Ammonia Smell"
+  "Ammonia Smell": "Ammonia Smell",
+
+  "Delete Account": "Delete Account",
+  "Something went wrong. Please try again.": "Something went wrong. Please try again.",
+  "For security, please log out and sign in again, then try deleting your account.": "For security, please log out and sign in again, then try deleting your account.",
+  "Unable to delete account.": "Unable to delete account.",
+  "This will permanently delete your account and cloud data. This action cannot be undone.": "This will permanently delete your account and cloud data. This action cannot be undone.",
+  "Delete Permanently": "Delete Permanently",
+  "Account Deleted": "Account Deleted",
+  "Your account has been deleted successfully.": "Your account has been deleted successfully.",
+  "Delete your account": "Delete your account",
+  "Your current account": "Your current account",
+  "Permanent action": "Permanent action",
+  "Your account will be permanently deleted and cannot be restored.": "Your account will be permanently deleted and cannot be restored.",
+  "Cloud data removal": "Cloud data removal",
+  "Cloud profile and synced farm data linked to this account will be removed.": "Cloud profile and synced farm data linked to this account will be removed.",
+  "Local device data": "Local device data",
+  "Offline data stored on this device may remain unless you clear app data or uninstall the app.": "Offline data stored on this device may remain unless you clear app data or uninstall the app.",
+  "Type DELETE to confirm": "Type DELETE to confirm",
+  "Deleting...": "Deleting...",
+  "No logged-in user found.": "No logged-in user found."
+
 
 
 

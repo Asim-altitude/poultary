@@ -83,9 +83,9 @@ class FlockImageUploader {
     final uri = Uri.parse("https://photogallerytv.com/Api/upload_db.php");
 
     final request = http.MultipartRequest('POST', uri);
-    request.headers.addAll({
+   /* request.headers.addAll({
       'Content-Type': 'multipart/form-data',
-    });
+    });*/
     request.fields['farm_id'] = farmId;
 
     final stream = http.ByteStream(dbFile.openRead().transform(
@@ -131,12 +131,12 @@ class FlockImageUploader {
           await SessionManager.saveBackupTimestamp();
         } else {
           print("BACKUP FAILED $json");
-          Utils.showToast("❌ Could not Backup".tr());
+          Utils.showToast("❌ Could not Backup".tr()+" ${json['message']}");
 
           throw Exception("Server error: ${json['message']}");
         }
       } else {
-        Utils.showToast("❌ Could not Backup".tr());
+        Utils.showToast("❌ Could not Backup".tr()+" ${response.statusCode}");
       throw Exception("HTTP ${response.statusCode}: Upload failed");
       }
     } catch (e) {
