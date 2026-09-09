@@ -355,29 +355,223 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
     child:
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(120),
+        preferredSize: const Size.fromHeight(140),
         child: AppBar(
           backgroundColor: Utils.getThemeColorBlue(),
           elevation: 0,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
+            icon: Icon(Icons.arrow_back_ios, color: Colors.white),
             onPressed: () {
-              if (activeStep > 0) {
-                setState(() => activeStep--);
-              } else {
-                Navigator.pop(context);
-              }
+              Navigator.pop(context);
             },
           ),
           automaticallyImplyLeading: true,
+
+          actions: [
+            // Previous step
+            if (activeStep > 0)
+              IconButton(
+                tooltip: "Previous",
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                onPressed: () {
+                  FocusScope.of(context).unfocus();
+
+                  setState(() {
+                    activeStep--;
+                  });
+                },
+              ),
+
+            // Next / Done
+            IconButton(
+              tooltip: activeStep < 1 ? "Next" : "Save",
+              icon: Icon(
+                activeStep <= 1
+                    ? Icons.arrow_forward
+                    : Icons.check,
+                color: Colors.white,
+                size: activeStep <= 1 ? 29 : 32,
+              ),
+              onPressed: () async {
+
+                if(saving_images)
+                  return;
+
+                bool validate = checkValidation();
+
+                if (activeStep == 0) {
+                  if (nameController.text.isNotEmpty && birdcountController.text.isNotEmpty) {
+                    setState(() {
+                      activeStep++;
+                    });
+                  } else {
+                    Utils.showToast("PROVIDE_ALL");
+                  }
+                } else if (activeStep == 1) {
+                  if (!checkValidationOption()) {
+                    Utils.showToast("PROVIDE_ALL");
+                  } else {
+                    notesController.text = "${nameController.text} Added on ${Utils.getFormattedDate(date)} with ${birdcountController.text} BIRDS";
+                    setState(() {
+                      activeStep++;
+                    });
+                  }
+                } else if (activeStep == 2) {
+                  if (validate) {
+                    print("Saving Data...");
+                    await DatabaseHelper.instance.database;
+                    Flock flock = Flock(
+                        f_id: 1,
+                        f_name: nameController.text,
+                        bird_count: int.parse(birdcountController.text),
+                        purpose: _purposeselectedValue,
+                        acqusition_type: _acqusitionselectedValue,
+                        acqusition_date: date,
+                        notes: notesController.text,
+                        icon: birds.elementAt(chosen_index).image,
+                        active_bird_count: int.parse(birdcountController.text),
+                        active: 1,
+                        flock_new: 1,
+                        sync_id: Utils.getUniueId(),
+                        sync_status: SyncStatus.SYNCED,
+                        last_modified: Utils.getTimeStamp(),
+                        modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                        farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : ''
+
+                    );
+
+                    int? id = await DatabaseHelper.insertFlock(flock);
+
+                    print("FLOCK_ID $id");
+                    SyncManager().addModifiedId(flock.f_name);
+
+                    /*// SET FLOCK ONLINE
+                            if(Utils.isMultiUSer) {
+                              flock.f_id = id!;
+                              bool synced = await FireBaseUtils.uploadFlock(flock);
+                              if (!synced) {
+                                flock.sync_status = SyncStatus.PENDING;
+                                await DatabaseHelper.updateFlockInfo(flock);
+                              }
+                            }
+              */
+                    if (isPurchase) {
+                      TransactionItem transaction = TransactionItem(
+                          flock_update_id: "-1",
+                          f_id: id!,
+                          date: date,
+                          expense_item: "Flock Purchase".tr(),
+                          type: "Expense",
+                          amount: amountController.text,
+                          payment_method: payment_method,
+                          payment_status: payment_status,
+                          sold_purchased_from: personController.text,
+                          short_note: notesController.text,
+                          how_many: birdcountController.text,
+                          f_name: nameController.text, sale_item: '', extra_cost: '', extra_cost_details: '',
+                          sync_id: Utils.getUniueId(),
+                          sync_status: SyncStatus.SYNCED,
+                          last_modified: Utils.getTimeStamp(),
+                          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                          f_sync_id: flock.sync_id
+
+                      );
+
+                      int? tr_id = await DatabaseHelper.insertNewTransaction(transaction);
+
+                      Flock_Detail flockDetail = Flock_Detail(
+                          f_id: id,
+                          item_type: 'Addition',
+                          item_count: int.parse(birdcountController.text),
+                          acqusition_type: _acqusitionselectedValue,
+                          acqusition_date: date,
+                          short_note: notesController.text,
+                          f_name: nameController.text,
+                          transaction_id: tr_id!.toString(), reason: '',
+
+                          sync_id: Utils.getUniueId(),
+                          sync_status: SyncStatus.SYNCED,
+                          last_modified: Utils.getTimeStamp(),
+                          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                          f_sync_id: flock.sync_id
+                      );
+                      int? flock_detail_id = await DatabaseHelper.insertFlockDetail(flockDetail);
+
+                      await DatabaseHelper.updateLinkedTransaction(tr_id.toString(), flock_detail_id.toString());
+
+                      if(Utils.isMultiUSer) {
+                        FlockFB flockFB = FlockFB(flock: flock,
+                            transaction: transaction,
+                            flockDetail: flockDetail);
+
+                        flockFB.farm_id = Utils.currentUser!.farmId;
+                        flockFB.modified_by = Utils.currentUser!.email;
+
+                        await FireBaseUtils.uploadFlock(flockFB);
+
+
+                      }
+
+                    }
+                    else {
+                      Flock_Detail flockDetail = Flock_Detail(
+                          f_id: id!,
+                          item_type: 'Addition',
+                          item_count: int.parse(birdcountController.text),
+                          acqusition_type: _acqusitionselectedValue,
+                          acqusition_date: date,
+                          short_note: notesController.text,
+                          f_name: nameController.text,
+                          transaction_id: "-1", reason: '',
+                          sync_id: Utils.getUniueId(),
+                          sync_status: SyncStatus.SYNCED,
+                          last_modified: Utils.getTimeStamp(),
+                          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                          f_sync_id: flock.sync_id
+                      );
+                      await DatabaseHelper.insertFlockDetail(flockDetail);
+
+                      if(Utils.isMultiUSer) {
+                        FlockFB flockFB = FlockFB(flock: flock, flockDetail: flockDetail);
+                        flockFB.farm_id = Utils.currentUser!.farmId;
+                        flockFB.modified_by = Utils.currentUser!.email;
+
+                        await FireBaseUtils.uploadFlock(flockFB);
+                      }
+
+                    }
+
+                    if (base64Images.isNotEmpty) {
+                      await insertFlockImages(id, flock.sync_id);
+                    } else {
+                      Utils.showToast("FLOCK_CREATED");
+                      gotoNotificationsScreen(id);
+                    }
+
+                    AnalyticsUtil.logAddFlock();
+                  } else {
+                    Utils.showToast("PROVIDE_ALL");
+                  }
+                }
+              },
+            ),
+
+            const SizedBox(width: 6),
+          ],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(30),
             child: _buildStepper(),
           ),
         ),
       ),
-      bottomNavigationBar:
-        SafeArea(
+      bottomNavigationBar:  SafeArea(
           top: false,
           child: Padding(
             padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
@@ -896,7 +1090,7 @@ class _ADDFlockScreen extends State<ADDFlockScreen>
                               children: [
                                 // Expense Amount
                                 _buildSectionLabel("EXPENSE_AMOUNT".tr()),
-                                _buildInputField("EXPENSE_AMOUNT".tr(), amountController,TextInputAction.next, Icons.attach_money, keyboardType: TextInputType.number, inputFormat: "float"),
+                                _buildInputField("EXPENSE_AMOUNT".tr(), amountController,TextInputAction.next, Icons.attach_money, keyboardType: TextInputType.numberWithOptions(decimal: true), inputFormat: "float"),
 
                                 SizedBox(height: 15),
 

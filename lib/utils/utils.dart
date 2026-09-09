@@ -845,13 +845,52 @@ ${"Farm ID".tr()}: $farmID
 📧 ${"sub_user_email".tr()}: $email
 🔑 ${"sub_user_password".tr()}: $password
 
+ ${"sub_user_note".tr()}
+
+  📱 ${"get_app_here".tr()}:
+  $storeLink
+  ''';
+
+    Share.share(message);
+  }
+
+  static Future<void> copySubUserCredentials({
+    required String name,
+    required String email,
+    required String password,
+    required String farmID,
+  }) async {
+    String storeLink;
+
+    if (Platform.isAndroid) {
+      storeLink =
+      'https://play.google.com/store/apps/details?id=com.zaheer.poultry';
+    } else if (Platform.isIOS) {
+      storeLink =
+      'https://apps.apple.com/pk/app/easy-poultry-chicken-manager/id6469481170';
+    } else {
+      storeLink = '';
+    }
+
+    final message = '''
+${"sub_user_share_title".tr()}
+
+${"Farm ID".tr()}: $farmID
+👤 ${"sub_user_name".tr()}: $name
+📧 ${"sub_user_email".tr()}: $email
+🔑 ${"sub_user_password".tr()}: $password
+
 ${"sub_user_note".tr()}
 
 📱 ${"get_app_here".tr()}:
 $storeLink
 ''';
 
-    Share.share(message);
+    await Clipboard.setData(
+      ClipboardData(text: message),
+    );
+
+    showToast("Copied!");
   }
 
 

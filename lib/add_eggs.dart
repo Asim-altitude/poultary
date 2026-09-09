@@ -352,28 +352,376 @@ class _NewEggCollection extends State<NewEggCollection>
     child:
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(120),
+        preferredSize: const Size.fromHeight(140),
         child: AppBar(
           backgroundColor: Utils.getThemeColorBlue(),
           elevation: 0,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
+            icon: Icon(Icons.arrow_back_ios, color: Colors.white),
             onPressed: () {
-              if (activeStep > 0) {
-                setState(() => activeStep--);
-              } else {
-                Navigator.pop(context);
-              }
+              Navigator.pop(context);
             },
           ),
           automaticallyImplyLeading: true,
+
+          actions: [
+            // Previous step
+            if (activeStep > 0)
+              IconButton(
+                tooltip: "Previous",
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                onPressed: () {
+                  FocusScope.of(context).unfocus();
+
+                  setState(() {
+                    activeStep--;
+                  });
+                },
+              ),
+
+            // Next / Done
+            IconButton(
+              tooltip: activeStep < 1 ? "Next" : "Save",
+              icon: Icon(
+                activeStep < 1
+                    ? Icons.arrow_forward
+                    : Icons.check,
+                color: Colors.white,
+                size: activeStep < 1 ? 29 : 32,
+              ),
+              onPressed: () async {
+                good_eggs = int.tryParse(goodEggsController.text) ?? 0;
+                bad_eggs = int.tryParse(badEggsController.text) ?? 0;
+
+                checkEggsInTrays();
+
+                setState(() {
+                  activeStep++;
+                });
+
+                if(activeStep==2) {
+
+                  if(totalEggsController.text.isEmpty || totalEggsController.text == "0") {
+                    Utils.showToast("Provide eggs count");
+                    setState(() {
+                      activeStep--;
+                    });
+                    return;
+                  }
+
+                  if(isEggSale() && amount ==0)
+                  {
+                    Utils.showToast("Provide payment details");
+                    setState(() {
+                      activeStep--;
+                    });
+                    return;
+                  }
+
+
+                  await DatabaseHelper.instance.database;
+                  try {
+                    if (isCollection)
+                    {
+                      if (isEdit)
+                      {
+                        widget.eggs!.f_id = getFlockID();
+                        widget.eggs!.f_name =
+                            _purposeselectedValue;
+                        widget.eggs!.date = this.date;
+                        widget.eggs!.egg_color = selectedColor;
+                        widget.eggs!.good_eggs = good_eggs;
+                        widget.eggs!.bad_eggs = bad_eggs;
+                        widget.eggs!.total_eggs = good_eggs + bad_eggs;
+                        widget.eggs!.short_note = notesController.text;
+
+                        widget.eggs!.sync_id = widget.eggs!.sync_id;
+                        widget.eggs!.sync_status= SyncStatus.SYNCED;
+                        widget.eggs!.last_modified = Utils.getTimeStamp();
+                        widget.eggs!.modified_by = Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                        widget.eggs!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+                        widget.eggs!.f_sync_id = getFlockSyncID();
+
+                        await DatabaseHelper.updateEggCollection(
+                            widget.eggs!);
+
+                        Utils.showToast("SUCCESSFUL");
+
+
+                        if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_eggs")) {
+                          EggRecord eggRecord = EggRecord(
+                            eggs: widget.eggs!,
+                            sync_id: widget.eggs!.sync_id,
+                            sync_status: SyncStatus.UPDATED,
+                            last_modified: Utils.getTimeStamp(),
+                            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                          );
+
+                          bool synced = await FireBaseUtils
+                              .updateEggRecord(eggRecord);
+                          if (!synced) {
+
+                          }
+                        }
+
+                        Navigator.pop(context, "Egg ADDED");
+                      }
+                      else {
+                        Eggs eggs = Eggs(
+                            f_id: getFlockID(),
+                            f_name: _purposeselectedValue,
+                            image: '',
+                            good_eggs: good_eggs,
+                            bad_eggs: bad_eggs,
+                            total_eggs: good_eggs + bad_eggs,
+                            short_note: notesController.text,
+                            date: date,
+                            reduction_reason: '',
+                            isCollection: 1,
+                            egg_color: selectedColor,
+                            sync_id: Utils.getUniueId(),
+                            sync_status: SyncStatus.SYNCED,
+                            last_modified: Utils.getTimeStamp(),
+                            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                            f_sync_id: getFlockSyncID());
+
+                        int? id = await DatabaseHelper.insertEggCollection(eggs);
+                        Utils.showToast("SUCCESSFUL");
+
+                        if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_eggs")) {
+                          EggRecord eggRecord = EggRecord(
+                            eggs: eggs,
+                            sync_id: eggs.sync_id,
+                            sync_status: SyncStatus.SYNCED,
+                            last_modified: Utils.getTimeStamp(),
+                            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                          );
+
+                          await FireBaseUtils.uploadEggRecord(eggRecord);
+
+                        }
+
+                        Navigator.pop(context, "${getFlockID()}");
+
+                      }
+                    }
+                    else
+                    {
+                      if (isEdit)
+                      {
+                        widget.eggs!.f_id = getFlockID();
+                        widget.eggs!.f_name =
+                            _purposeselectedValue;
+                        widget.eggs!.date = this.date;
+                        widget.eggs!.egg_color = selectedColor;
+                        widget.eggs!.good_eggs = good_eggs;
+                        widget.eggs!.bad_eggs = bad_eggs;
+                        widget.eggs!.reduction_reason =
+                            _reductionReasonValue;
+                        widget.eggs!.total_eggs = good_eggs + bad_eggs;
+                        widget.eggs!.short_note =
+                            notesController.text;
+
+                        widget.eggs!.sync_id = widget.eggs!.sync_id;
+                        widget.eggs!.sync_status= SyncStatus.SYNCED;
+                        widget.eggs!.last_modified = Utils.getTimeStamp();
+                        widget.eggs!.modified_by = Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                        widget.eggs!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+                        widget.eggs!.f_sync_id = getFlockSyncID();
+
+                        await DatabaseHelper.updateEggCollection(widget.eggs!);
+
+                        if(transactionItem != null)
+                        {
+
+                          transactionItem!.amount = amount.toString();
+                          transactionItem!.how_many = (good_eggs + bad_eggs).toString();
+                          transactionItem!.payment_status = payment_status;
+                          transactionItem!.payment_method = payment_method;
+                          transactionItem!.sold_purchased_from = contractorName;
+
+                          transactionItem!.sync_status = SyncStatus.UPDATED;
+                          transactionItem!.last_modified = Utils.getTimeStamp();
+                          transactionItem!.modified_by = Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                          transactionItem!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+                          transactionItem!.f_sync_id = getFlockSyncID();
+
+                          print("Contractor ${contractorName}");
+                          print("TR Contractor ${transactionItem!.sold_purchased_from}");
+
+                          await DatabaseHelper.updateTransaction(transactionItem!);
+
+                          if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_eggs")) {
+                            EggRecord eggRecord = EggRecord(
+                              eggs: widget.eggs!, transaction: transactionItem,
+                              sync_id: widget.eggs!.sync_id,
+                              sync_status: SyncStatus.UPDATED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                            );
+
+                            bool synced = await FireBaseUtils
+                                .updateEggRecord(eggRecord);
+                            if (!synced) {
+
+                            }
+                          }
+
+                        }
+                        else
+                        {
+                          print("NO Transaction");
+
+                          if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_eggs")) {
+                            EggRecord eggRecord = EggRecord(
+                              eggs: widget.eggs!,
+                              sync_id: widget.eggs!.sync_id,
+                              sync_status: SyncStatus.UPDATED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                            );
+
+                            bool synced = await FireBaseUtils
+                                .updateEggRecord(eggRecord);
+                            if (!synced) {
+
+                            }
+                          }
+                        }
+
+                        Utils.showToast("SUCCESSFUL");
+                        Navigator.pop(context, "Egg ADDED");
+                      }
+                      else
+                      {
+                        Eggs eggs = Eggs(
+                            f_id: getFlockID(),
+                            f_name: _purposeselectedValue,
+                            image: '',
+                            good_eggs: good_eggs,
+                            bad_eggs: bad_eggs,
+                            total_eggs: good_eggs + bad_eggs,
+                            short_note: notesController.text,
+                            date: date,
+                            reduction_reason: _reductionReasonValue,
+                            isCollection: 0,
+                            egg_color: selectedColor,
+                            sync_id: Utils.getUniueId(),
+                            sync_status: SyncStatus.SYNCED,
+                            last_modified: Utils.getTimeStamp(),
+                            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                            f_sync_id: getFlockSyncID()
+                        );
+
+                        int? eggs_id = await DatabaseHelper
+                            .insertEggCollection(eggs);
+
+                        if(isEggSale()){
+
+                          TransactionItem transaction_item = TransactionItem(
+                              f_id: getFlockID(),
+                              date: date,
+                              sale_item: "Egg Sale",
+                              expense_item: "",
+                              type: "Income",
+                              amount: amount.toString(),
+                              payment_method: payment_method,
+                              payment_status: payment_status,
+                              sold_purchased_from: contractorName,
+                              short_note: "Egg Sale".tr()+" on $date}",
+                              how_many: (good_eggs + bad_eggs).toString(),
+                              extra_cost: "",
+                              extra_cost_details: "",
+                              f_name: getFlockName(getFlockID()),
+                              flock_update_id: '-1',
+                              sync_id: Utils.getUniueId(),
+                              sync_status: SyncStatus.SYNCED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                              f_sync_id: getFlockSyncID());
+
+                          int? transaction_id = await DatabaseHelper.insertNewTransaction(transaction_item);
+
+                          EggTransaction eggTransaction = EggTransaction(eggItemId: eggs_id!, transactionId: transaction_id!, syncId: Utils.getUniueId(), syncStatus: SyncStatus.SYNCED, lastModified: Utils.getTimeStamp(), modifiedBy: Utils.isMultiUSer ? Utils.currentUser!.email : '', farmId: Utils.isMultiUSer ? Utils.currentUser!.farmId:'');
+
+                          DatabaseHelper.insertEggJunction(eggTransaction);
+
+                          if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_eggs")) {
+                            EggRecord eggRecord = EggRecord(
+                              eggs: eggs, transaction: transaction_item,
+                              sync_id: eggs.sync_id,
+                              sync_status: SyncStatus.SYNCED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                            );
+
+                            bool synced = await FireBaseUtils
+                                .uploadEggRecord(eggRecord);
+                            if (!synced) {
+
+                            }
+                          }
+
+                        }
+                        else
+                        {
+                          if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_eggs")) {
+                            EggRecord eggRecord = EggRecord(
+                              eggs: eggs,
+                              sync_id: eggs.sync_id,
+                              sync_status: SyncStatus.SYNCED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                            );
+
+
+
+                            bool synced = await FireBaseUtils
+                                .uploadEggRecord(eggRecord);
+                            if (!synced) {
+
+                            }
+                          }
+                        }
+
+                        Utils.showToast("SUCCESSFUL");
+                        Navigator.pop(context, "Egg Reduced");
+                      }
+                    }
+
+                    AnalyticsUtil.logAddEgg(quantity: totalEggsController.text, event: isCollection? _acqusitionselectedValue : _reductionReasonValue );
+
+                  }
+                  catch (ex) {
+                    activeStep = 2;
+                    Utils.showToast(ex.toString());
+                  }
+                }
+              },
+            ),
+
+            const SizedBox(width: 6),
+          ],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(30),
             child: _buildStepper(),
           ),
         ),
       ),
-      bottomNavigationBar:  SafeArea(
+      bottomNavigationBar:   SafeArea(
         top: false,
         child: Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
@@ -1688,6 +2036,7 @@ class _NewEggCollection extends State<NewEggCollection>
         controller: controller,
         maxLines: 2,
         keyboardType: TextInputType.multiline,
+        textInputAction: TextInputAction.done,
         decoration: InputDecoration(
           hintText: hint,
           border: InputBorder.none,

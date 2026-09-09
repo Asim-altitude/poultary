@@ -178,7 +178,7 @@ class _GeneralStockTransactionsScreenState
                   // Quantity
                   TextField(
                     controller: quantityCtrl,
-                    keyboardType: TextInputType.number,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true),
                     decoration: InputDecoration(
                       labelText: "Quantity".tr(),
                       prefixIcon: const Icon(Icons.numbers),
@@ -194,7 +194,7 @@ class _GeneralStockTransactionsScreenState
                   // Cost per unit
                   TextField(
                     controller: costCtrl,
-                    keyboardType: TextInputType.number,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true),
                     decoration: InputDecoration(
                       labelText: type == "IN"? "Cost per unit (optional)".tr() : "Profit per unit (optional)".tr(),
                       prefixIcon: const Icon(Icons.attach_money),

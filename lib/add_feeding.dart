@@ -288,21 +288,132 @@ class _NewFeeding extends State<NewFeeding>
     child:
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(120),
+        preferredSize: const Size.fromHeight(140),
         child: AppBar(
           backgroundColor: Utils.getThemeColorBlue(),
           elevation: 0,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
+            icon: Icon(Icons.arrow_back_ios, color: Colors.white),
             onPressed: () {
-              if (activeStep > 0) {
-                setState(() => activeStep--);
-              } else {
-                Navigator.pop(context);
-              }
+              Navigator.pop(context);
             },
           ),
           automaticallyImplyLeading: true,
+
+          actions: [
+            // Previous step
+            if (activeStep > 0)
+              IconButton(
+                tooltip: "Previous",
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                onPressed: () {
+                  FocusScope.of(context).unfocus();
+
+                  setState(() {
+                    activeStep--;
+                  });
+                },
+              ),
+
+            // Next / Done
+            IconButton(
+              tooltip: activeStep < 1 ? "Next" : "Save",
+              icon: Icon(
+                activeStep < 1
+                    ? Icons.arrow_forward
+                    : Icons.check,
+                color: Colors.white,
+                size: activeStep < 1 ? 29 : 32,
+              ),
+              onPressed: () async {
+
+                activeStep++;
+
+                if(activeStep==1) {
+                  if (quantityController.text
+                      .trim()
+                      .length == 0) {
+                    activeStep--;
+                    Utils.showToast("PROVIDE_ALL");
+                  }else{
+                    setState(() {
+
+                    });
+                  }
+                }
+
+                if(activeStep==2){
+
+                  if(isEdit)
+                  {
+                    await DatabaseHelper.instance.database;
+
+                    Feeding feeding = Feeding(
+                        f_id: getFlockID(),
+                        short_note: notesController.text,
+                        date: date,
+                        feed_name: _feedselectedValue,
+                        quantity: quantityController.text,
+                        f_name: _purposeselectedValue,
+                        sync_id: widget.feeding!.sync_id,
+                        sync_status: SyncStatus.UPDATED,
+                        last_modified: Utils.getTimeStamp(),
+                        modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                        farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                        f_sync_id: getFlockSyncID());
+                    feeding.id = widget.feeding!.id;
+
+                    int? id = await DatabaseHelper
+                        .updateFeeding(feeding);
+
+                    if(Utils.isMultiUSer && Utils.hasFeaturePermission('edit_feed'))
+                    {
+                      await FireBaseUtils.updateFeedingRecord(feeding);
+                    }
+
+                    Utils.showToast("SUCCESSFUL");
+                    Navigator.pop(context);
+                  } else
+                  {
+                    Feeding feeding = Feeding(
+                        f_id: getFlockID(),
+                        short_note: notesController.text,
+                        date: date,
+                        feed_name: _feedselectedValue,
+                        quantity: quantityController.text,
+                        f_name: _purposeselectedValue,
+                        sync_id: Utils.getUniueId(),
+                        sync_status: SyncStatus.SYNCED,
+                        last_modified: Utils.getTimeStamp(),
+                        modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                        farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                        f_sync_id: getFlockSyncID()
+                    );
+                    await DatabaseHelper.instance.database;
+                    int? id = await DatabaseHelper
+                        .insertNewFeeding(feeding);
+                    Utils.showToast("SUCCESSFUL");
+
+                    if(Utils.isMultiUSer && Utils.hasFeaturePermission('add_feed'))
+                    {
+                      await FireBaseUtils.uploadFeedingRecord(feeding);
+                    }
+
+                    Navigator.pop(context);
+                  }
+
+                  AnalyticsUtil.logAddFeed(unit: Utils.selected_unit, quantity: double.parse(quantityController.text));
+
+                }
+              },
+            ),
+
+            const SizedBox(width: 6),
+          ],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(30),
             child: _buildStepper(),
@@ -995,7 +1106,7 @@ class _NewFeeding extends State<NewFeeding>
       ),
       child: TextFormField(
         controller: controller,
-        keyboardType: TextInputType.number,
+        keyboardType: TextInputType.numberWithOptions(decimal: true),
         inputFormatters: [
           FilteringTextInputFormatter.allow(
             RegExp(r"^\d*\.?\d*$"),

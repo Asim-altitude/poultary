@@ -845,7 +845,7 @@ class _FinancialAnalysisScreenState extends State<FinancialAnalysisScreen>
                 ),
               ),
               const SizedBox(height: 4),
-              Text(_steps[s]['label'].tr() as String,
+              Text(_steps[s]['label'] as String,
                   style: TextStyle(
                     fontSize: 9.5,
                     fontWeight: active ? FontWeight.w700 : FontWeight.w500,

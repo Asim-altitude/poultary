@@ -567,7 +567,7 @@ class _GeneralStockScreenState extends State<GeneralStockScreen> with RefreshMix
                     // --------------------- MIN QUANTITY ---------------------
                     TextField(
                       controller: minQtyCtrl,
-                      keyboardType: TextInputType.number,
+                      keyboardType: TextInputType.numberWithOptions(decimal: true),
                       decoration: InputDecoration(
                         labelText: "Minimum Quantity",
                         prefixIcon: const Icon(Icons.warning_rounded, color: Colors.orange),

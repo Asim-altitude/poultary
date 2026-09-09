@@ -122,7 +122,9 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
     Languages.bengali,
     Languages.telugu,
     Languages.tamil,
-    Languages.greek
+    Languages.greek,
+    Languages.swahili,
+    Languages.czech
   ];
   double widthScreen = 0;
   double heightScreen = 0;

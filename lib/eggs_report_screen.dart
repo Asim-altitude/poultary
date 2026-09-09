@@ -252,7 +252,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
   List<EggReductionSummary> eggReductionSummary = [];
 
   int good_eggs = 0,
-      bad_eggs = 0;
+      bad_eggs = 0, rem_good_eggs=0, rem_bad_eggs=0, sold_good=0,sold_bad=0;
 
   void getFilteredEggsCollections(String st, String end, int reduced_eggs, List<TransactionItem> eggSales) async {
     await DatabaseHelper.instance.database;
@@ -266,6 +266,30 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
     bad_eggs = eggs
         .where((item) => item.isCollection == 1)
         .fold(0, (sum, item) => sum + item.bad_eggs);
+
+      sold_good = eggs
+        .where((item) => item.isCollection == 0)
+        .fold(0, (sum, item) => sum + item.good_eggs);
+
+     sold_bad = eggs
+        .where((item) => item.isCollection == 0)
+        .fold(0, (sum, item) => sum + item.bad_eggs);
+
+    rem_good_eggs = good_eggs - sold_good;
+    rem_bad_eggs = bad_eggs - sold_bad;
+
+    if(rem_good_eggs < 0)
+      rem_good_eggs =0;
+
+    if(rem_bad_eggs < 0)
+      rem_bad_eggs =0;
+
+    if(sold_good < 0)
+      sold_good =0;
+
+    if(sold_bad < 0)
+      sold_bad =0;
+
 
     flockEggSummary = getFlockWiseEggSummary(eggs, str_date, end_date);
     eggReductionSummary = getEggReductionSummary(eggs, str_date, end_date);
@@ -660,7 +684,15 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                                         color: Colors.red,
                                         percentage: percent(total_eggs_reduced, total_eggs_collected),
                                       ),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Row(children: [Text("Good".tr()+": ", style: TextStyle(fontSize: 12, color: Colors.green),), Text("$sold_good", style: TextStyle(fontSize: 14, color: Colors.green))],),
+                                          Row(children: [Text("Bad".tr()+": ", style: TextStyle(fontSize: 12, color: Colors.orange),), Text("$sold_bad", style: TextStyle(fontSize: 14, color: Colors.orange))],)
 
+                                        ],
+                                      ),
+                                      SizedBox(height: 10,),
                                       SummaryRow(
                                         title: 'Remaining Eggs'.tr(),
                                         value: '${total_eggs_collected - total_eggs_reduced}',
@@ -669,6 +701,32 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
                                         percentage: percent((total_eggs_collected - total_eggs_reduced), total_eggs_collected),
                                         isBold: true,
                                       ),
+
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Row(children: [Text("Good".tr()+": ", style: TextStyle(fontSize: 12, color: Colors.green),), Text("$rem_good_eggs", style: TextStyle(fontSize: 14, color: Colors.green))],),
+                                          Row(children: [Text("Bad".tr()+": ", style: TextStyle(fontSize: 12, color: Colors.orange),), Text("$rem_bad_eggs", style: TextStyle(fontSize: 14, color: Colors.orange))],)
+
+                                        ],
+                                      ),
+                                      /*SummaryRow(
+                                        title: 'Remaining Eggs'.tr() +" ("+"Good".tr()+")",
+                                        value: '${rem_good_eggs}',
+                                        icon: Icons.egg_alt,
+                                        color: (rem_good_eggs) >= 0 ? Colors.black : Colors.red,
+                                        percentage: percent((rem_good_eggs), total_eggs_collected - total_eggs_reduced),
+                                        isBold: true,
+                                      ),
+
+                                      SummaryRow(
+                                        title: 'Remaining Eggs'.tr() +" ("+"Bad".tr()+")",
+                                        value: '${rem_bad_eggs}',
+                                        icon: Icons.egg_alt,
+                                        color: (rem_bad_eggs) >= 0 ? Colors.black : Colors.red,
+                                        percentage: percent((rem_bad_eggs), total_eggs_collected - total_eggs_reduced),
+                                        isBold: true,
+                                      ),*/
                                     ],
                                   ),
 
@@ -1738,43 +1796,40 @@ class SummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(width: 12),
+    return Row(
+      children: [
+        Icon(icon, color: color, size: 22),
+        const SizedBox(width: 12),
 
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
+        ),
 
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+                color: color,
+              ),
+            ),
+            if (percentage != null)
               Text(
-                value,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-                  color: color,
+                percentage!,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
                 ),
               ),
-              if (percentage != null)
-                Text(
-                  percentage!,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
-                ),
-            ],
-          ),
-        ],
-      ),
+          ],
+        ),
+      ],
     );
   }
 }

@@ -311,28 +311,533 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
 
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(120),
+        preferredSize: const Size.fromHeight(140),
         child: AppBar(
           backgroundColor: Utils.getThemeColorBlue(),
           elevation: 0,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
+            icon: Icon(Icons.arrow_back_ios, color: Colors.white),
             onPressed: () {
-              if (activeStep > 0) {
-                setState(() => activeStep--);
-              } else {
-                Navigator.pop(context);
-              }
+              Navigator.pop(context);
             },
           ),
           automaticallyImplyLeading: true,
+
+          actions: [
+            // Previous step
+            if (activeStep > 0)
+              IconButton(
+                tooltip: "Previous",
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                onPressed: () {
+                  FocusScope.of(context).unfocus();
+
+                  setState(() {
+                    activeStep--;
+                  });
+                },
+              ),
+
+            // Next / Done
+            IconButton(
+              tooltip: activeStep < 1 ? "Next" : "Save",
+              icon: Icon(
+                activeStep < 1
+                    ? Icons.arrow_forward
+                    : Icons.check,
+                color: Colors.white,
+                size: activeStep < 1 ? 29 : 32,
+              ),
+              onPressed: () async {
+                activeStep++;
+                if(activeStep==1){
+
+                  if(is_transaction) {
+                    if (totalBirdsController.text.isEmpty
+                        || amountController.text.isEmpty
+                        || personController.text.isEmpty
+                        || int.parse(totalBirdsController.text) == 0
+                    ) {
+                      activeStep--;
+                      Utils.showToast("PROVIDE_ALL");
+                    }
+                  }else{
+                    if (totalBirdsController.text.isEmpty
+                        || int.parse(totalBirdsController.text) == 0) {
+                      activeStep--;
+                      Utils.showToast("PROVIDE_ALL");
+                    }
+                  }
+
+                }
+
+                if(activeStep == 2) {
+                  bool validate = checkValidation();
+
+                  if (validate) {
+                    print("Everything Okay");
+                    await DatabaseHelper.instance.database;
+
+                    if (isCollection)
+                    {
+                      if (isEdit)
+                      {
+
+                        int? transaction_id = await createTransaction();
+
+                        int active_birds = getFlockActiveBirds();
+                        active_birds = active_birds -
+                            widget.flock_detail!.item_count;
+                        active_birds = active_birds +
+                            int.parse(totalBirdsController.text);
+                        print(active_birds);
+
+                        DatabaseHelper.updateFlockBirds(
+                            active_birds, getFlockID());
+
+
+                        widget.flock_detail?.item_count =
+                            int.parse(totalBirdsController.text);
+                        widget.flock_detail?.acqusition_type =
+                            _acqusitionselectedValue;
+                        widget.flock_detail?.acqusition_date =
+                            date;
+                        widget.flock_detail?.short_note =
+                            notesController.text;
+                        widget.flock_detail?.f_id = getFlockID();
+                        widget.flock_detail?.sync_status = SyncStatus.UPDATED;
+                        widget.flock_detail?.modified_by = Utils.isMultiUSer? Utils.currentUser!.email : '';
+                        widget.flock_detail?.last_modified = Utils.getTimeStamp();
+                        widget.flock_detail?.f_sync_id = getFlockSyncID();
+
+                        await DatabaseHelper.updateFlock(widget.flock_detail);
+                        await DatabaseHelper.updateLinkedTransaction(widget.flock_detail!.transaction_id, widget.flock_detail!.f_detail_id.toString());
+                        Utils.showToast("SUCCESSFUL");
+
+                        if(Utils.isMultiUSer) {
+                          BirdsModification? birdsmodify = null;
+                          if(transaction_id != -1) {
+                            TransactionItem? transaction = await DatabaseHelper.getSingleTransaction(transaction_id!.toString());
+                            /*birdsmodify = BirdsModification(
+                                      flockDetail: widget.flock_detail!,
+                                      transaction: transaction);*/
+
+                            transaction!.f_sync_id = getFlockSyncID();
+                            transaction.sync_status = SyncStatus.UPDATED;
+
+                            FinanceItem financeItem = FinanceItem(transaction: transaction);
+                            financeItem.flockDetails = [];
+                            financeItem.flockDetails!.add(widget.flock_detail!);
+                            financeItem.sync_id = transaction.sync_id;
+                            financeItem.sync_status = SyncStatus.UPDATED;
+                            financeItem.last_modified = Utils.getTimeStamp();
+                            financeItem.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                            financeItem.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+                            await FireBaseUtils.updateExpenseRecord(financeItem);
+
+                            /*birdsmodify.farm_id = Utils.currentUser!.farmId;
+                                  birdsmodify.modified_by = Utils.currentUser!.email;*/
+                          }
+                          else{
+                            birdsmodify = BirdsModification(
+                                flockDetail: widget.flock_detail!);
+                            birdsmodify.farm_id = Utils.currentUser!.farmId;
+                            birdsmodify.modified_by = Utils.currentUser!.email;
+
+                            bool synced = await FireBaseUtils.uploadBirdsDetails(birdsmodify);
+
+                          }
+
+                          // UPDATE FLOCK
+                          Flock? flock = await DatabaseHelper.getSingleFlock(widget.flock_detail!.f_id);
+                          flock!.active_bird_count = active_birds;
+                          flock.farm_id = Utils.currentUser!.farmId;
+                          flock.last_modified = Utils.getTimeStamp();
+                          flock.modified_by = Utils.currentUser!.email;
+                          FireBaseUtils.updateFlock(flock);
+
+                        }
+
+                        Navigator.pop(context);
+
+                      }
+                      else {
+
+                        int? transaction_id = await createTransaction();
+
+                        int active_birds = getFlockActiveBirds();
+                        active_birds = active_birds +
+                            int.parse(totalBirdsController.text);
+                        print(active_birds);
+
+                        DatabaseHelper.updateFlockBirds(
+                            active_birds, getFlockID());
+
+                        Flock_Detail flock_detail = Flock_Detail(
+                            f_id: getFlockID(),
+                            item_type: isCollection
+                                ? 'Addition'
+                                : 'Reduction',
+                            item_count: int.parse(
+                                totalBirdsController.text),
+                            acqusition_type: _acqusitionselectedValue,
+                            acqusition_date: date,
+                            reason: _reductionReasonValue,
+                            short_note: notesController.text,
+                            f_name: _purposeselectedValue,
+                            transaction_id: transaction_id.toString(),
+                            sync_id: Utils.getUniueId(),
+                            sync_status: SyncStatus.SYNCED,
+                            last_modified: Utils.getTimeStamp(),
+                            modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                            farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                            f_sync_id: getFlockSyncID()
+                        );
+                        int? flock_detail_id = await DatabaseHelper
+                            .insertFlockDetail(flock_detail);
+                        await DatabaseHelper.updateLinkedTransaction(transaction_id.toString(), flock_detail_id.toString());
+
+
+                        /*if(Utils.isMultiUSer) {
+                                BirdsModification? birdsmodify = null;
+                                if(transaction_id != "-1") {
+                                  print("TRANSACTION");
+                                  TransactionItem? transaction = await DatabaseHelper
+                                      .getSingleTransaction(
+                                      transaction_id!.toString());
+                                  birdsmodify = BirdsModification(
+                                      flockDetail: flock_detail,
+                                      transaction: transaction);
+
+                                  birdsmodify.farm_id = Utils.currentUser!.farmId;
+                                  birdsmodify.modified_by = Utils.currentUser!.email;
+                                }else{
+                                  print("NO TRANSACTION");
+                                  birdsmodify = BirdsModification(
+                                      flockDetail: flock_detail);
+
+                                  birdsmodify.farm_id = Utils.currentUser!.farmId;
+                                  birdsmodify.modified_by = Utils.currentUser!.email;
+                                }
+
+                                bool synced = await FireBaseUtils.uploadBirdsDetails(birdsmodify);
+                                if(!synced){
+                                  //SAVE FOR LATER SYNC
+                                }
+
+                                // UPDATE FLOCK
+                                Flock? flock = getSelectedFlock();
+                                flock!.active_bird_count = active_birds;
+                                FireBaseUtils.updateFlock(flock);
+
+
+                              }
+              */
+                        if(Utils.isMultiUSer) {
+                          BirdsModification? birdsmodify = null;
+                          if(transaction_id != -1) {
+                            TransactionItem? transaction = await DatabaseHelper.getSingleTransaction(transaction_id!.toString());
+                            /*birdsmodify = BirdsModification(
+                                      flockDetail: widget.flock_detail!,
+                                      transaction: transaction);*/
+
+                            transaction!.f_sync_id = getFlockSyncID();
+                            transaction.sync_status = SyncStatus.SYNCED;
+                            FinanceItem financeItem = FinanceItem(transaction: transaction);
+                            financeItem.flockDetails = [];
+                            financeItem.flockDetails!.add(flock_detail);
+                            financeItem.sync_id = transaction.sync_id;
+                            financeItem.sync_status = SyncStatus.SYNCED;
+                            financeItem.last_modified = Utils.getTimeStamp();
+                            financeItem.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                            financeItem.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+                            await FireBaseUtils.uploadExpenseRecord(financeItem);
+
+                            /*birdsmodify.farm_id = Utils.currentUser!.farmId;
+                                  birdsmodify.modified_by = Utils.currentUser!.email;*/
+                          }
+                          else{
+                            birdsmodify = BirdsModification(
+                                flockDetail: flock_detail);
+                            birdsmodify.farm_id = Utils.currentUser!.farmId;
+                            birdsmodify.modified_by = Utils.currentUser!.email;
+
+                            bool synced = await FireBaseUtils.uploadBirdsDetails(birdsmodify);
+
+                          }
+
+                          // UPDATE FLOCK
+                          Flock? flock = await DatabaseHelper.getSingleFlock(flock_detail.f_id);
+                          flock!.active_bird_count = active_birds;
+                          flock.farm_id = Utils.currentUser!.farmId;
+                          flock.last_modified = Utils.getTimeStamp();
+                          flock.modified_by = Utils.currentUser!.email;
+                          FireBaseUtils.updateFlock(flock);
+                          Utils.showToast("SUCCESSFUL");
+
+                          Navigator.pop(context);
+
+                        } else {
+                          Utils.showToast("SUCCESSFUL");
+
+                          Navigator.pop(context);
+                        }
+
+                        /* if(Utils.isMultiUSer) {
+                                flock_detail.f_detail_id = flock_detail_id;
+                                bool synced = await FireBaseUtils.uploadFlockDetails(flock_detail);
+                                if(!synced)
+                                {
+                                  flock_detail.sync_status = SyncStatus.PENDING;
+                                  await DatabaseHelper.updateFlock(flock_detail);
+                                }
+                              }*/
+
+                      }
+                    }
+                    else {
+                      if (isEdit)
+                      {
+
+                        int? transaction_id = await createTransaction();
+
+                        int active_birds = getFlockActiveBirds();
+                        active_birds = active_birds + widget.flock_detail!.item_count;
+                        if (int.parse(totalBirdsController.text) <=
+                            active_birds) {
+
+                          active_birds = active_birds -
+                              int.parse(
+                                  totalBirdsController.text);
+                          print(active_birds);
+
+                          DatabaseHelper.updateFlockBirds(
+                              active_birds, getFlockID());
+
+                          widget.flock_detail?.item_count =
+                              int.parse(
+                                  totalBirdsController.text);
+                          widget.flock_detail?.reason =
+                              _reductionReasonValue;
+                          widget.flock_detail?.acqusition_date =
+                              date;
+                          widget.flock_detail?.short_note =
+                              notesController.text;
+                          widget.flock_detail?.f_id =
+                              getFlockID();
+                          widget.flock_detail?.sync_status = SyncStatus.UPDATED;
+                          widget.flock_detail?.modified_by = Utils.isMultiUSer? Utils.currentUser!.email:'';
+                          widget.flock_detail?.last_modified = Utils.getTimeStamp();
+                          widget.flock_detail?.f_sync_id = getFlockSyncID();
+
+                          await DatabaseHelper.updateFlock(
+                              widget.flock_detail);
+                          await DatabaseHelper.updateLinkedTransaction(widget.flock_detail!.transaction_id, widget.flock_detail!.f_detail_id.toString());
+
+                          Utils.showToast("SUCCESSFUL");
+
+                          if(Utils.isMultiUSer) {
+                            BirdsModification? birdsmodify = null;
+                            if(transaction_id != -1) {
+                              TransactionItem? transaction = await DatabaseHelper.getSingleTransaction(transaction_id!.toString());
+                              /*birdsmodify = BirdsModification(
+                                      flockDetail: widget.flock_detail!,
+                                      transaction: transaction);*/
+
+                              transaction!.f_sync_id = getFlockSyncID();
+                              transaction.sync_status = SyncStatus.UPDATED;
+
+                              FinanceItem financeItem = FinanceItem(transaction: transaction!);
+                              financeItem.flockDetails = [];
+                              financeItem.flockDetails!.add(widget.flock_detail!);
+                              financeItem.sync_id = transaction.sync_id;
+                              financeItem.sync_status = SyncStatus.UPDATED;
+                              financeItem.last_modified = Utils.getTimeStamp();
+                              financeItem.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                              financeItem.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+                              await FireBaseUtils.updateExpenseRecord(financeItem);
+
+                              /*birdsmodify.farm_id = Utils.currentUser!.farmId;
+                                  birdsmodify.modified_by = Utils.currentUser!.email;*/
+                            }
+                            else{
+                              birdsmodify = BirdsModification(
+                                  flockDetail: widget.flock_detail!);
+                              birdsmodify.farm_id = Utils.currentUser!.farmId;
+                              birdsmodify.modified_by = Utils.currentUser!.email;
+
+                              bool synced = await FireBaseUtils.uploadBirdsDetails(birdsmodify);
+
+                            }
+
+                            // UPDATE FLOCK
+                            Flock? flock = await DatabaseHelper.getSingleFlock(widget.flock_detail!.f_id);
+                            flock!.active_bird_count = active_birds;
+                            flock.farm_id = Utils.currentUser!.farmId;
+                            flock.last_modified = Utils.getTimeStamp();
+                            flock.modified_by = Utils.currentUser!.email;
+                            FireBaseUtils.updateFlock(flock);
+
+                          }
+                          /* if(Utils.isMultiUSer) {
+                                  bool synced = await FireBaseUtils.uploadFlockDetails(widget.flock_detail!);
+                                  if(!synced)
+                                  {
+                                    widget.flock_detail!.sync_status = SyncStatus.PENDING;
+                                    await DatabaseHelper.updateFlock(widget.flock_detail!);
+                                  }
+                                }*/
+
+                          Navigator.pop(context);
+                        }else{
+                          activeStep--;
+                          max_hint =
+                              "CANNOT_REDUCE".tr() +
+                                  "$active_birds";
+                          Utils.showToast(max_hint);
+                          setState(() {
+
+                          });
+                        }
+                      }
+                      else {
+
+                        int? transaction_id = await createTransaction();
+
+                        int active_birds = getFlockActiveBirds();
+
+                        if (int.parse(totalBirdsController.text) <=
+                            active_birds) {
+                          active_birds = active_birds -
+                              int.parse(totalBirdsController.text);
+                          print(active_birds);
+
+                          DatabaseHelper.updateFlockBirds(
+                              active_birds, getFlockID());
+
+                          Flock_Detail flock_detail = Flock_Detail(
+                              f_id: getFlockID(),
+                              item_type: isCollection
+                                  ? 'Addition'
+                                  : 'Reduction',
+                              item_count: int.parse(
+                                  totalBirdsController.text),
+                              acqusition_type: _acqusitionselectedValue,
+                              acqusition_date: date,
+                              reason: _reductionReasonValue,
+                              short_note: notesController.text,
+                              f_name: _purposeselectedValue,
+                              transaction_id: transaction_id.toString(),
+                              sync_id: Utils.getUniueId(),
+                              sync_status: SyncStatus.SYNCED,
+                              last_modified: Utils.getTimeStamp(),
+                              modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                              farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                              f_sync_id: getFlockSyncID()
+                          );
+                          int? flock_detail_id = await DatabaseHelper
+                              .insertFlockDetail(flock_detail);
+                          await DatabaseHelper.updateLinkedTransaction(transaction_id.toString(), flock_detail_id.toString());
+
+                          Utils.showToast("SUCCESSFUL");
+
+
+                          if(Utils.isMultiUSer) {
+                            BirdsModification? birdsmodify = null;
+                            if(transaction_id != -1) {
+                              TransactionItem? transaction = await DatabaseHelper.getSingleTransaction(transaction_id!.toString());
+                              /*birdsmodify = BirdsModification(
+                                      flockDetail: widget.flock_detail!,
+                                      transaction: transaction);*/
+                              transaction!.f_sync_id = getFlockSyncID();
+                              transaction.sync_status = SyncStatus.SYNCED;
+
+                              FinanceItem financeItem = FinanceItem(transaction: transaction!);
+                              financeItem.flockDetails = [];
+                              financeItem.flockDetails!.add(flock_detail);
+                              financeItem.sync_id = transaction.sync_id;
+                              financeItem.sync_status = SyncStatus.SYNCED;
+                              financeItem.last_modified = Utils.getTimeStamp();
+                              financeItem.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                              financeItem.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+                              await FireBaseUtils.uploadExpenseRecord(financeItem);
+
+                              /*birdsmodify.farm_id = Utils.currentUser!.farmId;
+                                  birdsmodify.modified_by = Utils.currentUser!.email;*/
+                            }
+                            else{
+                              birdsmodify = BirdsModification(
+                                  flockDetail: flock_detail);
+                              birdsmodify.farm_id = Utils.currentUser!.farmId;
+                              birdsmodify.modified_by = Utils.currentUser!.email;
+
+                              bool synced = await FireBaseUtils.uploadBirdsDetails(birdsmodify);
+
+                            }
+
+                            // UPDATE FLOCK
+                            Flock? flock = await DatabaseHelper.getSingleFlock(flock_detail.f_id);
+                            flock!.active_bird_count = active_birds;
+                            flock.farm_id = Utils.currentUser!.farmId;
+                            flock.last_modified = Utils.getTimeStamp();
+                            flock.modified_by = Utils.currentUser!.email;
+                            FireBaseUtils.updateFlock(flock);
+
+                          }
+
+                          /* if(Utils.isMultiUSer) {
+                                  flock_detail.f_detail_id = flock_detail_id;
+                                  bool synced = await FireBaseUtils.uploadFlockDetails(flock_detail);
+                                  if(!synced)
+                                  {
+                                    flock_detail.sync_status = SyncStatus.PENDING;
+                                    await DatabaseHelper.updateFlock(flock_detail);
+                                  }
+                                }*/
+
+                          AnalyticsUtil.logAddBirds(quantity: totalBirdsController.text, event: isCollection? _acqusitionselectedValue : _reductionReasonValue );
+                          Navigator.pop(context);
+                        } else {
+                          activeStep--;
+                          max_hint =
+                              "CANNOT_REDUCE".tr() +
+                                  "$active_birds";
+                          Utils.showToast(max_hint);
+
+                          setState(() {
+
+                          });
+                        }
+                      }
+                    }
+                  } else {
+                    activeStep--;
+                    Utils.showToast("PROVIDE_ALL");
+                  }
+                }
+                setState(() {
+
+                });
+              },
+            ),
+
+            const SizedBox(width: 6),
+          ],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(30),
             child: _buildStepper(),
           ),
         ),
       ),
-      bottomNavigationBar: SafeArea(
+      bottomNavigationBar:  SafeArea(
         top: false,
         child: Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
@@ -1554,6 +2059,7 @@ class _NewBirdsCollection extends State<NewBirdsCollection>
             child: TextFormField(
               controller: controller,
               keyboardType: keyboardType,
+              textInputAction: TextInputAction.done,
               inputFormatters: _getInputFormatters(inputFormat),
               style: TextStyle(fontSize: 17, color: Colors.black),
               decoration: InputDecoration(

@@ -472,7 +472,7 @@ class _AssetMaintenanceScreenState extends State<AssetMaintenanceScreen> {
                       ],
                     ),
 
-                    _field(costCtrl, "Cost", Icons.currency_exchange, type: TextInputType.number),
+                    _field(costCtrl, "Cost", Icons.currency_exchange, type: TextInputType.numberWithOptions(decimal: true)),
                     _field(byCtrl, "Performed By", Icons.person),
                     _field(descCtrl, "Description (optional)", Icons.notes, lines: 2),
                     const SizedBox(height: 16),

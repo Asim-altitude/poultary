@@ -384,6 +384,20 @@ class _UserEditScreenState extends State<UserEditScreen> {
 
                   ),
                 ),
+                const SizedBox(height: 8),
+                InkWell(
+                  onTap: () {
+                    Utils.copySubUserCredentials(name: widget.user.name, email: widget.user.email, password: widget.user.password, farmID: widget.user.farmId);
+                  },
+                  child: Row(
+                    children: [
+                      Icon(Icons.copy, size: 20, color: Colors.blue,),
+                      const SizedBox(width: 8),
+                      Text('Copy Credentials'.tr(), style: TextStyle(fontSize: 14, color: Colors.black, ),)
+                    ],
+
+                  ),
+                ),
                 Divider(),
                 const SizedBox(height: 10),
                 Row(

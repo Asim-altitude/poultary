@@ -423,19 +423,159 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
         (safeAreaHeight + safeAreaHeightBottom);
     child:
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0, // removes the shadow
-        scrolledUnderElevation: 0, // removes shadow when scrolling (Flutter 3.7+)
-        surfaceTintColor: Colors.transparent, // removes Material3 tint
-        backgroundColor: Utils.getScreenBackground(), // Customize the color
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Utils.getThemeColorBlue()),
-          onPressed: () {
-            Navigator.pop(context); // Navigates back
-          },
+
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60),
+        child: AppBar(
+          backgroundColor: Utils.getScreenBackground(),
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios, color: Colors.blue),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          automaticallyImplyLeading: true,
+
+          actions: [
+            // Previous step
+            if (activeStep > 0)
+              IconButton(
+                tooltip: "Previous",
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.blue,
+                  size: 28,
+                ),
+                onPressed: () {
+                  FocusScope.of(context).unfocus();
+
+                  setState(() {
+                    activeStep--;
+                  });
+                },
+              ),
+
+            // Next / Done
+            IconButton(
+              tooltip: activeStep < 1 ? "Next" : "Save",
+              icon: Icon(
+                activeStep < 1
+                    ? Icons.arrow_forward
+                    : Icons.check,
+                color: Colors.blue,
+                size: activeStep < 1 ? 29 : 32,
+              ),
+              onPressed: () async {
+
+
+                activeStep++;
+
+                if(activeStep==1)
+                {
+
+                  /* if(qtycountController.text.trim().length==0)
+                        {
+                          activeStep--;
+                          Utils.showToast("PROVIDE_ALL");
+                        }else{
+                          setState(() {
+
+                          });
+                        }*/
+                  setState(() {
+
+                  });
+                }
+
+                if(activeStep==2){
+
+                  if(doctorController.text.trim().length==0 /*|| qtycountController.text.isEmpty */|| bird_countController.text.isEmpty){
+                    activeStep--;
+                    Utils.showToast("PROVIDE_ALL");
+                  }else{
+                    multiHealthRecord = MultiHealthRecord();
+                    if(isEdit)
+                    {
+                      Vaccination_Medication med_vacc = Vaccination_Medication(
+                          f_id: getFlockID(),
+                          disease: "",
+                          medicine: "",
+                          date: date,
+                          type: Utils.vaccine_medicine.toLowerCase()
+                              .contains("medi")
+                              ? 'Medication'
+                              : 'Vaccination',
+                          short_note: notesController.text,
+                          bird_count: int.parse(
+                              bird_countController.text),
+                          doctor_name: doctorController.text,
+                          f_name: _purposeselectedValue, quantity: qtycountController.text, unit: _selectedUnit,
+                          sync_id: widget.vaccination_medication!.sync_id,
+                          sync_status: SyncStatus.UPDATED,
+                          last_modified: Utils.getTimeStamp(),
+                          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                          f_sync_id: getFlockSyncID());
+
+                      med_vacc.id = widget.vaccination_medication!.id!;
+                      int? id = await DatabaseHelper.updateHealth(med_vacc);
+
+                      multiHealthRecord!.record = med_vacc;
+
+                      await updateMultiRecords(med_vacc.id!);
+                      Utils.showToast("SUCCESSFUL");
+
+                      if(Utils.isMultiUSer && Utils.hasFeaturePermission("edit_health")){
+                        await FireBaseUtils.updateMultiHealthRecord(multiHealthRecord!);
+                      }
+
+                      Navigator.pop(context);
+                    }
+                    else
+                    {
+                      Vaccination_Medication med_vacc = Vaccination_Medication(
+                          f_id: getFlockID(),
+                          disease: "",
+                          medicine: "",
+                          date: date,
+                          type: Utils.vaccine_medicine.toLowerCase()
+                              .contains("medi")
+                              ? 'Medication'
+                              : 'Vaccination',
+                          short_note: notesController.text,
+                          bird_count: int.parse(
+                              bird_countController.text),
+                          doctor_name: doctorController.text,
+                          f_name: _purposeselectedValue, quantity: qtycountController.text, unit: _selectedUnit,
+                          sync_id: Utils.getUniueId(),
+                          sync_status: SyncStatus.SYNCED,
+                          last_modified: Utils.getTimeStamp(),
+                          modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                          farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                          f_sync_id: getFlockSyncID());
+                      int? id = await DatabaseHelper.insertMedVac(med_vacc);
+                      multiHealthRecord!.record = med_vacc;
+                      await addMultiRecords(id!);
+                      Utils.showToast("SUCCESSFUL");
+
+                      if(Utils.isMultiUSer && Utils.hasFeaturePermission("add_health")){
+                        await FireBaseUtils.uploadMultiHealthRecord(multiHealthRecord!);
+                      }
+                      Navigator.pop(context);
+                    }
+                  }
+                }
+
+              },
+            ),
+
+            const SizedBox(width: 6),
+          ],
+
         ),
       ),
-      bottomNavigationBar: SafeArea(
+      bottomNavigationBar:  SafeArea(
         top: false,
         child: Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
@@ -1480,7 +1620,7 @@ class _NewMultiVaccineMedicine extends State<NewMultiVaccineMedicine>
       ),
       child: TextFormField(
         controller: controller,
-        keyboardType: TextInputType.number,
+        keyboardType: TextInputType.numberWithOptions(decimal: true),
         inputFormatters: [
           FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows digits and one decimal point
           TextInputFormatter.withFunction((oldValue, newValue) {

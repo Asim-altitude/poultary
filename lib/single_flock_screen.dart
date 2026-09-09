@@ -435,7 +435,7 @@ class _SingleFlockScreen extends State<SingleFlockScreen> with SingleTickerProvi
               child: Image.asset('assets/ai_analysis.png',),),
           ),
          */
-          /*Container(
+         /* Container(
             alignment: Alignment.center,
             child: AIWaveButton(
               onTap: ()  {

@@ -3020,6 +3020,7 @@ _buildFeatureItem(Icons.cloud_upload, "Cloud Sync".tr(),
 
   /// **Card-Based Settings Tile**
   Widget _buildSettingsTile(BuildContext context, {required IconData icon, required String title, required VoidCallback onTap}) {
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -3060,9 +3061,15 @@ _buildFeatureItem(Icons.cloud_upload, "Cloud Sync".tr(),
         ),
       ),
     );
+
+   /*if(Utils.isMultiUSer && Utils.currentUser!.role.toLowerCase() != "admin")
+     return SizedBox.shrink();
+   else*/
+
   }
 
-  void addNewCollection(){
+  void addNewCollection()
+  {
     Navigator.push(
       context,
       MaterialPageRoute(

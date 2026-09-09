@@ -546,28 +546,186 @@ class _NewIncome extends State<NewIncome>
     child:
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(120),
+        preferredSize: const Size.fromHeight(140),
         child: AppBar(
           backgroundColor: Utils.getThemeColorBlue(),
           elevation: 0,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
+            icon: Icon(Icons.arrow_back_ios, color: Colors.white),
             onPressed: () {
-              if (activeStep > 0) {
-                setState(() => activeStep--);
-              } else {
-                Navigator.pop(context);
-              }
+              Navigator.pop(context);
             },
           ),
           automaticallyImplyLeading: true,
+
+          actions: [
+            // Previous step
+            if (activeStep > 0)
+              IconButton(
+                tooltip: "Previous",
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                onPressed: () {
+                  FocusScope.of(context).unfocus();
+
+                  setState(() {
+                    activeStep--;
+                  });
+                },
+              ),
+
+            // Next / Done
+            IconButton(
+              tooltip: activeStep < 1 ? "Next" : "Save",
+              icon: Icon(
+                activeStep <= 1
+                    ? Icons.arrow_forward
+                    : Icons.check,
+                color: Colors.white,
+                size: activeStep <= 1 ? 29 : 32,
+              ),
+              onPressed: () async {
+
+                activeStep++;
+                if(activeStep==1){
+                  if(invalidInput())
+                  {
+                    activeStep--;
+                    Utils.showToast("PROVIDE_ALL");
+                  }else{
+                    setState(() {
+
+                    });
+                  }
+                }
+
+                if(activeStep==2){
+                  if(!invalidInput() && soldtoController.text.trim().length>0)
+                  {
+                    setState(() {
+
+                    });
+                  }else{
+                    activeStep--;
+                    Utils.showToast("PROVIDE_ALL");
+                  }
+                }
+
+                if(activeStep==3)
+                {
+
+                  if(isEdit)
+                  {
+                    await DatabaseHelper.instance.database;
+                    TransactionItem transaction_item = TransactionItem(
+                        f_id: getFlockID(),
+                        date: date,
+                        sale_item: choose_option?_mysaleselectedValue : _saleselectedValue,
+                        expense_item: "",
+                        type: "Income",
+                        amount: amountController.text,
+                        payment_method: payment_method,
+                        payment_status: payment_status,
+                        sold_purchased_from: soldtoController.text,
+                        short_note: notesController.text,
+                        how_many: howmanyController.text,
+                        unitPrice: double.parse(unitPriceController.text),
+                        extra_cost: "",
+                        extra_cost_details: "",
+                        f_name: _purposeselectedValue, flock_update_id: '-1',
+                        sync_id: widget.transactionItem!.sync_id,
+                        sync_status: SyncStatus.SYNCED,
+                        last_modified: Utils.getTimeStamp(),
+                        modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                        farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                        f_sync_id: getFlockSyncID());
+
+                    transaction_item.id = widget.transactionItem!.id;
+
+                    int? id = await DatabaseHelper
+                        .updateTransaction(transaction_item);
+
+                    financeItem = FinanceItem(transaction: transaction_item);
+                    financeItem!.sync_id = transaction_item.sync_id;
+                    financeItem!.sync_status = SyncStatus.UPDATED;
+                    financeItem!.last_modified = Utils.getTimeStamp();
+                    financeItem!.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                    financeItem!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+
+                    reduceBirds(widget.transactionItem!.id!);
+                    Utils.showToast("SUCCESSFUL");
+                    Navigator.pop(context);
+                  }
+                  else
+                  {
+
+                    print("Everything Okay");
+                    await DatabaseHelper.instance.database;
+                    TransactionItem transaction_item = TransactionItem(
+                        f_id: getFlockID(),
+                        date: date,
+                        sale_item: choose_option? _mysaleselectedValue : _saleselectedValue,
+                        expense_item: "",
+                        type: "Income",
+                        amount: amountController.text,
+                        payment_method: payment_method,
+                        payment_status: payment_status,
+                        sold_purchased_from: soldtoController
+                            .text,
+                        short_note: notesController.text,
+                        how_many: howmanyController.text,
+                        unitPrice: double.parse(unitPriceController.text),
+                        extra_cost: "",
+                        extra_cost_details: "",
+                        f_name: _purposeselectedValue, flock_update_id: '-1',
+                        sync_id: Utils.getUniueId(),
+                        sync_status: SyncStatus.SYNCED,
+                        last_modified: Utils.getTimeStamp(),
+                        modified_by: Utils.isMultiUSer ? Utils.currentUser!.email : '',
+                        farm_id: Utils.isMultiUSer ? Utils.currentUser!.farmId : '',
+                        f_sync_id: getFlockSyncID());
+                    int? id = await DatabaseHelper
+                        .insertNewTransaction(transaction_item);
+
+                    financeItem = FinanceItem(transaction: transaction_item);
+                    financeItem!.sync_id = transaction_item.sync_id;
+                    financeItem!.sync_status = SyncStatus.SYNCED;
+                    financeItem!.last_modified = Utils.getTimeStamp();
+                    financeItem!.modified_by =  Utils.isMultiUSer ? Utils.currentUser!.email : '';
+                    financeItem!.farm_id = Utils.isMultiUSer ? Utils.currentUser!.farmId : '';
+
+
+                    if(widget.selectedIncomeType != null){
+                      if(widget.selectedIncomeType!.toLowerCase()=="egg sale"){
+
+                      }
+                    }else if (widget.selectedExpenseType != null){
+
+                    } else {
+                      reduceBirds(id!);
+                    }
+                    Utils.showToast("SUCCESSFUL");
+                    Navigator.pop(context);
+                  }
+
+                  AnalyticsUtil.logAddTransaction(type: "Income", amount: double.parse(amountController.text));
+                }
+              },
+            ),
+
+            const SizedBox(width: 6),
+          ],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(30),
             child: _buildStepper(),
           ),
         ),
       ),
-      bottomNavigationBar: SafeArea(
+      bottomNavigationBar:  SafeArea(
         top: false,
         child: Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
@@ -984,7 +1142,7 @@ class _NewIncome extends State<NewIncome>
                                         children: [
                                           _buildInputLabel("HOW_MANY".tr(), Icons.confirmation_num),
                                           SizedBox(height: 8),
-                                          _buildNumberField(howmanyController, "HOW_MANY".tr(), readOnly: !is_specific_flock && is_bird_sale, onTap: () {
+                                          _buildNumberField(howmanyController, "HOW_MANY".tr(),allowFloat: true ,readOnly: !is_specific_flock && is_bird_sale, onTap: () {
                                             if (!is_specific_flock && is_bird_sale) showBottomDialog();
                                           }),
                                         ],

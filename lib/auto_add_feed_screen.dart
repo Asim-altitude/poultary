@@ -306,7 +306,7 @@ class _AutoFeedSyncScreenState extends State<AutoFeedSyncScreen> {
               TextField(
                 controller: quantityController,
                 decoration: InputDecoration(labelText: 'Quantity'.tr()),
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
               ),
             ],
           ),

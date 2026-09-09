@@ -165,9 +165,9 @@ class _NewEventReminder extends State<NewEventReminder>
           },
         ),
       ),
-
-
-      bottomNavigationBar: InkWell(
+      resizeToAvoidBottomInset: true,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: InkWell(
         onTap: () async {
           activeStep++;
 

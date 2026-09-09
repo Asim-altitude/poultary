@@ -563,7 +563,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                       hintText: 'Qty'.tr(),
                       border: InputBorder.none,
                     ),
-                    keyboardType: TextInputType.number,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true),
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16),
                     inputFormatters: [
@@ -667,7 +667,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                     ),
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16),
-                    keyboardType: TextInputType.number,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
                       TextInputFormatter.withFunction((oldValue, newValue) {
@@ -777,7 +777,7 @@ class _AutomaticFeedManagementScreenState extends State<AutomaticFeedManagementS
                     : null,
                 enabled: isAutoFeedEnabled,
                 style: TextStyle(fontSize: 16),
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
                   TextInputFormatter.withFunction((oldValue, newValue) {

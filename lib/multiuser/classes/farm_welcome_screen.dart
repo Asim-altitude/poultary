@@ -642,7 +642,8 @@ class _FarmWelcomeScreenState extends State<FarmWelcomeScreen> {
         _consumables = consumables;
       });
     } else {
-      setState(() {
+      setState(()
+      {
         _purchases.add(purchaseDetails);
         _purchasePending = false;
       });

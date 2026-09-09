@@ -612,7 +612,7 @@ class _AddMedicineStockBottomSheetState extends State<AddMedicineStockBottomShee
                 controller: _quantityController,
                 label: "Quantity".tr(),
                 icon: Icons.production_quantity_limits,
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
               ),
       
               SizedBox(height: 12),
@@ -681,7 +681,7 @@ class _AddMedicineStockBottomSheetState extends State<AddMedicineStockBottomShee
                       controller: _amountController,
                       label: "Amount".tr(),
                       icon: Icons.attach_money,
-                      keyboardType: TextInputType.number,
+                      keyboardType: TextInputType.numberWithOptions(decimal: true),
                     ),
                     SizedBox(height: 12),
 
