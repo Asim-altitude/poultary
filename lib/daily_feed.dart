@@ -7,9 +7,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:poultary/add_feeding.dart';
+import 'package:poultary/feed_report_screen.dart';
 import 'package:poultary/model/feed_item.dart';
 import 'package:poultary/multiuser/utils/FirebaseUtils.dart';
-import 'package:poultary/sticky.dart';
 import 'package:poultary/utils/fb_analytics.dart';
 import 'package:poultary/utils/session_manager.dart';
 import 'package:poultary/utils/utils.dart';
@@ -42,7 +42,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
       print(ex);
     }
   }
-  
+
   double widthScreen = 0;
   double heightScreen = 0;
 
@@ -138,25 +138,25 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
         return;
       }
     }else{
-     await Navigator.push(
+      await Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) =>  NewFeeding()),
       );
 
-     try{
-       bool isFirst = true;//await DatabaseHelper.isFirstRecord("Feeding");
-       if(isFirst) {
-         _statuses  = await _prefs.loadAllStatuses(_routineOrder);
-         bool complete = _statuses["Feed"] ?? false;
-         if(!complete) {
-           _showFeedRoutineSuggestionDialog();
-         }
-       }
-     }
-     catch(ex){
-       print(ex);
-     }
+      try{
+        bool isFirst = true;//await DatabaseHelper.isFirstRecord("Feeding");
+        if(isFirst) {
+          _statuses  = await _prefs.loadAllStatuses(_routineOrder);
+          bool complete = _statuses["Feed"] ?? false;
+          if(!complete) {
+            _showFeedRoutineSuggestionDialog();
+          }
+        }
+      }
+      catch(ex){
+        print(ex);
+      }
 
       getFilteredTransactions(str_date, end_date);
     }
@@ -220,6 +220,9 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
 
   int feed_total = 0;
 
+  // UI-only: which cards are expanded (keyed by record id)
+  final Set<int> _expandedIds = {};
+
   String applied_filter_name = "All Feedings";
 
   @override
@@ -232,7 +235,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
     heightScreen = MediaQuery.of(context).size.height;
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
-      child:
+    child:
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight),
@@ -303,224 +306,121 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
       bottomNavigationBar: BottomAppBar(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_feed"))
-            {
-              Utils.showMissingPermissionDialog(context, "add_feed");
-              return;
-            }
+            onTap: () {
+              if(Utils.isMultiUSer && !Utils.hasFeaturePermission("add_feed"))
+              {
+                Utils.showMissingPermissionDialog(context, "add_feed");
+                return;
+              }
 
-            _addManualFeedingRecord();
-          },
-          child: Container(
-            height: 50,
-            margin: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Utils.getThemeColorBlue().withOpacity(0.9),
-                  Utils.getThemeColorBlue(),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.blue.shade200.withOpacity(0.6),
-                  blurRadius: 6,
-                  spreadRadius: 1,
-                  offset: Offset(0, 3), // Slight elevation
-                ),
-              ],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.add, color: Colors.white, size: 26),
-                SizedBox(width: 8),
-                Text(
-                  'NEW_FEEDING'.tr(),
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
+              _addManualFeedingRecord();
+            },
+            child: Container(
+              height: 50,
+              margin: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+              decoration: BoxDecoration(
+                color: Utils.getThemeColorBlue(),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.blue.shade200.withOpacity(0.5),
+                    blurRadius: 6,
+                    offset: Offset(0, 2),
                   ),
-                ),
-              ],
-            ),
-          )
+                ],
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.add, color: Colors.white, size: 26),
+                  SizedBox(width: 8),
+                  Text(
+                    'NEW_FEEDING'.tr(),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            )
 
         ),
       ),
       body:SafeArea(
         top: false,
 
-          child:Container(
+        child:Container(
           width: widthScreen,
           height: heightScreen,
-            color: Utils.getScreenBackground(),
-            child:Column(children: [
-               if(_isBannerAdReady)
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                      height: 60.0,
-                      width: Utils.WIDTH_SCREEN,
-                      child: AdWidget(ad: _bannerAd)
-                  ),
-                ),
-              Expanded(child: SingleChildScrollView(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children:  [
-
-                      /*ClipRRect(
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10),
-                ),
+          color: Utils.getScreenBackground(),
+          child:Column(children: [
+            if(_isBannerAdReady)
+              Align(
+                alignment: Alignment.topCenter,
                 child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                     // colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
-                      colors: [Colors.blue, Colors.blue],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 6,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                  child: Row(
-                    children: [
-                      /// Back Button
-                      InkWell(
-                        borderRadius: BorderRadius.circular(30),
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          width: 45,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.15),
-                          ),
-                          child: Icon(Icons.arrow_back, color: Colors.white, size: 28),
-                        ),
-                      ),
-
-                      /// Title
-                      Expanded(
-                        child: Container(
-                          margin: EdgeInsets.only(left: 12),
-                          child: Text(
-                            applied_filter_name.tr(),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      /// Sort Button
-                      InkWell(
-                        borderRadius: BorderRadius.circular(10),
-                        onTap: () {
-                          openSortDialog(context, (selectedSort) {
-                            setState(() {
-                              sortOption = selectedSort == "date_desc" ? "Date (New)" : "Date (Old)";
-                              sortSelected = selectedSort == "date_desc" ? "DESC" : "ASC";
-                            });
-
-                            getFilteredTransactions(str_date, end_date);
-                          });
-                        },
-                        child: Container(
-                          height: 45,
-                          width: 130,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  sortOption.tr(),
-                                  style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Icon(Icons.sort, color: Colors.white, size: 22),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    height: 60.0,
+                    width: Utils.WIDTH_SCREEN,
+                    child: AdWidget(ad: _bannerAd)
                 ),
               ),
-    */
-                      Center(
-                        child: Container(
-                          padding: EdgeInsets.only(top: 10),
-                          margin: EdgeInsets.symmetric(horizontal: 10), // Margin of 10 on left & right
-                          child: Row(
-                            children: [
-                              Expanded(
-                                flex: 3, // 60% of available space
-                                child: SizedBox(
-                                  height: 55,
-                                  child: _buildDropdownField(
-                                    "Select Item",
-                                    _purposeList,
-                                    _purposeselectedValue,
-                                        (String? newValue) {
-                                      _purposeselectedValue = newValue!;
-                                      getFlockID();
-                                      getFilteredTransactions(str_date, end_date);
-                                    },
-                                    width: double.infinity,
-                                    height: 45,
+            Expanded(
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Column(
+                      children: [
+                        // ── Dropdowns + hidden auto-feed entry (original code, unchanged) ──
+                        Center(
+                          child: Container(
+                            padding: EdgeInsets.only(top: 10),
+                            margin: EdgeInsets.symmetric(horizontal: 10), // Margin of 10 on left & right
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 3, // 60% of available space
+                                  child: SizedBox(
+                                    height: 55,
+                                    child: _buildDropdownField(
+                                      "Select Item",
+                                      _purposeList,
+                                      _purposeselectedValue,
+                                          (String? newValue) {
+                                        _purposeselectedValue = newValue!;
+                                        getFlockID();
+                                        getFilteredTransactions(str_date, end_date);
+                                      },
+                                      width: double.infinity,
+                                      height: 45,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(width: 5), // Space between the dropdowns
-                              Expanded(
-                                flex: 2, // 40% of available space
-                                child: SizedBox(
-                                  height: 55,
-                                  child: _buildDropdownField(
-                                    "Select Item",
-                                    filterList,
-                                    date_filter_name,
-                                        (String? newValue) {
-                                      setState(() {
-                                        date_filter_name = newValue!;
-                                        getData(date_filter_name);
-                                      });
-                                    },
-                                    width: double.infinity,
-                                    height: 45,
+                                SizedBox(width: 5), // Space between the dropdowns
+                                Expanded(
+                                  flex: 2, // 40% of available space
+                                  child: SizedBox(
+                                    height: 55,
+                                    child: _buildDropdownField(
+                                      "Select Item",
+                                      filterList,
+                                      date_filter_name,
+                                          (String? newValue) {
+                                        setState(() {
+                                          date_filter_name = newValue!;
+                                          getData(date_filter_name);
+                                        });
+                                      },
+                                      width: double.infinity,
+                                      height: 45,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ),    /*Container(
+                        ),    /*Container(
                 height: 50,
                 width: widthScreen ,
                 margin: EdgeInsets.only(left: 25,right: 25,bottom: 5),
@@ -604,457 +504,408 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
                   ),
                 ],),
               )*/
-                      Visibility(
-                        visible: false,
-                        child: InkWell(
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>  AutomaticFeedManagementScreen()),
-                            );
-
-                            SharedPreferences prefs = await SharedPreferences.getInstance();
-                            isAutoFeedEnabled = prefs.getBool('isAutoFeedEnabled') ?? false;
-
-                            setState(() {
-
-                            });
-
-                          },
-                          child: Container(height: 60,
-                            width: widthScreen,
-                            margin: EdgeInsets.all(10.0),
-                            padding: EdgeInsets.all(10.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(Radius.circular(20)),
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  spreadRadius: 2,
-                                  blurRadius: 2,
-                                  offset: Offset(0, 1), // changes position of shadow
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(child: Text('Automatic Feed Management'.tr(), style: TextStyle(color: Utils.getThemeColorBlue(), fontSize: 15, fontWeight: FontWeight.w600),)),
-                                Icon(Icons.arrow_forward_ios_rounded, color: Utils.getThemeColorBlue(), size: 30,)
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      feedings.length > 0 ? Container(
-                        height: heightScreen - (isAutoFeedEnabled? 50:100),
-                        width: widthScreen,
-
-                        child: ListView.builder(
-                            itemCount: feedings.length,
-                            scrollDirection: Axis.vertical,
-                            padding: EdgeInsets.only(bottom: 240),
-                            itemBuilder: (BuildContext context, int index) {
-                              return Container(
-                                margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                padding: EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.1),
-                                      blurRadius: 6,
-                                      spreadRadius: 2,
-                                      offset: Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // 🏷️ Top Row: Feed Name + More Options Button
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: RichText(
-                                            text: TextSpan(
-                                              text: feedings[index].feed_name!.tr(),
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18,
-                                                color: Utils.getThemeColorBlue(),
-                                              ),
-                                              children: [
-                                                TextSpan(
-                                                  text: " (${feedings[index].f_name!.tr()})",
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.normal,
-                                                    fontSize: 16,
-                                                    color: Colors.black87,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        GestureDetector(
-                                          onTapDown: (TapDownDetails details) {
-                                            selected_id = feedings[index].id;
-                                            selected_index = index;
-                                            showMemberMenu(details.globalPosition);
-                                          },
-                                          child: Icon(Icons.more_vert, color: Colors.grey.shade600),
-                                        ),
-                                      ],
-                                    ),
-
-                                    // 🔹 Divider Line (Under Feed Name & Flock Name)
-                                    Divider(color: Colors.grey.shade300, thickness: 1, height: 12),
-
-                                    // 📊 Consumption Info
-                                    Row(
-                                      children: [
-                                        Icon(Icons.restaurant, size: 16, color: Colors.grey.shade700),
-                                        SizedBox(width: 6),
-                                        Text(
-                                          'Consumption'.tr() + ': ',
-                                          style: TextStyle(fontSize: 14, color: Colors.black87),
-                                        ),
-                                        Text(
-                                          "${feedings[index].quantity}"+Utils.selected_unit.tr(),
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-
-                                    SizedBox(height: 6),
-
-                                    // 📅 Date Info
-                                    Row(
-                                      children: [
-                                        Icon(Icons.calendar_today, size: 16, color: Colors.grey.shade700),
-                                        SizedBox(width: 6),
-                                        Text(
-                                          Utils.getFormattedDate(feedings[index].date.toString()),
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
-                                            color: Colors.black87,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-
-                                    SizedBox(height: 8),
-
-                                    // 📝 Notes Section
-                                    Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Icon(
-                                          Icons.notes,
-                                          size: 16,
-                                          color: feedings[index].short_note!.isNotEmpty
-                                              ? Colors.grey.shade700
-                                              : Colors.grey.shade500,),
-                                        SizedBox(width: 6),
-                                        Expanded(
-                                          child: Text(
-                                            feedings[index].short_note!.isNotEmpty
-                                                ? feedings[index].short_note!
-                                                : 'NO_NOTES'.tr(),
-                                            maxLines: 3,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: feedings[index].short_note!.isNotEmpty
-                                                  ? Colors.black87
-                                                  : Colors.grey.shade600,
-                                            ),
-                                          ),
-                                        ),
-
-
-                                      ],
-                                    ),
-
-                                    /// **Sync Info Icon**
-                                    if(Utils.isMultiUSer)
-                                      GestureDetector(
-                                        onTap: () {
-                                          Feeding item = feedings[index];
-                                          String updated_at = item.last_modified == null
-                                              ? "Unknown".tr()
-                                              : DateFormat("dd MMM yyyy hh:mm a").format(item.last_modified!);
-
-                                          String updated_by = item.modified_by == null || item.modified_by!.isEmpty
-                                              ? "System".tr()
-                                              : item.modified_by!;
-
-                                          Utils.showSyncInfo(context, updated_at, updated_by);
-                                        },
-                                        child: Container(
-                                          alignment: Alignment.centerRight,
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(Icons.info_outline, size: 16, color: Colors.blueGrey),
-                                              SizedBox(width: 4),
-                                              Text(
-                                                "Sync Info",
-                                                style: TextStyle(fontSize: 12, color: Colors.blueGrey),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                  ],
-                                ),
+                        Visibility(
+                          visible: false,
+                          child: InkWell(
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>  AutomaticFeedManagementScreen()),
                               );
 
-                            }),
-                      ) : Utils.getCustomEmptyMessage("assets/pfeed.png", "NO_FFEDING")
+                              SharedPreferences prefs = await SharedPreferences.getInstance();
+                              isAutoFeedEnabled = prefs.getBool('isAutoFeedEnabled') ?? false;
 
-                      /* Text(
-              "Main Menu",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 24,
-                  color: Utils.getThemeColorBlue(),
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.bold
+                              setState(() {
+
+                              });
+
+                            },
+                            child: Container(height: 60,
+                              width: widthScreen,
+                              margin: EdgeInsets.all(10.0),
+                              padding: EdgeInsets.all(10.0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(20)),
+                                color: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.5),
+                                    spreadRadius: 2,
+                                    blurRadius: 2,
+                                    offset: Offset(0, 1), // changes position of shadow
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(child: Text('Automatic Feed Management'.tr(), style: TextStyle(color: Utils.getThemeColorBlue(), fontSize: 15, fontWeight: FontWeight.w600),)),
+                                  Icon(Icons.arrow_forward_ios_rounded, color: Utils.getThemeColorBlue(), size: 30,)
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // ── NEW: Summary card ──
+                        InkWell(
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => FeedReportsScreen()),
+                              );
+                            },
+                            child: _buildSummaryCard()),
+
+                        // ── NEW: list header ──
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(14, 8, 14, 2),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Feeding History".tr(),
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.black87)),
+                              Text("${feedings.length} ${'records'.tr()}",
+                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  if (feedings.isNotEmpty)
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                            (BuildContext context, int index) => _buildFeedCard(index),
+                        childCount: feedings.length,
+                      ),
+                    )
+                  else
+                    SliverToBoxAdapter(
+                      child: Utils.getCustomEmptyMessage("assets/pfeed.png", "NO_FFEDING"),
+                    ),
+
+                  SliverToBoxAdapter(child: SizedBox(height: 24)),
+                ],
               ),
             ),
-                    SizedBox(width: widthScreen, height: 50,),
-                    InkWell(
-                        child: Container(
-                          width: widthScreen - (widthScreen / 4),
-                          height: 60,
-                          padding: const EdgeInsets.all(10),
-                          margin: const EdgeInsets.only(left: 20, right: 20),
-                          decoration: const BoxDecoration(
-                              color: Utils.getThemeColorBlue(),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10))),
+          ],),),),);
+  }
+
+  // ═══════════════ UI HELPERS (redesign – display only) ═══════════════
+
+  int _cardKey(int index) => feedings[index].id ?? -(index + 1);
+
+  String _fmtQty(double v) => NumberFormat('#,##0.##').format(v);
+
+  Widget _buildSummaryCard() {
+    double total = 0;
+    int count = feedings.length;
+    DateTime? lastFed;
+    String? lastFedRaw;
+    for (final f in feedings) {
+      total += double.tryParse((f.quantity ?? '').trim()) ?? 0;
+      final d = DateTime.tryParse(f.date ?? '');
+      if (d != null && (lastFed == null || d.isAfter(lastFed))) {
+        lastFed = d;
+        lastFedRaw = f.date;
+      }
+    }
+    final double avg = count == 0 ? 0 : total / count;
+    final String unit = Utils.selected_unit.tr();
+    final String periodLabel = date_filter_name == 'DATE_RANGE'
+        ? '$str_date  →  $end_date'
+        : date_filter_name.tr();
+
+    return Container(
+      margin: EdgeInsets.fromLTRB(10, 10, 10, 4),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 10, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  "Feed Consumed".tr().toUpperCase(),
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.6, color: Colors.blueGrey),
+                ),
+              ),
+              SizedBox(width: 8),
+              Text(periodLabel, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey)),
+            ],
+          ),
+          SizedBox(height: 4),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                _fmtQty(total),
+                style: TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: Colors.black87, height: 1.1),
+              ),
+              SizedBox(width: 8),
+              Text(unit, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.blueGrey)),
+            ],
+          ),
+          SizedBox(height: 14),
+          Divider(height: 1, color: Colors.grey.withOpacity(0.25)),
+          SizedBox(height: 12),
+          Row(
+            children: [
+             /* _summaryStat("Feedings".tr(), "$count", false),*/
+              _summaryStat("Avg / feeding".tr(), "${_fmtQty(avg)} $unit", true),
+              _summaryStat("Last fed".tr(),
+                  lastFedRaw == null ? "-" : Utils.getFormattedDate(lastFedRaw), true),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _summaryStat(String label, String value, bool leftBorder) {
+    return Expanded(
+      child: Container(
+        padding: EdgeInsets.only(left: leftBorder ? 12 : 0),
+        decoration: leftBorder
+            ? BoxDecoration(border: Border(left: BorderSide(color: Colors.grey.withOpacity(0.25))))
+            : null,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blueGrey)),
+            SizedBox(height: 2),
+            Text(value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.black87)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _detailCell(String label, String value) {
+    final double cellWidth = (widthScreen - 20 - 24 - 12 - 50) / 2;
+    return SizedBox(
+      width: cellWidth,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blueGrey)),
+          SizedBox(height: 2),
+          Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.black87)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeedCard(int index) {
+    final Feeding item = feedings[index];
+    final int key = _cardKey(index);
+    final bool expanded = _expandedIds.contains(key);
+    final String feedName = (item.feed_name ?? '').tr();
+    final String flockName = item.f_name.tr();
+    final String note = item.short_note ?? '';
+    final String dateText = Utils.getFormattedDate(item.date.toString());
+    final String qty = "${item.quantity} ${Utils.selected_unit.tr()}";
+
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 8, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        children: [
+          /// ── Collapsed header (always visible) ──
+          InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: () {
+              setState(() {
+                if (expanded) {
+                  _expandedIds.remove(key);
+                } else {
+                  _expandedIds.add(key);
+                }
+              });
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.14),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(Icons.restaurant, color: Colors.orange.shade800, size: 20),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          feedName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.black87),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          "$flockName · $dateText",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.blueGrey),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    qty,
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Colors.black87),
+                  ),
+                  SizedBox(width: 4),
+                  AnimatedRotation(
+                    turns: expanded ? 0.5 : 0,
+                    duration: Duration(milliseconds: 200),
+                    child: Icon(Icons.keyboard_arrow_down, color: Colors.blueGrey),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          /// ── Expanded details ──
+          AnimatedSize(
+            duration: Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: expanded
+                ? Padding(
+              padding: EdgeInsets.fromLTRB(62, 0, 12, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Divider(height: 1, color: Colors.grey.withOpacity(0.25)),
+                  SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 10,
+                    children: [
+                      _detailCell("Flock".tr(), flockName),
+                      _detailCell("Feed".tr(), feedName),
+                      _detailCell("Consumption".tr(), qty),
+                      _detailCell("Date".tr(), dateText),
+                    ],
+                  ),
+                  if (note.isNotEmpty)
+                    Container(
+                      margin: EdgeInsets.only(top: 12),
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.notes, size: 16, color: Colors.black54),
+                          SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              note,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 14, color: Colors.black87),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  SizedBox(height: 14),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (Utils.isMultiUSer) ...[
+                        InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () {
+                            String updated_at = item.last_modified == null
+                                ? "Unknown".tr()
+                                : DateFormat("dd MMM yyyy hh:mm a").format(item.last_modified!);
+
+                            String updated_by = item.modified_by == null || item.modified_by!.isEmpty
+                                ? "System".tr()
+                                : item.modified_by!;
+
+                            Utils.showSyncInfo(context, updated_at, updated_by);
+                          },
                           child: Container(
-                            width: 40,height: 40,
-                            margin: EdgeInsets.only(left: 30),
+                            height: 44,
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             child: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Image(image: AssetImage(
-                                    'assets/image.png'),
-                                  fit: BoxFit.fill,
-                                  color: Colors.white,
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    "Inventory",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.bold
-                                        ),
-                                  ),
-                                ),
+                                Icon(Icons.info_outline, size: 16, color: Colors.blueGrey),
+                                SizedBox(width: 4),
+                                Text("Sync Info", style: TextStyle(fontSize: 12, color: Colors.blueGrey)),
                               ],
                             ),
                           ),
                         ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const Inventory()),
-                          );
-                        }),
-                    SizedBox(width: widthScreen,height: 20),
-                    InkWell(
-                  child: Container(
-                    width: widthScreen - (widthScreen / 4),
-                    height: 60,
-                    padding: const EdgeInsets.all(10),
-                    margin: const EdgeInsets.only(left: 20, right: 20),
-                    decoration: const BoxDecoration(
-                        color: Utils.getThemeColorBlue(),
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(10))),
-                    child: Container(
-                      width: 40,height: 40,
-                      margin: EdgeInsets.only(left: 30),
-                      child: Row(
-                        children: [
-                          Image(image: AssetImage(
-                              'assets/image.png'),
-                            fit: BoxFit.fill,
-                            color: Colors.white,
+                        SizedBox(width: 8),
+                      ],
+                      GestureDetector(
+                        onTapDown: (TapDownDetails details) {
+                          selected_id = item.id;
+                          selected_index = index;
+                          showMemberMenu(details.globalPosition);
+                        },
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          Expanded(
-                            child: Text(
-                              "Profit/Loss",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontFamily: 'Roboto',
-                                  fontWeight: FontWeight.bold
-                              ),
-                            ),
-                          ),
-                        ],
+                          child: Icon(Icons.more_vert, color: Colors.black54),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                  onTap: () {
-                    *//*Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const EmojiRepeatScreen()),
-                    );*//*
-                  }),
-                    SizedBox(width: widthScreen,height: 20),
-                    InkWell(
-                  child: Container(
-                    width: widthScreen - (widthScreen / 4),
-                    height: 60,
-                    padding: const EdgeInsets.all(10),
-                    margin: const EdgeInsets.only(left: 20, right: 20),
-                    decoration: const BoxDecoration(
-                        color: Utils.getThemeColorBlue(),
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(10))),
-                    child: Container(
-                      width: 40,height: 40,
-                      margin: EdgeInsets.only(left: 30),
-                      child: Row(
-                        children: [
-                          Image(image: AssetImage(
-                              'assets/image.png'),
-                            fit: BoxFit.fill,
-                            color: Colors.white,
-                          ),
-                          Expanded(
-                            child: Text(
-                              "Medication",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontFamily: 'Roboto',
-                                  fontWeight: FontWeight.bold
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  onTap: () {
-                    *//*Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const EmojiScreen()),
-                    );*//*
-                  }),
-              SizedBox(width: widthScreen,height: 20),
-              InkWell(
-                  child: Container(
-                    width: widthScreen - (widthScreen / 4),
-                    height: 60,
-                    padding: const EdgeInsets.all(10),
-                    margin: const EdgeInsets.only(left: 20, right: 20),
-                    decoration: const BoxDecoration(
-                        color: Utils.getThemeColorBlue(),
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(10))),
-                    child: Container(
-                      width: 40,height: 40,
-                      margin: EdgeInsets.only(left: 30),
-                      child: Row(
-                        children: [
-                          Image(image: AssetImage(
-                              'assets/image.png'),
-                            fit: BoxFit.fill,
-                            color: Colors.white,
-                          ),
-                          Expanded(
-                            child: Text(
-                              "Feeding",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontFamily: 'Roboto',
-                                  fontWeight: FontWeight.bold
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  onTap: () {
-                    *//*Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const EmojiTemplateScreen()),
-                    );*//*
-                  }),
-              SizedBox(width: widthScreen,height: 20),
-              InkWell(
-                  child: Container(
-                    width: widthScreen - (widthScreen / 4),
-                    height: 60,
-                    padding: const EdgeInsets.all(10),
-                    margin: const EdgeInsets.only(left: 20, right: 20),
-                    decoration: const BoxDecoration(
-                        color: Utils.getThemeColorBlue(),
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(10))),
-                    child: Container(
-                      width: 40,height: 40,
-                      margin: EdgeInsets.only(left: 30),
-                      child: Row(
-                        children: [
-                          Image(image: AssetImage(
-                              'assets/image.png'),
-                            fit: BoxFit.fill,
-                            color: Colors.white,
-                          ),
-                          Expanded(
-                            child: Text(
-                              "Form Setup",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontFamily: 'Roboto',
-                                  fontWeight: FontWeight.bold
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  onTap: () {
-                    *//*Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const EmojiTemplateScreen()),
-                    );*//*
-                  }),*/
-                    ]
-                ),))
-            ],),),),);
+                ],
+              ),
+            )
+                : SizedBox(width: double.infinity),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildDropdownField(
@@ -1468,7 +1319,7 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
 
       getFilteredTransactions(str_date, end_date);
     }else if (filter == 'DATE_RANGE'){
-     _pickDateRange();
+      _pickDateRange();
     }
 
   }
@@ -1673,4 +1524,3 @@ class _DailyFeedScreen extends State<DailyFeedScreen> with SingleTickerProviderS
 
 
 }
-

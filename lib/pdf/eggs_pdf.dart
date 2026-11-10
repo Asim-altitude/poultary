@@ -636,6 +636,7 @@ class Invoice {
     const tableHeaders = [
       'Reduction Reason',
       'TOTAL',
+      'SALE_AMOUNT'
     ];
 
     return pw.Container(
@@ -644,7 +645,8 @@ class Invoice {
         border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5), // Light border
         columnWidths: {
           0: pw.FlexColumnWidth(2), // Reason (wider column)
-          1: pw.FlexColumnWidth(1.5), // Total Reduced Eggs
+          1: pw.FlexColumnWidth(1.5),
+          2: pw.FlexColumnWidth(2),// Total Reduced Eggs
         },
         children: [
           // Table Header
@@ -689,7 +691,15 @@ class Invoice {
                 pw.Padding(
                   padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 5),
                   child: pw.Text(
-                    "-${item.totalReduced}",
+                    "${item.totalReduced}",
+                    style: pw.TextStyle(fontSize: 11, color: PdfColors.red, fontWeight: pw.FontWeight.bold),
+                    textAlign: pw.TextAlign.right,
+                  ),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 5),
+                  child: pw.Text(
+                    "${Utils.currency}${item.saleAmount}",
                     style: pw.TextStyle(fontSize: 11, color: PdfColors.red, fontWeight: pw.FontWeight.bold),
                     textAlign: pw.TextAlign.right,
                   ),

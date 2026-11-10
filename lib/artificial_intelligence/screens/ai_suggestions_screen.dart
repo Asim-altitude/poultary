@@ -127,7 +127,7 @@ class _AISuggestionsScreenState extends State<AISuggestionsScreen> {
 
     if(Utils.ai_credits <= 0) {
       Utils.showToast("Low Credits. Please Recharge".tr());
-      return;
+
     }
 
     await Navigator.push(

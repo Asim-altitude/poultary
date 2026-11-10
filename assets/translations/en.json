@@ -1863,7 +1863,10 @@
   "Offline data stored on this device may remain unless you clear app data or uninstall the app.": "Offline data stored on this device may remain unless you clear app data or uninstall the app.",
   "Type DELETE to confirm": "Type DELETE to confirm",
   "Deleting...": "Deleting...",
-  "No logged-in user found.": "No logged-in user found."
+  "No logged-in user found.": "No logged-in user found.",
+
+  "Flock Movement": "Flock Movement",
+  "Avg / feeding": "Avg / feeding"
 
 
 

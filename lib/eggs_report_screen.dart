@@ -257,7 +257,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
   void getFilteredEggsCollections(String st, String end, int reduced_eggs, List<TransactionItem> eggSales) async {
     await DatabaseHelper.instance.database;
 
-    eggs = await DatabaseHelper.getFilteredEggs(f_id, "All", st, end);
+    eggs = await DatabaseHelper.getFilteredEggsWithSort(f_id, "All", st, end,"ASC");
 
     good_eggs = eggs
         .where((item) => item.isCollection == 1)
@@ -798,9 +798,16 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
               reduction.reason.tr(),
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            trailing: Text(
-              "-${reduction.totalReduced}",
-              style: TextStyle(fontSize: 16, color: Colors.red, fontWeight: FontWeight.bold),
+            trailing: Column(
+              children: [
+                Text(
+                  "-${reduction.totalReduced}",
+                  style: TextStyle(fontSize: 16, color: Colors.red, fontWeight: FontWeight.bold),
+                ),Text(
+                  "${Utils.currency}${reduction.saleAmount}",
+                  style: TextStyle(fontSize: 12, color: Colors.green, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
           ),
         )),
@@ -1685,28 +1692,35 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
     return summaryMap.values.toList();
   }
 
-  List<EggReductionSummary> getEggReductionSummary(List<Eggs> eggsList,
-      String str, String endDate) {
-    Map<String, int> reductionMap = {};
+  List<EggReductionSummary> getEggReductionSummary(
+      List<Eggs> eggsList, String str, String endDate) {
+    final Map<String, int> reductionMap = {};
+    final Map<String, double> saleMap = {};
+
+    final DateTime start = DateTime.parse(str);
+    final DateTime end = DateTime.parse(endDate);
 
     for (var egg in eggsList) {
       if (egg.isCollection == 0) {
         DateTime eggDate = DateTime.parse(egg.date!);
-        DateTime start = DateTime.parse(str);
-        DateTime end = DateTime.parse(endDate);
 
-        if (eggDate.isAfter(start.subtract(Duration(days: 1))) &&
-            eggDate.isBefore(end.add(Duration(days: 1)))) {
+        if (eggDate.isAfter(start.subtract(const Duration(days: 1))) &&
+            eggDate.isBefore(end.add(const Duration(days: 1)))) {
           String reason = egg.reduction_reason ?? "Unknown";
+
           reductionMap[reason] = (reductionMap[reason] ?? 0) + egg.total_eggs;
-        }
+          saleMap[reason] = (saleMap[reason] ?? 0.0) +
+              (double.tryParse(egg.sale_amount?.toString() ?? '') ?? 0.0);    }
       }
     }
 
-      return reductionMap.entries
-          .map((entry) =>
-          EggReductionSummary(reason: entry.key, totalReduced: entry.value))
-          .toList();
+    return reductionMap.entries
+        .map((entry) => EggReductionSummary(
+      reason: entry.key,
+      totalReduced: entry.value,
+      saleAmount: saleMap[entry.key] ?? 0.0,
+    ))
+        .toList();
   }
 
   int isSameDateExists(List<Eggs_Chart_Item> reductionList, String date) {
@@ -1726,7 +1740,7 @@ class _EggsReportsScreen extends State<EggsReportsScreen> with SingleTickerProvi
         eggReductionSummary[i].totalReduced = eggReductionSummary[i].totalReduced + reduced_eggs;
         break;
       }else{
-        EggReductionSummary eggSummaryItem = EggReductionSummary(reason: "Egg Sale", totalReduced: reduced_eggs);
+        EggReductionSummary eggSummaryItem = EggReductionSummary(reason: "Egg Sale", totalReduced: reduced_eggs, saleAmount: 0.0);
         eggReductionSummary.add(eggSummaryItem);
         break;
       }
@@ -1837,7 +1851,8 @@ class SummaryRow extends StatelessWidget {
 class EggReductionSummary {
   String reason;
   int totalReduced;
+  double saleAmount;
 
-  EggReductionSummary({required this.reason, required this.totalReduced});
+  EggReductionSummary({required this.reason, required this.totalReduced, required this.saleAmount});
 }
 

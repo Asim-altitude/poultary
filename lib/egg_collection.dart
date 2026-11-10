@@ -149,6 +149,9 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
   int egg_total = 0;
 
+  // UI-only: which cards are expanded (keyed by record id)
+  final Set<int> _expandedIds = {};
+
   String applied_filter_name = "ALL_COLLECTION";
 
   @override
@@ -161,7 +164,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
     heightScreen = MediaQuery.of(context).size.height;
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
-      child:
+    child:
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight),
@@ -281,7 +284,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                   onTap: () {
                     reduceCollection(null);
                   },
-                 /* onTap: () {
+                  /* onTap: () {
                     showModifyCollectedEggsDialog(context);
                   },*/
                   borderRadius: BorderRadius.circular(10),
@@ -290,28 +293,18 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
                     height: 50,
                     margin: EdgeInsets.symmetric(horizontal: 6),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.red.shade600, Colors.red.shade400],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                      color: Colors.white,
+                      border: Border.all(color: Colors.red.shade600, width: 1.5),
                       borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.red.withOpacity(0.3),
-                          blurRadius: 5,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.remove_circle, color: Colors.white, size: 28),
+                        Icon(Icons.remove_circle, color: Colors.red.shade600, size: 28),
                         SizedBox(width: 6),
                         Text(
                           'REDUCE'.tr(),
-                          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: Colors.red.shade600, fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -324,603 +317,577 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
         elevation: 0,
       ),
       body: SafeArea(
-          child:Container(
+        child:Container(
           width: widthScreen,
           height: heightScreen,
-            color: Utils.getScreenBackground(),
-            child:Column(children: [
-               if(_isBannerAdReady)
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                      height: 60.0,
-                      width: Utils.WIDTH_SCREEN,
-                      child: AdWidget(ad: _bannerAd)
-                  ),
+          color: Utils.getScreenBackground(),
+          child:Column(children: [
+            if(_isBannerAdReady)
+              Align(
+                alignment: Alignment.topCenter,
+                child: Container(
+                    height: 60.0,
+                    width: Utils.WIDTH_SCREEN,
+                    child: AdWidget(ad: _bannerAd)
                 ),
-              Expanded(child: SingleChildScrollView(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children:  [
-
-                      Center(
-                        child: Container(
-                          padding: EdgeInsets.only(top: 2),
-                          margin: EdgeInsets.symmetric(horizontal: 10), // Margin of 10 on left & right
-                          child: Row(
-                            children: [
-                              Expanded(
-                                flex: 3, // 60% of available space
-                                child: SizedBox(
-                                  height: 55,
-                                  child: _buildDropdownField(
-                                    "Select Item",
-                                    _purposeList,
-                                    _purposeselectedValue,
-                                        (String? newValue) {
-                                      _purposeselectedValue = newValue!;
-                                      getFlockID();
-                                      getFilteredTransactions(str_date, end_date);
-                                    },
-                                    width: double.infinity,
-                                    height: 45,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 5), // Space between the dropdowns
-                              Expanded(
-                                flex: 2, // 40% of available space
-                                child: SizedBox(
-                                  height: 55,
-                                  child: _buildDropdownField(
-                                    "Select Item",
-                                    filterList,
-                                    date_filter_name,
-                                        (String? newValue) {
-                                      date_filter_name = newValue!;
-                                      getData(date_filter_name);
-                                    },
-                                    width: double.infinity,
-                                    height: 45,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      Container(
-                        height: 55,
-                        width: widthScreen,
-                        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                          color: Colors.white.withOpacity(0.1), // Light transparent background
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 10,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            buildFilterButton('All', 1, Colors.blue),
-                            buildFilterButton('Collection', 2, Colors.green),
-                            buildFilterButton('Reduction', 3, Colors.red),
-                          ],
-                        ),
-                      ),
-
-                      eggs.length > 0 ? Container(
-                        height: Utils.isShowAdd? heightScreen -  250 : heightScreen -  200,
-                        width: widthScreen,
-                        child:
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 120), // Adjust this value as needed
-                          child:
-                          ListView.builder(
-                              itemCount: eggs.length,
-                              scrollDirection: Axis.vertical,
-                              // shrinkWrap: true,
-                              // physics: NeverScrollableScrollPhysics(),
-                              itemBuilder: (BuildContext context, int index) {
-                                return InkWell(
-                                  onTap: ()
-                                  {
-
-                                  },
-                                  child: Container(
-                                    margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.1),
-                                          blurRadius: 6,
-                                          spreadRadius: 2,
-                                          offset: Offset(0, 3),
-                                        ),
-                                      ],
-                                    ),
-                                    padding: EdgeInsets.all(12),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        /// 🟢 Title Row (Icon + Name + Type + Menu)
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Icon(
-                                                  eggs[index].isCollection == 1 ? Icons.add_circle : Icons.remove_circle,
-                                                  color: eggs[index].isCollection == 1 ? Colors.green : Colors.red,
-                                                  size: 22,
-                                                ),
-                                                SizedBox(width: 6),
-                                                Text(
-                                                  "${eggs[index].f_name}",
-                                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
-                                                ),
-                                                SizedBox(width: 6),
-                                                Container(
-                                                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                                                  decoration: BoxDecoration(
-                                                    color: eggs[index].isCollection == 1 ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
-                                                    borderRadius: BorderRadius.circular(5),
-                                                  ),
-                                                  child: Text(
-                                                    eggs[index].isCollection == 1 ? "(Collected)".tr() : "Reduced".tr(),
-                                                    style: TextStyle(fontSize: 12, color: eggs[index].isCollection == 1 ? Colors.green : Colors.red),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            GestureDetector(
-                                              onTapDown: (TapDownDetails details) {
-                                                selected_id = eggs[index].id;
-                                                selected_index = index;
-                                                showMemberMenu(details.globalPosition);
-                                              },
-                                              child: Icon(Icons.more_vert, color: Colors.black54),
-                                            ),
-                                          ],
-                                        ),
-
-                                        SizedBox(height: 6),
-                                        Divider(thickness: 1, color: Colors.grey.withOpacity(0.3)),
-
-                                        /// 🍳 Eggs Count & Date
-                                        SizedBox(height: 6),
-                                        Row(
-                                          children: [
-                                            Icon(Icons.egg, size: 16, color: Colors.black54),
-                                            SizedBox(width: 6),
-                                            Text("Eggs".tr() + ": ", style: TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.bold)),
-                                            Text(
-                                              "${eggs[index].total_eggs}",
-                                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
-                                            ),
-                                            Spacer(),
-                                            Icon(Icons.calendar_today, size: 14, color: Colors.black54),
-                                            SizedBox(width: 4),
-                                            Text(
-                                              Utils.getFormattedDate(eggs[index].date.toString()),
-                                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
-                                            ),
-                                          ],
-                                        ),
-
-                                        SizedBox(height: 6),
-
-
-                                        /// 🥚 Good & Bad Eggs
-                                        trayEnabled? Row(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          children: [
-                                            Icon(Icons.egg, size: 16, color: Colors.green),
-                                            SizedBox(width: 5),
-                                            Text("Good trays".tr() + ": ", style: TextStyle(color: Colors.black, fontSize: 14)),
-                                            Text(
-                                              "${Utils.getEggTrays(eggs[index].good_eggs, traySize)}",
-                                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.green),
-                                            ),
-                                            SizedBox(width: 15),
-                                            Icon(Icons.egg, size: 16, color: Colors.orange),
-                                            SizedBox(width: 5),
-                                            Text("Bad trays".tr() + ": ", style: TextStyle(color: Colors.black, fontSize: 14)),
-                                            Text(
-                                              "${Utils.getEggTrays(eggs[index].bad_eggs, traySize)}",
-                                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.orange),
-                                            ),
-                                          ],
-                                        ) : SizedBox(width: 1,),
-                                        SizedBox(height: 6),
-
-                                        /// 🥚 Good & Bad Eggs
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          children: [
-                                            Icon(Icons.egg, size: 16, color: Colors.green),
-                                            SizedBox(width: 5),
-                                            Text("Good Eggs".tr() + ": ", style: TextStyle(color: Colors.black, fontSize: 14)),
-                                            Text(
-                                              trayEnabled? "${Utils.getRemaining(eggs[index].good_eggs, traySize)}" : "${eggs[index].good_eggs}",
-                                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.green),
-                                            ),
-                                            SizedBox(width: 15),
-                                            Icon(Icons.egg, size: 16, color: Colors.orange),
-                                            SizedBox(width: 5),
-                                            Text("Bad Eggs".tr() + ": ", style: TextStyle(color: Colors.black, fontSize: 14)),
-                                            Text(
-                                              trayEnabled? "${Utils.getRemaining(eggs[index].bad_eggs, traySize)}" : "${eggs[index].bad_eggs}",
-                                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.orange),
-                                            ),
-                                          ],
-                                        ),
-
-                                        SizedBox(height: 6),
-
-                                        /// 🎨 Egg Color
-                                        Row(
-                                          children: [
-                                            Icon(Icons.color_lens, size: 16, color: Colors.black54),
-                                            SizedBox(width: 5),
-                                            Text("Color".tr() + ": ", style: TextStyle(color: Colors.black, fontSize: 14)),
-                                            Text(
-                                              eggs[index].egg_color!.tr(),
-                                              style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.bold),
-                                            ),
-                                          ],
-                                        ),
-
-                                        /// ❌ Reduction Reason
-                                        if (eggs[index].isCollection == 0)
-                                          Padding(
-                                            padding: const EdgeInsets.only(top: 6),
-                                            child: Text(
-                                              eggs[index].reduction_reason!.tr(),
-                                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Utils.getThemeColorBlue()),
-                                            ),
-                                          ),
-
-                                        /// 📝 Notes Section
-                                        if (eggs[index].short_note!.isNotEmpty)
-                                          Padding(
-                                            padding: const EdgeInsets.only(top: 6),
-                                            child: Row(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Icon(Icons.notes, size: 16, color: Colors.black54),
-                                                SizedBox(width: 6),
-                                                Expanded(
-                                                  child: Text(
-                                                    eggs[index].short_note!,
-                                                    maxLines: 3,
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: TextStyle(fontSize: 14, color: Colors.black),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-
-                                        SizedBox(height: 6),
-
-                                        if (eggs[index].isCollection == 1)
-                                          Align(
-                                            alignment: Alignment.centerRight,
-                                            child: ElevatedButton(
-                                              onPressed: () => _showHatchBottomSheet(context), // Opens the hatch dialog
-                                              style: ElevatedButton.styleFrom(
-                                                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(30), // Rounded corners
-                                                ),
-                                                elevation: 5, // Adds shadow
-                                                backgroundColor: Colors.orange.shade600, // Warm egg-like color
-                                              ),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Icon(Icons.egg, color: Colors.white, size: 22), // Egg icon
-                                                  SizedBox(width: 8), // Space between icon and text
-                                                  Text(
-                                                    "Hatch These Eggs".tr(),
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                      fontWeight: FontWeight.w700,
-                                                      color: Colors.white, // Text color
-                                                    ),
-                                                  ),
-                                                  Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 22), // Egg icon
-
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-
-
-                                        /// **Sync Info Icon**
-                                        if(Utils.isMultiUSer)
-                                          GestureDetector(
-                                            onTap: () {
-                                              Eggs item = eggs[index];
-                                              String updated_at = item.last_modified == null
-                                                  ? "Unknown".tr()
-                                                  : DateFormat("dd MMM yyyy hh:mm a").format(item.last_modified!);
-
-                                              String updated_by = item.modified_by == null || item.modified_by!.isEmpty
-                                                  ? "System".tr()
-                                                  : item.modified_by!;
-
-                                              Utils.showSyncInfo(context, updated_at, updated_by);
-                                            },
-                                            child: Container(
-                                              alignment: eggs[index].isCollection == 1? Alignment.centerLeft : Alignment.centerRight,
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Icon(Icons.info_outline, size: 16, color: Colors.blueGrey),
-                                                  SizedBox(width: 4),
-                                                  Text(
-                                                    "Sync Info",
-                                                    style: TextStyle(fontSize: 12, color: Colors.blueGrey),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-
-                                      ],
-                                    ),
-                                  ),
-
-                                );
-
-                              }),),
-                      ) : Utils.getCustomEmptyMessage("assets/egg_collect.png", "No Egg Collections Added")
-
-
-                      /* Text(
-              "Main Menu",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 24,
-                  color: Utils.getThemeColorBlue(),
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.bold
               ),
-            ),
-                    SizedBox(width: widthScreen, height: 50,),
-                    InkWell(
-                        child: Container(
-                          width: widthScreen - (widthScreen / 4),
-                          height: 60,
-                          padding: const EdgeInsets.all(10),
-                          margin: const EdgeInsets.only(left: 20, right: 20),
-                          decoration: const BoxDecoration(
-                              color: Utils.getThemeColorBlue(),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10))),
+            Expanded(
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Column(
+                      children: [
+                        // ── Dropdowns (unchanged logic) ──
+                        Center(
                           child: Container(
-                            width: 40,height: 40,
-                            margin: EdgeInsets.only(left: 30),
+                            padding: EdgeInsets.only(top: 2),
+                            margin: EdgeInsets.symmetric(horizontal: 10),
                             child: Row(
                               children: [
-                                Image(image: AssetImage(
-                                    'assets/image.png'),
-                                  fit: BoxFit.fill,
-                                  color: Colors.white,
-                                ),
                                 Expanded(
-                                  child: Text(
-                                    "Inventory",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.bold
-                                        ),
+                                  flex: 3,
+                                  child: SizedBox(
+                                    height: 55,
+                                    child: _buildDropdownField(
+                                      "Select Item",
+                                      _purposeList,
+                                      _purposeselectedValue,
+                                          (String? newValue) {
+                                        _purposeselectedValue = newValue!;
+                                        getFlockID();
+                                        getFilteredTransactions(str_date, end_date);
+                                      },
+                                      width: double.infinity,
+                                      height: 45,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 5),
+                                Expanded(
+                                  flex: 2,
+                                  child: SizedBox(
+                                    height: 55,
+                                    child: _buildDropdownField(
+                                      "Select Item",
+                                      filterList,
+                                      date_filter_name,
+                                          (String? newValue) {
+                                        date_filter_name = newValue!;
+                                        getData(date_filter_name);
+                                      },
+                                      width: double.infinity,
+                                      height: 45,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const Inventory()),
-                          );
-                        }),
-                    SizedBox(width: widthScreen,height: 20),
-                    InkWell(
-                  child: Container(
-                    width: widthScreen - (widthScreen / 4),
-                    height: 60,
-                    padding: const EdgeInsets.all(10),
-                    margin: const EdgeInsets.only(left: 20, right: 20),
-                    decoration: const BoxDecoration(
-                        color: Utils.getThemeColorBlue(),
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(10))),
-                    child: Container(
-                      width: 40,height: 40,
-                      margin: EdgeInsets.only(left: 30),
+
+                        // ── NEW: Summary card ──
+                        _buildSummaryCard(),
+
+                        // ── Compact filter (same handlers) ──
+                        Container(
+                          margin: EdgeInsets.fromLTRB(10, 6, 10, 4),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: EdgeInsets.all(3),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blueGrey.shade50,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      buildFilterButton('All', 1, Colors.blue),
+                                      buildFilterButton('Collection', 2, Colors.green),
+                                      buildFilterButton('Reduction', 3, Colors.red),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                "${eggs.length} ${'records'.tr()}",
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  if (eggs.isNotEmpty)
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                            (BuildContext context, int index) => _buildEggCard(index),
+                        childCount: eggs.length,
+                      ),
+                    )
+                  else
+                    SliverToBoxAdapter(
+                      child: Utils.getCustomEmptyMessage("assets/egg_collect.png", "No Egg Collections Added"),
+                    ),
+
+                  SliverToBoxAdapter(child: SizedBox(height: 24)),
+                ],
+              ),
+            ),
+          ],),),),);
+  }
+
+  // ═══════════════ UI HELPERS (redesign – display only) ═══════════════
+
+  int _cardKey(int index) => eggs[index].id ?? -(index + 1);
+
+  /// Reads "84.28%" from the auto-generated note (e.g. "production is 84.28%")
+  String? _extractProduction(String? note) {
+    if (note == null) return null;
+    final m = RegExp(r'(\d+(?:\.\d+)?)\s*%').firstMatch(note);
+    return m == null ? null : '${m.group(1)}%';
+  }
+
+  Widget _buildSummaryCard() {
+    int collected = 0, reduced = 0, good = 0, bad = 0;
+    final Set<String> days = {};
+    for (final e in eggs) {
+      if (e.isCollection == 1) {
+        collected += e.total_eggs;
+        good += e.good_eggs;
+        bad += e.bad_eggs;
+        days.add(e.date ?? '');
+      } else {
+        reduced += e.total_eggs;
+      }
+    }
+    final int net = collected - reduced;
+    final int avgPerDay = days.isEmpty ? 0 : (collected / days.length).round();
+    final double goodFraction = (good + bad) == 0 ? 1.0 : good / (good + bad);
+    final nf = NumberFormat.decimalPattern();
+    final String periodLabel = date_filter_name == 'DATE_RANGE'
+        ? '$str_date  →  $end_date'
+        : date_filter_name.tr();
+
+    return Container(
+      margin: EdgeInsets.fromLTRB(10, 8, 10, 4),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 10, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  "TOTAL".tr()+" "+"eggs collected".tr().toUpperCase(),
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.6, color: Colors.blueGrey),
+                ),
+              ),
+              SizedBox(width: 8),
+              Text(
+                periodLabel,
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey),
+              ),
+            ],
+          ),
+          SizedBox(height: 4),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                nf.format(collected),
+                style: TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: Colors.black87, height: 1.1),
+              ),
+              SizedBox(width: 8),
+              Text("Eggs".tr(), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.blueGrey)),
+            ],
+          ),
+          if (trayEnabled)
+            Padding(
+              padding: EdgeInsets.only(top: 2),
+              child: Text(
+                "${Utils.getEggTrays(collected, traySize)} ${'trays'.tr()} + ${Utils.getRemaining(collected, traySize)} ${'Eggs'.tr()}",
+                style: TextStyle(fontSize: 12, color: Colors.blueGrey),
+              ),
+            ),
+          SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: goodFraction,
+              minHeight: 8,
+              backgroundColor: Colors.orange.shade300,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.green.shade600),
+            ),
+          ),
+          SizedBox(height: 6),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("${nf.format(good)} ${'Good Eggs'.tr()}",
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.green.shade700)),
+              Text("${nf.format(bad)} ${'Bad Eggs'.tr()}",
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.orange.shade800)),
+            ],
+          ),
+          SizedBox(height: 12),
+          Divider(height: 1, color: Colors.grey.withOpacity(0.25)),
+          SizedBox(height: 12),
+          Row(
+            children: [
+              _summaryStat("Reduced".tr(), nf.format(reduced), Colors.red.shade700),
+              Container(width: 1, height: 30, color: Colors.grey.withOpacity(0.25)),
+              _summaryStat("Net".tr(), nf.format(net), Colors.black87),
+              Container(width: 1, height: 30, color: Colors.grey.withOpacity(0.25)),
+              _summaryStat("Avg / day".tr(), nf.format(avgPerDay), Colors.black87),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _summaryStat(String label, String value, Color valueColor) {
+    return Expanded(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blueGrey)),
+            SizedBox(height: 2),
+            Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: valueColor)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _detailCell(String label, String value, {Color? valueColor}) {
+    final double cellWidth = (widthScreen - 20 - 24 - 12) / 2;
+    return SizedBox(
+      width: cellWidth,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blueGrey)),
+          SizedBox(height: 2),
+          Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: valueColor ?? Colors.black87)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEggCard(int index) {
+    final Eggs e = eggs[index];
+    final bool isCollect = e.isCollection == 1;
+    final Color accent = isCollect ? Colors.green.shade700 : Colors.red.shade700;
+    final int key = _cardKey(index);
+    final bool expanded = _expandedIds.contains(key);
+    final String? production = isCollect ? _extractProduction(e.short_note) : null;
+    final String note = e.short_note ?? '';
+    final String reason = e.reduction_reason ?? '';
+    final nf = NumberFormat.decimalPattern();
+    final String subtitle = isCollect
+        ? "${e.f_name ?? ''} · ${'Collected'.tr()}"
+        : "${e.f_name ?? ''} · ${reason.isNotEmpty ? reason.tr() : 'Reduced'.tr()}";
+
+    final double? amountVal =
+    double.tryParse((e.sale_amount ?? '').replaceAll(',', ''));
+    final bool hasAmount = !isCollect && amountVal != null && amountVal > 0;
+    final String amountText = hasAmount ? nf.format(amountVal) : '';
+
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 8, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        children: [
+          /// ── Collapsed header (always visible) ──
+          InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: () {
+              setState(() {
+                if (expanded) {
+                  _expandedIds.remove(key);
+                } else {
+                  _expandedIds.add(key);
+                }
+              });
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: accent.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(isCollect ? Icons.add : Icons.remove, color: accent, size: 22),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          Utils.getFormattedDate(e.date.toString()),
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.black87),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.blueGrey),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        "${isCollect ? '' : '-'}${nf.format(e.total_eggs)}",
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: isCollect ? Colors.black87 : Colors.red.shade700),
+                      ),
+                      if (hasAmount)
+                        Container(
+                          margin: EdgeInsets.only(top: 3),
+                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                           Utils.currency+amountText, // add your currency symbol here if you have one, e.g. "${Utils.currencySymbol} $amountText"
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.green.shade800,
+                            ),
+                          ),
+                        ),
+                      /*if (production != null)
+                        Container(
+                          margin: EdgeInsets.only(top: 3),
+                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.10),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(production,
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.blue.shade700)),
+                        ),*/
+                    ],
+                  ),
+                  SizedBox(width: 4),
+                  AnimatedRotation(
+                    turns: expanded ? 0.5 : 0,
+                    duration: Duration(milliseconds: 200),
+                    child: Icon(Icons.keyboard_arrow_down, color: Colors.blueGrey),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          /// ── Expanded details ──
+          AnimatedSize(
+            duration: Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: expanded
+                ? Padding(
+              padding: EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Divider(height: 1, color: Colors.grey.withOpacity(0.25)),
+                  SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 10,
+                    children: [
+                      if (trayEnabled)
+                        _detailCell("Good trays".tr(), "${Utils.getEggTrays(e.good_eggs, traySize)}", valueColor: Colors.green.shade700),
+                      if (trayEnabled)
+                        _detailCell("Bad trays".tr(), "${Utils.getEggTrays(e.bad_eggs, traySize)}", valueColor: Colors.orange.shade800),
+                      _detailCell("Good Eggs".tr(),
+                          trayEnabled ? "${Utils.getRemaining(e.good_eggs, traySize)}" : "${e.good_eggs}",
+                          valueColor: Colors.green.shade700),
+                      _detailCell("Bad Eggs".tr(),
+                          trayEnabled ? "${Utils.getRemaining(e.bad_eggs, traySize)}" : "${e.bad_eggs}",
+                          valueColor: Colors.orange.shade800),
+                      _detailCell("Color".tr(), (e.egg_color ?? '').tr()),
+                    ],
+                  ),
+                  if (!isCollect && reason.isNotEmpty)
+                    Padding(
+                      padding: EdgeInsets.only(top: 10),
                       child: Row(
                         children: [
-                          Image(image: AssetImage(
-                              'assets/image.png'),
-                            fit: BoxFit.fill,
-                            color: Colors.white,
-                          ),
                           Expanded(
                             child: Text(
-                              "Profit/Loss",
-                              textAlign: TextAlign.center,
+                              reason.tr(),
                               style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontFamily: 'Roboto',
-                                  fontWeight: FontWeight.bold
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: Utils.getThemeColorBlue(),
                               ),
                             ),
+                          ),
+                          /*if (hasAmount)
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(width: 4),
+                                Text(
+                                  Utils.currency+amountText,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.green.shade700,
+                                  ),
+                                ),
+                              ],
+                            ),*/
+                        ],
+                      ),
+                    ),
+                  if (note.isNotEmpty)
+                    Padding(
+                      padding: EdgeInsets.only(top: 10),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.notes, size: 16, color: Colors.black54),
+                          SizedBox(width: 6),
+                          Expanded(
+                            child: Text(note,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 14, color: Colors.black87)),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                  onTap: () {
-                    *//*Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const EmojiRepeatScreen()),
-                    );*//*
-                  }),
-                    SizedBox(width: widthScreen,height: 20),
-                    InkWell(
-                  child: Container(
-                    width: widthScreen - (widthScreen / 4),
-                    height: 60,
-                    padding: const EdgeInsets.all(10),
-                    margin: const EdgeInsets.only(left: 20, right: 20),
-                    decoration: const BoxDecoration(
-                        color: Utils.getThemeColorBlue(),
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(10))),
-                    child: Container(
-                      width: 40,height: 40,
-                      margin: EdgeInsets.only(left: 30),
-                      child: Row(
-                        children: [
-                          Image(image: AssetImage(
-                              'assets/image.png'),
-                            fit: BoxFit.fill,
-                            color: Colors.white,
-                          ),
-                          Expanded(
-                            child: Text(
-                              "Medication",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontFamily: 'Roboto',
-                                  fontWeight: FontWeight.bold
-                              ),
+                  SizedBox(height: 14),
+                  Row(
+                    children: [
+                      if (isCollect)
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () => _showHatchBottomSheet(context),
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: Size(0, 44),
+                              backgroundColor: Colors.orange.shade600,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.egg, color: Colors.white, size: 18),
+                                SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    "Hatch These Eggs".tr(),
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white),
+                                  ),
+                                ),
+                                SizedBox(width: 4),
+                                Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 14),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  onTap: () {
-                    *//*Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const EmojiScreen()),
-                    );*//*
-                  }),
-              SizedBox(width: widthScreen,height: 20),
-              InkWell(
-                  child: Container(
-                    width: widthScreen - (widthScreen / 4),
-                    height: 60,
-                    padding: const EdgeInsets.all(10),
-                    margin: const EdgeInsets.only(left: 20, right: 20),
-                    decoration: const BoxDecoration(
-                        color: Utils.getThemeColorBlue(),
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(10))),
-                    child: Container(
-                      width: 40,height: 40,
-                      margin: EdgeInsets.only(left: 30),
-                      child: Row(
-                        children: [
-                          Image(image: AssetImage(
-                              'assets/image.png'),
-                            fit: BoxFit.fill,
-                            color: Colors.white,
-                          ),
-                          Expanded(
-                            child: Text(
-                              "Feeding",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontFamily: 'Roboto',
-                                  fontWeight: FontWeight.bold
-                              ),
+                        )
+                      else
+                        Spacer(),
+                      if (Utils.isMultiUSer) ...[
+                        SizedBox(width: 8),
+                        InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () {
+                            Eggs item = e;
+                            String updated_at = item.last_modified == null
+                                ? "Unknown".tr()
+                                : DateFormat("dd MMM yyyy hh:mm a").format(item.last_modified!);
+
+                            String updated_by = item.modified_by == null || item.modified_by!.isEmpty
+                                ? "System".tr()
+                                : item.modified_by!;
+
+                            Utils.showSyncInfo(context, updated_at, updated_by);
+                          },
+                          child: Container(
+                            height: 44,
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.info_outline, size: 16, color: Colors.blueGrey),
+                                SizedBox(width: 4),
+                                Text("Sync Info", style: TextStyle(fontSize: 12, color: Colors.blueGrey)),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  onTap: () {
-                    *//*Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const EmojiTemplateScreen()),
-                    );*//*
-                  }),
-              SizedBox(width: widthScreen,height: 20),
-              InkWell(
-                  child: Container(
-                    width: widthScreen - (widthScreen / 4),
-                    height: 60,
-                    padding: const EdgeInsets.all(10),
-                    margin: const EdgeInsets.only(left: 20, right: 20),
-                    decoration: const BoxDecoration(
-                        color: Utils.getThemeColorBlue(),
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(10))),
-                    child: Container(
-                      width: 40,height: 40,
-                      margin: EdgeInsets.only(left: 30),
-                      child: Row(
-                        children: [
-                          Image(image: AssetImage(
-                              'assets/image.png'),
-                            fit: BoxFit.fill,
-                            color: Colors.white,
+                        ),
+                      ],
+                      SizedBox(width: 8),
+                      GestureDetector(
+                        onTapDown: (TapDownDetails details) {
+                          selected_id = e.id;
+                          selected_index = index;
+                          showMemberMenu(details.globalPosition);
+                        },
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          Expanded(
-                            child: Text(
-                              "Form Setup",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontFamily: 'Roboto',
-                                  fontWeight: FontWeight.bold
-                              ),
-                            ),
-                          ),
-                        ],
+                          child: Icon(Icons.more_vert, color: Colors.black54),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                  onTap: () {
-                    *//*Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const EmojiTemplateScreen()),
-                    );*//*
-                  }),*/
-                    ]
-                ),))
-            ],),),),);
+                ],
+              ),
+            )
+                : SizedBox(width: double.infinity),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildDropdownField(
@@ -1098,11 +1065,11 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
     }
   }
 
-  /// Function to Build Filter Buttons
+  /// Function to Build Filter Buttons (compact segmented style - logic unchanged)
   Widget buildFilterButton(String label, int index, Color color) {
     bool isSelected = selected == index;
 
-    return Flexible( // Use Flexible instead of Expanded
+    return Expanded(
       child: InkWell(
         onTap: () {
           setState(() {
@@ -1117,53 +1084,26 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
             getFilteredTransactions(str_date, end_date);
           });
         },
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(9),
         child: AnimatedContainer(
-          duration: Duration(milliseconds: 300),
+          duration: Duration(milliseconds: 200),
           curve: Curves.easeInOut,
-          height: 45,
+          height: 36,
+          alignment: Alignment.center,
           decoration: BoxDecoration(
-            gradient: isSelected
-                ? LinearGradient(
-              colors: [color.withOpacity(0.8), color.withOpacity(0.9)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            )
-                : LinearGradient(
-              colors: [Colors.white, Colors.white.withOpacity(0.7)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(
-              color: isSelected ? color.withOpacity(0.8) : Colors.grey.shade300,
-              width: isSelected ? 2 : 1.5,
-            ),
-            boxShadow: [
-              if (isSelected)
-                BoxShadow(
-                  color: color.withOpacity(0.4),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                ),
-            ],
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(9),
+            boxShadow: isSelected
+                ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
+                : [],
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (isSelected)
-                Icon(Icons.check, color: Colors.white, size: 18), // ✅ Checkmark only on selected
-              if (isSelected) SizedBox(width: 6),
-              Text(
-                label.tr(),
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: isSelected ? Colors.white : Colors.black,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
+          child: Text(
+            label.tr(),
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+              color: isSelected ? color : Colors.black54,
+            ),
           ),
         ),
       ),
@@ -1831,7 +1771,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
 
           EggTransaction? eggTransaction = await DatabaseHelper.getByEggItemId(eggs.elementAt(selected_index!).id!);
           if(eggTransaction!= null) {
-           TransactionItem? transactionItem = await DatabaseHelper.getSingleTransaction(
+            TransactionItem? transactionItem = await DatabaseHelper.getSingleTransaction(
                 eggTransaction.transactionId.toString());
 
             transactionItem!.sync_status = SyncStatus.DELETED;
@@ -1937,7 +1877,7 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
     );
   }
 
-  /*Future<void> checkReminderScheduling(String flockId) async {
+/*Future<void> checkReminderScheduling(String flockId) async {
 
     // Check if reminder is already set up
     final reminderService = ReminderSchedulerService();
@@ -2046,4 +1986,3 @@ class _EggCollectionScreen extends State<EggCollectionScreen> with SingleTickerP
   }*/
 
 }
-

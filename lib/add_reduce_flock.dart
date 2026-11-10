@@ -83,9 +83,9 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
     getData(date_filter_name);
 
-   }
+  }
 
-   void addNewColumn() async{
+  void addNewColumn() async{
     try{
       int c = await DatabaseHelper.addColumnInFlockDetail();
       print("Column Info $c");
@@ -109,7 +109,7 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
     }catch(ex){
       print(ex);
     }
-   }
+  }
 
   @override
   void initState() {
@@ -170,6 +170,9 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
   }
 
   int egg_total = 0;
+
+  // UI-only: which cards are expanded (keyed by record id)
+  final Set<int> _expandedIds = {};
 
   String applied_filter_name = "All Additions/Reductions";
 
@@ -309,28 +312,18 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
                       height: 55,
                       margin: EdgeInsets.symmetric(horizontal: 6),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Colors.red.shade700, Colors.red.shade500],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                        color: Colors.white,
+                        border: Border.all(color: Colors.red.shade600, width: 1.5),
                         borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.red.withOpacity(0.4),
-                            blurRadius: 6,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.remove_circle_outline, color: Colors.white, size: 28),
+                          Icon(Icons.remove_circle_outline, color: Colors.red.shade600, size: 28),
                           SizedBox(width: 6),
                           Text(
                             'REDUCE_BIRDS'.tr(),
-                            style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                            style: TextStyle(color: Colors.red.shade600, fontSize: 14, fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),
@@ -344,648 +337,476 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
       ),
       body: SafeArea(
         top: false,
-          child:Container(
+        child:Container(
           width: widthScreen,
           height: heightScreen,
-            color: Utils.getScreenBackground(),
-            child:Column(children: [
-               if(_isBannerAdReady)
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                      height: 60.0,
-                      width: Utils.WIDTH_SCREEN,
-                      child: AdWidget(ad: _bannerAd)
-                  ),
-                ),
-
-              Expanded(child: SingleChildScrollView(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children:  [
-                      /*ClipRRect(
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10),
-                ),
+          color: Utils.getScreenBackground(),
+          child:Column(children: [
+            if(_isBannerAdReady)
+              Align(
+                alignment: Alignment.topCenter,
                 child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                     // colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
-                      colors: [Colors.blue, Colors.blue],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 6,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                  child: Row(
-                    children: [
-                      /// Back Button
-                      InkWell(
-                        borderRadius: BorderRadius.circular(30),
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          width: 45,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.15),
-                          ),
-                          child: Icon(Icons.arrow_back, color: Colors.white, size: 28),
-                        ),
-                      ),
-
-                      /// Title
-                      Expanded(
-                        child: Container(
-                          margin: EdgeInsets.only(left: 12),
-                          child: Text(
-                            applied_filter_name.tr(),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      /// Sort Button
-                      InkWell(
-                        borderRadius: BorderRadius.circular(10),
-                        onTap: () {
-                          openSortDialog(context, (selectedSort) {
-                            setState(() {
-                              sortOption = selectedSort == "date_desc" ? "Date (New)" : "Date (Old)";
-                              sortSelected = selectedSort == "date_desc" ? "DESC" : "ASC";
-                            });
-
-                            getFilteredTransactions(str_date, end_date);
-                          });
-                        },
-                        child: Container(
-                          height: 45,
-                          width: 130,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  sortOption.tr(),
-                                  style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Icon(Icons.sort, color: Colors.white, size: 22),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    height: 60.0,
+                    width: Utils.WIDTH_SCREEN,
+                    child: AdWidget(ad: _bannerAd)
                 ),
               ),
-*/
-                      Center(
-                        child: Container(
-                          padding: EdgeInsets.only(top: 2),
-                          margin: EdgeInsets.symmetric(horizontal: 10), // Margin of 10 on left & right
-                          child: Row(
-                            children: [
-                              Expanded(
-                                flex: 3, // 60% of available space
-                                child: SizedBox(
-                                  height: 55,
-                                  child: _buildDropdownField(
-                                    "Select Item",
-                                    _purposeList,
-                                    _purposeselectedValue,
-                                        (String? newValue) {
-                                      _purposeselectedValue = newValue!;
-                                      getFlockID();
-                                      getFilteredTransactions(str_date, end_date);
-                                    },
-                                    width: double.infinity,
-                                    height: 45,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 5), // Space between the dropdowns
-                              Expanded(
-                                flex: 2, // 40% of available space
-                                child: SizedBox(
-                                  height: 55,
-                                  child: _buildDropdownField(
-                                    "Select Item",
-                                    filterList,
-                                    date_filter_name,
-                                        (String? newValue) {
-                                      setState(() {
-                                        date_filter_name = newValue!;
-                                        getData(date_filter_name);
-                                      });
-                                    },
-                                    width: double.infinity,
-                                    height: 45,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
 
-                      /// Color-coded filter buttons
-                      Container(
-                        height: 55,
-                        width: widthScreen,
-                        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                          color: Colors.white.withOpacity(0.1), // Light transparent background
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 10,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            buildFilterButton('All', 1, Colors.blue),
-                            buildFilterButton('Addition', 2, Colors.green),
-                            buildFilterButton('Reduction', 3, Colors.red),
-                          ],
-                        ),
-                      ),
-
-                      list.length > 0 ? Container(
-                        height: Utils.isShowAdd? heightScreen - 350 : heightScreen - 300,
-                        width: widthScreen,
-                        child: ListView.builder(
-                          itemCount: list.length,
-                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          itemBuilder: (BuildContext context, int index) {
-                            var item = list[index];
-                            bool hasTransaction = item.transaction_id != "-1";
-
-                            return Card(
-                              elevation: 3,
-                              margin: EdgeInsets.only(bottom: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Padding(
-                                padding: EdgeInsets.all(14),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    /// **Header: Name + Menu Icon**
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            item.f_name,
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black87,
-                                            ),
-                                          ),
-                                        ),
-
-                                        /// **Menu Icon**
-                                        !hasTransaction
-                                            ? GestureDetector(
-                                          onTapDown: (TapDownDetails details) {
-                                            selected_id = item.f_detail_id;
-                                            selected_index = index;
-                                            showMemberMenu(details.globalPosition);
-                                          },
-                                          child: Icon(Icons.more_vert, color: Colors.black54),
-                                        )
-                                            : SizedBox(height: 1),
-                                      ],
-                                    ),
-
-                                    SizedBox(height: 10),
-
-                                    /// **Bird Count with Addition/Reduction Label**
-                                    Row(
-                                      children: [
-                                        Image.asset("assets/bird_icon.png", width: 30, height: 30),
-                                        SizedBox(width: 6),
-                                        Text(
-                                          "${item.item_count} " + "BIRDS".tr(),
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.black87,
-                                          ),
-                                        ),
-                                        SizedBox(width: 10),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(vertical: 4, horizontal: 10),
-                                          decoration: BoxDecoration(
-                                            color: item.item_type == 'Reduction'
-                                                ? Colors.red.withOpacity(0.15)
-                                                : Colors.green.withOpacity(0.15),
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          child: Text(
-                                            item.item_type.tr(),
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w600,
-                                              color: item.item_type == 'Reduction' ? Colors.red : Colors.green,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 10),
-
-                                    /// **Date**
-                                    Row(
-                                      children: [
-                                        Icon(Icons.calendar_today, size: 16, color: Colors.blueGrey),
-                                        SizedBox(width: 6),
-                                        Text(
-                                          Utils.getFormattedDate(item.acqusition_date.toString()),
-                                          style: TextStyle(fontSize: 14, color: Colors.black54),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 10),
-
-                                    /// **Reason / Acquisition Type**
-                                    Text(
-                                      item.item_type == 'Reduction'
-                                          ? item.reason.toString().tr()
-                                          : item.acqusition_type.toString().tr(),
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.blueAccent,
-                                      ),
-                                    ),
-                                    SizedBox(height: 12),
-
-                                    /// **Notes Section**
-                                    if (item.short_note.isNotEmpty)
-                                      Container(
-                                        padding: EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[100],
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.notes, size: 18, color: Colors.black54),
-                                            SizedBox(width: 6),
-                                            Expanded(
-                                              child: Text(
-                                                item.short_note,
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(fontSize: 14, color: Colors.black87),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    SizedBox(height: 12),
-
-                                    /// **Action Button (View Details)**
-                                    if (hasTransaction)
-                                      Align(
-                                        alignment: Alignment.centerRight,
-                                        child: GestureDetector(
-                                          onTap: () async {
-                                            selected_id = item.f_detail_id;
-                                            selected_index = index;
-                                            await Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => ViewCompleteTransaction(
-                                                  transaction_id: item.transaction_id,
-                                                  isTransaction: false,
-                                                  flock_detail_id: '$selected_id',
-                                                ),
-                                              ),
-                                            );
-                                            getData(date_filter_name);
-                                          },
-                                          child: Container(
-                                            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 14),
-                                            decoration: BoxDecoration(
-                                              color: Colors.blueAccent,
-                                              borderRadius: BorderRadius.circular(8),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Icon(Icons.visibility, size: 18, color: Colors.white),
-                                                SizedBox(width: 6),
-                                                Text(
-                                                  "View Details".tr(),
-                                                  style: TextStyle(fontSize: 14, color: Colors.white),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-
-                                    SizedBox(height: 6),
-
-                                    /// **Sync Info Icon**
-                                    if(Utils.isMultiUSer)
-                                      GestureDetector(
-                                        onTap: () {
-                                          String updated_at = item.last_modified == null
-                                              ? "Unknown".tr()
-                                              : DateFormat("dd MMM yyyy hh:mm a").format(item.last_modified!);
-
-                                          String updated_by = item.modified_by == null || item.modified_by!.isEmpty
-                                              ? "System".tr()
-                                              : item.modified_by!;
-
-                                          Utils.showSyncInfo(context, updated_at, updated_by);
-                                        },
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(Icons.info_outline, size: 16, color: Colors.blueGrey),
-                                            SizedBox(width: 4),
-                                            Text(
-                                              "Sync Info",
-                                              style: TextStyle(fontSize: 12, color: Colors.blueGrey),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            );
-
-                          },
-                        ),
-                      )
-                          : Utils.getCustomEmptyMessage("assets/add_reduce_.png", "NO_BIRDS_ADD_REDUCE")
-
-
-                      /* Text(
-              "Main Menu",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 24,
-                  color: Utils.getThemeColorBlue(),
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.bold
-              ),
-            ),
-                    SizedBox(width: widthScreen, height: 50,),
-                    InkWell(
-                        child: Container(
-                          width: widthScreen - (widthScreen / 4),
-                          height: 60,
-                          padding: const EdgeInsets.all(10),
-                          margin: const EdgeInsets.only(left: 20, right: 20),
-                          decoration: const BoxDecoration(
-                              color: Utils.getThemeColorBlue(),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10))),
+            Expanded(
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Column(
+                      children: [
+                        // ── Dropdowns (unchanged logic) ──
+                        Center(
                           child: Container(
-                            width: 40,height: 40,
-                            margin: EdgeInsets.only(left: 30),
+                            padding: EdgeInsets.only(top: 2),
+                            margin: EdgeInsets.symmetric(horizontal: 10),
                             child: Row(
                               children: [
-                                Image(image: AssetImage(
-                                    'assets/image.png'),
-                                  fit: BoxFit.fill,
-                                  color: Colors.white,
-                                ),
                                 Expanded(
-                                  child: Text(
-                                    "Inventory",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.bold
-                                        ),
+                                  flex: 3,
+                                  child: SizedBox(
+                                    height: 55,
+                                    child: _buildDropdownField(
+                                      "Select Item",
+                                      _purposeList,
+                                      _purposeselectedValue,
+                                          (String? newValue) {
+                                        _purposeselectedValue = newValue!;
+                                        getFlockID();
+                                        getFilteredTransactions(str_date, end_date);
+                                      },
+                                      width: double.infinity,
+                                      height: 45,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 5),
+                                Expanded(
+                                  flex: 2,
+                                  child: SizedBox(
+                                    height: 55,
+                                    child: _buildDropdownField(
+                                      "Select Item",
+                                      filterList,
+                                      date_filter_name,
+                                          (String? newValue) {
+                                        setState(() {
+                                          date_filter_name = newValue!;
+                                          getData(date_filter_name);
+                                        });
+                                      },
+                                      width: double.infinity,
+                                      height: 45,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const Inventory()),
-                          );
-                        }),
-                    SizedBox(width: widthScreen,height: 20),
-                    InkWell(
-                  child: Container(
-                    width: widthScreen - (widthScreen / 4),
-                    height: 60,
-                    padding: const EdgeInsets.all(10),
-                    margin: const EdgeInsets.only(left: 20, right: 20),
-                    decoration: const BoxDecoration(
-                        color: Utils.getThemeColorBlue(),
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(10))),
-                    child: Container(
-                      width: 40,height: 40,
-                      margin: EdgeInsets.only(left: 30),
+
+                        // ── NEW: Summary card ──
+                        _buildSummaryCard(),
+
+                        // ── Compact filter (same handlers) ──
+                        Container(
+                          margin: EdgeInsets.fromLTRB(10, 6, 10, 4),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: EdgeInsets.all(3),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blueGrey.shade50,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      buildFilterButton('All', 1, Colors.blue),
+                                      buildFilterButton('Addition', 2, Colors.green),
+                                      buildFilterButton('Reduction', 3, Colors.red),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                "${list.length} ${'records'.tr()}",
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  if (list.isNotEmpty)
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                            (BuildContext context, int index) => _buildFlockCard(index),
+                        childCount: list.length,
+                      ),
+                    )
+                  else
+                    SliverToBoxAdapter(
+                      child: Utils.getCustomEmptyMessage("assets/add_reduce_.png", "NO_BIRDS_ADD_REDUCE"),
+                    ),
+
+                  SliverToBoxAdapter(child: SizedBox(height: 24)),
+                ],
+              ),
+            ),
+          ],),),),);
+  }
+
+  // ═══════════════ UI HELPERS (redesign – display only) ═══════════════
+
+  int _cardKey(int index) => list[index].f_detail_id ?? -(index + 1);
+
+  Widget _buildSummaryCard() {
+    int added = 0, reduced = 0;
+    for (final d in list) {
+      if (d.item_type == 'Reduction') {
+        reduced += d.item_count;
+      } else {
+        added += d.item_count;
+      }
+    }
+    final int net = added - reduced;
+    final nf = NumberFormat.decimalPattern();
+    final String periodLabel = date_filter_name == 'DATE_RANGE'
+        ? '$str_date  →  $end_date'
+        : date_filter_name.tr();
+    final Color netColor = net < 0 ? Colors.red.shade700 : (net > 0 ? Colors.green.shade700 : Colors.black87);
+
+    return Container(
+      margin: EdgeInsets.fromLTRB(10, 8, 10, 4),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 10, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  "Flock Movement".tr().toUpperCase(),
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.6, color: Colors.blueGrey),
+                ),
+              ),
+              SizedBox(width: 8),
+              Text(periodLabel, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey)),
+            ],
+          ),
+          SizedBox(height: 4),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                "${net > 0 ? '+' : (net < 0 ? '−' : '')}${nf.format(net.abs())}",
+                style: TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: netColor, height: 1.1),
+              ),
+              SizedBox(width: 8),
+              Text("Birds".tr(), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.blueGrey)),
+            ],
+          ),
+          SizedBox(height: 12),
+          Row(
+            children: [
+              _summaryTile("Addition".tr(), "+${nf.format(added)}", Colors.green.shade700, Colors.green.withOpacity(0.08)),
+              SizedBox(width: 10),
+              _summaryTile("Reduction".tr(), "−${nf.format(reduced)}", Colors.red.shade700, Colors.red.withOpacity(0.07)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _summaryTile(String label, String value, Color color, Color bg) {
+    return Expanded(
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blueGrey)),
+            SizedBox(height: 2),
+            Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: color)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _detailCell(String label, String value) {
+    final double cellWidth = (widthScreen - 20 - 24 - 12 - 50) / 2;
+    return SizedBox(
+      width: cellWidth,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blueGrey)),
+          SizedBox(height: 2),
+          Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.black87)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFlockCard(int index) {
+    final Flock_Detail item = list[index];
+    final bool hasTransaction = item.transaction_id != "-1";
+    final bool isReduction = item.item_type == 'Reduction';
+    final Color accent = isReduction ? Colors.red.shade700 : Colors.green.shade700;
+    final int key = _cardKey(index);
+    final bool expanded = _expandedIds.contains(key);
+    final nf = NumberFormat.decimalPattern();
+    final String reasonText = isReduction ? item.reason.toString().tr() : item.acqusition_type.toString().tr();
+
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 8, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        children: [
+          /// ── Collapsed header (always visible) ──
+          InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: () {
+              setState(() {
+                if (expanded) {
+                  _expandedIds.remove(key);
+                } else {
+                  _expandedIds.add(key);
+                }
+              });
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: accent.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(isReduction ? Icons.remove : Icons.add, color: accent, size: 22),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          Utils.getFormattedDate(item.acqusition_date.toString()),
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.black87),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          "${item.f_name} · $reasonText",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.blueGrey),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        "${isReduction ? '−' : '+'}${nf.format(item.item_count)}",
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: accent),
+                      ),
+                      Text("BIRDS".tr(), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blueGrey)),
+                    ],
+                  ),
+                  SizedBox(width: 4),
+                  AnimatedRotation(
+                    turns: expanded ? 0.5 : 0,
+                    duration: Duration(milliseconds: 200),
+                    child: Icon(Icons.keyboard_arrow_down, color: Colors.blueGrey),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          /// ── Expanded details ──
+          AnimatedSize(
+            duration: Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: expanded
+                ? Padding(
+              padding: EdgeInsets.fromLTRB(62, 0, 12, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Divider(height: 1, color: Colors.grey.withOpacity(0.25)),
+                  SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 10,
+                    children: [
+                      _detailCell("Flock".tr(), item.f_name),
+                      _detailCell("Type".tr(), item.item_type.tr()),
+                      _detailCell(isReduction ? "Reason".tr() : "Source".tr(), reasonText),
+                      _detailCell("Date".tr(), Utils.getFormattedDate(item.acqusition_date.toString())),
+                    ],
+                  ),
+                  if (item.short_note.isNotEmpty)
+                    Container(
+                      margin: EdgeInsets.only(top: 12),
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       child: Row(
                         children: [
-                          Image(image: AssetImage(
-                              'assets/image.png'),
-                            fit: BoxFit.fill,
-                            color: Colors.white,
-                          ),
+                          Icon(Icons.notes, size: 18, color: Colors.black54),
+                          SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              "Profit/Loss",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontFamily: 'Roboto',
-                                  fontWeight: FontWeight.bold
-                              ),
+                              item.short_note,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 14, color: Colors.black87),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                  onTap: () {
-                    *//*Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const EmojiRepeatScreen()),
-                    );*//*
-                  }),
-                    SizedBox(width: widthScreen,height: 20),
-                    InkWell(
-                  child: Container(
-                    width: widthScreen - (widthScreen / 4),
-                    height: 60,
-                    padding: const EdgeInsets.all(10),
-                    margin: const EdgeInsets.only(left: 20, right: 20),
-                    decoration: const BoxDecoration(
-                        color: Utils.getThemeColorBlue(),
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(10))),
-                    child: Container(
-                      width: 40,height: 40,
-                      margin: EdgeInsets.only(left: 30),
-                      child: Row(
-                        children: [
-                          Image(image: AssetImage(
-                              'assets/image.png'),
-                            fit: BoxFit.fill,
-                            color: Colors.white,
-                          ),
-                          Expanded(
-                            child: Text(
-                              "Medication",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontFamily: 'Roboto',
-                                  fontWeight: FontWeight.bold
+                  SizedBox(height: 14),
+                  Row(
+                    children: [
+                      if (hasTransaction)
+                        Expanded(
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () async {
+                              selected_id = item.f_detail_id;
+                              selected_index = index;
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ViewCompleteTransaction(
+                                    transaction_id: item.transaction_id,
+                                    isTransaction: false,
+                                    flock_detail_id: '$selected_id',
+                                  ),
+                                ),
+                              );
+                              getData(date_filter_name);
+                            },
+                            child: Container(
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: Colors.blueAccent,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.visibility, size: 18, color: Colors.white),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    "View Details".tr(),
+                                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  onTap: () {
-                    *//*Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const EmojiScreen()),
-                    );*//*
-                  }),
-              SizedBox(width: widthScreen,height: 20),
-              InkWell(
-                  child: Container(
-                    width: widthScreen - (widthScreen / 4),
-                    height: 60,
-                    padding: const EdgeInsets.all(10),
-                    margin: const EdgeInsets.only(left: 20, right: 20),
-                    decoration: const BoxDecoration(
-                        color: Utils.getThemeColorBlue(),
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(10))),
-                    child: Container(
-                      width: 40,height: 40,
-                      margin: EdgeInsets.only(left: 30),
-                      child: Row(
-                        children: [
-                          Image(image: AssetImage(
-                              'assets/image.png'),
-                            fit: BoxFit.fill,
-                            color: Colors.white,
-                          ),
-                          Expanded(
-                            child: Text(
-                              "Feeding",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontFamily: 'Roboto',
-                                  fontWeight: FontWeight.bold
-                              ),
+                        )
+                      else
+                        Spacer(),
+                      if (Utils.isMultiUSer) ...[
+                        SizedBox(width: 8),
+                        InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () {
+                            String updated_at = item.last_modified == null
+                                ? "Unknown".tr()
+                                : DateFormat("dd MMM yyyy hh:mm a").format(item.last_modified!);
+
+                            String updated_by = item.modified_by == null || item.modified_by!.isEmpty
+                                ? "System".tr()
+                                : item.modified_by!;
+
+                            Utils.showSyncInfo(context, updated_at, updated_by);
+                          },
+                          child: Container(
+                            height: 44,
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.info_outline, size: 16, color: Colors.blueGrey),
+                                SizedBox(width: 4),
+                                Text("Sync Info", style: TextStyle(fontSize: 12, color: Colors.blueGrey)),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  onTap: () {
-                    *//*Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const EmojiTemplateScreen()),
-                    );*//*
-                  }),
-              SizedBox(width: widthScreen,height: 20),
-              InkWell(
-                  child: Container(
-                    width: widthScreen - (widthScreen / 4),
-                    height: 60,
-                    padding: const EdgeInsets.all(10),
-                    margin: const EdgeInsets.only(left: 20, right: 20),
-                    decoration: const BoxDecoration(
-                        color: Utils.getThemeColorBlue(),
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(10))),
-                    child: Container(
-                      width: 40,height: 40,
-                      margin: EdgeInsets.only(left: 30),
-                      child: Row(
-                        children: [
-                          Image(image: AssetImage(
-                              'assets/image.png'),
-                            fit: BoxFit.fill,
-                            color: Colors.white,
-                          ),
-                          Expanded(
-                            child: Text(
-                              "Form Setup",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontFamily: 'Roboto',
-                                  fontWeight: FontWeight.bold
-                              ),
+                        ),
+                      ],
+                      if (!hasTransaction) ...[
+                        SizedBox(width: 8),
+                        GestureDetector(
+                          onTapDown: (TapDownDetails details) {
+                            selected_id = item.f_detail_id;
+                            selected_index = index;
+                            showMemberMenu(details.globalPosition);
+                          },
+                          child: Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(12),
                             ),
+                            child: Icon(Icons.more_vert, color: Colors.black54),
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      ],
+                    ],
                   ),
-                  onTap: () {
-                    *//*Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const EmojiTemplateScreen()),
-                    );*//*
-                  }),*/
-                    ]
-                ),))
-            ],),),),);
+                ],
+              ),
+            )
+                : SizedBox(width: double.infinity),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildDropdownField(
@@ -1038,11 +859,11 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
   }
 
 
-  /// Function to Build Filter Buttons
+  /// Function to Build Filter Buttons (compact segmented style - logic unchanged)
   Widget buildFilterButton(String label, int index, Color color) {
     bool isSelected = selected == index;
 
-    return Flexible( // Use Flexible instead of Expanded
+    return Expanded(
       child: InkWell(
         onTap: () {
           setState(() {
@@ -1051,53 +872,26 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
             getFilteredTransactions(str_date, end_date);
           });
         },
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(9),
         child: AnimatedContainer(
-          duration: Duration(milliseconds: 300),
+          duration: Duration(milliseconds: 200),
           curve: Curves.easeInOut,
-          height: 45,
+          height: 36,
+          alignment: Alignment.center,
           decoration: BoxDecoration(
-            gradient: isSelected
-                ? LinearGradient(
-              colors: [color.withOpacity(0.8), color.withOpacity(0.9)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            )
-                : LinearGradient(
-              colors: [Colors.white, Colors.white.withOpacity(0.7)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(
-              color: isSelected ? color.withOpacity(0.8) : Colors.grey.shade300,
-              width: isSelected ? 2 : 1.5,
-            ),
-            boxShadow: [
-              if (isSelected)
-                BoxShadow(
-                  color: color.withOpacity(0.4),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                ),
-            ],
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(9),
+            boxShadow: isSelected
+                ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
+                : [],
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (isSelected)
-                Icon(Icons.check, color: Colors.white, size: 18), // ✅ Checkmark only on selected
-              if (isSelected) SizedBox(width: 6),
-              Text(
-                label.tr(),
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: isSelected ? Colors.white : Colors.black,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
+          child: Text(
+            label.tr(),
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+              color: isSelected ? color : Colors.black54,
+            ),
           ),
         ),
       ),
@@ -1739,4 +1533,3 @@ class _AddReduceFlockScreen extends State<AddReduceFlockScreen> with SingleTicke
 
 
 }
-

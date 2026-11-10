@@ -3110,11 +3110,20 @@ class DatabaseHelper  {
 
     var result;
 
-    String baseQuery = '''
+    /*String baseQuery = '''
     SELECT Eggs.*, Flock.f_name 
     FROM Eggs 
     LEFT JOIN Flock ON Eggs.f_id = Flock.f_id
-  ''';
+  ''';*/
+    String baseQuery = '''
+  SELECT Eggs.*, 
+         Flock.f_name,
+         t.amount AS sale_amount
+  FROM Eggs 
+  LEFT JOIN Flock ON Eggs.f_id = Flock.f_id
+  LEFT JOIN EggTransaction et ON et.egg_item_id = Eggs.id
+  LEFT JOIN Transactions t ON t.id = et.transaction_id
+''';
 
     String whereClause = '';
     List<String> conditions = [];

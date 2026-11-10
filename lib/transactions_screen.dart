@@ -205,6 +205,9 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
 
 
   int selected = 1;
+
+  // UI-only: which cards are expanded (keyed by record id)
+  final Set<int> _expandedIds = {};
   int f_id = -1;
 
   @override
@@ -217,7 +220,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
     heightScreen = MediaQuery.of(context).size.height;
     Utils.WIDTH_SCREEN = widthScreen;
     Utils.HEIGHT_SCREEN = MediaQuery.of(context).size.height - (safeAreaHeight+safeAreaHeightBottom);
-      child:
+    child:
     return Scaffold(
 
       appBar: PreferredSize(
@@ -316,17 +319,13 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                     }
 
                     showIncomeTypeSelector(context);
-                   // addNewIncome();
+                    // addNewIncome();
                   },
                   borderRadius: BorderRadius.circular(10), // Smooth rounded ripple effect
                   child: Container(
                     height: 55, // Increased for better touch area
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.green.shade700, Colors.green.shade400], // Gradient for modern effect
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                      color: Colors.green.shade600,
                       borderRadius: BorderRadius.circular(10), // Rounded corners
                       boxShadow: [
                         BoxShadow(
@@ -370,11 +369,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                   child: Container(
                     height: 55,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.red.shade700, Colors.red.shade400], // Red gradient for expense
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                      color: Colors.red.shade600,
                       borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
@@ -406,628 +401,140 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
       ),
       body: SafeArea(
         top: false,
-          child:Container(
+        child:Container(
           width: widthScreen,
           height: heightScreen,
-            color: Utils.getScreenBackground(),
-            child:Column(children: [
-               if(_isBannerAdReady)
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                      height: 60.0,
-                      width: Utils.WIDTH_SCREEN,
-                      child: AdWidget(ad: _bannerAd)
-                  ),
-                ),
-
-              Expanded(child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children:  [
-
-                      /*ClipRRect(
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10),
-                ),
+          color: Utils.getScreenBackground(),
+          child:Column(children: [
+            if(_isBannerAdReady)
+              Align(
+                alignment: Alignment.topCenter,
                 child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.blue, Colors.blue],
-                     // colors: [Utils.getThemeColorBlue().withOpacity(0.9), Utils.getThemeColorBlue()],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 6,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                  child: Row(
-                    children: [
-                      /// Back Button
-                      InkWell(
-                        borderRadius: BorderRadius.circular(30),
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          width: 45,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.15),
-                          ),
-                          child: Icon(Icons.arrow_back, color: Colors.white, size: 28),
-                        ),
-                      ),
-
-                      /// Title
-                      Expanded(
-                        child: Container(
-                          margin: EdgeInsets.only(left: 12),
-                          child: Text(
-                            applied_filter_name.tr(),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      /// Sort Button
-                      InkWell(
-                        borderRadius: BorderRadius.circular(10),
-                        onTap: () {
-                          openSortDialog(context, (selectedSort) {
-                            setState(() {
-                              sortOption = selectedSort == "date_desc" ? "Date (New)" : "Date (Old)";
-                              sortSelected = selectedSort == "date_desc" ? "DESC" : "ASC";
-                            });
-
-                            getFilteredTransactions(str_date, end_date);
-                          });
-                        },
-                        child: Container(
-                          height: 45,
-                          width: 130,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  sortOption.tr(),
-                                  style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w500),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Icon(Icons.sort, color: Colors.white, size: 22),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    height: 60.0,
+                    width: Utils.WIDTH_SCREEN,
+                    child: AdWidget(ad: _bannerAd)
                 ),
-              ),*/
-                      Center(
-                        child: Container(
-                          padding: EdgeInsets.only(top: 2),
-                          margin: EdgeInsets.symmetric(horizontal: 10), // Margin of 10 on left & right
-                          child: Row(
-                            children: [
-                              Expanded(
-                                flex: 3, // 60% of available space
-                                child: SizedBox(
-                                  height: 55,
-                                  child: _buildDropdownField(
-                                    "Select Item",
-                                    _purposeList,
-                                    _purposeselectedValue,
-                                        (String? newValue) {
-                                      _purposeselectedValue = newValue!;
+              ),
 
-                                      f_id = getFlockID();
-                                      Utils.SELECTED_FLOCK = newValue;
-                                      Utils.SELECTED_FLOCK_ID = f_id;
-                                      print("SELECTED_FLOCK $f_id");
-                                      getFilteredTransactions(str_date, end_date);
+            Expanded(
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Column(
+                      children: [
+                        // ── Dropdowns (original code, unchanged) ──
+                        Center(
+                          child: Container(
+                            padding: EdgeInsets.only(top: 2),
+                            margin: EdgeInsets.symmetric(horizontal: 10), // Margin of 10 on left & right
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 3, // 60% of available space
+                                  child: SizedBox(
+                                    height: 55,
+                                    child: _buildDropdownField(
+                                      "Select Item",
+                                      _purposeList,
+                                      _purposeselectedValue,
+                                          (String? newValue) {
+                                        _purposeselectedValue = newValue!;
 
-                                    },
-                                    width: double.infinity,
-                                    height: 45,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 5), // Space between the dropdowns
-                              Expanded(
-                                flex: 2, // 40% of available space
-                                child: SizedBox(
-                                  height: 55,
-                                  child: _buildDropdownField(
-                                    "Select Item",
-                                    filterList,
-                                    date_filter_name,
-                                        (String? newValue) {
-                                      date_filter_name = newValue!;
-                                      getData(date_filter_name);
-                                    },
-                                    width: double.infinity,
-                                    height: 45,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Container(
-                        height: 55,
-                        width: widthScreen,
-                        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                          color: Colors.white.withOpacity(0.1), // Light transparent background
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 10,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            buildFilterButton('All', 1, Colors.blue),
-                            buildFilterButton('Income', 2, Colors.green),
-                            buildFilterButton('Expense', 3, Colors.red),
-                          ],
-                        ),
-                      ),
+                                        f_id = getFlockID();
+                                        Utils.SELECTED_FLOCK = newValue;
+                                        Utils.SELECTED_FLOCK_ID = f_id;
+                                        print("SELECTED_FLOCK $f_id");
+                                        getFilteredTransactions(str_date, end_date);
 
-                      transactionList.length > 0 ?
-
-                      Container(
-                        height: heightScreen,
-                        width: widthScreen,
-                        child: Padding(
-                          padding: Utils.isShowAdd? const EdgeInsets.only(bottom: 370) : const EdgeInsets.only(bottom: 300), // Adjust this value as needed
-                          child: ListView.builder(
-                              itemCount: transactionList.length,
-                              scrollDirection: Axis.vertical,
-                              shrinkWrap: true,
-                              itemBuilder: (BuildContext context, int index) {
-                                return Container(
-                                  margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    color: Colors.white,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.15),
-                                        spreadRadius: 1,
-                                        blurRadius: 4,
-                                        offset: Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.all(12),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-
-                                        /// **Title & Menu (Aligned in Same Row)**
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                transactionList.elementAt(index).type == 'Income'
-                                                    ? transactionList.elementAt(index).sale_item.tr()
-                                                    : transactionList.elementAt(index).expense_item.tr(),
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 16,
-                                                  color: Utils.getThemeColorBlue(),
-                                                ),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-
-                                            /// **Options Menu**
-                                            GestureDetector(
-                                              onTapDown: (TapDownDetails details) {
-                                                selected_id = transactionList.elementAt(index).id;
-                                                selected_index = index;
-                                                showMemberMenu(details.globalPosition);
-                                              },
-                                              child: Container(
-                                                width: 32,
-                                                height: 32,
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: Colors.grey.shade200,
-                                                ),
-                                                child: Icon(Icons.more_vert, size: 20, color: Colors.grey.shade700),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-
-                                        /// **Divider (Title Section)**
-                                        Container(
-                                          margin: EdgeInsets.symmetric(vertical: 6),
-                                          height: 1,
-                                          color: Colors.grey.shade300,
-                                        ),
-
-                                        /// **Item & Quantity**
-                                        Row(
-                                          children: [
-                                            Icon(Icons.shopping_bag, size: 16, color: Colors.blueAccent),
-                                            SizedBox(width: 5),
-                                            Text(
-                                              transactionList.elementAt(index).f_name.tr(),
-                                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
-                                            ),
-                                            SizedBox(width: 6),
-                                            Text(
-                                              "(${transactionList.elementAt(index).how_many} "+"ITEMS".tr()+")",
-                                              style: TextStyle(fontSize: 14, color: Colors.black54),
-                                            ),
-                                          ],
-                                        ),
-
-                                        SizedBox(height: 6),
-                                        /// **Quantity & Unit Price (Second Line)**
-                                        Row(
-                                          children: [
-                                            Text(
-                                              "${transactionList[index].how_many ?? 0} " + "ITEMS".tr(),
-                                              style: TextStyle(fontSize: 14, color: Colors.black),
-                                            ),
-                                            SizedBox(width: 10),
-                                            Text("•", style: TextStyle(color: Colors.grey, fontSize: 15)),
-                                            SizedBox(width: 10),
-                                            Text(
-                                              "${"UNIT_PRICE".tr()}: ${(transactionList[index].unitPrice ?? 0).toStringAsFixed(2)} ${Utils.currency}",
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                color: (transactionList[index].unitPrice ?? 0) == 0
-                                                    ? Colors.grey // dim if unit price is still 0
-                                                    : Colors.blueGrey.shade700,
-                                                fontStyle: (transactionList[index].unitPrice ?? 0) == 0
-                                                    ? FontStyle.italic
-                                                    : FontStyle.normal,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-
-
-                                        SizedBox(height: 6),
-
-                                        /// **Transaction Amount & Payment Status**
-                                        Container(
-                                          padding: const EdgeInsets.all(12),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(14),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black.withOpacity(0.05),
-                                                blurRadius: 10,
-                                                offset: const Offset(0, 4),
-                                              ),
-                                            ],
-                                          ),
-                                          child: Column(
-                                            children: [
-
-                                              /// TOP ROW
-                                              Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                children: [
-
-                                                  /// Income / Expense Badge
-                                                  Container(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                                    decoration: BoxDecoration(
-                                                      color: transactionList[index].type.toLowerCase() == 'income'
-                                                          ? Colors.green.withOpacity(0.12)
-                                                          : Colors.red.withOpacity(0.12),
-                                                      borderRadius: BorderRadius.circular(20),
-                                                    ),
-                                                    child: Row(
-                                                      children: [
-                                                        Icon(
-                                                          transactionList[index].type.toLowerCase() == 'income'
-                                                              ? Icons.arrow_downward
-                                                              : Icons.arrow_upward,
-                                                          size: 14,
-                                                          color: transactionList[index].type.toLowerCase() == 'income'
-                                                              ? Colors.green
-                                                              : Colors.red,
-                                                        ),
-                                                        const SizedBox(width: 5),
-                                                        Text(
-                                                          transactionList[index].type.tr(),
-                                                          style: TextStyle(
-                                                            fontWeight: FontWeight.w600,
-                                                            fontSize: 13,
-                                                            color: transactionList[index].type.toLowerCase() == 'income'
-                                                                ? Colors.green
-                                                                : Colors.red,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-
-                                                  /// Amount
-                                                  Row(
-                                                    children: [
-                                                      Text(
-                                                        transactionList[index].amount.toString(),
-                                                        style: const TextStyle(
-                                                          fontWeight: FontWeight.bold,
-                                                          fontSize: 18,
-                                                          color: Colors.black,
-                                                        ),
-                                                      ),
-                                                      const SizedBox(width: 4),
-                                                      Text(
-                                                        Utils.currency,
-                                                        style: TextStyle(
-                                                          fontSize: 14,
-                                                          color: Colors.grey.shade700,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-
-                                              const SizedBox(height: 12),
-
-                                              /// DIVIDER
-                                              Divider(height: 1, color: Colors.grey.shade200),
-
-                                              const SizedBox(height: 10),
-
-                                              /// BOTTOM ROW
-                                              Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                children: [
-
-                                                  /// Payment Method
-                                                  Row(
-                                                    children: [
-                                                      Container(
-                                                        padding: const EdgeInsets.all(6),
-                                                        decoration: BoxDecoration(
-                                                          color: Colors.blue.withOpacity(0.1),
-                                                          borderRadius: BorderRadius.circular(8),
-                                                        ),
-                                                        child: const Icon(
-                                                          Icons.account_balance_wallet,
-                                                          size: 18,
-                                                          color: Colors.blue,
-                                                        ),
-                                                      ),
-                                                      const SizedBox(width: 8),
-                                                      Text(
-                                                        transactionList[index].payment_method.tr(),
-                                                        style: const TextStyle(
-                                                          fontSize: 14,
-                                                          fontWeight: FontWeight.w500,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-
-                                                  /// Status Badge
-                                                  Container(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                                    decoration: BoxDecoration(
-                                                      color: transactionList[index].payment_status.toLowerCase() == "cleared"
-                                                          ? Colors.green.withOpacity(0.15)
-                                                          : Colors.orange.withOpacity(0.15),
-                                                      borderRadius: BorderRadius.circular(20),
-                                                    ),
-                                                    child: Text(
-                                                      transactionList[index].payment_status.toUpperCase().tr(),
-                                                      style: TextStyle(
-                                                        fontSize: 12,
-                                                        fontWeight: FontWeight.w600,
-                                                        color: transactionList[index].payment_status.toLowerCase() == "cleared"
-                                                            ? Colors.green.shade700
-                                                            : Colors.orange.shade800,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-
-                                        SizedBox(height: 8),
-
-                                        /// **Transaction Details**
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                              color: Colors.grey.withOpacity(0.25),
-                                            ),
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          child: Row(
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: [
-                                              Icon(
-                                                transactionList[index].type!.toLowerCase() == 'income'
-                                                    ? Icons.trending_up
-                                                    : Icons.trending_down,
-                                                size: 18,
-                                                color: transactionList[index].type!.toLowerCase() == 'income'
-                                                    ? Colors.green
-                                                    : Colors.red,
-                                              ),
-
-                                              const SizedBox(width: 10),
-
-                                              /// Two columns evenly spaced
-                                              Expanded(
-                                                child: Row(
-                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                  children: [
-                                                    /// Left column (constrained)
-                                                    Expanded(
-                                                      child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                        children: [
-                                                          Text(
-                                                            transactionList[index].type!.toLowerCase() == 'income'
-                                                                ? 'Sold To'.tr()
-                                                                : 'Paid To'.tr(),
-                                                            style: const TextStyle(
-                                                              fontSize: 13,
-                                                              color: Colors.black54,
-                                                            ),
-                                                          ),
-                                                          const SizedBox(height: 4),
-                                                          Text(
-                                                            transactionList[index].sold_purchased_from,
-                                                            maxLines: 1,
-                                                            overflow: TextOverflow.ellipsis,
-                                                            style: const TextStyle(
-                                                              fontWeight: FontWeight.w600,
-                                                              fontSize: 14,
-                                                              color: Colors.black,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-
-                                                    const SizedBox(width: 12),
-
-                                                    /// Right column (fixed width naturally)
-                                                    Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                                      children: [
-                                                        Text(
-                                                          "On".tr(),
-                                                          style: const TextStyle(
-                                                            fontSize: 13,
-                                                            color: Colors.black54,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(height: 4),
-                                                        Text(
-                                                          Utils.getFormattedDate(
-                                                            transactionList[index].date.toString(),
-                                                          ),
-                                                          style: const TextStyle(
-                                                            fontWeight: FontWeight.w600,
-                                                            fontSize: 14,
-                                                            color: Colors.black,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-
-                                        SizedBox(height: 6),
-
-                                        /// **Notes Section**
-                                        Row(
-                                          children: [
-                                            Icon(Icons.notes, size: 15, color: Colors.grey.shade700),
-                                            SizedBox(width: 5),
-                                            Expanded(
-                                              child: Text(
-                                                transactionList.elementAt(index).short_note!.isEmpty ? 'NO_NOTES'.tr() : transactionList.elementAt(index).short_note!,
-                                                maxLines: 3,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(fontSize: 14, color: Colors.black),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-
-                                        /// **Sync Info Icon**
-                                        if(Utils.isMultiUSer)
-                                          GestureDetector(
-                                            onTap: () {
-                                              TransactionItem item = transactionList[index];
-                                              String updated_at = item.last_modified == null
-                                                  ? "Unknown".tr()
-                                                  : DateFormat("dd MMM yyyy hh:mm a").format(item.last_modified!);
-
-                                              String updated_by = item.modified_by == null || item.modified_by!.isEmpty
-                                                  ? "System".tr()
-                                                  : item.modified_by!;
-
-                                              Utils.showSyncInfo(context, updated_at, updated_by);
-                                            },
-                                            child: Container(
-                                              alignment: Alignment.centerRight,
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Icon(Icons.info_outline, size: 16, color: Colors.blueGrey),
-                                                  SizedBox(width: 4),
-                                                  Text(
-                                                    "Sync Info",
-                                                    style: TextStyle(fontSize: 12, color: Colors.blueGrey),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                      ],
+                                      },
+                                      width: double.infinity,
+                                      height: 45,
                                     ),
                                   ),
-                                );
+                                ),
+                                SizedBox(width: 5), // Space between the dropdowns
+                                Expanded(
+                                  flex: 2, // 40% of available space
+                                  child: SizedBox(
+                                    height: 55,
+                                    child: _buildDropdownField(
+                                      "Select Item",
+                                      filterList,
+                                      date_filter_name,
+                                          (String? newValue) {
+                                        date_filter_name = newValue!;
+                                        getData(date_filter_name);
+                                      },
+                                      width: double.infinity,
+                                      height: 45,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
 
+                        // ── NEW: Summary card ──
+                        _buildSummaryCard(),
 
-                              }),
-                        ),) : Utils.getCustomEmptyMessage("assets/pfinance.png", "No Income/Expense added")
+                        // ── Compact filter (same handlers) ──
+                        Container(
+                          margin: EdgeInsets.fromLTRB(10, 6, 10, 4),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: EdgeInsets.all(3),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blueGrey.shade50,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      buildFilterButton('All', 1, Colors.blue),
+                                      buildFilterButton('Income', 2, Colors.green),
+                                      buildFilterButton('Expense', 3, Colors.red),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                "${transactionList.length} ${'records'.tr()}",
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
+                  if (transactionList.isNotEmpty)
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                            (BuildContext context, int index) => _buildTxnCard(index),
+                        childCount: transactionList.length,
+                      ),
+                    )
+                  else
+                    SliverToBoxAdapter(
+                      child: Utils.getCustomEmptyMessage("assets/pfinance.png", "No Income/Expense added"),
+                    ),
 
-                    ]
-                ),))
-            ],),),),);
+                  SliverToBoxAdapter(child: SizedBox(height: 24)),
+                ],
+              ),
+            ),
+          ],),),),);
   }
 
-  /// Function to Build Filter Buttons
+  /// Function to Build Filter Buttons (compact segmented style - logic unchanged)
   Widget buildFilterButton(String label, int index, Color color) {
     bool isSelected = selected == index;
 
-    return Flexible( // Use Flexible instead of Expanded
+    return Expanded(
       child: InkWell(
         onTap: () {
           setState(() {
@@ -1036,55 +543,380 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
             getFilteredTransactions(str_date, end_date);
           });
         },
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(9),
         child: AnimatedContainer(
-          duration: Duration(milliseconds: 300),
+          duration: Duration(milliseconds: 200),
           curve: Curves.easeInOut,
-          height: 45,
+          height: 36,
+          alignment: Alignment.center,
           decoration: BoxDecoration(
-            gradient: isSelected
-                ? LinearGradient(
-              colors: [color.withOpacity(0.8), color.withOpacity(0.9)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            )
-                : LinearGradient(
-              colors: [Colors.white, Colors.white.withOpacity(0.7)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(
-              color: isSelected ? color.withOpacity(0.8) : Colors.grey.shade300,
-              width: isSelected ? 2 : 1.5,
-            ),
-            boxShadow: [
-              if (isSelected)
-                BoxShadow(
-                  color: color.withOpacity(0.4),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                ),
-            ],
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(9),
+            boxShadow: isSelected
+                ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
+                : [],
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (isSelected)
-                Icon(Icons.check, color: Colors.white, size: 18), // ✅ Checkmark only on selected
-              if (isSelected) SizedBox(width: 6),
-              Text(
-                label.tr(),
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: isSelected ? Colors.white : Colors.black,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
+          child: Text(
+            label.tr(),
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+              color: isSelected ? color : Colors.black54,
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  // ═══════════════ UI HELPERS (redesign – display only) ═══════════════
+
+  int _cardKey(int index) => transactionList[index].id ?? -(index + 1);
+
+  double _amt(TransactionItem t) => double.tryParse(t.amount.toString()) ?? 0;
+
+  String _fmtMoney(double v) => NumberFormat('#,##0.##').format(v);
+
+  Widget _buildSummaryCard() {
+    double income = 0, expense = 0, pending = 0;
+    for (final t in transactionList) {
+      final double a = _amt(t);
+      if (t.type.toLowerCase() == 'income') {
+        income += a;
+      } else {
+        expense += a;
+      }
+      if (t.payment_status.toLowerCase() != 'cleared') pending += a;
+    }
+    final double net = income - expense;
+    final Color netColor = net < 0 ? Colors.red.shade700 : (net > 0 ? Colors.green.shade700 : Colors.black87);
+    final String periodLabel = date_filter_name == 'DATE_RANGE'
+        ? '$str_date  →  $end_date'
+        : date_filter_name.tr();
+
+    return Container(
+      margin: EdgeInsets.fromLTRB(10, 8, 10, 4),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 10, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  "Net Balance".tr().toUpperCase(),
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.6, color: Colors.blueGrey),
+                ),
+              ),
+              SizedBox(width: 8),
+              Text(periodLabel, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blueGrey)),
+            ],
+          ),
+          SizedBox(height: 4),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Flexible(
+                child: Text(
+                  "${net < 0 ? '−' : (net > 0 ? '+' : '')}${_fmtMoney(net.abs())}",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 34, fontWeight: FontWeight.w800, color: netColor, height: 1.1),
+                ),
+              ),
+              SizedBox(width: 8),
+              Text(Utils.currency, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.blueGrey)),
+            ],
+          ),
+          SizedBox(height: 12),
+          Row(
+            children: [
+              _summaryTile("Income".tr(), _fmtMoney(income), Colors.green.shade700, Colors.green.withOpacity(0.08)),
+              SizedBox(width: 10),
+              _summaryTile("Expense".tr(), _fmtMoney(expense), Colors.red.shade700, Colors.red.withOpacity(0.07)),
+            ],
+          ),
+          if (pending > 0)
+            Padding(
+              padding: EdgeInsets.only(top: 10),
+              child: Row(
+                children: [
+                  Icon(Icons.schedule, size: 15, color: Colors.orange.shade800),
+                  SizedBox(width: 6),
+                  Text(
+                    "${'Pending'.tr()}: ${_fmtMoney(pending)} ${Utils.currency}",
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.orange.shade800),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _summaryTile(String label, String value, Color color, Color bg) {
+    return Expanded(
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blueGrey)),
+            SizedBox(height: 2),
+            Text(value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: color)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _detailCell(String label, String value) {
+    final double cellWidth = (widthScreen - 24 - 24 - 12 - 50) / 2;
+    return SizedBox(
+      width: cellWidth,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blueGrey)),
+          SizedBox(height: 2),
+          Text(value, maxLines: 2, overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.black87)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTxnCard(int index) {
+    final TransactionItem item = transactionList[index];
+    final bool isIncome = item.type.toLowerCase() == 'income';
+    final Color accent = isIncome ? Colors.green.shade700 : Colors.red.shade700;
+    final int key = _cardKey(index);
+    final bool expanded = _expandedIds.contains(key);
+    final bool cleared = item.payment_status.toLowerCase() == 'cleared';
+    final String title = isIncome ? item.sale_item.tr() : item.expense_item.tr();
+    final String dateText = Utils.getFormattedDate(item.date.toString());
+    final String note = item.short_note ?? '';
+    final double unitPrice = item.unitPrice ?? 0;
+
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 8, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        children: [
+          /// ── Collapsed header (always visible) ──
+          InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: () {
+              setState(() {
+                if (expanded) {
+                  _expandedIds.remove(key);
+                } else {
+                  _expandedIds.add(key);
+                }
+              });
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: accent.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(isIncome ? Icons.arrow_downward : Icons.arrow_upward, color: accent, size: 20),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.black87),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          "${item.sold_purchased_from} · $dateText",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.blueGrey),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        "${isIncome ? '+' : '−'}${_fmtMoney(_amt(item))} ${Utils.currency}",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: accent),
+                      ),
+                      SizedBox(height: 3),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: cleared ? Colors.green.withOpacity(0.14) : Colors.orange.withOpacity(0.16),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          item.payment_status.toUpperCase().tr(),
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: cleared ? Colors.green.shade700 : Colors.orange.shade800,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(width: 4),
+                  AnimatedRotation(
+                    turns: expanded ? 0.5 : 0,
+                    duration: Duration(milliseconds: 200),
+                    child: Icon(Icons.keyboard_arrow_down, color: Colors.blueGrey),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          /// ── Expanded details ──
+          AnimatedSize(
+            duration: Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: expanded
+                ? Padding(
+              padding: EdgeInsets.fromLTRB(62, 0, 12, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Divider(height: 1, color: Colors.grey.withOpacity(0.25)),
+                  SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 10,
+                    children: [
+                      _detailCell("Flock".tr(), item.f_name.tr()),
+                      _detailCell("ITEMS".tr(), "${item.how_many ?? 0}"),
+                      _detailCell("UNIT_PRICE".tr(), "${unitPrice.toStringAsFixed(2)} ${Utils.currency}"),
+                      _detailCell("Payment".tr(), item.payment_method.tr()),
+                      _detailCell(isIncome ? 'Sold To'.tr() : 'Paid To'.tr(), item.sold_purchased_from),
+                      _detailCell("On".tr(), dateText),
+                    ],
+                  ),
+                  if (note.isNotEmpty)
+                    Container(
+                      margin: EdgeInsets.only(top: 12),
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.notes, size: 16, color: Colors.black54),
+                          SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              note,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 14, color: Colors.black87),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  SizedBox(height: 14),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (Utils.isMultiUSer) ...[
+                        InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () {
+                            String updated_at = item.last_modified == null
+                                ? "Unknown".tr()
+                                : DateFormat("dd MMM yyyy hh:mm a").format(item.last_modified!);
+
+                            String updated_by = item.modified_by == null || item.modified_by!.isEmpty
+                                ? "System".tr()
+                                : item.modified_by!;
+
+                            Utils.showSyncInfo(context, updated_at, updated_by);
+                          },
+                          child: Container(
+                            height: 44,
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.info_outline, size: 16, color: Colors.blueGrey),
+                                SizedBox(width: 4),
+                                Text("Sync Info", style: TextStyle(fontSize: 12, color: Colors.blueGrey)),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                      ],
+                      GestureDetector(
+                        onTapDown: (TapDownDetails details) {
+                          selected_id = item.id;
+                          selected_index = index;
+                          showMemberMenu(details.globalPosition);
+                        },
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(Icons.more_vert, color: Colors.black54),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            )
+                : SizedBox(width: double.infinity),
+          ),
+        ],
       ),
     );
   }
@@ -1199,13 +1031,13 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
   }
 
   Future<void> addNewExpense() async{
-   var txt = await Navigator.push(
+    var txt = await Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) =>  NewExpense(transactionItem: null,)),
     );
 
-   getData(date_filter_name);
+    getData(date_filter_name);
   }
   int getFlockID() {
 
@@ -1269,7 +1101,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
   }
 
 
-    Widget setupAlertDialoadContainer(BuildContext bcontext,double width, double height) {
+  Widget setupAlertDialoadContainer(BuildContext bcontext,double width, double height) {
 
     return Container(
       height: height, // Change as per your requirement
@@ -1621,7 +1453,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
       child: Text("Take Action".tr()),
       onPressed:  () async {
 
-       // Utils.selected_flock = await DatabaseHelper.getSingleFlock(transactionList.elementAt(selected_index!).f_id!);
+        // Utils.selected_flock = await DatabaseHelper.getSingleFlock(transactionList.elementAt(selected_index!).f_id!);
         await Navigator.push(
           context,
           MaterialPageRoute(
@@ -1945,7 +1777,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
       bool typeOk = filterPaymentType == null ||
           t.payment_status.toLowerCase() == filterPaymentType!.toLowerCase();
 
-     /* bool personOk = filterPerson == null ||
+      /* bool personOk = filterPerson == null ||
           t.sold_purchased_from.toLowerCase() == filterPerson!.toLowerCase();
 */
       return methodOk && typeOk;
@@ -1997,11 +1829,11 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                   openUpdatedSortDialog(
                     context,
                     getDistinctTransactionNames(transactionList),
-                    (selectedSort, transactionName) {
+                        (selectedSort, transactionName) {
                       setState(() {
                         sortSelected = selectedSort;
                         sortOption =
-                            selectedSort == "DESC" ? "Date (New)" : "Date (Old)";
+                        selectedSort == "DESC" ? "Date (New)" : "Date (Old)";
                         selectedTransactionName = transactionName;
                       });
                       getFilteredTransactions(str_date, end_date);
@@ -2095,7 +1927,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
   void openFilterDialog(BuildContext context) async {
 
     List<SubItem> pay_methods = await DatabaseHelper.getSubCategoryList(5);
-   // List<String> persons = await DatabaseHelper.getUniquePersons();
+    // List<String> persons = await DatabaseHelper.getUniquePersons();
 
     showModalBottomSheet(
       context: context,
@@ -2186,7 +2018,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                               horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(
                             color:
-                                isSelected ? color : Colors.grey.shade100,
+                            isSelected ? color : Colors.grey.shade100,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: isSelected
@@ -2246,7 +2078,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                               horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(
                             color:
-                                isSelected ? color : Colors.grey.shade100,
+                            isSelected ? color : Colors.grey.shade100,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: isSelected
@@ -2283,7 +2115,7 @@ class _TransactionsScreen extends State<TransactionsScreen> with SingleTickerPro
                       style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 10),
 
-                /*  Wrap(
+                  /*  Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: [
@@ -2710,9 +2542,9 @@ class TransactionInfoScreen extends StatelessWidget {
                     ? '-'
                     : transaction.payment_status!.toUpperCase().tr(),
                 valueColor:
-                    transaction.payment_status?.toLowerCase() == 'cleared'
-                        ? Colors.green
-                        : Colors.orange,
+                transaction.payment_status?.toLowerCase() == 'cleared'
+                    ? Colors.green
+                    : Colors.orange,
               ),
             ]),
 
@@ -2767,37 +2599,37 @@ class TransactionInfoScreen extends StatelessWidget {
   }
 
   Widget _sectionTitle(String title) => Padding(
-        padding: const EdgeInsets.only(bottom: 8, left: 2),
-        child: Text(
-          title,
-          style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: Colors.black54,
-              letterSpacing: 0.5),
-        ),
-      );
+    padding: const EdgeInsets.only(bottom: 8, left: 2),
+    child: Text(
+      title,
+      style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+          color: Colors.black54,
+          letterSpacing: 0.5),
+    ),
+  );
 
   Widget _infoCard(List<Widget> children) => Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.10),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.10),
+          blurRadius: 6,
+          offset: const Offset(0, 2),
         ),
-        child: Column(children: children),
-      );
+      ],
+    ),
+    child: Column(children: children),
+  );
 
   Widget _divider() =>
       Divider(height: 1, thickness: 1, color: Colors.grey.shade100);
 
   Widget _infoRow(IconData icon, String label, String value,
-          {Color? valueColor}) =>
+      {Color? valueColor}) =>
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
@@ -2807,7 +2639,7 @@ class TransactionInfoScreen extends StatelessWidget {
             Expanded(
               child: Text(label,
                   style:
-                      const TextStyle(fontSize: 13, color: Colors.black54)),
+                  const TextStyle(fontSize: 13, color: Colors.black54)),
             ),
             Text(
               value,

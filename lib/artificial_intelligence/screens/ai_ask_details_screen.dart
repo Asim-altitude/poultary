@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:language_picker/languages.dart' as lang;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -1026,11 +1027,11 @@ class _AskAIDetailsScreenState extends State<AskAIDetailsScreen> {
       String? token = await FirebaseAuth.instance.currentUser!
           .getIdToken();
 
-      Language? _selectedCupertinoLanguage = await Utils.getSelectedLanguage();
+      lang.Language _selectedCupertinoLanguage = await Utils.getSelectedLanguage();
       Map<String, dynamic> aiData = {
 
         "firebase_token": token,
-        "language": _selectedCupertinoLanguage!.name!,
+        "language": _selectedCupertinoLanguage.name,
         // FLOCK
         "flock_type": flockType,
         "bird_count": birds.text.trim(),

@@ -12,6 +12,7 @@ class Eggs {
   int total_eggs = 0;
   String? egg_color;
   String? date;
+  String? sale_amount;
   int? isCollection;
   String? reduction_reason;
   String? short_note;
@@ -37,6 +38,7 @@ class Eggs {
     required this.short_note,
     required this.isCollection,
     required this.reduction_reason,
+    this.sale_amount,
     this.sync_id,
     this.sync_status,
     this.last_modified,
@@ -68,6 +70,7 @@ class Eggs {
       egg_color: json['egg_color'],
       date: json['collection_date']?.toString(),
       isCollection: json['isCollection'],
+      sale_amount: json['sale_amount']?.toString(),
       reduction_reason: json['reduction_reason'],
       short_note: json['short_note']?.toString(),
       sync_id: json['sync_id'],
